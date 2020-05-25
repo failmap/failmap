@@ -229,17 +229,24 @@ SCANNERS = [
             'internet_nl_mail_legacy_ipv6_nameserver',
             'internet_nl_mail_legacy_ipv6_mailserver',
 
-            'internet_nl_mail_non_sending_domain',  # Added 24th of May 2019
-            'internet_nl_mail_server_configured',  # Added 24th of May 2019
-            'internet_nl_mail_servers_testable',   # Added 24th of May 2019
-            'internet_nl_mail_starttls_dane_ta',  # Added 24th of May 2019
-            'internet_nl_mail_auth_dmarc_policy_only',  # Added 24th of May 2019
-            'internet_nl_mail_auth_dmarc_ext_destination',  # Added 24th of May 2019
+            'internet_nl_mail_non_sending_domain',  # Added 24th of May 2019 -> removed in api 2
+            'internet_nl_mail_server_configured',  # Added 24th of May 2019 -> removed in api 2
+            'internet_nl_mail_servers_testable',   # Added 24th of May 2019 -> removed in api 2
+            'internet_nl_mail_starttls_dane_ta',  # Added 24th of May 2019 -> removed in api 2
+            'internet_nl_mail_auth_dmarc_policy_only',  # Added 24th of May 2019 -> removed in api 2
+            'internet_nl_mail_auth_dmarc_ext_destination',  # Added 24th of May 2019... not removed?
 
             # added with api v2.0 May 2020:
             'internet_nl_mail_starttls_tls_cipherorder',
             'internet_nl_mail_starttls_tls_keyexchangehash',
             'internet_nl_mail_starttls_tls_0rtt',
+
+            # extra fields with api 2.0
+            'internet_nl_mail_legacy_mail_non_sending_domain',
+            'internet_nl_mail_legacy_mail_server_testable',
+            'internet_nl_mail_legacy_mail_server_reachable',
+            'internet_nl_mail_legacy_domain_has_mx',
+            'internet_nl_mail_legacy_tls_1_3',
         ],
         'creates url scan types': []
     },
@@ -306,6 +313,9 @@ SCANNERS = [
             'internet_nl_web_https_tls_0rtt',
             'internet_nl_web_https_tls_ocsp',
             'internet_nl_web_https_tls_keyexchangehash',
+
+            # extra fields added with api 2.0
+            'internet_nl_web_legacy_tls_1_3',
         ],
         'creates url scan types': []
     },

@@ -610,6 +610,14 @@ calculation_methods = {
     'internet_nl_web_appsecpriv_x_content_type_options': internet_nl_requirement_tilde_value_format,  # Added 24th of Ma
     'internet_nl_web_appsecpriv_x_frame_options': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
     'internet_nl_web_appsecpriv_x_xss_protection': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+
+    # Extra fields in API 2.0:
+    'internet_nl_web_legacy_tls_1_3': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_mail_non_sending_domain': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_mail_server_testable': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_mail_server_reachable': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_domain_has_mx': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_tls_1_3': internet_nl_requirement_tilde_value_format,
 }
 
 
