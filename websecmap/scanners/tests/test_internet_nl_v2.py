@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timedelta
 
 from websecmap.organizations.models import Url
+from websecmap.reporting.report import create_timeline, create_url_report
 from websecmap.scanners.models import (Endpoint, EndpointGenericScan, InternetNLV2Scan,
                                        InternetNLV2StateLog)
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import (initialize_scan,
@@ -262,6 +263,9 @@ def test_internet_nl_store_testresults(db):
 
     process_scan_results(scan)
 
+    create_url_report(create_timeline(url1), url1)
+    create_url_report(create_timeline(url2), url2)
+
     # is there a series of imports?
     assert EndpointGenericScan.objects.all().count() == 94
 
@@ -378,8 +382,10 @@ def test_internet_nl_store_testresults(db):
                         'data_matrix': [['fallback.dommel.nl.', 'no'], ['mail.dommel.nl.', 'no']]}},
                     'mail_starttls_tls_keyexchangehash': {'status': 'passed', 'verdict': 'good', 'technical_details': {
                         'data_matrix': [['fallback.dommel.nl.', 'yes'], ['mail.dommel.nl.', 'yes']]}}},
-            'custom': {'mail_non_sending_domain': False, 'mail_servers_testable_status': 'ok',
+            'custom': {'mail_non_sending_domain': False, 'mail_servers_testable_status': 'no_mx',
                        'tls_1_3_support': 'no'}}}}
+
+    # special no_mx state for mail_servers_testable is set above.
 
     scan = InternetNLV2Scan()
     scan.retrieved_scan_report = mail_results
@@ -408,3 +414,5 @@ def test_internet_nl_store_testresults(db):
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_legacy_category_ipv6").count() == 1
 
     assert EndpointGenericScan.objects.all().count() == 94 + 53
+
+    create_url_report(create_timeline(url1), url1)
