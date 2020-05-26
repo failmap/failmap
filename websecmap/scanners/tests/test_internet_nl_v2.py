@@ -413,6 +413,8 @@ def test_internet_nl_store_testresults(db):
 
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_legacy_category_ipv6").count() == 1
 
+    assert EndpointGenericScan.objects.all().filter(type="nonsense").count() == 0
+
     assert EndpointGenericScan.objects.all().count() == 94 + 53
 
     create_url_report(create_timeline(url1), url1)

@@ -247,6 +247,7 @@ SCANNERS = [
             'internet_nl_mail_legacy_mail_server_reachable',
             'internet_nl_mail_legacy_domain_has_mx',
             'internet_nl_mail_legacy_tls_1_3',
+            'internet_nl_mail_legacy_category_ipv6',
         ],
         'creates url scan types': []
     },
@@ -316,6 +317,8 @@ SCANNERS = [
 
             # extra fields added with api 2.0
             'internet_nl_web_legacy_tls_1_3',
+            'internet_nl_web_legacy_category_ipv6',
+
         ],
         'creates url scan types': []
     },
