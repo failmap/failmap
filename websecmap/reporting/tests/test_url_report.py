@@ -99,3 +99,27 @@ def test_url_report(db):
     assert report.calculation['high'] == 0
     assert report.high == 0
     assert report.ok == 0
+
+
+def test_aggegrate_error_in_report(db):
+
+    some_time = datetime(day=1, month=1, year=2000, tzinfo=pytz.utc)
+    some_later_time = datetime(day=2, month=1, year=2000, tzinfo=pytz.utc)
+    even_later = datetime(day=3, month=1, year=2000, tzinfo=pytz.utc)
+
+    url, created = Url.objects.all().get_or_create(url='test.nl', created_on=some_time, not_resolvable=False)
+    first_endpoint, created = Endpoint.objects.all().get_or_create(
+        url=url, protocol='https', port='443', ip_version=4, discovered_on=some_later_time, is_dead=False)
+
+    # any internet.nl scan is enough
+    EndpointGenericScan.objects.all().get_or_create(
+        endpoint=first_endpoint, type='internet_nl_web_appsecpriv_csp', rating='error', rating_determined_on=even_later,
+        last_scan_moment=even_later, comply_or_explain_is_explained=False, is_the_latest_scan=True)
+
+    create_url_report(create_timeline(url), url)
+    report = UrlReport.objects.all().order_by('pk').last()
+
+    assert report.endpoint_error_in_test == 1
+    # This is 0 because this is not an endpoint level error, but an url_level_error
+    assert report.url_error_in_test == 0
+    assert report.error_in_test == 1

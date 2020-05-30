@@ -15,7 +15,7 @@ def test_internet_nl_standard_calculation(db):
     scan.last_scan_moment = now
     scan.type = "test"
 
-    value = standard_calculation_for_internet_nl(scan, "", 0, 0, 0, False, False)
+    value = standard_calculation_for_internet_nl(scan, "", 0, 0, 0, False, False, False)
 
     assert value == {
         "type": "test",
@@ -30,10 +30,11 @@ def test_internet_nl_standard_calculation(db):
         "ok": 1,
         "not_testable": False,
         "not_applicable": False,
+        "error_in_test": False,
         'test_result': 0,
     }
 
-    value = standard_calculation_for_internet_nl(scan, '{"translation": "test"}', 0, 0, 0, False, False)
+    value = standard_calculation_for_internet_nl(scan, '{"translation": "test"}', 0, 0, 0, False, False, False)
 
     assert value == {
         "type": "test",
@@ -48,5 +49,6 @@ def test_internet_nl_standard_calculation(db):
         "ok": 1,
         "not_testable": False,
         "not_applicable": False,
+        "error_in_test": False,
         'test_result': 0,
     }
