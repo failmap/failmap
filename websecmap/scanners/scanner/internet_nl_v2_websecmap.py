@@ -529,18 +529,7 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
                     "test_result": "pass",
                     "translation": {
                         "key": "string"
-                    },
-                    "technical_details":
-                    {
-                        "data_matrix":
-                        [
-
-                            [
-                                "string"
-                            ]
-                        ]
                     }
-
                 }
             }
         }
@@ -645,7 +634,9 @@ def store_test_results(endpoint, test_results):
         # in either rating and message, and will cause delays in working with these fields. What we do instead is
         # create a hash and append it to the message. Technical details are an array of array of string
         # log.debug(f"{scan_type}  = {test_result}")
-        dumped_technical_details = json.dumps(test_result['technical_details'])
+        # may 2020: technical details moved to their own endpoint. Will be relevant in a later
+        # version, so all the rest of the stuff is kept.
+        dumped_technical_details = ""
         technical_details_hash = hashlib.md5(dumped_technical_details.encode('utf-8')).hexdigest()
         store_endpoint_scan_result(
             scan_type=scan_type,
@@ -655,7 +646,7 @@ def store_test_results(endpoint, test_results):
                 {'translation': test_result['verdict'],
                  'technical_details_hash': technical_details_hash}
             ),
-            evidence=json.dumps(test_result['technical_details'])
+            evidence=""
         )
 
 
