@@ -332,6 +332,9 @@ def internet_nl_requirement_tilde_value_format(scan: Union[EndpointGenericScan, 
     if scan.rating in ['not_tested', 'not_testable']:
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_testable=True)
 
+    if scan.rating in ['error']:
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, error_in_test=True)
+
     # todo: this is probably wrong.
     if scan.rating in ['not_applicable']:
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_applicable=True)
@@ -408,6 +411,8 @@ def internet_nl_api_v1_requirement_tilde_value_format(scan: Union[EndpointGeneri
     if scan_value == 'not_testable':
         return standard_calculation(scan=scan, explanation=explanation, not_testable=True)
 
+    # error_in_test is not used in api V1 and backwards compatibility is not needed.
+
     # todo: is this used? And is that used correctly?
     if scan_value == 'not_applicable':
         return standard_calculation(scan=scan, explanation=explanation, not_applicable=True)
@@ -443,9 +448,9 @@ def dummy_calculated_values(scan: Union[EndpointGenericScan, UrlGenericScan]):
 
 def standard_calculation(scan: Union[EndpointGenericScan, UrlGenericScan],
                          explanation: str, high: int = 0, medium: int = 0, low: int = 0,
-                         not_testable: bool = False, not_applicable: bool = False):
+                         not_testable: bool = False, not_applicable: bool = False, error_in_test: bool = False):
 
-    ok = 0 if high or medium or low or not_testable or not_testable else 1
+    ok = 0 if any([high, medium, low, not_testable, not_testable, error_in_test]) else 1
 
     return {
         "type": scan.type,
@@ -457,17 +462,19 @@ def standard_calculation(scan: Union[EndpointGenericScan, UrlGenericScan],
         "low": low,
         "ok": ok,
         "not_testable": not_testable,
-        "not_applicable": not_applicable
+        "not_applicable": not_applicable,
+        "error_in_test": error_in_test
     }
 
 
 def standard_calculation_for_internet_nl(scan: Union[EndpointGenericScan, UrlGenericScan], explanation: str,
                                          high: int = 0, medium: int = 0, low: int = 0,
-                                         not_testable: bool = False, not_applicable: bool = False):
+                                         not_testable: bool = False, not_applicable: bool = False,
+                                         error_in_test: bool = False):
 
     # the explanation is a bunch of json, that is not really workable. These fields are split into separate data
     # and should be the same for everything except the score.
-    calc = standard_calculation(scan, "", high, medium, low, not_testable, not_applicable)
+    calc = standard_calculation(scan, "", high, medium, low, not_testable, not_applicable, error_in_test)
 
     # V1 reports do not have json stored in the explanation, only text messages or nothing.
     # So, only parse this is it contains json at all. To improve speed, first check the first letter.

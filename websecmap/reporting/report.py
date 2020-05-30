@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from copy import deepcopy
+from copy import copy, deepcopy
 from datetime import datetime
 from typing import List
 
@@ -479,6 +479,7 @@ def create_url_report(timeline, url: Url):
                             "ok": 0,
                             "not_applicable": 0,
                             "not_testable": 0,
+                            "error_in_test": 0,
                             "since": these_endpoint_scans[endpoint_scan_type].rating_determined_on.isoformat(),
                             "last_scan": these_endpoint_scans[endpoint_scan_type].last_scan_moment.isoformat(),
 
@@ -579,6 +580,7 @@ def add_report_to_key(amount_of_issues, key, report):
     if key in ['overall', 'endpoint', 'url']:
         amount_of_issues[key]['not_testable'] += report['not_testable']
         amount_of_issues[key]['not_applicable'] += report['not_applicable']
+        amount_of_issues[key]['error_in_test'] += report['error_in_test']
 
     return amount_of_issues
 
@@ -614,32 +616,38 @@ def judge(amount_of_issues, clean_issues_for_judgement, key, reports: List):
 
 
 def statistics_over_url_calculation(calculation):
+
+    empty_with_some_extras = {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0,
+                              'not_testable': 0, 'not_applicable': 0, 'error_in_test': 0}
+
+    empty = {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0}
+
     # Calculate statistics here, instead of working with all kinds of variables.
     amount_of_issues = {
-        'overall': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
-        'overall_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'overall': copy(empty_with_some_extras),
+        'overall_explained': copy(empty),
 
         # sum of all issues on the url level
-        'url': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
-        'url_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'url': copy(empty_with_some_extras),
+        'url_explained': copy(empty),
 
         # sum of all issues in endpoints
-        'endpoint': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
-        'endpoint_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'endpoint': copy(empty_with_some_extras),
+        'endpoint_explained': copy(empty),
 
         # judgements are complex situation: when ALL reports of an endpoint say the endpoint is OK, a single
         # judgement is added for that endpoint. There are multiple endpoints with multiple judgements.
-        'endpoint_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'endpoint_judgements': copy(empty),
         # Some reports will be explained, that means the endpoint will be explained on a certain level.
-        'endpoint_explained_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'endpoint_explained_judgements': copy(empty),
 
         # As there is only one url, with multiple reports, only one judgement will be made.
-        'url_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
-        'url_explained_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'url_judgements': copy(empty),
+        'url_explained_judgements': copy(empty),
 
         # If there is a single high endpoint judgement, or a single high url judgement, the overall is high.
         # This can have a maximum of 1 value, which summarizes all url_judgements and endpoint_judgements
-        'overall_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'overall_judgements': copy(empty),
     }
 
     clean_issues_for_judgement = deepcopy(amount_of_issues)
@@ -724,6 +732,7 @@ def save_url_report(url: Url, date: datetime, calculation):
     u.ok = amount_of_issues['overall']['ok']
     u.not_testable = amount_of_issues['overall']['not_testable']
     u.not_applicable = amount_of_issues['overall']['not_applicable']
+    u.error_in_test = amount_of_issues['overall']['error_in_test']
 
     u.high_endpoints = amount_of_issues['endpoint_judgements']['high']
     u.medium_endpoints = amount_of_issues['endpoint_judgements']['medium']
@@ -738,6 +747,7 @@ def save_url_report(url: Url, date: datetime, calculation):
     u.url_issues_low = amount_of_issues['url']['low']
     u.url_not_testable = amount_of_issues['url']['not_testable']
     u.url_not_applicable = amount_of_issues['url']['not_applicable']
+    u.url_error_in_test = amount_of_issues['url']['error_in_test']
 
     # probably the same as OK, as you can only be OK once.
     u.url_ok = amount_of_issues['overall_judgements']['ok']
@@ -748,6 +758,7 @@ def save_url_report(url: Url, date: datetime, calculation):
     u.endpoint_ok = amount_of_issues['endpoint']['ok']
     u.endpoint_not_testable = amount_of_issues['endpoint']['not_testable']
     u.endpoint_not_applicable = amount_of_issues['endpoint']['not_applicable']
+    u.endpoint_error_in_test = amount_of_issues['endpoint']['error_in_test']
 
     u.explained_high = amount_of_issues['url_explained_judgements']['high']
     u.explained_medium = amount_of_issues['url_explained_judgements']['medium']

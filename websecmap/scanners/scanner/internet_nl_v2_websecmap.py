@@ -690,6 +690,7 @@ def lowest_value_in_results(scan_data, test_names: List[str]) -> str:
         raise ValueError('No values provided. Would always result in True, which could be risky.')
 
     test_order = {
+        'error_in_test': -2,
         'not_applicable': -1,
         'not_tested': 0,
         'failed': 1,

@@ -16,6 +16,7 @@ class AllIssuesCombined(models.Model):
     ok = models.IntegerField(default=0)
     not_applicable = models.IntegerField(default=0)
     not_testable = models.IntegerField(default=0)
+    error_in_test = models.IntegerField(default=0)
 
     class Meta:
         abstract = True
@@ -58,6 +59,11 @@ class EndpointIssues(models.Model):
 
     endpoint_not_applicable = models.IntegerField(
         help_text="Amount of things that are not applicable on this endpoint.",
+        default=0
+    )
+
+    endpoint_error_in_test = models.IntegerField(
+        help_text="Amount of errors in tests performed on this endpoint.",
         default=0
     )
 
@@ -105,6 +111,11 @@ class UrlIssues(models.Model):
         default=0
     )
 
+    url_error_in_test = models.IntegerField(
+        help_text="Amount of errors in tests on this url.",
+        default=0
+    )
+
     class Meta:
         abstract = True
 
@@ -145,8 +156,8 @@ class JudgedEndpoints(models.Model):
 class AllExplainedIssuesCombined(models.Model):
     """
     The same as all above statistics classes, but with the major difference that this does not contain
-    not_testable and not_applicable. Each EndpointGenericScan and UrlGEnericScan can be explained. Instead
-    of counting towards the normal set of issues, separate statistics are created over this.
+    not_testable, not_applicable and error in test. Each EndpointGenericScan and UrlGEnericScan can be explained.
+    Instead of counting towards the normal set of issues, separate statistics are created over this.
 
     Everything that is explained therefore does not count as a 'good' value, only as an explained 'bad' value.
     """
