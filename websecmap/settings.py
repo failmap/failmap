@@ -16,10 +16,11 @@ import os
 from collections import OrderedDict
 from datetime import timedelta
 
-import raven
-import raven.contrib.celery
+import sentry_sdk
 from django.utils.translation import gettext_lazy as _
 from pkg_resources import get_distribution
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.django import DjangoIntegration
 
 from websecmap.scanners.constance import add_scanner_fields, add_scanner_fieldsets
 
@@ -598,22 +599,25 @@ if DEBUG:
 # if sentry DSN is provided register raven to emit events on exceptions
 SENTRY_DSN = os.environ.get('SENTRY_DSN')
 if SENTRY_DSN:
-    INSTALLED_APPS += ('raven.contrib.django.raven_compat',)
-    RAVEN_CONFIG = {
-        'dsn': SENTRY_DSN,
-        'release': __version__,
-    }
+    # new sentry_sdk implementation, with hopes to also get exceptions from workers.
+    sentry_sdk.init(dsn=SENTRY_DSN, integrations=[CeleryIntegration(), DjangoIntegration()],
+                    release=__version__, send_default_pii=False)
+
+    # INSTALLED_APPS += ('raven.contrib.django.raven_compat',)
+
     # add sentry ID to request for inclusion in templates
     # https://docs.sentry.io/clients/python/integrations/django/#message-references
-    MIDDLEWARE.insert(1, 'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware')
+    # Not (yet) supported, or renamed in the new sentry_sdk. Cannot find a replacement for this feature.
+    # MIDDLEWARE.insert(1, 'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware')
 
     # Celery specific handlers
-    client = raven.Client(SENTRY_DSN)
-    raven.contrib.celery.register_logger_signal(client)
-    raven.contrib.celery.register_signal(client)
+    # client = raven.Client(SENTRY_DSN)
+
+    # raven.contrib.celery.register_logger_signal(client)
+    # raven.contrib.celery.register_signal(client)
 
 # set javascript sentry token if provided
-SENTRY_TOKEN = os.environ.get('SENTRY_TOKEN', '')
+# SENTRY_TOKEN = os.environ.get('SENTRY_TOKEN', '')
 
 SENTRY_ORGANIZATION = 'internet-cleanup-foundation'
 SENTRY_PROJECT = 'faalkaart'
