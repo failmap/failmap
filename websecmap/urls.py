@@ -31,7 +31,14 @@ import websecmap.app.dashboard_module_views  # noqa
 admin.site.site_header = 'Web Security Map Admin'
 admin.site.site_title = 'Web Security Map Admin'
 
+
+def trigger_error(request):
+    # See: https://docs.sentry.io/platforms/python/django/
+    division_by_zero = 1 / 0  # noqa
+
+
 admin_urls = [
+    path('sentry-debug/', trigger_error),
     url(r'^admin/', admin.site.urls),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^jet/', include('jet.urls', 'jet')),

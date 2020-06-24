@@ -70,7 +70,7 @@ colorlog
 django-proxy
 
 # sentry client
-raven
+sentry-sdk
 
 # allow recursive comparison of dictionaries
 deepdiff
