@@ -9,7 +9,8 @@ from websecmap.scanners.scanner.internet_nl_v2_websecmap import (initialize_scan
                                                                  lowest_value_in_results,
                                                                  process_scan_results,
                                                                  progress_running_scan,
-                                                                 update_state)
+                                                                 update_state,
+                                                                 calculate_forum_standaardisatie_views_mail)
 
 log = logging.getLogger('websecmap')
 
@@ -310,15 +311,15 @@ def test_internet_nl_store_testresults(db):
     mail_results = {
         'dommel.nl': {'status': 'ok', 'report': {'url': 'https://dev.batch.internet.nl/mail/dommel.nl/287994/'},
                       'scoring': {'percentage': 83}, 'results': {
-            'categories': {'mail_ipv6': {'verdict': 'failed', 'status': 'failed'},
-                           'mail_dnssec': {'verdict': 'passed', 'status': 'passed'},
-                           'mail_auth': {'verdict': 'passed', 'status': 'passed'},
-                           'mail_starttls': {'verdict': 'failed', 'status': 'failed'}}, 'tests': {
-                'mail_ipv6_ns_address': {'status': 'passed', 'verdict': 'good', 'technical_details': {
-                    'data_matrix': [['ns1.qsp.nl.', '2a04:c580:0:f0::1', '193.254.215.240'],
-                                    ['ns2.qsp.nl.', '2a04:c580:0:f1::1', '193.254.215.241']]}},
-                'mail_ipv6_ns_reach': {'status': 'passed', 'verdict': 'good',
-                                       'technical_details': {'data_matrix': []}},
+                'categories': {'mail_ipv6': {'verdict': 'failed', 'status': 'failed'},
+                               'mail_dnssec': {'verdict': 'passed', 'status': 'passed'},
+                               'mail_auth': {'verdict': 'passed', 'status': 'passed'},
+                               'mail_starttls': {'verdict': 'failed', 'status': 'failed'}}, 'tests': {
+                    'mail_ipv6_ns_address': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['ns1.qsp.nl.', '2a04:c580:0:f0::1', '193.254.215.240'],
+                                        ['ns2.qsp.nl.', '2a04:c580:0:f1::1', '193.254.215.241']]}},
+                    'mail_ipv6_ns_reach': {'status': 'passed', 'verdict': 'good',
+                                           'technical_details': {'data_matrix': []}},
                     'mail_ipv6_mx_address': {'status': 'failed', 'verdict': 'bad', 'technical_details': {
                         'data_matrix': [['mail.dommel.nl.', 'None', '81.175.72.228'],
                                         ['fallback.dommel.nl.', 'None', '89.106.167.130']]}},
@@ -382,8 +383,10 @@ def test_internet_nl_store_testresults(db):
                         'data_matrix': [['fallback.dommel.nl.', 'no'], ['mail.dommel.nl.', 'no']]}},
                     'mail_starttls_tls_keyexchangehash': {'status': 'passed', 'verdict': 'good', 'technical_details': {
                         'data_matrix': [['fallback.dommel.nl.', 'yes'], ['mail.dommel.nl.', 'yes']]}}},
-            'custom': {'mail_non_sending_domain': False, 'mail_servers_testable_status': 'no_mx',
-                       'tls_1_3_support': 'no'}}}}
+                # mail non sending domain is True, so we can check that the dkim value form issue #183 will prevail
+                # over the data returned.
+                'custom': {'mail_non_sending_domain': True, 'mail_servers_testable_status': 'no_mx',
+                           'tls_1_3_support': 'no'}}}}
 
     # special no_mx state for mail_servers_testable is set above.
 
@@ -418,3 +421,91 @@ def test_internet_nl_store_testresults(db):
     assert EndpointGenericScan.objects.all().count() == 94 + 53
 
     create_url_report(create_timeline(url1), url1)
+
+
+def test_legacy_calculations():
+    mail_results = {
+        'dommel.nl': {'status': 'ok', 'report': {'url': 'https://dev.batch.internet.nl/mail/dommel.nl/287994/'},
+                      'scoring': {'percentage': 83}, 'results': {
+                'categories': {'mail_ipv6': {'verdict': 'failed', 'status': 'failed'},
+                               'mail_dnssec': {'verdict': 'passed', 'status': 'passed'},
+                               'mail_auth': {'verdict': 'passed', 'status': 'passed'},
+                               'mail_starttls': {'verdict': 'failed', 'status': 'failed'}}, 'tests': {
+                    'mail_ipv6_ns_address': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['ns1.qsp.nl.', '2a04:c580:0:f0::1', '193.254.215.240'],
+                                        ['ns2.qsp.nl.', '2a04:c580:0:f1::1', '193.254.215.241']]}},
+                    'mail_ipv6_ns_reach': {'status': 'passed', 'verdict': 'good',
+                                           'technical_details': {'data_matrix': []}},
+                    'mail_ipv6_mx_address': {'status': 'failed', 'verdict': 'bad', 'technical_details': {
+                        'data_matrix': [['mail.dommel.nl.', 'None', '81.175.72.228'],
+                                        ['fallback.dommel.nl.', 'None', '89.106.167.130']]}},
+                    'mail_ipv6_mx_reach': {'status': 'not_tested', 'verdict': 'not-tested',
+                                           'technical_details': {'data_matrix': []}},
+                    'mail_dnssec_mailto_exist': {'status': 'passed', 'verdict': 'good',
+                                                 'technical_details': {'data_matrix': [['dommel.nl', 'None']]}},
+                    'mail_dnssec_mailto_valid': {'status': 'passed', 'verdict': 'good',
+                                                 'technical_details': {'data_matrix': [['dommel.nl', 'secure']]}},
+                    'mail_dnssec_mx_exist': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['mail.dommel.nl.', 'yes'], ['fallback.dommel.nl.', 'yes']]}},
+                    'mail_dnssec_mx_valid': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['mail.dommel.nl.', 'secure'], ['fallback.dommel.nl.', 'secure']]}},
+                    'mail_auth_dmarc_exist': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['v=DMARC1; p=quarantine; pct=100; rua=mailto:dmarcreports@dommel.nl;']]}},
+                    'mail_auth_dmarc_policy': {'status': 'passed', 'verdict': 'good',
+                                               'technical_details': {'data_matrix': []}},
+                    'mail_auth_dkim_exist': {'status': 'passed', 'verdict': 'good',
+                                             'technical_details': {'data_matrix': []}},
+                    'mail_auth_spf_exist': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [
+                            ['v=spf1 ip4:81.175.72.228 ip4:85.17.2.13 ip4:46.31.48.0/21 a:fallback.dommel.nl -all']]}},
+                    'mail_auth_spf_policy': {'status': 'passed', 'verdict': 'good',
+                                             'technical_details': {'data_matrix': []}},
+                    'mail_starttls_tls_available': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'yes'], ['mail.dommel.nl.', 'yes']]}},
+                    'mail_starttls_tls_keyexchange': {'status': 'failed', 'verdict': 'bad', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'DH-2048', 'insufficient'],
+                                        ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_tls_ciphers': {'status': 'warning', 'verdict': 'phase-out', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'AES256-GCM-SHA384', 'phase out'],
+                                        ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_tls_cipherorder': {'status': 'failed', 'verdict': 'bad', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'None'], ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_tls_version': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'None'], ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_tls_compress': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'no'], ['mail.dommel.nl.', 'no']]}},
+                    'mail_starttls_tls_secreneg': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'yes'], ['mail.dommel.nl.', 'yes']]}},
+                    'mail_starttls_tls_clientreneg': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'no'], ['mail.dommel.nl.', 'no']]}},
+                    'mail_starttls_cert_chain': {'status': 'info', 'verdict': 'bad', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'fallback.dommel.nl'], ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_cert_pubkey': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'None'], ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_cert_sig': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'None'], ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_cert_domain': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'None'], ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_dane_exist': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.',
+                                         '3 0 1 7E27A55454560F21B829DC501691C6780A086A445FF549DC36065BE43896FB17'],
+                                        ['mail.dommel.nl.',
+                                         '3 0 1 002E3C83A3EC137AA0C395F32AD3C3DDAF68DECE6F8AE9066AF1DA62554E53DE']]}},
+                    'mail_starttls_dane_valid': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'yes'], ['mail.dommel.nl.', 'yes']]}},
+                    'mail_starttls_dane_rollover': {'status': 'info', 'verdict': 'bad', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'no'], ['mail.dommel.nl.', 'no']]}},
+                    'mail_starttls_tls_0rtt': {'status': 'passed', 'verdict': 'na', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'no'], ['mail.dommel.nl.', 'no']]}},
+                    'mail_starttls_tls_keyexchangehash': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'yes'], ['mail.dommel.nl.', 'yes']]}}},
+                # mail non sending domain is True, so we can check that the dkim value form issue #183 will prevail
+                # over the data returned.
+                'custom': {'mail_non_sending_domain': True, 'mail_servers_testable_status': 'no_mx',
+                           'tls_1_3_support': 'no'}}}}
+
+    # https://github.com/internetstandards/Internet.nl-dashboard/issues/183
+    # initialized in other method
+    mail_results['dommel.nl']['results']['calculated_results'] = {}
+    data = calculate_forum_standaardisatie_views_mail(mail_results['dommel.nl'])
+    assert data['results']['calculated_results']['mail_legacy_dkim']['status'] == "passed"

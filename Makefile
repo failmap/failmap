@@ -126,7 +126,7 @@ testcase: ${app}
 	# run specific testcase
 	# example: make testcase case=test_openstreetmaps
 	${env} DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 \
-		${env} pytest -ra -k ${case}
+		${env} pytest -v -ra -k ${case}
 
 test_integration: ${app}
 	# run integration tests
