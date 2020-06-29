@@ -613,9 +613,9 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
     # prepare for calculated results
     scan_data['results']['calculated_results'] = {}
     if scan_type == "web":
-        scan_data = calculate_forum_standaardisatie_views_web(scan_data, scan_data['results']['custom'])
+        scan_data = calculate_forum_standaardisatie_views_web(scan_data)
     elif scan_type == 'mail_dashboard':
-        scan_data = calculate_forum_standaardisatie_views_mail(scan_data, scan_data['results']['custom'])
+        scan_data = calculate_forum_standaardisatie_views_mail(scan_data)
 
     store_test_results(endpoint, scan_data['results']['calculated_results'])
 
@@ -703,8 +703,10 @@ def lowest_value_in_results(scan_data, test_names: List[str]) -> str:
     return lowest_test_status
 
 
-def calculate_forum_standaardisatie_views_web(scan_data, custom_api_field_results):
+def calculate_forum_standaardisatie_views_web(scan_data):
     # These values are published in the forum standaardisatie magazine.
+
+    custom_api_field_results = scan_data['results']['custom']
 
     # DNSSEC
     add_calculation(scan_data=scan_data, new_key='web_legacy_dnssec',
@@ -763,8 +765,9 @@ def calculate_forum_standaardisatie_views_web(scan_data, custom_api_field_result
     return scan_data
 
 
-def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_results):
+def calculate_forum_standaardisatie_views_mail(scan_data):
     # These values are published in the forum standaardisatie magazine.
+    custom_api_field_results = scan_data['results']['custom']
 
     # not all custom fields are defined yet, temporarily all will be false, these fields will be defined next week:
     # v1 mail_non_sending_domain = v2 mail_non_sending_domain
@@ -778,10 +781,14 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
 
     # DKIM
     # api v2: custom field exists.
-    if custom_api_field_results['mail_non_sending_domain']:
-        add_instant_calculation(scan_data, "mail_legacy_dkim", "not_applicable")
-    else:
+    # https://github.com/internetstandards/Internet.nl-dashboard/issues/183
+    if scan_data['results']['tests']['mail_auth_dkim_exist']['status'] == "passed":
         add_calculation(scan_data=scan_data, new_key='mail_legacy_dkim', required_values=['mail_auth_dkim_exist'])
+    else:
+        if custom_api_field_results['mail_non_sending_domain']:
+            add_instant_calculation(scan_data, "mail_legacy_dkim", "not_applicable")
+        else:
+            add_calculation(scan_data=scan_data, new_key='mail_legacy_dkim', required_values=['mail_auth_dkim_exist'])
 
     # SPF
     add_calculation(scan_data=scan_data, new_key='mail_legacy_spf', required_values=['mail_auth_spf_exist'])
