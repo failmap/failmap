@@ -914,10 +914,13 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
         add_instant_calculation(scan_data, 'mail_legacy_mail_server_testable', "passed")
 
     # Kept the double negation to see if this causes confusion or not.
-    if custom_api_field_results['mail_non_sending_domain'] == "true":
-        add_instant_calculation(scan_data, 'mail_legacy_mail_non_sending_domain', "passed")
+    # https://github.com/internetstandards/Internet.nl-dashboard/issues/182
+    # We want a grey icon when the domain does send email = not_applicable
+    # We want a blue info icon when the domain does not send email = info
+    if custom_api_field_results['mail_non_sending_domain']:
+        add_instant_calculation(scan_data, 'mail_legacy_mail_non_sending_domain', "info")
     else:
-        add_instant_calculation(scan_data, 'mail_legacy_mail_non_sending_domain', "failed")
+        add_instant_calculation(scan_data, 'mail_legacy_mail_non_sending_domain', "not_applicable")
 
     # add custom field for the ipv6 test, so this can be labelled individually
     add_instant_calculation(scan_data, "mail_legacy_category_ipv6",

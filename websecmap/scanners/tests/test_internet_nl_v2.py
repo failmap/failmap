@@ -1,4 +1,5 @@
 import logging
+from copy import copy
 from datetime import datetime, timedelta
 
 from websecmap.organizations.models import Url
@@ -475,7 +476,7 @@ def test_legacy_calculations():
                     'mail_servers_testable_status': 'no_mx',
                     'tls_1_3_support': 'no'
                 }
-            }
+            },
         },
         'www.zundert.nl': {
             'status': 'ok',
@@ -538,6 +539,13 @@ def test_legacy_calculations():
     add_calculation(scan_data=data, new_key='mail_legacy_ipv6_mailserver',
                     required_values=['mail_ipv6_mx_address', 'mail_ipv6_mx_reach'])
     assert data['results']['calculated_results']['mail_legacy_ipv6_mailserver']['status'] == "failed"
+
+    # https://github.com/internetstandards/Internet.nl-dashboard/issues/182
+    mail_results['dommel2.nl'] = copy(mail_results['dommel.nl'])
+    mail_results['dommel2.nl']['results']['custom']['mail_non_sending_domain'] = False
+    assert data['results']['calculated_results']['mail_legacy_mail_non_sending_domain']['status'] == "info"
+    data = calculate_forum_standaardisatie_views_mail(mail_results['dommel2.nl'])
+    assert data['results']['calculated_results']['mail_legacy_mail_non_sending_domain']['status'] == "not_applicable"
 
     # https://github.com/internetstandards/Internet.nl-dashboard/issues/185
     # the test result gave "passed" while it was an error.
