@@ -617,7 +617,7 @@ if SENTRY_DSN:
     # raven.contrib.celery.register_signal(client)
 
 # set javascript sentry token if provided
-# SENTRY_TOKEN = os.environ.get('SENTRY_TOKEN', '')
+SENTRY_TOKEN = os.environ.get('SENTRY_TOKEN', '')
 
 SENTRY_ORGANIZATION = 'internet-cleanup-foundation'
 SENTRY_PROJECT = 'faalkaart'
