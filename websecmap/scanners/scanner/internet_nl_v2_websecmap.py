@@ -680,15 +680,17 @@ def lowest_value_in_results(scan_data, test_names: List[str]) -> str:
     if not test_names:
         raise ValueError('No values provided. Would always result in True, which could be risky.')
 
-    test_order = {
-        'error_in_test': -2,
-        'not_applicable': -1,
-        'not_tested': 0,
-        'failed': 1,
+    severity_order = {
+        # Failed is always the worst possible output. It overrules not tested etc.
+        # as per: https://github.com/internetstandards/Internet.nl-dashboard/issues/184
+        'failed': -10,
+        'error_in_test': -8,
         'warning': 2,
         'info': 3,
         'good_not_tested': 4,
-        'passed': 5
+        'not_applicable': 8,
+        'not_tested': 9,
+        'passed': 10
     }
 
     lowest_test_outcome = 5
@@ -696,8 +698,8 @@ def lowest_value_in_results(scan_data, test_names: List[str]) -> str:
     for test_name in test_names:
         current_status = scan_data['results']['tests'][test_name]['status']
         # Never up the status with an unknown status. Those are ignored with the random high value of 9000.
-        if test_order.get(current_status, 9000) < lowest_test_outcome:
-            lowest_test_outcome = test_order[current_status]
+        if severity_order.get(current_status, 9000) < lowest_test_outcome:
+            lowest_test_outcome = severity_order[current_status]
             lowest_test_status = current_status
 
     return lowest_test_status
