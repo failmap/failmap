@@ -685,6 +685,8 @@ def lowest_value_in_results(scan_data, test_names: List[str]) -> str:
         # as per: https://github.com/internetstandards/Internet.nl-dashboard/issues/184
         'failed': -10,
         'error_in_test': -8,
+        # error counts as error in test: error_in_test is never returned from the API.
+        'error': -8,
         'warning': 2,
         'info': 3,
         'good_not_tested': 4,

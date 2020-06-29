@@ -6,8 +6,9 @@ from websecmap.reporting.report import create_timeline, create_url_report
 from websecmap.scanners.models import (Endpoint, EndpointGenericScan, InternetNLV2Scan,
                                        InternetNLV2StateLog)
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import (
-    add_calculation, calculate_forum_standaardisatie_views_mail, initialize_scan,
-    lowest_value_in_results, process_scan_results, progress_running_scan, update_state)
+    add_calculation, calculate_forum_standaardisatie_views_mail,
+    calculate_forum_standaardisatie_views_web, initialize_scan, lowest_value_in_results,
+    process_scan_results, progress_running_scan, update_state)
 
 log = logging.getLogger('websecmap')
 
@@ -475,7 +476,53 @@ def test_legacy_calculations():
                     'tls_1_3_support': 'no'
                 }
             }
-        }
+        },
+        'www.zundert.nl': {
+            'status': 'ok',
+            'report': {'url': 'https://dev.batch.internet.nl/site/www.zundert.nl/671859/'},
+            'scoring': {'percentage': 81},
+            'results': {
+                'categories': {
+                    'web_ipv6': {'verdict': 'failed', 'status': 'failed'},
+                    'web_dnssec': {'verdict': 'passed', 'status': 'passed'},
+                    'web_https': {'verdict': 'unreachable', 'status': 'error'},
+                    'web_appsecpriv': {'verdict': 'warning', 'status': 'warning'}},
+                'tests': {
+                    'web_ipv6_ns_address': {'status': 'passed', 'verdict': 'good'},
+                    'web_ipv6_ns_reach': {'status': 'passed', 'verdict': 'good'},
+                    'web_ipv6_ws_address': {'status': 'passed', 'verdict': 'good'},
+                    'web_ipv6_ws_reach': {'status': 'failed', 'verdict': 'bad'},
+                    'web_ipv6_ws_similar': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_dnssec_exist': {'status': 'passed', 'verdict': 'good'},
+                    'web_dnssec_valid': {'status': 'passed', 'verdict': 'good'},
+                    'web_https_http_available': {'status': 'error', 'verdict': 'other'},
+                    'web_https_http_redirect': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_http_hsts': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_http_compress': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_tls_keyexchange': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_tls_ciphers': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_tls_cipherorder': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_tls_version': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_tls_compress': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_tls_secreneg': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_tls_clientreneg': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_cert_chain': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_cert_pubkey': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_cert_sig': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_cert_domain': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_dane_exist': {'status': 'info', 'verdict': 'bad'},
+                    'web_https_dane_valid': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_tls_0rtt': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_https_tls_ocsp': {'status': 'info', 'verdict': 'ok'},
+                    'web_https_tls_keyexchangehash': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_appsecpriv_x_frame_options': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_appsecpriv_referrer_policy': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_appsecpriv_csp': {'status': 'not_tested', 'verdict': 'not-tested'},
+                    'web_appsecpriv_x_content_type_options': {'status': 'not_tested', 'verdict': 'not-tested'}
+                },
+                'custom': {'tls_1_3_support': 'undetermined'}
+            }
+        },
     }
 
     # https://github.com/internetstandards/Internet.nl-dashboard/issues/183
@@ -491,3 +538,12 @@ def test_legacy_calculations():
     add_calculation(scan_data=data, new_key='mail_legacy_ipv6_mailserver',
                     required_values=['mail_ipv6_mx_address', 'mail_ipv6_mx_reach'])
     assert data['results']['calculated_results']['mail_legacy_ipv6_mailserver']['status'] == "failed"
+
+    # https://github.com/internetstandards/Internet.nl-dashboard/issues/185
+    # the test result gave "passed" while it was an error.
+    mail_results['www.zundert.nl']['results']['calculated_results'] = {}
+    data = calculate_forum_standaardisatie_views_web(mail_results['www.zundert.nl'])
+
+    assert lowest_value_in_results(data, ['web_https_http_available']) == "error"
+
+    assert data['results']['calculated_results']['web_legacy_tls_available']['status'] == "error"
