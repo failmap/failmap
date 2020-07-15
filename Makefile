@@ -62,8 +62,8 @@ ${app}: ${VIRTUAL_ENV}/.requirements.installed | ${pip}
 test: .make.test	## run test suite
 .make.test: ${pysrc} ${app}
 	# run testsuite
-	DJANGO_SETTINGS_MODULE=${app_name}.settings ${env} coverage run --include '${app_name}/*' \
-		-m pytest -ra -k 'not integration and not system' ${testargs}
+	DJANGO_SETTINGS_MODULE=${app_name}.settings ${env} coverage run --include '${app_name}/*' --omit '*migrations*' \
+		-m pytest -vv -ra -k 'not integration and not system' ${testargs}
 	# generate coverage
 	${env} coverage report
 	# and pretty html
@@ -126,16 +126,16 @@ testcase: ${app}
 	# run specific testcase
 	# example: make testcase case=test_openstreetmaps
 	${env} DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 \
-		${env} pytest -v -ra -k ${case}
+		${env} pytest -vv -ra -k ${case}
 
 test_integration: ${app}
 	# run integration tests
 	${env} DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 \
-		${env} pytest -ra -k 'integration' ${testargs}
+		${env} pytest -vv -ra -k 'integration' ${testargs}
 
 test_system:
 	# run system tests
-	${env} pytest --setup-show tests/system ${testargs}
+	${env} pytest -vv --setup-show tests/system ${testargs}
 
 test_datasets: ${app}
 	${env} /bin/sh -ec "find websecmap -path '*/fixtures/*.json' -print0 | \
