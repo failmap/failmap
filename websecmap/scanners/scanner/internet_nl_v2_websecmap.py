@@ -695,7 +695,7 @@ def lowest_value_in_results(scan_data, test_names: List[str]) -> str:
         'passed': 10
     }
 
-    lowest_test_outcome = 5
+    lowest_test_outcome = 10
     lowest_test_status = "passed"
     for test_name in test_names:
         current_status = scan_data['results']['tests'][test_name]['status']

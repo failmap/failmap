@@ -4,9 +4,6 @@ from datetime import datetime, timedelta
 import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 
@@ -577,133 +574,134 @@ class EndpointGenericScanScratchpad(models.Model):
     )
 
 
-class GenericScanQueue(models.Model):
-    """
-    Design: use a generic foreignkey for endpoints and urls, use no relation or have a model for urls and one for
-    endpoints. Given there will be millions and millions of scans, running a genericforeignkey sounds like a bad idea.
-
-    Using a direct foreign key would be faster, easier to understand and maintain. Splitting the scan from an endpoint
-    would require mimicing the endpoint data to be able to retrieve what endpoint has been scanned. That does not
-    make sense.
-
-    Therefore two models will be made, with a relation to their scan type: endpoint or url.
-    """
-
-    scanner = models.CharField(
-        max_length=60,
-        db_index=True,
-        help_text="The scanner used to perform this scan. Options at time of designing: tlsq, https_headers..."
-    )
-
-    created_at_when = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="The time of queueing this scan."
-    )
-
-    finished_at_when = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="The time of this scan to finish."
-    )
-
-    state = models.CharField(
-        max_length=60,
-        db_index=True,
-        help_text="The current state of the scan in progress. The normal lifecycle is: queued, being scanned, finished."
-                  "In case of exceptions / errors, and the scan is returned, the state is error. A scan can also be "
-                  "cancelled, in that case it will not be picked up by the scan workers. A new scan can be scheduled."
-                  "A new scan for something can only be scheduled if the state is finished or cancelled. A scan can "
-                  "also time out. in that case the scan could be picked up again lateron. Something went wrong during"
-                  "a scan."
-    )
-
-    state_message = models.CharField(
-        max_length=250,
-        help_text="Information about the status, for example error information.",
-        blank=True,
-        null=True
-    )
-
-    last_state_change = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="The moment the state changed for this scan."
-    )
-
-
-class GenericScanQueueLog(models.Model):
-    state = models.CharField(
-        max_length=255,
-        blank=True,
-        default="",
-        help_text="The state that was registered at a certain moment in time."
-    )
-
-    state_message = models.CharField(
-        max_length=250,
-        help_text="Information about the status, for example error information.",
-        blank=True,
-        null=True
-    )
-
-    last_state_update = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="Last time this state was written to this field, for example when the endpoint was saved, but"
-                  "contained the same data as before. In that case the current state is updated."
-    )
-
-    at_when = models.DateTimeField(
-        blank=True,
-        null=True
-    )
-
-
-class EndpointScanQueue(GenericScanQueue):
-    endpoint = models.ForeignKey(
-        Endpoint,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-
-
-class UrlScanQueue(GenericScanQueue):
-    url = models.ForeignKey(
-        Url,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-
-
-@receiver(post_save, sender=EndpointScanQueue)
-def log_state_change(sender, instance, *args, **kwargs):
-
-    # do not add anything to the log if the message is the same, only update the last_state_update in that case.
-    esql = EndpointScanQueueLog.objects.all().filter(scan__endpoint=instance.endpoint).last()
-    if esql:
-        if esql.state == instance.state and esql.state_message == instance.state_message:
-            esql.last_state_update = timezone.now()
-            esql.save()
-            return
-
-    esql = EndpointScanQueueLog()
-    esql.scan = instance
-    esql.at_when = datetime.now(pytz.utc)
-    esql.state = instance.state
-    esql.state_message = instance.state_message
-    esql.last_state_check = datetime.now(pytz.utc)
-    esql.save()
-
-
-class EndpointScanQueueLog(GenericScanQueueLog):
-
-    scan = models.ForeignKey(
-        EndpointScanQueue,
-        on_delete=models.CASCADE,
-    )
+# disabled for being too soon and not being modelled properly
+# class GenericScanQueue(models.Model):
+#     """
+#     Design: use a generic foreignkey for endpoints and urls, use no relation or have a model for urls and one for
+#     endpoints. Given there will be millions and millions of scans, running a genericforeignkey sounds like a bad idea.
+#
+#     Using a direct foreign key would be faster, easier to understand and maintain. Splitting the scan from an endpoint
+#     would require mimicing the endpoint data to be able to retrieve what endpoint has been scanned. That does not
+#     make sense.
+#
+#     Therefore two models will be made, with a relation to their scan type: endpoint or url.
+#     """
+#
+#     scanner = models.CharField(
+#         max_length=60,
+#         db_index=True,
+#         help_text="The scanner used to perform this scan. Options at time of designing: tlsq, https_headers..."
+#     )
+#
+#     created_at_when = models.DateTimeField(
+#         blank=True,
+#         null=True,
+#         help_text="The time of queueing this scan."
+#     )
+#
+#     finished_at_when = models.DateTimeField(
+#         blank=True,
+#         null=True,
+#         help_text="The time of this scan to finish."
+#     )
+#
+#     state = models.CharField(
+#         max_length=60,
+#         db_index=True,
+#         help_text="The current state of scan in progress. The normal lifecycle is: queued, being scanned, finished."
+#                   "In case of exceptions / errors, and the scan is returned, the state is error. A scan can also be "
+#                   "cancelled, in that case it will not be picked up by the scan workers. A new scan can be scheduled."
+#                   "A new scan for something can only be scheduled if the state is finished or cancelled. A scan can "
+#                   "also time out. in that case the scan could be picked up again lateron. Something went wrong during"
+#                   "a scan."
+#     )
+#
+#     state_message = models.CharField(
+#         max_length=250,
+#         help_text="Information about the status, for example error information.",
+#         blank=True,
+#         null=True
+#     )
+#
+#     last_state_change = models.DateTimeField(
+#         blank=True,
+#         null=True,
+#         help_text="The moment the state changed for this scan."
+#     )
+#
+#
+# class GenericScanQueueLog(models.Model):
+#     state = models.CharField(
+#         max_length=255,
+#         blank=True,
+#         default="",
+#         help_text="The state that was registered at a certain moment in time."
+#     )
+#
+#     state_message = models.CharField(
+#         max_length=250,
+#         help_text="Information about the status, for example error information.",
+#         blank=True,
+#         null=True
+#     )
+#
+#     last_state_update = models.DateTimeField(
+#         blank=True,
+#         null=True,
+#         help_text="Last time this state was written to this field, for example when the endpoint was saved, but"
+#                   "contained the same data as before. In that case the current state is updated."
+#     )
+#
+#     at_when = models.DateTimeField(
+#         blank=True,
+#         null=True
+#     )
+#
+#
+# class EndpointScanQueue(GenericScanQueue):
+#     endpoint = models.ForeignKey(
+#         Endpoint,
+#         on_delete=models.CASCADE,
+#         null=True,
+#         blank=True,
+#     )
+#
+#
+# class UrlScanQueue(GenericScanQueue):
+#     url = models.ForeignKey(
+#         Url,
+#         on_delete=models.CASCADE,
+#         null=True,
+#         blank=True,
+#     )
+#
+#
+# @receiver(post_save, sender=EndpointScanQueue)
+# def log_state_change(sender, instance, *args, **kwargs):
+#
+#     # do not add anything to the log if the message is the same, only update the last_state_update in that case.
+#     esql = EndpointScanQueueLog.objects.all().filter(scan__endpoint=instance.endpoint).last()
+#     if esql:
+#         if esql.state == instance.state and esql.state_message == instance.state_message:
+#             esql.last_state_update = timezone.now()
+#             esql.save()
+#             return
+#
+#     esql = EndpointScanQueueLog()
+#     esql.scan = instance
+#     esql.at_when = datetime.now(pytz.utc)
+#     esql.state = instance.state
+#     esql.state_message = instance.state_message
+#     esql.last_state_check = datetime.now(pytz.utc)
+#     esql.save()
+#
+#
+# class EndpointScanQueueLog(GenericScanQueueLog):
+#
+#     scan = models.ForeignKey(
+#         EndpointScanQueue,
+#         on_delete=models.CASCADE,
+#     )
 
 
 class Screenshot(models.Model):

@@ -450,7 +450,7 @@ def test_legacy_calculations():
                     'mail_auth_dmarc_policy': {'status': 'passed', 'verdict': 'good'},
                     'mail_auth_dkim_exist': {'status': 'passed', 'verdict': 'good'},
                     'mail_auth_spf_exist': {'status': 'passed', 'verdict': 'good'},
-                    'mail_auth_spf_policy': {'status': 'passed', 'verdict': 'good'},
+                    'mail_auth_spf_policy': {'status': 'not_tested', 'verdict': 'good'},
                     'mail_starttls_tls_available': {'status': 'passed', 'verdict': 'good'},
                     'mail_starttls_tls_keyexchange': {'status': 'failed', 'verdict': 'bad'},
                     'mail_starttls_tls_ciphers': {'status': 'warning', 'verdict': 'phase-out'},
@@ -535,6 +535,10 @@ def test_legacy_calculations():
     # https://github.com/internetstandards/Internet.nl-dashboard/issues/184
 
     assert "failed" == lowest_value_in_results(data, ['mail_ipv6_mx_address', 'mail_ipv6_mx_reach'])
+
+    # https://github.com/internetstandards/Internet.nl-dashboard/issues/194
+    # code delivered "passed", should be "not_tested", due to too low Lowest test outocome (5 instead of 10)
+    assert "not_tested" == lowest_value_in_results(data, ['mail_auth_spf_policy'])
 
     add_calculation(scan_data=data, new_key='mail_legacy_ipv6_mailserver',
                     required_values=['mail_ipv6_mx_address', 'mail_ipv6_mx_reach'])
