@@ -6,15 +6,14 @@ from celery import group
 from websecmap.scanners.autoexplain import autoexplain
 from websecmap.scanners.scanner import (dns_endpoints, dns_wildcards, dnssec, dummy, ftp, http,
                                         internet_nl_mail, internet_nl_web, plain_http,
-                                        security_headers, subdomains, tls_qualys,
-                                        tls_qualys_periodic_task)
+                                        security_headers, subdomains, tls_qualys)
 
 log = logging.getLogger(__name__)
 
 
 # explicitly declare the imported modules as this modules 'content', prevents pyflakes issues
 __all__ = [tls_qualys, security_headers, dummy, http, dnssec, ftp, subdomains, internet_nl_mail, internet_nl_web,
-           dns_endpoints, tls_qualys_periodic_task, dns_wildcards, autoexplain]
+           dns_endpoints, dns_wildcards, autoexplain]
 
 # This is the single source of truth regarding scanner configuration.
 # Lists to be used elsewhere when tasks need to be composed, these lists contain compose functions.

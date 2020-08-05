@@ -1,12 +1,15 @@
 # coding=UTF-8
 from datetime import datetime, timedelta
+from typing import List
 
 import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 
+from websecmap.celery import app
 from websecmap.organizations.models import Url
 
 
@@ -467,6 +470,60 @@ class TlsQualysScan(ExplainMixin, LatestScanMixin):
 
     def __str__(self):
         return "%s - %s" % (self.scan_date, self.qualys_rating)
+
+
+class PlannedScan(models.Model):
+    """
+    A planned scan is always performed per url, even if the scan itself is about endpoints. The endpoints can be
+    retrieved at a later state,
+    """
+    url = models.ForeignKey(
+        Url,
+        on_delete=models.CASCADE
+    )
+
+    activity = models.CharField(
+        max_length=10,
+        default="",
+        db_index=True,
+        help_text="discover, verify or scan"
+        # could be an enum, which saves some data
+    )
+
+    scanner = models.CharField(
+        max_length=10,
+        default="",
+        db_index=True,
+        help_text="tlsq, dnssec, http_security_headers, plain_http, internet_nl_mail, dnssec, ftp, dns_endpoints"
+        # could be an enum, which saves some data
+    )
+
+    state = models.CharField(
+        max_length=10,
+        default="",
+        db_index=True,
+        help_text="requested, picked_up, finished, error, timeout"
+    )
+
+    requested_at_when = models.DateTimeField()
+
+    finished_at_when = models.DateTimeField(
+        null=True,
+        help_text="when finished, timeout, error"
+    )
+
+
+class PlannedScanError(models.Model):
+    # since many plannedscans will run just fine, don't add this information to that model.
+
+    planned_scan = models.ForeignKey(
+        PlannedScan,
+        on_delete=models.CASCADE
+    )
+
+    debug_information = models.CharField(
+        max_length=512
+    )
 
 
 # https://docs.djangoproject.com/en/dev/topics/db/models/#id6
