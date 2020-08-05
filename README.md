@@ -217,6 +217,15 @@ set LDFLAGS -L/usr/local/opt/openssl/lib
 ```
 
 
+If you get issues like these:
+OSError: dlopen(/usr/local/lib/libgdal.dylib, 6): Library not loaded: /usr/local/opt/openssl/lib/libssl.1.0.0.dylib
+  Referenced from: /usr/local/opt/libpq/lib/libpq.5.dylib
+  Reason: image not found
+
+
+Then look here:
+https://github.com/kelaberetiv/TagUI/issues/86
+
 
 ### Missing Docker Daemon (mac users)
 While docker is installed using brew in prior steps, you probably want to have

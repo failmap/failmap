@@ -23,7 +23,7 @@ import ipaddress
 import json
 import logging
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from http.client import BadStatusLine
 from multiprocessing.pool import ThreadPool
 from time import sleep
@@ -34,16 +34,20 @@ import requests
 from celery import Task, group
 from constance import config
 from django.db import transaction
+from django.db.models import Count
+from django.utils import timezone
 from requests.exceptions import ConnectTimeout, ProxyError, SSLError
 from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fixed
 from urllib3.exceptions import ProtocolError
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
+from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad, PlannedScan
+from websecmap.scanners.plannedscan import request
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_configurations_to_scan
 from websecmap.scanners.scanner.http import store_url_ips
+from websecmap.scanners import plannedscan
 
 # There is a balance between network timeout and qualys result cache.
 # This is relevant, since the results are not kept in cache for hours. More like 15 minutes.
@@ -63,6 +67,62 @@ New architecture:
 """
 
 
+def plan_scans():
+
+    if not allowed_to_scan("tls_qualys"):
+        return None
+
+    # This is a query for the TLS scanner that only scans endpoints that did not have a scan yet.
+    # Plan scans for endpoints that never have been scanned:
+    urls = Url.objects.filter(
+        q_configurations_to_scan(),
+        is_dead=False,
+        not_resolvable=False,
+        endpoint__protocol="https",
+        endpoint__port=443,
+        endpoint__is_dead=False,
+    ).annotate(
+        nr_of_scans=Count('endpoint__endpointgenericscan')
+    ).filter(
+        nr_of_scans=0
+    ).only('id', 'url')
+
+    # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
+    plannedscan.request(activity="scan", scanner="tls_qualys", urls=list(set(urls)))
+
+    # Scans for endpoints that have already been scanned:
+    # Scan the bad ones more frequently than the good ones, to reduce the amount of requests.
+    # todo: parameterize using settings in constance.
+    parameter_sets = [
+        {
+            "exclude_urls_scanned_in_the_last_n_days": 7,
+            "quality_levels": ["A", "A+", "A-", "trusted"]
+        },
+        {
+            "exclude_urls_scanned_in_the_last_n_days": 3,
+            "quality_levels": ["F", "C", "B", "not trusted"]
+        }
+    ]
+
+    for parameter_set in parameter_sets:
+        urls = Url.objects.filter(
+            q_configurations_to_scan(),
+            is_dead=False,
+            not_resolvable=False,
+            endpoint__protocol="https",
+            endpoint__port=443,
+            endpoint__is_dead=False,
+            endpoint__endpointgenericscan__is_the_latest_scan=True,
+
+            # an exclude filter here will not work, as you will exclude so much...
+            endpoint__endpointgenericscan__last_scan_moment__lte=timezone.now() - timedelta(
+                days=parameter_set['exclude_urls_scanned_in_the_last_n_days']),
+            endpoint__endpointgenericscan__rating__in=parameter_set['quality_levels']
+        ).only('id', 'url')
+        print(urls.query)
+        plannedscan.request(activity="scan", scanner="tls_qualys", urls=list(set(urls)))
+
+
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
@@ -72,66 +132,20 @@ def compose_task(
     if not allowed_to_scan("tls_qualys"):
         return group()
 
-    # apply filter to organizations (or if no filter, all organizations)
-    organizations = []
-    if organizations_filter:
-        organizations = Organization.objects.filter(**organizations_filter)
-
-        # Discover Endpoints will figure out if there is https and if port 443 is open.
-        # apply filter to urls in organizations (or if no filter, all urls)
-        # do not scan the same url within 24 hours.
-        # we assume all endpoints are scanned at the same time (this is what qualys does)
-
-        # scan only once in seven days. an emergency fix to make sure everything is scanned.
-        # todo: force re-scan, where days is < 7, with 5000 scanning takes a while and a lot still goes wrong.
-        urls = Url.objects.filter(
-            q_configurations_to_scan(),
-            is_dead=False,
-            not_resolvable=False,
-            endpoint__protocol="https",
-            endpoint__port=443,
-            endpoint__is_dead=False,
-            organization__in=organizations,  # when empty, no results...
-            **urls_filter
-        ).order_by(
-            '-endpoint__endpointgenericscan__latest_scan_moment'
-        ).only('id', 'url')
-    else:
-        # use order by to get a few of the most outdated results...
-        urls = Url.objects.filter(
-            q_configurations_to_scan(),
-            is_dead=False,
-            not_resolvable=False,
-            endpoint__protocol="https",
-            endpoint__port=443,
-            endpoint__is_dead=False,
-            **urls_filter
-        ).order_by(
-            '-endpoint__endpointgenericscan__latest_scan_moment'
-        ).only('id', 'url')
-
-    # Urls are ordered randomly.
-    # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
-    urls = list(set(urls))
-    random.shuffle(urls)
-
-    if not urls:
-        log.warning('Applied filters resulted in no urls, thus no tls qualys tasks!')
-        return group()
-
-    log.info('Creating qualys scan task for %s urls for %s organizations.', len(urls), len(organizations))
+    # pickup 25 and process them.
 
     # Instead of hyper.sh, we're using a proxy to connect to Qualys to run a scan. A list of proxies is maintained in
     # ScanProxy. We'll try to get a valid proxy first, this might take a few minutes. Then at most once every 5 minutes
     # an new set of scans (of 25 urls) is run on the proxy. While not very elegant, we had just a few days to migrate.
 
-    chunks = list(chunks2(urls, 25))
+    urls = plannedscan.pickup(activity="scan", scanner="tlsq", amount=25)
+    if not urls:
+        return group()
 
-    # a bulk scan of 25 urls takes about 45 minutes.
-    tasks = []
-    for chunk in chunks:
-        tasks.append(claim_proxy.s(chunk[0]) | qualys_scan_bulk.s(chunk) | release_proxy.s(chunk[0]))
-    return group(tasks)
+    return group(claim_proxy.s(urls)
+                 | qualys_scan_bulk.s(urls)
+                 | release_proxy.s(urls)
+                 | plannedscan.finish_multiple.si(urls))
 
 
 # Use the same rate limiting as qualys_scan_bulk, otherwise all proxies are claimed before scans are made.
