@@ -66,7 +66,7 @@ New architecture:
 """
 
 
-def plan_scans():
+def plan_scan(urls_filter: dict = dict(), **kwargs):
 
     if not allowed_to_scan("tls_qualys"):
         return None
@@ -80,6 +80,7 @@ def plan_scans():
         endpoint__protocol="https",
         endpoint__port=443,
         endpoint__is_dead=False,
+        **urls_filter
     ).annotate(
         nr_of_scans=Count('endpoint__endpointgenericscan')
     ).filter(
@@ -116,7 +117,8 @@ def plan_scans():
             # an exclude filter here will not work, as you will exclude so much...
             endpoint__endpointgenericscan__last_scan_moment__lte=timezone.now() - timedelta(
                 days=parameter_set['exclude_urls_scanned_in_the_last_n_days']),
-            endpoint__endpointgenericscan__rating__in=parameter_set['quality_levels']
+            endpoint__endpointgenericscan__rating__in=parameter_set['quality_levels'],
+            **urls_filter
         ).only('id', 'url')
         print(urls.query)
         plannedscan.request(activity="scan", scanner="tls_qualys", urls=list(set(urls)))

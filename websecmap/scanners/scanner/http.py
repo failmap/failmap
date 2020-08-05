@@ -44,6 +44,7 @@ from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, UrlIp
+from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.__init__ import (allowed_to_discover_endpoints, endpoint_filters,
                                                  q_configurations_to_scan, unique_and_random)
 from websecmap.scanners.timeout import timeout
@@ -232,9 +233,7 @@ def compose_manual_verify_task(
 
 
 def compose_verify_task(urls):
-    endpoints = [Endpoint.objects.all().filter(url=url, protocol__in=['http', 'https']).only("id", "port", "ip_version", "url__url") for
-                 url in urls]
-
+    endpoints = retrieve_endpoints_from_urls(urls, protocols=['http', 'https'])
     endpoints = unique_and_random(endpoints)
 
 

@@ -18,6 +18,7 @@ from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
+from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import (allowed_to_scan, endpoint_filters,
                                                  q_configurations_to_scan, url_filters, unique_and_random)
@@ -141,8 +142,7 @@ def compose_manual_scan_task(organizations_filter: dict = dict(),
 
 
 def compose_scan_task(urls):
-    endpoints = [Endpoint.objects.all().filter(url=url, protocol='ftp').only("id", "port", "ip_version", "url__url") for
-                 url in urls]
+    endpoints = retrieve_endpoints_from_urls(urls, protocols=['ftp'])
 
     endpoints = unique_and_random(endpoints)
 
@@ -216,9 +216,7 @@ def compose_manual_verify_task(organizations_filter: dict = dict(),
 
 
 def compose_verify_task(urls):
-    endpoints = [Endpoint.objects.all().filter(url=url, protocol='ftp').only("id", "port", "ip_version", "url__url") for
-                 url in urls]
-
+    endpoints = retrieve_endpoints_from_urls(urls, protocols=['ftp'])
     endpoints = unique_and_random(endpoints)
 
     log.info(f'Verifying FTP servers on {len(endpoints)} endpoints.')
