@@ -130,40 +130,79 @@ def create_function_job(function: str, **kwargs):
 
 
 @app.task(queue='storage')
-def create_job(task_module: str, **kwargs):
+def create_planned_scan_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 
     task_module: module from which to call `compose_discover_task` which results in the task to be executed
     """
 
     module = importlib.import_module(task_module)
-    task = module.compose_task(**kwargs)
+    task = module.compose_planned_scan_task(**kwargs)
 
     return Job.create(task, task_module, None)
 
 
 @app.task(queue='storage')
-def create_discover_job(task_module: str, **kwargs):
+def create_planned_discover_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 
     task_module: module from which to call `compose_discover_task` which results in the task to be executed
     """
 
     module = importlib.import_module(task_module)
-    task = module.compose_discover_task(**kwargs)
+    task = module.compose_planned_discover_task(**kwargs)
 
     return Job.create(task, task_module, None)
 
 
 @app.task(queue='storage')
-def create_verify_job(task_module: str, **kwargs):
+def create_planned_verify_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 
     task_module: module from which to call `compose_discover_task` which results in the task to be executed
     """
 
     module = importlib.import_module(task_module)
-    task = module.compose_verify_task(**kwargs)
+    task = module.compose_planned_verify_task(**kwargs)
+
+    return Job.create(task, task_module, None)
+
+
+@app.task(queue='storage')
+def create_manual_scan_job(task_module: str, **kwargs):
+    """Helper to allow Jobs to be created using Celery Beat.
+
+    task_module: module from which to call `compose_discover_task` which results in the task to be executed
+    """
+
+    module = importlib.import_module(task_module)
+    task = module.compose_manual_scan_task(**kwargs)
+
+    return Job.create(task, task_module, None)
+
+
+@app.task(queue='storage')
+def create_manual_discover_job(task_module: str, **kwargs):
+    """Helper to allow Jobs to be created using Celery Beat.
+
+    task_module: module from which to call `compose_discover_task` which results in the task to be executed
+    """
+
+    module = importlib.import_module(task_module)
+    task = module.compose_manual_discover_task(**kwargs)
+
+    return Job.create(task, task_module, None)
+
+
+@app.task(queue='storage')
+def create_manual_verify_job(task_module: str, **kwargs):
+    """Helper to allow Jobs to be created using Celery Beat.
+
+    task_module: module from which to call `compose_discover_task` which results in the task to be executed
+    """
+
+    module = importlib.import_module(task_module)
+    task = module.compose_manual_verify_task(**kwargs)
 
     return Job.create(task, task_module, None)
 

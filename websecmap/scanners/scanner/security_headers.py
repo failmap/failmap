@@ -13,9 +13,10 @@ from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Ti
 
 from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Organization, Url
+from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
 from websecmap.scanners.scanner.http import get_random_user_agent
 
 log = logging.getLogger(__name__)
@@ -28,18 +29,10 @@ SECURITY_HEADER_SCAN_TYPES = ['http_security_header_strict_transport_security',
                               'http_security_header_x_xss_protection']
 
 
-def compose_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
-    **kwargs
-) -> Task:
-    """Compose taskset to scan specified endpoints.
-    """
-
-    if not allowed_to_scan("security_headers"):
-        return group()
-
+def filter_scan(organizations_filter: dict = dict(),
+              urls_filter: dict = dict(),
+              endpoints_filter: dict = dict(),
+              **kwargs):
     # apply filter to organizations (or if no filter, all organizations)
     # apply filter to urls in organizations (or if no filter, all urls)
     organizations = []
@@ -61,11 +54,50 @@ def compose_task(
     ).only('id', 'port', 'protocol', 'ip_version', 'url__id', 'url__url')
 
     # unique endpoints only
-    endpoints = list(set(endpoints))
-    random.shuffle(endpoints)
+    endpoints = unique_and_random(endpoints)
+    return unique_and_random([endpoint.url for endpoint in endpoints])
 
-    log.info(f'Scanning security headers on '
-             f'{len(endpoints)} endpoints, {len(urls)} urls, {len(organizations)} organizations.')
+
+def plan_scan(organizations_filter: dict = dict(),
+              urls_filter: dict = dict(),
+              endpoints_filter: dict = dict(),
+              **kwargs
+              ):
+    if not allowed_to_scan("security_headers"):
+        return group()
+
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    plannedscan.request(activity="scan", scanner="http_security_headers", urls=urls)
+
+
+def compose_planned_scan_task(**kwargs):
+    urls = plannedscan.pickup(activity="scan", scanner="http_security_headers", amount=kwargs.get('amount', 25))
+    return compose_scan_task(urls)
+
+
+def compose_manual_scan_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+    **kwargs
+) -> Task:
+    """Compose taskset to scan specified endpoints.
+    """
+    if not allowed_to_scan("security_headers"):
+        return group()
+
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    return compose_scan_task(urls)
+
+
+def compose_scan_task(urls):
+
+    endpoints = [Endpoint.objects.all().filter(url=url, protocol__in=['http', 'https']).only("id", "port", "ip_version", "url__url") for
+                 url in urls]
+
+    endpoints = unique_and_random(endpoints)
+    log.info(f'Scanning security headers on {len(endpoints)} endpoints, {len(urls)} urls')
+
 
     tasks = []
     for endpoint in endpoints:
@@ -74,6 +106,7 @@ def compose_task(
                 endpoint.uri_url()
             ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
             | analyze_headers.s(endpoint)
+            | plannedscan.finish.si('scan', 'http_security_headers', endpoint.url)
         )
 
     return group(tasks)

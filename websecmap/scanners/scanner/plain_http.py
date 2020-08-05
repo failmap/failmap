@@ -12,9 +12,10 @@ from celery import Task, group
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
+from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
 from websecmap.scanners.scanner.http import (can_connect, connect_result, redirects_to_safety,
                                              resolves_on_v4, resolves_on_v6)
 
@@ -30,15 +31,10 @@ saved_by_the_bell = "Redirects to a secure site, while a secure counterpart on t
 no_https_at_all = "Site does not redirect to secure url, and has no secure alternative on a standard port."
 
 
-def compose_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    **kwargs
-) -> Task:
-
-    # We might not be allowed to scan for this at all.
-    if not allowed_to_scan("plain_http"):
-        return group()  # An empty group fits this callable's signature and does not impede celery.
+def filter_scan(organizations_filter: dict = dict(),
+              urls_filter: dict = dict(),
+              endpoints_filter: dict = dict(),
+              **kwargs):
 
     if organizations_filter:
         organizations = Organization.objects.filter(is_dead=False, **organizations_filter).only('id')
@@ -56,12 +52,42 @@ def compose_task(
         ).only('id', 'url')
         log.info(f'Creating scan plain http task {len(urls)} urls.')
 
-    if not urls:
-        log.warning('Applied filters resulted in no urls, thus no plain http tasks!')
+    return unique_and_random(urls)
+
+
+def plan_scan(organizations_filter: dict = dict(),
+              urls_filter: dict = dict(),
+              endpoints_filter: dict = dict(),
+              **kwargs
+              ):
+    if not allowed_to_scan("plain_http"):
         return group()
 
-    urls = list(set(urls))
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    plannedscan.request(activity="scan", scanner="plain_http", urls=urls)
 
+
+def compose_planned_scan_task(**kwargs):
+    urls = plannedscan.pickup(activity="scan", scanner="plain_http", amount=kwargs.get('amount', 25))
+    return compose_scan_task(urls)
+
+
+def compose_manual_scan_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+    **kwargs
+) -> Task:
+
+    # We might not be allowed to scan for this at all.
+    if not allowed_to_scan("plain_http"):
+        return group()  # An empty group fits this callable's signature and does not impede celery.
+
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    return compose_scan_task(urls)
+
+
+def compose_scan_task(urls):
     tasks = []
     for url in urls:
         complete_endpoints, incomplete_endpoints = get_endpoints_with_missing_encryption(url)
@@ -75,6 +101,9 @@ def compose_task(
                     incomplete_endpoint
                 ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[incomplete_endpoint.ip_version])
                 | store.s(incomplete_endpoint))
+
+    if not tasks:
+        log.warning('Applied filters resulted in no urls, thus no plain http tasks!')
 
     return group(tasks)
 

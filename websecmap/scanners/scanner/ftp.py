@@ -16,10 +16,11 @@ from django.utils import timezone
 
 from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Url
+from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import (allowed_to_scan, endpoint_filters,
-                                                 q_configurations_to_scan, url_filters)
+                                                 q_configurations_to_scan, url_filters, unique_and_random)
 
 log = logging.getLogger(__name__)
 
@@ -33,12 +34,94 @@ EXPIRES = 3600  # one hour is more then enough
 CELERY_IP_VERSION_QUEUE_NAMES = {4: 'ipv4', 6: 'ipv6'}
 
 
-# todo: rename compose_task to compose_scan_task
-def compose_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
-    **kwargs
+def filter_scan(organizations_filter: dict = dict(),
+              urls_filter: dict = dict(),
+              endpoints_filter: dict = dict(),
+              **kwargs):
+    default_filter = {"protocol": "ftp", "is_dead": False}
+    endpoints_filter = {**endpoints_filter, **default_filter}
+    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
+    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+    endpoints = endpoints.only("id", "port", "ip_version", "url__url")
+
+    endpoints = unique_and_random(endpoints)
+    return unique_and_random([endpoint.url for endpoint in endpoints])
+
+
+@app.task(queue='storage')
+def plan_scan(organizations_filter: dict = dict(),
+              urls_filter: dict = dict(),
+              endpoints_filter: dict = dict(),
+              **kwargs
+              ):
+    if not allowed_to_scan("ftp"):
+        return group()
+
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    plannedscan.request(activity="scan", scanner="ftp", urls=urls)
+
+
+def filter_verify(organizations_filter: dict = dict(),
+                      urls_filter: dict = dict(),
+                      endpoints_filter: dict = dict(),
+                      **kwargs):
+
+    default_filter = {"protocol": "ftp", "is_dead": False}
+    endpoints_filter = {**endpoints_filter, **default_filter}
+    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
+    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+    endpoints = endpoints.only('id', 'url__id', 'url__url', 'port', 'ip_version')
+
+    endpoints = unique_and_random(endpoints)
+    return unique_and_random([endpoint.url for endpoint in endpoints])
+
+
+@app.task(queue='storage')
+def plan_verify(organizations_filter: dict = dict(),
+                      urls_filter: dict = dict(),
+                      endpoints_filter: dict = dict(),
+                      **kwargs):
+    if not allowed_to_scan("ftp"):
+        return group()
+
+    urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    plannedscan.request(activity="discover", scanner="ftp", urls=urls)
+
+
+def filter_discover(organizations_filter: dict = dict(),
+                    urls_filter: dict = dict(),
+                    endpoints_filter: dict = dict(),
+                    **kwargs):
+
+    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), not_resolvable=False, is_dead=False)
+    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
+    urls = urls.only('id', 'url')
+
+    return unique_and_random(urls)
+
+
+@app.task(queue='storage')
+def plan_discover(organizations_filter: dict = dict(),
+                   urls_filter: dict = dict(),
+                   endpoints_filter: dict = dict(),
+                   **kwargs):
+    if not allowed_to_scan("ftp"):
+        return group()
+
+    urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    plannedscan.request(activity="discover", scanner="ftp", urls=urls)
+
+
+@app.task(queue='storage')
+def compose_planned_scan_task(**kwargs):
+    urls = plannedscan.pickup(activity="scan", scanner="ftp", amount=kwargs.get('amount', 25))
+    return compose_scan_task(urls)
+
+
+def compose_manual_scan_task(organizations_filter: dict = dict(),
+                   urls_filter: dict = dict(),
+                   endpoints_filter: dict = dict(),
+                   **kwargs
 ) -> Task:
     """
     Todo's:
@@ -54,14 +137,14 @@ def compose_task(
     if not allowed_to_scan("ftp"):
         return group()
 
-    default_filter = {"protocol": "ftp", "is_dead": False}
-    endpoints_filter = {**endpoints_filter, **default_filter}
-    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
-    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
-    endpoints = endpoints.only("id", "port", "ip_version", "url__url")
+    return filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
 
-    endpoints = list(set(endpoints))
-    random.shuffle(endpoints)
+
+def compose_scan_task(urls):
+    endpoints = [Endpoint.objects.all().filter(url=url, protocol='ftp').only("id", "port", "ip_version", "url__url") for
+                 url in urls]
+
+    endpoints = unique_and_random(endpoints)
 
     log.info('Scanning FTP servers on %s endpoints.', len(endpoints))
     tasks = []
@@ -72,32 +155,35 @@ def compose_task(
                 endpoint.url.url,
                 endpoint.port
             ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
-            | store.s(endpoint))
+            | store.s(endpoint)
+            | plannedscan.finish.si('scan', 'ftp', endpoint.url)
+        )
 
     return group(tasks)
 
 
-def compose_discover_task(organizations_filter: dict = dict(),
+@app.task(queue='storage')
+def compose_planned_discover_task(**kwargs):
+    urls = plannedscan.pickup(activity="discover", scanner="ftp", amount=kwargs.get('amount', 25))
+    return compose_discover_task(urls)
+
+
+def compose_manual_discover_task(organizations_filter: dict = dict(),
                           urls_filter: dict = dict(),
                           endpoints_filter: dict = dict(), **kwargs) -> Task:
     # There are only semi-alternative ports, no real alternative ports.
     # ports = [21, 990, 2811, 5402, 6622, 20, 2121, 212121]  # All types different default ports.
-
-    ports = [21]
-    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), not_resolvable=False, is_dead=False)
-    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
-    urls = urls.only('id', 'url')
-
-    urls = list(set(urls))
-    random.shuffle(urls)
-
+    urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     log.info(f'Discovering FTP servers on {len(urls)} urls.')
+    return compose_discover_task(urls)
 
+
+def compose_discover_task(urls):
     tasks = []
     for ip_version in [4, 6]:
         # first iterate through ports, so there is more time between different connection attempts. Which reduces load
         # for the tested server. Also, the first port has the most hits :)
-        for port in ports:
+        for port in [21]:
             for url in urls:
                 tasks.append(
                     discover.si(
@@ -109,23 +195,31 @@ def compose_discover_task(organizations_filter: dict = dict(),
                         port,
                         'ftp',
                         ip_version)
+                    | plannedscan.finish.si('discover', 'ftp', url)
                 )
 
     return group(tasks)
 
 
-def compose_verify_task(organizations_filter: dict = dict(),
+@app.task(queue='storage')
+def compose_planned_verify_task(**kwargs):
+    urls = plannedscan.pickup(activity="verify", scanner="ftp", amount=kwargs.get('amount', 25))
+    return compose_verify_task(urls)
+
+
+def compose_manual_verify_task(organizations_filter: dict = dict(),
                         urls_filter: dict = dict(),
                         endpoints_filter: dict = dict(), **kwargs) -> Task:
 
-    default_filter = {"protocol": "ftp", "is_dead": False}
-    endpoints_filter = {**endpoints_filter, **default_filter}
-    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
-    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
-    endpoints = endpoints.only('id', 'url__id', 'url__url', 'port', 'ip_version')
+    urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    return compose_verify_task(urls)
 
-    endpoints = list(set(endpoints))
-    random.shuffle(endpoints)
+
+def compose_verify_task(urls):
+    endpoints = [Endpoint.objects.all().filter(url=url, protocol='ftp').only("id", "port", "ip_version", "url__url") for
+                 url in urls]
+
+    endpoints = unique_and_random(endpoints)
 
     log.info(f'Verifying FTP servers on {len(endpoints)} endpoints.')
 
@@ -141,7 +235,9 @@ def compose_verify_task(organizations_filter: dict = dict(),
                 endpoint.url,
                 endpoint.port,
                 'ftp',
-                endpoint.ip_version))
+                endpoint.ip_version)
+            | plannedscan.finish.si('verify', 'ftp', endpoint.url)
+        )
 
     return group(tasks)
 

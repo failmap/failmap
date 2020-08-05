@@ -20,7 +20,6 @@ We strongly recomend using the docker approach.
 """
 
 import logging
-import random
 import subprocess
 from typing import List
 
@@ -30,9 +29,10 @@ from django.db.models import Q
 
 from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Organization, Url
+from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import store_url_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
 
 log = logging.getLogger(__name__)
 
@@ -45,21 +45,10 @@ RETRY_DELAY = 10
 EXPIRES = 3600  # one hour is more then enough
 
 
-def compose_task(
-    organizations_filter: dict = dict(),
+def filter_scan(organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
-    **kwargs
-) -> Task:
-    """ Compose taskset to scan toplevel domains.
-
-    DNSSEC is implemented on a (top level) url. It's useless to scan per-endpoint.
-    This is the first scanner that uses the UrlGenericScan table, which looks nearly the same as the
-    endpoint variant.
-    """
-
-    if not allowed_to_scan("dnssec"):
-        return group()
+    **kwargs):
 
     # DNSSEC only works on top level urls
     urls_filter = dict(urls_filter, **{"computed_subdomain": ""})
@@ -85,10 +74,37 @@ def compose_task(
                                   **urls_filter).only('id', 'url')
 
     # Optimize: only required values, unique and randomized
-    urls = list(set(urls))
-    random.shuffle(urls)
+    urls = unique_and_random(urls)
+    return urls
 
+
+def plan_scan(organizations_filter: dict = dict(),
+              urls_filter: dict = dict(),
+              endpoints_filter: dict = dict(),
+              **kwargs):
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     log.info(f'Creating DNSSEC scan task for {len(urls)} urls.')
+    plannedscan.request(activity="scan", scanner="dnssec", urls=urls)
+
+
+def compose_task(organizations_filter: dict = dict(),
+              urls_filter: dict = dict(),
+              endpoints_filter: dict = dict(),
+              **kwargs) -> Task:
+    """ Compose taskset to scan toplevel domains.
+
+    DNSSEC is implemented on a (top level) url. It's useless to scan per-endpoint.
+    This is the first scanner that uses the UrlGenericScan table, which looks nearly the same as the
+    endpoint variant.
+    """
+
+    if not allowed_to_scan("dnssec"):
+        return group()
+
+    if any([organizations_filter, urls_filter, endpoints_filter, kwargs]):
+        urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    else:
+        urls = plannedscan.pickup(activity="scan", scanner="dnssec", amount=25)
 
     # The number of top level urls is negligible, so randomization is not needed.
 
@@ -96,7 +112,8 @@ def compose_task(
     # Sending entire objects is possible. How signatures (.s and .si) work is documented:
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     task = group(
-        scan_dnssec.si(url.url) | store_dnssec.s(url) for url in urls
+        scan_dnssec.si(url.url) | store_dnssec.s(url) | plannedscan.finish.si('scan', 'tls_qualys', urls) for url in
+        urls
     )
 
     return task

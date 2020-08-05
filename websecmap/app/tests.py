@@ -96,8 +96,9 @@ def verify_periodic_tasks_from_fixture(fixture):
         # include the module and method for easier debugging if this test fails.
         assert module_name == module_name and method == method and has_method is True and loaded is True
 
-        if periodic_task.task in ['websecmap.app.models.create_job', 'websecmap.app.models.create_discover_job',
-                                  'websecmap.app.models.create_verify_job', 'websecmap.app.models.create_scan_job']:
+        if periodic_task.task in ['websecmap.app.models.create_manual_discover_job',
+                                  'websecmap.app.models.create_manual_verify_job',
+                                  'websecmap.app.models.create_manual_scan_job']:
 
             # also validate that the argument exists.
             args = json.loads(periodic_task.args)
@@ -112,11 +113,6 @@ def verify_periodic_tasks_from_fixture(fixture):
             assert args[0] == args[0] and loaded is True
 
             # specific types of tasks require specific methods to be present.
-
-            if args[0] == 'websecmap.app.models.create_job':
-                has_method = hasattr(module, 'compose_task')
-                assert args[0] == args[0] and 'compose_task' == 'compose_task' and has_method is True
-
             if args[0] == 'websecmap.app.models.create_verify_job':
                 has_method = hasattr(module, 'compose_verify_task')
                 assert args[0] == args[0] and 'compose_verify_task' == 'compose_verify_task' and has_method is True

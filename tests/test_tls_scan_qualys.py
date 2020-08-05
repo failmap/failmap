@@ -144,7 +144,7 @@ def test_tls_scan_qualys_sample_result(db):
     announce_testcase(1, "Creating a new scan, where everything has to go right.")
     with freeze_time('2000-1-1', tick=True, tz_offset=1):
         with HTTMock(qualys_mock_a):
-            tls_qualys.compose_task()(urls_filter={'name__in': ["www.faalkaart.nl"]})
+            tls_qualys.compose_manual_scan_task(urls_filter={'name__in': ["www.faalkaart.nl"]})
             assert Endpoint.objects.filter(domain="www.faalkaart.nl").count() == 2  # ipv4 + ipv6
             assert TlsQualysScan.objects.filter(qualys_rating="A").count() == 2
 
@@ -152,7 +152,7 @@ def test_tls_scan_qualys_sample_result(db):
                          "or scan results. Scan results would only be updated after 24h.")
     with freeze_time('2000-1-3', tick=True, tz_offset=1):
         with HTTMock(qualys_mock_a):
-            tls_qualys.compose_task()(urls_filter={'name__in': ["www.faalkaart.nl"]})
+            tls_qualys.compose_manual_scan_task()(urls_filter={'name__in': ["www.faalkaart.nl"]})
             assert Endpoint.objects.filter(domain="www.faalkaart.nl").count() == 2
             assert TlsQualysScan.objects.filter(qualys_rating="A").count() == 2
 
@@ -161,7 +161,7 @@ def test_tls_scan_qualys_sample_result(db):
                          "should increase as only changes are recorded.")
     with freeze_time('2000-1-5', tick=True, tz_offset=1):
         with HTTMock(qualys_mock_b):
-            tls_qualys.compose_task()(urls_filter={'name__in': ["www.faalkaart.nl"]})
+            tls_qualys.compose_manual_scan_task()(urls_filter={'name__in': ["www.faalkaart.nl"]})
             assert Endpoint.objects.filter(domain="www.faalkaart.nl").count() == 2
             assert TlsQualysScan.objects.filter(qualys_rating="A").count() == 2
             assert TlsQualysScan.objects.filter(qualys_rating="B").count() == 2
@@ -170,7 +170,7 @@ def test_tls_scan_qualys_sample_result(db):
                          "scan is dismissed")
     with freeze_time('2000-1-5', tick=True, tz_offset=1):
         with HTTMock(qualys_mock_c):
-            tls_qualys.compose_task()(urls_filter={'name__in': ["www.faalkaart.nl"]})
+            tls_qualys.compose_manual_scan_task()(urls_filter={'name__in': ["www.faalkaart.nl"]})
             assert Endpoint.objects.filter(domain="www.faalkaart.nl").count() == 2
             assert TlsQualysScan.objects.filter(qualys_rating="A").count() == 2
             assert TlsQualysScan.objects.filter(qualys_rating="B").count() == 2
@@ -179,7 +179,7 @@ def test_tls_scan_qualys_sample_result(db):
     announce_testcase(5, "Verify that it's possible to scan multiple domains.")
     with freeze_time('2000-1-7', tick=True, tz_offset=1):
         with HTTMock(qualys_mirror):
-            tls_qualys.compose_task()(
+            tls_qualys.compose_manual_scan_task()(
                 urls_filter={
                     'name__in': [
                         "www.faalkaart.nl",
@@ -200,7 +200,7 @@ def test_tls_scan_qualys_sample_result(db):
     Counter().reset()
     with freeze_time('2000-1-9', tick=True, tz_offset=1):
         with HTTMock(qualys_realistic_scan):
-            tls_qualys.compose_task()(urls_filter={'name__in': ["www.faalkaart.nl"]})
+            tls_qualys.compose_manual_scan_task()(urls_filter={'name__in': ["www.faalkaart.nl"]})
 
             # no update on the rating, so no new scans.
             assert TlsQualysScan.objects.filter(qualys_rating="A").count() == 8
@@ -211,7 +211,7 @@ def test_tls_scan_qualys_sample_result(db):
     Counter().reset()
     with freeze_time('2000-1-11', tick=True, tz_offset=1):
         with HTTMock(qualys_error_scan):
-            tls_qualys.compose_task()(urls_filter={'name__in': ["www.faalkaart.nl"]})
+            tls_qualys.compose_manual_scan_task()(urls_filter={'name__in': ["www.faalkaart.nl"]})
 
             # no update on the rating, so no new scan.
             # the endpoints should now be set to dead...
