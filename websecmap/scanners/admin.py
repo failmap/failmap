@@ -325,3 +325,11 @@ class ScanProxyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         self.message_user(request, "Proxies enabled.")
     enable_proxy.short_description = "Enable proxy"
     actions.append('enable_proxy')
+
+
+@admin.register(models.PlannedScan)
+class PlannedScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('url', 'activity', 'scanner', 'state', 'requested_at_when', 'finished_at_when')
+    search_fields = ('url__url', 'activity', 'scanner', 'state')
+    list_filter = ['activity', 'scanner', 'state'][::-1]
+    fields = ('url', 'activity', 'scanner', 'state', 'requested_at_when', 'finished_at_when')

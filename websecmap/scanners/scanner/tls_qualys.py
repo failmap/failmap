@@ -41,11 +41,10 @@ from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fix
 from urllib3.exceptions import ProtocolError
 
 from websecmap.celery import app
-from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad, PlannedScan
-from websecmap.scanners.plannedscan import request
+from websecmap.organizations.models import Url, Organization
+from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_configurations_to_scan
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, chunks2
 from websecmap.scanners.scanner.http import store_url_ips
 from websecmap.scanners import plannedscan
 
@@ -123,29 +122,90 @@ def plan_scans():
         plannedscan.request(activity="scan", scanner="tls_qualys", urls=list(set(urls)))
 
 
-def compose_task(
-    organizations_filter: dict = dict(),
+def compose_manual_scan_task(organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
-    **kwargs
-) -> Task:
+    **kwargs):
+    if not allowed_to_scan("tls_qualys"):
+        return group()
+
+    # apply filter to organizations (or if no filter, all organizations)
+    organizations = []
+    if organizations_filter:
+        organizations = Organization.objects.filter(**organizations_filter)
+
+        # Discover Endpoints will figure out if there is https and if port 443 is open.
+        # apply filter to urls in organizations (or if no filter, all urls)
+        # do not scan the same url within 24 hours.
+        # we assume all endpoints are scanned at the same time (this is what qualys does)
+
+        # scan only once in seven days. an emergency fix to make sure everything is scanned.
+        # todo: force re-scan, where days is < 7, with 5000 scanning takes a while and a lot still goes wrong.
+        urls = Url.objects.filter(
+            q_configurations_to_scan(),
+            is_dead=False,
+            not_resolvable=False,
+            endpoint__protocol="https",
+            endpoint__port=443,
+            endpoint__is_dead=False,
+            organization__in=organizations,  # when empty, no results...
+            **urls_filter
+        ).order_by(
+            '-endpoint__endpointgenericscan__latest_scan_moment'
+        ).only('id', 'url')
+    else:
+        # use order by to get a few of the most outdated results...
+        urls = Url.objects.filter(
+            q_configurations_to_scan(),
+            is_dead=False,
+            not_resolvable=False,
+            endpoint__protocol="https",
+            endpoint__port=443,
+            endpoint__is_dead=False,
+            **urls_filter
+        ).order_by(
+            '-endpoint__endpointgenericscan__latest_scan_moment'
+        ).only('id', 'url')
+
+    # Urls are ordered randomly.
+    # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
+    urls = list(set(urls))
+    random.shuffle(urls)
+
+    if not urls:
+        log.warning('Applied filters resulted in no urls, thus no tls qualys tasks!')
+        return group()
+
+    log.info('Creating qualys scan task for %s urls for %s organizations.', len(urls), len(organizations))
+
+    return compose_scan_task(urls)
+
+
+def compose_planned_scan_task(**kwargs) -> Task:
 
     if not allowed_to_scan("tls_qualys"):
         return group()
 
-    # pickup 25 and process them.
+    # size for the proxies and such is 25 /each
+    urls = plannedscan.pickup(activity="scan", scanner="tls_qualys", amount=kwargs.get('amount', 25))
+    return compose_scan_task(urls)
 
-    # Instead of hyper.sh, we're using a proxy to connect to Qualys to run a scan. A list of proxies is maintained in
-    # ScanProxy. We'll try to get a valid proxy first, this might take a few minutes. Then at most once every 5 minutes
-    # an new set of scans (of 25 urls) is run on the proxy. While not very elegant, we had just a few days to migrate.
 
-    urls = plannedscan.pickup(activity="scan", scanner="tlsq", amount=25)
+def compose_scan_task(urls):
+
     if not urls:
         return group()
 
-    return group(claim_proxy.s(urls)
-                 | qualys_scan_bulk.s(urls)
-                 | release_proxy.s(urls)
-                 | plannedscan.finish_multiple.si(urls))
+    chunks = list(chunks2(urls, 25))
+
+    tasks = []
+    for chunk in chunks:
+
+        tasks.append(group(claim_proxy.s(chunk[0])
+                     | qualys_scan_bulk.s(chunk)
+                     | release_proxy.s(chunk[0])
+                     | plannedscan.finish_multiple.si('scan', 'tls_qualys', chunk)))
+
+    return group(tasks)
 
 
 # Use the same rate limiting as qualys_scan_bulk, otherwise all proxies are claimed before scans are made.

@@ -1,7 +1,8 @@
-from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 import logging
+
+import pytz
 from django.db import connection
 
 from websecmap.celery import app
@@ -68,7 +69,10 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
         # todo: should there be a state log? Probably.
         scan.state = "picked_up"
         scan.save()
-    return [scan.url for scan in scans]
+
+    urls = [scan.url for scan in scans]
+    log.debug(f"Picked up {len(urls)} to {activity} with {scanner}.")
+    return urls
 
 
 def request(activity: str, scanner: str, urls: List[Url]):
@@ -86,8 +90,10 @@ def request(activity: str, scanner: str, urls: List[Url]):
         ps.scanner = scanner
         ps.url = url
         ps.state = "requested"
-        ps.requested_at_when = datetime.utcnow()
+        ps.requested_at_when = datetime.now(pytz.utc)
         ps.save()
+
+    log.debug(f"Requested {activity} with {scanner} on {len(urls)} urls.")
 
 
 def already_requested(activity: str, scanner: str, url: Url):
@@ -96,6 +102,7 @@ def already_requested(activity: str, scanner: str, url: Url):
     ).exists()
 
 
+@app.task(queue='storage')
 def finish(activity: str, scanner: str, url: Url):
     set_scan_state(activity, scanner, url, "finished")
 
@@ -103,10 +110,15 @@ def finish(activity: str, scanner: str, url: Url):
 def set_scan_state(activity: str, scanner: str, url: Url, state="finished"):
     oldest_scan = PlannedScan.objects.all().filter(
         activity=activity, scanner=scanner, url=url, state="picked_up"
-    ).earliest('requested_at_when')
-    oldest_scan.state = state
-    oldest_scan.finished_at_when = datetime.utcnow()
-    oldest_scan.save()
+    ).first()
+    if oldest_scan:
+        oldest_scan.state = state
+        oldest_scan.finished_at_when = datetime.now(pytz.utc)
+        oldest_scan.save()
+
+        log.debug(f"Altered scan state for {url}. Changing it to {activity} with {scanner}.")
+    else:
+        log.debug(f"No state found for {url}. Ignored.")
 
 
 @app.task(queue='storage')

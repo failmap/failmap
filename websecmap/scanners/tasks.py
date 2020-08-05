@@ -29,10 +29,10 @@ DEFAULT_CRAWLERS = []
 # Beta: tls_osaft.compose_task, - is this using the outdated ssl library?
 # Beta: screenshot.compose_task, - Browser is not available in docker container
 DEFAULT_SCANNERS = [
-    security_headers.compose_task,
-    tls_qualys.compose_task,
-    ftp.compose_task,
-    plain_http.compose_task,
+    security_headers.compose_manual_scan_task,
+    tls_qualys.compose_manual_scan_task,
+    ftp.compose_manual_scan_task,
+    plain_http.compose_manual_scan_task,
 ]
 TLD_DEFAULT_SCANNERS = [dnssec.compose_task]
 
