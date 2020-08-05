@@ -87,33 +87,40 @@ def plan_scan(organizations_filter: dict = dict(),
     plannedscan.request(activity="scan", scanner="dnssec", urls=urls)
 
 
-def compose_task(organizations_filter: dict = dict(),
-              urls_filter: dict = dict(),
-              endpoints_filter: dict = dict(),
-              **kwargs) -> Task:
+@app.task(queue='storage')
+def compose_planned_scan_task(**kwargs):
+    urls = plannedscan.pickup(activity="scan", scanner="dnssec", amount=25)
+    return compose_scan_task(urls)
+
+
+def compose_manual_scan_task(organizations_filter: dict = dict(),
+                   urls_filter: dict = dict(),
+                   endpoints_filter: dict = dict(),
+                   **kwargs):
+
+    if not allowed_to_scan("dnssec"):
+        return group()
+
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    return compose_scan_task(urls)
+
+
+def compose_scan_task(urls) -> Task:
     """ Compose taskset to scan toplevel domains.
 
     DNSSEC is implemented on a (top level) url. It's useless to scan per-endpoint.
     This is the first scanner that uses the UrlGenericScan table, which looks nearly the same as the
     endpoint variant.
     """
-
-    if not allowed_to_scan("dnssec"):
-        return group()
-
-    if any([organizations_filter, urls_filter, endpoints_filter, kwargs]):
-        urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    else:
-        urls = plannedscan.pickup(activity="scan", scanner="dnssec", amount=25)
-
     # The number of top level urls is negligible, so randomization is not needed.
 
     # create tasks for scanning all selected endpoints as a single managable group
     # Sending entire objects is possible. How signatures (.s and .si) work is documented:
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     task = group(
-        scan_dnssec.si(url.url) | store_dnssec.s(url) | plannedscan.finish.si('scan', 'tls_qualys', urls) for url in
-        urls
+        scan_dnssec.si(url.url)
+        | store_dnssec.s(url)
+        | plannedscan.finish.si('scan', 'dnssec', url) for url in urls
     )
 
     return task

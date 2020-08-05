@@ -1,12 +1,8 @@
-import json
 import logging
-from pprint import pprint
 
 from django.core.management.base import BaseCommand
 from django_celery_beat.models import PeriodicTask, CrontabSchedule
 
-from websecmap.scanners.scanner import (dnssec, ftp, security_headers, tls_qualys, plain_http, subdomains,
-                                        dns_wildcards, dns_known_subdomains, dns_endpoints, http)
 
 log = logging.getLogger(__name__)
 
@@ -31,10 +27,10 @@ intervals = {
 }
 
 
-def plan_daily(scanner: str, method: str):
+def plan_daily(scanner: str, method: str, interval: str = "every day"):
     return {'task': f'websecmap.scanners.{scanner}.plan_{method}',
-            'cron': intervals["every day"],
-            'friendly_name': f'{scanner} &#x2795 Plan {method} for scanner {scanner}',
+            'cron': intervals[interval],
+            'friendly_name': f'{scanner} {fitting_icon(method)} Plan {method} for scanner {scanner}',
             'args': "[]",
             'kwargs': "{}"
             }
@@ -42,11 +38,26 @@ def plan_daily(scanner: str, method: str):
 
 def consume(scanner: str, method: str, interval: str, amount: int):
     return {'task': f'websecmap.app.models.create_{method}_job',
-         'cron': intervals[interval],
-         'friendly_name': f'{scanner} &#x1F52C; {method} using {scanner}.',
-         'args': f'["websecmap.scanners.scanner.{scanner}"]',
-         'kwargs': f'{{"amount": {amount}}'
-         },
+            'cron': intervals[interval],
+            'friendly_name': f'{scanner} {fitting_icon(method)} {method} using {scanner}.',
+            'args': f'["websecmap.scanners.scanner.{scanner}"]',
+            'kwargs': f'{{"amount": {amount}}}'
+            }
+
+
+def fitting_icon(some_text):
+
+    options = {
+        'scan': '📅 🔬',
+        'verify': '📅 ✅',
+        'discover': '📅 🌈',
+        'planned_scan': '🔬',
+        'planned_verify': '✅',
+        'planned_discover': '🌈',
+    }
+
+    return options[some_text]
+
 
 class Command(BaseCommand):
     """
@@ -60,11 +71,12 @@ class Command(BaseCommand):
 
     task_name = "create_planned_scan_job, create_planned_verify_job, create_planned_discover_job"
     # todo: check if dns_endpoints can/should be refactored too. Probably, but there are external dependencies.
+    # todo: dns wildcards (is not used in automatided scans yet...), internet.nl v2 with dns_endpoints
     regime = [
-        # FTP, discover, scan and verify
-        plan_daily('ftp', 'discover'),
-        plan_daily('ftp', 'scan'),
-        plan_daily('ftp', 'verify'),
+        # FTP: discover, scan and verify
+        plan_daily('ftp', 'discover', "every day"),
+        plan_daily('ftp', 'scan', "every day"),
+        plan_daily('ftp', 'verify', "every day"),
 
         # processing tasks will do nothing if there is nothing planned. Just keep them running.
         # if they request too much stuff, the workers themselves will distribute / rate limit.
@@ -72,8 +84,38 @@ class Command(BaseCommand):
         consume('ftp', 'planned_verify', 'every 10 minutes', amount=25),
         consume('ftp', 'planned_discover', 'every 5 minutes', amount=200),
 
-        # http endpoints, discover and verify
+        # http endpoints: discover and verify
+        plan_daily('http', 'discover', "every 5 days"),
+        plan_daily('http', 'verify', "every 2 days"),
 
+        consume('http', 'planned_discover', 'every 5 minutes', amount=200),
+        consume('http', 'planned_verify', 'every 5 minutes', amount=200),
+
+        # dnssec: scan
+        plan_daily('dnssec', 'scan', "every day"),
+        consume('dnssec', 'planned_scan', 'every 10 minutes', amount=50),
+
+        # plain_https: scan
+        plan_daily('plain_https', 'scan', "every day"),
+        consume('plain_https', 'planned_scan', 'every 10 minutes', amount=200),
+
+        # subdomains: verify, discover
+        plan_daily('subdomains', 'verify', "every 3 days"),
+        plan_daily('subdomains', 'discover', "every 3 days"),
+        consume('subdomains', 'planned_verify', 'every 10 minutes', amount=200),
+        consume('subdomains', 'planned_discover', 'every 10 minutes', amount=200),
+
+        # verify unresolvable
+        plan_daily('verify_unresolvable', 'verify', "every 3 days"),
+        consume('verify_unresolvable', 'planned_verify', 'every 10 minutes', amount=200),
+
+        # tls qualys: scan
+        plan_daily('tls_qualys', 'scan', "every 3 days"),
+        consume('tls_qualys', 'planned_scan', 'every 10 minutes', amount=25),
+
+        # http security headers
+        plan_daily('security_headers', 'scan', "every day"),
+        consume('security_headers', 'planned_scan', 'every 10 minutes', amount=200),
     ]
 
     def handle(self, *args, **options):

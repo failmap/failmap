@@ -7,7 +7,7 @@ from freezegun import freeze_time
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners.models import Endpoint, PlannedScan, EndpointGenericScan
 from websecmap.scanners.plannedscan import request, pickup, finish_multiple, progress, reset
-from websecmap.scanners.scanner.tls_qualys import plan_scans
+from websecmap.scanners.scanner.tls_qualys import plan_scan
 
 log = logging.getLogger('websecmap')
 
@@ -97,11 +97,11 @@ def test_plan_scans(db):
         u = link_url_to_organization(u2, o)
 
         # plan scans on endpoints that have never been scanned.
-        plan_scans()
+        plan_scan()
         assert progress() == [{'scanner': 'tls_qualys', 'activity': 'scan', 'state': 'requested', 'amount': 2}]
 
         # if there are already planned, no new scans will be created
-        plan_scans()
+        plan_scan()
         assert progress() == [{'scanner': 'tls_qualys', 'activity': 'scan', 'state': 'requested', 'amount': 2}]
 
         # to test what happens on endpoints that already have scans:
@@ -110,7 +110,7 @@ def test_plan_scans(db):
         # with very recent scans no new scans will be created:
         create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", timezone.now())
         create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", timezone.now())
-        plan_scans()
+        plan_scan()
         assert progress() == []
 
         # this does not delete endpoints...
@@ -130,7 +130,7 @@ def test_plan_scans(db):
         assert egs.last_scan_moment < timezone.now() - timedelta(days=4)
         assert egs.is_the_latest_scan is True
 
-        plan_scans()
+        plan_scan()
         assert PlannedScan.objects.all().filter(state="requested").count() == 1
         assert progress() == [{'scanner': 'tls_qualys', 'activity': 'scan', 'state': 'requested', 'amount': 1}]
 
@@ -140,6 +140,6 @@ def test_plan_scans(db):
         # with very old scans both scans will be requested
         create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", timezone.now() - timedelta(days=6))
         create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", timezone.now() - timedelta(days=100))
-        plan_scans()
+        plan_scan()
         assert PlannedScan.objects.all().filter(state="requested").count() == 2
         assert progress() == [{'scanner': 'tls_qualys', 'activity': 'scan', 'state': 'requested', 'amount': 2}]
