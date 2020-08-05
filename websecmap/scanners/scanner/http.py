@@ -224,11 +224,7 @@ def compose_manual_verify_task(
     if not allowed_to_discover_endpoints("http"):
         return group()
 
-    if any([organizations_filter, urls_filter, endpoints_filter, kwargs]):
-        urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    else:
-        urls = plannedscan.pickup(activity="verify", scanner="http", amount=25)
-
+    urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     compose_verify_task(urls)
 
 
