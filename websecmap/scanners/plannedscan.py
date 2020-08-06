@@ -116,9 +116,9 @@ def set_scan_state(activity: str, scanner: str, url: Url, state="finished"):
         oldest_scan.finished_at_when = datetime.now(pytz.utc)
         oldest_scan.save()
 
-        log.debug(f"Altered scan state for {url}. Changing it to {activity} with {scanner}.")
+        log.debug(f"Altered planned scan state for {url}. Changing it to {activity} with {scanner}.")
     else:
-        log.debug(f"No state found for {url}. Ignored.")
+        log.debug(f"No planned scan found for {url}. Ignored.")
 
 
 @app.task(queue='storage')

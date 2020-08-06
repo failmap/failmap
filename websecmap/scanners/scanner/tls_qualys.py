@@ -45,7 +45,7 @@ from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_configurations_to_scan
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_configurations_to_scan, unique_and_random
 from websecmap.scanners.scanner.http import store_url_ips
 
 # There is a balance between network timeout and qualys result cache.
@@ -170,8 +170,7 @@ def compose_manual_scan_task(organizations_filter: dict = dict(),
 
     # Urls are ordered randomly.
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
-    urls = list(set(urls))
-    random.shuffle(urls)
+    urls = unique_and_random(urls)
 
     if not urls:
         log.warning('Applied filters resulted in no urls, thus no tls qualys tasks!')

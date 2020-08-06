@@ -36,7 +36,7 @@ def test_job(db, mocker, celery):
     job.refresh_from_db()
     assert job.status == 'completed'
     assert job.result == 'result'
-    assert job.task == 'websecmap.app.tests.dummy()'
+    assert job.task == 'test_jobs.dummy()'
     assert job.created_by == user
     assert str(job) == 'a-name'
 
@@ -53,5 +53,5 @@ def test_job_no_result(db, celery):
     job.refresh_from_db()
     assert job.status == 'completed'
     assert job.result == '-- task generated no result object --'
-    assert job.task == 'websecmap.app.tests.dummy(False)'
+    assert job.task == 'test_jobs.dummy(False)'
 
