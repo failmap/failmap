@@ -4,22 +4,58 @@ from celery import Task, group
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
+from websecmap.scanners import plannedscan
+from websecmap.scanners.scanner import unique_and_random
 from websecmap.scanners.scanner.subdomains import discover_wildcard, url_by_filters
 
 log = logging.getLogger(__package__)
 
 
-def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs) -> Task:
+def filter_discover(organizations_filter: dict = dict(),
+                    urls_filter: dict = dict(),
+                    endpoints_filter: dict = dict(),
+                    **kwargs):
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
-    log.info(f'Checking wildcards on {len(urls)} urls.')
+    return unique_and_random(urls)
 
+
+@app.task(queue='storage')
+def compose_planned_discover_task(**kwargs):
+    urls = plannedscan.pickup(activity="discover", scanner="dns_wildcard", amount=kwargs.get('amount', 200))
+    return compose_discover_task(urls)
+
+
+@app.task(queue='storage')
+def plan_discover(organizations_filter: dict = dict(),
+                  urls_filter: dict = dict(),
+                  endpoints_filter: dict = dict(),
+                  **kwargs):
+    urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    plannedscan.request(activity="discover", scanner="dns_wildcard", urls=urls)
+
+
+def compose_discover_task(urls):
     task = group(discover_wildcard.si(url.url) | store_wildcard.s(url.id) for url in urls)
     return task
 
 
+def compose_manual_discover_task(organizations_filter: dict = dict(),
+                                 urls_filter: dict = dict(),
+                                 endpoints_filter: dict = dict(), **kwargs) -> Task:
+    urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+
+    # a heuristic
+    if not urls:
+        log.info("Did not get any urls to discover wildcards.")
+        return group()
+
+    log.debug("Going to scan for wildcards for the following %s urls." % len(urls))
+
+    return compose_discover_task(urls)
+
+
 @app.task(queue="storage")
 def store_wildcard(result: bool, url_id: int):
-
     try:
         url = Url.objects.all().get(id=url_id)
     except Url.DoesNotExist:
