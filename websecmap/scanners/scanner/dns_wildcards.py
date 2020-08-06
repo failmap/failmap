@@ -35,7 +35,9 @@ def plan_discover(organizations_filter: dict = dict(),
 
 
 def compose_discover_task(urls):
-    task = group(discover_wildcard.si(url.url) | store_wildcard.s(url.id) for url in urls)
+    task = group(discover_wildcard.si(url.url)
+                 | store_wildcard.s(url.id)
+                 | plannedscan.finish.si('discover', 'dns_wildcard', url) for url in urls)
     return task
 
 

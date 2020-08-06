@@ -22,7 +22,8 @@ from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.__init__ import (add_model_filter, endpoint_filters,
-                                                 q_configurations_to_scan, url_filters, unique_and_random)
+                                                 q_configurations_to_scan, unique_and_random,
+                                                 url_filters)
 from websecmap.scanners.scanner.http import connect_result
 
 log = logging.getLogger(__name__)
@@ -51,9 +52,9 @@ def filter_discover(organizations_filter: dict = dict(),
 
 
 def filter_verify(organizations_filter: dict = dict(),
-                    urls_filter: dict = dict(),
-                    endpoints_filter: dict = dict(),
-                    **kwargs):
+                  urls_filter: dict = dict(),
+                  endpoints_filter: dict = dict(),
+                  **kwargs):
 
     default_filter = {"protocol__in": ["dns_mx_no_cname", "dns_soa", "dns_a_aaaa"], "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
@@ -80,6 +81,7 @@ def compose_new_discover_task(urls):
             | connect_result.s(protocol="dns_soa", url=url, port=0, ip_version=0)
             | has_a_or_aaaa.si(url.url)
             | connect_result.s(protocol="dns_a_aaaa", url=url, port=0, ip_version=0)
+            | plannedscan.finish.si('discover', 'dns_endpoints', url)
         )
 
     return group(tasks)
@@ -97,6 +99,7 @@ def compose_new_verify_task(urls):
             | connect_result.s(protocol="dns_soa", url=endpoint.url, port=0, ip_version=0)
             | has_a_or_aaaa.si(endpoint.url.url)
             | connect_result.s(protocol="dns_a_aaaa", url=endpoint.url, port=0, ip_version=0)
+            | plannedscan.finish.si('verify', 'dns_endpoints', endpoint.url)
         )
     return group(tasks)
 

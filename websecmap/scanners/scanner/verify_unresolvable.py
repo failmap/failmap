@@ -13,11 +13,11 @@ def plan_verify(organizations_filter: dict = dict(),
                 endpoints_filter: dict = dict(),
                 **kwargs):
     urls = filter_verify(organizations_filter, urls_filter, **kwargs)
-    plannedscan.request(activity="verify", scanner="unresolving_subdomains", urls=urls)
+    plannedscan.request(activity="verify", scanner="verify_unresolvable", urls=urls)
 
 
 def compose_planned_verify_task(**kwargs):
-    urls = plannedscan.pickup(activity="verify", scanner="unresolving_subdomains", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="verify", scanner="verify_unresolvable", amount=kwargs.get('amount', 25))
     return compose_verify_task(urls)
 
 
@@ -41,5 +41,5 @@ def compose_verify_task(urls) -> Task:
     task = group(
         subdomains.url_resolves.si(url.url)
         | subdomains.handle_resolves.s(url)
-        | plannedscan.finish.si('verify', 'unresolving_subdomains', url) for url in urls)
+        | plannedscan.finish.si('verify', 'verify_unresolvable', url) for url in urls)
     return task

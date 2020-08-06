@@ -55,13 +55,14 @@ def compose_discover_task(urls):
     wordlist = get_subdomains([first_organization.country], None)
 
     # The worker has no way to write / save things. A wordlist can be 10's of thousands of words.
-    task = group(wordlist_scan.si([url], wordlist) for url in urls)
+    task = group(wordlist_scan.si([url], wordlist)
+                 | plannedscan.finish.si('discover', 'known_subdomains', url) for url in urls)
     return task
 
 
 def compose_manual_discover_task(organizations_filter: dict = dict(),
-                          urls_filter: dict = dict(),
-                          endpoints_filter: dict = dict(), **kwargs) -> Task:
+                                 urls_filter: dict = dict(),
+                                 endpoints_filter: dict = dict(), **kwargs) -> Task:
 
     if not allowed_to_discover_urls("dns_known_subdomains"):
         return group()
