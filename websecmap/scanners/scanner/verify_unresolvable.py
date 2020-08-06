@@ -31,8 +31,8 @@ def filter_verify(organizations_filter: dict = dict(),
 
 
 def compose_manual_verify_task(organizations_filter: dict = dict(),
-                        urls_filter: dict = dict(),
-                        endpoints_filter: dict = dict(), **kwargs):
+                               urls_filter: dict = dict(),
+                               endpoints_filter: dict = dict(), **kwargs):
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_verify_task(urls)
 

@@ -8,7 +8,6 @@ Scans for missing AUTH TLS / AUTH SSL options in FTP servers.
 """
 
 import logging
-import random
 from ftplib import FTP, error_perm, error_proto, error_reply, error_temp
 
 from celery import Task, group
@@ -21,7 +20,8 @@ from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import (allowed_to_scan, endpoint_filters,
-                                                 q_configurations_to_scan, url_filters, unique_and_random)
+                                                 q_configurations_to_scan, unique_and_random,
+                                                 url_filters)
 
 log = logging.getLogger(__name__)
 
@@ -36,9 +36,9 @@ CELERY_IP_VERSION_QUEUE_NAMES = {4: 'ipv4', 6: 'ipv6'}
 
 
 def filter_scan(organizations_filter: dict = dict(),
-              urls_filter: dict = dict(),
-              endpoints_filter: dict = dict(),
-              **kwargs):
+                urls_filter: dict = dict(),
+                endpoints_filter: dict = dict(),
+                **kwargs):
     default_filter = {"protocol": "ftp", "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
@@ -63,9 +63,9 @@ def plan_scan(organizations_filter: dict = dict(),
 
 
 def filter_verify(organizations_filter: dict = dict(),
-                      urls_filter: dict = dict(),
-                      endpoints_filter: dict = dict(),
-                      **kwargs):
+                  urls_filter: dict = dict(),
+                  endpoints_filter: dict = dict(),
+                  **kwargs):
 
     default_filter = {"protocol": "ftp", "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
@@ -79,9 +79,9 @@ def filter_verify(organizations_filter: dict = dict(),
 
 @app.task(queue='storage')
 def plan_verify(organizations_filter: dict = dict(),
-                      urls_filter: dict = dict(),
-                      endpoints_filter: dict = dict(),
-                      **kwargs):
+                urls_filter: dict = dict(),
+                endpoints_filter: dict = dict(),
+                **kwargs):
     if not allowed_to_scan("ftp"):
         return group()
 
@@ -103,9 +103,9 @@ def filter_discover(organizations_filter: dict = dict(),
 
 @app.task(queue='storage')
 def plan_discover(organizations_filter: dict = dict(),
-                   urls_filter: dict = dict(),
-                   endpoints_filter: dict = dict(),
-                   **kwargs):
+                  urls_filter: dict = dict(),
+                  endpoints_filter: dict = dict(),
+                  **kwargs):
     if not allowed_to_scan("ftp"):
         return group()
 
@@ -120,10 +120,10 @@ def compose_planned_scan_task(**kwargs):
 
 
 def compose_manual_scan_task(organizations_filter: dict = dict(),
-                   urls_filter: dict = dict(),
-                   endpoints_filter: dict = dict(),
-                   **kwargs
-) -> Task:
+                             urls_filter: dict = dict(),
+                             endpoints_filter: dict = dict(),
+                             **kwargs
+                             ) -> Task:
     """
     Todo's:
     [X] Created allowed_to_scan permission in config.
@@ -169,8 +169,8 @@ def compose_planned_discover_task(**kwargs):
 
 
 def compose_manual_discover_task(organizations_filter: dict = dict(),
-                          urls_filter: dict = dict(),
-                          endpoints_filter: dict = dict(), **kwargs) -> Task:
+                                 urls_filter: dict = dict(),
+                                 endpoints_filter: dict = dict(), **kwargs) -> Task:
     # There are only semi-alternative ports, no real alternative ports.
     # ports = [21, 990, 2811, 5402, 6622, 20, 2121, 212121]  # All types different default ports.
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
@@ -208,8 +208,8 @@ def compose_planned_verify_task(**kwargs):
 
 
 def compose_manual_verify_task(organizations_filter: dict = dict(),
-                        urls_filter: dict = dict(),
-                        endpoints_filter: dict = dict(), **kwargs) -> Task:
+                               urls_filter: dict = dict(),
+                               endpoints_filter: dict = dict(), **kwargs) -> Task:
 
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_verify_task(urls)

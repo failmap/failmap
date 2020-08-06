@@ -105,6 +105,10 @@ static_urlpatterns = [
     path('data/admin/map/switch_lat_lng/<oid:organization_id>/', views._switch_lattitude_and_longitude),
     path('data/admin/organization/add/', views._add_organization),
 
+    # a progress bar for running scans...
+    path('data/planned_scan_progress/', views.planned_scan_progress),
+    path('data/map_health/<c:country>/<slug:organization_type>/', views.map_health),
+
     # translations for javascript files. Copied from the manual.
     # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/
     # cache_page(86400, key_prefix='js18n')

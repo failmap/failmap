@@ -28,6 +28,7 @@ from websecmap.map.logic.map import get_map_data
 from websecmap.map.logic.map_defaults import (DEFAULT_COUNTRY, DEFAULT_LAYER, get_country,
                                               get_defaults, get_initial_countries, get_layers,
                                               get_organization_type)
+from websecmap.map.logic.map_health import get_lastest_map_health_data
 from websecmap.map.logic.organization_report import (get_organization_report_by_id,
                                                      get_organization_report_by_name)
 from websecmap.map.logic.rss_feeds import latest_updates
@@ -40,6 +41,7 @@ from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
 from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import Organization
+from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Screenshot
 
 log = logging.getLogger(__package__)
@@ -564,3 +566,11 @@ def _switch_lattitude_and_longitude(request, organization_id=0):
 def _add_organization(request):
     request = get_json_body(request)
     return JsonResponse(add_organization(request), encoder=JSEncoder, safe=False)
+
+
+def planned_scan_progress(request):
+    return JsonResponse(plannedscan.progress(7), encoder=JSEncoder, safe=False)
+
+
+def map_health(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER):
+    return JsonResponse(get_lastest_map_health_data(country, organization_type), encoder=JSEncoder, safe=False)

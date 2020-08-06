@@ -1047,6 +1047,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     {'label': _('📊 Generated Reports'), 'items': [
         {'name': 'reporting.urlreport'},
         {'name': 'map.organizationreport'},
+        {'name': 'map.maphealthreport'},
     ]},
 
     {'label': _('🐒 API'), 'items': [

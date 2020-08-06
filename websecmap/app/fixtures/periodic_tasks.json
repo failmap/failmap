@@ -1,1055 +1,1302 @@
 [
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 3,
-    "fields": {
-      "minute": "0",
-      "hour": "4",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 3,
+        "fields": {
+            "minute": "0",
+            "hour": "4",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 4,
+        "fields": {
+            "minute": "0",
+            "hour": "0",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 5,
+        "fields": {
+            "minute": "0",
+            "hour": "2",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 6,
+        "fields": {
+            "minute": "0",
+            "hour": "3",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 7,
+        "fields": {
+            "minute": "0",
+            "hour": "0",
+            "day_of_week": "*/5",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 8,
+        "fields": {
+            "minute": "0",
+            "hour": "5",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 9,
+        "fields": {
+            "minute": "*/5",
+            "hour": "*",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 10,
+        "fields": {
+            "minute": "0",
+            "hour": "0",
+            "day_of_week": "*/7",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 11,
+        "fields": {
+            "minute": "0",
+            "hour": "0",
+            "day_of_week": "*/3",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 12,
+        "fields": {
+            "minute": "0",
+            "hour": "20",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 13,
+        "fields": {
+            "minute": "0",
+            "hour": "21",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 14,
+        "fields": {
+            "minute": "0",
+            "hour": "23",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 15,
+        "fields": {
+            "minute": "0",
+            "hour": "22",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 16,
+        "fields": {
+            "minute": "0",
+            "hour": "19",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 17,
+        "fields": {
+            "minute": "0",
+            "hour": "1",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 18,
+        "fields": {
+            "minute": "0",
+            "hour": "6",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 19,
+        "fields": {
+            "minute": "0",
+            "hour": "7",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 20,
+        "fields": {
+            "minute": "0",
+            "hour": "8",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 21,
+        "fields": {
+            "minute": "0",
+            "hour": "9",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 22,
+        "fields": {
+            "minute": "0",
+            "hour": "10",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 23,
+        "fields": {
+            "minute": "0",
+            "hour": "11",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 24,
+        "fields": {
+            "minute": "0",
+            "hour": "12",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 25,
+        "fields": {
+            "minute": "0",
+            "hour": "13",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 26,
+        "fields": {
+            "minute": "0",
+            "hour": "14",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 27,
+        "fields": {
+            "minute": "0",
+            "hour": "15",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 28,
+        "fields": {
+            "minute": "0",
+            "hour": "16",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 29,
+        "fields": {
+            "minute": "0",
+            "hour": "17",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 30,
+        "fields": {
+            "minute": "0",
+            "hour": "18",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 31,
+        "fields": {
+            "minute": "*/1",
+            "hour": "*",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 32,
+        "fields": {
+            "minute": "*/10",
+            "hour": "*",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 33,
+        "fields": {
+            "minute": "*/30",
+            "hour": "*",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 34,
+        "fields": {
+            "minute": "*/15",
+            "hour": "*",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.crontabschedule",
+        "pk": 35,
+        "fields": {
+            "minute": "0",
+            "hour": "0",
+            "day_of_week": "*/2",
+            "day_of_month": "*",
+            "month_of_year": "*",
+            "timezone": "UTC"
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictasks",
+        "pk": 1,
+        "fields": {
+            "last_update": "2019-01-24T15:43:53Z"
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 1,
+        "fields": {
+            "name": "&#x1F4C4; Create reports based on the latest findings",
+            "task": "websecmap.app.models.create_job",
+            "interval": null,
+            "crontab": 13,
+            "solar": null,
+            "args": "[\"websecmap.map.report\"]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "priority": null,
+            "expires": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": "2019-01-23T21:00:00Z",
+            "total_run_count": 0,
+            "date_changed": "2019-01-23T21:00:40Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 4,
+        "fields": {
+            "name": "celery.backend_cleanup (hidden)",
+            "task": "celery.backend_cleanup",
+            "interval": null,
+            "crontab": 3,
+            "solar": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": null,
+            "exchange": null,
+            "routing_key": null,
+            "priority": null,
+            "expires": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": "2019-01-24T04:00:00Z",
+            "total_run_count": 0,
+            "date_changed": "2019-01-24T04:00:45Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 15,
+        "fields": {
+            "name": "&#x1F5FA;&#xFE0F; Update the map cache for faster browsing",
+            "task": "websecmap.map.report.calculate_map_data_today",
+            "interval": null,
+            "crontab": 8,
+            "solar": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "priority": null,
+            "expires": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": "2019-01-24T05:00:00Z",
+            "total_run_count": 0,
+            "date_changed": "2019-01-24T05:02:10Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 20,
+        "fields": {
+            "name": "&#x1F501; Check running mail scans (hidden)",
+            "task": "websecmap.scanners.scanner.internet_nl_mail.check_running_scans",
+            "interval": null,
+            "crontab": 33,
+            "solar": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "priority": null,
+            "expires": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": "2019-01-24T15:30:00Z",
+            "total_run_count": 0,
+            "date_changed": "2019-01-24T15:31:05Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 22,
+        "fields": {
+            "name": "&#x1F52C; Scan E-Mail Security (SPF, DKIM, DMARC, STARTLS)",
+            "task": "websecmap.app.models.create_job",
+            "interval": null,
+            "crontab": 10,
+            "solar": null,
+            "args": "[\"websecmap.scanners.scanner.internet_nl_mail\"]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "priority": null,
+            "expires": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": "2019-01-20T00:00:00Z",
+            "total_run_count": 0,
+            "date_changed": "2019-01-20T00:00:45Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 23,
+        "fields": {
+            "name": "Import New Proxies (hidden) Does not work with Celery 4.",
+            "task": "websecmap.scanners.find_scanproxies.find",
+            "interval": null,
+            "crontab": 23,
+            "solar": null,
+            "args": "[]",
+            "kwargs": "{\r\n\"countries\": [\"NL\", \"BE\", \"DE\", \"FR\", \"SE\", \"US\", \"GB\"],\r\n\"amount\": 50\r\n}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "priority": null,
+            "expires": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": "2019-01-24T11:00:00Z",
+            "total_run_count": 0,
+            "date_changed": "2019-01-24T11:00:55Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 24,
+        "fields": {
+            "name": "Update working proxies (hidden)",
+            "task": "websecmap.scanners.find_scanproxies.check_existing_alive_proxies",
+            "interval": null,
+            "crontab": 12,
+            "solar": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "priority": null,
+            "expires": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": "2019-01-23T20:00:00Z",
+            "total_run_count": 0,
+            "date_changed": "2019-01-23T20:02:30Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 25,
+        "fields": {
+            "name": "&#x2795 Discover DNS endpoints",
+            "task": "websecmap.app.models.create_discover_job",
+            "interval": null,
+            "crontab": 7,
+            "solar": null,
+            "args": "[\"websecmap.scanners.scanner.dns_endpoints\"]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "priority": null,
+            "expires": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": "2019-01-20T00:00:00Z",
+            "total_run_count": 0,
+            "date_changed": "2019-01-20T00:00:45Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 29,
+        "fields": {
+            "name": "&#x1F501; Perform automatic comply or explain (hidden)",
+            "task": "websecmap.scanners.autoexplain.autoexplain",
+            "interval": null,
+            "crontab": 7,
+            "solar": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "priority": null,
+            "expires": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": "2019-01-24T15:30:00Z",
+            "total_run_count": 0,
+            "date_changed": "2019-01-24T15:31:05Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 113,
+        "fields": {
+            "name": "ftp \ud83d\udcc5 \ud83c\udf08 Plan discover for scanner ftp",
+            "task": "websecmap.scanners.scanner.ftp.plan_discover",
+            "interval": null,
+            "crontab": 4,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.513Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 114,
+        "fields": {
+            "name": "ftp \ud83d\udcc5 \ud83d\udd2c Plan scan for scanner ftp",
+            "task": "websecmap.scanners.scanner.ftp.plan_scan",
+            "interval": null,
+            "crontab": 4,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.522Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 115,
+        "fields": {
+            "name": "ftp \ud83d\udcc5 \u2705 Plan verify for scanner ftp",
+            "task": "websecmap.scanners.scanner.ftp.plan_verify",
+            "interval": null,
+            "crontab": 4,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.531Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 116,
+        "fields": {
+            "name": "ftp \ud83d\udd2c planned_scan using ftp.",
+            "task": "websecmap.app.models.create_planned_scan_job",
+            "interval": null,
+            "crontab": 32,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.ftp\"]",
+            "kwargs": "{\"amount\": 100}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.540Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 117,
+        "fields": {
+            "name": "ftp \u2705 planned_verify using ftp.",
+            "task": "websecmap.app.models.create_planned_verify_job",
+            "interval": null,
+            "crontab": 32,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.ftp\"]",
+            "kwargs": "{\"amount\": 25}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.548Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 118,
+        "fields": {
+            "name": "ftp \ud83c\udf08 planned_discover using ftp.",
+            "task": "websecmap.app.models.create_planned_discover_job",
+            "interval": null,
+            "crontab": 9,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.ftp\"]",
+            "kwargs": "{\"amount\": 200}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.558Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 119,
+        "fields": {
+            "name": "http \ud83d\udcc5 \ud83c\udf08 Plan discover for scanner http",
+            "task": "websecmap.scanners.scanner.http.plan_discover",
+            "interval": null,
+            "crontab": 7,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.569Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 120,
+        "fields": {
+            "name": "http \ud83d\udcc5 \u2705 Plan verify for scanner http",
+            "task": "websecmap.scanners.scanner.http.plan_verify",
+            "interval": null,
+            "crontab": 35,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.578Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 121,
+        "fields": {
+            "name": "http \ud83c\udf08 planned_discover using http.",
+            "task": "websecmap.app.models.create_planned_discover_job",
+            "interval": null,
+            "crontab": 9,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.http\"]",
+            "kwargs": "{\"amount\": 200}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.587Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 122,
+        "fields": {
+            "name": "http \u2705 planned_verify using http.",
+            "task": "websecmap.app.models.create_planned_verify_job",
+            "interval": null,
+            "crontab": 9,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.http\"]",
+            "kwargs": "{\"amount\": 200}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.596Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 123,
+        "fields": {
+            "name": "dnssec \ud83d\udcc5 \ud83d\udd2c Plan scan for scanner dnssec",
+            "task": "websecmap.scanners.scanner.dnssec.plan_scan",
+            "interval": null,
+            "crontab": 4,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.605Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 124,
+        "fields": {
+            "name": "dnssec \ud83d\udd2c planned_scan using dnssec.",
+            "task": "websecmap.app.models.create_planned_scan_job",
+            "interval": null,
+            "crontab": 32,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.dnssec\"]",
+            "kwargs": "{\"amount\": 50}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.614Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 125,
+        "fields": {
+            "name": "plain_http \ud83d\udcc5 \ud83d\udd2c Plan scan for scanner plain_http",
+            "task": "websecmap.scanners.scanner.plain_http.plan_scan",
+            "interval": null,
+            "crontab": 4,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.623Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 126,
+        "fields": {
+            "name": "plain_http \ud83d\udd2c planned_scan using plain_http.",
+            "task": "websecmap.app.models.create_planned_scan_job",
+            "interval": null,
+            "crontab": 32,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.plain_http\"]",
+            "kwargs": "{\"amount\": 200}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.632Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 127,
+        "fields": {
+            "name": "subdomains \ud83d\udcc5 \u2705 Plan verify for scanner subdomains",
+            "task": "websecmap.scanners.scanner.subdomains.plan_verify",
+            "interval": null,
+            "crontab": 11,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.641Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 128,
+        "fields": {
+            "name": "subdomains \ud83d\udcc5 \ud83c\udf08 Plan discover for scanner subdomains",
+            "task": "websecmap.scanners.scanner.subdomains.plan_discover",
+            "interval": null,
+            "crontab": 11,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.649Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 129,
+        "fields": {
+            "name": "subdomains \u2705 planned_verify using subdomains.",
+            "task": "websecmap.app.models.create_planned_verify_job",
+            "interval": null,
+            "crontab": 32,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.subdomains\"]",
+            "kwargs": "{\"amount\": 200}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.658Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 130,
+        "fields": {
+            "name": "subdomains \ud83c\udf08 planned_discover using subdomains.",
+            "task": "websecmap.app.models.create_planned_discover_job",
+            "interval": null,
+            "crontab": 32,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.subdomains\"]",
+            "kwargs": "{\"amount\": 200}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.667Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 131,
+        "fields": {
+            "name": "verify_unresolvable \ud83d\udcc5 \u2705 Plan verify for scanner verify_unresolvable",
+            "task": "websecmap.scanners.scanner.verify_unresolvable.plan_verify",
+            "interval": null,
+            "crontab": 11,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.676Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 132,
+        "fields": {
+            "name": "verify_unresolvable \u2705 planned_verify using verify_unresolvable.",
+            "task": "websecmap.app.models.create_planned_verify_job",
+            "interval": null,
+            "crontab": 32,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.verify_unresolvable\"]",
+            "kwargs": "{\"amount\": 200}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.686Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 133,
+        "fields": {
+            "name": "tls_qualys \ud83d\udcc5 \ud83d\udd2c Plan scan for scanner tls_qualys",
+            "task": "websecmap.scanners.scanner.tls_qualys.plan_scan",
+            "interval": null,
+            "crontab": 11,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.695Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 134,
+        "fields": {
+            "name": "tls_qualys \ud83d\udd2c planned_scan using tls_qualys.",
+            "task": "websecmap.app.models.create_planned_scan_job",
+            "interval": null,
+            "crontab": 32,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.tls_qualys\"]",
+            "kwargs": "{\"amount\": 25}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.706Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 135,
+        "fields": {
+            "name": "security_headers \ud83d\udcc5 \ud83d\udd2c Plan scan for scanner security_headers",
+            "task": "websecmap.scanners.scanner.security_headers.plan_scan",
+            "interval": null,
+            "crontab": 4,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.715Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 136,
+        "fields": {
+            "name": "security_headers \ud83d\udd2c planned_scan using security_headers.",
+            "task": "websecmap.app.models.create_planned_scan_job",
+            "interval": null,
+            "crontab": 32,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.security_headers\"]",
+            "kwargs": "{\"amount\": 200}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T11:00:28.727Z",
+            "description": ""
+        }
     }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 4,
-    "fields": {
-      "minute": "0",
-      "hour": "0",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 5,
-    "fields": {
-      "minute": "0",
-      "hour": "2",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 6,
-    "fields": {
-      "minute": "0",
-      "hour": "3",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 7,
-    "fields": {
-      "minute": "0",
-      "hour": "0",
-      "day_of_week": "*/5",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 8,
-    "fields": {
-      "minute": "0",
-      "hour": "5",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 9,
-    "fields": {
-      "minute": "*/5",
-      "hour": "*",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 10,
-    "fields": {
-      "minute": "0",
-      "hour": "0",
-      "day_of_week": "*/7",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 11,
-    "fields": {
-      "minute": "0",
-      "hour": "0",
-      "day_of_week": "*/3",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 12,
-    "fields": {
-      "minute": "0",
-      "hour": "20",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 13,
-    "fields": {
-      "minute": "0",
-      "hour": "21",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 14,
-    "fields": {
-      "minute": "0",
-      "hour": "23",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 15,
-    "fields": {
-      "minute": "0",
-      "hour": "22",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 16,
-    "fields": {
-      "minute": "0",
-      "hour": "19",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 17,
-    "fields": {
-      "minute": "0",
-      "hour": "1",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 18,
-    "fields": {
-      "minute": "0",
-      "hour": "6",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 19,
-    "fields": {
-      "minute": "0",
-      "hour": "7",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 20,
-    "fields": {
-      "minute": "0",
-      "hour": "8",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 21,
-    "fields": {
-      "minute": "0",
-      "hour": "9",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 22,
-    "fields": {
-      "minute": "0",
-      "hour": "10",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 23,
-    "fields": {
-      "minute": "0",
-      "hour": "11",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 24,
-    "fields": {
-      "minute": "0",
-      "hour": "12",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 25,
-    "fields": {
-      "minute": "0",
-      "hour": "13",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 26,
-    "fields": {
-      "minute": "0",
-      "hour": "14",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 27,
-    "fields": {
-      "minute": "0",
-      "hour": "15",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 28,
-    "fields": {
-      "minute": "0",
-      "hour": "16",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 29,
-    "fields": {
-      "minute": "0",
-      "hour": "17",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 30,
-    "fields": {
-      "minute": "0",
-      "hour": "18",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 31,
-    "fields": {
-      "minute": "*/1",
-      "hour": "*",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 32,
-    "fields": {
-      "minute": "*/10",
-      "hour": "*",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 33,
-    "fields": {
-      "minute": "*/30",
-      "hour": "*",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 34,
-    "fields": {
-      "minute": "*/15",
-      "hour": "*",
-      "day_of_week": "*",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.crontabschedule",
-    "pk": 35,
-    "fields": {
-      "minute": "0",
-      "hour": "0",
-      "day_of_week": "*/2",
-      "day_of_month": "*",
-      "month_of_year": "*",
-      "timezone": "UTC"
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictasks",
-    "pk": 1,
-    "fields": {
-      "last_update": "2019-01-24T15:43:53Z"
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 1,
-    "fields": {
-      "name": "&#x1F4C4; Create reports based on the latest findings",
-      "task": "websecmap.app.models.create_job",
-      "interval": null,
-      "crontab": 13,
-      "solar": null,
-      "args": "[\"websecmap.map.report\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-23T21:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-23T21:00:40Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 2,
-    "fields": {
-      "name": "&#x1F52C; Scan HTTPS encryption quality using Qualys",
-      "task": "websecmap.app.models.create_job",
-      "interval": null,
-      "crontab": 10,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.tls_qualys_periodic_task\"]",
-      "kwargs": "{\r\n\"exclude_urls_scanned_in_the_last_n_days\": 3,\r\n\"urls_filter\": {\"endpoint__endpointgenericscan__rating__in\": [\"A\", \"A+\", \"A-\", \"trusted\"]}\r\n}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-20T00:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-20T00:00:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 3,
-    "fields": {
-      "name": "&#x1F52C; Scan for HTTP servers missing an encrypted counterpart",
-      "task": "websecmap.app.models.create_job",
-      "interval": null,
-      "crontab": 5,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.plain_http\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T02:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T02:01:20Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 4,
-    "fields": {
-      "name": "celery.backend_cleanup (hidden)",
-      "task": "celery.backend_cleanup",
-      "interval": null,
-      "crontab": 3,
-      "solar": null,
-      "args": "[]",
-      "kwargs": "{}",
-      "queue": null,
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T04:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T04:00:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 5,
-    "fields": {
-      "name": "&#x1F52C; Scan HTTP/HTTPS security headers",
-      "task": "websecmap.app.models.create_job",
-      "interval": null,
-      "crontab": 12,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.security_headers\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-23T20:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-23T20:02:30Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 6,
-    "fields": {
-      "name": "&#x2795 Discover new HTTP/HTTPS servers",
-      "task": "websecmap.app.models.create_discover_job",
-      "interval": null,
-      "crontab": 7,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.http\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-20T00:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-20T00:00:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 7,
-    "fields": {
-      "name": "&#x1F52C; Scan the quality of DNSSEC implementations",
-      "task": "websecmap.app.models.create_job",
-      "interval": null,
-      "crontab": 4,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.dnssec\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T00:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T00:01:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 8,
-    "fields": {
-      "name": "&#x1F52C; Scan whether FTP servers are capable of encrypted transport",
-      "task": "websecmap.app.models.create_job",
-      "interval": null,
-      "crontab": 4,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.ftp\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T00:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T00:01:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 9,
-    "fields": {
-      "name": "&#x1F501; Onboard (perform initial scans the first time)",
-      "task": "websecmap.app.models.create_job",
-      "interval": null,
-      "crontab": 31,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.onboard\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T15:46:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T15:46:25Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 10,
-    "fields": {
-      "name": "&#x2795 Discover new FTP servers",
-      "task": "websecmap.app.models.create_discover_job",
-      "interval": null,
-      "crontab": 11,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.ftp\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-23T00:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-23T00:03:00Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 11,
-    "fields": {
-      "name": "&#x2795 Discover new subdomains",
-      "task": "websecmap.app.models.create_discover_job",
-      "interval": null,
-      "crontab": 10,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.subdomains\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-20T00:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-20T00:00:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 12,
-    "fields": {
-      "name": "&#x2705 Verify that FTP servers still exist",
-      "task": "websecmap.app.models.create_verify_job",
-      "interval": null,
-      "crontab": 4,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.ftp\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T00:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T00:01:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 13,
-    "fields": {
-      "name": "&#x2705 Verify that HTTP/HTTPS servers still exist",
-      "task": "websecmap.app.models.create_verify_job",
-      "interval": null,
-      "crontab": 6,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.http\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T03:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T03:02:35Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 14,
-    "fields": {
-      "name": "&#x2705 Verify that internet adresses still resolve (DNS)",
-      "task": "websecmap.app.models.create_verify_job",
-      "interval": null,
-      "crontab": 16,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.subdomains\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-23T19:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-23T19:01:10Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 15,
-    "fields": {
-      "name": "&#x1F5FA;&#xFE0F; Update the map cache for faster browsing",
-      "task": "websecmap.map.report.calculate_map_data_today",
-      "interval": null,
-      "crontab": 8,
-      "solar": null,
-      "args": "[]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T05:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T05:02:10Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 18,
-    "fields": {
-      "name": "celery.backend_cleanup",
-      "task": "celery.backend_cleanup",
-      "interval": null,
-      "crontab": 3,
-      "solar": null,
-      "args": "[]",
-      "kwargs": "{}",
-      "queue": null,
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T04:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T04:00:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 19,
-    "fields": {
-      "name": "&#x1F52C; Scan HTTPS encryption quality using Qualys on insecure adresses only",
-      "task": "websecmap.app.models.create_job",
-      "interval": null,
-      "crontab": 35,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.tls_qualys_periodic_task\"]",
-      "kwargs": "{\r\n\"exclude_urls_scanned_in_the_last_n_days\": 3,\r\n\"urls_filter\": {\"endpoint__endpointgenericscan__rating__in\": [\"F\", \"C\", \"B\", \"not trusted\"]}\r\n}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T00:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T00:01:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 20,
-    "fields": {
-      "name": "&#x1F501; Check running mail scans (hidden)",
-      "task": "websecmap.scanners.scanner.internet_nl_mail.check_running_scans",
-      "interval": null,
-      "crontab": 33,
-      "solar": null,
-      "args": "[]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T15:30:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T15:31:05Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 22,
-    "fields": {
-      "name": "&#x1F52C; Scan E-Mail Security (SPF, DKIM, DMARC, STARTLS)",
-      "task": "websecmap.app.models.create_job",
-      "interval": null,
-      "crontab": 10,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.internet_nl_mail\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-20T00:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-20T00:00:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 23,
-    "fields": {
-      "name": "Import New Proxies (hidden) Does not work with Celery 4.",
-      "task": "websecmap.scanners.find_scanproxies.find",
-      "interval": null,
-      "crontab": 23,
-      "solar": null,
-      "args": "[]",
-      "kwargs": "{\r\n\"countries\": [\"NL\", \"BE\", \"DE\", \"FR\", \"SE\", \"US\", \"GB\"],\r\n\"amount\": 50\r\n}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T11:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T11:00:55Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 24,
-    "fields": {
-      "name": "Update working proxies (hidden)",
-      "task": "websecmap.scanners.find_scanproxies.check_existing_alive_proxies",
-      "interval": null,
-      "crontab": 12,
-      "solar": null,
-      "args": "[]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-23T20:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-23T20:02:30Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 25,
-    "fields": {
-      "name": "&#x2795 Discover DNS endpoints",
-      "task": "websecmap.app.models.create_discover_job",
-      "interval": null,
-      "crontab": 7,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.dns_endpoints\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-20T00:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-20T00:00:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 26,
-    "fields": {
-      "name": "&#x2705 Verify that DNS endpoints still exist",
-      "task": "websecmap.app.models.create_verify_job",
-      "interval": null,
-      "crontab": 6,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.dns_endpoints\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T03:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T03:02:35Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 27,
-    "fields": {
-      "name": "&#x1F52C; Scan HTTPS encryption quality using Qualys on new addresses",
-      "task": "websecmap.app.models.create_job",
-      "interval": null,
-      "crontab": 35,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.tls_qualys_periodic_task_zero_scans\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T00:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T00:01:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 28,
-    "fields": {
-      "name": "&#x2795 Discover wildcards on urls",
-      "task": "websecmap.app.models.create_discover_job",
-      "interval": null,
-      "crontab": 7,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.dns_wildcards\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-20T00:00:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-20T00:00:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
-    "pk": 29,
-    "fields": {
-      "name": "&#x1F501; Perform automatic comply or explain (hidden)",
-      "task": "websecmap.scanners.autoexplain.autoexplain",
-      "interval": null,
-      "crontab": 7,
-      "solar": null,
-      "args": "[]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-24T15:30:00Z",
-      "total_run_count": 0,
-      "date_changed": "2019-01-24T15:31:05Z",
-      "description": ""
-    }
-  }
 ]

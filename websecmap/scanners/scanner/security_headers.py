@@ -3,8 +3,7 @@ Check if the https site uses HSTS to tell the browser the site should only be re
 (useful until browsers do https by default, instead of by choice)
 """
 import logging
-import random
-from typing import Dict, List
+from typing import Dict
 
 import requests
 import urllib3
@@ -17,7 +16,8 @@ from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
+from websecmap.scanners.scanner.__init__ import (allowed_to_scan, q_configurations_to_scan,
+                                                 unique_and_random)
 from websecmap.scanners.scanner.http import get_random_user_agent
 
 log = logging.getLogger(__name__)
@@ -31,9 +31,9 @@ SECURITY_HEADER_SCAN_TYPES = ['http_security_header_strict_transport_security',
 
 
 def filter_scan(organizations_filter: dict = dict(),
-              urls_filter: dict = dict(),
-              endpoints_filter: dict = dict(),
-              **kwargs):
+                urls_filter: dict = dict(),
+                endpoints_filter: dict = dict(),
+                **kwargs):
     # apply filter to organizations (or if no filter, all organizations)
     # apply filter to urls in organizations (or if no filter, all urls)
     organizations = []
