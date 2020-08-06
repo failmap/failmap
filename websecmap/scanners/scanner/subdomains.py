@@ -39,11 +39,7 @@ def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict
     else:
         urls = urls.filter(Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""), do_not_find_subdomains=False)
 
-    # make sure all urls are unique
-    urls = list(set(urls))
-
-    # randomize the endpoints to better spread load over urls.
-    random.shuffle(urls)
+    urls = unique_and_random(urls)
 
     return urls
 

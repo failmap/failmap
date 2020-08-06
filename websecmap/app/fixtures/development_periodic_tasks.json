@@ -481,8 +481,8 @@
         "model": "django_celery_beat.periodictask",
         "pk": 20,
         "fields": {
-            "name": "&#x1F501; Check running mail scans (hidden)",
-            "task": "websecmap.scanners.scanner.internet_nl_mail.check_running_scans",
+            "name": "&#x1F501; Progress running internet.nl scans (hidden)",
+            "task": "websecmap.scanners.scanner.internet_nl_v2_websecmap.check_running_internet_nl_scans",
             "interval": null,
             "crontab": 33,
             "solar": null,
@@ -499,31 +499,6 @@
             "last_run_at": "2019-01-24T15:30:00Z",
             "total_run_count": 0,
             "date_changed": "2019-01-24T15:31:05Z",
-            "description": ""
-        }
-    },
-    {
-        "model": "django_celery_beat.periodictask",
-        "pk": 22,
-        "fields": {
-            "name": "&#x1F52C; Scan E-Mail Security (SPF, DKIM, DMARC, STARTLS)",
-            "task": "websecmap.app.models.create_job",
-            "interval": null,
-            "crontab": 10,
-            "solar": null,
-            "args": "[\"websecmap.scanners.scanner.internet_nl_mail\"]",
-            "kwargs": "{}",
-            "queue": "storage",
-            "exchange": null,
-            "routing_key": null,
-            "priority": null,
-            "expires": null,
-            "one_off": false,
-            "start_time": null,
-            "enabled": false,
-            "last_run_at": "2019-01-20T00:00:00Z",
-            "total_run_count": 0,
-            "date_changed": "2019-01-20T00:00:45Z",
             "description": ""
         }
     },
@@ -579,31 +554,6 @@
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 25,
-        "fields": {
-            "name": "&#x2795 Discover DNS endpoints",
-            "task": "websecmap.app.models.create_discover_job",
-            "interval": null,
-            "crontab": 7,
-            "solar": null,
-            "args": "[\"websecmap.scanners.scanner.dns_endpoints\"]",
-            "kwargs": "{}",
-            "queue": "storage",
-            "exchange": null,
-            "routing_key": null,
-            "priority": null,
-            "expires": null,
-            "one_off": false,
-            "start_time": null,
-            "enabled": false,
-            "last_run_at": "2019-01-20T00:00:00Z",
-            "total_run_count": 0,
-            "date_changed": "2019-01-20T00:00:45Z",
-            "description": ""
-        }
-    },
-    {
-        "model": "django_celery_beat.periodictask",
         "pk": 29,
         "fields": {
             "name": "&#x1F501; Perform automatic comply or explain (hidden)",
@@ -629,9 +579,9 @@
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 113,
+        "pk": 259,
         "fields": {
-            "name": "ftp \ud83d\udcc5 \ud83c\udf08 Plan discover for scanner ftp",
+            "name": "ftp Schedule Discovery Plan discover for scanner ftp",
             "task": "websecmap.scanners.scanner.ftp.plan_discover",
             "interval": null,
             "crontab": 4,
@@ -651,15 +601,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.513Z",
+            "date_changed": "2020-08-06T14:57:02.426Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 114,
+        "pk": 260,
         "fields": {
-            "name": "ftp \ud83d\udcc5 \ud83d\udd2c Plan scan for scanner ftp",
+            "name": "ftp Schedule Scan Plan scan for scanner ftp",
             "task": "websecmap.scanners.scanner.ftp.plan_scan",
             "interval": null,
             "crontab": 4,
@@ -679,15 +629,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.522Z",
+            "date_changed": "2020-08-06T14:57:02.438Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 115,
+        "pk": 261,
         "fields": {
-            "name": "ftp \ud83d\udcc5 \u2705 Plan verify for scanner ftp",
+            "name": "ftp Schedule Verification Plan verify for scanner ftp",
             "task": "websecmap.scanners.scanner.ftp.plan_verify",
             "interval": null,
             "crontab": 4,
@@ -707,15 +657,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.531Z",
+            "date_changed": "2020-08-06T14:57:02.447Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 116,
+        "pk": 262,
         "fields": {
-            "name": "ftp \ud83d\udd2c planned_scan using ftp.",
+            "name": "ftp Perform Scan planned_scan using ftp.",
             "task": "websecmap.app.models.create_planned_scan_job",
             "interval": null,
             "crontab": 32,
@@ -735,15 +685,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.540Z",
+            "date_changed": "2020-08-06T14:57:02.457Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 117,
+        "pk": 263,
         "fields": {
-            "name": "ftp \u2705 planned_verify using ftp.",
+            "name": "ftp Perform Verification planned_verify using ftp.",
             "task": "websecmap.app.models.create_planned_verify_job",
             "interval": null,
             "crontab": 32,
@@ -763,15 +713,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.548Z",
+            "date_changed": "2020-08-06T14:57:02.467Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 118,
+        "pk": 264,
         "fields": {
-            "name": "ftp \ud83c\udf08 planned_discover using ftp.",
+            "name": "ftp Perform Discovery planned_discover using ftp.",
             "task": "websecmap.app.models.create_planned_discover_job",
             "interval": null,
             "crontab": 9,
@@ -791,15 +741,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.558Z",
+            "date_changed": "2020-08-06T14:57:02.479Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 119,
+        "pk": 265,
         "fields": {
-            "name": "http \ud83d\udcc5 \ud83c\udf08 Plan discover for scanner http",
+            "name": "http Schedule Discovery Plan discover for scanner http",
             "task": "websecmap.scanners.scanner.http.plan_discover",
             "interval": null,
             "crontab": 7,
@@ -819,15 +769,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.569Z",
+            "date_changed": "2020-08-06T14:57:02.489Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 120,
+        "pk": 266,
         "fields": {
-            "name": "http \ud83d\udcc5 \u2705 Plan verify for scanner http",
+            "name": "http Schedule Verification Plan verify for scanner http",
             "task": "websecmap.scanners.scanner.http.plan_verify",
             "interval": null,
             "crontab": 35,
@@ -847,15 +797,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.578Z",
+            "date_changed": "2020-08-06T14:57:02.500Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 121,
+        "pk": 267,
         "fields": {
-            "name": "http \ud83c\udf08 planned_discover using http.",
+            "name": "http Perform Discovery planned_discover using http.",
             "task": "websecmap.app.models.create_planned_discover_job",
             "interval": null,
             "crontab": 9,
@@ -875,15 +825,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.587Z",
+            "date_changed": "2020-08-06T14:57:02.511Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 122,
+        "pk": 268,
         "fields": {
-            "name": "http \u2705 planned_verify using http.",
+            "name": "http Perform Verification planned_verify using http.",
             "task": "websecmap.app.models.create_planned_verify_job",
             "interval": null,
             "crontab": 9,
@@ -903,15 +853,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.596Z",
+            "date_changed": "2020-08-06T14:57:02.526Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 123,
+        "pk": 269,
         "fields": {
-            "name": "dnssec \ud83d\udcc5 \ud83d\udd2c Plan scan for scanner dnssec",
+            "name": "dnssec Schedule Scan Plan scan for scanner dnssec",
             "task": "websecmap.scanners.scanner.dnssec.plan_scan",
             "interval": null,
             "crontab": 4,
@@ -931,15 +881,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.605Z",
+            "date_changed": "2020-08-06T14:57:02.537Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 124,
+        "pk": 270,
         "fields": {
-            "name": "dnssec \ud83d\udd2c planned_scan using dnssec.",
+            "name": "dnssec Perform Scan planned_scan using dnssec.",
             "task": "websecmap.app.models.create_planned_scan_job",
             "interval": null,
             "crontab": 32,
@@ -959,15 +909,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.614Z",
+            "date_changed": "2020-08-06T14:57:02.546Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 125,
+        "pk": 271,
         "fields": {
-            "name": "plain_http \ud83d\udcc5 \ud83d\udd2c Plan scan for scanner plain_http",
+            "name": "plain_http Schedule Scan Plan scan for scanner plain_http",
             "task": "websecmap.scanners.scanner.plain_http.plan_scan",
             "interval": null,
             "crontab": 4,
@@ -987,15 +937,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.623Z",
+            "date_changed": "2020-08-06T14:57:02.555Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 126,
+        "pk": 272,
         "fields": {
-            "name": "plain_http \ud83d\udd2c planned_scan using plain_http.",
+            "name": "plain_http Perform Scan planned_scan using plain_http.",
             "task": "websecmap.app.models.create_planned_scan_job",
             "interval": null,
             "crontab": 32,
@@ -1015,15 +965,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.632Z",
+            "date_changed": "2020-08-06T14:57:02.566Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 127,
+        "pk": 273,
         "fields": {
-            "name": "subdomains \ud83d\udcc5 \u2705 Plan verify for scanner subdomains",
+            "name": "subdomains Schedule Verification Plan verify for scanner subdomains",
             "task": "websecmap.scanners.scanner.subdomains.plan_verify",
             "interval": null,
             "crontab": 11,
@@ -1043,15 +993,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.641Z",
+            "date_changed": "2020-08-06T14:57:02.577Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 128,
+        "pk": 274,
         "fields": {
-            "name": "subdomains \ud83d\udcc5 \ud83c\udf08 Plan discover for scanner subdomains",
+            "name": "subdomains Schedule Discovery Plan discover for scanner subdomains",
             "task": "websecmap.scanners.scanner.subdomains.plan_discover",
             "interval": null,
             "crontab": 11,
@@ -1071,15 +1021,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.649Z",
+            "date_changed": "2020-08-06T14:57:02.587Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 129,
+        "pk": 275,
         "fields": {
-            "name": "subdomains \u2705 planned_verify using subdomains.",
+            "name": "subdomains Perform Verification planned_verify using subdomains.",
             "task": "websecmap.app.models.create_planned_verify_job",
             "interval": null,
             "crontab": 32,
@@ -1099,15 +1049,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.658Z",
+            "date_changed": "2020-08-06T14:57:02.596Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 130,
+        "pk": 276,
         "fields": {
-            "name": "subdomains \ud83c\udf08 planned_discover using subdomains.",
+            "name": "subdomains Perform Discovery planned_discover using subdomains.",
             "task": "websecmap.app.models.create_planned_discover_job",
             "interval": null,
             "crontab": 32,
@@ -1127,15 +1077,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.667Z",
+            "date_changed": "2020-08-06T14:57:02.607Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 131,
+        "pk": 277,
         "fields": {
-            "name": "verify_unresolvable \ud83d\udcc5 \u2705 Plan verify for scanner verify_unresolvable",
+            "name": "verify_unresolvable Schedule Verification Plan verify for scanner verify_unresolvable",
             "task": "websecmap.scanners.scanner.verify_unresolvable.plan_verify",
             "interval": null,
             "crontab": 11,
@@ -1155,15 +1105,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.676Z",
+            "date_changed": "2020-08-06T14:57:02.617Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 132,
+        "pk": 278,
         "fields": {
-            "name": "verify_unresolvable \u2705 planned_verify using verify_unresolvable.",
+            "name": "verify_unresolvable Perform Verification planned_verify using verify_unresolvable.",
             "task": "websecmap.app.models.create_planned_verify_job",
             "interval": null,
             "crontab": 32,
@@ -1183,15 +1133,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.686Z",
+            "date_changed": "2020-08-06T14:57:02.628Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 133,
+        "pk": 279,
         "fields": {
-            "name": "tls_qualys \ud83d\udcc5 \ud83d\udd2c Plan scan for scanner tls_qualys",
+            "name": "tls_qualys Schedule Scan Plan scan for scanner tls_qualys",
             "task": "websecmap.scanners.scanner.tls_qualys.plan_scan",
             "interval": null,
             "crontab": 11,
@@ -1211,15 +1161,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.695Z",
+            "date_changed": "2020-08-06T14:57:02.638Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 134,
+        "pk": 280,
         "fields": {
-            "name": "tls_qualys \ud83d\udd2c planned_scan using tls_qualys.",
+            "name": "tls_qualys Perform Scan planned_scan using tls_qualys.",
             "task": "websecmap.app.models.create_planned_scan_job",
             "interval": null,
             "crontab": 32,
@@ -1239,15 +1189,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.706Z",
+            "date_changed": "2020-08-06T14:57:02.648Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 135,
+        "pk": 281,
         "fields": {
-            "name": "security_headers \ud83d\udcc5 \ud83d\udd2c Plan scan for scanner security_headers",
+            "name": "security_headers Schedule Scan Plan scan for scanner security_headers",
             "task": "websecmap.scanners.scanner.security_headers.plan_scan",
             "interval": null,
             "crontab": 4,
@@ -1267,15 +1217,15 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.715Z",
+            "date_changed": "2020-08-06T14:57:02.658Z",
             "description": ""
         }
     },
     {
         "model": "django_celery_beat.periodictask",
-        "pk": 136,
+        "pk": 282,
         "fields": {
-            "name": "security_headers \ud83d\udd2c planned_scan using security_headers.",
+            "name": "security_headers Perform Scan planned_scan using security_headers.",
             "task": "websecmap.app.models.create_planned_scan_job",
             "interval": null,
             "crontab": 32,
@@ -1295,7 +1245,343 @@
             "enabled": false,
             "last_run_at": null,
             "total_run_count": 0,
-            "date_changed": "2020-08-06T11:00:28.727Z",
+            "date_changed": "2020-08-06T14:57:02.670Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 283,
+        "fields": {
+            "name": "dns_endpoints Schedule Verification Plan verify for scanner dns_endpoints",
+            "task": "websecmap.scanners.scanner.dns_endpoints.plan_verify",
+            "interval": null,
+            "crontab": 4,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T14:57:02.680Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 284,
+        "fields": {
+            "name": "dns_endpoints Schedule Discovery Plan discover for scanner dns_endpoints",
+            "task": "websecmap.scanners.scanner.dns_endpoints.plan_discover",
+            "interval": null,
+            "crontab": 4,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T14:57:02.690Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 285,
+        "fields": {
+            "name": "dns_endpoints Perform Verification planned_verify using dns_endpoints.",
+            "task": "websecmap.app.models.create_planned_verify_job",
+            "interval": null,
+            "crontab": 32,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.dns_endpoints\"]",
+            "kwargs": "{\"amount\": 200}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T14:57:02.700Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 286,
+        "fields": {
+            "name": "dns_endpoints Perform Discovery planned_discover using dns_endpoints.",
+            "task": "websecmap.app.models.create_planned_discover_job",
+            "interval": null,
+            "crontab": 32,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.dns_endpoints\"]",
+            "kwargs": "{\"amount\": 200}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T14:57:02.710Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 287,
+        "fields": {
+            "name": "internet_nl_v2_mail Schedule Scan Plan scan for scanner internet_nl_v2_mail",
+            "task": "websecmap.scanners.scanner.internet_nl_v2_mail.plan_scan",
+            "interval": null,
+            "crontab": 11,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T14:57:02.719Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 288,
+        "fields": {
+            "name": "internet_nl_v2_web Schedule Scan Plan scan for scanner internet_nl_v2_web",
+            "task": "websecmap.scanners.scanner.internet_nl_v2_web.plan_scan",
+            "interval": null,
+            "crontab": 11,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T14:57:02.730Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 289,
+        "fields": {
+            "name": "internet_nl_v2_mail Perform Scan planned_scan using internet_nl_v2_mail.",
+            "task": "websecmap.app.models.create_planned_scan_job",
+            "interval": null,
+            "crontab": 33,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.internet_nl_v2_mail\"]",
+            "kwargs": "{\"amount\": 500}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T14:57:02.741Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 290,
+        "fields": {
+            "name": "internet_nl_v2_web Perform Scan planned_scan using internet_nl_v2_web.",
+            "task": "websecmap.app.models.create_planned_scan_job",
+            "interval": null,
+            "crontab": 33,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.internet_nl_v2_web\"]",
+            "kwargs": "{\"amount\": 500}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T14:57:02.752Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 291,
+        "fields": {
+            "name": "dns_known_subdomains Schedule Discovery Plan discover for scanner dns_known_subdomains",
+            "task": "websecmap.scanners.scanner.dns_known_subdomains.plan_discover",
+            "interval": null,
+            "crontab": 10,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T14:57:02.763Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 292,
+        "fields": {
+            "name": "dns_known_subdomains Perform Discovery planned_discover using dns_known_subdomains.",
+            "task": "websecmap.app.models.create_planned_discover_job",
+            "interval": null,
+            "crontab": 33,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.dns_known_subdomains\"]",
+            "kwargs": "{\"amount\": 25}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T14:57:02.775Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 293,
+        "fields": {
+            "name": "dns_wildcards Schedule Discovery Plan discover for scanner dns_wildcards",
+            "task": "websecmap.scanners.scanner.dns_wildcards.plan_discover",
+            "interval": null,
+            "crontab": 11,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T14:57:02.786Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 294,
+        "fields": {
+            "name": "dns_wildcards Perform Discovery planned_discover using dns_wildcards.",
+            "task": "websecmap.app.models.create_planned_discover_job",
+            "interval": null,
+            "crontab": 32,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.dns_wildcards\"]",
+            "kwargs": "{\"amount\": 200}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-06T14:57:02.797Z",
             "description": ""
         }
     }

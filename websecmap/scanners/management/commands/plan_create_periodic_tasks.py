@@ -6,23 +6,15 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask
 log = logging.getLogger(__name__)
 
 intervals = {
-    # daily
-    "every day": 4,
-
-    # every 10 minutes
-    'every 10 minutes': 32,
-
-    # every 5 minutes
     'every 5 minutes': 9,
+    'every 10 minutes': 32,
+    'every 30 minutes': 33,
 
-    # every 5 days:
-    'every 5 days': 7,
-
-    # :
-    'every 7 days': 10,
-
-    'every 3 days': 11,
+    "every day": 4,
     'every 2 days': 35,
+    'every 3 days': 11,
+    'every 5 days': 7,
+    'every 7 days': 10,
 }
 
 
@@ -47,12 +39,12 @@ def consume(scanner: str, method: str, interval: str, amount: int):
 def fitting_icon(some_text):
 
     options = {
-        'scan': '📅 🔬',
-        'verify': '📅 ✅',
-        'discover': '📅 🌈',
-        'planned_scan': '🔬',
-        'planned_verify': '✅',
-        'planned_discover': '🌈',
+        'scan': 'Schedule Scan',
+        'verify': 'Schedule Verification',
+        'discover': 'Schedule Discovery',
+        'planned_scan': 'Perform Scan',
+        'planned_verify': 'Perform Verification',
+        'planned_discover': 'Perform Discovery',
     }
 
     return options[some_text]
@@ -115,6 +107,29 @@ class Command(BaseCommand):
         # http security headers
         plan_daily('security_headers', 'scan', "every day"),
         consume('security_headers', 'planned_scan', 'every 10 minutes', amount=200),
+
+        # dns_endpoints: verify, discover
+        plan_daily('dns_endpoints', 'verify', "every day"),
+        plan_daily('dns_endpoints', 'discover', "every day"),
+        consume('dns_endpoints', 'planned_verify', 'every 10 minutes', amount=200),
+        consume('dns_endpoints', 'planned_discover', 'every 10 minutes', amount=200),
+
+        # internet.nl v2: scan
+        # add urls to the queue
+        plan_daily('internet_nl_v2_mail', 'scan', "every 3 days"),
+        plan_daily('internet_nl_v2_web', 'scan', "every 3 days"),
+        # and then run a scan on them, as long as there are urls, per 500:
+        consume('internet_nl_v2_mail', 'planned_scan', 'every 30 minutes', amount=500),
+        consume('internet_nl_v2_web', 'planned_scan', 'every 30 minutes', amount=500),
+
+        # known subdomains: discover
+        # it's very intense as it tries a number of words per domain, so don't use it too often
+        plan_daily('dns_known_subdomains', 'discover', "every 7 days"),
+        consume('dns_known_subdomains', 'planned_discover', 'every 30 minutes', amount=25),
+
+        # dns wildcards
+        plan_daily('dns_wildcards', 'discover', "every 3 days"),
+        consume('dns_wildcards', 'planned_discover', 'every 10 minutes', amount=200),
     ]
 
     def handle(self, *args, **options):

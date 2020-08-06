@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from websecmap.scanners.scanner import (dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec,
                                         ftp, http, plain_http, security_headers, subdomains,
-                                        tls_qualys)
+                                        tls_qualys, internet_nl_v2_mail, internet_nl_v2_web)
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # internet.nl v2 scanner has to be used in websecmap.
         for scanner in [ftp, dnssec, security_headers, tls_qualys, plain_http, subdomains, dns_wildcards,
-                        dns_known_subdomains, dns_endpoints, http]:
+                        dns_known_subdomains, dns_endpoints, http, internet_nl_v2_mail, internet_nl_v2_web]:
             for planning_method in ['plan_discover', 'plan_verify', 'plan_scan']:
                 method = getattr(scanner, planning_method, None)
                 if method:

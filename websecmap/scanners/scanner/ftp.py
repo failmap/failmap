@@ -86,7 +86,7 @@ def plan_verify(organizations_filter: dict = dict(),
         return group()
 
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    plannedscan.request(activity="discover", scanner="ftp", urls=urls)
+    plannedscan.request(activity="verify", scanner="ftp", urls=urls)
 
 
 def filter_discover(organizations_filter: dict = dict(),
