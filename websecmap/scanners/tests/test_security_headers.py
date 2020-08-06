@@ -18,8 +18,8 @@ def test_security_headers(responses, db, faalonië):
     responses.add(responses.GET, 'https://' + faalonië['url'].url + ':443/', headers=SECURITY_HEADERS)
 
     result = json.loads(call_command('scan', 'headers', '-v3', '-o', TEST_ORGANIZATION))
-
-    assert result[0]['status'] == 'success'
+    # the result of scan headers was {'status': 'success'} but the planned scan task has changed that to None
+    assert result[0] is None
 
 
 def test_security_headers_all(responses, db, faalonië):
@@ -28,8 +28,8 @@ def test_security_headers_all(responses, db, faalonië):
     responses.add(responses.GET, 'https://' + faalonië['url'].url + ':443/', headers=SECURITY_HEADERS)
 
     result = json.loads(call_command('scan', 'headers', '-v3'))
-
-    assert result[0]['status'] == 'success'
+    print(result)
+    assert result[0] is None
 
 
 def test_security_headers_notfound(responses, db, faalonië):
@@ -48,5 +48,5 @@ def test_security_headers_failure(responses, db, faalonië):
     responses.add(responses.GET, 'https://' + faalonië['url'].url + ':443/', status=500)
 
     result = json.loads(call_command('scan', 'headers', '-v3', '-o', TEST_ORGANIZATION))
-
-    assert result[0]['status'] == 'success'
+    print(result)
+    assert result[0] is None

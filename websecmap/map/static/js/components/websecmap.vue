@@ -161,41 +161,6 @@
             </l-control>
 
 
-            <l-control position="bottomright" class="hide_on_small_screens">
-                <div class="info table-light" style="font-size: 1em; line-height: 1em;">
-                    <h4 style="font-weight: bold; font-size: 1.4em;">Scan Monitor</h4>
-                    <template v-if="scan_monitor_visible"><span @click="show_hide_scan_monitor()">hide</span></template>
-                    <template v-if="!scan_monitor_visible"><span @click="show_hide_scan_monitor()">show</span></template>
-
-                    <template v-if="scan_monitor_visible === true">
-                        <br><br>
-                        <table width="100%;">
-                        <template v-for="(scanner_value, scanner) in planned_scan_progress">
-                            <tr>
-                                <td colspan="2"><b>{{ $t(scanner) }}</b></td>
-                            </tr>
-                            <template v-for="(metrics, scanner_task) in scanner_value">
-                                <tr>
-                                    <td style="width: 30%;">
-                                        <i>{{scanner_task}}</i>
-                                    </td><td style="width: 80%;">
-                                        <div style="width: 100%; background-color: gray; height: 15px;">
-                                            <template v-for="(value, metric) in metrics">
-                                                <div v-if='metric === "finished"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: darkgreen; color: white; float: left; text-align: center; vertical-align: middle; height: 15px;'">{{value}}</div>
-                                                <div v-if='metric === "requested"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: lightgreen; color: white; float: left; text-align: center; vertical-align: middle;  height: 15px;'">{{value}}</div>
-                                                <div v-if='metric === "picked_up"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: orange; color: white; float: left; text-align: center; vertical-align: middle;  height: 15px;'">{{value}}</div>
-                                            </template>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </template>
-                        </template>
-                        </table>
-                    </template>
-                </div>
-            </l-control>
-
-
             <l-control position="bottomright" class="hide_on_small_screens" v-if="simplestats">
                 <div style="max-width: 300px; overflow:hidden;" class="info table-light">
                     <!-- Only if there are stats -->
@@ -231,12 +196,101 @@
                       style='font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>🗺️</span>
                 </div>
             </l-control>
+
+            <l-control position="topleft">
+                <div>
+                    <span @click='start_showing_map_health()' style='margin-top: 34px; font-size: 1.2em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>
+                        <template v-if="map_health">
+                            <template v-if="map_health['percentage_up_to_date'] === 0">❌</template>
+                            <template v-if="map_health['percentage_up_to_date'] > 0 && map_health['percentage_up_to_date'] < 55">🔴</template>
+                            <template v-if="map_health['percentage_up_to_date'] > 54 && map_health['percentage_up_to_date'] < 90">🟠</template>
+                            <template v-if="map_health['percentage_up_to_date'] > 89 && map_health['percentage_up_to_date'] < 100">🟢</template>
+                            <template v-if="map_health['percentage_up_to_date'] === 100">🌈</template>
+                        </template>
+                    </span>
+                </div>
+            </l-control>
+
             <l-control position="topleft" v-if="loading">
                 <div style='margin-top: 34px; font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>
                     <span v-if='loading'><div class="loader" style="width: 18px; height: 18px;"></div></span>
                 </div>
             </l-control>
         </l-map>
+
+        <modal v-if="show_map_health" @close="stop_showing_map_health()">
+            <h3 slot="header">Map Transparency</h3>
+
+            <div slot="body">
+                <p>Map transparency gives insight into how up to date this map is and if there are pending scans scheduled. Data is considered out of date after {{map_health['outdate_period_in_hours']}} hours. Scans of the past 7 days are shown.</p>
+                <div class="container">
+                  <div class="row">
+                    <div class="col-sm">
+                        <h4 style="font-size: 1.4em;">Map Health</h4>
+                        <table style="width: 100%">
+                            <tr><td>Verdict:</td><td>
+                                <template v-if="map_health['percentage_up_to_date'] === 0">❌ Obsolete</template>
+                                <template v-if="map_health['percentage_up_to_date'] > 0 && map_health['percentage_up_to_date'] < 55">🔴 Outdated</template>
+                                <template v-if="map_health['percentage_up_to_date'] > 54 && map_health['percentage_up_to_date'] < 90">🟠 Workable</template>
+                                <template v-if="map_health['percentage_up_to_date'] > 89 && map_health['percentage_up_to_date'] < 100">🟢 Usable</template>
+                                <template v-if="map_health['percentage_up_to_date'] === 100">🌈 Up to date</template>
+                            </td></tr>
+                            <tr><td>Up to date:</td><td>{{map_health['percentage_up_to_date']}}% ({{map_health['amount_up_to_date']}})</td></tr>
+                            <tr><td>Out of date:</td><td>{{map_health['percentage_out_of_date']}}% ({{map_health['amount_out_of_date']}})</td></tr>
+                        </table>
+
+                        <table style="width: 100%">
+                            <template v-for="scan in map_health['per_scan']">
+                                <tr><td colspan="2"><small>{{ $t(scan['scan_type']) }}</small></td></tr>
+                                <tr><td><small>Up to date:</small></td><td><small>{{scan['percentage_up_to_date']}}% ({{scan['amount_up_to_date']}})</small></td></tr>
+                                <tr><td><small>Out of date:</small></td><td><small>{{scan['percentage_out_of_date']}}% ({{scan['amount_out_of_date']}})</small></td></tr>
+                                <tr></tr>
+                            </template>
+                        </table>
+                    </div>
+                    <div class="col-sm">
+                      <h4 style="font-size: 1.4em;">Scan Monitor</h4>
+
+                        <table width="100%;">
+                        <template v-for="(scanner_value, scanner) in planned_scan_progress">
+                            <tr>
+                                <td colspan="2"><b>{{ $t(scanner) }}</b></td>
+                            </tr>
+                            <template v-for="(metrics, scanner_task) in scanner_value">
+                                <tr>
+                                    <td style="width: 30%;">
+                                        <i>{{scanner_task}}</i>
+                                    </td><td style="width: 80%;">
+                                        <div style="width: 100%; background-color: gray; height: 15px;">
+                                            <template v-for="(value, metric) in metrics">
+                                                <div v-if='metric === "finished"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: darkgreen; color: white; float: left; text-align: center; vertical-align: middle; height: 15px;'">{{value}}</div>
+                                                <div v-if='metric === "requested"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: lightgreen; color: white; float: left; text-align: center; vertical-align: middle;  height: 15px;'">{{value}}</div>
+                                                <div v-if='metric === "picked_up"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: orange; color: white; float: left; text-align: center; vertical-align: middle;  height: 15px;'">{{value}}</div>
+                                            </template>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </template>
+                        </table>
+
+                        <table>
+                            <tr><td><div style="height: 15px; width:15px; background-color: darkgreen;">&nbsp;</div></td><td>Scan finished</td></tr>
+                            <tr><td><div style="height: 15px; width:15px; background-color: lightgreen;">&nbsp;</div></td><td>Planned</td></tr>
+                            <tr><td><div style="height: 15px; width:15px; background-color: orange;">&nbsp;</div></td><td>In progress</td></tr>
+                            <tr><td><div style="height: 15px; width:15px; background-color: gray;">&nbsp;</div></td><td>Other (errors, timeouts)</td></tr>
+                        </table>
+
+                    </div>
+                  </div>
+                </div>
+
+
+            </div>
+            <div slot="footer">
+                <button class="btn btn-primary" @click="stop_showing_map_health()">OK</button>
+            </div>
+        </modal>
 
         <modal v-if="show_add_domains" @close="stop_adding_domains()">
             <h3 slot="header">Add Domains...</h3>
@@ -462,8 +516,10 @@ const WebSecMap = Vue.component('websecmap', {
             simplestats: null,
 
             planned_scan_progress: null,
-            scan_monitor_visible: false,
             planned_scan_progress_interval: null,
+
+            map_health: null,
+            show_map_health: false,
         }
     },
 
@@ -502,6 +558,7 @@ const WebSecMap = Vue.component('websecmap', {
 
             this.get_simplestats();
             this.get_planned_scan_progress();
+            this.get_map_health();
             this.timer = setInterval(this.get_planned_scan_progress, 30*60*1000)
         })
     },
@@ -511,9 +568,15 @@ const WebSecMap = Vue.component('websecmap', {
 
 
     methods: {
-        show_hide_scan_monitor: function(){
-            this.scan_monitor_visible = !this.scan_monitor_visible;
+
+        start_showing_map_health: function(){
+            this.show_map_health = true;
         },
+
+        stop_showing_map_health: function(){
+            this.show_map_health = false;
+        },
+
         start_adding_domains: function(){
             this.new_domains = "";
             this.show_add_domains = true;
@@ -583,6 +646,12 @@ const WebSecMap = Vue.component('websecmap', {
         get_simplestats: function() {
             fetch(`/data/short_and_simple_stats/${this.state.week}/`).then(response => response.json()).then(data => {
                 this.simplestats = data;
+            }).catch((fail) => {console.log('A simplestat loading error occurred: ' + fail)});
+        },
+
+        get_map_health: function() {
+            fetch(`/data/map_health/${this.state.country}/${this.state.layer}/`).then(response => response.json()).then(data => {
+                this.map_health = data;
             }).catch((fail) => {console.log('A simplestat loading error occurred: ' + fail)});
         },
 

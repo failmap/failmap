@@ -138,7 +138,8 @@ def compose_manual_scan_task(organizations_filter: dict = dict(),
     if not allowed_to_scan("ftp"):
         return group()
 
-    return filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    return compose_scan_task(urls)
 
 
 def compose_scan_task(urls):

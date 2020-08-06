@@ -118,6 +118,11 @@ def create_health_report(outdated: List, good: List, published_scan_types):
         }
 
     """
+
+    # only include published metrics:
+    outdated = [item for item in outdated if item.get('scan_type', 'unknown') in published_scan_types]
+    good = [item for item in good if item.get('scan_type', 'unknown') in published_scan_types]
+
     nr_total = len(good) + len(outdated)
     nr_good = len(good)
     nr_outdated = len(outdated)
@@ -142,9 +147,6 @@ def create_health_report(outdated: List, good: List, published_scan_types):
     }
 
     failures_per_scan_type = defaultdict(dict)
-
-    outdated = [item for item in outdated if item.get('scan_type', 'unknown') in published_scan_types]
-    good = [item for item in good if item.get('scan_type', 'unknown') in published_scan_types]
 
     for outdate in outdated:
         if not failures_per_scan_type[outdate.get('scan_type', 'unknown')]:

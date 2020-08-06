@@ -12,10 +12,12 @@ from celery import Task, group
 from django.conf import settings
 
 from websecmap.celery import ParentFailed, app
+from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
+from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import (allowed_to_scan, endpoint_filters,
-                                                 q_configurations_to_scan)
+                                                 q_configurations_to_scan, unique_and_random)
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +31,71 @@ RETRY_DELAY = 1
 EXPIRES = 3600 * 10  # 10 hour example
 
 
-def compose_task(
+def filter_scan(organizations_filter: dict = dict(),
+                urls_filter: dict = dict(),
+                endpoints_filter: dict = dict(),
+                **kwargs):
+    """
+    This creates a filter on what needs to be scanned. This filter is often reused for manual and planned scans.
+    """
+
+    endpoints = Endpoint.objects.filter(
+        q_configurations_to_scan(level='endpoint'),
+        # only scan endpoints that are known to be alive, using the http(s) protocol
+        is_dead=False, protocol__in=['http', 'https'])
+
+    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+
+    """
+        Make sure there are no duplicate urls in the set: some filters may have resulted in a cartesian product.
+        Randomize the list of endpoints, so that scanned hosts experience less pressure / less requests per second.
+    """
+    return unique_and_random([endpoint.url for endpoint in endpoints])
+
+
+@app.task(queue='storage')
+def plan_scan(organizations_filter: dict = dict(),
+              urls_filter: dict = dict(),
+              endpoints_filter: dict = dict(),
+              **kwargs
+              ):
+    """
+    Adds scans to the scan planning. These can be consumed with compose_planned_scan_task
+    """
+    if not allowed_to_scan("ftp"):
+        return group()
+
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    plannedscan.request(activity="scan", scanner="dummy", urls=urls)
+
+
+def compose_scan_task(urls):
+    """
+    Everything is managed on url basis, because the underlaying impelentations may differ and because it's
+    more efficient than a generic model. It's also easier to understand.
+    """
+    endpoints = retrieve_endpoints_from_urls(urls, protocols=['http', 'https'])
+    endpoints = unique_and_random(endpoints)
+    log.info(f'Creating dummy scan task for {len(endpoints)} endpoints ')
+
+    # Make the first task immutable, so it doesn't get any arguments of other scanners in a chain.
+    # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
+    task = group(
+        scan.si(endpoint.uri_url()) | store.s(endpoint) for endpoint in endpoints
+    )
+    return task
+
+
+def compose_planned_scan_task(**kwargs):
+    if not allowed_to_scan("dummy"):
+        log.warning("Dummy scanner is not allowed to scan.")
+        return group()
+
+    urls = plannedscan.pickup(activity="scan", scanner="dummy", amount=kwargs.get('amount', 25))
+    return compose_scan_task(urls)
+
+
+def compose_manual_scan_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
@@ -46,33 +112,8 @@ def compose_task(
         log.warning("Dummy scanner is not allowed to scan.")
         return group()
 
-    endpoints = Endpoint.objects.filter(
-        q_configurations_to_scan(level='endpoint'),
-        # only scan endpoints that are known to be alive, using the http(s) protocol
-        is_dead=False, protocol__in=['http', 'https'])
-
-    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
-
-    if not endpoints:
-        log.warning('Applied filters resulted in no endpoints, thus no dummy tasks!')
-        return group()
-
-    log.info('Creating dummy scan task for %s endpoints ', len(endpoints))
-
-    """
-    Make sure there are no duplicate endpoints in the set: some filters may have resulted in a cartesian product.
-    Randomize the list of endpoints, so that scanned hosts experience less pressure / less requests per second.
-    """
-    endpoints = list(set(endpoints))
-    random.shuffle(endpoints)
-
-    # Make the first task immutable, so it doesn't get any arguments of other scanners in a chain.
-    # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
-    task = group(
-        scan.si(endpoint.uri_url()) | store.s(endpoint) for endpoint in endpoints
-    )
-
-    return task
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    return compose_scan_task(urls)
 
 
 @app.task(queue='storage')
