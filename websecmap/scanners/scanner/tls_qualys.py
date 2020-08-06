@@ -41,12 +41,12 @@ from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fix
 from urllib3.exceptions import ProtocolError
 
 from websecmap.celery import app
-from websecmap.organizations.models import Url, Organization
+from websecmap.organizations.models import Organization, Url
+from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, chunks2
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_configurations_to_scan
 from websecmap.scanners.scanner.http import store_url_ips
-from websecmap.scanners import plannedscan
 
 # There is a balance between network timeout and qualys result cache.
 # This is relevant, since the results are not kept in cache for hours. More like 15 minutes.
@@ -125,8 +125,8 @@ def plan_scan(urls_filter: dict = dict(), **kwargs):
 
 
 def compose_manual_scan_task(organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    **kwargs):
+                             urls_filter: dict = dict(),
+                             **kwargs):
     if not allowed_to_scan("tls_qualys"):
         return group()
 
@@ -203,9 +203,9 @@ def compose_scan_task(urls):
     for chunk in chunks:
 
         tasks.append(group(claim_proxy.s(chunk[0])
-                     | qualys_scan_bulk.s(chunk)
-                     | release_proxy.s(chunk[0])
-                     | plannedscan.finish_multiple.si('scan', 'tls_qualys', chunk)))
+                           | qualys_scan_bulk.s(chunk)
+                           | release_proxy.s(chunk[0])
+                           | plannedscan.finish_multiple.si('scan', 'tls_qualys', chunk)))
 
     return group(tasks)
 

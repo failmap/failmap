@@ -136,7 +136,7 @@ class TaskCommand(BaseCommand):
         return result
 
 
-class ScannerTaskCommand(TaskCommand):
+class GenericTaskCommand(TaskCommand):
     """Generic Task Command for scanners."""
 
     scanner_module = None
@@ -198,6 +198,68 @@ class ScannerTaskCommand(TaskCommand):
                                                 endpoints_filter=endpoints_filter)
 
 
+class ScannerTaskCommand(TaskCommand):
+    """Generic Task Command for scanners."""
+
+    scanner_module = None
+
+    def _add_arguments(self, parser):
+        """Add command specific arguments."""
+
+        # Endpoint filters should work on port, ip-version and protocol. Those should be anded with organization and
+        # urls. Running into an issue: nargs_pattern = '(-*%s-*)' % '-*'.join('A' * nargs)
+        # TypeError: can't multiply sequence by non-int of type 'str'
+        # Given i only needed urls at this moment, i only added urls as a parameter.
+
+        # select distinct options...
+        self.mutual_group.add_argument('-o', '--organization_names', nargs='*',
+                                       help="Perform scans on these organizations (default is all).")
+
+        self.mutual_group.add_argument('-u', '--url_addresses', nargs='*',
+                                       help="Perform scans on these urls (default is all).")
+
+        self.mutual_group.add_argument('-y', '--organization_type', nargs='*',
+                                       help="Perform scans on these organization types (default is all).")
+
+        self.mutual_group.add_argument('-c', '--country', nargs='*',
+                                       help="Perform scans on these countries (default is all).")
+
+    def compose(self, *args, **options):
+        """Compose set of tasks based on provided arguments."""
+
+        # by default no filter means all of each.
+        organizations_filter = dict()
+        urls_filter = dict()
+        endpoints_filter = dict()  # A choice of ports, ip-version and protocol
+
+        if options['organization_names']:
+            # create a case-insensitive filter to match organizations by name
+            regex = '^(' + '|'.join(options['organization_names']) + ')$'
+            organizations_filter = {'name__iregex': regex}
+
+        if options['url_addresses']:
+            # create a case-insensitive filter to match organizations by name
+            regex = '^(' + '|'.join(options['url_addresses']) + ')$'
+            urls_filter = {'url__iregex': regex}
+
+        if options['organization_type']:
+            # create a case-insensitive filter to match organizations by name
+            regex = '^(' + '|'.join(options['organization_type']) + ')$'
+            organizations_filter = {'type__name__iregex': regex}
+
+        if options['country']:
+            # create a case-insensitive filter to match organizations by name
+            organizations_filter = {'country__in': options['country']}
+
+        log.debug("organizations_filter: %s, urls_filter: %s, endpoints_filter: %s" % (
+            organizations_filter, urls_filter, endpoints_filter))
+
+        # compose set of tasks to be executed
+        return self.scanner_module.compose_manual_scan_task(organizations_filter=organizations_filter,
+                                                            urls_filter=urls_filter,
+                                                            endpoints_filter=endpoints_filter)
+
+
 class DiscoverTaskCommand(TaskCommand):
     """Discovery command, launces tasks that can discover services.
     These tasks can take a lot of time as they might encounter many network timeout for non existing adresses.
@@ -252,7 +314,7 @@ class DiscoverTaskCommand(TaskCommand):
             organization_filter, urls_filter, []))
 
         # compose set of tasks to be executed
-        return self.scanner_module.compose_discover_task(organization_filter, urls_filter)
+        return self.scanner_module.compose_manual_discover_task(organization_filter, urls_filter)
 
 
 class VerifyTaskCommand(TaskCommand):
@@ -297,5 +359,6 @@ class VerifyTaskCommand(TaskCommand):
             organizations_filter, urls_filter, endpoints_filter))
 
         # compose set of tasks to be executed
-        return self.scanner_module.compose_verify_task(organizations_filter=organizations_filter,
-                                                       urls_filter=urls_filter, endpoints_filter=endpoints_filter)
+        return self.scanner_module.compose_manual_verify_task(organizations_filter=organizations_filter,
+                                                              urls_filter=urls_filter,
+                                                              endpoints_filter=endpoints_filter)

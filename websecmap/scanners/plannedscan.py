@@ -1,13 +1,13 @@
-from datetime import datetime, timedelta
-from typing import List, Dict, Any
 import logging
+from datetime import datetime, timedelta
+from typing import Any, Dict, List
 
 import pytz
 from django.db import connection
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import PlannedScan, Endpoint
+from websecmap.scanners.models import Endpoint, PlannedScan
 
 log = logging.getLogger(__name__)
 
@@ -24,13 +24,13 @@ def progress(days=7) -> List[Dict[str, Any]]:
 
     # i'm _DONE_ with the obscuring of group_by and counts using terrible abstractions.
     # so here is a raw query that just works on all databases and is trivially simple to understand.
-    sql = """SELECT 
+    sql = """SELECT
                 scanner, activity, state, count(*) as amount
-            FROM 
+            FROM
                 scanners_plannedscan
-            WHERE 
+            WHERE
                 requested_at_when >= '%(when)s'
-            GROUP BY 
+            GROUP BY
                 scanner, activity, state
             """ % {'when': when}
 

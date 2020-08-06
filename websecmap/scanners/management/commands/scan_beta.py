@@ -1,6 +1,6 @@
 import logging
 
-from websecmap.app.management.commands._private import ScannerTaskCommand
+from websecmap.app.management.commands._private import GenericTaskCommand
 from websecmap.scanners.scanner_beta import debug, screenshot, tls_osaft
 
 log = logging.getLogger(__name__)
@@ -12,7 +12,7 @@ scanners = {
 }
 
 
-class Command(ScannerTaskCommand):
+class Command(GenericTaskCommand):
     """*BETA* Can perform a host of scans. Run like: failmap scan [scanner_name] and then options."""
 
     help = __doc__

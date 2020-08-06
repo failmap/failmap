@@ -1,8 +1,7 @@
 import logging
 
 from django.core.management.base import BaseCommand
-from django_celery_beat.models import PeriodicTask, CrontabSchedule
-
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +27,7 @@ intervals = {
 
 
 def plan_daily(scanner: str, method: str, interval: str = "every day"):
-    return {'task': f'websecmap.scanners.{scanner}.plan_{method}',
+    return {'task': f'websecmap.scanners.scanner.{scanner}.plan_{method}',
             'cron': intervals[interval],
             'friendly_name': f'{scanner} {fitting_icon(method)} Plan {method} for scanner {scanner}',
             'args': "[]",
@@ -96,8 +95,8 @@ class Command(BaseCommand):
         consume('dnssec', 'planned_scan', 'every 10 minutes', amount=50),
 
         # plain_https: scan
-        plan_daily('plain_https', 'scan', "every day"),
-        consume('plain_https', 'planned_scan', 'every 10 minutes', amount=200),
+        plan_daily('plain_http', 'scan', "every day"),
+        consume('plain_http', 'planned_scan', 'every 10 minutes', amount=200),
 
         # subdomains: verify, discover
         plan_daily('subdomains', 'verify', "every 3 days"),

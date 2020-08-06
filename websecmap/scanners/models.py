@@ -1,15 +1,12 @@
 # coding=UTF-8
 from datetime import datetime, timedelta
-from typing import List
 
 import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 
-from websecmap.celery import app
 from websecmap.organizations.models import Url
 
 

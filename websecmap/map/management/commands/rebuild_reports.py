@@ -1,12 +1,12 @@
 import logging
 
-from websecmap.app.management.commands._private import ScannerTaskCommand
+from websecmap.app.management.commands._private import GenericTaskCommand
 from websecmap.map import rebuild_report
 
 log = logging.getLogger(__name__)
 
 
-class Command(ScannerTaskCommand):
+class Command(GenericTaskCommand):
     """Remove all organization and url ratings, then rebuild them from scratch. Used whan ratings changed and impact
     history. Also creates stats for over a year."""
 

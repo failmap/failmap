@@ -125,6 +125,22 @@ class Configuration(models.Model):
         return '%s/%s' % (self.country, self.organization_type,)
 
 
+class MapHealthReport(models.Model):
+
+    map_configuration = models.ForeignKey(
+        Configuration,
+        on_delete=models.CASCADE,
+        verbose_name="Map Configuration",
+    )
+
+    at_when = models.DateField()
+
+    percentage_up_to_date = models.FloatField()
+    percentage_out_of_date = models.FloatField()
+    outdate_period_in_hours = models.IntegerField()
+    detailed_report = JSONField()
+
+
 class LandingPage(models.Model):
 
     map_configuration = models.ForeignKey(

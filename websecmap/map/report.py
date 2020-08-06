@@ -12,6 +12,7 @@ from django.db.models import Count
 
 from websecmap.celery import Task, app
 from websecmap.map.logic.map import get_map_data, get_reports_by_ids
+from websecmap.map.logic.map_health import update_map_health_reports
 from websecmap.map.models import (Configuration, HighLevelStatistic, MapDataCache,
                                   OrganizationReport, VulnerabilityStatistic)
 from websecmap.organizations.models import Organization, OrganizationType, Url
@@ -112,6 +113,8 @@ def compose_task(
         tasks.append(calculate_vulnerability_statistics.si(1))
         tasks.append(calculate_map_data.si(1))
         tasks.append(calculate_high_level_stats.si(1))
+
+    tasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES))
 
     task = group(tasks)
 

@@ -130,6 +130,38 @@ def create_function_job(function: str, **kwargs):
 
 
 @app.task(queue='storage')
+def create_job(task_module: str, **kwargs):
+    # will be deleted after all scanners have migrated to the manual / planned approach
+    module = importlib.import_module(task_module)
+    task = module.compose_task(**kwargs)
+    return Job.create(task, task_module, None)
+
+
+@app.task(queue='storage')
+def create_discover_job(task_module: str, **kwargs):
+    # will be deleted after all scanners have migrated to the manual / planned approach
+    module = importlib.import_module(task_module)
+    task = module.compose_discover_task(**kwargs)
+    return Job.create(task, task_module, None)
+
+
+@app.task(queue='storage')
+def create_verify_job(task_module: str, **kwargs):
+    # will be deleted after all scanners have migrated to the manual / planned approach
+    module = importlib.import_module(task_module)
+    task = module.compose_verify_task(**kwargs)
+    return Job.create(task, task_module, None)
+
+
+@app.task(queue='storage')
+def create_scan_job(task_module: str, **kwargs):
+    # will be deleted after all scanners have migrated to the manual / planned approach
+    module = importlib.import_module(task_module)
+    task = module.compose_scan_task(**kwargs)
+    return Job.create(task, task_module, None)
+
+
+@app.task(queue='storage')
 def create_planned_scan_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 

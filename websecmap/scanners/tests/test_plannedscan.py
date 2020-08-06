@@ -1,12 +1,12 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.utils import timezone
 from freezegun import freeze_time
 
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.models import Endpoint, PlannedScan, EndpointGenericScan
-from websecmap.scanners.plannedscan import request, pickup, finish_multiple, progress, reset
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, PlannedScan
+from websecmap.scanners.plannedscan import finish_multiple, pickup, progress, request, reset
 from websecmap.scanners.scanner.tls_qualys import plan_scan
 
 log = logging.getLogger('websecmap')
@@ -64,9 +64,9 @@ def test_plannedscan(db):
 
     o = create_organization("Test")
     u1 = create_url("example.com")
-    u = link_url_to_organization(u1, o)
+    link_url_to_organization(u1, o)
     u2 = create_url("example2.com")
-    u = link_url_to_organization(u2, o)
+    link_url_to_organization(u2, o)
 
     request(scanner="tls_qualys", activity="scan", urls=[u1, u2])
     assert PlannedScan.objects.all().count() == 2
@@ -91,10 +91,10 @@ def test_plan_scans(db):
         o = create_organization("Test")
         u1 = create_url("example.com")
         e1 = create_endpoint(u1, 4, "https", 443)
-        u = link_url_to_organization(u1, o)
+        link_url_to_organization(u1, o)
         u2 = create_url("example2.com")
         e2 = create_endpoint(u2, 4, "https", 443)
-        u = link_url_to_organization(u2, o)
+        link_url_to_organization(u2, o)
 
         # plan scans on endpoints that have never been scanned.
         plan_scan()

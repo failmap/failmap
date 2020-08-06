@@ -17,7 +17,8 @@ from tenacity import before_log, retry, wait_fixed
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
-from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, url_filters, unique_and_random
+from websecmap.scanners.scanner.__init__ import (q_configurations_to_scan, unique_and_random,
+                                                 url_filters)
 from websecmap.scanners.scanner.http import get_ips
 
 # Include DNSRecon code from an external dependency. This is cloned recursively and placed outside the django app.
@@ -47,10 +48,11 @@ def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict
     return urls
 
 
+@app.task(queue='storage')
 def plan_discover(organizations_filter: dict = dict(),
-                   urls_filter: dict = dict(),
-                   endpoints_filter: dict = dict(),
-                   **kwargs):
+                  urls_filter: dict = dict(),
+                  endpoints_filter: dict = dict(),
+                  **kwargs):
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
     plannedscan.request(activity="discover", scanner="subdomains", urls=urls)
 
@@ -67,14 +69,15 @@ def compose_manual_discover_task(organizations_filter: dict = dict(), urls_filte
 
 
 def compose_discover_task(urls) -> Task:
-    task = group(certificate_transparency_scan.si([url]) | nsec_scan.si([url]) | plannedscan.finish.si('discover', 'subdomains', url) for url in urls)
+    task = group(certificate_transparency_scan.si([url]) | nsec_scan.si(
+        [url]) | plannedscan.finish.si('discover', 'subdomains', url) for url in urls)
     return task
 
 
 def filter_verify(organizations_filter: dict = dict(),
-                      urls_filter: dict = dict(),
-                      endpoints_filter: dict = dict(),
-                      **kwargs):
+                  urls_filter: dict = dict(),
+                  endpoints_filter: dict = dict(),
+                  **kwargs):
 
     default_filter = {"not_resolvable": False}
     # The urls filter will overwrite the default filter in this case. Used in verify unresolvable
@@ -87,9 +90,9 @@ def filter_verify(organizations_filter: dict = dict(),
 
 
 def plan_verify(organizations_filter: dict = dict(),
-                      urls_filter: dict = dict(),
-                      endpoints_filter: dict = dict(),
-                      **kwargs):
+                urls_filter: dict = dict(),
+                endpoints_filter: dict = dict(),
+                **kwargs):
 
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="verify", scanner="subdomains", urls=urls)
@@ -102,8 +105,8 @@ def compose_planned_verify_task(**kwargs):
 
 # it will not revive anything(!) Should that be a revive task?
 def compose_manual_verify_task(organizations_filter: dict = dict(),
-                        urls_filter: dict = dict(),
-                        endpoints_filter: dict = dict(), **kwargs) -> Task:
+                               urls_filter: dict = dict(),
+                               endpoints_filter: dict = dict(), **kwargs) -> Task:
 
     # instead of only checking by domain, just accept the filters as they are handled in any other scenario...
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
@@ -113,13 +116,14 @@ def compose_manual_verify_task(organizations_filter: dict = dict(),
 
 
 def compose_verify_task(urls):
-    task = group(url_resolves.si(url.url) | handle_resolves.s(url) | plannedscan.finish.si('verify', 'subdomains', url) for url in urls)
+    task = group(url_resolves.si(url.url) | handle_resolves.s(url) |
+                 plannedscan.finish.si('verify', 'subdomains', url) for url in urls)
     return task
 
 
 def filter_discover(organizations_filter: dict = dict(),
-                        urls_filter: dict = dict(),
-                        endpoints_filter: dict = dict(), **kwargs):
+                    urls_filter: dict = dict(),
+                    endpoints_filter: dict = dict(), **kwargs):
 
     default_filter = {"not_resolvable": False}
     # The urls filter will overwrite the default filter in this case. Used in verify unresolvable
@@ -130,7 +134,6 @@ def filter_discover(organizations_filter: dict = dict(),
 
     urls = list(set(urls))
     random.shuffle(urls)
-
 
 
 # this is so fast, the overhead on running this elsewhere is insane... requires both ipv4 and 6 capabilities

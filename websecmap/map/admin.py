@@ -351,6 +351,21 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdmin
     actions.append(move_down)
 
 
+@admin.register(models.MapHealthReport)
+class MapHealthReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = (
+        'map_configuration', 'at_when', 'percentage_up_to_date', 'percentage_out_of_date', 'outdate_period_in_hours')
+
+    search_fields = (['map_configuration__country', 'map_configuration__organization_type__name', ])
+
+    list_filter = ['percentage_up_to_date', 'percentage_out_of_date', 'outdate_period_in_hours',
+                   'map_configuration__country',
+                   'map_configuration__organization_type__name', 'at_when'][::-1]
+    fields = (
+        'map_configuration', 'at_when', 'percentage_up_to_date', 'percentage_out_of_date', 'outdate_period_in_hours',
+        'detailed_report')
+
+
 @admin.register(models.MapDataCache)
 class MapDataCacheAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('pk', 'country', 'organization_type', 'filters', 'at_when')

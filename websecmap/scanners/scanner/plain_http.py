@@ -15,7 +15,8 @@ from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
+from websecmap.scanners.scanner.__init__ import (allowed_to_scan, q_configurations_to_scan,
+                                                 unique_and_random)
 from websecmap.scanners.scanner.http import (can_connect, connect_result, redirects_to_safety,
                                              resolves_on_v4, resolves_on_v6)
 
@@ -32,9 +33,9 @@ no_https_at_all = "Site does not redirect to secure url, and has no secure alter
 
 
 def filter_scan(organizations_filter: dict = dict(),
-              urls_filter: dict = dict(),
-              endpoints_filter: dict = dict(),
-              **kwargs):
+                urls_filter: dict = dict(),
+                endpoints_filter: dict = dict(),
+                **kwargs):
 
     if organizations_filter:
         organizations = Organization.objects.filter(is_dead=False, **organizations_filter).only('id')

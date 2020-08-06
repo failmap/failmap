@@ -47,6 +47,7 @@ const messages = {
         // issues, are used at various places, the original value comes from the database stored as scan results.
 
         // DNSSEC
+        "dnssec": "Domain name security (DNSSEC)",
         "DNSSEC": "Domain name security (DNSSEC)",
         "DNSSEC is incorrectly or not configured (errors found).": "DNSSEC is incorrectly or not configured (errors found).",
         "DNSSEC seems to be implemented sufficiently.": "DNSSEC seems to be implemented sufficiently.",
@@ -69,6 +70,7 @@ const messages = {
 
 
         // http_security_header_strict_transport_security
+        "http_security_headers": "HTTP Security Headers",
         "http_security_header_strict_transport_security": "Website: Strict-Transport-Security Header (HSTS)",
         "Strict-Transport-Security": "Strict-Transport-Security", // not used?
         "Strict-Transport-Security header present.": "Strict-Transport-Security header present.",
@@ -102,6 +104,9 @@ const messages = {
 
 
         // plain_https
+        "http": "Websites",
+
+        "plain_http": "Missing transport encryption",
         "plain_https": "Missing transport encryption (HTTP only)",
         "Redirect from unsafe address": "Redirect from unsafe address",
         "Site does not redirect to secure url, and has no secure alternative on a standard port.": "Site does not redirect to secure url, and has no secure alternative on a standard port.",
@@ -113,6 +118,7 @@ const messages = {
 
 
         // tls_qualys_encryption_quality
+        "tls_qualys": "TLS (websites)",
         "tls_qualys_encryption_quality": "Encryption Quality (HTTPS)",
         "Broken Transport Security, rated F": "Broken Transport Security, rated F",
         "Certificate not valid for domain name.": "Certificate not valid for domain name.",

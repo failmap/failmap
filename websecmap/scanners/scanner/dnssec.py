@@ -32,7 +32,8 @@ from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import store_url_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
+from websecmap.scanners.scanner.__init__ import (allowed_to_scan, q_configurations_to_scan,
+                                                 unique_and_random)
 
 log = logging.getLogger(__name__)
 
@@ -46,9 +47,9 @@ EXPIRES = 3600  # one hour is more then enough
 
 
 def filter_scan(organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
-    **kwargs):
+                urls_filter: dict = dict(),
+                endpoints_filter: dict = dict(),
+                **kwargs):
 
     # DNSSEC only works on top level urls
     urls_filter = dict(urls_filter, **{"computed_subdomain": ""})
@@ -94,9 +95,9 @@ def compose_planned_scan_task(**kwargs):
 
 
 def compose_manual_scan_task(organizations_filter: dict = dict(),
-                   urls_filter: dict = dict(),
-                   endpoints_filter: dict = dict(),
-                   **kwargs):
+                             urls_filter: dict = dict(),
+                             endpoints_filter: dict = dict(),
+                             **kwargs):
 
     if not allowed_to_scan("dnssec"):
         return group()

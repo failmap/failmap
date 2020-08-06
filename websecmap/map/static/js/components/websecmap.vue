@@ -73,29 +73,13 @@
 
             <l-control-scale position="bottomleft" :imperial="true" :metric="true"></l-control-scale>
 
+
             <l-control position="topright" class="search-on-map">
                 <div class="info table-light">
                     <input id='searchbar' type='text' v-model="searchquery" :placeholder="$t('map.search.placeholder')"/>
                 </div>
             </l-control>
 
-            <l-control position="bottomright" class="hide_on_small_screens" v-if="simplestats">
-                <div style="max-width: 300px; overflow:hidden;" class="info table-light">
-                    <!-- Only if there are stats -->
-                    <template v-if="simplestats[this.state.country][this.state.layer] !== undefined">
-                        <!-- if there are multiple countries -->
-                        <template v-if="Object.keys(simplestats).length > 2">
-                            <h4><img :src="simplestats[this.state.country][this.state.layer].country_flag" />{{simplestats[this.state.country][this.state.layer].country_name}}, {{ $t($store.state.layer) }}</h4>
-                        </template>
-                        <template v-else>
-                            <h4>{{ $t($store.state.layer) }}</h4>
-                        </template>
-                        {{simplestats[this.state.country][this.state.layer].organizations}} {{$t('organizations')}}<br>
-                        {{simplestats[this.state.country][this.state.layer].urls}} {{$t('internet_adresses')}}<br>
-                        {{simplestats[this.state.country][this.state.layer].services}} {{$t('services')}}<br>
-                    </template>
-                </div>
-            </l-control>
 
             <!--
             <l-control position="topright" class="hide_on_small_screens">
@@ -175,6 +159,61 @@
 
                 </div>
             </l-control>
+
+
+            <l-control position="bottomright" class="hide_on_small_screens">
+                <div class="info table-light" style="font-size: 1em; line-height: 1em;">
+                    <h4 style="font-weight: bold; font-size: 1.4em;">Scan Monitor</h4>
+                    <template v-if="scan_monitor_visible"><span @click="show_hide_scan_monitor()">hide</span></template>
+                    <template v-if="!scan_monitor_visible"><span @click="show_hide_scan_monitor()">show</span></template>
+
+                    <template v-if="scan_monitor_visible === true">
+                        <br><br>
+                        <table width="100%;">
+                        <template v-for="(scanner_value, scanner) in planned_scan_progress">
+                            <tr>
+                                <td colspan="2"><b>{{ $t(scanner) }}</b></td>
+                            </tr>
+                            <template v-for="(metrics, scanner_task) in scanner_value">
+                                <tr>
+                                    <td style="width: 30%;">
+                                        <i>{{scanner_task}}</i>
+                                    </td><td style="width: 80%;">
+                                        <div style="width: 100%; background-color: gray; height: 15px;">
+                                            <template v-for="(value, metric) in metrics">
+                                                <div v-if='metric === "finished"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: darkgreen; color: white; float: left; text-align: center; vertical-align: middle; height: 15px;'">{{value}}</div>
+                                                <div v-if='metric === "requested"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: lightgreen; color: white; float: left; text-align: center; vertical-align: middle;  height: 15px;'">{{value}}</div>
+                                                <div v-if='metric === "picked_up"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: orange; color: white; float: left; text-align: center; vertical-align: middle;  height: 15px;'">{{value}}</div>
+                                            </template>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </template>
+                        </table>
+                    </template>
+                </div>
+            </l-control>
+
+
+            <l-control position="bottomright" class="hide_on_small_screens" v-if="simplestats">
+                <div style="max-width: 300px; overflow:hidden;" class="info table-light">
+                    <!-- Only if there are stats -->
+                    <template v-if="simplestats[this.state.country][this.state.layer] !== undefined">
+                        <!-- if there are multiple countries -->
+                        <template v-if="Object.keys(simplestats).length > 2">
+                            <h4><img :src="simplestats[this.state.country][this.state.layer].country_flag" />{{simplestats[this.state.country][this.state.layer].country_name}}, {{ $t($store.state.layer) }}</h4>
+                        </template>
+                        <template v-else>
+                            <h4>{{ $t($store.state.layer) }}</h4>
+                        </template>
+                        {{simplestats[this.state.country][this.state.layer].organizations}} {{$t('organizations')}}<br>
+                        {{simplestats[this.state.country][this.state.layer].urls}} {{$t('internet_adresses')}}<br>
+                        {{simplestats[this.state.country][this.state.layer].services}} {{$t('services')}}<br>
+                    </template>
+                </div>
+            </l-control>
+
 
             <l-control position="bottomright" class="hide_on_small_screens">
                 <div class="info legend table-light">
@@ -421,6 +460,10 @@ const WebSecMap = Vue.component('websecmap', {
             clicked_map_object: null,
 
             simplestats: null,
+
+            planned_scan_progress: null,
+            scan_monitor_visible: false,
+            planned_scan_progress_interval: null,
         }
     },
 
@@ -458,12 +501,19 @@ const WebSecMap = Vue.component('websecmap', {
             this.update_visible_week();
 
             this.get_simplestats();
+            this.get_planned_scan_progress();
+            this.timer = setInterval(this.get_planned_scan_progress, 30*60*1000)
         })
+    },
+    beforeDestroy () {
+      clearInterval(this.planned_scan_progress_interval)
     },
 
 
     methods: {
-
+        show_hide_scan_monitor: function(){
+            this.scan_monitor_visible = !this.scan_monitor_visible;
+        },
         start_adding_domains: function(){
             this.new_domains = "";
             this.show_add_domains = true;
@@ -534,6 +584,33 @@ const WebSecMap = Vue.component('websecmap', {
             fetch(`/data/short_and_simple_stats/${this.state.week}/`).then(response => response.json()).then(data => {
                 this.simplestats = data;
             }).catch((fail) => {console.log('A simplestat loading error occurred: ' + fail)});
+        },
+
+        get_planned_scan_progress: function() {
+
+            fetch(`/data/planned_scan_progress/`).then(response => response.json()).then(data => {
+                let progress = {}
+
+                // row = {"scanner": "ftp", "activity": "discover", "state": "finished", "amount": 201}
+                data.forEach((row) => {
+                    if (progress[row['scanner']] === undefined) {
+                        progress[row['scanner']] = {}
+                    }
+                    if (progress[row['scanner']][row['activity']] === undefined) {
+                        progress[row['scanner']][row['activity']] = {}
+                        progress[row['scanner']][row['activity']]['total'] = 0
+                    }
+                    if (progress[row['scanner']][row['activity']][row['state']] === undefined) {
+                        progress[row['scanner']][row['activity']][row['state']] = {}
+                    }
+
+
+                    progress[row['scanner']][row['activity']][row['state']] = row['amount']
+                    progress[row['scanner']][row['activity']]['total'] += row['amount']
+                })
+
+                this.planned_scan_progress = progress;
+            }).catch((fail) => {console.log('A planned scan process loading error occurred: ' + fail)});
         },
 
         handle_map_data: function(data){

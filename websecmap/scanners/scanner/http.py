@@ -91,8 +91,8 @@ READ_TIMEOUT = 10
 
 
 def filter_discover(organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    **kwargs):
+                    urls_filter: dict = dict(),
+                    **kwargs):
     # ignore administratively dead domains by default.
     urls_filter = {'is_dead': False} if not urls_filter else urls_filter
 
@@ -116,9 +116,10 @@ def filter_discover(organizations_filter: dict = dict(),
     return urls
 
 
+@app.task(queue='storage')
 def plan_discover(organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    **kwargs):
+                  urls_filter: dict = dict(),
+                  **kwargs):
 
     if not allowed_to_discover_endpoints("http"):
         return group()
@@ -179,9 +180,9 @@ def compose_discover_task(urls):
 
 
 def filter_verify(organizations_filter: dict = dict(),
-                      urls_filter: dict = dict(),
-                      endpoints_filter: dict = dict(),
-                      **kwargs):
+                  urls_filter: dict = dict(),
+                  endpoints_filter: dict = dict(),
+                  **kwargs):
     # todo: do we need a generic resurrect task and also check for , 'is_dead': False here?
     # otherwise we'll be verifying things that existed ages ago and probably will never return. Which makes this
     # scan also extremely slow. - The description says we should.
@@ -196,9 +197,9 @@ def filter_verify(organizations_filter: dict = dict(),
 
 
 def plan_verify(organizations_filter: dict = dict(),
-                      urls_filter: dict = dict(),
-                      endpoints_filter: dict = dict(),
-                      **kwargs):
+                urls_filter: dict = dict(),
+                endpoints_filter: dict = dict(),
+                **kwargs):
     if not allowed_to_discover_endpoints("http"):
         return group()
 
@@ -231,7 +232,6 @@ def compose_manual_verify_task(
 def compose_verify_task(urls):
     endpoints = retrieve_endpoints_from_urls(urls, protocols=['http', 'https'])
     endpoints = unique_and_random(endpoints)
-
 
     # query takes 4 seconds in production on 41857 endpoints (htttp = 20000, https = 22465).
     endpoints = unique_and_random(endpoints)
