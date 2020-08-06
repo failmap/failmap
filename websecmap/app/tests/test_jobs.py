@@ -54,4 +54,3 @@ def test_job_no_result(db, celery):
     assert job.status == 'completed'
     assert job.result == '-- task generated no result object --'
     assert job.task == 'test_jobs.dummy(False)'
-
