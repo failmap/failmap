@@ -81,7 +81,9 @@ def compose_scan_task(urls):
     # Make the first task immutable, so it doesn't get any arguments of other scanners in a chain.
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     task = group(
-        scan.si(endpoint.uri_url()) | store.s(endpoint) for endpoint in endpoints
+        scan.si(endpoint.uri_url())
+        | store.s(endpoint)
+        | plannedscan.finish.si('scan', 'dummy', endpoint.url)  for endpoint in endpoints
     )
     return task
 

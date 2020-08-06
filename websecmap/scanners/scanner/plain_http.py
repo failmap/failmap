@@ -94,14 +94,16 @@ def compose_scan_task(urls):
         complete_endpoints, incomplete_endpoints = get_endpoints_with_missing_encryption(url)
 
         for complete_endpoint in complete_endpoints:
-            tasks.append(well_done.si(complete_endpoint))
+            tasks.append(well_done.si(complete_endpoint) | plannedscan.finish.si('scan', 'plain_http', url))
 
         for incomplete_endpoint in incomplete_endpoints:
             tasks.append(
                 scan.si(
                     incomplete_endpoint
                 ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[incomplete_endpoint.ip_version])
-                | store.s(incomplete_endpoint))
+                | store.s(incomplete_endpoint)
+                | plannedscan.finish.si('scan', 'plain_http', url)
+            )
 
     if not tasks:
         log.warning('Applied filters resulted in no urls, thus no plain http tasks!')

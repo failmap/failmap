@@ -44,6 +44,15 @@ const messages = {
         website: "Website",
 
 
+        "dns_endpoints": "Endpoints for internet.nl",
+        "dns_wildcard": "Wildcard domains",
+        "known_subdomains": "New subdomains (known)",
+        "subdomains": "New subdomains (OSINT)",
+
+        "internet_nl_v2_mail": "Internet.nl Mail",
+        "internet_nl_v2_web": "Internet.nl Web",
+
+
         // issues, are used at various places, the original value comes from the database stored as scan results.
 
         // DNSSEC

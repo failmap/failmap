@@ -14,7 +14,7 @@ from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.scanner.__init__ import (allowed_to_scan, q_configurations_to_scan,
-                                                 url_filters, unique_and_random)
+                                                 unique_and_random, url_filters)
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import initialize_scan
 
 log = logging.getLogger(__name__)
@@ -58,7 +58,8 @@ def plan_scan(organizations_filter: dict = dict(),
 
 
 def compose_scan_task(urls):
-    return group([initialize_scan.si("mail", urls)])
+    return group([initialize_scan.si("mail", urls)
+                  | plannedscan.finish_multiple.si('scan', 'internet_nl_v2_mail', urls)])
 
 
 def compose_manual_scan_task(
