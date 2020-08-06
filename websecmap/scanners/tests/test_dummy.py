@@ -14,4 +14,4 @@ def test_dummy(responses, db, faalonië):
     result = json.loads(call_command('scan', 'dummy', '-v3', '-o', TEST_ORGANIZATION))
 
     # dummy returns random success/failure results, only check if there is a result, not the result itself
-    assert result[0]
+    assert result[0] is None

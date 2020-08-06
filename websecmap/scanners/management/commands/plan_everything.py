@@ -4,7 +4,8 @@ from django.core.management.base import BaseCommand
 
 from websecmap.scanners.scanner import (dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec,
                                         ftp, http, internet_nl_v2_mail, internet_nl_v2_web,
-                                        plain_http, security_headers, subdomains, tls_qualys, verify_unresolvable)
+                                        plain_http, security_headers, subdomains, tls_qualys,
+                                        verify_unresolvable)
 
 log = logging.getLogger(__name__)
 
