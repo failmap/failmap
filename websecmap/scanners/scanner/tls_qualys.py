@@ -22,7 +22,6 @@ https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
 import ipaddress
 import json
 import logging
-import random
 from datetime import datetime, timedelta
 from http.client import BadStatusLine
 from multiprocessing.pool import ThreadPool
@@ -45,7 +44,8 @@ from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_configurations_to_scan, unique_and_random
+from websecmap.scanners.scanner.__init__ import (allowed_to_scan, chunks2, q_configurations_to_scan,
+                                                 unique_and_random)
 from websecmap.scanners.scanner.http import store_url_ips
 
 # There is a balance between network timeout and qualys result cache.

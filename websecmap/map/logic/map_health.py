@@ -6,7 +6,7 @@ import dateutil.parser
 import pytz
 
 from websecmap.celery import app
-from websecmap.map.logic.map_defaults import get_organization_type, get_country
+from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.map.models import Configuration, MapHealthReport, OrganizationReport
 from websecmap.organizations.models import Organization
 
