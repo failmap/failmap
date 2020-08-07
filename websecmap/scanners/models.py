@@ -488,7 +488,9 @@ class PlannedScan(models.Model):
     )
 
     scanner = models.CharField(
-        max_length=10,
+        # perhaps this should be an int and scanners should be a number. This works also though...
+        # more data = more better
+        max_length=30,  # internet_nl_v2_mail, known_subdomains, http_security_headers, verify_unresolvable
         default="",
         db_index=True,
         help_text="tlsq, dnssec, http_security_headers, plain_http, internet_nl_mail, dnssec, ftp, dns_endpoints"
@@ -503,6 +505,10 @@ class PlannedScan(models.Model):
     )
 
     requested_at_when = models.DateTimeField()
+
+    last_state_change_at = models.DateTimeField(
+        null=True,
+    )
 
     finished_at_when = models.DateTimeField(
         null=True,
