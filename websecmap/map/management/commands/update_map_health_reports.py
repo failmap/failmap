@@ -3,6 +3,7 @@ import logging
 from django.core.management.base import BaseCommand
 
 from websecmap.map.logic.map_health import update_map_health_reports
+from websecmap.map.report import PUBLISHED_SCAN_TYPES
 
 log = logging.getLogger(__package__)
 
@@ -12,4 +13,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         log.warning('This does not clear your browsers chache. For JSON this might be relevant.')
-        update_map_health_reports()
+        update_map_health_reports(PUBLISHED_SCAN_TYPES)
