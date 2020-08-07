@@ -21,7 +21,7 @@ intervals = {
 def plan_daily(scanner: str, method: str, interval: str = "every day"):
     return {'task': f'websecmap.scanners.scanner.{scanner}.plan_{method}',
             'cron': intervals[interval],
-            'friendly_name': f'{scanner} {fitting_icon(method)} Plan {method} for scanner {scanner}',
+            'friendly_name': f'{scanner}: {fitting_icon(method)}',
             'args': "[]",
             'kwargs': "{}"
             }
@@ -30,7 +30,7 @@ def plan_daily(scanner: str, method: str, interval: str = "every day"):
 def consume(scanner: str, method: str, interval: str, amount: int):
     return {'task': f'websecmap.app.models.create_{method}_job',
             'cron': intervals[interval],
-            'friendly_name': f'{scanner} {fitting_icon(method)} {method} using {scanner}.',
+            'friendly_name': f'{scanner}: {fitting_icon(method)}',
             'args': f'["websecmap.scanners.scanner.{scanner}"]',
             'kwargs': f'{{"amount": {amount}}}'
             }
@@ -44,7 +44,7 @@ def fitting_icon(some_text):
         'discover': 'Schedule Discovery',
         'planned_scan': 'Perform Scan',
         'planned_verify': 'Perform Verification',
-        'planned_discover': 'Perform Discovery',
+        'planned_discover': 'Perform Discovery ',
     }
 
     return options[some_text]
