@@ -121,7 +121,7 @@ def compose_task(
     return task
 
 
-@app.task(queue='storage')
+@app.task(queue='reporting')
 def calculate_vulnerability_statistics(days: int = 366, countries: List = None, organization_types: List = None):
     log.info("Calculation vulnerability graphs")
 
@@ -412,12 +412,12 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                     vs.save()
 
 
-@app.task(queue='storage')
+@app.task(queue='reporting')
 def calculate_map_data_today():
     calculate_map_data.si(1).apply_async()
 
 
-@app.task(queue='storage')
+@app.task(queue='reporting')
 def calculate_map_data(days: int = 366, countries: List = None, organization_types: List = None):
     from django.db import OperationalError
 
@@ -477,7 +477,7 @@ def filter_map_configs(countries: List = None, organization_types: List = None):
                                                     'organization_type', 'organization_type__id')
 
 
-@app.task(queue='storage')
+@app.task(queue='reporting')
 def calculate_high_level_stats(days: int = 1, countries: List = None, organization_types: List = None):
     log.info("Creating high_level_stats")
 
@@ -754,7 +754,7 @@ def relevant_urls_at_timepoint_organization(organization: Organization, when: da
     return relevant_urls_at_timepoint(queryset, when)
 
 
-@app.task(queue='storage')
+@app.task(queue='reporting')
 def default_organization_rating(organizations: List[Organization]):
     """
     Generate default ratings so all organizations are on the map (as being grey). This prevents
@@ -822,7 +822,7 @@ def default_organization_rating(organizations: List[Organization]):
         r.save()
 
 
-@app.task(queue='storage')
+@app.task(queue='reporting')
 def create_organization_reports_now(organizations: List[Organization]):
 
     for organization in organizations:
@@ -830,7 +830,7 @@ def create_organization_reports_now(organizations: List[Organization]):
         create_organization_report_on_moment(organization, now)
 
 
-@app.task(queue='storage')
+@app.task(queue='reporting')
 def recreate_organization_reports(organizations: List):
     """Remove organization rating and rebuild a new."""
 
@@ -862,7 +862,7 @@ def recreate_organization_reports(organizations: List):
             default_organization_rating(organizations=[organization])
 
 
-@app.task(queue='storage')
+@app.task(queue='reporting')
 def update_report_tasks(url_chunk: List[Url]):
     """
     A small update function that only rebuilds a single url and the organization report for a single day. Using this

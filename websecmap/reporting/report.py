@@ -43,7 +43,7 @@ def get_allowed_to_report():
     return allowed_to_report
 
 
-@app.task(queue='storage')
+@app.task(queue='reporting')
 def recreate_url_reports(urls: List):
     """Remove the rating of one url and rebuild anew."""
 
