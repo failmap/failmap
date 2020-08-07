@@ -66,6 +66,7 @@ New architecture:
 """
 
 
+@app.task(queue='storage')
 def plan_scan(urls_filter: dict = dict(), **kwargs):
 
     if not allowed_to_scan("tls_qualys"):
@@ -181,6 +182,7 @@ def compose_manual_scan_task(organizations_filter: dict = dict(),
     return compose_scan_task(urls)
 
 
+@app.task(queue='storage')
 def compose_planned_scan_task(**kwargs) -> Task:
 
     if not allowed_to_scan("tls_qualys"):

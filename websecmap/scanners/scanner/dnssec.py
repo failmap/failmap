@@ -79,6 +79,7 @@ def filter_scan(organizations_filter: dict = dict(),
     return urls
 
 
+@app.task(queue='storage')
 def plan_scan(organizations_filter: dict = dict(),
               urls_filter: dict = dict(),
               endpoints_filter: dict = dict(),
