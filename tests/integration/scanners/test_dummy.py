@@ -26,4 +26,7 @@ def test_scan_method(method, worker, faalonië):
     result = output[0]
 
     # test output is a task response and account for the both success or failure responses as the tasks
-    assert isinstance(result, dict) and ('status' in result or 'error' in result)
+    # assert isinstance(result, dict) and ('status' in result or 'error' in result)
+
+    # newer tasks are all 'finished' and deliver 'none'
+    assert result is None
