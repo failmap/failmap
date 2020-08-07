@@ -334,4 +334,4 @@ class PlannedScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ('url__url', 'activity', 'scanner', 'state')
     list_filter = ['activity', 'scanner', 'state', 'last_state_change_at', 'requested_at_when',
                    'finished_at_when'][::-1]
-    fields = ('url', 'activity', 'scanner', 'state', 'finished_at_when', 'requested_at_when', 'finished_at_when')
+    fields = ('url', 'activity', 'scanner', 'state', 'last_state_change_at', 'requested_at_when', 'finished_at_when')
