@@ -34,22 +34,21 @@ from django.db.models import Q
 from PIL import Image
 
 from websecmap.celery import app
+from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, Screenshot
-from websecmap.scanners.scanner.__init__ import endpoint_filters, q_configurations_to_scan
+from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
+from websecmap.scanners.scanner.__init__ import endpoint_filters, q_configurations_to_scan, unique_and_random
 from websecmap.scanners.timeout import timeout
 
 log = logging.getLogger(__package__)
 
 
-# basically updates screenshots. It will ignore whatever parameter you throw at it as creating screenshots every day
-# is a bit nonsense. It will update every month.
-def compose_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
-    **kwargs
-) -> Task:
-
+def filter_scan(organizations_filter: dict = dict(),
+                urls_filter: dict = dict(),
+                endpoints_filter: dict = dict(),
+                **kwargs):
+    # basically updates screenshots. It will ignore whatever parameter you throw at it as creating screenshots every day
+    # is a bit nonsense. It will update every month.
     one_month_ago = datetime.now(pytz.utc) - timedelta(days=31)
 
     # chromium also understands FTP servers and renders those
@@ -66,13 +65,33 @@ def compose_task(
 
     # It's possible to overwrite the above query also, you can add whatever you want to the normal query.
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+    return unique_and_random([endpoint.url for endpoint in endpoints])
 
-    # only retrieve fields we need:
-    endpoints = endpoints.only('id', 'ip_version', 'port', 'protocol', 'url__id', 'url__url')
 
-    # unique endpoints only
-    endpoints = list(set(endpoints))
-    random.shuffle(endpoints)
+@app.task(queue='storage')
+def plan_scan(organizations_filter: dict = dict(),
+              urls_filter: dict = dict(),
+              endpoints_filter: dict = dict(),
+              **kwargs
+              ):
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    plannedscan.request(activity="scan", scanner="screenshot", urls=urls)
+
+
+@app.task(queue='storage')
+def compose_planned_scan_task(**kwargs):
+    urls = plannedscan.pickup(activity="scan", scanner="ftp", amount=kwargs.get('amount', 25))
+    return compose_scan_task(urls)
+
+
+def compose_scan_task(urls):
+    endpoints = retrieve_endpoints_from_urls(
+        urls,
+        protocols=['ftp', 'http', 'https'],
+        ports=[80, 443, 8443, 8080, 8888, 21]
+    )
+
+    endpoints = unique_and_random(endpoints)
 
     # prevent constance from looking up the value constantly:
     v4_service = config.SCREENSHOT_API_URL_V4

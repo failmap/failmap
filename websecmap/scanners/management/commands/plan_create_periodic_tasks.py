@@ -130,6 +130,10 @@ class Command(BaseCommand):
         # dns wildcards
         plan_daily('dns_wildcards', 'discover', "every 3 days"),
         consume('dns_wildcards', 'planned_discover', 'every 10 minutes', amount=200),
+
+        # screenshots
+        plan_daily('screenshot', 'scan', "every 7 days"),
+        consume('screenshot', 'planned_scan', 'every 30 minutes', amount=25),
     ]
 
     def handle(self, *args, **options):

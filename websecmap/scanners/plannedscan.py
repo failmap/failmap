@@ -131,7 +131,8 @@ def retrieve_endpoints_from_urls(
     urls: List[Url],
     protocols: List[str] = None,
     ports: List[int] = None,
-    ip_versions: List[int] = None
+    ip_versions: List[int] = None,
+    is_dead: bool = False
 ) -> List[Endpoint]:
     """
     Given this approach reduces all scans to urls, and some scans require endpoints.
@@ -149,6 +150,8 @@ def retrieve_endpoints_from_urls(
 
     if ip_versions:
         ep_querysets = ep_querysets.filter(ip_version__in=ip_versions)
+
+    ep_querysets = ep_querysets.filter(is_dead=is_dead)
 
     ep_querysets = ep_querysets.only("id", "port", "ip_version", "url__url")
     endpoints += list(ep_querysets)
