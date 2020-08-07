@@ -156,7 +156,7 @@ def retrieve_endpoints_from_urls(
 
     ep_querysets = ep_querysets.filter(is_dead=is_dead)
 
-    ep_querysets = ep_querysets.only("id", "port", "ip_version", "url", "url__url")
+    ep_querysets = ep_querysets.only("id", "port", "protocol", "ip_version", "url", "url__id", "url__url")
     endpoints += list(ep_querysets)
 
     return endpoints
