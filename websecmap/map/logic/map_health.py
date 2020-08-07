@@ -80,7 +80,7 @@ def split_ratings_between_good_and_bad(report: OrganizationReport, hours: int = 
 
         # url ratings (dnssec etc)
         for rating in url['ratings']:
-            if rating['last_scan'] < a_while_ago:
+            if dateutil.parser.isoparse(rating['last_scan']) < a_while_ago:
                 infractions.append(rating)
             else:
                 good.append(rating)
