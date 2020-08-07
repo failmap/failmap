@@ -4,17 +4,17 @@ import logging
 from celery import group
 
 from websecmap.map.views import screenshot
-from websecmap.scanners.autoexplain import autoexplain
-from websecmap.scanners.scanner import (dns_endpoints, dns_wildcards, dnssec, dummy, ftp, http,
-                                        internet_nl_mail, internet_nl_web, plain_http,
-                                        security_headers, subdomains, tls_qualys, dns_known_subdomains,
-                                        internet_nl_v2_mail, internet_nl_v2_web, verify_unresolvable)
+from websecmap.scanners.scanner import (dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec,
+                                        dummy, ftp, http, internet_nl_v2_mail,
+                                        internet_nl_v2_web, plain_http,
+                                        security_headers, subdomains, tls_qualys,
+                                        verify_unresolvable)
 
 log = logging.getLogger(__name__)
 
 
 # explicitly declare the imported modules as this modules 'content', prevents pyflakes issues
-__all__ = [dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec, ftp, http, internet_nl_v2_mail,
+__all__ = [dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec, dummy, ftp, http, internet_nl_v2_mail,
            internet_nl_v2_web, plain_http, screenshot, security_headers, subdomains, tls_qualys, verify_unresolvable]
 
 # This is the single source of truth regarding scanner configuration.

@@ -19,14 +19,13 @@ http://screenshot_v6:1337
 """
 
 import logging
-import random
 import urllib.parse
 from datetime import datetime, timedelta
 from io import BytesIO
 
 import pytz
 import requests
-from celery import Task, group
+from celery import group
 from constance import config
 from django.conf import settings
 from django.core.files import File
@@ -37,7 +36,8 @@ from websecmap.celery import app
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, Screenshot
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
-from websecmap.scanners.scanner.__init__ import endpoint_filters, q_configurations_to_scan, unique_and_random
+from websecmap.scanners.scanner.__init__ import (endpoint_filters, q_configurations_to_scan,
+                                                 unique_and_random)
 from websecmap.scanners.timeout import timeout
 
 log = logging.getLogger(__package__)
