@@ -48,6 +48,9 @@ def plan_discover(organizations_filter: dict = dict(),
 
 
 def compose_discover_task(urls):
+    if not urls:
+        return group()
+
     first_url = urls[0]
     first_organization = first_url.organization.all().first()
 
