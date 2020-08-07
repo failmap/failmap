@@ -58,6 +58,9 @@ def plan_scan(organizations_filter: dict = dict(),
 
 
 def compose_scan_task(urls):
+    if not urls:
+        return group()
+
     return group([initialize_scan.si("mail", urls)
                   | plannedscan.finish_multiple.si('scan', 'internet_nl_v2_mail', urls)])
 
