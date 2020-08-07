@@ -51,6 +51,7 @@ const messages = {
 
         "internet_nl_v2_mail": "Internet.nl Mail",
         "internet_nl_v2_web": "Internet.nl Web",
+        "verify_unresolvable": "Revive unresolvable",
 
 
         // issues, are used at various places, the original value comes from the database stored as scan results.
