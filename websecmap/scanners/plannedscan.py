@@ -68,6 +68,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     for scan in scans:
         # todo: should there be a state log? Probably.
         scan.state = "picked_up"
+        scan.last_state_change_at = datetime.now(pytz.utc)
         scan.save()
 
     urls = [scan.url for scan in scans]
@@ -90,6 +91,7 @@ def request(activity: str, scanner: str, urls: List[Url]):
         ps.scanner = scanner
         ps.url = url
         ps.state = "requested"
+        ps.last_state_change_at = datetime.now(pytz.utc)
         ps.requested_at_when = datetime.now(pytz.utc)
         ps.save()
 
@@ -113,6 +115,7 @@ def set_scan_state(activity: str, scanner: str, url: Url, state="finished"):
     ).first()
     if oldest_scan:
         oldest_scan.state = state
+        oldest_scan.last_state_change_at = datetime.now(pytz.utc)
         oldest_scan.finished_at_when = datetime.now(pytz.utc)
         oldest_scan.save()
 

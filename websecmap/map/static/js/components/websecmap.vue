@@ -281,6 +281,10 @@
                             <tr><td><div style="height: 15px; width:15px; background-color: gray;">&nbsp;</div></td><td>Other (errors, timeouts)</td></tr>
                         </table>
 
+                        <template v-if="authenticated">
+                            <button @click="get_planned_scan_progress()">Refresh</button>
+                        </template>
+
                     </div>
                   </div>
                 </div>
