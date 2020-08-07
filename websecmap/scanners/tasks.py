@@ -6,20 +6,21 @@ from celery import group
 from websecmap.scanners.autoexplain import autoexplain
 from websecmap.scanners.scanner import (dns_endpoints, dns_wildcards, dnssec, dummy, ftp, http,
                                         internet_nl_mail, internet_nl_web, plain_http,
-                                        security_headers, subdomains, tls_qualys)
+                                        security_headers, subdomains, tls_qualys, dns_known_subdomains,
+                                        internet_nl_v2_mail, internet_nl_v2_web, verify_unresolvable)
 
 log = logging.getLogger(__name__)
 
 
 # explicitly declare the imported modules as this modules 'content', prevents pyflakes issues
-__all__ = [tls_qualys, security_headers, dummy, http, dnssec, ftp, subdomains, internet_nl_mail, internet_nl_web,
-           dns_endpoints, dns_wildcards, autoexplain]
+__all__ = [dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec, ftp, http, internet_nl_v2_mail,
+           internet_nl_v2_web, plain_http, security_headers, subdomains, tls_qualys, verify_unresolvable]
 
 # This is the single source of truth regarding scanner configuration.
 # Lists to be used elsewhere when tasks need to be composed, these lists contain compose functions.
 # Other code can iterate over these functions and call them, example: see onboard.py.
 TLD_DEFAULT_EXPLORERS = []
-DEFAULT_EXPLORERS = [http.compose_discover_task, ftp.compose_discover_task]
+DEFAULT_EXPLORERS = [http.compose_manual_discover_task, ftp.compose_manual_discover_task]
 
 # Beta: dns.brute_known_subdomains_compose_task, - old code still
 TLD_DEFAULT_CRAWLERS = [

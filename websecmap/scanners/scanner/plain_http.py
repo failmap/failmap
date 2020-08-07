@@ -56,6 +56,7 @@ def filter_scan(organizations_filter: dict = dict(),
     return unique_and_random(urls)
 
 
+@app.task(queue='storage')
 def plan_scan(organizations_filter: dict = dict(),
               urls_filter: dict = dict(),
               endpoints_filter: dict = dict(),
@@ -68,6 +69,7 @@ def plan_scan(organizations_filter: dict = dict(),
     plannedscan.request(activity="scan", scanner="plain_http", urls=urls)
 
 
+@app.task(queue='storage')
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="plain_http", amount=kwargs.get('amount', 25))
     return compose_scan_task(urls)

@@ -88,6 +88,7 @@ def compose_scan_task(urls):
     return task
 
 
+@app.task(queue='storage')
 def compose_planned_scan_task(**kwargs):
     if not allowed_to_scan("dummy"):
         log.warning("Dummy scanner is not allowed to scan.")

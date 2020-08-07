@@ -53,6 +53,7 @@ def plan_discover(organizations_filter: dict = dict(),
     plannedscan.request(activity="discover", scanner="subdomains", urls=urls)
 
 
+@app.task(queue='storage')
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="subdomains", amount=kwargs.get('amount', 25))
     return compose_discover_task(urls)
@@ -85,6 +86,7 @@ def filter_verify(organizations_filter: dict = dict(),
     return unique_and_random(urls)
 
 
+@app.task(queue='storage')
 def plan_verify(organizations_filter: dict = dict(),
                 urls_filter: dict = dict(),
                 endpoints_filter: dict = dict(),
@@ -94,6 +96,7 @@ def plan_verify(organizations_filter: dict = dict(),
     plannedscan.request(activity="verify", scanner="subdomains", urls=urls)
 
 
+@app.task(queue='storage')
 def compose_planned_verify_task(**kwargs):
     urls = plannedscan.pickup(activity="verify", scanner="subdomains", amount=kwargs.get('amount', 25))
     return compose_verify_task(urls)
