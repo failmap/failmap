@@ -91,7 +91,7 @@ def plan_scan(organizations_filter: dict = dict(),
 
 @app.task(queue='storage')
 def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="dnssec", amount=25)
+    urls = plannedscan.pickup(activity="scan", scanner="dnssec", amount=kwargs.get('amount', 25))
     return compose_scan_task(urls)
 
 
