@@ -8,13 +8,17 @@ from websecmap.scanners.scanner import (dns_endpoints, dns_known_subdomains, dns
                                         dummy, ftp, http, internet_nl_v2_mail, internet_nl_v2_web,
                                         plain_http, security_headers, subdomains, tls_qualys,
                                         verify_unresolvable)
+from websecmap.scanners import proxy
 
 log = logging.getLogger(__name__)
 
 
 # explicitly declare the imported modules as this modules 'content', prevents pyflakes issues
-__all__ = [dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec, dummy, ftp, http, internet_nl_v2_mail,
-           internet_nl_v2_web, plain_http, screenshot, security_headers, subdomains, tls_qualys, verify_unresolvable]
+__scanners__ = [dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec, dummy, ftp, http, internet_nl_v2_mail,
+                internet_nl_v2_web, plain_http, screenshot, security_headers, subdomains, tls_qualys,
+                verify_unresolvable]
+
+__others__ = [proxy]
 
 # This is the single source of truth regarding scanner configuration.
 # Lists to be used elsewhere when tasks need to be composed, these lists contain compose functions.

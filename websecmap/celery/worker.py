@@ -2,7 +2,6 @@
 A worker gets a role from it's configuration. This role determines which queue's are processed by the worker.
 The role also specifies what network connectivity is required (ipv4, ipv6 or both).
 
-Note that hyper.sh workers only offer IPv4. (No sign of changing)
 A normal websecmap server should have both IPv4 and IPv6 access.
 
 On tricky issue:
@@ -82,15 +81,13 @@ QUEUES_MATCHING_ROLES = {
         Queue('isolated'),
         # run qualys scans
         Queue('qualys'),
-        # scaling things
-        Queue('hyper'),
+        Queue('claim_proxy'),
     ],
 
     # queuemonitor shows the currently running queues on the dashboard. It will not do anything else. It subscribes
     # to all queues. This does not have a worker (and doesn't need one).
     'queuemonitor': [
         Queue('storage'),
-        Queue('hyper'),
         Queue('4and6'),
         Queue('ipv4'),
         Queue('ipv6'),
@@ -134,10 +131,6 @@ QUEUES_MATCHING_ROLES = {
         Queue('claim_proxy'),
         # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might block the worker.
         # Given there is only one storage worker, blocking it doesn't help it's work.
-    ],
-    'hyper': [
-        # where hyper scaling tasks take place. Is not waiting or dealing with load elsewhere.
-        Queue('hyper'),
     ],
     'calculator': [
         Queue('isolated')
