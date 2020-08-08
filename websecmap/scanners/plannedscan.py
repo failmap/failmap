@@ -54,6 +54,21 @@ def reset():
     PlannedScan.objects.all().delete()
 
 
+@app.task(queue='storage')
+def retry():
+    """
+    When something is picked up, but not finished in a day, just retry. Something went wrong.
+
+    This might result in a bunch of the same things being attempted over and over because they are never
+    finished. Those things are nice investigation subjects. All scans should finish (or error).
+
+    """
+    PlannedScan.objects.all().filter(
+        state='picked_up',
+        last_state_change_at__lte=datetime.now(pytz.utc) - timedelta(days=1)
+    ).update(state='requested')
+
+
 def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     """
     Amount should not be too high: then this loses it's power and make scans invisible again. But it helps
