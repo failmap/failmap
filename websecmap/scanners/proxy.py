@@ -1,9 +1,9 @@
 import asyncio
+import logging
 from datetime import datetime, timedelta
 from http.client import BadStatusLine
 from multiprocessing.pool import ThreadPool
 from time import sleep
-import logging
 from typing import List
 
 import pytz
@@ -11,8 +11,8 @@ import requests
 from constance import config
 from django.db import transaction
 from proxybroker import Broker
-from requests.exceptions import ProxyError, SSLError, ConnectTimeout
-from tenacity import RetryError, retry, wait_fixed, stop_after_attempt, before_log
+from requests.exceptions import ConnectTimeout, ProxyError, SSLError
+from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fixed
 from urllib3.exceptions import ProtocolError
 
 from websecmap.celery import app
@@ -112,7 +112,6 @@ def check_all_proxies():
 
     pool.close()
     pool.join()
-    pass
 
 
 def timeout_claims():
@@ -354,7 +353,7 @@ async def save_new_proxy(proxies):
 
 
 @app.task(queue='storage')
-def find(countries: List = None, amount: int = 5, timeout: float = 0.5, **kwargs):
+def find_new_proxies(countries: List = None, amount: int = 5, timeout: float = 0.5, **kwargs):
     # Warning: this will only work with celery 5. This is not released yet.
 
     if not countries:
@@ -370,8 +369,3 @@ def find(countries: List = None, amount: int = 5, timeout: float = 0.5, **kwargs
                            save_new_proxy(proxies))
     loop = asyncio.get_event_loop()
     loop.run_until_complete(tasks)
-
-
-@app.task(queue='storage')
-def check_existing_alive_proxies():
-    return check_all_proxies()

@@ -4,11 +4,11 @@ import logging
 from celery import group
 
 from websecmap.map.views import screenshot
+from websecmap.scanners import proxy
 from websecmap.scanners.scanner import (dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec,
                                         dummy, ftp, http, internet_nl_v2_mail, internet_nl_v2_web,
                                         plain_http, security_headers, subdomains, tls_qualys,
                                         verify_unresolvable)
-from websecmap.scanners import proxy
 
 log = logging.getLogger(__name__)
 

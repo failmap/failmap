@@ -507,12 +507,12 @@
         "pk": 23,
         "fields": {
             "name": "Import New Proxies (hidden) Does not work with Celery 4.",
-            "task": "websecmap.scanners.find_scanproxies.find",
+            "task": "websecmap.scanners.proxy.find_new_proxies",
             "interval": null,
             "crontab": 23,
             "solar": null,
             "args": "[]",
-            "kwargs": "{\r\n\"countries\": [\"NL\", \"BE\", \"DE\", \"FR\", \"SE\", \"US\", \"GB\"],\r\n\"amount\": 50\r\n}",
+            "kwargs": "{\r\n\"amount\": 50\r\n}",
             "queue": "storage",
             "exchange": null,
             "routing_key": null,
@@ -532,7 +532,7 @@
         "pk": 24,
         "fields": {
             "name": "Update working proxies (hidden)",
-            "task": "websecmap.scanners.find_scanproxies.check_existing_alive_proxies",
+            "task": "websecmap.scanners.proxy.check_all_proxies",
             "interval": null,
             "crontab": 12,
             "solar": null,

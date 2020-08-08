@@ -38,8 +38,8 @@ from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
-from websecmap.scanners.proxy import claim_proxy, release_proxy, store_check_result, service_provider_status, \
-    timeout_claims
+from websecmap.scanners.proxy import (claim_proxy, release_proxy, service_provider_status,
+                                      store_check_result, timeout_claims)
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import (allowed_to_scan, chunks2, q_configurations_to_scan,
                                                  unique_and_random)
@@ -190,12 +190,12 @@ def compose_planned_scan_task(**kwargs) -> Task:
     timeout_claims()
 
     proxies_available = ScanProxy.objects.all().filter(
-                    is_dead=False,
-                    currently_used_in_tls_qualys_scan=False,
-                    manually_disabled=False,
-                    request_speed_in_ms__gte=1,
-                    request_speed_in_ms__lte=2000,
-                ).order_by('request_speed_in_ms')
+        is_dead=False,
+        currently_used_in_tls_qualys_scan=False,
+        manually_disabled=False,
+        request_speed_in_ms__gte=1,
+        request_speed_in_ms__lte=2000,
+    ).order_by('request_speed_in_ms')
 
     # size for the proxies and such is 25 / each.
     amount_to_scan = len(proxies_available) * 25

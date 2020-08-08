@@ -20,7 +20,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         try:
-            websecmap.scanners.proxy.find(amount=options['amount'])
+            websecmap.scanners.proxy.find_new_proxies(amount=options['amount'])
 
         except KeyboardInterrupt:
             log.info("Received keyboard interrupt. Stopped.")
