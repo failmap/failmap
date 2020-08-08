@@ -8,7 +8,7 @@ from jet.filters import RelatedFieldAjaxListFilter
 from websecmap.scanners import models
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import (progress_running_scan,
                                                                  recover_and_retry)
-from websecmap.scanners.scanner.tls_qualys import check_proxy
+from websecmap.scanners.proxy import check_proxy
 
 
 class TlsQualysScanAdminInline(CompactInline):

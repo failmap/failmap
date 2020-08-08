@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from websecmap.scanners import find_scanproxies
+import websecmap.scanners.proxy
 
 log = logging.getLogger(__name__)
 
@@ -13,14 +13,14 @@ class Command(BaseCommand):
     help = __doc__
 
     def add_arguments(self, parser):
-        parser.add_argument("--amount", help="amount", nargs='?', type=int, const=1, default=7)
+        parser.add_argument("--amount", help="amount", nargs='?', type=int, const=1, default=100)
 
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
 
         try:
-            find_scanproxies.find(amount=options['amount'])
+            websecmap.scanners.proxy.find(amount=options['amount'])
 
         except KeyboardInterrupt:
             log.info("Received keyboard interrupt. Stopped.")

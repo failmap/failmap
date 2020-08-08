@@ -23,7 +23,6 @@ import ipaddress
 import json
 import logging
 from datetime import datetime, timedelta
-from http.client import BadStatusLine
 from multiprocessing.pool import ThreadPool
 from time import sleep
 from typing import List
@@ -31,18 +30,16 @@ from typing import List
 import pytz
 import requests
 from celery import Task, group
-from constance import config
-from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
-from requests.exceptions import ConnectTimeout, ProxyError, SSLError
-from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fixed
-from urllib3.exceptions import ProtocolError
+from tenacity import RetryError, before_log, retry, wait_fixed
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
+from websecmap.scanners.proxy import claim_proxy, release_proxy, store_check_result, service_provider_status, \
+    timeout_claims
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import (allowed_to_scan, chunks2, q_configurations_to_scan,
                                                  unique_and_random)
@@ -184,12 +181,32 @@ def compose_manual_scan_task(organizations_filter: dict = dict(),
 
 @app.task(queue='storage')
 def compose_planned_scan_task(**kwargs) -> Task:
+    # If you run this every 10 minutes, there will be little problems with 'toctou' problems, claiming
+    # a proxy is free, while it has been claimed by other results of this method (in the call before).
 
     if not allowed_to_scan("tls_qualys"):
         return group()
 
-    # size for the proxies and such is 25 /each
-    urls = plannedscan.pickup(activity="scan", scanner="tls_qualys", amount=kwargs.get('amount', 25))
+    timeout_claims()
+
+    proxies_available = ScanProxy.objects.all().filter(
+                    is_dead=False,
+                    currently_used_in_tls_qualys_scan=False,
+                    manually_disabled=False,
+                    request_speed_in_ms__gte=1,
+                    request_speed_in_ms__lte=2000,
+                ).order_by('request_speed_in_ms')
+
+    # size for the proxies and such is 25 / each.
+    amount_to_scan = len(proxies_available) * 25
+
+    if not amount_to_scan:
+        log.info("No free proxies available for TLS qualys scans, try again later (when scans are finished or the "
+                 "claims on proxies have timed out.")
+        return group()
+
+    # using this method proxy claiming does not need to be rate limited anymore.
+    urls = plannedscan.pickup(activity="scan", scanner="tls_qualys", amount=amount_to_scan)
     return compose_scan_task(urls)
 
 
@@ -211,204 +228,6 @@ def compose_scan_task(urls):
     return group(tasks)
 
 
-# Use the same rate limiting as qualys_scan_bulk, otherwise all proxies are claimed before scans are made.
-# which would mean a lot of proxies could be claimed days in advance of the scan. That's not correct.
-# this task floods and blocks the storage queue completely. The low prio seems to remedy this somewhat,
-# as more important tasks are then handled as soon as one of these is finished.
-# the storage queue should never be filled with this type of junk...
-# removed rate limiting and such. If a proxy died it will stay claimed and it will fail the next verification
-# the scan tasks will be added again and that's that.
-# Moved this to a dedicated worker that can deadlock / block whatever it wants to block. We can add rate
-# limiting again so not everything gets claimed in advance.
-@app.task(queue='claim_proxy', rate_limit='30/h')
-def claim_proxy(tracing_label=""):
-    """ A proxy should first be claimed and then checked. If not, several scans might use the same proxy and thus
-    crash. """
-
-    # try to get the first available, fastest, proxy
-    while True:
-
-        log.debug(f"Attempting to claim a proxy to scan {tracing_label} et al...")
-
-        try:
-
-            with transaction.atomic():
-
-                # proxies can die if they are limited too often.
-                proxy = ScanProxy.objects.all().filter(
-                    is_dead=False,
-                    currently_used_in_tls_qualys_scan=False,
-                    manually_disabled=False,
-                    request_speed_in_ms__gte=1,
-                    qualys_capacity_current=0
-                ).order_by('request_speed_in_ms').first()
-
-                if proxy:
-
-                    # first claim to prevent duplicate claims
-                    log.debug(f"Proxy {proxy.id} claimed for {tracing_label} et al...")
-                    proxy.currently_used_in_tls_qualys_scan = True
-                    proxy.last_claim_at = datetime.now(pytz.utc)
-                    proxy.save(update_fields=['currently_used_in_tls_qualys_scan', 'last_claim_at'])
-
-                    # we can't check for proxy quality here, as that will fill up the strorage with long tasks.
-                    # instead run the proxy checking worker every hour or so to make sure the list stays fresh.
-                    # if check_proxy(proxy):
-                    #    log.debug('Using proxy %s for scan.' % proxy)
-                    return proxy
-                    # else:
-                    #     log.debug('Proxy %s was not suitable for scanning. Trying another one in 60 seconds.' % proxy)
-
-                else:
-                    # do not log an error here, when forgetting to add proxies or if there are no clean proxies anymore,
-                    # the queue might fill up with too many claim_proxy tasks. Each of them continuing in their own
-                    # thread
-                    # to get a proxy every 2 minutes (30/h). This can lead up to 30.000 issues per day.
-                    # When you have over 500 proxy requests, things are off. It's better to start with a clean
-                    # slate then.
-                    log.debug(f'No proxies available for {tracing_label} et al. '
-                              f'You can add more proxies to solve this. Will try again in 60 seconds.')
-
-        except BaseException as e:
-            # In some rare cases this method crashes, while it should be as reliable as can be.
-            log.error(f"Exception occurred when requesting a proxy for {tracing_label} et al")
-            log.exception(e)
-            raise e
-
-        sleep(60)
-
-
-@app.task(queue='storage')
-def release_proxy(proxy: ScanProxy, tracing_label=""):
-    """As the claim proxy queue is ALWAYS filled, you cannot insert release proxy commands there..."""
-    log.debug(f"Releasing proxy {proxy.id} claimed for {tracing_label} et al...")
-    proxy.currently_used_in_tls_qualys_scan = False
-    proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
-
-
-@app.task(queue='internet')
-def check_proxy(proxy: ScanProxy):
-    # todo: service_provider_status should stop after a certain amount of requests.
-    # Note that you MUST USE HTTPS proxies for HTTPS traffic! Otherwise your normal IP is used.
-
-    log.debug(f"Testing proxy {proxy.id}")
-
-    if not config.SCAN_PROXY_TESTING_URL:
-        proxy_testing_url = "https://google.com/"
-        log.debug("No SCAN_PROXY_TESTING_URL configured, falling back to google.com.")
-    else:
-        proxy_testing_url = config.SCAN_PROXY_TESTING_URL
-
-    log.debug(f"Attempting to connect to testing url: {proxy_testing_url}")
-    # send requests to a known domain to inspect the headers the proxies attach. There has to be something
-    # that links various scans to each other.
-    try:
-        requests.get(
-            proxy_testing_url,
-            proxies={proxy.protocol: proxy.address},
-            timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),
-            headers={
-                'User-Agent': f"Request through proxy {proxy.id}",
-                'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                'Accept-Language': 'en-US,en;q=0.5',
-                'DNT': '1',
-            }
-        )
-
-    # Storage is handled async, because you might not be on the machine that is able to save data.
-    except ProxyError:
-        log.debug("ProxyError, Perhaps because: proxy does not support https.")
-        store_check_result.apply_async([proxy, "ProxyError, Perhaps because: proxy does not support https.", True,
-                                        datetime.now(pytz.utc)])
-        return False
-    except SSLError:
-        log.debug("SSL error received.")
-        store_check_result.apply_async([proxy, "SSL error received.", True, datetime.now(pytz.utc)])
-        return False
-    except ConnectTimeout:
-        log.debug("Connection timeout.")
-        store_check_result.apply_async([proxy, "Connection timeout.", True, datetime.now(pytz.utc)])
-        return False
-    except ConnectionError:
-        log.debug("Connection error.")
-        store_check_result.apply_async([proxy, "Connection error.", True, datetime.now(pytz.utc)])
-        return False
-    except ProtocolError:
-        log.debug("Protocol error.")
-        store_check_result.apply_async([proxy, "Protocol error.", True, datetime.now(pytz.utc)])
-        return False
-    except BadStatusLine:
-        log.debug("Bad status line.")
-        store_check_result.apply_async([proxy, "Bad status line.", True, datetime.now(pytz.utc)])
-        return False
-
-    log.debug(f"Could connect to test site {proxy_testing_url}. Proxy is functional.")
-
-    log.debug(f"Attempting to connect to the Qualys API.")
-    try:
-        api_results = service_provider_status(proxy)
-    except RetryError:
-        log.debug("Retry error. Could not connect.")
-        store_check_result.apply_async([proxy, "Retry error. Could not connect.", True, datetime.now(pytz.utc)])
-        return False
-
-    # tried a few times, no result. Proxy is dead.
-    if not api_results:
-        log.debug("No result, proxy not reachable?")
-        store_check_result.apply_async([proxy, "No result, proxy not reachable?", True, datetime.now(pytz.utc)])
-        return False
-
-    if api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
-        log.debug("Out of capacity %s." % proxy)
-        store_check_result.apply_async([proxy, "Out of capacity.", True, datetime.now(pytz.utc),
-                                        api_results['current'], api_results['max'], api_results['this-client-max']])
-        return False
-    else:
-        # todo: Request time via the proxy. Just getting google.com might take a lot of time...
-        try:
-            speed = requests.get('https://apple.com',
-                                 proxies={proxy.protocol: proxy.address},
-                                 timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT)
-                                 ).elapsed.total_seconds()
-            log.debug("Website retrieved.")
-        except ProxyError:
-            log.debug("Could not retrieve website.")
-            store_check_result.apply_async([proxy, "Could not retrieve website.", True, datetime.now(pytz.utc),
-                                            api_results['current'], api_results['max'], api_results['this-client-max']])
-            return False
-        except ConnectTimeout:
-            log.debug("Proxy too slow for standard site.")
-            store_check_result.apply_async([proxy, "Proxy too slow for standard site.", True, datetime.now(pytz.utc),
-                                            api_results['current'], api_results['max'], api_results['this-client-max']])
-            return False
-
-        # todo: how to check the headers the proxy sends to the client? That requires a server to receive
-        # requests. Proxies wont work if they are not "elite", aka: not revealing the internet user behind them.
-        # otherwise the data will be coupled to a single client.
-
-        log.debug(f"Proxy accessible. Capacity available. {proxy.id}.")
-        store_check_result.apply_async([proxy, "Proxy accessible. Capacity available.", False, datetime.now(pytz.utc),
-                                        api_results['current'], api_results['max'], api_results['this-client-max'],
-                                        int(speed * 1000)])
-        return True
-
-
-@app.task(queue="storage")
-def store_check_result(proxy: ScanProxy, check_result, is_dead: bool, check_result_date,
-                       qualys_capacity_current=-1, qualys_capacity_max=-1,
-                       qualys_capacity_this_client=-1, request_speed_in_ms=-1):
-    """Separates this to storage, so that capacity scans can be performed on another worker."""
-
-    proxy.is_dead = is_dead
-    proxy.check_result = check_result
-    proxy.check_result_date = check_result_date
-    proxy.qualys_capacity_max = qualys_capacity_max
-    proxy.qualys_capacity_current = qualys_capacity_current
-    proxy.qualys_capacity_this_client = qualys_capacity_this_client
-    proxy.request_speed_in_ms = request_speed_in_ms
-    proxy.save()
-
-
 # It's possible a lot of scans start at the same time. In that case the API does not have a notion of how many scans
 # are running (this takes a while). This results in too many requests and still a lot of errors. To avoid that this
 # method has been rate limited to one per minute per worker. This gives a bit of slack.
@@ -420,7 +239,7 @@ def store_check_result(proxy: ScanProxy, check_result, is_dead: bool, check_resu
 # 12 / hour = 1 every 5 minutes. In 30 minutes 6 scans will run at the same time. We used to have 10.
 # 20 / hour = 1 every 3 minutes. In 30 minutes 10 scans will run at the same time.
 # 30 / hours = 1 every 2 minutes. In 30 minutes 15 scans will run at the same time.
-@app.task(queue='qualys', rate_limit='30/h', acks_late=True)
+@app.task(queue='qualys', acks_late=True)
 def qualys_scan_bulk(proxy: ScanProxy, urls: List[Url]):
 
     log.debug('Initiating bulk scan')
@@ -432,30 +251,36 @@ def qualys_scan_bulk(proxy: ScanProxy, urls: List[Url]):
     # Using this solution still uses parallel scans, while not having to rely on the black-box of redis and celery
     # that have caused priority shifts. This is much faster and easier to understand.
 
-    # start one every 60 seconds, a thread can manage itself if too many are running.
-    pool = ThreadPool(25)
+    try:
+        # start one every 60 seconds, a thread can manage itself if too many are running.
+        pool = ThreadPool(25)
 
-    # Even if qualys is down, it will just wait until it knows you can add more... And the retry is infinite
-    # every 30 seconds. So they may be even down for a day and it will continue.
-    for url in urls:
+        # Even if qualys is down, it will just wait until it knows you can add more... And the retry is infinite
+        # every 30 seconds. So they may be even down for a day and it will continue.
+        for url in urls:
 
-        try:
-            api_results = service_provider_status(proxy)
-            while api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
-                log.debug("Running out of capacity, waiting to start new scan.")
-                sleep(70)
+            try:
                 api_results = service_provider_status(proxy)
+                while api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
+                    log.debug("Running out of capacity, waiting to start new scan.")
+                    sleep(70)
+                    api_results = service_provider_status(proxy)
 
-            pool.apply_async(qualys_scan_thread, [proxy, url])
-            sleep(70)
+                pool.apply_async(qualys_scan_thread, [proxy, url])
+                sleep(70)
 
-        except RetryError:
-            log.debug("Retry error. Could not connect to proxy anymore.")
-            store_check_result.apply_async([proxy, "Retry error. Proxy died while scanning.", True,
-                                            datetime.now(pytz.utc)])
+            except RetryError:
+                log.debug("Retry error. Could not connect to proxy anymore.")
+                store_check_result.apply_async([proxy, "Retry error. Proxy died while scanning.", True,
+                                                datetime.now(pytz.utc)])
 
-    pool.close()
-    pool.join()
+        pool.close()
+        pool.join()
+
+    except Exception as e:
+        # catch _anything_ that goes wrong, log it to the sentry/logfile
+        # This is done to still return the scanproxy so it can be released.
+        log.exception(f"Unexpected crash in qualys bulk scan: {e}")
 
     # return the proxy so it can be closed.
     # The scan results are created as separate tasks in the scan thread.
@@ -465,7 +290,8 @@ def qualys_scan_bulk(proxy: ScanProxy, urls: List[Url]):
 # keeps scanning in a loop until it has the data to fire a
 def qualys_scan_thread(proxy, url):
 
-    waiting_time = 60  # seconds until retry, can be increased when queues are full. Max = 180
+    normal_waiting_time = 30
+    error_waiting_time = 60  # seconds until retry, can be increased when queues are full. Max = 180
     max_waiting_time = 360
 
     data = {}
@@ -496,8 +322,11 @@ def qualys_scan_thread(proxy, url):
                 process_qualys_result.apply_async([data, url])
                 return True
             else:
-                log.debug(f"Scan on {url.url} has not yet finished. Waiting {waiting_time} seconds before next update.")
-                sleep(waiting_time)
+                log.debug(
+                    f"Scan on {url.url} has not yet finished. "
+                    f"Waiting {normal_waiting_time} seconds before next update."
+                )
+                sleep(normal_waiting_time)
                 # Don't break out of the loop...
                 # continue
 
@@ -509,7 +338,7 @@ def qualys_scan_thread(proxy, url):
             if error_message == "Running at full capacity. Please try again later.":
                 # this happens all the time, so don't raise an exception but just make a log message.
                 log.info(f"Error occurred while scanning {url.url}: qualys is at full capacity, trying later.")
-                sleep(waiting_time)
+                sleep(error_waiting_time)
                 # Don't break out of the loop...
                 # continue
 
@@ -518,16 +347,16 @@ def qualys_scan_thread(proxy, url):
                 log.error(f"Too many concurrent assessments: Are you running multiple scans from the same IP? "
                           f"Concurrent scans slowly lower the concurrency limit of 25 concurrent scans to zero. "
                           f"Slow down. {data['errors'][0]['message']}")
-                if waiting_time < max_waiting_time:
-                    waiting_time += 60
-                    sleep(waiting_time)
+                if error_waiting_time < max_waiting_time:
+                    error_waiting_time += 60
+                    sleep(error_waiting_time)
                     # continue
 
             if error_message.startswith("Too many concurrent assessments"):
                 log.info(f"Error occurred while scanning {url.url}: Too many concurrent assessments.")
-                if waiting_time < max_waiting_time:
-                    waiting_time += 60
-                    sleep(waiting_time)
+                if error_waiting_time < max_waiting_time:
+                    error_waiting_time += 60
+                    sleep(error_waiting_time)
                     # continue
 
             # All other situations that we did not foresee...
@@ -536,9 +365,8 @@ def qualys_scan_thread(proxy, url):
         # This is an undefined state.
         # scan started without errors. It's probably pending. Reset the waiting time to 60 seconds again as we
         # we want to get the result asap.
-        waiting_time = 60
         log.debug(f"Got to an undefined state on qualys scan on {url.url}. Scan has not finished, and we're retrying.")
-        sleep(waiting_time)
+        sleep(error_waiting_time)
 
 
 @app.task(queue='storage')
@@ -637,82 +465,6 @@ def service_provider_scan_via_api_with_limits(proxy, domain):
               domain,
               proxy
               )
-
-    return {'max': int(response.headers.get('X-Max-Assessments', 25)),
-            'current': int(response.headers.get('X-Current-Assessments', 0)),
-            'this-client-max': int(response.headers.get('X-ClientMaxAssessments', 25)),
-            'data': response.json()}
-
-
-@retry(wait=wait_fixed(30), stop=stop_after_attempt(3), before=before_log(log, logging.INFO))
-def service_provider_status(proxy):
-    # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
-
-    response = requests.get(
-        "https://api.ssllabs.com/api/v2/getStatusCodes",
-        params={},
-        timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
-        headers={
-            'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) "
-                          "Chrome/79.0.3945.130 Safari/537.36",
-            'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,"
-                      "*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-            'Accept-Language': 'en-US,en;q=0.5',
-            'DNT': '1',
-        },
-        proxies={proxy.protocol: proxy.address},
-        cookies={}
-    )
-
-    # inspect to see if there are cookies or other tracking variables.
-    log.debug("Cookies: %s Proxy: %s" % (proxy, response.cookies))
-
-    """
-    Always the same response. This is just used to get a correct response and the available capacity.
-
-     {'statusDetails': {'TESTING_PROTOCOL_INTOLERANCE_399': 'Testing Protocol Intolerance (TLS 1.152)',
-     'PREPARING_REPORT': 'Preparing the report', 'TESTING_SESSION_RESUMPTION': 'Testing session resumption',
-     'RETRIEVING_CERT_V3__NO_SNI': 'Retrieving certificate', 'TESTING_NPN': 'Testing NPN',
-     'RETRIEVING_CERT_V3__SNI_APEX': 'Retrieving certificate', 'TESTING_CVE_2014_0224': 'Testing CVE-2014-0224',
-     'TESTING_CAPABILITIES': 'Determining server capabilities', 'TESTING_CVE_2016_2107': 'Testing CVE-2016-2107',
-     'TESTING_HEARTBLEED': 'Testing Heartbleed', 'TESTING_PROTO_3_3_V2H': 'Testing TLS 1.1 (v2 handshake)',
-     'TESTING_SESSION_TICKETS': 'Testing Session Ticket support', 'VALIDATING_TRUST_PATHS': 'Validating trust paths',
-     'TESTING_RENEGOTIATION': 'Testing renegotiation', 'TESTING_HTTPS': 'Sending one complete HTTPS request',
-     'TESTING_ALPN': 'Determining supported ALPN protocols', 'TESTING_V2H_HANDSHAKE': 'Testing v2 handshake',
-     'TESTING_STRICT_RI': 'Testing Strict Renegotiation', 'TESTING_HANDSHAKE_SIMULATION': 'Simulating handshakes',
-     'TESTING_SUITES_DEPRECATED': 'Testing deprecated cipher suites', 'TESTING_STRICT_SNI': 'Testing Strict SNI',
-     'TESTING_PROTOCOL_INTOLERANCE_499': 'Testing Protocol Intolerance (TLS 2.152)', 'TESTING_PROTO_3_1_V2H':
-     'Testing TLS 1.0 (v2 handshake)', 'TESTING_TLS_VERSION_INTOLERANCE': 'Testing TLS version intolerance',
-     'TESTING_BLEICHENBACHER': 'Testing Bleichenbacher', 'TESTING_PROTOCOL_INTOLERANCE_304':
-     'Testing Protocol Intolerance (TLS 1.3)', 'TESTING_SUITES_BULK': 'Bulk-testing less common cipher suites',
-     'TESTING_BEAST': 'Testing for BEAST', 'TESTING_PROTO_2_0': 'Testing SSL 2.0', 'TESTING_TICKETBLEED':
-     'Testing Ticketbleed', 'BUILDING_TRUST_PATHS': 'Building trust paths', 'TESTING_PROTO_3_1': 'Testing TLS 1.0',
-     'TESTING_PROTO_3_0_V2H': 'Testing SSL 3.0 (v2 handshake)', 'TESTING_PROTO_3_0': 'Testing SSL 3.0',
-     'TESTING_PROTOCOL_INTOLERANCE_300': 'Testing Protocol Intolerance (SSL 3.0)', 'TESTING_PROTOCOL_INTOLERANCE_301':
-     'Testing Protocol Intolerance (TLS 1.0)', 'TESTING_PROTOCOL_INTOLERANCE_302':
-     'Testing Protocol Intolerance (TLS 1.1)', 'TESTING_SUITES_NO_SNI': 'Observed extra suites during simulation,
-     Testing cipher suites without SNI support', 'TESTING_EC_NAMED_CURVES': 'Determining supported named groups',
-     'TESTING_PROTOCOL_INTOLERANCE_303': 'Testing Protocol Intolerance (TLS 1.2)', 'TESTING_OCSP_STAPLING_PRIME':
-     'Trying to prime OCSP stapling', 'TESTING_DROWN': 'Testing for DROWN', 'TESTING_EXTENSION_INTOLERANCE':
-     'Testing Extension Intolerance (might take a while)', 'TESTING_OCSP_STAPLING': 'Testing OCSP stapling',
-     'TESTING_SSL2_SUITES': 'Checking if SSL 2.0 has any ciphers enabled', 'TESTING_SUITES':
-     'Determining available cipher suites', 'TESTING_ECDHE_PARAMETER_REUSE': 'Testing ECDHE parameter reuse',
-     'TESTING_PROTO_3_2_V2H': 'Testing TLS 1.1 (v2 handshake)', 'TESTING_POODLE_TLS': 'Testing POODLE against TLS',
-     'RETRIEVING_CERT_TLS13': 'Retrieving certificate', 'RETRIEVING_CERT_V3__SNI_WWW': 'Retrieving certificate',
-     'TESTING_PROTO_3_4': 'Testing TLS 1.3', 'TESTING_COMPRESSION': 'Testing compression', 'CHECKING_REVOCATION':
-     'Checking for revoked certificates', 'TESTING_SUITE_PREFERENCE': 'Determining cipher suite preference',
-     'TESTING_PROTO_3_2': 'Testing TLS 1.1', 'TESTING_PROTO_3_3': 'Testing TLS 1.2', 'TESTING_LONG_HANDSHAKE':
-     'Testing Long Handshake (might take a while)'}}
-    """
-
-    # log.debug(vars(response))  # extreme debugging
-    # The x-max-assements etc have been removed from the response headers in december 2019.
-    # always return the max available. And make sure the claiming works as intended.
-    log.debug("Status: max: %s, current: %s, this client: %s, proxy: %s",
-              response.headers.get('X-Max-Assessments', 25),
-              response.headers.get('X-Current-Assessments', 0),
-              response.headers.get('X-ClientMaxAssessments', 25),
-              proxy.id)
 
     return {'max': int(response.headers.get('X-Max-Assessments', 25)),
             'current': int(response.headers.get('X-Current-Assessments', 0)),
