@@ -1,16 +1,13 @@
-import asyncio
 import logging
 from datetime import datetime, timedelta
 from http.client import BadStatusLine
 from multiprocessing.pool import ThreadPool
 from time import sleep
-from typing import List
 
 import pytz
 import requests
 from constance import config
 from django.db import transaction
-from proxybroker import Broker
 from requests.exceptions import ConnectTimeout, ProxyError, SSLError
 from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fixed
 from urllib3.exceptions import ProtocolError
@@ -330,42 +327,3 @@ def service_provider_status(proxy):
             'current': int(response.headers.get('X-Current-Assessments', 0)),
             'this-client-max': int(response.headers.get('X-ClientMaxAssessments', 25)),
             'data': response.json()}
-
-
-async def save_new_proxy(proxies):
-    """Save proxies to a file."""
-
-    while True:
-        proxy = await proxies.get()
-        if proxy is None:
-            break
-
-        address = f"{proxy.host}:{proxy.port}"
-        if not ScanProxy.objects.all().filter(address=address).exists():
-            sp = ScanProxy()
-            sp.address = f"{proxy.host}:{proxy.port}"
-            sp.protocol = "https"
-            sp.request_speed_in_ms = round(proxy.avg_resp_time * 1000)
-            sp.save()
-            log.debug(f"Added proxy: {sp}")
-        else:
-            log.debug(f"Proxy with address {address} already exists.")
-
-
-@app.task(queue='storage')
-def find_new_proxies(countries: List = None, amount: int = 5, timeout: float = 0.5, **kwargs):
-    # Warning: this will only work with celery 5. This is not released yet.
-
-    if not countries:
-        countries = ['US', 'DE', 'SE', 'FR', 'NL', 'GB', 'ES', 'DK', 'NO', 'FI', 'BE', 'PT', 'AT', 'PL']
-
-    proxies = asyncio.Queue()
-    broker = Broker(proxies)
-    tasks = asyncio.gather(broker.find(types=['HTTPS'],
-                                       limit=amount,
-                                       countries=countries,
-                                       timeout=timeout,
-                                       ),
-                           save_new_proxy(proxies))
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(tasks)
