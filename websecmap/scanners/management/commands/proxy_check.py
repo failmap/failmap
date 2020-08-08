@@ -3,7 +3,7 @@ import logging
 from django.core.management import BaseCommand
 
 from websecmap.scanners.models import ScanProxy
-from websecmap.scanners.proxy import check_proxy, check_all_proxies
+from websecmap.scanners.proxy import check_all_proxies, check_proxy
 
 log = logging.getLogger(__name__)
 
