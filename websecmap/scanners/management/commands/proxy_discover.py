@@ -3,6 +3,7 @@ import logging
 from django.core.management.base import BaseCommand
 
 import websecmap.scanners.proxy
+import websecmap.scanners.proxy_unsafe
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         try:
-            websecmap.scanners.proxy.find_new_proxies(amount=options['amount'])
+            websecmap.scanners.proxy_unsafe.find_new_proxies(amount=options['amount'])
 
         except KeyboardInterrupt:
             log.info("Received keyboard interrupt. Stopped.")

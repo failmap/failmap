@@ -507,7 +507,7 @@
         "pk": 23,
         "fields": {
             "name": "Import New Proxies (hidden) Does not work with Celery 4.",
-            "task": "websecmap.scanners.proxy.find_new_proxies",
+            "task": "websecmap.scanners.proxy_unsafe.find_new_proxies",
             "interval": null,
             "crontab": 23,
             "solar": null,
