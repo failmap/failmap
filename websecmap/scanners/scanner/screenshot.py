@@ -25,7 +25,7 @@ from io import BytesIO
 
 import pytz
 import requests
-from celery import group
+from celery import Task, group
 from constance import config
 from django.conf import settings
 from django.core.files import File
@@ -81,6 +81,16 @@ def plan_scan(organizations_filter: dict = dict(),
 @app.task(queue='storage')
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="ftp", amount=kwargs.get('amount', 25))
+    return compose_scan_task(urls)
+
+
+def compose_manual_scan_task(organizations_filter: dict = dict(),
+                             urls_filter: dict = dict(),
+                             endpoints_filter: dict = dict(),
+                             **kwargs
+                             ) -> Task:
+
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_scan_task(urls)
 
 
