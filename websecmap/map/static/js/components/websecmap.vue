@@ -21,6 +21,11 @@
                 zoomSnap: 0.1,
                 contextmenu: true,
                 contextmenuWidth: 140,
+
+                // two finger dragging on mobile.
+                // see: https://stackoverflow.com/questions/41622980/how-to-customize-touch-interaction-on-leaflet-maps
+                dragging: !this.L.Browser.mobile,
+
                 contextmenuItems: [
                 {
                     text: 'Show coordinates',
@@ -263,9 +268,9 @@
                                     </td><td style="width: 80%;">
                                         <div style="width: 100%; background-color: gray; height: 15px;">
                                             <template v-for="(value, metric) in metrics">
-                                                <div v-if='metric === "finished"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: darkgreen; color: white; float: left; text-align: center; vertical-align: middle; height: 15px;'">{{value}}</div>
-                                                <div v-if='metric === "requested"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: lightgreen; color: white; float: left; text-align: center; vertical-align: middle;  height: 15px;'">{{value}}</div>
-                                                <div v-if='metric === "picked_up"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: orange; color: white; float: left; text-align: center; vertical-align: middle;  height: 15px;'">{{value}}</div>
+                                                <div v-if='metric === "finished"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: darkgreen; color: white; float: left; text-align: center; vertical-align: middle; height: 15px; font-size: 0.7em;'">{{value}}</div>
+                                                <div v-if='metric === "requested"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: lightgreen; color: white; float: left; text-align: center; vertical-align: middle;  height: 15px;  font-size: 0.7em;'">{{value}}</div>
+                                                <div v-if='metric === "picked_up"' :style="'width: ' + Math.floor((value / metrics['total']) * 100) + '%; background-color: orange; color: white; float: left; text-align: center; vertical-align: middle;  height: 15px; font-size: 0.7em;'">{{value}}</div>
                                             </template>
                                         </div>
                                     </td>
