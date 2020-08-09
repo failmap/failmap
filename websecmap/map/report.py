@@ -1,7 +1,7 @@
 import logging
 from collections import OrderedDict
 from copy import deepcopy
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import List
 
 import pytz
@@ -13,8 +13,9 @@ from django.db.models import Count
 from websecmap.celery import Task, app
 from websecmap.map.logic.map import get_map_data, get_reports_by_ids
 from websecmap.map.logic.map_health import update_map_health_reports
-from websecmap.map.models import (Configuration, HighLevelStatistic, MapDataCache,
-                                  OrganizationReport, VulnerabilityStatistic)
+from websecmap.map.map_configs import filter_map_configs
+from websecmap.map.models import (HighLevelStatistic, MapDataCache, OrganizationReport,
+                                  VulnerabilityStatistic)
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.reporting.report import (START_DATE, aggegrate_url_rating_scores,
                                         get_allowed_to_report, get_latest_urlratings_fast,
@@ -464,19 +465,6 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
                     log.exception(a)
 
 
-def filter_map_configs(countries: List = None, organization_types: List = None):
-    configs = Configuration.objects.all()
-    log.debug("filter for countries: %s" % countries)
-    log.debug("filter for organization_types: %s" % organization_types)
-    configs = configs.filter(is_reported=True)
-    if countries:
-        configs = configs.filter(country__in=countries)
-    if organization_types:
-        configs = configs.filter(organization_type__name__in=organization_types)
-    return configs.order_by('display_order').values('country', 'organization_type__name',
-                                                    'organization_type', 'organization_type__id')
-
-
 @app.task(queue='reporting')
 def calculate_high_level_stats(days: int = 1, countries: List = None, organization_types: List = None):
     log.info("Creating high_level_stats")
@@ -839,15 +827,14 @@ def recreate_organization_reports(organizations: List):
     for organization in organizations:
         log.info('Adding rating for organization %s', organization)
 
-        # Given yuou're rebuilding, you have to delete all previous ratings:
+        # Given this is a rebuild, delete all previous reports;
         OrganizationReport.objects.all().filter(organization=organization).delete()
 
-        # and then rebuild the ratings per moment. This is not really fast.
-        # done: reduce the number of significants moments to be weekly in the past, which will safe a lot of time
-        # not needed: the rebuild already takes a lot of time, so why bother with that extra hour or so.
-
+        # and then rebuild the ratings per moment, which is a maximum of one per day.
         urls = Url.objects.filter(organization__in=organizations)
         moments, happenings = significant_moments(urls=urls, reported_scan_types=get_allowed_to_report())
+
+        moments = reduce_to_days(moments)
         for moment in moments:
             create_organization_report_on_moment(organization, moment)
 
@@ -858,8 +845,20 @@ def recreate_organization_reports(organizations: List):
         # empty which does not make sense. Therefore we only add a default rating if there is really nothing else.
         if not moments:
             # Make sure the organization has the default rating
-
             default_organization_rating(organizations=[organization])
+
+
+def reduce_to_days(moments: List[datetime]) -> List[datetime]:
+
+    # reduce to only the dates.
+    reduced_datetimes: List[date] = list(set([moment.date() for moment in moments]))
+
+    # pick the first possible moment on the date:
+    as_datetimes = [datetime(
+        year=moment.year, month=moment.month, day=moment.day, tzinfo=pytz.utc
+    ) for moment in reduced_datetimes]
+
+    return as_datetimes
 
 
 @app.task(queue='reporting')

@@ -46,6 +46,8 @@ def compose_task(
         if not urls:
             continue
 
+        # Do NOT update the statistics also. This can take long and might not have a desired effect.
+        # those updates have to be called explicitly.
         tasks.append(recreate_url_reports.si(urls)
                      | recreate_organization_reports.si([organization]))
 

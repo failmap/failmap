@@ -4,8 +4,6 @@ from argparse import ArgumentTypeError
 from django.core.management.base import BaseCommand
 from iso3166 import countries_by_alpha2
 
-from websecmap.map.report import calculate_high_level_stats
-
 log = logging.getLogger(__package__)
 
 
@@ -51,10 +49,6 @@ class CalculateCommand(BaseCommand):
             log.debug("No command given for calculations")
 
         CalculateCommand.command(days=days, countries=countries, organization_types=organization_type)
-
-
-class Command(CalculateCommand):
-    CalculateCommand.command = calculate_high_level_stats
 
 
 def check_positive(value):

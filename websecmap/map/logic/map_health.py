@@ -7,6 +7,7 @@ import pytz
 
 from websecmap.celery import app
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
+from websecmap.map.map_configs import filter_map_configs, retrieve
 from websecmap.map.models import Configuration, MapHealthReport, OrganizationReport
 from websecmap.organizations.models import Organization
 
@@ -22,41 +23,55 @@ This grade gets stored inside a model related to a certain map, so the metric ca
 """
 
 
-@app.task(queue="storage")
-def update_map_health_reports(published_scan_types):
-    map_configurations = Configuration.objects.all()
+@app.task(queue="reporting")
+def update_map_health_reports(published_scan_types,
+                              days: int = 366, countries: List = None, organization_types: List = None):
+
+    map_configurations = filter_map_configs(countries=countries, organization_types=organization_types)
     for map_configuration in map_configurations:
-        total_outdated = []
-        total_good = []
+        organization_type_id = map_configuration['organization_type']
+        country = map_configuration['country']
+
         organizations_on_map = Organization.objects.all().filter(
-            country=map_configuration.country, type=map_configuration.organization_type)
-        for organization in organizations_on_map:
-            print(f"Creating health report of {organization}")
-            latest_report = OrganizationReport.objects.all().filter(organization=organization).last()
-            if not latest_report:
-                continue
-            ratings_outdated, ratings_good = split_ratings_between_good_and_bad(latest_report, OUTDATED_HOURS)
-            total_outdated += ratings_outdated
-            total_good += ratings_good
-        report = \
-            create_health_report(total_outdated, total_good, published_scan_types)
-        # Update reports of a certain day. For example when the report for a single day is re-generated.
-        now = datetime.now(pytz.utc)
-        hr = MapHealthReport.objects.all().filter(
-            map_configuration=map_configuration,
-            at_when__year=now.year,
-            at_when__month=now.month,
-            at_when__day=now.day,
-        ).first()
-        if not hr:
-            hr = MapHealthReport()
-        hr.map_configuration = map_configuration
-        hr.at_when = datetime.now(pytz.utc)
-        hr.percentage_up_to_date = report['percentage_up_to_date']
-        hr.percentage_out_of_date = report['percentage_out_of_date']
-        hr.outdate_period_in_hours = report['outdate_period_in_hours']
-        hr.detailed_report = report
-        hr.save()
+            country=country, type=organization_type_id)
+
+        for days_back in list(reversed(range(0, days))):
+            total_outdated = []
+            total_good = []
+            old_date = datetime.now(pytz.utc) - timedelta(days=days_back)
+
+            for organization in organizations_on_map:
+                print(f"Creating health report of {organization} at {old_date}.")
+                latest_report = OrganizationReport.objects.all().filter(
+                    organization=organization,
+                    at_when__lte=old_date
+                ).first()
+
+                if not latest_report:
+                    continue
+
+                ratings_outdated, ratings_good = split_ratings_between_good_and_bad(latest_report, OUTDATED_HOURS)
+                total_outdated += ratings_outdated
+                total_good += ratings_good
+
+            report = \
+                create_health_report(total_outdated, total_good, published_scan_types)
+            # Update reports of a certain day. For example when the report for a single day is re-generated.
+            hr = MapHealthReport.objects.all().filter(
+                map_configuration=retrieve(country, organization_type_id),
+                at_when__year=old_date.year,
+                at_when__month=old_date.month,
+                at_when__day=old_date.day,
+            ).first()
+            if not hr:
+                hr = MapHealthReport()
+            hr.map_configuration = retrieve(country, organization_type_id)
+            hr.at_when = old_date
+            hr.percentage_up_to_date = report['percentage_up_to_date']
+            hr.percentage_out_of_date = report['percentage_out_of_date']
+            hr.outdate_period_in_hours = report['outdate_period_in_hours']
+            hr.detailed_report = report
+            hr.save()
 
 
 def split_ratings_between_good_and_bad(report: OrganizationReport, hours: int = OUTDATED_HOURS) -> Tuple[
