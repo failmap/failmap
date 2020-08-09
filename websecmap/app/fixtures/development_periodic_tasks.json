@@ -482,11 +482,11 @@
         "pk": 20,
         "fields": {
             "name": "&#x1F501; Progress running internet.nl scans (hidden)",
-            "task": "websecmap.scanners.scanner.internet_nl_v2_websecmap.check_running_internet_nl_scans",
+            "task": "websecmap.app.models.create_function_job",
             "interval": null,
             "crontab": 33,
             "solar": null,
-            "args": "[]",
+            "args": "[\"websecmap.scanners.scanner.internet_nl_v2_websecmap.check_running_internet_nl_scans\"]",
             "kwargs": "{}",
             "queue": "storage",
             "exchange": null,
