@@ -51,7 +51,8 @@ def claim_proxy(tracing_label=""):
 
                     # proxies that are too slow tend to have timeout errors
                     # self hosted proxies are between 150 and 300 ms.
-                    request_speed_in_ms__lte=2000
+                    # more proxy checks at the same time make slower results... disabled for now
+                    # request_speed_in_ms__lte=2000
                 ).order_by('request_speed_in_ms').first()
 
                 if proxy:

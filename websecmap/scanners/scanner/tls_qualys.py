@@ -194,7 +194,9 @@ def compose_planned_scan_task(**kwargs) -> Task:
         currently_used_in_tls_qualys_scan=False,
         manually_disabled=False,
         request_speed_in_ms__gte=1,
-        request_speed_in_ms__lte=2000,
+        # the upper speed should be configurable. When running N proxy checks at a time theywill be slower.
+        # more checks at the same time = slower > 3000ms.
+        # request_speed_in_ms__lte=2000,
     ).order_by('request_speed_in_ms')
 
     # size for the proxies and such is 25 / each.
