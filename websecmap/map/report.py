@@ -2,7 +2,8 @@ import logging
 from collections import OrderedDict
 from copy import deepcopy
 from datetime import date, datetime, timedelta
-from typing import List
+from typing import List, Tuple
+import calendar
 
 import pytz
 import simplejson as json
@@ -106,16 +107,18 @@ def compose_task(
         tasks.append(calculate_vulnerability_statistics.si(1, organizations_filter['country__in']))
         tasks.append(calculate_map_data.si(1, organizations_filter['country__in']))
         tasks.append(calculate_high_level_stats.si(1, organizations_filter['country__in']))
+        tasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1, organizations_filter['country__in']))
     elif organizations_filter.get('country', None):
         tasks.append(calculate_vulnerability_statistics.si(1, [organizations_filter['country']]))
         tasks.append(calculate_map_data.si(1, [organizations_filter['country']]))
         tasks.append(calculate_high_level_stats.si(1, [organizations_filter['country']]))
+        tasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1, [organizations_filter['country']]))
     else:
         tasks.append(calculate_vulnerability_statistics.si(1))
         tasks.append(calculate_map_data.si(1))
         tasks.append(calculate_high_level_stats.si(1))
+        tasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1))
 
-    tasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES))
 
     task = group(tasks)
 
@@ -834,7 +837,7 @@ def recreate_organization_reports(organizations: List):
         urls = Url.objects.filter(organization__in=organizations)
         moments, happenings = significant_moments(urls=urls, reported_scan_types=get_allowed_to_report())
 
-        moments = reduce_to_days(moments)
+        moments = reduce_to_save_data(moments)
         for moment in moments:
             create_organization_report_on_moment(organization, moment)
 
@@ -848,8 +851,72 @@ def recreate_organization_reports(organizations: List):
             default_organization_rating(organizations=[organization])
 
 
-def reduce_to_days(moments: List[datetime]) -> List[datetime]:
+def reduce_to_save_data(moments: List[datetime]) -> List[datetime]:
 
+    # reduce to only the dates, easier to work with.
+    moments = reduce_to_days(moments)
+
+    results = []
+    # get the days in this year:
+    some_day_a_year_ago = datetime.now(pytz.utc) - timedelta(days=365)
+    some_day_a_two_years_ago = datetime.now(pytz.utc) - timedelta(days=730)
+
+    to_reduce_to_days = [moment for moment in moments if moment > some_day_a_year_ago]
+    # log.debug(f"To days: {to_reduce_to_days}")
+    results += reduce_to_days(to_reduce_to_days)
+
+    to_reduce_to_weeks = [moment for moment in moments if
+                          # not simplyfying the chain expression, as i can't understand what is being said clear enough
+                          moment > some_day_a_two_years_ago and moment <= some_day_a_year_ago]
+    # log.debug(f"To weeks: {to_reduce_to_weeks}")
+    results += reduce_to_weeks(to_reduce_to_weeks)
+
+    to_reduce_to_months = [moment for moment in moments if moment <= some_day_a_two_years_ago]
+    # log.debug(f"To months: {to_reduce_to_weeks}")
+    results += reduce_to_months(to_reduce_to_months)
+
+    # make sure the last possible moment is chosen on these moments:
+    return set_dates_to_last_possible_moment(results)
+
+
+def reduce_to_months(moments: List[datetime]) -> List[datetime]:
+    reduced_datetimes: List[datetime] = []
+
+    # last moment of the month is good enough, that is at least a point there will be data.
+    # https://stackoverflow.com/questions/42950/how-to-get-the-last-day-of-the-month
+    for moment in moments:
+        (first_weekday, amount_of_days_in_month) = calendar.monthrange(moment.year, moment.month)
+        if datetime(moment.year, moment.month, amount_of_days_in_month, tzinfo=pytz.utc) not in reduced_datetimes:
+            reduced_datetimes.append(datetime(moment.year, moment.month, amount_of_days_in_month, tzinfo=pytz.utc))
+
+    return reduced_datetimes
+
+
+def reduce_to_weeks(moments: List[datetime]) -> List[datetime]:
+    reduced_datetimes: List[datetime] = []
+    processed_weeks_and_years: List[Tuple[int, int]] = []
+
+    for moment in moments:
+        # https://stackoverflow.com/questions/2600775/how-to-get-week-number-in-python
+        week = moment.isocalendar()[1]
+        if (week, moment.year) not in processed_weeks_and_years:
+            processed_weeks_and_years.append((week, moment.year))
+            reduced_datetimes.append(datetime_to_last_day_of_the_week(moment))
+
+    return reduced_datetimes
+
+
+def datetime_to_last_day_of_the_week(some_datetime: datetime) -> datetime:
+    # https://stackoverflow.com/questions/9847213/how-do-i-get-the-day-of-week-given-a-date
+    weekday = some_datetime.weekday()
+    if weekday < 7:
+        add_days = 7 - weekday  # 7 - 4 = 3
+        return some_datetime + timedelta(days=add_days)
+
+    return some_datetime
+
+
+def reduce_to_days(moments: List[datetime]) -> List[datetime]:
     # reduce to only the dates.
     reduced_datetimes: List[date] = list(set([moment.date() for moment in moments]))
 
@@ -859,6 +926,14 @@ def reduce_to_days(moments: List[datetime]) -> List[datetime]:
     ) for moment in reduced_datetimes]
 
     return as_datetimes
+
+
+def set_dates_to_last_possible_moment(moments: List[datetime]) -> List[datetime]:
+    new_moments = []
+    for moment in moments:
+        new_moments.append(datetime(moment.year, moment.month, moment.day, 23, 59, 59, 999999, tzinfo=pytz.utc))
+
+    return new_moments
 
 
 @app.task(queue='reporting')
