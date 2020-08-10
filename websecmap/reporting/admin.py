@@ -7,6 +7,16 @@ from websecmap.reporting import models
 
 @admin.register(models.UrlReport)
 class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    # do NOT load the calculation field, as that will be slow.
+    # https://stackoverflow.com/questions/34774028/how-to-ignore-loading-huge-fields-in-django-admin-list-display
+    def get_queryset(self, request):
+        qs = super(UrlRatingAdmin, self).get_queryset(request)
+
+        # tell Django to not retrieve mpoly field from DB
+        qs = qs.defer('calculation')
+        return qs
+
     def inspect_url(self, obj):
         return format_html('<a href="../../organizations/url/{id}/change">inspect</a>',
                            id=format(obj.url_id))

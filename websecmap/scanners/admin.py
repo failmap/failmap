@@ -127,11 +127,22 @@ class ScreenshotAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.EndpointGenericScan)
 class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    def get_queryset(self, request):
+        qs = super(EndpointGenericScanAdmin, self).get_queryset(request)
+
+        # Because the endpoint, to display, needs url data, it will try to retrieve that for every
+        # record. Here we already include those results, so the page loads 10x faster (at okay speeds now)
+        qs = qs.prefetch_related('endpoint', 'endpoint__url')
+
+        return qs
+
     list_display = ('endpoint', 'type', 'rating',
-                    'explanation', 'last_scan_moment', 'rating_determined_on',
+                    'last_scan_moment', 'rating_determined_on',
                     'comply_or_explain_is_explained', 'explain', 'is_the_latest_scan')
     search_fields = ('endpoint__url__url', 'type', 'rating',
                      'explanation', 'last_scan_moment', 'rating_determined_on')
+
     list_filter = ['endpoint__url__organization__country', 'endpoint__url__organization__type__name',
                    'endpoint__url__is_dead',
                    ('endpoint', RelatedFieldAjaxListFilter), 'type', 'rating',

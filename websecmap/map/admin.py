@@ -427,6 +427,16 @@ class LandingPageAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.OrganizationReport)
 class OrganizationReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
+    # do NOT load the calculation field, as that will be slow.
+    # https://stackoverflow.com/questions/34774028/how-to-ignore-loading-huge-fields-in-django-admin-list-display
+    def get_queryset(self, request):
+        qs = super(OrganizationReportAdmin, self).get_queryset(request)
+
+        # tell Django to not retrieve mpoly field from DB
+        qs = qs.defer('calculation')
+        return qs
+
+
     def inspect_organization(self, obj):
         return format_html(
             '<a href="../../organizations/organization/{id}/change">inspect organization</a>',
