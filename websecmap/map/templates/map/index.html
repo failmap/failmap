@@ -86,12 +86,113 @@
     {% endcompress %}{% endif %}
 
     <script type="text/javascript" src="/static/js/translations/websecmap.js"></script>
+    <script type="text/javascript" src="/static/js/translations/internet_nl.js"></script>
 
     <script>
         // Registry Sentry for error reporting
         {% if sentry_token %}
             Raven.config('{{ sentry_token }}', {release: '{{ version }}'}).install();
         {%  endif %}
+
+        const internet_nl_field_mapping = {
+            internet_nl_web_tls: 'test_sitetls',
+            internet_nl_web_dnssec: 'test_sitednssec',
+            internet_nl_web_ipv6: 'test_siteipv6',
+
+            internet_nl_mail_dashboard_tls: 'test_mailtls',
+            internet_nl_mail_dashboard_auth: 'test_mailauth',
+            internet_nl_mail_dashboard_dnssec: 'test_maildnssec',
+            internet_nl_mail_dashboard_ipv6: 'test_mailipv6',
+
+            internet_nl_web_appsecpriv: 'test_siteappsecpriv',
+            internet_nl_web_appsecpriv_csp: 'detail_web_appsecpriv_http_csp',
+            internet_nl_web_appsecpriv_referrer_policy: 'detail_web_appsecpriv_http_referrer_policy',
+            internet_nl_web_appsecpriv_x_content_type_options: 'detail_web_appsecpriv_http_x_content_type',
+            internet_nl_web_appsecpriv_x_frame_options: 'detail_web_appsecpriv_http_x_frame',
+            internet_nl_web_appsecpriv_x_xss_protection: 'detail_web_appsecpriv_http_x_xss',
+            internet_nl_web_https_cert_domain: 'detail_web_tls_cert_hostmatch',
+            internet_nl_web_https_http_redirect: 'detail_web_tls_https_forced',
+            internet_nl_web_https_cert_chain: 'detail_web_tls_cert_trust',
+            internet_nl_web_https_tls_version: 'detail_web_tls_version',
+            internet_nl_web_https_tls_clientreneg: 'detail_web_tls_renegotiation_client',
+            internet_nl_web_https_tls_ciphers: 'detail_web_tls_ciphers',
+            internet_nl_web_https_http_available: 'detail_web_tls_https_exists',
+            internet_nl_web_https_dane_exist: 'detail_web_tls_dane_exists',
+            internet_nl_web_https_http_compress: 'detail_web_tls_http_compression',
+            internet_nl_web_https_http_hsts: 'detail_web_tls_https_hsts',
+            internet_nl_web_https_tls_secreneg: 'detail_web_tls_renegotiation_secure',
+            internet_nl_web_https_dane_valid: 'detail_web_tls_dane_valid',
+            internet_nl_web_https_cert_pubkey: 'detail_web_tls_cert_pubkey',
+            internet_nl_web_https_cert_sig: 'detail_web_tls_cert_signature',
+            internet_nl_web_https_tls_compress: 'detail_web_tls_compression',
+            internet_nl_web_https_tls_keyexchange: 'detail_web_tls_fs_params',
+            internet_nl_web_dnssec_valid: 'detail_web_dnssec_valid',
+            internet_nl_web_dnssec_exist: 'detail_web_dnssec_exists',
+            internet_nl_web_ipv6_ws_similar: 'detail_web_ipv6_web_ipv46',
+            internet_nl_web_ipv6_ws_address: 'detail_web_ipv6_web_aaaa',
+            internet_nl_web_ipv6_ns_reach: 'detail_web_mail_ipv6_ns_reach',
+            internet_nl_web_ipv6_ws_reach: 'detail_web_ipv6_web_reach',
+            internet_nl_web_ipv6_ns_address: 'detail_web_mail_ipv6_ns_aaaa',
+
+            // added with api 2.0.0
+            internet_nl_web_https_tls_cipherorder: 'detail_web_tls_cipher_order',
+            internet_nl_web_https_tls_0rtt: 'detail_web_tls_zero_rtt',
+            internet_nl_web_https_tls_ocsp: 'detail_web_tls_ocsp_stapling',
+            internet_nl_web_https_tls_keyexchangehash: 'detail_web_tls_kex_hash_func',
+
+            internet_nl_mail_starttls_cert_domain: 'detail_mail_tls_cert_hostmatch',
+            internet_nl_mail_starttls_tls_version: 'detail_mail_tls_version',
+            internet_nl_mail_starttls_cert_chain: 'detail_mail_tls_cert_trust',
+            internet_nl_mail_starttls_tls_available: 'detail_mail_tls_starttls_exists',
+            internet_nl_mail_starttls_tls_clientreneg: 'detail_mail_tls_renegotiation_client',
+            internet_nl_mail_starttls_tls_ciphers: 'detail_mail_tls_ciphers',
+            internet_nl_mail_starttls_dane_valid: 'detail_mail_tls_dane_valid',
+            internet_nl_mail_starttls_dane_exist: 'detail_mail_tls_dane_exists',
+            internet_nl_mail_starttls_tls_secreneg: 'detail_mail_tls_renegotiation_secure',
+            internet_nl_mail_starttls_dane_rollover: 'detail_mail_tls_dane_rollover',
+            internet_nl_mail_starttls_cert_pubkey: 'detail_mail_tls_cert_pubkey',
+            internet_nl_mail_starttls_cert_sig: 'detail_mail_tls_cert_signature',
+            internet_nl_mail_starttls_tls_compress: 'detail_mail_tls_compression',
+            internet_nl_mail_starttls_tls_keyexchange: 'detail_mail_tls_fs_params',
+            internet_nl_mail_auth_dmarc_policy: 'detail_mail_auth_dmarc_policy',
+            internet_nl_mail_auth_dmarc_exist: 'detail_mail_auth_dmarc',
+            internet_nl_mail_auth_spf_policy: 'detail_mail_auth_spf_policy',
+            internet_nl_mail_auth_dkim_exist: 'detail_mail_auth_dkim',
+            internet_nl_mail_auth_spf_exist: 'detail_mail_auth_spf',
+            internet_nl_mail_dnssec_mailto_exist: 'detail_mail_dnssec_exists',
+            internet_nl_mail_dnssec_mailto_valid: 'detail_mail_dnssec_valid',
+            internet_nl_mail_dnssec_mx_valid: 'detail_mail_dnssec_mx_valid',
+            internet_nl_mail_dnssec_mx_exist: 'detail_mail_dnssec_mx_exists',
+            internet_nl_mail_ipv6_mx_address: 'detail_mail_ipv6_mx_aaaa',
+            internet_nl_mail_ipv6_mx_reach: 'detail_mail_ipv6_mx_reach',
+            internet_nl_mail_ipv6_ns_reach: 'detail_web_mail_ipv6_ns_reach',
+            internet_nl_mail_ipv6_ns_address: 'detail_web_mail_ipv6_ns_aaaa',
+
+            // added with api2.0
+            internet_nl_mail_starttls_tls_cipherorder: 'detail_mail_tls_cipher_order',
+            internet_nl_mail_starttls_tls_keyexchangehash: 'detail_mail_tls_kex_hash_func',
+            internet_nl_mail_starttls_tls_0rtt: 'detail_mail_tls_zero_rtt',
+        };
+
+        // categories are translated with _passed_summary or _failed_summary. The rest with their label. Should be in
+        // the retrieved translations anyway.
+        function import_field_translations(language){
+            let mapping = {};
+            for (let key of Object.keys(internet_nl_field_mapping)) {
+                mapping[key] = internet_nl_messages[language].internet_nl[internet_nl_field_mapping[key] + '_label']
+            }
+            return mapping;
+        }
+
+        function interpolate_translations(){
+            // messages here, is the translation that already exists, info from internet_nl_messages is added.
+            let translation = messages;
+
+            translation.nl = Object.assign(translation.nl, import_field_translations('nl'));
+            translation.en = Object.assign(translation.en, import_field_translations('en'));
+
+            return translation;
+        }
 
         // support for week numbers in javascript
         // https://stackoverflow.com/questions/7765767/show-week-number-with-javascript
