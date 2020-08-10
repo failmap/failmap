@@ -1,10 +1,11 @@
-from datetime import datetime
 import random
+from datetime import datetime
 
 import pytz
 from freezegun import freeze_time
 
-from websecmap.map.report import reduce_to_days, reduce_to_weeks, reduce_to_months, reduce_to_save_data
+from websecmap.map.report import (reduce_to_days, reduce_to_months, reduce_to_save_data,
+                                  reduce_to_weeks)
 
 
 def test_reduce_to_days():
@@ -150,4 +151,3 @@ def test_reduce_to_save_data():
         ])
 
         assert reduce_to_save_data([]) == []
-
