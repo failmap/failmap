@@ -1,9 +1,9 @@
 import logging
 
 from websecmap.app.management.commands._private import ScannerTaskCommand
-from websecmap.scanners.scanner import (dnssec, dummy, ftp, internet_nl_v2_mail,
-                                        internet_nl_v2_web, onboard, plain_http,
-                                        screenshot, security_headers, tls_qualys)
+from websecmap.scanners.scanner import (dnssec, dummy, ftp, internet_nl_v2_mail, internet_nl_v2_web,
+                                        onboard, plain_http, screenshot, security_headers,
+                                        tls_qualys)
 
 log = logging.getLogger(__name__)
 
