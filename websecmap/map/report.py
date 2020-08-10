@@ -1,9 +1,9 @@
+import calendar
 import logging
 from collections import OrderedDict
 from copy import deepcopy
 from datetime import date, datetime, timedelta
 from typing import List, Tuple
-import calendar
 
 import pytz
 import simplejson as json
@@ -118,7 +118,6 @@ def compose_task(
         tasks.append(calculate_map_data.si(1))
         tasks.append(calculate_high_level_stats.si(1))
         tasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1))
-
 
     task = group(tasks)
 
