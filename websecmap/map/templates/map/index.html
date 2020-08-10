@@ -176,16 +176,50 @@
 
         // categories are translated with _passed_summary or _failed_summary. The rest with their label. Should be in
         // the retrieved translations anyway.
+        // todo: why not convert these files instead of re-converting them every page load?
         function import_field_translations(language){
+
             let mapping = {};
             for (let key of Object.keys(internet_nl_field_mapping)) {
-                mapping[key] = internet_nl_messages[language].internet_nl[internet_nl_field_mapping[key] + '_label']
+                let subfields = get_subtranslations(internet_nl_field_mapping[key]);
+                subfields.forEach((subfield) => {
+                    mapping[key + subfield] = internet_nl_messages[language].internet_nl[internet_nl_field_mapping[key] + subfield]
+                    // console.log(`Creating mapping for ${key + subfield}. subfield: ${subfield} with data from: ${internet_nl_field_mapping[key] + subfield}`)
+                })
             }
             return mapping;
         }
 
+
+        const all_internet_nl_fields = Object.keys(internet_nl_messages['en'].internet_nl)
+
+        function get_subtranslations(find_field_name) {
+            /*
+            * detail_mail_tls_cipher_order_exp
+                detail_mail_tls_cipher_order_label
+                detail_mail_tls_cipher_order_tech_table
+                detail_mail_tls_cipher_order_verdict_bad
+                detail_mail_tls_cipher_order_verdict_good
+                detail_mail_tls_cipher_order_verdict_na
+                detail_mail_tls_cipher_order_verdict_seclevel_bad
+                detail_mail_tls_cipher_order_verdict_warning
+            * */
+            // example input: detail_mail_tls_cipher_order
+            // example output: _label, _tech_table, _verdict_bad, _vestartsWitchrdict_good, _verdict_na, _verdict_seclevel_bad, ...
+            subfields = [];
+
+            all_internet_nl_fields.forEach((field_name) => {
+                if (field_name.startsWith(find_field_name)) {
+                    subfields.push(field_name.replace(find_field_name, ""))
+                }
+            })
+
+            return subfields;
+        }
+
         function interpolate_translations(){
             // messages here, is the translation that already exists, info from internet_nl_messages is added.
+            // note that these translations are not complete: you'll have to add _label and _verdict etc to the
             let translation = messages;
 
             translation.nl = Object.assign(translation.nl, import_field_translations('nl'));
@@ -884,7 +918,7 @@
             // which is strange. Translations themselves work fine.
             silentFallbackWarn: true,
             // it's required this is called messages.
-            messages,
+            messages: interpolate_translations(),
         });
 
         function set_language(language_code){
