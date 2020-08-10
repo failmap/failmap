@@ -39,7 +39,7 @@ def filter_scan(organizations_filter: dict = dict(),
 
 @app.task(queue='storage')
 def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="internet_nl_v2_mail", amount=kwargs.get('amount', 500))
+    urls = plannedscan.pickup(activity="scan", scanner="internet_nl_mail", amount=kwargs.get('amount', 500))
     return compose_scan_task(urls)
 
 
@@ -54,7 +54,7 @@ def plan_scan(organizations_filter: dict = dict(),
         return group()
 
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    plannedscan.request(activity="scan", scanner="internet_nl_v2_mail", urls=urls)
+    plannedscan.request(activity="scan", scanner="internet_nl_mail", urls=urls)
 
 
 def compose_scan_task(urls):
@@ -62,7 +62,7 @@ def compose_scan_task(urls):
         return group()
 
     return group([initialize_scan.si("mail", urls)
-                  | plannedscan.finish_multiple.si('scan', 'internet_nl_v2_mail', urls)])
+                  | plannedscan.finish_multiple.si('scan', 'internet_nl_mail', urls)])
 
 
 def compose_manual_scan_task(

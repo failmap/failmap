@@ -84,6 +84,7 @@ const messages = {
 
 
         // http_security_header_strict_transport_security
+        "security_headers": "HTTP Security Headers",
         "http_security_headers": "HTTP Security Headers",
         "http_security_header_strict_transport_security": "Website: Strict-Transport-Security Header (HSTS)",
         "Strict-Transport-Security": "Strict-Transport-Security", // not used?

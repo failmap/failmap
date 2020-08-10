@@ -47,11 +47,7 @@ def update_map_health_reports(published_scan_types,
             log.debug(f"Creating health report of {days_back} days back.")
             for organization in organizations_on_map:
                 # log.debug(f"Creating health report of {organization} at {old_date}.")
-                latest_report = OrganizationReport.objects.all().filter(
-                    organization=organization,
-                    at_when__lte=old_date
-                ).order_by('-at_when').first()
-
+                latest_report = get_latest_report_of_organization(organization, old_date)
                 if not latest_report:
                     continue
 
@@ -81,6 +77,28 @@ def update_map_health_reports(published_scan_types,
             hr.save()
 
 
+def get_outdated_ratings(organizations: List[Organization]) -> List[Dict[str, Any]]:
+    total_outdated = []
+
+    for organization in organizations:
+        # log.debug(f"Creating health report of {organization} at {old_date}.")
+        latest_report = get_latest_report_of_organization(organization, datetime.now(pytz.utc))
+        if not latest_report:
+            continue
+
+        ratings_outdated, ratings_good = split_ratings_between_good_and_bad(latest_report, OUTDATED_HOURS)
+        total_outdated += ratings_outdated
+
+    return total_outdated
+
+
+def get_latest_report_of_organization(organization, at_when):
+    return OrganizationReport.objects.all().filter(
+        organization=organization,
+        at_when__lte=at_when
+    ).order_by('-at_when').first()
+
+
 def split_ratings_between_good_and_bad(report: OrganizationReport, hours: int = OUTDATED_HOURS) -> Tuple[
         List[Dict[str, Any]], List[Dict[str, Any]]]:
     now = datetime.now(pytz.utc)
@@ -91,12 +109,18 @@ def split_ratings_between_good_and_bad(report: OrganizationReport, hours: int = 
         # endpoint ratings
         for endpoint in url['endpoints']:
             for rating in endpoint['ratings']:
+                # make sure to be able to figure out what url is causing it, so it's easier to reschedule
+                # a scan for this finding.
+                rating['url'] = url['url']
                 if dateutil.parser.isoparse(rating['last_scan']) < a_while_ago:
                     infractions.append(rating)
                 else:
                     good.append(rating)
         # url ratings (dnssec etc)
         for rating in url['ratings']:
+            # make sure to be able to figure out what url is causing it, so it's easier to reschedule
+            # a scan for this finding.
+            rating['url'] = url['url']
             if dateutil.parser.isoparse(rating['last_scan']) < a_while_ago:
                 infractions.append(rating)
             else:

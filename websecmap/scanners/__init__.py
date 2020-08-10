@@ -36,6 +36,9 @@ SCANNERS = [
         'can verify endpoints': True,
         'can discover urls': False,
         'can verify urls': False,
+        'can scan endpoints': True,
+        'can scan urls': False,
+        'needs results from': ['ftp'],
         'creates endpoint scan types': ['ftp'],
         'creates url scan types': [],
     },
@@ -47,6 +50,9 @@ SCANNERS = [
         'can verify endpoints': True,
         'can discover urls': False,
         'can verify urls': False,
+        'can scan endpoints': True,
+        'can scan urls': False,
+        'needs results from': ['http'],
         'creates endpoint scan types': ['plain_https'],
         'creates url scan types': [],
     },
@@ -58,7 +64,10 @@ SCANNERS = [
         'can verify endpoints': False,
         'can discover urls': False,
         'can verify urls': False,
-        'creates endpoint scan types': [],
+        'can scan endpoints': False,
+        'can scan urls': True,
+        'needs results from': [],
+        'creates endpoint scan types': ['subdomains'],
         'creates url scan types': ['DNSSEC'],
     },
     {
@@ -70,6 +79,9 @@ SCANNERS = [
         'can verify endpoints': False,
         'can discover urls': False,
         'can verify urls': False,
+        'can scan endpoints': True,
+        'can scan urls': False,
+        'needs results from': ['http'],
         'creates endpoint scan types': ['http_security_header_strict_transport_security',
                                         'http_security_header_x_content_type_options',
                                         'http_security_header_x_frame_options',
@@ -85,6 +97,9 @@ SCANNERS = [
         'can verify endpoints': False,
         'can discover urls': False,
         'can verify urls': False,
+        'can scan endpoints': True,
+        'can scan urls': False,
+        'needs results from': ['http'],
         'creates endpoint scan types': ['tls_qualys_certificate_trusted', 'tls_qualys_encryption_quality'],
         'creates url scan types': [],
     },
@@ -107,6 +122,9 @@ SCANNERS = [
         'can verify endpoints': False,
         'can discover urls': True,
         'can verify urls': True,
+        'can scan endpoints': False,
+        'can scan urls': False,
+        'needs results from': [],
         'creates endpoint scan types': [],
         'creates url scan types': [],
     },
@@ -118,6 +136,9 @@ SCANNERS = [
         'can verify endpoints': False,
         'can discover urls': True,
         'can verify urls': False,
+        'can scan endpoints': False,
+        'can scan urls': False,
+        'needs results from': [],
         'creates endpoint scan types': [],
         'creates url scan types': [],
     },
@@ -129,6 +150,9 @@ SCANNERS = [
         'can verify endpoints': True,
         'can discover urls': False,
         'can verify urls': False,
+        'can scan endpoints': False,
+        'can scan urls': False,
+        'needs results from': [],
         'creates endpoint scan types': [],
         'creates url scan types': [],
     },
@@ -140,6 +164,9 @@ SCANNERS = [
         'can verify endpoints': True,
         'can discover urls': False,
         'can verify urls': False,
+        'can scan endpoints': False,
+        'can scan urls': False,
+        'needs results from': ['http'],
         'creates endpoint scan types': [],
         'creates url scan types': [],
     },
@@ -151,7 +178,9 @@ SCANNERS = [
         'can verify endpoints': False,
         'can discover urls': True,
         'can verify urls': False,
-
+        'can scan endpoints': False,
+        'can scan urls': False,
+        'needs results from': [],
         # don't re-hash the same scan types. This scanner simply uses other scanners which changes over time
         # to reduce complexity, this scanner creates no scan types specifically.
         'creates endpoint scan types': [],
@@ -166,6 +195,9 @@ SCANNERS = [
         'can verify endpoints': True,
         'can discover urls': False,
         'can verify urls': False,
+        'can scan endpoints': False,
+        'can scan urls': False,
+        'needs results from': [],
         'creates endpoint scan types': [],
         'creates url scan types': [],
     },
@@ -178,6 +210,9 @@ SCANNERS = [
         'can verify endpoints': False,
         'can discover urls': False,
         'can verify urls': False,
+        'can scan endpoints': True,
+        'can scan urls': False,
+        'needs results from': ['dns_endpoints'],
         'creates endpoint scan types': [
             # used in dashboard and websecmap
             'internet_nl_mail_starttls_tls_available',
@@ -259,6 +294,9 @@ SCANNERS = [
         'can verify endpoints': False,
         'can discover urls': False,
         'can verify urls': False,
+        'can scan endpoints': True,
+        'can scan urls': False,
+        'needs results from': ['dns_endpoints'],
         'creates endpoint scan types': [
             # used in websecmap and dashboard
             'internet_nl_web_ipv6_ws_similar',
@@ -324,7 +362,7 @@ SCANNERS = [
     },
 ]
 
-BETA_SCANNERS = ['tls_osaft', 'screenshot']
+BETA_SCANNERS = ['tls_osaft']
 
 # todo: should we move the scanner definitions to different scanners and harvest them here?
 
@@ -341,6 +379,19 @@ for scanner in SCANNERS:
     URL_SCAN_TYPES = list(set(URL_SCAN_TYPES + scanner["creates url scan types"]))
 
 ALL_SCAN_TYPES = URL_SCAN_TYPES + ENDPOINT_SCAN_TYPES
+
+# convert endpoint scan types to scanners, so we know what endpoint scan type belongs to what scanner
+SCAN_TYPES_TO_SCANNER = {}
+for scanner in SCANNERS:
+    for scan_type in scanner["creates endpoint scan types"]:
+        SCAN_TYPES_TO_SCANNER[scan_type] = scanner
+
+    for scan_type in scanner["creates url scan types"]:
+        SCAN_TYPES_TO_SCANNER[scan_type] = scanner
+
+SCANNERS_BY_NAME = {}
+for scanner in SCANNERS:
+    SCANNERS_BY_NAME[scanner['name']] = scanner
 
 # todo: add config options for each of the scans defined above, include them in constance.
 # todo: check these config options dynamically at the right moments, so to reduce maintenance.
