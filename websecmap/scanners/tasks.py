@@ -4,7 +4,7 @@ import logging
 from celery import group
 
 from websecmap.map.views import screenshot
-from websecmap.scanners import proxy
+from websecmap.scanners import autoexplain, plannedscan, proxy
 from websecmap.scanners.scanner import (dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec,
                                         dummy, ftp, http, internet_nl_v2_mail, internet_nl_v2_web,
                                         plain_http, security_headers, subdomains, tls_qualys,
@@ -18,7 +18,7 @@ __scanners__ = [dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec, dumm
                 internet_nl_v2_web, plain_http, screenshot, security_headers, subdomains, tls_qualys,
                 verify_unresolvable]
 
-__others__ = [proxy]
+__others__ = [proxy, autoexplain, plannedscan]
 
 # This is the single source of truth regarding scanner configuration.
 # Lists to be used elsewhere when tasks need to be composed, these lists contain compose functions.
