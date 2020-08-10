@@ -1,3 +1,5 @@
+import logging
+
 from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Tuple
@@ -12,6 +14,9 @@ from websecmap.map.models import Configuration, MapHealthReport, OrganizationRep
 from websecmap.organizations.models import Organization
 
 OUTDATED_HOURS = 24 * 7
+
+log = logging.getLogger(__name__)
+
 
 """
 Retrieves all reports of a map, and will determine the health of those reports to a single percentage.
@@ -40,15 +45,18 @@ def update_map_health_reports(published_scan_types,
             total_good = []
             old_date = datetime.now(pytz.utc) - timedelta(days=days_back)
 
+            log.debug(f"Creating health report of {days_back} days back.")
             for organization in organizations_on_map:
-                print(f"Creating health report of {organization} at {old_date}.")
+                # log.debug(f"Creating health report of {organization} at {old_date}.")
                 latest_report = OrganizationReport.objects.all().filter(
                     organization=organization,
                     at_when__lte=old_date
-                ).first()
+                ).order_by('-at_when').first()
 
                 if not latest_report:
                     continue
+
+                # log.debug(f"The latest report of {organization} at {old_date} is from {latest_report.at_when}.")
 
                 ratings_outdated, ratings_good = split_ratings_between_good_and_bad(latest_report, OUTDATED_HOURS)
                 total_outdated += ratings_outdated
