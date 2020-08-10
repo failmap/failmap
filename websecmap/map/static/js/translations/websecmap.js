@@ -43,6 +43,7 @@ const messages = {
         integrity: "Integrity",
         website: "Website",
 
+        "dns_a_aaaa": "Website (http and https)",
 
         "dns_endpoints": "Endpoints for internet.nl",
         "dns_wildcard": "Wildcard domains",
@@ -53,6 +54,9 @@ const messages = {
         "internet_nl_v2_web": "Internet.nl Web",
         "verify_unresolvable": "Revive unresolvable",
 
+        "https": "Website (https)",
+
+        "internet_nl_not_tested": 'This test did not run, because either a parent test that this test depends on gave a negative result (\'fail\') or not enough information was available to run this test.',
 
         // issues, are used at various places, the original value comes from the database stored as scan results.
 
@@ -114,7 +118,7 @@ const messages = {
 
 
         // plain_https
-        "http": "Websites",
+        "http": "Website (http)",
 
         "plain_http": "Missing transport encryption",
         "plain_https": "Missing transport encryption (HTTP only)",
@@ -153,7 +157,7 @@ const messages = {
         "Certificate is trusted.": "Certificate is trusted.",
 
         // Mail
-        "dns_mx_no_cname": "E-Mail Server",
+        "dns_mx_no_cname": "E-Mail",
 
         // internet_nl_mail_starttls_tls_available
         "internet_nl_mail_starttls_tls_available": "E-Mail: Encrypted transport (STARTTLS)",
@@ -219,6 +223,7 @@ const messages = {
         "DNSSEC is incorrectly or not configured (errors found).": "DNSSEC is niet of niet juist geconfigureerd.",
         "DNSSEC seems to be implemented sufficiently.": "DNSSEC lijkt juist geconfigureerd.",
 
+        "internet_nl_not_tested": 'Deze test is niet uitgevoerd, omdat een hogergelegen test waarvan deze test afhankelijk is al een negatief testresultaat (\'gezakt\') gaf, of omdat onvoldoende informatie beschikbaar was om de test uit te kunnen voeren. ',
 
         // FTP
         "ftp": "Bestandsoverdracht (FTP)",

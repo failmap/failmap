@@ -232,12 +232,12 @@
                                 <div class="finding_block" v-if="rating.comply_or_explain_valid_at_time_of_report">
                                     <span class="awarded_points_explained">{{ $t("report_content.report.explained") }}</span> {{ rating.comply_or_explain_explanation }}<br />
                                     {{ $t("report_content.report.explained_on") }}: {{ humanize(rating.comply_or_explain_explained_on) }}, {{ $t("report_content.report.explanation_expires") }}: {{ humanize(rating.comply_or_explain_explanation_valid_until) }}<br>
-                                    <del style="font-size: 0.8em"><span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
+                                    <del style="font-size: 0.8em"><span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> <span v-html="create_rating_explanation(rating)"></span> <br/>
                                     {{ $t("report_content.report.since") }}: {{ humanize(rating.since) }}, {{ $t("report_content.report.last_check") }}: {{ humanize(rating.last_scan) }}</del>
                                     <div class="finding_references" v-html="second_opinion_links(rating, url)"> </div>
                                 </div>
                                 <div class="finding_block" v-else>
-                                    <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
+                                    <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> <span v-html="create_rating_explanation(rating)"></span> <br/>
                                     {{ $t("report_content.report.since") }}: {{ humanize(rating.since) }}, {{ $t("report_content.report.last_check") }}: {{ humanize(rating.last_scan) }}
 
                                     <div class="finding_references">
@@ -700,7 +700,23 @@ Vue.component('report_content', {
             return moment(date).fromNow();
         },
         create_header: function (rating) {
+            if (rating.type.startsWith('internet_nl'))
+                return this.translate(rating.type + "_label");
             return this.translate(rating.type);
+        },
+        create_rating_explanation: function (rating) {
+            if (rating.type.startsWith('internet_nl')) {
+                // has various translations, in the translation key:
+                if (rating.translation !== undefined) {
+                    if (rating.translation === "not-tested") {
+                        return this.translate('internet_nl_not_tested')
+                    }
+
+                    return this.translate(rating.type + "_verdict_" + rating.translation.replace("-", "_"))
+                }
+            }
+
+            return this.translate(rating.explanation)
         },
         second_opinion_links: function (rating, url) {
 
@@ -770,7 +786,9 @@ Vue.component('report_content', {
                 return this.$t("report_content.report.score_low");
         },
         endpoint_type: function (endpoint) {
-            return endpoint.protocol + "/" + endpoint.port + " (IPv" + endpoint.ip_version + ")";
+            if (endpoint.port && endpoint.ip_version)
+                return this.translate(endpoint.protocol) + "/" + endpoint.port + " (IPv" + endpoint.ip_version + ")";
+            return this.translate(endpoint.protocol)
         },
     },
 
