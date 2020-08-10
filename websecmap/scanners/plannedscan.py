@@ -1,12 +1,17 @@
 import logging
 from datetime import datetime, timedelta
+from pprint import pprint
 from typing import Any, Dict, List
 
 import pytz
 from django.db import connection
 
 from websecmap.celery import app
-from websecmap.organizations.models import Url
+from websecmap.map.logic.map_health import get_outdated_ratings
+from websecmap.map.map_configs import filter_map_configs
+from websecmap.map.report import PUBLISHED_SCAN_TYPES
+from websecmap.organizations.models import Organization, Url
+from websecmap.scanners import SCAN_TYPES_TO_SCANNER, SCANNERS_BY_NAME
 from websecmap.scanners.models import Endpoint, PlannedScan
 
 log = logging.getLogger(__name__)
@@ -175,3 +180,81 @@ def retrieve_endpoints_from_urls(
     endpoints += list(ep_querysets)
 
     return endpoints
+
+
+@app.task(queue="storage")
+def websecmap_plan_outdated_scans():
+    # one without parameters
+    return plan_outdated_scans(PUBLISHED_SCAN_TYPES)
+
+
+@app.task(queue="storage")
+def plan_outdated_scans(published_scan_types):
+    for map_configuration in filter_map_configs():
+        log.debug(f"Retrieving outdated scans from config: {map_configuration}.")
+
+        organizations_on_map = Organization.objects.all().filter(
+            country=map_configuration['country'],
+            type=map_configuration['organization_type']
+        )
+
+        log.debug(f"There are {len(organizations_on_map)} organizations on this map.")
+
+        outdated = get_outdated_ratings(organizations_on_map)
+        relevant_outdated = [item for item in outdated if item.get('scan_type', 'unknown') in published_scan_types]
+
+        # plan scans for outdated results:
+        plan = []
+        for outdated_result in relevant_outdated:
+            scanner = SCAN_TYPES_TO_SCANNER[outdated_result['scan_type']]
+            plan.append({
+                'scanner': scanner['name'],
+                'url': outdated_result['url'],
+                'activity': 'scan',
+            })
+
+            # see if there are requirements for verification or discovery from other scanners:
+            # log.debug(f"There are {len(scanner['needs results from'])} underlaying scanners.")
+            for underlaying_scanner in scanner['needs results from']:
+                underlaying_scanner_details = SCANNERS_BY_NAME[underlaying_scanner]
+
+                if any([underlaying_scanner_details['can discover endpoints'],
+                        underlaying_scanner_details['can discover urls']]):
+                    plan.append({
+                        'scanner': underlaying_scanner,
+                        'url': outdated_result['url'],
+                        'activity': 'discover'
+                    })
+                if any([underlaying_scanner_details['can verify endpoints'],
+                        underlaying_scanner_details['can verify urls']]):
+                    plan.append({
+                        'scanner': underlaying_scanner,
+                        'url': outdated_result['url'],
+                        'activity': 'verify'
+                    })
+
+        # there can be many duplicate tasks, especially when there are multiple scan results from a single scanner.
+        hashed_items = []
+        clean_plan = []
+        for item in plan:
+            hashed_item = f"{item['activity']} {item['scanner']} {item['url']}"
+
+            if hashed_item not in hashed_items:
+                hashed_items.append(hashed_item)
+                clean_plan.append(item)
+
+        log.debug(pprint(clean_plan))
+
+        # make sure the urls are actual urls. Only plan for alive urls anyway.
+        clean_plan_with_urls = []
+        for item in clean_plan:
+            url = Url.objects.all().filter(url=item['url'], is_dead=False, not_resolvable=False).first()
+            if url:
+                item['url'] = url
+                clean_plan_with_urls.append(item)
+
+        # and finally, plan it...
+        for item in clean_plan_with_urls:
+            request(item['activity'], item['scanner'], [item['url']])
+
+        log.debug(f"Planned {len(clean_plan_with_urls)} scans / verify and discovery tasks.")

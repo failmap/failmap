@@ -69,12 +69,12 @@ def plan_scan(organizations_filter: dict = dict(),
         return group()
 
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    plannedscan.request(activity="scan", scanner="http_security_headers", urls=urls)
+    plannedscan.request(activity="scan", scanner="security_headers", urls=urls)
 
 
 @app.task(queue='storage')
 def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="http_security_headers", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="scan", scanner="security_headers", amount=kwargs.get('amount', 25))
     return compose_scan_task(urls)
 
 
@@ -106,7 +106,7 @@ def compose_scan_task(urls):
                 endpoint.uri_url()
             ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
             | analyze_headers.s(endpoint)
-            | plannedscan.finish.si('scan', 'http_security_headers', endpoint.url)
+            | plannedscan.finish.si('scan', 'security_headers', endpoint.url)
         )
 
     return group(tasks)
