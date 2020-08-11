@@ -23,20 +23,30 @@ class Command(DumpDataCommand):
         "organizations.Coordinate",
         "organizations.Url",
         "organizations.Dataset",
+
         "scanners.Endpoint",
         "scanners.EndpointGenericScan",
         "scanners.UrlGenericScan",
-        "scanners.InternetNLScan",
+        "scanners.InternetNLV2Scan",
+        "scanners.InternetNLV2StateLog",
         "scanners.ScanProxy",
+        "scanners.PlannedScan",
+
         "map.Configuration",
         "map.AdministrativeRegion",
         "map.LandingPage",
-        "api.SIDNUpload",
-        "game",
-        "constance",
-    )
 
-    # celery beat tasks are managed elsehwere(!)
+        "api",
+
+        # game
+        "game",
+
+        # settings
+        "constance",
+
+        # planned tasks
+        "django_celery_beat",
+    )
 
     def handle(self, *app_labels, **options):
         """

@@ -57,11 +57,13 @@ class Command(DumpDataCommand):
         "organizations.Coordinate",
         "organizations.Url",
         "organizations.Dataset",
-        "scanners.InternetNLScan",
         "scanners.scanproxy",
         "map.Configuration",
         "map.AdministrativeRegion",
+        "map.LandingPage",
         "game",
+        "api",
+        "constance",
         "django_celery_beat",
     )
 
