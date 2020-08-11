@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime, timedelta
-from pprint import pprint
 from typing import Any, Dict, List
 
 import pytz
@@ -189,6 +188,51 @@ def websecmap_plan_outdated_scans():
 
 
 @app.task(queue="storage")
+def websecmap_list_outdated():
+    # one without parameters
+    return list_outdated(PUBLISHED_SCAN_TYPES)
+
+
+@app.task(queue="storage")
+def list_outdated(published_scan_types):
+    for map_configuration in filter_map_configs():
+        print(f"Outdated items for f{map_configuration}:")
+        organizations_on_map = Organization.objects.all().filter(
+            country=map_configuration['country'],
+            type=map_configuration['organization_type']
+        )
+        # Outdated is earlier than the map_health says something is outdated. Otherwise we're always
+        # one day behind with scans, and thus is always something outdated.
+        outdated = get_outdated_ratings(organizations_on_map, 24 * 5)
+        relevant_outdated = [item for item in outdated if item.get('scan_type', 'unknown') in published_scan_types]
+        plan = []
+        for outdated_result in relevant_outdated:
+            scanner = SCAN_TYPES_TO_SCANNER[outdated_result['scan_type']]
+            plan.append({
+                'scanner': scanner['name'],
+                'url': outdated_result['url'],
+                'activity': 'scan',
+            })
+        plan = deduplicate_plan(plan)
+        for item in plan:
+            print(f"{item['activity']:20} {item['scanner']:30} {item['url']:60}")
+    return
+
+
+def deduplicate_plan(planned_items):
+    hashed_items = []
+    clean_plan = []
+    for item in planned_items:
+        hashed_item = f"{item['activity']} {item['scanner']} {item['url']}"
+
+        if hashed_item not in hashed_items:
+            hashed_items.append(hashed_item)
+            clean_plan.append(item)
+
+    return clean_plan
+
+
+@app.task(queue="storage")
 def plan_outdated_scans(published_scan_types):
     for map_configuration in filter_map_configs():
         log.debug(f"Retrieving outdated scans from config: {map_configuration}.")
@@ -200,7 +244,9 @@ def plan_outdated_scans(published_scan_types):
 
         log.debug(f"There are {len(organizations_on_map)} organizations on this map.")
 
-        outdated = get_outdated_ratings(organizations_on_map)
+        # Outdated is earlier than the map_health says something is outdated. Otherwise we're always
+        # one day behind with scans, and thus is always something outdated.
+        outdated = get_outdated_ratings(organizations_on_map, 24 * 5)
         relevant_outdated = [item for item in outdated if item.get('scan_type', 'unknown') in published_scan_types]
 
         # plan scans for outdated results:
@@ -234,16 +280,7 @@ def plan_outdated_scans(published_scan_types):
                     })
 
         # there can be many duplicate tasks, especially when there are multiple scan results from a single scanner.
-        hashed_items = []
-        clean_plan = []
-        for item in plan:
-            hashed_item = f"{item['activity']} {item['scanner']} {item['url']}"
-
-            if hashed_item not in hashed_items:
-                hashed_items.append(hashed_item)
-                clean_plan.append(item)
-
-        log.debug(pprint(clean_plan))
+        clean_plan = deduplicate_plan(plan)
 
         # make sure the urls are actual urls. Only plan for alive urls anyway.
         clean_plan_with_urls = []

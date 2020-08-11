@@ -77,7 +77,8 @@ def update_map_health_reports(published_scan_types,
             hr.save()
 
 
-def get_outdated_ratings(organizations: List[Organization]) -> List[Dict[str, Any]]:
+def get_outdated_ratings(organizations: List[Organization],
+                         expiry_time_hours: int = OUTDATED_HOURS) -> List[Dict[str, Any]]:
     total_outdated = []
 
     for organization in organizations:
@@ -86,7 +87,7 @@ def get_outdated_ratings(organizations: List[Organization]) -> List[Dict[str, An
         if not latest_report:
             continue
 
-        ratings_outdated, ratings_good = split_ratings_between_good_and_bad(latest_report, OUTDATED_HOURS)
+        ratings_outdated, ratings_good = split_ratings_between_good_and_bad(latest_report, expiry_time_hours)
         total_outdated += ratings_outdated
 
     return total_outdated
