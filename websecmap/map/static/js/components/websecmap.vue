@@ -232,6 +232,7 @@
                   <div class="row">
                     <div class="col-sm">
                         <h4 style="font-size: 1.4em;">Map Health</h4>
+                        <p>Applies to displayed map.</p>
                         <table style="width: 100%">
                             <tr><td>Verdict:</td><td>
                                 <template v-if="map_health['percentage_up_to_date'] === 0">❌ Obsolete</template>
@@ -255,7 +256,7 @@
                     </div>
                     <div class="col-sm">
                       <h4 style="font-size: 1.4em;">Scan Monitor</h4>
-
+                        <p>Applies to entire site.</p>
                         <table width="100%;">
                         <template v-for="(scanner_value, scanner) in planned_scan_progress">
                             <tr>
@@ -579,6 +580,8 @@ const WebSecMap = Vue.component('websecmap', {
     methods: {
 
         start_showing_map_health: function(){
+            // update the data for the current map.
+            this.get_map_health();
             this.show_map_health = true;
         },
 
