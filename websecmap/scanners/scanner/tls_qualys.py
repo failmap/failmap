@@ -36,7 +36,7 @@ from tenacity import RetryError, before_log, retry, wait_fixed
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
-from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad, EndpointGenericScan
+from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
 from websecmap.scanners.proxy import (claim_proxy, release_proxy, service_provider_status,
                                       store_check_result, timeout_claims)
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
