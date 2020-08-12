@@ -94,7 +94,7 @@ def get_security_header_calculation(scan: Union[EndpointGenericScan, UrlGenericS
     # We add what is done well, so it's more obvious it's checked.
     if scan.rating == "Unreachable":
         return standard_calculation(scan, "Web server content became unreachable. No HTTP content present.",
-                                    high, medium, low)
+                                    high, medium, low, error_in_test=True)
 
     if scan.rating == "RESTRICTED":
         return standard_calculation(scan,
