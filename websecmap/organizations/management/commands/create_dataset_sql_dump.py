@@ -1,15 +1,13 @@
 import logging
 from pprint import pprint
 
+from django.apps import apps
 from django.core.management import BaseCommand
 
-
-from django.apps import apps
-
-from websecmap.organizations.models import (OrganizationType, Organization, Coordinate, Url, Dataset)
-from websecmap.scanners.models import (Endpoint, EndpointGenericScan, UrlGenericScan, InternetNLV2Scan, 
-                                       InternetNLV2StateLog, ScanProxy, PlannedScan)
-from websecmap.map.models import (Configuration, AdministrativeRegion, LandingPage)
+from websecmap.map.models import AdministrativeRegion, Configuration, LandingPage
+from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url
+from websecmap.scanners.models import (Endpoint, EndpointGenericScan, InternetNLV2Scan,
+                                       InternetNLV2StateLog, PlannedScan, ScanProxy, UrlGenericScan)
 
 full_apps = ["api", "game", "constance", "django_celery_beat"]
 
