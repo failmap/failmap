@@ -194,6 +194,8 @@ def tls_qualys_certificate_trusted(scan: Union[EndpointGenericScan, UrlGenericSc
     explanations = {
         "not trusted": "Certificate is not trusted.",
         "trusted": "Certificate is trusted.",
+        # copy the error we got. And do not add any score to it(!)
+        "scan_error": scan.explanation,
     }
 
     explanation = explanations[scan.rating]
@@ -201,7 +203,7 @@ def tls_qualys_certificate_trusted(scan: Union[EndpointGenericScan, UrlGenericSc
     if scan.rating == "not trusted":
         high += 1
 
-    return standard_calculation(scan, explanation, high, medium, low)
+    return standard_calculation(scan, explanation, high, medium, low, error_in_test=scan.rating == "scan_error")
 
 
 def tls_qualys_encryption_quality(scan: Union[EndpointGenericScan, UrlGenericScan]):
@@ -214,6 +216,8 @@ def tls_qualys_encryption_quality(scan: Union[EndpointGenericScan, UrlGenericSca
         "A-": "Good Transport Security, rated A-.",
         "A": "Good Transport Security, rated A.",
         "A+": "Perfect Transport Security, rated A+.",
+        # copy the error we got. And do not add any score to it(!)
+        "scan_error": scan.explanation,
     }
 
     explanation = explanations[scan.rating]
@@ -224,7 +228,7 @@ def tls_qualys_encryption_quality(scan: Union[EndpointGenericScan, UrlGenericSca
     if scan.rating in ["B", "C"]:
         low += 1
 
-    return standard_calculation(scan, explanation, high, medium, low)
+    return standard_calculation(scan, explanation, high, medium, low, error_in_test=scan.rating == "scan_error")
 
 
 def internet_nl_mail_starttls_tls_available(scan: Union[EndpointGenericScan, UrlGenericScan]):
