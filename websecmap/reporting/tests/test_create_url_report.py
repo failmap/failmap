@@ -20,6 +20,8 @@ def test_data_from_dead_endpoint_stays_gone(db):
     u = create_url("example.nl")
     e1 = create_endpoint(u, 4, "https", 443)
 
+    assert e1.id == 1
+
     # would e2 be on the same moment, this would result in a repeated finding (which is also wrong).
     e2 = create_endpoint(u, 6, "https", 443)
 
@@ -27,6 +29,7 @@ def test_data_from_dead_endpoint_stays_gone(db):
     e2.is_dead_since = datetime(2020, 1, 20)
     e2.is_dead = True
     e2.save()
+    assert e2.id == 2
 
     # make identical scans for both endpoints. But one endpoint dies, and the other doesn't.
 
