@@ -229,7 +229,7 @@ def compose_manual_verify_task(
         return group()
 
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    compose_verify_task(urls)
+    return compose_verify_task(urls)
 
 
 def compose_verify_task(urls):
