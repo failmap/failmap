@@ -165,13 +165,12 @@ def ftp(scan: Union[EndpointGenericScan, UrlGenericScan]):
     # sometimes we cannot connect, but do see there is an FTP server. As we're not sure, and cannot verify, we'll give
     # this a low rating. It might be wrong. On the other hand: FTP should be implemented properly and doing a FEAT
     # and AUTH TLS should not result in connection resets and such. If that is happening: why is that server public?
-    if scan.rating == "unknown":
-        medium += 1
+    # this is now an error_in_test, as we can't be sure what is happening.
 
     # also here: the last scan moment increases with every scan. When you have a set of
     # relevant dates (when scans where made) ....
 
-    return standard_calculation(scan, scan.explanation, high, medium, low)
+    return standard_calculation(scan, scan.explanation, high, medium, low, error_in_test=scan.rating == "unknown")
 
 
 def DNSSEC(scan: Union[EndpointGenericScan, UrlGenericScan]):
