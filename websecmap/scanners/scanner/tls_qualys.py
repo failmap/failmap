@@ -30,14 +30,13 @@ from typing import List
 import pytz
 import requests
 from celery import Task, group
-from django.db.models import Count
 from django.utils import timezone
 from tenacity import RetryError, before_log, retry, wait_fixed
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
-from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
+from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad, EndpointGenericScan
 from websecmap.scanners.proxy import (claim_proxy, release_proxy, service_provider_status,
                                       store_check_result, timeout_claims)
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
@@ -69,8 +68,8 @@ def plan_scan(urls_filter: dict = dict(), **kwargs):
     if not allowed_to_scan("tls_qualys"):
         return None
 
-    # This is a query for the TLS scanner that only scans endpoints that did not have a scan yet.
-    # Plan scans for endpoints that never have been scanned:
+    # fuck the django orm, for making the following more complicated than it needs to be:
+    # Plan scans for endpoints that never have been scanned
     urls = Url.objects.filter(
         q_configurations_to_scan(),
         is_dead=False,
@@ -79,14 +78,20 @@ def plan_scan(urls_filter: dict = dict(), **kwargs):
         endpoint__port=443,
         endpoint__is_dead=False,
         **urls_filter
-    ).annotate(
-        nr_of_scans=Count('endpoint__endpointgenericscan')
-    ).filter(
-        nr_of_scans=0
+    ).exclude(
+        # remove any url that has an endpoint scan on tls_qualys
+        id__in=Url.objects.filter(
+            is_dead=False,
+            not_resolvable=False,
+            endpoint__protocol="https",
+            endpoint__port=443,
+            endpoint__is_dead=False,
+            endpoint__endpointgenericscan__type__in=['tls_qualys_encryption_quality', 'tls_qualys_certificate_trusted']
+        )
     ).only('id', 'url')
 
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
-    plannedscan.request(activity="scan", scanner="tls_qualys", urls=list(set(urls)))
+    plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(urls))
 
     # Scans for endpoints that have already been scanned:
     # Scan the bad ones more frequently than the good ones, to reduce the amount of requests.
@@ -118,8 +123,8 @@ def plan_scan(urls_filter: dict = dict(), **kwargs):
             endpoint__endpointgenericscan__rating__in=parameter_set['quality_levels'],
             **urls_filter
         ).only('id', 'url')
-        print(urls.query)
-        plannedscan.request(activity="scan", scanner="tls_qualys", urls=list(set(urls)))
+
+        plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(urls))
 
 
 def compose_manual_scan_task(organizations_filter: dict = dict(),
