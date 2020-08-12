@@ -427,13 +427,14 @@ def create_url_report(timeline, url: Url):
                     previous_endpoints.remove(dead_endpoint)
 
         for endpoint in relevant_endpoints:
-            # All endpoints of all time are iterated. The dead endpoints etc should be filtered out above.
-            url_was_once_rated = True
-
             # do not do things with endpoints that have died.
             # see: test_data_from_dead_endpoint_stays_gone
+            # how can it be that the dead endpoint is still in relevant endpoints (because of previous endpoints.?
             if endpoint in dead_endpoints:
                 continue
+
+            # All endpoints of all time are iterated. The dead endpoints etc should be filtered out above.
+            url_was_once_rated = True
 
             calculations = []
             these_endpoint_scans = {}
