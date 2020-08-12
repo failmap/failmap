@@ -174,7 +174,7 @@ def analyze_headers(result: requests.Response, endpoint):
 
         For this case another state had been defined: unreachable. This is a header state that is seen as good. It
         will be applied to all existing headers of this endpoint, in order to clean up what is already there.
-        
+
         """
 
         existing_header_scans = EndpointGenericScan.objects.all().filter(
