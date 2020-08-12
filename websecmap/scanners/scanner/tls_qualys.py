@@ -494,6 +494,8 @@ def save_scan(url, data):
     stored_ipv6 = False
     stored_ipv4 = False
 
+    log.debug(f"Found {len(data['endpoints'])} endpoints in data.")
+
     # Scan can contain multiple IPv4 and IPv6 endpoints, for example, four of each.
     for qualys_endpoint in data['endpoints']:
         """
@@ -517,6 +519,10 @@ def save_scan(url, data):
         # End prevent duplicates
 
         message = qualys_endpoint['statusMessage']
+        log.debug(f"Message for endpoint {qualys_endpoint['ipAddress']} is {message}.")
+
+        # Qualys might discover endpoints we don't have yet. In that case, be pragmatic and create the endpoint.
+        failmap_endpoint = Endpoint.force_get(url, ip_version, 'https', 443)
 
         if message in [
                 "Unable to connect to the server",
@@ -528,6 +534,13 @@ def save_scan(url, data):
                 "Certificate not valid for domain name"]:
             # Note: Certificate not valid for domain name can be ignored with correct API setting.
             # Nothing to store: something went wrong at the API side and we can't fix that.
+            # Example; werkplek.alkmaar.nl, cannot be scanned with this scanner, and will result in an error.
+            # make sure that the newest scan result is then error, so we can handle it properly in the report.
+            # this server DOES respond on ipv6, but not on ipv4. Creating a very old, and never deleted ipv4 endpoint.
+            # even worse: the http verify scanner sees that it exists, and if you type it in in the browser, it
+            # does exist. So perhaps they blocked the qualys scanner, which is perfectly possible of course.
+            store_endpoint_scan_result('tls_qualys_certificate_trusted', failmap_endpoint, "scan_error", message)
+            store_endpoint_scan_result('tls_qualys_encryption_quality', failmap_endpoint, "scan_error", message)
             continue
 
         if message not in ["Ready"]:
@@ -535,9 +548,6 @@ def save_scan(url, data):
 
         rating = qualys_endpoint['grade']
         rating_no_trust = qualys_endpoint['gradeTrustIgnored']
-
-        # Qualys might discover endpoints we don't have yet. In that case, be pragmatic and create the endpoint.
-        failmap_endpoint = Endpoint.force_get(url, ip_version, 'https', 443)
 
         if rating == "T":
             trust = "not trusted"

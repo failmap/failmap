@@ -197,7 +197,7 @@ div#report {
     font-size: 17px;
 }
 
-.awarded_points_medium, .awarded_points_low, .awarded_points_good, .awarded_points_high, .awarded_points_explained {
+.awarded_points_medium, .awarded_points_low, .awarded_points_good, .awarded_points_high, .awarded_points_explained, .awarded_points_error_in_test {
     padding: 0 3px;
     font-weight: bold;
     font-size: 11px;

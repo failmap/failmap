@@ -169,7 +169,7 @@
                 </div>
             </div>
 
-            <div v-if="!urls.length" class="perurl" :class="colorizebg(0, 0, 0)">
+            <div v-if="!urls.length" class="perurl" :class="colorizebg(0, 0, 0, 0)">
                 {{ $t("report_content.report.no_data") }}
             </div>
 
@@ -182,7 +182,7 @@
                     <div class="col-md-8">
                         <a :name="'report_url_'+url.url"></a>
                         <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
-                        <span :class="'faildomain report_' + colorize(url.high, url.medium, url.low)+'_text'" :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
+                        <span :class="'faildomain report_' + colorize(url.high, url.medium, url.low, false)+'_text'" :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
                         <a :href="'mailto:' + incorrect_finding_mail + '?subject=' + encodeURIComponent($t('report_content.report.incorrect_finding_mail.title', [url.url])) + '&body=' + encodeURIComponent($t('report_content.report.incorrect_finding_mail.body'))" class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
                             {{ $t("report_content.report.report_incorrect_finding") }}</a>
                     </div>
@@ -199,7 +199,7 @@
                         <div v-for="rating in url.ratings">
                             <h5>&nbsp; {{ create_header(rating) }}</h5>
                             <div class="finding_block">
-                                <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
+                                <span v-html="awarded_points(rating.high, rating.medium, rating.low, rating.error_in_test)"></span> {{ translate(rating.explanation) }}<br/>
                                 {{ $t("report_content.report.since") }}: {{ humanize(rating.since) }}, {{ $t("report_content.report.last_check") }}: {{ humanize(rating.last_scan) }}
                                 <div class="finding_references">
                                     <span v-html="second_opinion_links(rating, url)"> </span>
@@ -232,12 +232,12 @@
                                 <div class="finding_block" v-if="rating.comply_or_explain_valid_at_time_of_report">
                                     <span class="awarded_points_explained">{{ $t("report_content.report.explained") }}</span> {{ rating.comply_or_explain_explanation }}<br />
                                     {{ $t("report_content.report.explained_on") }}: {{ humanize(rating.comply_or_explain_explained_on) }}, {{ $t("report_content.report.explanation_expires") }}: {{ humanize(rating.comply_or_explain_explanation_valid_until) }}<br>
-                                    <del style="font-size: 0.8em"><span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> <span v-html="create_rating_explanation(rating)"></span> <br/>
+                                    <del style="font-size: 0.8em"><span v-html="awarded_points(rating.high, rating.medium, rating.low, rating.error_in_test)"></span> <span v-html="create_rating_explanation(rating)"></span> <br/>
                                     {{ $t("report_content.report.since") }}: {{ humanize(rating.since) }}, {{ $t("report_content.report.last_check") }}: {{ humanize(rating.last_scan) }}</del>
                                     <div class="finding_references" v-html="second_opinion_links(rating, url)"> </div>
                                 </div>
                                 <div class="finding_block" v-else>
-                                    <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> <span v-html="create_rating_explanation(rating)"></span> <br/>
+                                    <span v-html="awarded_points(rating.high, rating.medium, rating.low, rating.error_in_test)"></span> <span v-html="create_rating_explanation(rating)"></span> <br/>
                                     {{ $t("report_content.report.since") }}: {{ humanize(rating.since) }}, {{ $t("report_content.report.last_check") }}: {{ humanize(rating.last_scan) }}
 
                                     <div class="finding_references">
@@ -353,6 +353,7 @@ Vue.component('report_content', {
                         explained: "Explained",
                         explanation_expires: "Explanation expired on",
 
+                        score_error_in_test: "test error",
                         score_perfect: "perfect",
                         score_high: "high",
                         score_medium: "medium",
@@ -676,7 +677,8 @@ Vue.component('report_content', {
 
         },
 
-        colorize: function (high, medium, low) {
+        colorize: function (high, medium, low, error_in_test) {
+            if (error_in_test) return "error_in_test";
             if (high > 0) return "high";
             if (medium > 0) return "medium";
             if (low > 0) return "low";
@@ -769,13 +771,16 @@ Vue.component('report_content', {
         },
         total_awarded_points: function (high, medium, low) {
             let marker = this.make_marker(high, medium, low);
-            return '<span class="total_awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
+            return '<span class="total_awarded_points_' + this.colorize(high, medium, low, false) + '">' + marker + '</span>'
         },
-        awarded_points: function (high, medium, low) {
-            let marker = this.make_marker(high, medium, low);
-            return '<span class="awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
+        awarded_points: function (high, medium, low, error_in_test) {
+            let marker = this.make_marker(high, medium, low, error_in_test);
+            return '<span class="awarded_points_' + this.colorize(high, medium, low, error_in_test) + '">' + marker + '</span>'
         },
-        make_marker: function (high, medium, low) {
+        make_marker: function (high, medium, low, error_in_test) {
+            if (error_in_test)
+                return this.$t("report_content.report.score_error_in_test");
+
             if (high === 0 && medium === 0 && low === 0)
                 return this.$t("report_content.report.score_perfect");
             else if (high > 0)

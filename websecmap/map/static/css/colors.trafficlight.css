@@ -123,6 +123,11 @@
     background-color: #fdfffb;
 }
 
+.awarded_points_error_in_test {
+    border: 2px solid #8b8987;
+    background-color: #c0d9ff;
+}
+
 .total_awarded_points_medium  {
     border: 2px solid darkorange;
     background-color: orange;
