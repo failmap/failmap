@@ -174,38 +174,23 @@ def analyze_headers(result: requests.Response, endpoint):
 
         For this case another state had been defined: unreachable. This is a header state that is seen as good. It
         will be applied to all existing headers of this endpoint, in order to clean up what is already there.
-
-        (nothing has been returned, so we have no clue what header scans already exist...)
+        
         """
 
         existing_header_scans = EndpointGenericScan.objects.all().filter(
             endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True)
 
+        # Do not store 'corrections' when there are no scans already.
         if not existing_header_scans:
             return ParentFailed('Skipping http header result parsing because scan failed.', cause=result)
 
-        # We only accept connection resets
-        if not isinstance(result, OSError):
-            log.exception("Connection failed, but headers currently exist. Please investigate the cause and "
-                          "add a cleanup exception to the code for this specific case. (Not an OSError)")
-            return ParentFailed('Skipping http header result parsing because scan failed.', cause=result)
-
-        # Only on active connection resets, where we know there is a server, but the server
-        # does not want to talk with us.
-        # 104 = Connection reset (includes ECONNRESET)
-        # 54 = Connection aborted (includes ECONNRESET)
-        # This happens with PR_END_OF_FILE_ERROR
-        # unreachable endpoints also trigger this error. Keeping the endpoints up to date would make sure
-        # this error is triggered only for special cases. A special cleanup is not needed when the endpoint is
-        # unreachable.
-
-        if "ECONNRESET" not in str(result):
-            log.exception("Connection failed, but headers currently exist. Please investigate the cause and "
-                          "add a cleanup exception to the code for this specific case. (Not a CONNECTION RESET).")
-            return ParentFailed('Skipping http header result parsing because scan failed.', cause=result)
+        # There used to be stringent filtering here: for oserror and ECONNRESET in the exception, but the fact is
+        # that there are so many possible network errors, that it's always a struggle to keep up to date.
+        # Instead of handling every edge case, make sure that the existing headers are set to unreachable,
+        # and that the evidence shows what went wrong for later debugging reasons.
 
         for scan in existing_header_scans:
-            store_endpoint_scan_result(scan.type, endpoint, 'Unreachable', "Address became unreachable.")
+            store_endpoint_scan_result(scan.type, endpoint, 'Unreachable', "Address became unreachable.", str(result))
 
         return {'status': 'success'}
 
