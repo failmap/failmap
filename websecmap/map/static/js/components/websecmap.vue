@@ -206,6 +206,7 @@
                 <div>
                     <span @click='start_showing_map_health()' style='margin-top: 34px; font-size: 1.2em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>
                         <template v-if="map_health">
+                            <template v-if="map_health['percentage_up_to_date'] === -1">❓</template>
                             <template v-if="map_health['percentage_up_to_date'] === 0">❌</template>
                             <template v-if="map_health['percentage_up_to_date'] > 0 && map_health['percentage_up_to_date'] < 55">🔴</template>
                             <template v-if="map_health['percentage_up_to_date'] > 54 && map_health['percentage_up_to_date'] < 90">🟠</template>
@@ -235,14 +236,17 @@
                         <p>Applies to displayed map.</p>
                         <table style="width: 100%">
                             <tr><td>Verdict:</td><td>
+                                <template v-if="map_health['percentage_up_to_date'] === -1">❓ Missing</template>
                                 <template v-if="map_health['percentage_up_to_date'] === 0">❌ Obsolete</template>
                                 <template v-if="map_health['percentage_up_to_date'] > 0 && map_health['percentage_up_to_date'] < 55">🔴 Outdated</template>
                                 <template v-if="map_health['percentage_up_to_date'] > 54 && map_health['percentage_up_to_date'] < 90">🟠 Workable</template>
                                 <template v-if="map_health['percentage_up_to_date'] > 89 && map_health['percentage_up_to_date'] < 100">🟢 Usable</template>
                                 <template v-if="map_health['percentage_up_to_date'] === 100">🌈 Up to date</template>
                             </td></tr>
-                            <tr><td>Up to date:</td><td>{{map_health['percentage_up_to_date']}}% ({{map_health['amount_up_to_date']}})</td></tr>
-                            <tr><td>Out of date:</td><td>{{map_health['percentage_out_of_date']}}% ({{map_health['amount_out_of_date']}})</td></tr>
+                            <template v-if="map_health['percentage_up_to_date'] !== -1">
+                                <tr><td>Up to date:</td><td>{{map_health['percentage_up_to_date']}}% ({{map_health['amount_up_to_date']}})</td></tr>
+                                <tr><td>Out of date:</td><td>{{map_health['percentage_out_of_date']}}% ({{map_health['amount_out_of_date']}})</td></tr>
+                            </template>
                         </table>
 
                         <table style="width: 100%">
@@ -253,6 +257,7 @@
                                 <tr></tr>
                             </template>
                         </table>
+
                     </div>
                     <div class="col-sm">
                       <h4 style="font-size: 1.4em;">Scan Monitor</h4>
