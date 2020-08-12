@@ -370,6 +370,7 @@ def create_url_report(timeline, url: Url):
     previous_url_ratings = {}
     previous_endpoints = []
     url_was_once_rated = False
+    dead_endpoints = set()
 
     # work on a sorted timeline as otherwise this code is non-deterministic!
     for moment in sorted(timeline):
@@ -408,6 +409,14 @@ def create_url_report(timeline, url: Url):
         # we don't need to remove the previous ratings, unless we want to save memory (Nah :))
         if "dead_endpoints" in timeline[moment]:
             for dead_endpoint in timeline[moment]['dead_endpoints']:
+
+                # make sure that scan results are never added to dead endpoints.
+                # this can happen when a scan result is stored or performed _after_ the endpoint is declared dead
+                # as the endpoint is dead, no new scans will be added to it, overwriting the data.
+                # this causes stale results to show up in the report.
+                # Endpoints cannot be revived, so we can safely ignore all scan results from dead_endpoints.
+                dead_endpoints.add(dead_endpoint)
+
                 # endpoints can die this moment,
                 # note that this removes only once. if the endpoint was rated twice with the same rating, the older one
                 # is still in there. Therefore it's not an IF but a WHILE statement.
@@ -420,6 +429,11 @@ def create_url_report(timeline, url: Url):
         for endpoint in relevant_endpoints:
             # All endpoints of all time are iterated. The dead endpoints etc should be filtered out above.
             url_was_once_rated = True
+
+            # do not do things with endpoints that have died.
+            # see: test_data_from_dead_endpoint_stays_gone
+            if endpoint in dead_endpoints:
+                continue
 
             calculations = []
             these_endpoint_scans = {}
