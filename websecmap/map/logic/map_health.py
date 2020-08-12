@@ -134,7 +134,28 @@ def get_lastest_map_health_data(country: str = "NL", organization_type: str = "m
         country=get_country(country),
         organization_type=get_organization_type(organization_type)
     ).first()
-    mh = MapHealthReport.objects.all().filter(map_configuration=map_configuration).latest('at_when')
+
+    if not map_configuration:
+        return {
+            "outdate_period_in_hours": -1,
+            "percentage_up_to_date": -1,
+            "percentage_out_of_date": -1,
+            "amount_up_to_date": -1,
+            "amount_out_of_date": -1,
+            "per_scan": [],
+        }
+    try:
+        mh = MapHealthReport.objects.all().filter(map_configuration=map_configuration).latest('at_when')
+    except MapHealthReport.DoesNotExist:
+        return {
+            "outdate_period_in_hours": -1,
+            "percentage_up_to_date": -1,
+            "percentage_out_of_date": -1,
+            "amount_up_to_date": -1,
+            "amount_out_of_date": -1,
+            "per_scan": [],
+        }
+
     return mh.detailed_report
 
 
