@@ -118,7 +118,7 @@ def get_security_header_calculation(scan: Union[EndpointGenericScan, UrlGenericS
     else:
         explanation = "Missing " + header + " header."
 
-        if header in ["X-Frame-Options", "Strict-Transport-Security"]:
+        if header in ["Strict-Transport-Security"]:
 
             # special case when no insecure alternatives are offered
             if scan.explanation == "Security Header not present: Strict-Transport-Security, " \
@@ -128,7 +128,7 @@ def get_security_header_calculation(scan: Union[EndpointGenericScan, UrlGenericS
             else:
                 medium += 1
 
-        if header in ["X-Content-Type-Options", "X-XSS-Protection"]:
+        if header in ["X-Content-Type-Options", "X-XSS-Protection", "X-Frame-Options"]:
             low += 1
 
     return standard_calculation(scan, explanation, high, medium, low)
