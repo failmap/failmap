@@ -10,7 +10,8 @@ from cryptography.x509.oid import NameOID
 
 import websecmap
 from websecmap.organizations.models import Url
-from websecmap.scanners.autoexplain import certificate_matches_microsoft_exception_policy, autoexplain_trust_microsoft, retrieve_certificate
+from websecmap.scanners.autoexplain import (autoexplain_trust_microsoft,
+                                            certificate_matches_microsoft_exception_policy)
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 log = logging.getLogger('websecmap')
@@ -50,7 +51,6 @@ def test_autoexplain_certificate(db):
 
     assert True is certificate_matches_microsoft_exception_policy(
         generate_certificate(), endpointscan, applicable_subdomains, trusted_organization)
-
 
 
 def generate_certificate(failure_mode: str = ""):

@@ -1690,5 +1690,61 @@
             "date_changed": "2020-08-07T09:54:04.514Z",
             "description": ""
         }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 333,
+        "fields": {
+            "name": "dns_clean_wildcards: Schedule Scan",
+            "task": "websecmap.scanners.scanner.dns_clean_wildcards.plan_scan",
+            "interval": null,
+            "crontab": 10,
+            "solar": null,
+            "clocked": null,
+            "args": "[]",
+            "kwargs": "{}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-07T09:54:04.506Z",
+            "description": ""
+        }
+    },
+    {
+        "model": "django_celery_beat.periodictask",
+        "pk": 334,
+        "fields": {
+            "name": "dns_clean_wildcards: Perform Scan",
+            "task": "websecmap.app.models.create_planned_scan_job",
+            "interval": null,
+            "crontab": 33,
+            "solar": null,
+            "clocked": null,
+            "args": "[\"websecmap.scanners.scanner.dns_clean_wildcards\"]",
+            "kwargs": "{\"amount\": 25}",
+            "queue": "storage",
+            "exchange": null,
+            "routing_key": null,
+            "headers": "{}",
+            "priority": null,
+            "expires": null,
+            "expire_seconds": null,
+            "one_off": false,
+            "start_time": null,
+            "enabled": false,
+            "last_run_at": null,
+            "total_run_count": 0,
+            "date_changed": "2020-08-07T09:54:04.514Z",
+            "description": ""
+        }
     }
 ]
