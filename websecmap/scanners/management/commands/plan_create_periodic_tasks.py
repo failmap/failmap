@@ -134,6 +134,10 @@ class Command(BaseCommand):
         # screenshots
         plan_daily('screenshot', 'scan', "every 7 days"),
         consume('screenshot', 'planned_scan', 'every 30 minutes', amount=25),
+
+        # dns_clean_subdomains
+        plan_daily('dns_clean_subdomains', 'scan', "every 7 days"),
+        consume('dns_clean_subdomains', 'planned_scan', 'every 30 minutes', amount=25),
     ]
 
     def handle(self, *args, **options):
