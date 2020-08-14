@@ -8,14 +8,15 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 
+import websecmap
 from websecmap.organizations.models import Url
-from websecmap.scanners.autoexplain import certificate_matches_microsoft_exception_policy
+from websecmap.scanners.autoexplain import certificate_matches_microsoft_exception_policy, autoexplain_trust_microsoft, retrieve_certificate
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 log = logging.getLogger('websecmap')
 
 
-def test_autoexplain(db):
+def test_autoexplain_certificate(db):
     url, created = Url.objects.all().get_or_create(url='autodiscover.arnhem.nl')
     endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='https', port='443', ip_version=4)
     endpointscan, created = EndpointGenericScan.objects.all().get_or_create(
@@ -23,7 +24,8 @@ def test_autoexplain(db):
         rating='not trusted',
         rating_determined_on=datetime.datetime.now(pytz.utc),
         is_the_latest_scan=True,
-        type='tls_qualys_certificate_trusted')
+        type='tls_qualys_certificate_trusted'
+    )
 
     applicable_subdomains = {
         'autodiscover': ['accepted.test.example'],
@@ -48,6 +50,7 @@ def test_autoexplain(db):
 
     assert True is certificate_matches_microsoft_exception_policy(
         generate_certificate(), endpointscan, applicable_subdomains, trusted_organization)
+
 
 
 def generate_certificate(failure_mode: str = ""):
@@ -89,3 +92,69 @@ def generate_certificate(failure_mode: str = ""):
     certificate = builder.sign(private_key=private_key, algorithm=hashes.SHA256(), backend=default_backend())
 
     return certificate
+
+
+def generate_specific_certificate(subject="", issuer=""):
+    one_day = datetime.timedelta(1, 0, 0)
+    # weak key size, to make test faster
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=512, backend=default_backend())
+    public_key = private_key.public_key()
+    builder = x509.CertificateBuilder()
+    builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, subject)]))
+    builder = builder.issuer_name(x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, issuer)]))
+    builder = builder.not_valid_before(datetime.datetime.today() - one_day)
+    builder = builder.not_valid_after(datetime.datetime.today() + (one_day * 30))
+    builder = builder.serial_number(x509.random_serial_number())
+    builder = builder.public_key(public_key)
+    builder = builder.add_extension(x509.SubjectAlternativeName([x509.DNSName(u'cryptography.io')]), critical=False)
+    builder = builder.add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
+    certificate = builder.sign(private_key=private_key, algorithm=hashes.SHA256(), backend=default_backend())
+
+    return certificate
+
+
+# overwrite the retrieve_certificate method in autoexplain. Otherwise it tries to access the internet.
+def fake_retrieve_certificate(*args, **kwargs):
+    return generate_specific_certificate(u"*.online.lync.com", u"Microsoft Corporation")
+
+
+def test_autoexplain_including_headers(db, monkeypatch):
+    url, created = Url.objects.all().get_or_create(url='lyncdiscover.arnhem.nl')
+    endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='https', port='443', ip_version=4)
+    endpointscan, created = EndpointGenericScan.objects.all().get_or_create(
+        endpoint=endpoint,
+        rating='not trusted',
+        rating_determined_on=datetime.datetime.now(pytz.utc),
+        is_the_latest_scan=True,
+        type='tls_qualys_certificate_trusted'
+    )
+    header_scan_new, created = EndpointGenericScan.objects.all().get_or_create(
+        endpoint=endpoint,
+        rating='not trusted',
+        rating_determined_on=datetime.datetime.now(pytz.utc),
+        is_the_latest_scan=True,
+        type='http_security_header_x_content_type_options'
+    )
+    header_scan_old, created = EndpointGenericScan.objects.all().get_or_create(
+        endpoint=endpoint,
+        rating='not trusted',
+        rating_determined_on=datetime.datetime.now(pytz.utc),
+        is_the_latest_scan=False,
+        type='http_security_header_x_content_type_options'
+    )
+
+    assert endpointscan.comply_or_explain_is_explained is False
+    assert header_scan_new.comply_or_explain_is_explained is False
+    assert header_scan_old.comply_or_explain_is_explained is False
+
+    log.debug("explaining...")
+    monkeypatch.setattr(websecmap.scanners.autoexplain, "retrieve_certificate", fake_retrieve_certificate)
+
+    autoexplain_trust_microsoft()
+
+    updated_endpoint = EndpointGenericScan.objects.get(id=endpoint.id)
+    assert updated_endpoint.comply_or_explain_is_explained is True
+    updated_endpoint = EndpointGenericScan.objects.get(id=header_scan_new.id)
+    assert updated_endpoint.comply_or_explain_is_explained is True
+    updated_endpoint = EndpointGenericScan.objects.get(id=header_scan_old.id)
+    assert updated_endpoint.comply_or_explain_is_explained is False
