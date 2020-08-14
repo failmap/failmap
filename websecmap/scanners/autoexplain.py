@@ -51,6 +51,7 @@ def autoexplain_trust_microsoft():
     trusted_organization = 'Microsoft Corporation'
     # accepted_issue = 'SSL_ERROR_BAD_CERT_DOMAIN'
     standard_explanation = 'trusted_on_local_device_with_custom_trust_policy'
+    intended_for_devices = 'service_intended_for_devices_not_browsers'
     explanation_duration = timedelta(days=365*10)
 
     applicable_subdomains = {
@@ -116,13 +117,37 @@ def autoexplain_trust_microsoft():
         if matches_exception_policy:
             # when all checks pass, and indeed the SSL_ERROR_BAD_CERT_DOMAIN was found, the finding is explained
             log.debug(f"Scan {scan} fits all criteria to be auto explained for incorrect cert usage.")
-            scan.comply_or_explain_is_explained = True
-            scan.comply_or_explain_case_handled_by = "WebSecMap Explanation Bot"
-            scan.comply_or_explain_explained_by = "Websecmap Explanation Bot"
-            scan.comply_or_explain_explanation = standard_explanation
-            scan.comply_or_explain_explained_on = datetime.now(pytz.utc)
-            scan.comply_or_explain_explanation_valid_until = datetime.now(pytz.utc) + explanation_duration
-            scan.save()
+            add_bot_explanation(scan, standard_explanation, explanation_duration)
+
+            # Also retrieve all http security headers, they are never correct. The only thing that is actually
+            # tested is the encryption quality here.
+            header_scans = ['http_security_header_strict_transport_security',
+                            'http_security_header_x_content_type_options',
+                            'http_security_header_x_frame_options',
+                            'http_security_header_x_xss_protection']
+            for header_scan in header_scans:
+                latest_scan = get_latest_endpoint_scan(endpoint=scan.endpoint, scan_type=header_scan)
+                if latest_scan:
+                    add_bot_explanation(latest_scan, intended_for_devices, explanation_duration)
+
+
+def get_latest_endpoint_scan(endpoint, scan_type):
+    return EndpointGenericScan.objects.all().filter(
+        endpoint=endpoint,
+        is_the_latest_scan=True,
+        type=scan_type,
+        comply_or_explain_is_explained=False
+    ).first()
+
+
+def add_bot_explanation(scan: EndpointGenericScan, explanation: str, duration: timedelta):
+    scan.comply_or_explain_is_explained = True
+    scan.comply_or_explain_case_handled_by = "WebSecMap Explanation Bot"
+    scan.comply_or_explain_explained_by = "Websecmap Explanation Bot"
+    scan.comply_or_explain_explanation = explanation
+    scan.comply_or_explain_explained_on = datetime.now(pytz.utc)
+    scan.comply_or_explain_explanation_valid_until = datetime.now(pytz.utc) + duration
+    scan.save()
 
 
 def retrieve_certificate(url: str, port: int = 443) -> [x509.Certificate, None]:
