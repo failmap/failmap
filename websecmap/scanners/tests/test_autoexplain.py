@@ -152,7 +152,7 @@ def test_autoexplain_including_headers(db, monkeypatch):
 
     autoexplain_trust_microsoft()
 
-    updated_endpoint = EndpointGenericScan.objects.get(id=endpoint.id)
+    updated_endpoint = EndpointGenericScan.objects.get(id=endpointscan.id)
     assert updated_endpoint.comply_or_explain_is_explained is True
     updated_endpoint = EndpointGenericScan.objects.get(id=header_scan_new.id)
     assert updated_endpoint.comply_or_explain_is_explained is True

@@ -157,6 +157,14 @@ def get_identical_sites_on_wildcard_url(wildcard_url: Url) -> List[Url]:
         # couldn't get the filtering correct in the subdomains_under_wildcard method.
         if subdomain_url == wildcard_url:
             continue
+
+        # Not needed: in this case the www. is the same as the (steady) wildcard. And thus is also not useful.
+        # Don't remove the www. prefix subdomain of the 2nd level domain, that domain is
+        # intended to be the same as the 2nd level domain.
+        # if subdomain_url.url == f"www.{wildcard_url.url}":
+        #     log.debug(f"Will keep {subdomain_url.url} as that is intended to be the same as {wildcard_url.url}")
+        #     continue
+
         subdomain_content = site_content(subdomain_url.url)
         if wildcard_content == subdomain_content:
             log.debug(f"WILDCARD: Content of {subdomain_url} is the same as {wildcard_subdomain}.")
