@@ -517,34 +517,6 @@ def today():
     return datetime.now(pytz.utc).today()
 
 
-class Promise(models.Model):
-    """Allow recording of organisation promises for improvement."""
-
-    organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
-
-    notes = models.TextField(
-        blank=True,
-        null=True,
-        help_text="Context information about the promise (eg: ticket reference).")
-
-    # https://stackoverflow.com/questions/29549611/fixed-default-value-provided-after-upgrading-to-django-1-8#29549675
-    created_on = models.DateTimeField(
-        default=today, blank=True, null=True)
-
-    expires_on = models.DateTimeField(
-        default=seven_days_in_the_future,
-        blank=True,
-        null=True,
-        help_text="When in the future this promise is expected to be fulfilled.")
-
-    def __str__(self):
-        return '%s - %s' % (self.organization.name, self.created_on)
-
-    class Meta:
-        verbose_name = _('promise')
-        verbose_name_plural = _('promises')
-
-
 class Dataset(models.Model):
     """
     Allows you to define URL datasources to download and import into the system. This acts as a memory of what you

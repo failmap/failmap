@@ -203,54 +203,6 @@ def compose_task(
 
 
 def compare_results():
-    """
-    Gets the latest scan results from previously done qualys scans. So to make it easier to compare output and see if
-    this scanner needs extra implementations (or that there are bugs in O-Saft).
-
-    :return:
-    """
-    # given refactoring, the old approach didn't work anymore. Code saved for when the implemenation is updated.
-
-    """
-    from failmap.scanners.models import TlsScan, TlsQualysScan
-    tlsscans = TlsScan.objects.all().filter(last_scan_moment__gte=datetime.now(pytz.utc) - timedelta(days=7))
-    checked_scans = 0
-    different_scans = 0
-
-    for tlsscan in tlsscans:
-        checked_scans += 1
-        # log.debug("comparing %s" % tlsscan)
-        # get the most recent qualys scan, see if there are differences. If so: publish it with a qualys scan link.
-        latest_qualys = TlsQualysScan.objects.all().filter(endpoint=tlsscan.endpoint).latest('last_scan_moment')
-
-        if latest_qualys.qualys_rating != tlsscan.rating or \
-                latest_qualys.qualys_rating_no_trust != tlsscan.rating_no_trust:
-            different_scans += 1
-            qualys_scan_url = "https://www.ssllabs.com/ssltest/analyze.html?d=%s&hideResults=on&latest" % \
-                              tlsscan.endpoint.url.url
-            qualys_scan_saved_url = "http://localhost:8000/admin/scanners/tlsqualysscan/%s/change/" % \
-                                    latest_qualys.pk
-            tlsscan_saved = "http://localhost:8000/admin/scanners/tlsscan/%s/change/" % tlsscan.pk
-            log.info("Difference between Qualys and O-Saft detected on %s:%s. \n"
-                     "Qualys: %s, O-Saft: %s\n"
-                     "Qualys: %s, O-Saft: %s (without trust)\n"
-                     "Qualys online:%s\n"
-                     "Qualys database:%s\n"
-                     "TlsScan database:%s \n\n" % (tlsscan.endpoint.url.url, tlsscan.endpoint.port,
-                                                   latest_qualys.qualys_rating, tlsscan.rating,
-                                                   latest_qualys.qualys_rating_no_trust, tlsscan.rating_no_trust,
-                                                   qualys_scan_url, qualys_scan_saved_url, tlsscan_saved))
-        else:
-            log.info("%s:%s has the same rating." % (tlsscan.endpoint.url.url, tlsscan.endpoint.port))
-
-    log.info("")
-    log.info("Summary:")
-    log.info("%5s hosts scanned." % checked_scans)
-    log.info("%5s host differed." % different_scans)
-    log.info("")
-    log.info('comparison completed.')
-    """
-
     raise NotImplementedError
 
 

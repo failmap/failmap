@@ -352,7 +352,7 @@ class ExplainMixin(models.Model):
     An explanation excludes the grading to impact the report. The result is added in the report,
     strikethrough, with an explanation and the expiry time of this explanation.
 
-    Explains are available for all scans: GenericUrlScan, GenericEndpointScan, TlsScan, TlsQualysscan, this means
+    Explains are available for all scans: GenericUrlScan, GenericEndpointScan this means
     and extra model for each of these scans types.
 
     Given there is a 1-1 relation, the info is saved in scans. This reserves about 1kb per scan, which is somewhat
@@ -380,9 +380,7 @@ class ExplainMixin(models.Model):
     comply_or_explain_explanation = models.TextField(
         max_length=2048,
         help_text="Text that helps explain why this result is not counted in the report. For example: "
-                  "a broken scanner or another edge-case that is mainly on the side of the scanning party. Having "
-                  "requested the supplier for a fix, or promising a fix should be stored as a promise, not as an "
-                  "explanation.",
+                  "a broken scanner or another edge-case that is mainly on the side of the scanning party.",
         verbose_name="explanation",
         default="",
         null=True,
@@ -427,46 +425,6 @@ class ExplainMixin(models.Model):
 
     class Meta:
         abstract = True
-
-
-class TlsQualysScan(ExplainMixin, LatestScanMixin):
-    """
-    Model for scanner tls qualys
-    """
-    endpoint = models.ForeignKey(Endpoint, on_delete=models.CASCADE)
-
-    # result from the API
-    qualys_rating = models.CharField(max_length=3, default=0)  # 0, F, D, C, B, A-, A, A+
-    qualys_rating_no_trust = models.CharField(max_length=3, default=0)
-    qualys_message = models.CharField(max_length=255, help_text="Whatever Qualys said "
-                                                                "about the endpoint",
-                                      blank=True,
-                                      null=True)
-
-    # scan management
-    # Deprecated: pending = models.BooleanField(default=0)  # scan in progress
-    # Deprecated: pending_since = models.DateTimeField(null=True, blank=True)
-
-    # This is the last completed scan, we scan often, but the rating doesn't change that much
-    # This is just so we can manage when to scan next and to say when we've last checked.
-    scan_date = models.DateField(auto_now_add=True)  # completed scan
-    scan_time = models.TimeField(auto_now_add=True)  # For database indexes
-    last_scan_moment = models.DateTimeField(auto_now_add=True, db_index=True)  # For database indexes
-
-    # This is when the rating was determined. Ratings don't change that much.
-    rating_determined_on = models.DateTimeField()
-
-    class Meta:
-        managed = True
-        db_table = 'scanner_tls_qualys'
-        ordering = ['-rating_determined_on', ]
-
-    @property
-    def type(self):
-        return "tls_qualys"
-
-    def __str__(self):
-        return "%s - %s" % (self.scan_date, self.qualys_rating)
 
 
 class PlannedScan(models.Model):
@@ -634,136 +592,6 @@ class EndpointGenericScanScratchpad(models.Model):
     )
 
 
-# disabled for being too soon and not being modelled properly
-# class GenericScanQueue(models.Model):
-#     """
-#     Design: use a generic foreignkey for endpoints and urls, use no relation or have a model for urls and one for
-#     endpoints. Given there will be millions and millions of scans, running a genericforeignkey sounds like a bad idea.
-#
-#     Using a direct foreign key would be faster, easier to understand and maintain. Splitting the scan from an endpoint
-#     would require mimicing the endpoint data to be able to retrieve what endpoint has been scanned. That does not
-#     make sense.
-#
-#     Therefore two models will be made, with a relation to their scan type: endpoint or url.
-#     """
-#
-#     scanner = models.CharField(
-#         max_length=60,
-#         db_index=True,
-#         help_text="The scanner used to perform this scan. Options at time of designing: tlsq, https_headers..."
-#     )
-#
-#     created_at_when = models.DateTimeField(
-#         blank=True,
-#         null=True,
-#         help_text="The time of queueing this scan."
-#     )
-#
-#     finished_at_when = models.DateTimeField(
-#         blank=True,
-#         null=True,
-#         help_text="The time of this scan to finish."
-#     )
-#
-#     state = models.CharField(
-#         max_length=60,
-#         db_index=True,
-#         help_text="The current state of scan in progress. The normal lifecycle is: queued, being scanned, finished."
-#                   "In case of exceptions / errors, and the scan is returned, the state is error. A scan can also be "
-#                   "cancelled, in that case it will not be picked up by the scan workers. A new scan can be scheduled."
-#                   "A new scan for something can only be scheduled if the state is finished or cancelled. A scan can "
-#                   "also time out. in that case the scan could be picked up again lateron. Something went wrong during"
-#                   "a scan."
-#     )
-#
-#     state_message = models.CharField(
-#         max_length=250,
-#         help_text="Information about the status, for example error information.",
-#         blank=True,
-#         null=True
-#     )
-#
-#     last_state_change = models.DateTimeField(
-#         blank=True,
-#         null=True,
-#         help_text="The moment the state changed for this scan."
-#     )
-#
-#
-# class GenericScanQueueLog(models.Model):
-#     state = models.CharField(
-#         max_length=255,
-#         blank=True,
-#         default="",
-#         help_text="The state that was registered at a certain moment in time."
-#     )
-#
-#     state_message = models.CharField(
-#         max_length=250,
-#         help_text="Information about the status, for example error information.",
-#         blank=True,
-#         null=True
-#     )
-#
-#     last_state_update = models.DateTimeField(
-#         blank=True,
-#         null=True,
-#         help_text="Last time this state was written to this field, for example when the endpoint was saved, but"
-#                   "contained the same data as before. In that case the current state is updated."
-#     )
-#
-#     at_when = models.DateTimeField(
-#         blank=True,
-#         null=True
-#     )
-#
-#
-# class EndpointScanQueue(GenericScanQueue):
-#     endpoint = models.ForeignKey(
-#         Endpoint,
-#         on_delete=models.CASCADE,
-#         null=True,
-#         blank=True,
-#     )
-#
-#
-# class UrlScanQueue(GenericScanQueue):
-#     url = models.ForeignKey(
-#         Url,
-#         on_delete=models.CASCADE,
-#         null=True,
-#         blank=True,
-#     )
-#
-#
-# @receiver(post_save, sender=EndpointScanQueue)
-# def log_state_change(sender, instance, *args, **kwargs):
-#
-#     # do not add anything to the log if the message is the same, only update the last_state_update in that case.
-#     esql = EndpointScanQueueLog.objects.all().filter(scan__endpoint=instance.endpoint).last()
-#     if esql:
-#         if esql.state == instance.state and esql.state_message == instance.state_message:
-#             esql.last_state_update = timezone.now()
-#             esql.save()
-#             return
-#
-#     esql = EndpointScanQueueLog()
-#     esql.scan = instance
-#     esql.at_when = datetime.now(pytz.utc)
-#     esql.state = instance.state
-#     esql.state_message = instance.state_message
-#     esql.last_state_check = datetime.now(pytz.utc)
-#     esql.save()
-#
-#
-# class EndpointScanQueueLog(GenericScanQueueLog):
-#
-#     scan = models.ForeignKey(
-#         EndpointScanQueue,
-#         on_delete=models.CASCADE,
-#     )
-
-
 class Screenshot(models.Model):
     endpoint = models.ForeignKey(
         Endpoint, null=True, blank=True, on_delete=models.CASCADE)
@@ -878,136 +706,6 @@ class InternetNLV2StateLog(models.Model):
 
     def __str__(self):
         return "%s.%s: %s" % (self.scan.pk, self.pk, self.state)
-
-
-class InternetNLScan(models.Model):
-
-    type = models.CharField(
-        max_length=30,
-        help_text="mail, mail_dashboard or web",
-        blank=True,
-        null=True
-    )
-
-    success = models.BooleanField(
-        default=False,
-        help_text="If the scan finished successfully."
-    )
-
-    started = models.BooleanField(
-        default=False,
-        help_text="If the scan is started, normally this is a YES."
-    )
-
-    """
-    during deploy this somehow converts to a datetime(6) NULL... which causes a syntax error.
-    this error did not pop up during development, tests or migration during tests. Weird.
-    it also doesn't deviate much from the other column specifications with a datetimefield... so wtf.
-    DATETIME(6) is the fractional seconds precision. So that is something real and supported. What is the
-    syntax error then?
-    o your MySQL server version for the right syntax to use near '(6) NULL, `finished` bool NOT NULL, `finished_on`
-    datetime(6) NULL, `url` varcha' at line 1"). Is "started_on" or started a reserved word?
-    only type is a reserved word. But type is not in the first version of this query.
-    https://dev.mysql.com/doc/refman/5.5/en/keywords.html
-    can i see the whole query?
-
-    failmap sqlmigrate scanners 0051_internetnlscan
-
-    This is the whole query:
-    BEGIN;
-    --
-    -- Create model InternetNLScan
-    --
-    CREATE TABLE `scanners_internetnlscan`
-    (
-        `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-        `success` bool NOT NULL,
-        `started` bool NOT NULL,
-        `started_on` datetime(6) NULL,
-        `finished` bool NOT NULL,
-        `finished_on` datetime(6) NULL, `url` varchar(500) NULL,
-        `message` varchar(500) NULL
-    );
-    COMMIT;
-
-    It crashes on the (6) NULL at `started_on`. So what's up?
-    This? https://django-mysql.readthedocs.io/en/latest/management_commands/fix_datetime_columns.html
-    Server version: 5.5.62-0+deb8u1 (Debian)
-    That version doesn't support datetime(6) yet...?
-    i guess they dropped 5.5 support in this version of django?
-
-    Python version: 3.6.6
-    Django version: 2.1.3
-    Failmap version: 1.1+b9ef27fe
-
-    https://dev.mysql.com/doc/refman/5.6/en/fractional-seconds.html
-    MySQL 5.6.4 and up expands fractional seconds support for TIME, DATETIME, and TIMESTAMP values, with up to
-    microseconds (6 digits) precision:
-
-    With MySQL 5.5, Django uses datetime for DateTimeField, from 5.6 onwards it uses datetime(6) with microseconds.
-    super_stitch@faalserver:~# mysql --version
-    mysql  Ver 14.14 Distrib 5.5.62, for debian-linux-gnu (x86_64) using readline 6.3
-
-    So this seems to be a bug. I guess we have to upgrade to 5.6?
-    I think the django script sees Distrib 5.5.62 which contains "5.6" :) Which would mean we didn't create datetime
-    since july this year or the bug was freshly introduced.
-
-    So the issue is probably somewhere in Django.
-    The mysql with microseconds came out 5 years ago. And there is no similar issue yet. So now what...
-
-    5.5 support seems to be dropped from django. Rightly so.
-    https://code.djangoproject.com/ticket/28552
-
-    And there you also see the microsecond_precision flag dropped.
-    'The end of upstream support for MySQL 5.5 is December 2018. Therefore, Django 2.1 (released a couple months
-    earlier in August 2018) may set MySQL 5.6 as the minimum version that it supports.'
-
-    Which is also in the release notes: https://docs.djangoproject.com/en/2.1/releases/2.1/
-    So we where lucky to be able to run this version at all. So we can stay on an old django version to support legacy
-    sql. Which means no support etc. Or move to 1.11 LTS, but that means also a lot of changes and stagnation in
-    adoption of new features. I guess we're updating the database then. And if that's a lot of work, set django fixed
-    to 2.0
-    """
-    started_on = models.DateTimeField(
-        blank=True,
-        null=True
-    )
-
-    finished = models.BooleanField(
-        default=False,
-        help_text="If the scan is complete."
-    )
-
-    finished_on = models.DateTimeField(
-        blank=True,
-        null=True
-    )
-
-    status_url = models.TextField(
-        max_length=500,
-        help_text="The url where the status of the batch scan can be retrieved.",
-        blank=True,
-        null=True
-    )
-
-    last_check = models.DateTimeField(
-        blank=True,
-        null=True
-    )
-
-    message = models.TextField(
-        max_length=500,
-        help_text="The complete answer retrieved from the server.",
-        blank=True,
-        null=True
-    )
-
-    friendly_message = models.CharField(
-        max_length=255,
-        help_text="The message from the complete answer. Gives insight into progress of the scan.",
-        blank=True,
-        null=True
-    )
 
 
 # A debugging table to help with API interactions.

@@ -11,13 +11,6 @@ from websecmap.scanners.scanner.internet_nl_v2_websecmap import (progress_runnin
                                                                  recover_and_retry)
 
 
-class TlsQualysScanAdminInline(CompactInline):
-    model = models.TlsQualysScan
-    extra = 0
-    show_change_link = True
-    ordering = ["-rating_determined_on"]
-
-
 class EndpointGenericScanInline(CompactInline):
     model = models.EndpointGenericScan
     extra = 0
@@ -60,51 +53,8 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         url = "%s://%s:%s/" % (inst.protocol, inst.url.url, inst.port)
         return format_html("<a href='%s' target='_blank'>Visit</a>" % url)
 
-    inlines = [TlsQualysScanAdminInline, EndpointGenericScanInline]
+    inlines = [EndpointGenericScanInline]
     save_as = True  # Save as new is nice for duplicating endpoints.
-
-
-@admin.register(models.TlsQualysScan)
-class TlsQualysScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust', 'qualys_message',
-                    'last_scan_moment', 'rating_determined_on', 'comply_or_explain_is_explained', 'explain',
-                    'is_the_latest_scan')
-    search_fields = ('endpoint__url__url', 'qualys_rating', 'qualys_rating_no_trust',
-                     'scan_date', 'rating_determined_on')
-
-    # listing all endpoints takes ages
-    list_filter = ['endpoint__url__organization__country', 'endpoint__url__organization__type__name',
-                   'qualys_rating', 'qualys_rating_no_trust',
-                   'scan_date', 'rating_determined_on', 'qualys_message',
-                   'endpoint__protocol',
-                   'endpoint__port', 'endpoint__ip_version', 'endpoint__discovered_on', 'endpoint__is_dead',
-                   'comply_or_explain_is_explained', 'comply_or_explain_explained_on',
-                   'comply_or_explain_case_handled_by', 'comply_or_explain_explanation_valid_until',
-                   'is_the_latest_scan'
-                   ][::-1]
-
-    # loading related fields in django jet is not done in a smart way: everything is prefetched.
-    # and when there are > 10000 objects of some sort, the system becomes insanely slow.
-    # Should make it an autocomplete field... or something else.
-    # therefore endpoint is set as a readonly_field.
-    fieldsets = (
-        (None, {
-            'fields': ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
-                       'rating_determined_on', 'last_scan_moment', 'is_the_latest_scan')
-        }),
-        ('comply or explain', {
-            'fields': ('comply_or_explain_is_explained', 'comply_or_explain_explanation_valid_until',
-                       'comply_or_explain_explanation', 'comply_or_explain_explained_by',
-                       'comply_or_explain_explained_on', 'comply_or_explain_case_handled_by',
-                       'comply_or_explain_case_additional_notes'),
-        }),
-    )
-
-    readonly_fields = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
-                       'rating_determined_on', 'last_scan_moment', 'is_the_latest_scan')
-
-    def explain(self, object):
-        return format_html("<a href='./{}/change/#/tab/module_1/'>Explain</a>", object.pk)
 
 
 @admin.register(models.TlsQualysScratchpad)
@@ -217,14 +167,6 @@ class EndpointGenericScanScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmi
     list_filter = ['type', 'domain', 'at_when', 'data'][::-1]
     fields = ('type', 'domain', 'at_when', 'data')
 
-
-@admin.register(models.InternetNLScan)
-class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('pk', 'type', 'started_on', 'finished_on', 'success', 'message', 'friendly_message')
-    search_fields = ('message', 'status_url')
-    list_filter = ('started_on', 'finished_on', 'success', 'message', 'type')
-    fields = ('type', 'started', 'started_on', 'finished', 'finished_on', 'success', 'message', 'friendly_message',
-              'status_url')
 
 
 @admin.register(models.InternetNLV2Scan)
