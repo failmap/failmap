@@ -29,7 +29,6 @@ class Command(DumpDataCommand):
     #         - Organizations         Yes         Hard to gather
     #         - OrganizationType      Yes         Foreign Keys
     #         - Urls                  Yes         Even harder to gather
-    #         - Promises              Yes         Might contain valuable data
     #
     #         Scanners:
     #         - Endpoints             Yes         Needed for rebuild ratings, hard to gather

@@ -23,26 +23,12 @@ from websecmap.celery import PRIO_HIGH, app
 from websecmap.map.models import OrganizationReport
 from websecmap.organizations import datasources
 from websecmap.organizations.datasources import dutch_government, excel
-from websecmap.organizations.models import (Coordinate, Dataset, Organization, OrganizationType,
-                                            Promise, Url)
+from websecmap.organizations.models import (Coordinate, Dataset, Organization, OrganizationType, Url)
 from websecmap.reporting.models import UrlReport
 from websecmap.scanners import SCANNERS
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, UrlIp
 
 log = logging.getLogger(__name__)
-
-
-PROMISE_DESCRIPTION = """
-<p>A 'promise' is an indication by an organisation representitive that an improvement
-has been made which will alter the organizations score. A generic message will be
-displayed on the organization report with the creation and expiry date of the promise
-until it expires.</p>
-<p>This indication is to overcome the problem of a negative score even though improvement
-are made, but the score cannot reflect them yet due to technical or bureaucratic reasons.</p>
-<p>It is not intended for long term promises of improvement that have not been applied or
-put in to progress. The promised improvement must be verifiable by Faalkaart within a
-handfull of days.</p>
-"""
 
 
 # todo: the through solution has two challenges:
@@ -167,19 +153,6 @@ class UrlIpInline(CompactInline):
     ordering = ["-discovered_on"]
 
 
-class PromiseAdminInline(CompactInline):
-    model = Promise
-    extra = 0
-    ordering = ["-created_on"]
-
-    fieldsets = (
-        (None, {
-            'fields': ('organization', 'created_on', 'expires_on', 'notes'),
-            'description': PROMISE_DESCRIPTION,
-        }),
-    )
-
-
 class ActionMixin:
     """Generic Mixin to add Admin Button for Organization/Url/Endpoint Actions.
 
@@ -278,7 +251,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     fields = ('name', 'type', 'country', 'internal_notes', 'twitter_handle', 'created_on', 'wikidata', 'wikipedia',
               'is_dead', 'is_dead_since', 'is_dead_reason')
 
-    inlines = [CoordinateAdminInline, UrlAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
+    inlines = [CoordinateAdminInline, UrlAdminInline, OrganizationRatingAdminInline]  #
 
     @staticmethod
     def name_details(self):
@@ -653,20 +626,6 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
                 obj.edit_area = edit_area
 
         super().save_model(request, obj, form, change)
-
-
-@admin.register(Promise)
-class PromiseAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('organization', 'created_on', 'expires_on')
-    search_fields = ('organization',)
-    list_filter = ('organization',)
-
-    fieldsets = (
-        (None, {
-            'fields': ('organization', 'created_on', 'expires_on', 'notes'),
-            'description': PROMISE_DESCRIPTION,
-        }),
-    )
 
 
 class DatasetForm(forms.ModelForm):

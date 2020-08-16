@@ -6,7 +6,7 @@ from typing import List
 import pytz
 from django.db import transaction
 
-from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
+from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 
 log = logging.getLogger(__package__)
 
@@ -149,14 +149,6 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
             coordinate.is_dead_since = when
             coordinate.is_dead_reason = "Merged with %s" % new_organization
 
-        # still active promises
-        for promise in Promise.objects.all().filter(
-                organization=source_organization,
-                expires_on__gte=datetime.now(pytz.utc)):
-            cloned_promise = deepcopy(promise)
-            cloned_promise.id = None
-            cloned_promise.organization = new_organization
-            cloned_promise.save()
 
         # Should we make copies of all urls? And for what? Or should we state somewhere when an URL was owned
         # by an organization? Like n-n with extra information from when that is valid? That would result in
@@ -239,18 +231,10 @@ def dissolve(dissolved_organization_name: str, target_organization_names: List[s
         clone_target.created_on = when
         clone_target.save()
 
-        # copy the urls and promises to the clone.
+        # copy the urls to the clone.
         for url in Url.objects.all().filter(organization=target_organization):
             url.organization.add(clone_target)
             url.save()
-
-        for promise in Promise.objects.all().filter(
-                organization=target_organization,
-                expires_on__gte=datetime.now(pytz.utc)):
-            cloned_promise = deepcopy(promise)
-            cloned_promise.id = None
-            cloned_promise.organization = clone_target
-            cloned_promise.save()
 
         # enjoy solving the stuff of the other organizations...
         # they also get the dead urls, supposed they get back to life for some weird reason...

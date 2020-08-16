@@ -8,7 +8,7 @@ from websecmap.map.models import OrganizationReport
 from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url
 from websecmap.reporting.models import UrlReport
 from websecmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
-                                       InternetNLScan, ScanProxy, Screenshot, UrlGenericScan)
+                                       ScanProxy, Screenshot, UrlGenericScan, InternetNLV2Scan, InternetNLV2StateLog)
 
 log = logging.getLogger(__package__)
 
@@ -58,7 +58,8 @@ def and_its_gone():
     UrlReport.objects.all().delete()
 
     # scanners
-    InternetNLScan.objects.all().delete()
+    InternetNLV2Scan.objects.all().delete()
+    InternetNLV2StateLog.objects.all().delete()
     ScanProxy.objects.all().delete()
     UrlGenericScan.objects.all().delete()
     Screenshot.objects.all().delete()
