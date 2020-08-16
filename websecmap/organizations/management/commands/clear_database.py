@@ -8,7 +8,8 @@ from websecmap.map.models import OrganizationReport
 from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url
 from websecmap.reporting.models import UrlReport
 from websecmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
-                                       ScanProxy, Screenshot, UrlGenericScan, InternetNLV2Scan, InternetNLV2StateLog)
+                                       InternetNLV2Scan, InternetNLV2StateLog, ScanProxy,
+                                       Screenshot, UrlGenericScan)
 
 log = logging.getLogger(__package__)
 

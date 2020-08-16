@@ -168,7 +168,6 @@ class EndpointGenericScanScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmi
     fields = ('type', 'domain', 'at_when', 'data')
 
 
-
 @admin.register(models.InternetNLV2Scan)
 class InternetNLV2ScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('id', 'type', 'scan_id', 'online', 'state', 'state_message', 'last_state_check',
