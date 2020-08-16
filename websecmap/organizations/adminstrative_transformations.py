@@ -3,7 +3,6 @@ from copy import deepcopy
 from datetime import datetime
 from typing import List
 
-import pytz
 from django.db import transaction
 
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
@@ -148,7 +147,6 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
             coordinate.is_dead = True
             coordinate.is_dead_since = when
             coordinate.is_dead_reason = "Merged with %s" % new_organization
-
 
         # Should we make copies of all urls? And for what? Or should we state somewhere when an URL was owned
         # by an organization? Like n-n with extra information from when that is valid? That would result in
