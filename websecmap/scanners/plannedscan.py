@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
 
+import dateutil.parser
 import pytz
 from django.db import connection
 
@@ -196,7 +197,7 @@ def websecmap_list_outdated():
 @app.task(queue="storage")
 def list_outdated(published_scan_types):
     for map_configuration in filter_map_configs():
-        print(f"Outdated items for f{map_configuration}:")
+        print(f"Outdated items for {map_configuration['country']}/{map_configuration['organization_type__name']}:")
         organizations_on_map = Organization.objects.all().filter(
             country=map_configuration['country'],
             type=map_configuration['organization_type']
@@ -212,10 +213,24 @@ def list_outdated(published_scan_types):
                 'scanner': scanner['name'],
                 'url': outdated_result['url'],
                 'activity': 'scan',
+                'last_scan': outdated_result['last_scan'],
+                'scan': outdated_result['scan'],
             })
         plan = deduplicate_plan(plan)
+
+        # update the dates to match:
+        for activity in plan:
+            activity['last_scan'] = dateutil.parser.isoparse(activity['last_scan'])
+
+        plan = sorted(plan, key=lambda mplan: mplan['last_scan'])
+        print(f" For a total of {len(plan)} items:")
+        print("-------------------------------------------------------------------------------------------------------")
+        print(f"{'Last scan':22} {'Scan':9} {'Activity':10} {'Scanner':30} {'Url':60}")
+        print("-------------------------------------------------------------------------------------------------------")
+
         for item in plan:
-            print(f"{item['activity']:20} {item['scanner']:30} {item['url']:60}")
+            print(f"{str(item['last_scan'].strftime('%Y-%m-%d %H:%M:%S')):22} {item['scan']:9} "
+                  f"{item['activity']:10} {item['scanner']:30} {item['url']:60}")
     return
 
 
