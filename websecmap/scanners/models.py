@@ -462,7 +462,13 @@ class PlannedScan(models.Model):
         help_text="requested, picked_up, finished, error, timeout"
     )
 
-    requested_at_when = models.DateTimeField()
+    """
+        WHERE
+        requested_at_when >= '%(when)s'
+    """
+    requested_at_when = models.DateTimeField(
+        db_index=True
+    )
 
     last_state_change_at = models.DateTimeField(
         null=True,
