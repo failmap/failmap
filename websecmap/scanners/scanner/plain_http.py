@@ -209,6 +209,7 @@ def scan(endpoint):
         # no need to further check, can't even get the IP address...
         return False, False, False
 
+    # retry harder!
     can_connect_result = can_connect(protocol="https", url=endpoint.url, port=443, ip_version=endpoint.ip_version)
     redirects_to_safety_result = None
 

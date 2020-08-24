@@ -467,7 +467,12 @@ class PlannedScan(models.Model):
         requested_at_when >= '%(when)s'
     """
     requested_at_when = models.DateTimeField(
-        db_index=True
+        db_index=False
+    )
+
+    requested_at_when_date = models.DateField(
+        db_index=True,
+        null=True,
     )
 
     last_state_change_at = models.DateTimeField(

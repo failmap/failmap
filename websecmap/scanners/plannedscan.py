@@ -34,10 +34,10 @@ def progress(days=7) -> List[Dict[str, Any]]:
             FROM
                 scanners_plannedscan
             WHERE
-                requested_at_when >= '%(when)s'
+                requested_at_when_date >= '%(when)s'
             GROUP BY
                 scanner, activity, state
-            """ % {'when': when}
+            """ % {'when': when.date()}
 
     cursor = connection.cursor()
     cursor.execute(sql)
@@ -106,13 +106,16 @@ def request(activity: str, scanner: str, urls: List[Url]):
             log.warning(f"Already registered: {activity} on {scanner} for {url}.")
             continue
 
+        now = datetime.now(pytz.utc)
+
         ps = PlannedScan()
         ps.activity = activity
         ps.scanner = scanner
         ps.url = url
         ps.state = "requested"
-        ps.last_state_change_at = datetime.now(pytz.utc)
-        ps.requested_at_when = datetime.now(pytz.utc)
+        ps.last_state_change_at = now
+        ps.requested_at_when = now
+        ps.requested_at_when_date = now.date()
         ps.save()
 
     log.debug(f"Requested {activity} with {scanner} on {len(urls)} urls.")
