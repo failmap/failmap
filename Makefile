@@ -166,7 +166,7 @@ test_postgres:
 		-e POSTGRES_DB=failmap \
 		-e POSTGRES_USER=root \
 		-e POSTGRES_PASSWORD=failmap \
-		postgres:9.4
+		postgres:9.5
 	DJANGO_DATABASE=production DB_ENGINE=postgresql_psycopg2 DB_USER=root DB_HOST=127.0.0.1 \
 		$(MAKE) test; e=$$?; docker stop postgres; exit $$e
 
