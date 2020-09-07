@@ -94,6 +94,7 @@ def test_map_views(organization_type, organization):
     }
 
     import inspect
+
     from websecmap.map.urls import urlpatterns
 
     for pattern in urlpatterns:

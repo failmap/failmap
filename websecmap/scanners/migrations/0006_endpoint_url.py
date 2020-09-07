@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import django.db.models.deletion
 from django.db import migrations, models
 
-
 """
 +------+------------------------------------+----------------------------+----------------------------+------+----------+---------+----------------+---------------+
 | id   | domain                             | server_name                | ip                         | port | protocol | is_dead | is_dead_reason | is_dead_since |

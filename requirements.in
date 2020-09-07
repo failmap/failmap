@@ -19,17 +19,18 @@ attrs==19.3.0
 git+https://github.com/stitch/ProxyBroker#egg=proxybroker
 # end dephel for proxies
 
-django<3
-django-jet
+django
+# special version of django jet that removes python2 support.
+# see this issue: https://github.com/geex-arts/django-jet/issues/418
+r-django-jet
 django-countries
 django-leaflet
 django-geojson
-# jsonfield 3+ breaks django-geojson: https://github.com/makinacorpus/django-geojson/issues/104
-jsonfield<3
+jsonfield
 django-import-export
 # version 2.6.0+ breaks functionality, not yet investigated a mitigation:
 # ImportError: cannot import name 'config' from 'constance' (/root/.cache/virtualenvs/web-security-map/lib/python3.7/site-packages/constance/__init__.py)
-django-constance<2.6.0
+django-constance
 django-picklefield
 
 pyyaml

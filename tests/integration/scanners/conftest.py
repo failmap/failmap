@@ -13,7 +13,7 @@ TIMEOUT = 30
 
 
 @pytest.fixture(scope="session")
-def faalonië():
+def faaloniae():
     """Load test organization fixtures."""
 
     subprocess.call(['websecmap', 'migrate'])
