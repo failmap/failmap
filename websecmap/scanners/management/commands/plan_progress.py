@@ -15,4 +15,4 @@ class Command(BaseCommand):
     """
 
     def handle(self, *args, **options):
-        pprint(plannedscan.progress())
+        pprint(plannedscan.calculate_progress())

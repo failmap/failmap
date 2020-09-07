@@ -12,12 +12,28 @@ from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.report import PUBLISHED_SCAN_TYPES
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import SCAN_TYPES_TO_SCANNER, SCANNERS_BY_NAME
-from websecmap.scanners.models import Endpoint, PlannedScan
+from websecmap.scanners.models import Endpoint, PlannedScan, PlannedScanStatistic
 
 log = logging.getLogger(__name__)
 
 
-def progress(days=7) -> List[Dict[str, Any]]:
+@app.task(queue='storage')
+def store_progress():
+    """
+    Runs every N minutes (periodic task) and stores the latest calculated progress in the db.
+    """
+    pss = PlannedScanStatistic()
+    pss.at_when = datetime.now(pytz.utc)
+    pss.data = calculate_progress(7)
+    pss.save()
+
+
+def get_latest_progress():
+    pss = PlannedScanStatistic.objects.last()
+    return {} if not pss else pss.data
+
+
+def calculate_progress(days=7) -> List[Dict[str, Any]]:
     """
     Retrieves the progress of all scans in the past 7 days. Will show how many are requested and how many
     are at what state.
@@ -34,7 +50,7 @@ def progress(days=7) -> List[Dict[str, Any]]:
             FROM
                 scanners_plannedscan
             WHERE
-                requested_at_when_date >= '%(when)s'
+                requested_at_when >= '%(when)s'
             GROUP BY
                 scanner, activity, state
             """ % {'when': when.date()}

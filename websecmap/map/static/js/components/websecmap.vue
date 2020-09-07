@@ -677,6 +677,10 @@ const WebSecMap = Vue.component('websecmap', {
             fetch(`/data/planned_scan_progress/`).then(response => response.json()).then(data => {
                 let progress = {}
 
+                // in case there is no data:
+                if (Object.keys(data).length === 0)
+                    return;
+
                 // row = {"scanner": "ftp", "activity": "discover", "state": "finished", "amount": 201}
                 data.forEach((row) => {
                     if (progress[row['scanner']] === undefined) {

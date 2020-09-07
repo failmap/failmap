@@ -1029,6 +1029,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
 
     {'label': _('🔬 Generated Scans'), 'items': [
         {'name': 'scanners.plannedscan', 'label': 'Planned Scans'},
+        {'name': 'scanners.plannedscanstatistic', 'label': 'Planned Scans Stats'},
         {'name': 'scanners.endpoint', 'label': 'Endpoints'},
         {'name': 'scanners.endpointgenericscan', 'label': 'Endpoint Scans & Explanations'},
         {'label': '- By Last Scan Moment (newest)',

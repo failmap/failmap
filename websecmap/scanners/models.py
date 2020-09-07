@@ -427,6 +427,11 @@ class ExplainMixin(models.Model):
         abstract = True
 
 
+class PlannedScanStatistic(models.Model):
+    at_when = models.DateTimeField()
+    data = JSONField()
+
+
 class PlannedScan(models.Model):
     """
     A planned scan is always performed per url, even if the scan itself is about endpoints. The endpoints can be
@@ -470,11 +475,6 @@ class PlannedScan(models.Model):
         db_index=False
     )
 
-    requested_at_when_date = models.DateField(
-        db_index=True,
-        null=True,
-    )
-
     last_state_change_at = models.DateTimeField(
         null=True,
     )
@@ -483,6 +483,13 @@ class PlannedScan(models.Model):
         null=True,
         help_text="when finished, timeout, error"
     )
+
+    # add joined index over scanner, activity, state, so queries are faster:
+    # see: https://docs.djangoproject.com/en/3.0/ref/models/options/#indexes
+    class Meta:
+        indexes = [
+            models.Index(fields=['scanner', 'activity', 'state'])
+        ]
 
 
 class PlannedScanError(models.Model):

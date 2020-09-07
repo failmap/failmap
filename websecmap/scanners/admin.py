@@ -287,3 +287,10 @@ class PlannedScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_filter = ['activity', 'scanner', 'state', 'last_state_change_at', 'requested_at_when',
                    'finished_at_when'][::-1]
     fields = ('url', 'activity', 'scanner', 'state', 'last_state_change_at', 'requested_at_when', 'finished_at_when')
+
+
+@admin.register(models.PlannedScanStatistic)
+class PlannedScanStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('at_when', 'data')
+    list_filter = ['at_when'][::-1]
+    fields = ('at_when', 'data')
