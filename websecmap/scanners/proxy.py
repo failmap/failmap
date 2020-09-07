@@ -189,7 +189,7 @@ def check_proxy(proxy: ScanProxy):
 
     log.debug(f"Could connect to test site {proxy_testing_url}. Proxy is functional.")
 
-    log.debug(f"Attempting to connect to the Qualys API.")
+    log.debug("Attempting to connect to the Qualys API.")
     try:
         api_results = service_provider_status(proxy)
     except RetryError:

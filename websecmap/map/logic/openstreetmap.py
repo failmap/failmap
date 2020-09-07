@@ -405,7 +405,7 @@ def match_organization(openstreetmap_properties, country, organization_type):
         except Organization.DoesNotExist:
             log.debug("Could not find organization by property 'name', trying another way.")
 
-    log.info(f"""
+    log.info("""
     Organization from OSM is currently not found in the database.
 
     This happens when neighbouring countries are also returned from your OSM query. Or when you decided to remove

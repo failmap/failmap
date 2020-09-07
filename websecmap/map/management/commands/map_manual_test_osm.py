@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
         )
 
-        log.debug(f"Response from server:")
+        log.debug("Response from server:")
         log.info(f"{response.content[0:250]}")
         response.raise_for_status()
 
