@@ -1,5 +1,4 @@
 import logging
-from pprint import pprint
 
 from django.core.management.base import BaseCommand
 
@@ -15,4 +14,4 @@ class Command(BaseCommand):
     """
 
     def handle(self, *args, **options):
-        pprint(plannedscan.calculate_progress())
+        plannedscan.store_progress()

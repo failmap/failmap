@@ -569,7 +569,7 @@ def _add_organization(request):
 
 
 def planned_scan_progress(request):
-    return JsonResponse(plannedscan.progress(7), encoder=JSEncoder, safe=False)
+    return JsonResponse(plannedscan.get_latest_progress(), encoder=JSEncoder, safe=False)
 
 
 def map_health(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER):
