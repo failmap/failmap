@@ -62,8 +62,12 @@ ${app}: ${VIRTUAL_ENV}/.requirements.installed | ${pip}
 test: .make.test	## run test suite
 .make.test: ${pysrc} ${app}
 	# run testsuite
+	# #7040: -k no longer matches against the names of the directories outside the test session root.
+	# #7122: Expressions given to the -m and -k options are no longer evaluated using Python’s eval().
+	# The format supports or, and, not, parenthesis and general identifiers to match against.
+	# Python constants, keywords or other operators are no longer evaluated differently.
 	DJANGO_SETTINGS_MODULE=${app_name}.settings ${env} coverage run --include '${app_name}/*' --omit '*migrations*' \
-		-m pytest -vv -ra -k 'not integration and not system' ${testargs}
+		-m pytest -vv -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
 	# generate coverage
 	${env} coverage report
 	# and pretty html
@@ -130,8 +134,9 @@ testcase: ${app}
 
 test_integration: ${app}
 	# run integration tests
+	# see docs at make test why the -k option is so explicit (no globbing anymore).
 	${env} DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 \
-		${env} pytest -vv -ra -k 'integration' ${testargs}
+		${env} pytest -vv -ra -k 'integration_celery or integration_scanners' ${testargs}
 
 test_system:
 	# run system tests
