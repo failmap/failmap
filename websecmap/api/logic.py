@@ -162,7 +162,7 @@ def sidn_handle_domain_upload(upload_id: int):
         new_subdomain = remove_last_dot(row[2])
 
         if new_subdomain == remove_last_dot(row[1]):
-            log.debug(f"New subdomain is the same as domain, skipping.")
+            log.debug("New subdomain is the same as domain, skipping.")
             continue
 
         # the entire domain is included, len of new subdomain + dot (1).

@@ -561,11 +561,11 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                 calculation = json.loads(reports[rating.id])
                 measurement["total_urls"] += len(calculation['organization']['urls'])
 
-                measurement["good_urls"] += sum([l['high'] == 0 and l['medium'] == 0
-                                                 for l in calculation['organization']['urls']])
-                measurement["medium_urls"] += sum([l['high'] == 0 and l['medium'] > 0
-                                                   for l in calculation['organization']['urls']])
-                measurement["high_urls"] += sum([l['high'] > 0 for l in calculation['organization']['urls']])
+                measurement["good_urls"] += sum([lx['high'] == 0 and lx['medium'] == 0
+                                                 for lx in calculation['organization']['urls']])
+                measurement["medium_urls"] += sum([lx['high'] == 0 and lx['medium'] > 0
+                                                   for lx in calculation['organization']['urls']])
+                measurement["high_urls"] += sum([lx['high'] > 0 for lx in calculation['organization']['urls']])
 
                 measurement["included_organizations"] += 1
 

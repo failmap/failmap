@@ -285,7 +285,7 @@ def save_coordinate(organization, lat, lng, address):
             coordinate.save(update_fields=['created_on', 'creation_metadata'])
 
     except Coordinate.MultipleObjectsReturned:
-        log.debug('Coordinate %s is multiple times in the database.' % [lng, lat])
+        log.debug('Coordinate is multiple times in the database. Unclear which one to fix.')
 
         # should we reduce the amount of coordinates?
 
