@@ -782,7 +782,7 @@ def redirects_to_safety(endpoint: Endpoint):
     :return:
     """
     import requests
-    from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError
+    from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
     # The worker (should) only resolve domain names only over ipv4 or ipv6. (A / AAAA).
     # Currenlty docker does not support that. Which means a lot of network rewriting for dealing with

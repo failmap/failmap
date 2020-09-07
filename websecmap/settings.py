@@ -536,6 +536,15 @@ CELERY_BROKER_CONNECTION_MAX_RETRIES = 1
 CELERY_BROKER_CONNECTION_RETRY = False
 CELERY_RESULT_EXPIRES = timedelta(hours=4)
 
+# Solve "assert {'error': 'DatabaseError', 'message': "DatabaseWrapper objects created in a thread can only be used in
+# that same thread. The object with alias 'default' was created in thread id 140582651898312 and this is thread id
+# 140582746599800."} is None"
+# according to: https://stackoverflow.com/questions/60179472/
+# Which might not be the best approach according to: https://docs.celeryproject.org/en/stable/userguide/testing.html
+# According to the documentation this should be set to False in production, unless you don't want to use queues.
+# How do we detect we're in a test?
+# CELERY_TASK_ALWAYS_EAGER = True
+
 # Use the value of 2 for celery prefetch multiplier. Previous was 1. The
 # assumption is that 1 will block a worker thread until the current (rate
 # limited) task is completed. When using 2 (or higher) the assumption is that

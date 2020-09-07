@@ -8,7 +8,7 @@ TEST_ORGANIZATION = 'faalonië'
 NON_EXISTING_ORGANIZATION = 'faaloniet'
 
 
-def test_dummy(responses, db, faalonië):
+def test_dummy(responses, db, faaloniae):
     """Test running dummy scan."""
 
     result = json.loads(call_command('scan', 'dummy', '-v3', '-o', TEST_ORGANIZATION))

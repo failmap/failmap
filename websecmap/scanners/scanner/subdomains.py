@@ -298,8 +298,8 @@ def wordlist_scan(urls: List[Url], wordlist: List[str]):
     """
     # import DNSRecon using evil methods
     sys.path.append(settings.VENDOR_DIR + '/dnsrecon/')
-    from lib.dnshelper import DnsHelper
     from dnsrecon import ThreadPool, brute_domain
+    from lib.dnshelper import DnsHelper
 
     # dnsrecon needs it's own threadpool. And you can only override it via builtins.
     global pool
@@ -457,8 +457,9 @@ def certificate_transparency_scan(urls: List[Url]):
     :param urls: List of Url objects
     :return:
     """
-    import requests
     import re
+
+    import requests
 
     addedlist = []
     for url in urls:
@@ -518,8 +519,8 @@ def nsec_scan(urls: List[Url]):
     """
     # import DNSRecon using evil methods
     sys.path.append(settings.VENDOR_DIR + '/dnsrecon/')
-    from lib.dnshelper import DnsHelper
     from dnsrecon import ds_zone_walk
+    from lib.dnshelper import DnsHelper
 
     for url in urls:
         resolver = DnsHelper(url.url, '8.8.8.8', 30)

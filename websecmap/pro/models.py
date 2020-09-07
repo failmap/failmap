@@ -8,7 +8,6 @@ from websecmap.organizations.models import Organization, Url
 from websecmap.reporting.models import SeriesOfUrlsReportMixin
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 
-
 """
 Ideas:
 

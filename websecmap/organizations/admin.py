@@ -513,8 +513,9 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     actions.append('declare_dead')
 
     def timeline_debug(self, request, queryset):
-        from websecmap.reporting.report import create_timeline, inspect_timeline
         from django.http import HttpResponse
+
+        from websecmap.reporting.report import create_timeline, inspect_timeline
 
         content = "<pre>"
         for url in queryset:
