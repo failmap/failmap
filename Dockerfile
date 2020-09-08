@@ -1,5 +1,5 @@
 # base build on small footprint image
-FROM alpine:3.8 as build
+FROM alpine:3.12 as build
 
 RUN apk --no-cache add \
   build-base \
