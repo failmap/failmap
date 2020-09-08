@@ -140,6 +140,7 @@ pyexcel-xlsx
 pyexcel-ods
 
 # database clients
+# Mysqlclient on mac install instructions: https://github.com/PyMySQL/mysqlclient-python
 mysqlclient
 psycopg2-binary # binary package installs wheel, avoiding compiling
 

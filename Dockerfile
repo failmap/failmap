@@ -21,10 +21,12 @@ RUN apk --no-cache add \
   libxml2-dev \
   libxslt-dev \
   python3-dev \
-  git \
+  git
   # build cffi module, requires compile because no wheel is available.
   # cffi is needed in certificate tests and in remote workers.
-  gcc
+  # libressl-dev \
+  # musl-dev \
+  # libffi-dev
 
 # install dnscheck
 COPY vendor/dnscheck /vendor/dnscheck
@@ -40,15 +42,11 @@ RUN python3 -mvenv /pyenv
 ENV VIRTUAL_ENV /pyenv
 ENV PATH $VIRTUAL_ENV/bin:$PATH
 
-# a module wants to build a wheel, which is fine. But wheel needs to be available first. (is this still valid after
-# removing proxybroker and django-geojson?)
-RUN python3 -m pip install wheel
-
 COPY requirements.txt /source/
 RUN pip install -qr /source/requirements.txt
 
 # restart with a clean image
-FROM websecmap/o-saft:latest
+FROM alpine:3.12
 
 USER root
 
@@ -87,6 +85,15 @@ RUN apk --no-cache add \
   # runtime dependencies for osmtogeojson
   nodejs \
   nodejs-npm
+  # cryptography / cffi
+  # https://cryptography.io/en/latest/installation/#building-cryptography-on-linux
+  # todo: remove packages after install?
+  # gcc \
+  # musl-dev \
+  # python3-dev \
+  # libffi-dev \
+  # libressl-dev
+  # missing mysql? mariadb-dev \
 
 ENV VIRTUAL_ENV = /pyenv
 ENV PATH=/pyenv/bin:$PATH
@@ -120,9 +127,8 @@ COPY tools/ /source/tools/
 COPY websecmap/ /source/websecmap/
 WORKDIR /source
 
-# no module named 'pip', cannot run pip directly
-RUN python3 -m ensurepip
-RUN python3 -m pip install -e .
+# "requirements already satisfied" :)
+RUN pip install -e .
 
 WORKDIR /
 

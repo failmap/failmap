@@ -103,7 +103,9 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'proxy',
     'django_statsd',
-    'leaflet',
+
+    # needs GDAL_LIBRARY_PATH, used for ?
+    # 'leaflet',
 
     # Has been removed due to build errors (gdal) and little to no need to actually manually
     # edit coordinated via the admin interface.
