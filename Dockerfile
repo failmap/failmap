@@ -21,7 +21,10 @@ RUN apk --no-cache add \
   libxml2-dev \
   libxslt-dev \
   python3-dev \
-  git
+  git \
+  # build cffi module, requires compile because no wheel is available.
+  # cffi is needed in certificate tests and in remote workers.
+  gcc
 
 # install dnscheck
 COPY vendor/dnscheck /vendor/dnscheck
@@ -36,6 +39,10 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 RUN python3 -mvenv /pyenv
 ENV VIRTUAL_ENV /pyenv
 ENV PATH $VIRTUAL_ENV/bin:$PATH
+
+# a module wants to build a wheel, which is fine. But wheel needs to be available first. (is this still valid after
+# removing proxybroker and django-geojson?)
+RUN python3 -m pip install wheel
 
 COPY requirements.txt /source/
 RUN pip install -qr /source/requirements.txt
@@ -112,7 +119,10 @@ COPY setup.py README.md /source/
 COPY tools/ /source/tools/
 COPY websecmap/ /source/websecmap/
 WORKDIR /source
-RUN pip install -e .
+
+# no module named 'pip', cannot run pip directly
+RUN python3 -m ensurepip
+RUN python3 -m pip install -e .
 
 WORKDIR /
 

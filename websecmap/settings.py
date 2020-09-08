@@ -104,7 +104,11 @@ INSTALLED_APPS = [
     'proxy',
     'django_statsd',
     'leaflet',
-    'djgeojson',
+
+    # Has been removed due to build errors (gdal) and little to no need to actually manually
+    # edit coordinated via the admin interface.
+    # 'djgeojson',
+
     'crispy_forms',  # for the game
 
     # django helpdesk requirements:
