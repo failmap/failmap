@@ -15,7 +15,6 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
-from leaflet.admin import LeafletGeoAdminMixin
 
 from websecmap import types
 from websecmap.app.models import Job
@@ -539,7 +538,7 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 @admin.register(Coordinate)
-class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
+class CoordinateAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     # show Europe as default. Will probably change over time.
     # http://django-leaflet.readthedocs.io/en/latest/advanced.html
