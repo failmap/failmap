@@ -56,7 +56,7 @@ test_postgres: &test_postgres_template
   <<: *test_template
   services:
     # current version in debian jessie
-    - postgres:9.4
+    - postgres:9.5
   variables:
     # configuration for docker postgres service
     POSTGRES_DB: failmap
