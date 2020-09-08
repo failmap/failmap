@@ -16,7 +16,9 @@
 # sigh, attrs is bumped to a compatible version later than the latest stable release. Welcome to dephell.
 attrs==19.3.0
 
-git+https://github.com/stitch/ProxyBroker#egg=proxybroker
+# Do not use proxybroker anymore, it is unreliable and too bleeding edge. While it does what is advertises it's much
+# easier to just buy some proxylist and run with that for years.
+# git+https://github.com/stitch/ProxyBroker#egg=proxybroker
 # end dephel for proxies
 
 django
@@ -25,7 +27,12 @@ django
 r-django-jet
 django-countries
 django-leaflet
-django-geojson
+
+# Django geojson was used for geojson fields in the "edit_area" of organizations. This was a GUI feature to
+# edit coordinated visually. The geojsonfield has dependencies on gdal, and as such is impossible to work with
+# as that requires the bleeding edge version of alpine linux (for over 2 years now). So we can't support this.
+# Has been replaced with a normal jsonfield.
+# django-geojson
 jsonfield
 django-import-export
 # version 2.6.0+ breaks functionality, not yet investigated a mitigation:

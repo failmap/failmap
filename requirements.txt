@@ -4,123 +4,112 @@
 #
 #    pip-compile
 #
-aiodns==2.0.0             # via proxybroker
-aiohttp==3.6.2            # via proxybroker
 amqp==2.6.1               # via kombu
 asgiref==3.2.10           # via django
-async-timeout==3.0.1      # via aiohttp
-attrs==19.3.0             # via -r requirements.in (line 17), aiohttp, proxybroker
+attrs==19.3.0             # via -r requirements.in (line 17)
 billiard==3.6.3.0         # via celery
-celery[eventlet,redis]==4.4.7  # via -r requirements.in (line 46), django-celery-beat, flower
-certifi==2020.6.20        # via -r requirements.in (line 40), requests, sentry-sdk
-cffi==1.14.2              # via cryptography, pycares
-chardet==3.0.4            # via aiohttp, requests
-colorlog==4.2.1           # via -r requirements.in (line 68)
+celery[eventlet,redis]==4.4.7  # via -r requirements.in (line 53), django-celery-beat, flower
+certifi==2020.6.20        # via -r requirements.in (line 47), requests, sentry-sdk
+cffi==1.14.2              # via cryptography
+chardet==3.0.4            # via requests
+colorlog==4.2.1           # via -r requirements.in (line 75)
 colormath==3.0.0          # via spectra
 cryptography==3.1         # via pyopenssl
-csscompressor==0.9.5      # via -r requirements.in (line 91)
+csscompressor==0.9.5      # via -r requirements.in (line 98)
 decorator==4.4.2          # via networkx, retry, validators
-deepdiff==5.0.2           # via -r requirements.in (line 77)
+deepdiff==5.0.2           # via -r requirements.in (line 84)
 defusedxml==0.6.0         # via odfpy
 diff-match-patch==20200713  # via django-import-export
-django-admin-sortable2==0.7.7  # via -r requirements.in (line 106)
+django-admin-sortable2==0.7.7  # via -r requirements.in (line 113)
 django-appconf==1.0.4     # via django-compressor, django-select2
-django-autocomplete-light==3.5.1  # via -r requirements.in (line 104)
-django-celery-beat==2.0.0  # via -r requirements.in (line 44)
-django-colorful==1.3      # via -r requirements.in (line 111)
-django-compressor==2.4    # via -r requirements.in (line 90)
-django-constance==2.7.0   # via -r requirements.in (line 33)
-django-countries==6.1.3   # via -r requirements.in (line 26)
-django-crispy-forms==1.9.2  # via -r requirements.in (line 103)
-django-excel==0.0.10      # via -r requirements.in (line 130)
-django-geojson==3.0.0     # via -r requirements.in (line 28)
-django-import-export==2.3.0  # via -r requirements.in (line 30)
-django-leaflet==0.27.1    # via -r requirements.in (line 27)
-django-nested-admin==3.3.2  # via -r requirements.in (line 100)
-django-picklefield==3.0.1  # via -r requirements.in (line 34)
-django-proxy==1.2.1       # via -r requirements.in (line 71)
-django-select2==7.4.2     # via -r requirements.in (line 114)
-django-statsd-mozilla==0.4.0  # via -r requirements.in (line 51)
+django-autocomplete-light==3.5.1  # via -r requirements.in (line 111)
+django-celery-beat==2.0.0  # via -r requirements.in (line 51)
+django-colorful==1.3      # via -r requirements.in (line 118)
+django-compressor==2.4    # via -r requirements.in (line 97)
+django-constance==2.7.0   # via -r requirements.in (line 40)
+django-countries==6.1.3   # via -r requirements.in (line 28)
+django-crispy-forms==1.9.2  # via -r requirements.in (line 110)
+django-excel==0.0.10      # via -r requirements.in (line 137)
+django-import-export==2.3.0  # via -r requirements.in (line 37)
+django-leaflet==0.27.1    # via -r requirements.in (line 29)
+django-nested-admin==3.3.2  # via -r requirements.in (line 107)
+django-picklefield==3.0.1  # via -r requirements.in (line 41)
+django-proxy==1.2.1       # via -r requirements.in (line 78)
+django-select2==7.4.2     # via -r requirements.in (line 121)
+django-statsd-mozilla==0.4.0  # via -r requirements.in (line 58)
 django-timezone-field==4.0  # via django-celery-beat
-django-uwsgi==0.2.2       # via -r requirements.in (line 141)
-django==3.1.1             # via -r requirements.in (line 22), django-admin-sortable2, django-appconf, django-celery-beat, django-colorful, django-excel, django-geojson, django-import-export, django-leaflet, django-picklefield, django-select2, django-timezone-field, jsonfield, r-django-jet
-dnspython==1.16.0         # via -r requirements.in (line 57), eventlet
+django-uwsgi==0.2.2       # via -r requirements.in (line 148)
+django==3.1.1             # via -r requirements.in (line 24), django-admin-sortable2, django-appconf, django-celery-beat, django-colorful, django-excel, django-import-export, django-leaflet, django-picklefield, django-select2, django-timezone-field, jsonfield, r-django-jet
+dnspython==1.16.0         # via -r requirements.in (line 64), eventlet
 et-xmlfile==1.0.1         # via openpyxl
 eventlet==0.27.0          # via celery
-flower==0.9.5             # via -r requirements.in (line 48)
-googlemaps==4.4.2         # via -r requirements.in (line 127)
+flower==0.9.5             # via -r requirements.in (line 55)
+googlemaps==4.4.2         # via -r requirements.in (line 134)
 greenlet==0.4.16          # via eventlet
 humanize==2.6.0           # via flower
-idna-ssl==1.1.0           # via aiohttp
-idna==2.10                # via idna-ssl, requests, tldextract, yarl
+idna==2.10                # via requests, tldextract
 importlib-metadata==1.7.0  # via kombu, markdown
 importlib-resources==3.0.0  # via netaddr
-iso3166==1.0.1            # via -r requirements.in (line 117)
+iso3166==1.0.1            # via -r requirements.in (line 124)
 jdcal==1.4.1              # via openpyxl
-jsonfield==3.1.0          # via -r requirements.in (line 29)
+jsonfield==3.1.0          # via -r requirements.in (line 36)
 kombu==4.6.11             # via celery
 lml==0.0.9                # via pyexcel, pyexcel-io
-markdown==3.2.2           # via -r requirements.in (line 124)
+markdown==3.2.2           # via -r requirements.in (line 131)
 markuppy==1.14            # via tablib
-maxminddb==2.0.2          # via proxybroker
 monotonic==1.5            # via eventlet
-multidict==4.7.6          # via aiohttp, yarl
-mysqlclient==2.0.1        # via -r requirements.in (line 136)
-netaddr==0.8.0            # via -r requirements.in (line 58)
+mysqlclient==2.0.1        # via -r requirements.in (line 143)
+netaddr==0.8.0            # via -r requirements.in (line 65)
 networkx==2.5             # via colormath
 numpy==1.19.1             # via colormath, rdp
 odfpy==1.4.1              # via pyexcel-ods, tablib
 openpyxl==3.0.5           # via pyexcel-xlsx, tablib
 ordered-set==4.0.2        # via deepdiff
-pillow==7.2.0             # via -r requirements.in (line 61), python-resize-image
+pillow==7.2.0             # via -r requirements.in (line 68), python-resize-image
 prometheus-client==0.8.0  # via flower
-git+https://github.com/stitch/ProxyBroker#egg=proxybroker  # via -r requirements.in (line 19)
-psycopg2-binary==2.8.6    # via -r requirements.in (line 137)
+psycopg2-binary==2.8.6    # via -r requirements.in (line 144)
 py==1.9.0                 # via retry
-pycares==3.1.1            # via aiodns
 pycparser==2.20           # via cffi
 pyexcel-io==0.5.20        # via pyexcel, pyexcel-ods, pyexcel-xls, pyexcel-xlsx
-pyexcel-ods==0.5.6        # via -r requirements.in (line 133)
-pyexcel-text==0.2.7.1     # via -r requirements.in (line 108)
+pyexcel-ods==0.5.6        # via -r requirements.in (line 140)
+pyexcel-text==0.2.7.1     # via -r requirements.in (line 115)
 pyexcel-webio==0.1.4      # via django-excel
-pyexcel-xls==0.5.9        # via -r requirements.in (line 131)
-pyexcel-xlsx==0.5.8       # via -r requirements.in (line 132)
+pyexcel-xls==0.5.9        # via -r requirements.in (line 138)
+pyexcel-xlsx==0.5.8       # via -r requirements.in (line 139)
 pyexcel==0.6.4            # via django-excel, pyexcel-text, pyexcel-webio
-pyopenssl==19.1.0         # via -r requirements.in (line 87)
+pyopenssl==19.1.0         # via -r requirements.in (line 94)
 python-crontab==2.5.1     # via django-celery-beat
 python-dateutil==2.8.1    # via python-crontab
 python-monkey-business==1.0.0  # via django-nested-admin
-python-resize-image==1.1.19  # via -r requirements.in (line 62)
-pytz==2020.1              # via -r requirements.in (line 41), celery, django, django-timezone-field, flower
-pyyaml==5.3.1             # via -r requirements.in (line 36), tablib
-r-django-jet==2.0.8       # via -r requirements.in (line 25)
+python-resize-image==1.1.19  # via -r requirements.in (line 69)
+pytz==2020.1              # via -r requirements.in (line 48), celery, django, django-timezone-field, flower
+pyyaml==5.3.1             # via -r requirements.in (line 43), tablib
+r-django-jet==2.0.8       # via -r requirements.in (line 27)
 rcssmin==1.0.6            # via django-compressor
-rdp==0.8                  # via -r requirements.in (line 96)
+rdp==0.8                  # via -r requirements.in (line 103)
 redis==3.5.3              # via celery
 requests-file==1.5.1      # via tldextract
-requests==2.24.0          # via -r requirements.in (line 54), django-proxy, googlemaps, python-resize-image, requests-file, tldextract
-retry==0.9.2              # via -r requirements.in (line 93)
+requests==2.24.0          # via -r requirements.in (line 61), django-proxy, googlemaps, python-resize-image, requests-file, tldextract
+retry==0.9.2              # via -r requirements.in (line 100)
 rjsmin==1.1.0             # via django-compressor
-sentry-sdk==0.17.3        # via -r requirements.in (line 74)
-simplejson==3.17.2        # via -r requirements.in (line 84)
-six==1.15.0               # via cryptography, django-autocomplete-light, django-compressor, django-geojson, django-nested-admin, eventlet, pyopenssl, python-dateutil, python-monkey-business, requests-file, tenacity, validators
-spectra==0.0.11           # via -r requirements.in (line 123)
+sentry-sdk==0.17.3        # via -r requirements.in (line 81)
+simplejson==3.17.2        # via -r requirements.in (line 91)
+six==1.15.0               # via cryptography, django-autocomplete-light, django-compressor, django-nested-admin, eventlet, pyopenssl, python-dateutil, python-monkey-business, requests-file, tenacity, validators
+spectra==0.0.11           # via -r requirements.in (line 130)
 sqlparse==0.3.1           # via django
 statsd==3.3.0             # via django-statsd-mozilla
 tablib[html,ods,xls,xlsx,yaml]==2.0.0  # via django-import-export
 tabulate==0.8.7           # via pyexcel-text
-tenacity==6.2.0           # via -r requirements.in (line 120)
+tenacity==6.2.0           # via -r requirements.in (line 127)
 texttable==1.6.3          # via pyexcel
-tldextract==2.2.3         # via -r requirements.in (line 65)
+tldextract==2.2.3         # via -r requirements.in (line 72)
 tornado==6.0.4            # via flower
-typing-extensions==3.7.4.3  # via aiohttp, yarl
-typing==3.7.4.3           # via -r requirements.in (line 37), aiodns
-urllib3==1.25.10          # via -r requirements.in (line 79), requests, sentry-sdk
-uwsgi==2.0.19.1           # via -r requirements.in (line 140)
-validators==0.18.1        # via -r requirements.in (line 110)
+typing==3.7.4.3           # via -r requirements.in (line 44)
+urllib3==1.25.10          # via -r requirements.in (line 86), requests, sentry-sdk
+uwsgi==2.0.19.1           # via -r requirements.in (line 147)
+validators==0.18.1        # via -r requirements.in (line 117)
 vine==1.3.0               # via amqp, celery
-wikidata==0.7.0           # via -r requirements.in (line 98)
+wikidata==0.7.0           # via -r requirements.in (line 105)
 xlrd==1.2.0               # via pyexcel-xls, tablib
 xlwt==1.3.0               # via pyexcel-xls, tablib
-yarl==1.5.1               # via aiohttp
 zipp==3.1.0               # via importlib-metadata, importlib-resources

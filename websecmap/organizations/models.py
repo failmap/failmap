@@ -12,7 +12,6 @@ from django.db import models, transaction
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
-from djgeojson.fields import GeoJSONField
 from jsonfield import JSONField
 from validators import domain
 
@@ -200,7 +199,7 @@ class Coordinate(models.Model):
                   "this field is not required... We still developed it because we forgot what we made..."
     )
 
-    edit_area = GeoJSONField(
+    edit_area = JSONField(
         max_length=10000,
         null=True,
         blank=True,

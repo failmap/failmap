@@ -2,7 +2,7 @@
 
 import django.db.models.deletion
 import django_countries.fields
-import djgeojson.fields
+import jsonfield.fields
 from django.db import migrations, models
 
 
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                                                        help_text='The contest the team is participating in.', max_length=42)),
                 ('organization_address', models.CharField(default='unknown',
                                                           help_text='The address of the (main location) of the organization. This will be used for geocoding.', max_length=600)),
-                ('organization_address_geocoded', djgeojson.fields.GeoJSONField(
+                ('organization_address_geocoded', jsonfield.fields.JSONField(
                     help_text='Automatic geocoded organization address.', max_length=5000)),
                 ('url', models.CharField(help_text='The URL the team has submitted, for review before acceptance.', max_length=500)),
                 ('has_been_accepted', models.BooleanField(default=False,
