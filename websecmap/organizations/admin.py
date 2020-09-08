@@ -95,9 +95,6 @@ class EndpointGenericScanInline(nested_admin.NestedTabularInline):
     # def last_scan_moment_date(obj):
     #     return obj.last_scan_moment
 
-    def has_add_permission(self, request):
-        return False
-
 
 class EndpointAdminInline(nested_admin.NestedStackedInline):
     model = Endpoint
