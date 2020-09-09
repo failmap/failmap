@@ -24,7 +24,8 @@ attrs==19.3.0
 django
 # special version of django jet that removes python2 support.
 # see this issue: https://github.com/geex-arts/django-jet/issues/418
-r-django-jet
+# r-django-jet
+git+https://github.com/Barukimang/django-jet#egg=django-3-jet
 django-countries
 django-leaflet
 
