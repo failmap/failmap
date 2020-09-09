@@ -1152,3 +1152,11 @@ DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 # something else, like an internet.nl dashboard. In case of websecmap, severities are adjusted.
 # This flag will probably not be present in other installations by default.
 APPLICATION_NAME = 'websecmap'
+
+"""
+Django Jet 3:
+From Django 3.0 the default value of the X_FRAME_OPTIONS setting was changed from SAMEORIGIN to DENY. This can 
+cause errors for popups such as for the Field Lookup Popup. To solve this you should add the following to your 
+Django project settings.py file:
+"""
+X_FRAME_OPTIONS = 'SAMEORIGIN'
