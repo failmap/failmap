@@ -12,37 +12,32 @@
 
 # When recompiling for mac: export LDFLAGS=-L/usr/local/opt/openssl/lib
 
-# Get proxies
-# sigh, attrs is bumped to a compatible version later than the latest stable release. Welcome to dephell.
-# attrs
+##
+# Removed stuff
 
-# Do not use proxybroker anymore, it is unreliable and too bleeding edge. While it does what is advertises it's much
-# easier to just buy some proxylist and run with that for years.
-# git+https://github.com/stitch/ProxyBroker#egg=proxybroker
-# end dephel for proxies
-
-django
-# special version of django jet that removes python2 support.
-# see this issue: https://github.com/geex-arts/django-jet/issues/418
-# r-django-jet
-git+https://github.com/Barukimang/django-jet#egg=django-3-jet
-django-countries
-django-leaflet
+# proxybroker and it's dependency and requirements hell has been removed. It's replaced by 'get proxies elsewhere'
+# which turned to be much more reliable and even cheaper (because it's faster and there is no list to maintain anymore)
 
 # Django geojson was used for geojson fields in the "edit_area" of organizations. This was a GUI feature to
 # edit coordinated visually. The geojsonfield has dependencies on gdal, and as such is impossible to work with
 # as that requires the bleeding edge version of alpine linux (for over 2 years now). So we can't support this.
-# Has been replaced with a normal jsonfield.
-# django-geojson
+# Has been replaced with a normal jsonfield. When a need arises from a user, we can support it again (means = paid).
+
+# typing was needed for python < 3.5
+# Not needed with python < 3.5, we support 3.7 and up.
+
+django
+# Jet admin interface with several Django 3 fixes. Breaks the tab container + select2 lists. But it's better than
+# nothing. Jet has not been maintained, even though it's been great, and alternatives are like 20 euro a month.
+# This means we'll probably move to the (simpler) grapelli interface.
+git+https://github.com/Barukimang/django-jet#egg=django-3-jet
+django-countries
+django-leaflet
 jsonfield
 django-import-export
-# version 2.6.0+ breaks functionality, not yet investigated a mitigation:
-# ImportError: cannot import name 'config' from 'constance' (/root/.cache/virtualenvs/web-security-map/lib/python3.7/site-packages/constance/__init__.py)
-django-constance
-django-picklefield
+django-constance[database]
 
 pyyaml
-typing
 
 # use mozzila certificate bundle by default
 certifi
@@ -50,11 +45,10 @@ pytz
 
 # task processing framework
 django-celery-beat
-# celery 4.3+: https://github.com/celery/celery/issues/4500#issuecomment-400350526
-celery[redis,eventlet]>=4.3
-# flower < 0.9.3 conflicts with tornado >6.0
-flower>=0.9.3
+celery[redis,eventlet]
+flower
 
+# Feature usage statistics
 # https://github.com/pi-bjl/celery-statsd/commit/5d61d7756f115dbf05a7eeb8314495b53ee1955e
 django-statsd-mozilla
 
