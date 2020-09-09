@@ -62,7 +62,7 @@ def get_organization_report_by_id(organization_id: int, weeks_back: int = 0):
 
         # fixing json being presented and escaped as a string, this makes it a lot slowr
         # had to do this cause we use jsonfield, not django_jsonfield, due to rendering map widgets in admin
-        "calculation": json.loads(values['organizationreport__calculation']),
+        "calculation": values['organizationreport__calculation'],
         "promise": "",
         "high": values['organizationreport__high'],
         "medium": values['organizationreport__medium'],
