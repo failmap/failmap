@@ -14,7 +14,7 @@
 
 # Get proxies
 # sigh, attrs is bumped to a compatible version later than the latest stable release. Welcome to dephell.
-attrs==19.3.0
+# attrs
 
 # Do not use proxybroker anymore, it is unreliable and too bleeding edge. While it does what is advertises it's much
 # easier to just buy some proxylist and run with that for years.

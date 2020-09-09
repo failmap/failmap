@@ -6,7 +6,6 @@
 #
 amqp==2.6.1               # via kombu
 asgiref==3.2.10           # via django
-attrs==19.3.0             # via -r requirements.in
 billiard==3.6.3.0         # via celery
 celery[eventlet,redis]==4.4.7  # via -r requirements.in, django-celery-beat, flower
 certifi==2020.6.20        # via -r requirements.in, requests, sentry-sdk
