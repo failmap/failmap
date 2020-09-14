@@ -6,6 +6,7 @@
 #
 amqp==2.6.1               # via kombu
 asgiref==3.2.10           # via django
+babel==2.8.0              # via -r requirements.in
 billiard==3.6.3.0         # via celery
 celery[eventlet,redis]==4.4.7  # via -r requirements.in, django-celery-beat, flower
 certifi==2020.6.20        # via -r requirements.in, requests, sentry-sdk
@@ -80,7 +81,7 @@ python-crontab==2.5.1     # via django-celery-beat
 python-dateutil==2.8.1    # via python-crontab
 python-monkey-business==1.0.0  # via django-nested-admin
 python-resize-image==1.1.19  # via -r requirements.in
-pytz==2020.1              # via -r requirements.in, celery, django, django-timezone-field, flower
+pytz==2020.1              # via -r requirements.in, babel, celery, django, django-timezone-field, flower
 pyyaml==5.3.1             # via -r requirements.in, tablib
 rcssmin==1.0.6            # via django-compressor
 rdp==0.8                  # via -r requirements.in
