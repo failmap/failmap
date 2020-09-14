@@ -104,6 +104,8 @@ django-nested-admin
 # game requirements
 django-crispy-forms
 django-autocomplete-light
+# who speaks what where
+babel
 
 django-admin-sortable2
 
