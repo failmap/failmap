@@ -1,7 +1,7 @@
 import logging
 
 from django.core.exceptions import MultipleObjectsReturned
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from jet.dashboard import modules
 from jet.dashboard.dashboard import Dashboard
 from jet.dashboard.models import UserDashboardModule

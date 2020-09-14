@@ -1,10 +1,10 @@
 # urls for scanners, maybe in their own url files
 import proxy.views
 from constance import config
-from django.conf.urls import url
 from django.db import connection
 from django.urls import path, register_converter
 from django.views.i18n import JavaScriptCatalog
+from django.urls import re_path
 
 import websecmap.map.logic.rss_feeds
 from websecmap import converters
@@ -93,7 +93,7 @@ static_urlpatterns = [
     path("images/screenshot/<int:endpoint_id>/", views.screenshot),
     # Proxy maptile requests,
     # In production this can be done by caching proxy, this makes sure it works for dev. as well.
-    url(
+    re_path(
         r"^proxy/(?P<url>https://api.mapbox.com/styles/v1/mapbox/.*./$)",
         proxy.views.proxy_view,
         {"requests_args": {"params": {"access_token": config.MAPBOX_ACCESS_TOKEN}}},
@@ -112,7 +112,7 @@ static_urlpatterns = [
     # translations for javascript files. Copied from the manual.
     # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/
     # cache_page(86400, key_prefix='js18n')
-    url(r"^jsi18n/map/$", JavaScriptCatalog.as_view(packages=["websecmap.map"]), name="javascript-catalog"),
+    re_path(r"^jsi18n/map/$", JavaScriptCatalog.as_view(packages=["websecmap.map"]), name="javascript-catalog"),
 ]
 
 # See if we already have access to this database object. If not, then skip this: map_landingpage,

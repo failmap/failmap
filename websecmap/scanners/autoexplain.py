@@ -20,6 +20,7 @@ from cryptography.x509.oid import NameOID
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import EndpointGenericScan
+import dns
 
 log = logging.getLogger(__package__)
 
@@ -33,6 +34,54 @@ def autoexplain():
     """
 
     autoexplain_trust_microsoft()
+    autoexplain_no_https_microsoft()
+
+
+def autoexplain_no_https_microsoft():
+    """
+    Microsoft Office365/Exchange need the autodiscover subdomain. This is configured as a CNAME. The CNAME
+    cannot be further configured. Microsoft does not expose an HTTPS service over this subdomain, only http.
+    This is true for the "online" configuration, not for the "on premise" configuration.
+    The documentation on "WHY IS THIS SECURE" is not really well done (or at least microsoft style obfuscated).
+    Currently we "assume" that they know what they are doing, since they have a well performing security team.
+    issue: https://gitlab.com/internet-cleanup-foundation/web-security-map/-/issues/271
+
+    The CNAME will point to autodiscover.outlook.com. Thus in that case we can quickly validate that this specific
+    issue will always be the same.
+    """
+
+    scan_type = "plain_https"
+    possible_urls = Url.objects.all().filter(computed_subdomain="autodiscover")
+
+    log.debug(f"Found {len(possible_urls)} possible autodiscover urls.")
+
+    # Only check this on the latest scans, do not alter existing explanations
+    scans = EndpointGenericScan.objects.all().filter(
+        endpoint__url__in=possible_urls,
+        type=scan_type,
+        is_the_latest_scan=True,
+        comply_or_explain_is_explained=False,
+        endpoint__protocol="http",
+        endpoint__port=80,
+        # it DOES redirect to a secure site.
+        rating="25",
+    )
+
+    log.debug(f"Found {len(scans)} possible autodiscover subdomains. Checking them for automatic explanation.")
+
+    for scan in scans:
+        try:
+            result = dns.resolver.query(scan.endpoint.url.url, "CNAME")
+            for cnameval in result:
+                # don't accept trickery such as autodiscover.outlook.com.mydomain.com.
+                log.debug(f"Retrieved cname value: {cnameval}.")
+                if "autodiscover.outlook.com." == str(cnameval):
+                    log.debug("Perfect match, will add automatic explanation.")
+                    add_bot_explanation(scan, "service_intentionally_designed_this_way", timedelta(days=365 * 10))
+        except dns.exception.DNSException as e:
+            log.debug(f"Received an expectable error from dns server: {e}.")
+            # can happen of course.
+            # sample: dns.resolver.NXDOMAIN, dns.exception.Timeout, dns.resolver.NoAnswer, dns.query.BadResponse
 
 
 def autoexplain_trust_microsoft():

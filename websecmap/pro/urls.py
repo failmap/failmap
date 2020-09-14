@@ -1,6 +1,6 @@
-from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 from django.urls import path
+from django.urls import re_path
 
 from websecmap.pro import views
 from websecmap.pro.view import explain
@@ -8,7 +8,7 @@ from websecmap.pro.view import explain
 # todo: https://wsvincent.com/django-user-authentication-tutorial-signup/
 urlpatterns = [
     path("", views.home),
-    url(r"^login/$", auth_views.LoginView.as_view(template_name="pro/registration/login.html"), name="login"),
+    re_path(r"^login/$", auth_views.LoginView.as_view(template_name="pro/registration/login.html"), name="login"),
     path("account/", views.account),
     path("signup/", views.signup),
     path("mail/", views.mail),
