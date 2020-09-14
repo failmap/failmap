@@ -84,7 +84,17 @@ def compose_scan_task(urls):
     # Make the first task immutable, so it doesn't get any arguments of other scanners in a chain.
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     task = group(
-        scan.si(endpoint.uri_url()) | store.s(endpoint) | plannedscan.finish.si("scan", "dummy", endpoint.url)
+        # During testcases in certain scenario's the finish object may not be endpoint.url, and must be endpoint.url.pk
+        # In production code: only use endpoint.url or url. Never .pk.
+        # Found out while debugging test_scan_method:
+        # Endpoint.url.pk is used here because of a threading issue: it's not allowed to use the endpoint.url
+        # in another thread, as seen in:
+        # 2020-09-14 11:58	ERROR    - Task websecmap.scanners.plannedscan.finish[83996b41-3eba-4aed-9449-d7100ac5e5cb]
+        # aised unexpected: DatabaseError("DatabaseWrapper objects created in a thread can only be used in that same
+        # thread. The object with alias 'default' was created in thread id 4561566752 and this is thread id 4858017888.
+        # ")
+        # referencing the PK directly is enough for the query. It doesn't crash and it will probably do nothing.
+        scan.si(endpoint.uri_url()) | store.s(endpoint) | plannedscan.finish.si("scan", "dummy", endpoint.url.pk)
         for endpoint in endpoints
     )
     return task
@@ -138,7 +148,8 @@ def store(result, endpoint):
     message_result_ok = "Because the result was True"
     message_result_false = "Because the result was False"
 
-    log.debug("Storing result: %s, for endpoint: %s.", result, endpoint)
+    log.debug(f"Storing result: {result}, for endpoint: {endpoint}.")
+
     # You can save any (string) value and any (string) message.
     # The EndpointScanManager deduplicates the data for you automatically.
     if result:
@@ -180,7 +191,7 @@ def scan(self, uri_url):
 
     """
     try:
-        log.info("Start scanning %s", uri_url)
+        log.info(f"Start scanning {uri_url}")
 
         # Tools and output for this scan are registered in /failmap/settings.py
         # We prefer tools written in python, limiting the amount of dependencies used in the project.
@@ -195,7 +206,7 @@ def scan(self, uri_url):
         # mytool = settings.TOOLS['youtool']['executable']
         # Below demonstrates the usage of settings.
         sample_settings_usage = len(settings.TOOLS)
-        log.debug("%s are registered." % sample_settings_usage)
+        log.debug(f"{sample_settings_usage} are registered.")
 
         # simulation: sometimes a task fails, for example with network errors etcetera. The task will be retried.
         if not random.randint(0, 5):
@@ -207,7 +218,7 @@ def scan(self, uri_url):
         # simulation: the result can be different
         result = bool(random.randint(0, 1))
 
-        log.info("Done scanning: %s, result: %s", uri_url, result)
+        log.info(f"Done scanning: {uri_url}, result: {result}")
         return result
     except SomeError as e:
         # If an expected error is encountered put this task back on the queue to be retried.

@@ -4,18 +4,28 @@ import signal
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 import pytest
 
 from websecmap.celery import waitsome
+import logging
 
 TIMEOUT = 30
+log = logging.getLogger(__package__)
+
+
+@pytest.fixture
+def current_path():
+    path = Path(__file__).parent
+    yield path
 
 
 @pytest.fixture(scope="session")
-def faaloniae():
+def faaloniae_integration():
     """Load test organization fixtures."""
 
+    log.debug("Loading faalonie dataset")
     subprocess.call(["websecmap", "migrate"])
     subprocess.call(["websecmap", "load_dataset", "faalonie"])
 

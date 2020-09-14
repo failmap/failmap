@@ -41,7 +41,7 @@ class Contest(models.Model):
         verbose_name_plural = _("contests")
 
     def __str__(self):
-        return "%s" % self.name
+        return f"{self.name}"
 
 
 class Team(models.Model):
@@ -89,7 +89,7 @@ class Team(models.Model):
 
     def __str__(self):
         return mark_safe(
-            "%s/<span style='background-color: %s'>%s</span>" % (self.participating_in_contest, self.color, self.name)
+            f"{self.participating_in_contest}/<span style='background-color: {self.color}'>{self.name}</span>"
         )
 
 
@@ -167,7 +167,7 @@ class OrganizationSubmission(models.Model):
 
     def __str__(self):
         if self.has_been_accepted:
-            return "OK: %s" % self.organization_name
+            return f"OK: {self.organization_name}"
         else:
             return self.organization_name
 
@@ -216,7 +216,7 @@ class UrlSubmission(models.Model):
 
     def __str__(self):
         if self.has_been_accepted:
-            return "OK: %s" % self.url
+            return f"OK: {self.url}"
         else:
             return self.url
 
