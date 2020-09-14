@@ -16,7 +16,8 @@ Including another URLconf
 import sys
 
 from django.conf import settings
-from django.conf.urls import include, url
+from django.conf.urls import include
+from django.urls import re_path
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.template.response import TemplateResponse
@@ -41,15 +42,15 @@ admin_urls = [
     path("sentry-debug/", trigger_error),
     path("jet/", include("jet.urls", "jet")),  # Django JET URLS
     path("jet/dashboard/", include("jet.dashboard.urls", "jet-dashboard")),  # Django JET dashboard URLS
-    url(r"^admin/", admin.site.urls),
-    url(r"^admin/doc/", include("django.contrib.admindocs.urls")),
-    url(r"^nested_admin/", include("nested_admin.urls")),
+    re_path(r"^admin/", admin.site.urls),
+    re_path(r"^admin/doc/", include("django.contrib.admindocs.urls")),
+    re_path(r"^nested_admin/", include("nested_admin.urls")),
 ]
 frontend_urls = [
-    url("", include("websecmap.map.urls")),
-    url(r"^api/", include("websecmap.api.urls")),
-    url(r"^game/", include("websecmap.game.urls")),
-    url(r"^pro/", include("websecmap.pro.urls")),
+    re_path(r"", include("websecmap.map.urls")),
+    re_path(r"^api/", include("websecmap.api.urls")),
+    re_path(r"^game/", include("websecmap.game.urls")),
+    re_path(r"^pro/", include("websecmap.pro.urls")),
     path("pro/", include("django.contrib.auth.urls")),
 ]
 interactive_urls = [
@@ -75,7 +76,7 @@ if settings.DEBUG:
         import debug_toolbar
 
         urlpatterns = [
-            url(r"^__debug__/", include(debug_toolbar.urls)),
+            re_path(r"^__debug__/", include(debug_toolbar.urls)),
         ] + urlpatterns
     except ImportError:
         pass
@@ -114,5 +115,5 @@ def handler500(request):
 if settings.DEBUG:
     urlpatterns = [
         # test urls for error pages (cause normally we don't have them, ahum)
-        url(r"^500/$", handler500),
+        re_path(r"^500/$", handler500),
     ] + urlpatterns

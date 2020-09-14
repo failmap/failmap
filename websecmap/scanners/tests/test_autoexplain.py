@@ -10,10 +10,62 @@ from cryptography.x509.oid import NameOID
 
 import websecmap
 from websecmap.organizations.models import Url
-from websecmap.scanners.autoexplain import autoexplain_trust_microsoft, certificate_matches_microsoft_exception_policy
+from websecmap.scanners.autoexplain import (
+    autoexplain_trust_microsoft,
+    certificate_matches_microsoft_exception_policy,
+    autoexplain_no_https_microsoft,
+)
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 log = logging.getLogger("websecmap")
+
+
+def test_autoexplain_no_https_microsoft(db, mocker):
+    url, created = Url.objects.all().get_or_create(url="autodiscover.arnhem.nl")
+    endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol="http", port=80, ip_version=4)
+    endpointscan, created = EndpointGenericScan.objects.all().get_or_create(
+        endpoint=endpoint,
+        rating="25",
+        rating_determined_on=datetime.datetime.now(pytz.utc),
+        is_the_latest_scan=True,
+        type="plain_https",
+    )
+
+    class Answer:
+        # <DNS name autodiscover.westerkwartier.nl.>
+        # str(a.name)
+        # Out[18]: 'autodiscover.westerkwartier.nl.'
+        name: str = ""
+
+        def __init__(self, name):
+            self.name = name
+
+        def __str__(self):
+            return self.name
+
+    # The answer is sort of a list... here we sort of emulate that.
+    # '<dns.resolver.Answer object at 0x1136d1d60>'
+    # for z in a:
+    #   print(z)
+
+    # mock dns.resolver.query(scan.endpoint.url.url, 'CNAME') in several ways:
+    log.debug("mydomain.com is not a valid cname record in this case.")
+    mocker.patch("dns.resolver.query", return_value=[Answer("mydomain.com")])
+    autoexplain_no_https_microsoft()
+    my_epgs = EndpointGenericScan.objects.all().first()
+    assert my_epgs.comply_or_explain_is_explained is False
+
+    log.debug("The cname must match exactly to the desired cname.")
+    mocker.patch("dns.resolver.query", return_value=[Answer("autodiscover.outlook.com.mydomain.com")])
+    autoexplain_no_https_microsoft()
+    my_epgs = EndpointGenericScan.objects.all().first()
+    assert my_epgs.comply_or_explain_is_explained is False
+
+    log.debug("It should be an exact match to this value.")
+    mocker.patch("dns.resolver.query", return_value=[Answer("autodiscover.outlook.com.")])
+    autoexplain_no_https_microsoft()
+    my_epgs = EndpointGenericScan.objects.all().first()
+    assert my_epgs.comply_or_explain_is_explained is True
 
 
 def test_autoexplain_certificate(db):

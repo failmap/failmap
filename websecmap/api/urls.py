@@ -1,6 +1,7 @@
-from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 from django.urls import path, register_converter
+from django.urls import re_path
+
 
 from websecmap import converters
 from websecmap.api import views
@@ -14,8 +15,8 @@ register_converter(converters.JsonConverter, "json")
 
 
 urlpatterns = [
-    url(r"^login/$", auth_views.LoginView.as_view(template_name="api/login.html"), name="login"),
-    url(r"^logout/$", auth_views.LogoutView.as_view(template_name="api/login.html"), name="logout"),
+    re_path(r"^login/$", auth_views.LoginView.as_view(template_name="api/login.html"), name="login"),
+    re_path(r"^logout/$", auth_views.LogoutView.as_view(template_name="api/login.html"), name="logout"),
     path("", views.show_apis_),
     path("SIDN/", views.sidn_show_instructions_),
     path("SIDN/layers/", views.sidn_get_map_configuration_),

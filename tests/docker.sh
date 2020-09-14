@@ -46,8 +46,8 @@ curl -sI "http://$host:$port/static/images/fail_logo.png" |grep 200\ OK
 # curl -siv --cookie-jar cookie-$$ --cookie cookie-$$ --data "csrfmiddlewaretoken=$(grep csrftoken cookie-$$ | cut -f 7)&username=admin&password=faalkaart" "http://$host:$port/admin/login/"|grep 302\ Found
 
 
-# Test if o-saft runs
-docker exec websecmap-$$ /O-Saft/o-saft
+# Test if o-saft runs, obsoleted
+# docker exec websecmap-$$ /O-Saft/o-saft
 
 # cleanup
 rm -f cookie-$$
