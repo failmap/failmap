@@ -27,6 +27,7 @@ django-extensions
 django-debug-toolbar
 django-debug-toolbar-request-history
 pytest-mock
+requests_mock
 
 # docs / readthedocs.io
 sphinx

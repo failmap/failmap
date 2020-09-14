@@ -12,6 +12,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         urls = Url.objects.all()
-        print("Going to re-calculate and save autocomputed_ values for %s urls." % len(urls))
+        print(f"Going to re-calculate and save autocomputed_ values for {len(urls)} urls.")
         [url.save() for url in urls]
         print("Done")

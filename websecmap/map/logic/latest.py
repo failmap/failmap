@@ -61,7 +61,7 @@ def get_all_latest_scans(country, organization_type):
             dataset["scans"][scan_type].append(
                 {
                     "url": scan.endpoint.url.url,
-                    "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
+                    "service": f"{scan.endpoint.protocol}/{scan.endpoint.port} (IPv{scan.endpoint.ip_version})",
                     "protocol": scan.endpoint.protocol,
                     "port": scan.endpoint.port,
                     "ip_version": scan.endpoint.ip_version,
@@ -104,7 +104,7 @@ def get_all_latest_scans(country, organization_type):
             dataset["scans"][scan_type].append(
                 {
                     "url": scan.url.url,
-                    "service": "%s" % scan.url.url,
+                    "service": f"{scan.url.url}",
                     "protocol": scan_type,
                     "port": "-",
                     "ip_version": "-",
