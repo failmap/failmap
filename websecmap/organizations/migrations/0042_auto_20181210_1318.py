@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0041_auto_20181207_1951'),
+        ("organizations", "0041_auto_20181207_1951"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organization',
-            name='internal_notes',
-            field=models.TextField(blank=True, help_text="These notes can contain information on WHY this organization was added. Can be handy if it's not straightforward. This helps with answering questions why the organization was added lateron. These notes will not be published, but are also not secret.", max_length=2500, null=True),
+            model_name="organization",
+            name="internal_notes",
+            field=models.TextField(
+                blank=True,
+                help_text="These notes can contain information on WHY this organization was added. Can be handy if it's not straightforward. This helps with answering questions why the organization was added lateron. These notes will not be published, but are also not secret.",
+                max_length=2500,
+                null=True,
+            ),
         ),
     ]

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0058_auto_20190111_1634'),
+        ("scanners", "0058_auto_20190111_1634"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='scanproxy',
-            name='manually_disabled',
-            field=models.BooleanField(default=False, help_text='Proxy will not be used if manually disabled.'),
+            model_name="scanproxy",
+            name="manually_disabled",
+            field=models.BooleanField(default=False, help_text="Proxy will not be used if manually disabled."),
         ),
     ]

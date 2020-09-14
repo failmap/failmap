@@ -8,38 +8,38 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0006_auto_20171116_1451'),
+        ("map", "0006_auto_20171116_1451"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organizationrating',
-            name='high',
-            field=models.IntegerField(default=0, help_text='The number of high risk vulnerabilities and failures.'),
+            model_name="organizationrating",
+            name="high",
+            field=models.IntegerField(default=0, help_text="The number of high risk vulnerabilities and failures."),
         ),
         migrations.AddField(
-            model_name='organizationrating',
-            name='low',
-            field=models.IntegerField(default=0, help_text='The number of low risk vulnerabilities and failures.'),
+            model_name="organizationrating",
+            name="low",
+            field=models.IntegerField(default=0, help_text="The number of low risk vulnerabilities and failures."),
         ),
         migrations.AddField(
-            model_name='organizationrating',
-            name='medium',
-            field=models.IntegerField(default=0, help_text='The number of medium risk vulnerabilities and failures.'),
+            model_name="organizationrating",
+            name="medium",
+            field=models.IntegerField(default=0, help_text="The number of medium risk vulnerabilities and failures."),
         ),
         migrations.AddField(
-            model_name='urlrating',
-            name='high',
-            field=models.IntegerField(default=0, help_text='The number of high risk vulnerabilities and failures.'),
+            model_name="urlrating",
+            name="high",
+            field=models.IntegerField(default=0, help_text="The number of high risk vulnerabilities and failures."),
         ),
         migrations.AddField(
-            model_name='urlrating',
-            name='low',
-            field=models.IntegerField(default=0, help_text='The number of low risk vulnerabilities and failures.'),
+            model_name="urlrating",
+            name="low",
+            field=models.IntegerField(default=0, help_text="The number of low risk vulnerabilities and failures."),
         ),
         migrations.AddField(
-            model_name='urlrating',
-            name='medium',
-            field=models.IntegerField(default=0, help_text='The number of medium risk vulnerabilities and failures.'),
+            model_name="urlrating",
+            name="medium",
+            field=models.IntegerField(default=0, help_text="The number of medium risk vulnerabilities and failures."),
         ),
     ]

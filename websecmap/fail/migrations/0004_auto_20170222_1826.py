@@ -9,20 +9,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fail', '0003_auto_20170222_1817'),
+        ("fail", "0003_auto_20170222_1817"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='coordinate',
-            name='organization',
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT, to='fail.Organization'),
+            model_name="coordinate",
+            name="organization",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="fail.Organization"),
         ),
         migrations.AlterField(
-            model_name='url',
-            name='organization',
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT, to='fail.Organization'),
+            model_name="url",
+            name="organization",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="fail.Organization"),
         ),
     ]

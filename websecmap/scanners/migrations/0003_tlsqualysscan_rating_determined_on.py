@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0002_auto_20170226_2007'),
+        ("scanners", "0002_auto_20170226_2007"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tlsqualysscan',
-            name='rating_determined_on',
+            model_name="tlsqualysscan",
+            name="rating_determined_on",
             field=models.DateTimeField(auto_now_add=True, default="2017-01-01"),
             preserve_default=False,
         ),

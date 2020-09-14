@@ -19,10 +19,10 @@ def tryint(s):
 
 
 def alphanum_key(s):
-    """ Turn a string into a list of string and number chunks.
-        "z23a" -> ["z", 23, "a"]
+    """Turn a string into a list of string and number chunks.
+    "z23a" -> ["z", 23, "a"]
     """
-    return [tryint(c) for c in re.split('([0-9]+)', s)]
+    return [tryint(c) for c in re.split("([0-9]+)", s)]
 
 
 class Command(BaseCommand):
@@ -31,10 +31,18 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         # no empty, because that loads all screenshots
-        filters = ['all', "ftp", "DNSSEC", "http_security_header_x_xss_protection",
-                   "http_security_header_x_content_type_options", "http_security_header_x_frame_options",
-                   "tls_qualys_certificate_trusted", "tls_qualys_encryption_quality",
-                   "http_security_header_strict_transport_security", "plain_https"]
+        filters = [
+            "all",
+            "ftp",
+            "DNSSEC",
+            "http_security_header_x_xss_protection",
+            "http_security_header_x_content_type_options",
+            "http_security_header_x_frame_options",
+            "tls_qualys_certificate_trusted",
+            "tls_qualys_encryption_quality",
+            "http_security_header_strict_transport_security",
+            "plain_https",
+        ]
 
         map_configurations = Configuration.objects.all()
 
@@ -48,20 +56,24 @@ def create_movie(filter, configuration):
 
     log.info("Creating movie for %s" % file_filter)
 
-    log.debug('Loading filenames')
-    files = [filename for filename in os.listdir(
-        settings.TOOLS['firefox']['screenshot_output_dir']) if filename.startswith(file_filter)]
+    log.debug("Loading filenames")
+    files = [
+        filename
+        for filename in os.listdir(settings.TOOLS["firefox"]["screenshot_output_dir"])
+        if filename.startswith(file_filter)
+    ]
 
     # some filters may not result in any files
     if not files:
-        log.debug('No suitable images could be found for this Configuration / filter. Did you make screenshots?')
+        log.debug("No suitable images could be found for this Configuration / filter. Did you make screenshots?")
         return
 
     files.sort(key=alphanum_key)
     files = reversed(files)
-    log.debug('Creating clips')
-    clips = [ImageClip(settings.TOOLS['firefox']['screenshot_output_dir'] + file).set_duration(0.2) for file in files]
-    log.debug('Writing file')
+    log.debug("Creating clips")
+    clips = [ImageClip(settings.TOOLS["firefox"]["screenshot_output_dir"] + file).set_duration(0.2) for file in files]
+    log.debug("Writing file")
     concat_clip = concatenate_videoclips(clips, method="compose")
-    concat_clip.write_videofile("%svideo_%s.mp4" % (
-        settings.TOOLS['firefox']['screenshot_output_dir'], file_filter), fps=30)
+    concat_clip.write_videofile(
+        "%svideo_%s.mp4" % (settings.TOOLS["firefox"]["screenshot_output_dir"], file_filter), fps=30
+    )

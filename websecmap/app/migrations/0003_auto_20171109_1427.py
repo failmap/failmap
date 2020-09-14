@@ -11,19 +11,20 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('app', '0002_job_name'),
+        ("app", "0002_job_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='created_by',
-            field=models.ForeignKey(blank=True, null=True,
-                                    on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="job",
+            name="created_by",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='result_id',
-            field=models.CharField(help_text='celery asyncresult ID for tracing task', max_length=255, unique=True),
+            model_name="job",
+            name="result_id",
+            field=models.CharField(help_text="celery asyncresult ID for tracing task", max_length=255, unique=True),
         ),
     ]

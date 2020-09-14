@@ -9,35 +9,37 @@ from django.utils.timezone import utc
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0031_auto_20180410_0953'),
+        ("organizations", "0031_auto_20180410_0953"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='coordinate',
-            name='created_on',
-            field=models.DateTimeField(blank=True, db_index=True, default=datetime.datetime(
-                2016, 1, 1, 0, 0, tzinfo=utc), null=True),
+            model_name="coordinate",
+            name="created_on",
+            field=models.DateTimeField(
+                blank=True, db_index=True, default=datetime.datetime(2016, 1, 1, 0, 0, tzinfo=utc), null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='coordinate',
-            name='is_dead_since',
+            model_name="coordinate",
+            name="is_dead_since",
             field=models.DateTimeField(blank=True, db_index=True, null=True),
         ),
         migrations.AlterField(
-            model_name='organization',
-            name='created_on',
-            field=models.DateTimeField(blank=True, db_index=True, default=datetime.datetime(
-                2016, 1, 1, 0, 0, tzinfo=utc), null=True),
+            model_name="organization",
+            name="created_on",
+            field=models.DateTimeField(
+                blank=True, db_index=True, default=datetime.datetime(2016, 1, 1, 0, 0, tzinfo=utc), null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='organization',
-            name='is_dead_since',
+            model_name="organization",
+            name="is_dead_since",
             field=models.DateTimeField(blank=True, db_index=True, null=True),
         ),
         migrations.AlterField(
-            model_name='organization',
-            name='name',
+            model_name="organization",
+            name="name",
             field=models.CharField(db_index=True, max_length=50),
         ),
     ]

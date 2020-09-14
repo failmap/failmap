@@ -6,7 +6,7 @@ from websecmap.api.logic import get_map_configuration
 class ApiTest(TestCase):
     # https://stackoverflow.com/questions/2470634/loading-fixtures-in-django-unit-tests
 
-    fixtures = ['development_scandata.json']
+    fixtures = ["development_scandata.json"]
 
     def test_SIDN_data(self):
 

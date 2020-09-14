@@ -13,8 +13,13 @@ log = logging.getLogger(__package__)
 
 
 @transaction.atomic
-def merge(source_organizations_names: List[str], target_organization_name: str, when: datetime,
-          organization_type: str = "municipality", country: str = "NL"):
+def merge(
+    source_organizations_names: List[str],
+    target_organization_name: str,
+    when: datetime,
+    organization_type: str = "municipality",
+    country: str = "NL",
+):
     """
     Keeping historical data correct is important.
     - The old organization should be visible, exactly as it was at that moment (geography), with the same ratings and
@@ -92,14 +97,16 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
     # implies that name + country + organization_type is unique.
     try:
         original_target = Organization.objects.get(
-            name=target_organization_name, country=country, type=type, is_dead=False)
+            name=target_organization_name, country=country, type=type, is_dead=False
+        )
         new_organization.twitter_handle = original_target.twitter_handle
 
         log.info("Creating a new %s, with information from the merged organization." % target_organization_name)
         original_target.is_dead = True
         original_target.is_dead_since = when
-        original_target.is_dead_reason = "Merged with other organizations, reusing the same name but different data" \
-                                         "+ the old data."
+        original_target.is_dead_reason = (
+            "Merged with other organizations, reusing the same name but different data" "+ the old data."
+        )
         original_target.save()
 
         # save the clone of the organization. Because autherwise the above "get" will get two.
@@ -124,16 +131,16 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
 
         try:
             source_organization = Organization.objects.get(
-                name=source_organizations_name,
-                country=country,
-                type=type,
-                is_dead=False)
+                name=source_organizations_name, country=country, type=type, is_dead=False
+            )
         except Organization.DoesNotExist:
             # New organizations don't exist... so nothing to migrate.
             raise ValueError(
                 "Organization %s does not exist. Tried to merge it with %s. Are you using a different translation for "
                 "this organization (for example a local dialect)?",
-                source_organizations_name, target_organization_name)
+                source_organizations_name,
+                target_organization_name,
+            )
 
         # copy todays used coordinates from all to-be-merged organizations into the target
         for coordinate in Coordinate.objects.all().filter(organization=source_organization, is_dead=False):
@@ -181,8 +188,13 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
 
 
 @transaction.atomic
-def dissolve(dissolved_organization_name: str, target_organization_names: List[str], when: datetime,
-             organization_type: str = "municipality", country: str = "NL"):
+def dissolve(
+    dissolved_organization_name: str,
+    target_organization_names: List[str],
+    when: datetime,
+    organization_type: str = "municipality",
+    country: str = "NL",
+):
     """
     Dissolving organizations leave behind a set of urls. Those urls should be taken care off by other existing
     organizations. This is not always the case unfortunately (but who will solve these issues otherwise?)
@@ -199,7 +211,8 @@ def dissolve(dissolved_organization_name: str, target_organization_names: List[s
 
     type = OrganizationType.objects.get(name=organization_type)
     dissolved_organization = Organization.objects.get(
-        name=dissolved_organization_name, country=country, type=type, is_dead=False)
+        name=dissolved_organization_name, country=country, type=type, is_dead=False
+    )
     dissolved_organization.is_dead = True
     dissolved_organization.is_dead_since = when
     dissolved_organization.is_dead_reason = "Disolved into other organizations (%s)" % target_organization_names
@@ -212,17 +225,16 @@ def dissolve(dissolved_organization_name: str, target_organization_names: List[s
 
     for target_organization_name in target_organization_names:
         target_organization = Organization.objects.get(
-            name=target_organization_name,
-            country=country,
-            type=type,
-            is_dead=False)
+            name=target_organization_name, country=country, type=type, is_dead=False
+        )
 
         clone_target = deepcopy(target_organization)
 
         target_organization.is_dead = True
         target_organization.is_dead_since = when
-        target_organization.is_dead_reason = "Received heritage of dissolved organization %s" % \
-                                             dissolved_organization_name
+        target_organization.is_dead_reason = (
+            "Received heritage of dissolved organization %s" % dissolved_organization_name
+        )
         target_organization.save()
 
         clone_target.id = None

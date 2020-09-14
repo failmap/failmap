@@ -8,23 +8,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0004_auto_20170227_1622'),
+        ("scanners", "0004_auto_20170227_1622"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tlsqualysscan',
-            name='pending',
+            model_name="tlsqualysscan",
+            name="pending",
             field=models.BooleanField(default=0),
         ),
         migrations.AlterField(
-            model_name='tlsqualysscan',
-            name='pending_since',
+            model_name="tlsqualysscan",
+            name="pending_since",
             field=models.DateTimeField(null=True),
         ),
         migrations.AlterField(
-            model_name='tlsqualysscan',
-            name='rating_determined_on',
+            model_name="tlsqualysscan",
+            name="rating_determined_on",
             field=models.DateTimeField(),
         ),
     ]

@@ -7,13 +7,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0008_organizationsubmission_organization_wikidata_code'),
+        ("game", "0008_organizationsubmission_organization_wikidata_code"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='team',
-            name='color',
-            field=colorful.fields.RGBColorField(blank=True, colors=['#FF0000', '#00FF00', '#0000FF'], null=True),
+            model_name="team",
+            name="color",
+            field=colorful.fields.RGBColorField(blank=True, colors=["#FF0000", "#00FF00", "#0000FF"], null=True),
         ),
     ]

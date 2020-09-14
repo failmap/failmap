@@ -9,17 +9,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0007_auto_20171127_1456'),
+        ("map", "0007_auto_20171127_1456"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organizationrating',
-            name='organization',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='organizations.Organization'),
+            model_name="organizationrating",
+            name="organization",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="organizations.Organization"),
         ),
         migrations.AlterIndexTogether(
-            name='organizationrating',
-            index_together=set([('when', 'id')]),
+            name="organizationrating",
+            index_together=set([("when", "id")]),
         ),
     ]

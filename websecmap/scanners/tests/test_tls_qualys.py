@@ -12,19 +12,45 @@ def test_qualys_save_data(db):
     Should store scan errors.
     """
 
-    data = {"host": "werkplek.alkmaar.nl", "port": 443, "protocol": "http", "isPublic": True, "status": "READY",
-            "startTime": 1597216890988, "testTime": 1597217025442, "engineVersion": "2.1.5", "criteriaVersion": "2009q",
-            "endpoints": [
-                {"ipAddress": "2a02:2738:1:1:0:0:0:67", "serverName": "nsx01.alkmaar.nl", "statusMessage": "Ready",
-                 "grade": "B", "gradeTrustIgnored": "B", "hasWarnings": False, "isExceptional": False, "progress": 100,
-                 "duration": 118567, "eta": 12, "delegation": 1, "details": {}},
-                {"ipAddress": "93.93.121.103", "serverName": "nsx01.alkmaar.nl",
-                 "statusMessage": "Unable to connect to the server", "statusDetails": "TESTING_PROTO_2_0",
-                 "statusDetailsMessage": "Testing SSL 2.0", "progress": -1, "duration": 15022, "eta": -1,
-                 "delegation": 1,
-                 "details": {}}
-            ]
-            }
+    data = {
+        "host": "werkplek.alkmaar.nl",
+        "port": 443,
+        "protocol": "http",
+        "isPublic": True,
+        "status": "READY",
+        "startTime": 1597216890988,
+        "testTime": 1597217025442,
+        "engineVersion": "2.1.5",
+        "criteriaVersion": "2009q",
+        "endpoints": [
+            {
+                "ipAddress": "2a02:2738:1:1:0:0:0:67",
+                "serverName": "nsx01.alkmaar.nl",
+                "statusMessage": "Ready",
+                "grade": "B",
+                "gradeTrustIgnored": "B",
+                "hasWarnings": False,
+                "isExceptional": False,
+                "progress": 100,
+                "duration": 118567,
+                "eta": 12,
+                "delegation": 1,
+                "details": {},
+            },
+            {
+                "ipAddress": "93.93.121.103",
+                "serverName": "nsx01.alkmaar.nl",
+                "statusMessage": "Unable to connect to the server",
+                "statusDetails": "TESTING_PROTO_2_0",
+                "statusDetailsMessage": "Testing SSL 2.0",
+                "progress": -1,
+                "duration": 15022,
+                "eta": -1,
+                "delegation": 1,
+                "details": {},
+            },
+        ],
+    }
 
     u = create_url("werkplek.alkmaar.nl")
 
@@ -41,4 +67,4 @@ def test_qualys_save_data(db):
     for scan in EndpointGenericScan.objects.all():
         scan_results.append(scan.rating)
 
-    assert sorted(scan_results) == sorted(['B', 'trusted', "scan_error", "scan_error"])
+    assert sorted(scan_results) == sorted(["B", "trusted", "scan_error", "scan_error"])

@@ -8,42 +8,42 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fail', '0009_auto_20170222_2030'),
+        ("fail", "0009_auto_20170222_2030"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='coordinate',
-            name='organization',
+            model_name="coordinate",
+            name="organization",
         ),
         migrations.RemoveField(
-            model_name='organization',
-            name='type',
+            model_name="organization",
+            name="type",
         ),
         migrations.DeleteModel(
-            name='ScansDnssec',
+            name="ScansDnssec",
         ),
         migrations.DeleteModel(
-            name='ScansSsllabs',
+            name="ScansSsllabs",
         ),
         migrations.AlterUniqueTogether(
-            name='url',
+            name="url",
             unique_together=set([]),
         ),
         migrations.RemoveField(
-            model_name='url',
-            name='organization',
+            model_name="url",
+            name="organization",
         ),
         migrations.DeleteModel(
-            name='Coordinate',
+            name="Coordinate",
         ),
         migrations.DeleteModel(
-            name='Organization',
+            name="Organization",
         ),
         migrations.DeleteModel(
-            name='OrganizationType',
+            name="OrganizationType",
         ),
         migrations.DeleteModel(
-            name='Url',
+            name="Url",
         ),
     ]

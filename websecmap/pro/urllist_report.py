@@ -10,29 +10,35 @@ from deepdiff import DeepDiff
 from websecmap.celery import Task, app
 from websecmap.organizations.models import Url
 from websecmap.pro.models import UrlList, UrlListReport
-from websecmap.reporting.report import (aggegrate_url_rating_scores, get_latest_urlratings_fast,
-                                        relevant_urls_at_timepoint)
+from websecmap.reporting.report import (
+    aggegrate_url_rating_scores,
+    get_latest_urlratings_fast,
+    relevant_urls_at_timepoint,
+)
 
 log = logging.getLogger(__package__)
 
 # todo: determine the moments things changed, using timeline.
 
 
-def compose_task(organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(),
-                 ) -> Task:
+def compose_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+) -> Task:
     urllists = UrlList.objects.filter()
     tasks = [rate_urllists_now.si([urllist]) for urllist in urllists]
     return group(tasks)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def rate_urllists_now(urllists: List[UrlList]):
     for urllist in urllists:
         now = datetime.now(pytz.utc)
         rate_urllist_on_moment(urllist, now)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def rate_urllists_historically(urllists: List[UrlList]):
     # weekly, and for the last 14 days daily. 64 calculations
     # maybe this is not precise enough...
@@ -56,7 +62,13 @@ def rate_urllist_on_moment(urllist: UrlList, when: datetime = None):
     if not when:
         when = datetime.now(pytz.utc)
 
-    log.info("Creating report for urllist %s on %s" % (UrlList, when, ))
+    log.info(
+        "Creating report for urllist %s on %s"
+        % (
+            UrlList,
+            when,
+        )
+    )
 
     if UrlListReport.objects.all().filter(urllist=urllist, at_when=when).exists():
         log.debug("UrllistReport already exists for %s on %s. Not overwriting." % (urllist, when))
@@ -67,11 +79,11 @@ def rate_urllist_on_moment(urllist: UrlList, when: datetime = None):
     scores = aggegrate_url_rating_scores(all_url_ratings)
 
     try:
-        last = UrlListReport.objects.filter(urllist=urllist, at_when__lte=when).latest('at_when')
+        last = UrlListReport.objects.filter(urllist=urllist, at_when__lte=when).latest("at_when")
     except UrlListReport.DoesNotExist:
         last = UrlListReport()  # create a dummy one for comparison
 
-    scores['name'] = urllist.name
+    scores["name"] = urllist.name
     calculation = {"organization": scores}
 
     if not DeepDiff(last.calculation, calculation, ignore_order=True, report_repetition=True):
@@ -83,8 +95,8 @@ def rate_urllist_on_moment(urllist: UrlList, when: datetime = None):
     # remove urls and name from scores object, so it can be used as initialization parameters (saves lines)
     # this is by reference, meaning that the calculation will be affected if we don't work on a clone.
     init_scores = deepcopy(scores)
-    del(init_scores['name'])
-    del(init_scores['urls'])
+    del init_scores["name"]
+    del init_scores["urls"]
 
     report = UrlListReport(**init_scores)
     report.urllist = urllist

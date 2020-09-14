@@ -30,7 +30,7 @@ def reflag_urlgenericscan(type):
     UrlGenericScan.objects.all().filter(type=type).update(is_the_latest_scan=False)
 
     # get the latest scans
-    sql = '''
+    sql = """
         SELECT
             id,
             last_scan_moment,
@@ -41,7 +41,10 @@ def reflag_urlgenericscan(type):
              WHERE last_scan_moment <= '%(when)s' and type = '%(type)s' GROUP BY url_id
              ) as x
         ON x.id2 = scanners_urlgenericscan.id
-    ''' % {'when': datetime.now(pytz.utc), 'type': type}
+    """ % {
+        "when": datetime.now(pytz.utc),
+        "type": type,
+    }
 
     updatescans(UrlGenericScan.objects.raw(sql))
 
@@ -51,7 +54,7 @@ def reflag_endpointgenericscan(type):
     EndpointGenericScan.objects.all().filter(type=type).update(is_the_latest_scan=False)
 
     # get the latest endpointgenericscans
-    sql = '''
+    sql = """
         SELECT
             id,
             last_scan_moment,
@@ -62,7 +65,10 @@ def reflag_endpointgenericscan(type):
              WHERE last_scan_moment <= '%(when)s' and type = '%(type)s' GROUP BY endpoint_id
              ) as x
         ON x.id2 = scanners_endpointgenericscan.id
-    ''' % {'when': datetime.now(pytz.utc), 'type': type}
+    """ % {
+        "when": datetime.now(pytz.utc),
+        "type": type,
+    }
 
     updatescans(EndpointGenericScan.objects.raw(sql))
 

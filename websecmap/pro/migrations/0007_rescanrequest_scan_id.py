@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pro', '0006_auto_20181218_1526'),
+        ("pro", "0006_auto_20181218_1526"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='rescanrequest',
-            name='scan_id',
-            field=models.IntegerField(default=0, help_text='Makes it easy to find if a rescan is already requested.'),
+            model_name="rescanrequest",
+            name="scan_id",
+            field=models.IntegerField(default=0, help_text="Makes it easy to find if a rescan is already requested."),
         ),
     ]

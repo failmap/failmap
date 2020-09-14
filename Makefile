@@ -80,6 +80,8 @@ check: .make.check.py .make.check.sh  ## code quality checks
 .make.check.py: ${pysrc} ${app}
 	# check code quality
 	${env} pylama ${pysrcdirs} --skip "**/migrations/*"
+	# check formatting
+	${env} black --line-length 120 --check ${pysrcdirs}
 	@touch $@
 
 .make.check.sh: ${shsrc}
@@ -89,12 +91,15 @@ check: .make.check.py .make.check.sh  ## code quality checks
 
 autofix fix: .make.fix  ## automatic fix of trivial code quality issues
 .make.fix: ${pysrc} ${app}
-	# fix trivial pep8 style issues
-	${env} autopep8 -ri ${pysrcdirs}
 	# remove unused imports
 	${env} autoflake -ri --remove-all-unused-imports ${pysrcdirs}
-	# sort imports
-	${env} isort -rc ${pysrcdirs}
+	# autoformat code
+	# -q is used because a few files cannot be formatted with black, and will raise errors
+	${env} black --line-length 120 -q ${pysrcdirs}
+	# replaced by black: fix trivial pep8 style issues
+	# replaced by black: ${env} autopep8 -ri ${pysrcdirs}
+	# replaced by black: sort imports
+	# replaced by black: ${env} isort -rc ${pysrcdirs}
 	# do a check after autofixing to show remaining problems
 	${MAKE} check
 	@touch $@

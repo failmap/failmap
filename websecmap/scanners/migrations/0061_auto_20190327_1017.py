@@ -6,20 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0060_auto_20190116_0937'),
+        ("scanners", "0060_auto_20190116_0937"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='internetnlscan',
-            name='friendly_message',
+            model_name="internetnlscan",
+            name="friendly_message",
             field=models.CharField(
-                blank=True, help_text='The message from the complete answer. Gives insight into progress of the scan.', max_length=255, null=True),
+                blank=True,
+                help_text="The message from the complete answer. Gives insight into progress of the scan.",
+                max_length=255,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='internetnlscan',
-            name='message',
+            model_name="internetnlscan",
+            name="message",
             field=models.TextField(
-                blank=True, help_text='The complete answer retrieved from the server.', max_length=500, null=True),
+                blank=True, help_text="The complete answer retrieved from the server.", max_length=500, null=True
+            ),
         ),
     ]

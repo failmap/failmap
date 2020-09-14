@@ -8,13 +8,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0030_auto_20171113_1240'),
+        ("scanners", "0030_auto_20171113_1240"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='tlsqualysscan',
-            old_name='scan_moment',
-            new_name='last_scan_moment',
+            model_name="tlsqualysscan",
+            old_name="scan_moment",
+            new_name="last_scan_moment",
         ),
     ]

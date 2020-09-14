@@ -10,20 +10,19 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Job',
+            name="Job",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('task', models.TextField(help_text='celery task signature in string form')),
-                ('result_id', models.CharField(help_text='celery asyncresult ID for tracing task', max_length=255)),
-                ('status', models.CharField(help_text='status of the job', max_length=255)),
-                ('result', jsonfield.fields.JSONField(default=dict, help_text='output of the task as JSON')),
-                ('created_on', models.DateTimeField(auto_now_add=True, help_text='when task was created', null=True)),
-                ('finished_on', models.DateTimeField(blank=True, help_text='when task ended', null=True)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("task", models.TextField(help_text="celery task signature in string form")),
+                ("result_id", models.CharField(help_text="celery asyncresult ID for tracing task", max_length=255)),
+                ("status", models.CharField(help_text="status of the job", max_length=255)),
+                ("result", jsonfield.fields.JSONField(default=dict, help_text="output of the task as JSON")),
+                ("created_on", models.DateTimeField(auto_now_add=True, help_text="when task was created", null=True)),
+                ("finished_on", models.DateTimeField(blank=True, help_text="when task ended", null=True)),
             ],
         ),
     ]

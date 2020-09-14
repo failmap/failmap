@@ -9,13 +9,13 @@ from jet.dashboard.modules import DashboardModule
 
 
 class RebuildRatings(DashboardModule):
-    title = 'Rebuild Ratings'
-    title_url = 'Rebuild Ratings'
+    title = "Rebuild Ratings"
+    title_url = "Rebuild Ratings"
 
-    template = 'app/templates/admin/rebuild_ratings.html'
+    template = "app/templates/admin/rebuild_ratings.html"
 
 
 class TaskProcessing(DashboardModule):
-    title = 'Task Processing Status'
-    title_url = 'Task Processing Status'
-    template = 'app/templates/admin/task_processing_status.html'
+    title = "Task Processing Status"
+    title_url = "Task Processing Status"
+    template = "app/templates/admin/task_processing_status.html"

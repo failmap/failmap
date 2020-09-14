@@ -4,12 +4,17 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from websecmap.api.logic import (get_2ndlevel_domains, get_map_configuration, get_uploads,
-                                 get_uploads_with_results, sidn_domain_upload)
+from websecmap.api.logic import (
+    get_2ndlevel_domains,
+    get_map_configuration,
+    get_uploads,
+    get_uploads_with_results,
+    sidn_domain_upload,
+)
 
 log = logging.getLogger(__package__)
 
-SIDN_LOGIN_URL = '/api/login/?next=/SIDN/'
+SIDN_LOGIN_URL = "/api/login/?next=/SIDN/"
 
 
 # todo: verify if the correct account is used (contains "SIDN" in the description)
@@ -41,7 +46,7 @@ def has_SIDN_permissions(user):
 
 @login_required(login_url=SIDN_LOGIN_URL)
 def show_apis_(request):
-    return render(request, 'api/apis.html', {})
+    return render(request, "api/apis.html", {})
 
 
 @user_passes_test(has_SIDN_permissions, login_url=SIDN_LOGIN_URL)
@@ -57,27 +62,31 @@ def sidn_get_2ndlevel_domains_(request, country, organization_type):
 
 @user_passes_test(has_SIDN_permissions, login_url=SIDN_LOGIN_URL)
 def sidn_show_instructions_(request):
-    return render(request, 'api/SIDN.html', {})
+    return render(request, "api/SIDN.html", {})
 
 
 @user_passes_test(has_SIDN_permissions, login_url=SIDN_LOGIN_URL)
 def sidn_domain_upload_(request):
-    data = request.POST.get('data', "")
+    data = request.POST.get("data", "")
     if not data:
-        return JsonResponse({'result': 'no data supplied, not going to process request'})
+        return JsonResponse({"result": "no data supplied, not going to process request"})
     sidn_domain_upload.apply_async([request.user, data])
-    return JsonResponse({'result': 'processing'})
+    return JsonResponse({"result": "processing"})
 
 
 @user_passes_test(has_SIDN_permissions, login_url=SIDN_LOGIN_URL)
 def sidn_get_uploads_(request):
-    return JsonResponse(get_uploads(request.user), safe=False, json_dumps_params={
-        'sort_keys': False, 'indent': 4, 'separators': (',', ': ')
-    })
+    return JsonResponse(
+        get_uploads(request.user),
+        safe=False,
+        json_dumps_params={"sort_keys": False, "indent": 4, "separators": (",", ": ")},
+    )
 
 
 @user_passes_test(has_SIDN_permissions, login_url=SIDN_LOGIN_URL)
 def sidn_get_uploads_with_results_(request):
-    return JsonResponse(get_uploads_with_results(request.user), safe=False, json_dumps_params={
-        'sort_keys': False, 'indent': 4, 'separators': (',', ': ')
-    })
+    return JsonResponse(
+        get_uploads_with_results(request.user),
+        safe=False,
+        json_dumps_params={"sort_keys": False, "indent": 4, "separators": (",", ": ")},
+    )

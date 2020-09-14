@@ -6,14 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0044_auto_20181213_0805'),
+        ("organizations", "0044_auto_20181213_0805"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='dataset',
-            name='kwargs',
+            model_name="dataset",
+            name="kwargs",
             field=models.TextField(
-                blank=True, help_text='A dictionary with extra options for the parser to handle the dataset. This is different per parser.This field is highly coupled with the code of the parser.', max_length=5000, null=True),
+                blank=True,
+                help_text="A dictionary with extra options for the parser to handle the dataset. This is different per parser.This field is highly coupled with the code of the parser.",
+                max_length=5000,
+                null=True,
+            ),
         ),
     ]

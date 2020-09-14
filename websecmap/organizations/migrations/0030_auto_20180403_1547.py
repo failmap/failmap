@@ -6,24 +6,24 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0029_auto_20180321_1002'),
+        ("organizations", "0029_auto_20180321_1002"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='coordinate',
-            options={'managed': True, 'verbose_name': 'coordinate', 'verbose_name_plural': 'coordinates'},
+            name="coordinate",
+            options={"managed": True, "verbose_name": "coordinate", "verbose_name_plural": "coordinates"},
         ),
         migrations.AlterModelOptions(
-            name='organization',
-            options={'managed': True, 'verbose_name': 'organization', 'verbose_name_plural': 'organizations'},
+            name="organization",
+            options={"managed": True, "verbose_name": "organization", "verbose_name_plural": "organizations"},
         ),
         migrations.AlterModelOptions(
-            name='organizationtype',
-            options={'managed': True, 'verbose_name': 'organization_type', 'verbose_name_plural': 'organization_types'},
+            name="organizationtype",
+            options={"managed": True, "verbose_name": "organization_type", "verbose_name_plural": "organization_types"},
         ),
         migrations.AlterModelOptions(
-            name='promise',
-            options={'verbose_name': 'promise', 'verbose_name_plural': 'promises'},
+            name="promise",
+            options={"verbose_name": "promise", "verbose_name_plural": "promises"},
         ),
     ]

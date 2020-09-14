@@ -7,8 +7,8 @@ log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
-    help = 'Clear all caches'
+    help = "Clear all caches"
 
     def handle(self, *args, **options):
-        log.warning('This does not clear your browsers chache. For JSON this might be relevant.')
+        log.warning("This does not clear your browsers chache. For JSON this might be relevant.")
         cache.clear()

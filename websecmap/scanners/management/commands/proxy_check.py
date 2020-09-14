@@ -14,14 +14,14 @@ class Command(BaseCommand):
     help = __doc__
 
     def add_arguments(self, parser):
-        parser.add_argument('id', nargs='?')
+        parser.add_argument("id", nargs="?")
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
 
         try:
-            if options['id']:
-                for id in options['id']:
+            if options["id"]:
+                for id in options["id"]:
                     proxy = ScanProxy.objects.all().filter(id=id).first()
                     if proxy:
                         check_proxy(proxy)

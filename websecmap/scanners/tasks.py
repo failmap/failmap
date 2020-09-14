@@ -5,18 +5,44 @@ from celery import group
 
 from websecmap.map.views import screenshot
 from websecmap.scanners import autoexplain, plannedscan, proxy
-from websecmap.scanners.scanner import (dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec,
-                                        dummy, ftp, http, internet_nl_v2_mail, internet_nl_v2_web,
-                                        plain_http, security_headers, subdomains, tls_qualys,
-                                        verify_unresolvable)
+from websecmap.scanners.scanner import (
+    dns_endpoints,
+    dns_known_subdomains,
+    dns_wildcards,
+    dnssec,
+    dummy,
+    ftp,
+    http,
+    internet_nl_v2_mail,
+    internet_nl_v2_web,
+    plain_http,
+    security_headers,
+    subdomains,
+    tls_qualys,
+    verify_unresolvable,
+)
 
 log = logging.getLogger(__name__)
 
 
 # explicitly declare the imported modules as this modules 'content', prevents pyflakes issues
-__scanners__ = [dns_endpoints, dns_known_subdomains, dns_wildcards, dnssec, dummy, ftp, http, internet_nl_v2_mail,
-                internet_nl_v2_web, plain_http, screenshot, security_headers, subdomains, tls_qualys,
-                verify_unresolvable]
+__scanners__ = [
+    dns_endpoints,
+    dns_known_subdomains,
+    dns_wildcards,
+    dnssec,
+    dummy,
+    ftp,
+    http,
+    internet_nl_v2_mail,
+    internet_nl_v2_web,
+    plain_http,
+    screenshot,
+    security_headers,
+    subdomains,
+    tls_qualys,
+    verify_unresolvable,
+]
 
 __others__ = [proxy, autoexplain, plannedscan]
 
@@ -27,8 +53,7 @@ TLD_DEFAULT_EXPLORERS = []
 DEFAULT_EXPLORERS = [http.compose_manual_discover_task, ftp.compose_manual_discover_task]
 
 # Beta: dns.brute_known_subdomains_compose_task, - old code still
-TLD_DEFAULT_CRAWLERS = [
-    subdomains.compose_discover_task]
+TLD_DEFAULT_CRAWLERS = [subdomains.compose_discover_task]
 DEFAULT_CRAWLERS = []
 
 # Beta: tls_osaft.compose_task, - is this using the outdated ssl library?

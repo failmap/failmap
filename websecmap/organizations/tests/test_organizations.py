@@ -7,5 +7,5 @@ def test_create_organization(db):
     org = Organization(name="test", type=OrganizationType.objects.get(pk=1))
 
     assert org
-    assert org.name == 'test'
-    assert org.type.name == 'municipality'
+    assert org.name == "test"
+    assert org.type.name == "municipality"

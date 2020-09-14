@@ -6,8 +6,9 @@ from websecmap.map.logic.map_defaults import get_country, get_organization_type,
 from websecmap.map.models import OrganizationReport
 
 
-def get_ticker_data(country: str = "NL", organization_type: str = "municipality",
-                    weeks_back: int = 0, weeks_duration: int = 0):
+def get_ticker_data(
+    country: str = "NL", organization_type: str = "municipality", weeks_back: int = 0, weeks_duration: int = 0
+):
 
     weeks_back = int(weeks_back)
     weeks_duration = int(weeks_duration)
@@ -60,8 +61,11 @@ def get_ticker_data(country: str = "NL", organization_type: str = "municipality"
         AND organization.type_id = '%(OrganizationTypeId)s'
         AND organization.country = '%(country)s'
         AND total_urls > 0
-        """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
-               "country": get_country(country)}
+        """ % {
+        "when": when,
+        "OrganizationTypeId": get_organization_type(organization_type),
+        "country": get_country(country),
+    }
 
     newest_urlratings = list(OrganizationReport.objects.raw(sql))
 
@@ -100,9 +104,11 @@ def get_ticker_data(country: str = "NL", organization_type: str = "municipality"
         AND organization.type_id = '%(OrganizationTypeId)s'
         AND organization.country = '%(country)s'
         AND total_urls > 0
-        """ % {"when": when - timedelta(days=(weeks_duration * 7)),
-               "OrganizationTypeId": get_organization_type(organization_type),
-               "country": get_country(country)}
+        """ % {
+        "when": when - timedelta(days=(weeks_duration * 7)),
+        "OrganizationTypeId": get_organization_type(organization_type),
+        "country": get_country(country),
+    }
 
     oldest_urlratings = list(OrganizationReport.objects.raw(sql))
 
@@ -114,7 +120,7 @@ def get_ticker_data(country: str = "NL", organization_type: str = "municipality"
 
     # insuccesful rebuild? Or not enough organizations?
     if not newest_urlratings:
-        return {'changes': {}, 'slogan': config.TICKER_SLOGAN}
+        return {"changes": {}, "slogan": config.TICKER_SLOGAN}
 
     changes = []
     for newest_urlrating in newest_urlratings:
@@ -139,20 +145,20 @@ def get_ticker_data(country: str = "NL", organization_type: str = "municipality"
             low_changes = newest_urlrating.low - matching_oldest.low
 
         change = {
-            'organization': newest_urlrating.name,
-            'high_now': newest_urlrating.high,
-            'medium_now': newest_urlrating.medium,
-            'low_now': newest_urlrating.low,
-            'high_then': high_then,
-            'medium_then': medium_then,
-            'low_then': low_then,
-            'high_changes': high_changes,
-            'medium_changes': medium_changes,
-            'low_changes': int(low_changes),
+            "organization": newest_urlrating.name,
+            "high_now": newest_urlrating.high,
+            "medium_now": newest_urlrating.medium,
+            "low_now": newest_urlrating.low,
+            "high_then": high_then,
+            "medium_then": medium_then,
+            "low_then": low_then,
+            "high_changes": high_changes,
+            "medium_changes": medium_changes,
+            "low_changes": int(low_changes),
         }
 
         changes.append(change)
 
-    data = {'changes': changes, 'slogan': config.TICKER_SLOGAN}
+    data = {"changes": changes, "slogan": config.TICKER_SLOGAN}
 
     return data

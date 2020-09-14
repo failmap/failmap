@@ -6,20 +6,20 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0042_auto_20180814_1415'),
+        ("scanners", "0042_auto_20180814_1415"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='endpoint',
-            options={'verbose_name': 'endpoint', 'verbose_name_plural': 'endpoint'},
+            name="endpoint",
+            options={"verbose_name": "endpoint", "verbose_name_plural": "endpoint"},
         ),
         migrations.AlterModelOptions(
-            name='tlsscan',
-            options={'verbose_name': 'tlsscan', 'verbose_name_plural': 'tlsscan'},
+            name="tlsscan",
+            options={"verbose_name": "tlsscan", "verbose_name_plural": "tlsscan"},
         ),
         migrations.AlterModelOptions(
-            name='urlip',
-            options={'verbose_name': 'urlip', 'verbose_name_plural': 'urlip'},
+            name="urlip",
+            options={"verbose_name": "urlip", "verbose_name_plural": "urlip"},
         ),
     ]

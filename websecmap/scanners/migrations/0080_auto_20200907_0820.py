@@ -6,16 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0079_plannedscanstatistic'),
+        ("scanners", "0079_plannedscanstatistic"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='plannedscan',
-            name='requested_at_when_date',
+            model_name="plannedscan",
+            name="requested_at_when_date",
         ),
         migrations.AddIndex(
-            model_name='plannedscan',
-            index=models.Index(fields=['scanner', 'activity', 'state'], name='scanners_pl_scanner_b2f5af_idx'),
+            model_name="plannedscan",
+            index=models.Index(fields=["scanner", "activity", "state"], name="scanners_pl_scanner_b2f5af_idx"),
         ),
     ]

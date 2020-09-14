@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0018_auto_20181206_1039'),
+        ("game", "0018_auto_20181206_1039"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organizationsubmission',
-            name='organization_address_geocoded',
-            field=models.CharField(blank=True, help_text='Automatic geocoded organization address.',
-                                   max_length=5000, null=True),
+            model_name="organizationsubmission",
+            name="organization_address_geocoded",
+            field=models.CharField(
+                blank=True, help_text="Automatic geocoded organization address.", max_length=5000, null=True
+            ),
         ),
     ]

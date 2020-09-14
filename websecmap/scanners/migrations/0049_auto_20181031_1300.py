@@ -6,32 +6,40 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0048_auto_20181009_1315'),
+        ("scanners", "0048_auto_20181009_1315"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='endpointgenericscan',
-            name='is_the_latest_scan',
+            model_name="endpointgenericscan",
+            name="is_the_latest_scan",
             field=models.BooleanField(
-                default=False, help_text='Notes if this was the latest scan for this url/endpoint. Scanmanagers set this value.'),
+                default=False,
+                help_text="Notes if this was the latest scan for this url/endpoint. Scanmanagers set this value.",
+            ),
         ),
         migrations.AddField(
-            model_name='tlsqualysscan',
-            name='is_the_latest_scan',
+            model_name="tlsqualysscan",
+            name="is_the_latest_scan",
             field=models.BooleanField(
-                default=False, help_text='Notes if this was the latest scan for this url/endpoint. Scanmanagers set this value.'),
+                default=False,
+                help_text="Notes if this was the latest scan for this url/endpoint. Scanmanagers set this value.",
+            ),
         ),
         migrations.AddField(
-            model_name='tlsscan',
-            name='is_the_latest_scan',
+            model_name="tlsscan",
+            name="is_the_latest_scan",
             field=models.BooleanField(
-                default=False, help_text='Notes if this was the latest scan for this url/endpoint. Scanmanagers set this value.'),
+                default=False,
+                help_text="Notes if this was the latest scan for this url/endpoint. Scanmanagers set this value.",
+            ),
         ),
         migrations.AddField(
-            model_name='urlgenericscan',
-            name='is_the_latest_scan',
+            model_name="urlgenericscan",
+            name="is_the_latest_scan",
             field=models.BooleanField(
-                default=False, help_text='Notes if this was the latest scan for this url/endpoint. Scanmanagers set this value.'),
+                default=False,
+                help_text="Notes if this was the latest scan for this url/endpoint. Scanmanagers set this value.",
+            ),
         ),
     ]

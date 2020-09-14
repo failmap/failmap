@@ -6,19 +6,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reporting', '0002_auto_20190222_1047'),
+        ("reporting", "0002_auto_20190222_1047"),
     ]
 
-    database_operations = [
-        migrations.AlterModelTable('VulnerabilityStatistic', 'map_vulnerabilitystatistic')
-    ]
+    database_operations = [migrations.AlterModelTable("VulnerabilityStatistic", "map_vulnerabilitystatistic")]
 
-    state_operations = [
-        migrations.DeleteModel('VulnerabilityStatistic')
-    ]
+    state_operations = [migrations.DeleteModel("VulnerabilityStatistic")]
 
     operations = [
-        migrations.SeparateDatabaseAndState(
-            database_operations=database_operations,
-            state_operations=state_operations)
+        migrations.SeparateDatabaseAndState(database_operations=database_operations, state_operations=state_operations)
     ]

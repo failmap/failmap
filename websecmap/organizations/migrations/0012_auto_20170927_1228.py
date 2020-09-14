@@ -9,14 +9,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0011_auto_20170922_1612'),
+        ("organizations", "0011_auto_20170922_1612"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='url',
-            name='organization',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    to='organizations.Organization'),
+            model_name="url",
+            name="organization",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="organizations.Organization"),
         ),
     ]

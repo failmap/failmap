@@ -15,6 +15,6 @@ class Command(BaseCommand):
 
     def run_from_argv(self, argv):
         """Replace python with celery process with given arguments."""
-        appname = __name__.split('.', 1)[0] + '.celery:app'
-        appname_arguments = ['-A', appname]
+        appname = __name__.split(".", 1)[0] + ".celery:app"
+        appname_arguments = ["-A", appname]
         os.execvp(argv[1], argv[1:2] + appname_arguments + argv[2:])

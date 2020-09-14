@@ -6,20 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0028_mapdatacache_cached_on'),
+        ("map", "0028_mapdatacache_cached_on"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='vulnerabilitystatistic',
-            name='endpoints',
+            model_name="vulnerabilitystatistic",
+            name="endpoints",
             field=models.PositiveIntegerField(
-                default=0, help_text='Makes only sense on the total number of vulnerabilities'),
+                default=0, help_text="Makes only sense on the total number of vulnerabilities"
+            ),
         ),
         migrations.AddField(
-            model_name='vulnerabilitystatistic',
-            name='urls',
+            model_name="vulnerabilitystatistic",
+            name="urls",
             field=models.PositiveIntegerField(
-                default=0, help_text='Makes only sense on the total number of vulnerabilities'),
+                default=0, help_text="Makes only sense on the total number of vulnerabilities"
+            ),
         ),
     ]

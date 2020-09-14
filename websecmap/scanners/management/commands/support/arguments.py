@@ -7,11 +7,12 @@ from websecmap.organizations.models import Organization
 
 def add_organization_argument(parser):
     return parser.add_argument(
-        '--organization', '-o',
+        "--organization",
+        "-o",
         help="Name of an organization, for example Arnhem. Prefix spaces with a backslash (\\)",
         nargs=1,
         required=False,
-        type=valid_organization
+        type=valid_organization,
     )
 
 

@@ -2,7 +2,7 @@ from django.contrib.auth.middleware import RemoteUserMiddleware
 
 
 class CustomRemoteUserMiddleware(RemoteUserMiddleware):
-    header = 'HTTP_REMOTE_USER'
+    header = "HTTP_REMOTE_USER"
 
     def process_request(self, request):
         super().process_request(request)

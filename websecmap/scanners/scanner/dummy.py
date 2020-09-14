@@ -16,8 +16,12 @@ from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import (allowed_to_scan, endpoint_filters,
-                                                 q_configurations_to_scan, unique_and_random)
+from websecmap.scanners.scanner.__init__ import (
+    allowed_to_scan,
+    endpoint_filters,
+    q_configurations_to_scan,
+    unique_and_random,
+)
 
 log = logging.getLogger(__name__)
 
@@ -31,18 +35,19 @@ RETRY_DELAY = 1
 EXPIRES = 3600 * 10  # 10 hour example
 
 
-def filter_scan(organizations_filter: dict = dict(),
-                urls_filter: dict = dict(),
-                endpoints_filter: dict = dict(),
-                **kwargs):
+def filter_scan(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     """
     This creates a filter on what needs to be scanned. This filter is often reused for manual and planned scans.
     """
 
     endpoints = Endpoint.objects.filter(
-        q_configurations_to_scan(level='endpoint'),
+        q_configurations_to_scan(level="endpoint"),
         # only scan endpoints that are known to be alive, using the http(s) protocol
-        is_dead=False, protocol__in=['http', 'https'])
+        is_dead=False,
+        protocol__in=["http", "https"],
+    )
 
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
 
@@ -53,12 +58,10 @@ def filter_scan(organizations_filter: dict = dict(),
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue='storage')
-def plan_scan(organizations_filter: dict = dict(),
-              urls_filter: dict = dict(),
-              endpoints_filter: dict = dict(),
-              **kwargs
-              ):
+@app.task(queue="storage")
+def plan_scan(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     """
     Adds scans to the scan planning. These can be consumed with compose_planned_scan_task
     """
@@ -74,35 +77,31 @@ def compose_scan_task(urls):
     Everything is managed on url basis, because the underlaying impelentations may differ and because it's
     more efficient than a generic model. It's also easier to understand.
     """
-    endpoints = retrieve_endpoints_from_urls(urls, protocols=['http', 'https'])
+    endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
     endpoints = unique_and_random(endpoints)
-    log.info(f'Creating dummy scan task for {len(endpoints)} endpoints ')
+    log.info(f"Creating dummy scan task for {len(endpoints)} endpoints ")
 
     # Make the first task immutable, so it doesn't get any arguments of other scanners in a chain.
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     task = group(
-        scan.si(endpoint.uri_url())
-        | store.s(endpoint)
-        | plannedscan.finish.si('scan', 'dummy', endpoint.url) for endpoint in endpoints
+        scan.si(endpoint.uri_url()) | store.s(endpoint) | plannedscan.finish.si("scan", "dummy", endpoint.url)
+        for endpoint in endpoints
     )
     return task
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
     if not allowed_to_scan("dummy"):
         log.warning("Dummy scanner is not allowed to scan.")
         return group()
 
-    urls = plannedscan.pickup(activity="scan", scanner="dummy", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="scan", scanner="dummy", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
 
 
 def compose_manual_scan_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
-    **kwargs
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ) -> Task:
     """Compose taskset to scan specified endpoints.
 
@@ -119,7 +118,7 @@ def compose_manual_scan_task(
     return compose_scan_task(urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def store(result, endpoint):
     """
 
@@ -129,26 +128,26 @@ def store(result, endpoint):
     """
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
-        return ParentFailed('skipping result parsing because scan failed.', cause=result)
+        return ParentFailed("skipping result parsing because scan failed.", cause=result)
 
     # Messages are translated for display. Add the exact messages in: /failmap/map/static/js/script.js
     # Run "failmap translate" to have the messages added to:
     # /failmap/map/locale/*/djangojs.po
     # /failmap/map/locale/*/django.po
     # translate them and then run "failmap translate" again.
-    message_result_ok = 'Because the result was True'
-    message_result_false = 'Because the result was False'
+    message_result_ok = "Because the result was True"
+    message_result_false = "Because the result was False"
 
-    log.debug('Storing result: %s, for endpoint: %s.', result, endpoint)
+    log.debug("Storing result: %s, for endpoint: %s.", result, endpoint)
     # You can save any (string) value and any (string) message.
     # The EndpointScanManager deduplicates the data for you automatically.
     if result:
-        store_endpoint_scan_result('Dummy', endpoint, 'True', message_result_ok)
+        store_endpoint_scan_result("Dummy", endpoint, "True", message_result_ok)
     else:
-        store_endpoint_scan_result('Dummy', endpoint, 'False', message_result_false)
+        store_endpoint_scan_result("Dummy", endpoint, "False", message_result_false)
 
     # return something informative
-    return {'status': 'success', 'result': result}
+    return {"status": "success", "result": result}
 
 
 class SomeError(Exception):
@@ -156,11 +155,13 @@ class SomeError(Exception):
 
 
 # The isolated queue means no network connection.
-@app.task(queue='storage',
-          bind=True,
-          default_retry_delay=RETRY_DELAY,
-          retry_kwargs={'max_retries': MAX_RETRIES},
-          expires=EXPIRES)
+@app.task(
+    queue="storage",
+    bind=True,
+    default_retry_delay=RETRY_DELAY,
+    retry_kwargs={"max_retries": MAX_RETRIES},
+    expires=EXPIRES,
+)
 def scan(self, uri_url):
     """
 
@@ -179,7 +180,7 @@ def scan(self, uri_url):
 
     """
     try:
-        log.info('Start scanning %s', uri_url)
+        log.info("Start scanning %s", uri_url)
 
         # Tools and output for this scan are registered in /failmap/settings.py
         # We prefer tools written in python, limiting the amount of dependencies used in the project.
@@ -198,7 +199,7 @@ def scan(self, uri_url):
 
         # simulation: sometimes a task fails, for example with network errors etcetera. The task will be retried.
         if not random.randint(0, 5):
-            raise SomeError('some error occured')
+            raise SomeError("some error occured")
 
         # simulation: often tasks take different times to execute
         time.sleep(random.randint(1, 10) / 10)
@@ -206,7 +207,7 @@ def scan(self, uri_url):
         # simulation: the result can be different
         result = bool(random.randint(0, 1))
 
-        log.info('Done scanning: %s, result: %s', uri_url, result)
+        log.info("Done scanning: %s, result: %s", uri_url, result)
         return result
     except SomeError as e:
         # If an expected error is encountered put this task back on the queue to be retried.
@@ -218,5 +219,5 @@ def scan(self, uri_url):
         except BaseException:
             # If this task still fails after maximum retries the last
             # error will be passed as result to the next task.
-            log.exception('Retried %s times and it still failed', MAX_RETRIES)
+            log.exception("Retried %s times and it still failed", MAX_RETRIES)
             return e

@@ -8,23 +8,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0028_auto_20171113_1203'),
+        ("scanners", "0028_auto_20171113_1203"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='endpoint',
-            name='domain',
+            model_name="endpoint",
+            name="domain",
             field=models.CharField(default=None, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='endpoint',
-            name='ip',
+            model_name="endpoint",
+            name="ip",
             field=models.CharField(default=None, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='endpoint',
-            name='server_name',
+            model_name="endpoint",
+            name="server_name",
             field=models.CharField(default=None, max_length=255, null=True),
         ),
     ]

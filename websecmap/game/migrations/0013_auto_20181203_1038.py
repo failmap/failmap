@@ -6,14 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0012_contest_admin_user'),
+        ("game", "0012_contest_admin_user"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='team',
-            name='name',
+            model_name="team",
+            name="name",
             field=models.CharField(
-                default='Unspecified', help_text='Whatever name the team wants. Must be at least PEGI 88.', max_length=42, verbose_name='Team name'),
+                default="Unspecified",
+                help_text="Whatever name the team wants. Must be at least PEGI 88.",
+                max_length=42,
+                verbose_name="Team name",
+            ),
         ),
     ]

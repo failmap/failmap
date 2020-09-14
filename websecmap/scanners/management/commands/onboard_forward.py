@@ -15,8 +15,7 @@ class Command(VerifyTaskCommand):
     def handle(self, *args, **options):
 
         try:
-            expired = Url.objects.all().filter(onboarding_stage__in=['endpoint_discovery', 'scans_running',
-                                                                     'crawling'])
+            expired = Url.objects.all().filter(onboarding_stage__in=["endpoint_discovery", "scans_running", "crawling"])
 
             for url in expired:
                 log.debug("Forwarding onboarding status of %s" % url)

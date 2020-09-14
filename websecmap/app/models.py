@@ -31,7 +31,10 @@ def censor_sensitive_data(data):
     # https://stackoverflow.com/questions/10120295/valid-characters-in-a-python-class-name
     data = re.sub(
         r"(?i)([a-zA-Z0-9_]*?(sessionid|token|pass|password|key|secret|hash|salt)[a-zA-Z0-9_]*?=)(['\"]).*?\3",
-        r"\1\3********************\3", data, flags=re.MULTILINE)
+        r"\1\3********************\3",
+        data,
+        flags=re.MULTILINE,
+    )
     return data
 
 
@@ -40,8 +43,9 @@ class Job(models.Model):
 
     name = models.CharField(max_length=255, help_text="name of the job")
     task = models.TextField(help_text="celery task signature in string form")
-    result_id = models.CharField(unique=True, null=True, blank=True, max_length=255,
-                                 help_text="celery asyncresult ID for tracing task")
+    result_id = models.CharField(
+        unique=True, null=True, blank=True, max_length=255, help_text="celery asyncresult ID for tracing task"
+    )
     status = models.CharField(max_length=255, help_text="status of the job")
     result = JSONField(help_text="output of the task as JSON")  # JSONfield (not django-jsonfield) does not
     # encoder_class=ResultEncoder
@@ -51,7 +55,12 @@ class Job(models.Model):
 
     # TypeError: __init__() missing 1 required positional argument: 'on_delete'
     # probably because of blank and/or default.
-    created_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,)
+    created_by = models.ForeignKey(
+        User,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+    )
 
     def clean_task(self):
         """Truncate long task signatures as they result in mysql issues.
@@ -61,19 +70,19 @@ class Job(models.Model):
         Task signatures are for informational purpose and not functionally required. Currently
         there is no reason to keep large signatures so truncating to arbitrary limit of 1k.
         """
-        data = self.cleaned_data['task'][:1000*1]
+        data = self.cleaned_data["task"][: 1000 * 1]
 
         return censor_sensitive_data(data)
 
     @classmethod
-    def create(cls, task: celery.Task, name: str, request, *args, **kwargs) -> 'Job':
+    def create(cls, task: celery.Task, name: str, request, *args, **kwargs) -> "Job":
         """Create job object and publish task on celery queue."""
         # create database object
         job = cls(task=censor_sensitive_data(str(task)))
         if request:
             job.created_by = request.user
         job.name = name[:255]
-        job.status = 'created'
+        job.status = "created"
         job.save()
 
         # publish original task which stores the result in this Job object
@@ -81,31 +90,31 @@ class Job(models.Model):
 
         # store the task async result ID for reference
         job.result_id = result_id.id
-        job.save(update_fields=['result_id'])
+        job.save(update_fields=["result_id"])
 
         return job
 
     @staticmethod
-    @app.task(queue='storage')
+    @app.task(queue="storage")
     def store_result(result, job_id=None):
         """Celery task to store result of wrapped task after it has completed."""
         job = Job.objects.get(id=job_id)
         if not result:
-            result = '-- task generated no result object --'
+            result = "-- task generated no result object --"
         job.result = result
-        job.status = 'completed'
+        job.status = "completed"
         job.finished_on = timezone.now()
         try:
-            job.save(update_fields=['result', 'status', 'finished_on'])
+            job.save(update_fields=["result", "status", "finished_on"])
         except TypeError:
             job.result = "Job returned a '%s' which could not be serialized. Job finished." % type(result)
-            job.save(update_fields=['result', 'status', 'finished_on'])
+            job.save(update_fields=["result", "status", "finished_on"])
 
     def __str__(self):
         return self.name
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def create_function_job(function: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 
@@ -115,21 +124,21 @@ def create_function_job(function: str, **kwargs):
     a module should look. Anything that composes tasks can be inserted here.
     """
 
-    parts = function.split('.')
+    parts = function.split(".")
     module = ".".join(parts[0:-1])
     function_name = parts[-1]
 
     module = importlib.import_module(module)
     call = getattr(module, function_name, None)
     if not call:
-        raise ValueError('Function %s not found in %s.' % (function_name, module))
+        raise ValueError("Function %s not found in %s." % (function_name, module))
 
     task = call(**kwargs)
 
     return Job.create(task, function, None)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def create_job(task_module: str, **kwargs):
     # will be deleted after all scanners have migrated to the manual / planned approach
     module = importlib.import_module(task_module)
@@ -137,7 +146,7 @@ def create_job(task_module: str, **kwargs):
     return Job.create(task, task_module, None)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def create_discover_job(task_module: str, **kwargs):
     # will be deleted after all scanners have migrated to the manual / planned approach
     module = importlib.import_module(task_module)
@@ -145,7 +154,7 @@ def create_discover_job(task_module: str, **kwargs):
     return Job.create(task, task_module, None)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def create_verify_job(task_module: str, **kwargs):
     # will be deleted after all scanners have migrated to the manual / planned approach
     module = importlib.import_module(task_module)
@@ -153,7 +162,7 @@ def create_verify_job(task_module: str, **kwargs):
     return Job.create(task, task_module, None)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def create_scan_job(task_module: str, **kwargs):
     # will be deleted after all scanners have migrated to the manual / planned approach
     module = importlib.import_module(task_module)
@@ -161,7 +170,7 @@ def create_scan_job(task_module: str, **kwargs):
     return Job.create(task, task_module, None)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def create_planned_scan_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 
@@ -174,7 +183,7 @@ def create_planned_scan_job(task_module: str, **kwargs):
     return Job.create(task, task_module, None)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def create_planned_discover_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 
@@ -187,7 +196,7 @@ def create_planned_discover_job(task_module: str, **kwargs):
     return Job.create(task, task_module, None)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def create_planned_verify_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 
@@ -200,7 +209,7 @@ def create_planned_verify_job(task_module: str, **kwargs):
     return Job.create(task, task_module, None)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def create_manual_scan_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 
@@ -213,7 +222,7 @@ def create_manual_scan_job(task_module: str, **kwargs):
     return Job.create(task, task_module, None)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def create_manual_discover_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 
@@ -226,7 +235,7 @@ def create_manual_discover_job(task_module: str, **kwargs):
     return Job.create(task, task_module, None)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def create_manual_verify_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 

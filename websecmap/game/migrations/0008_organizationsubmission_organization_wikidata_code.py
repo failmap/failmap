@@ -6,14 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0007_organizationsubmission_organization_wikipedia'),
+        ("game", "0007_organizationsubmission_organization_wikipedia"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organizationsubmission',
-            name='organization_wikidata_code',
+            model_name="organizationsubmission",
+            name="organization_wikidata_code",
             field=models.CharField(
-                blank=True, help_text="The code for this page that starts with Q. Search for wikidata and the terms you're looking for to get this code.", max_length=20),
+                blank=True,
+                help_text="The code for this page that starts with Q. Search for wikidata and the terms you're looking for to get this code.",
+                max_length=20,
+            ),
         ),
     ]

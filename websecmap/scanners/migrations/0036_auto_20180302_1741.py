@@ -8,20 +8,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0035_auto_20180302_1722'),
+        ("scanners", "0035_auto_20180302_1722"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpointgenericscan',
-            name='evidence',
+            model_name="endpointgenericscan",
+            name="evidence",
             field=models.TextField(
-                default=0, help_text='Content that might help understanding the result.', max_length=9001),
+                default=0, help_text="Content that might help understanding the result.", max_length=9001
+            ),
         ),
         migrations.AlterField(
-            model_name='urlgenericscan',
-            name='evidence',
+            model_name="urlgenericscan",
+            name="evidence",
             field=models.TextField(
-                default=0, help_text='Content that might help understanding the result.', max_length=9001),
+                default=0, help_text="Content that might help understanding the result.", max_length=9001
+            ),
         ),
     ]

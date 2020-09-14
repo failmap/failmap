@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class MapConfig(AppConfig):
-    name = 'api'
+    name = "api"

@@ -6,26 +6,38 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0075_auto_20200807_1237'),
+        ("scanners", "0075_auto_20200807_1237"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='InternetNLScan',
+            name="InternetNLScan",
         ),
         migrations.AlterField(
-            model_name='endpointgenericscan',
-            name='comply_or_explain_explanation',
-            field=models.TextField(blank=True, default='', help_text='Text that helps explain why this result is not counted in the report. For example: a broken scanner or another edge-case that is mainly on the side of the scanning party.',
-                                   max_length=2048, null=True, verbose_name='explanation'),
+            model_name="endpointgenericscan",
+            name="comply_or_explain_explanation",
+            field=models.TextField(
+                blank=True,
+                default="",
+                help_text="Text that helps explain why this result is not counted in the report. For example: a broken scanner or another edge-case that is mainly on the side of the scanning party.",
+                max_length=2048,
+                null=True,
+                verbose_name="explanation",
+            ),
         ),
         migrations.AlterField(
-            model_name='urlgenericscan',
-            name='comply_or_explain_explanation',
-            field=models.TextField(blank=True, default='', help_text='Text that helps explain why this result is not counted in the report. For example: a broken scanner or another edge-case that is mainly on the side of the scanning party.',
-                                   max_length=2048, null=True, verbose_name='explanation'),
+            model_name="urlgenericscan",
+            name="comply_or_explain_explanation",
+            field=models.TextField(
+                blank=True,
+                default="",
+                help_text="Text that helps explain why this result is not counted in the report. For example: a broken scanner or another edge-case that is mainly on the side of the scanning party.",
+                max_length=2048,
+                null=True,
+                verbose_name="explanation",
+            ),
         ),
         migrations.DeleteModel(
-            name='TlsQualysScan',
+            name="TlsQualysScan",
         ),
     ]

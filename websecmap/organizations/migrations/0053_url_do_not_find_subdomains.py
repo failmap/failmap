@@ -6,14 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0052_auto_20190128_1214'),
+        ("organizations", "0052_auto_20190128_1214"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='url',
-            name='do_not_find_subdomains',
+            model_name="url",
+            name="do_not_find_subdomains",
             field=models.BooleanField(
-                default=False, help_text='If you do not want to automatically find subdomains, check this. This might be useful when a very, very large number of subdomains will be added for an organization and you only want to monitor a few urls that are relevant.'),
+                default=False,
+                help_text="If you do not want to automatically find subdomains, check this. This might be useful when a very, very large number of subdomains will be added for an organization and you only want to monitor a few urls that are relevant.",
+            ),
         ),
     ]

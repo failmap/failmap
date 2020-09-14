@@ -32,8 +32,7 @@ from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import store_url_scan_result
-from websecmap.scanners.scanner.__init__ import (allowed_to_scan, q_configurations_to_scan,
-                                                 unique_and_random)
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
 
 log = logging.getLogger(__name__)
 
@@ -46,59 +45,60 @@ RETRY_DELAY = 10
 EXPIRES = 3600  # one hour is more then enough
 
 
-def filter_scan(organizations_filter: dict = dict(),
-                urls_filter: dict = dict(),
-                endpoints_filter: dict = dict(),
-                **kwargs):
+def filter_scan(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
 
     # DNSSEC only works on top level urls
     urls_filter = dict(urls_filter, **{"computed_subdomain": ""})
 
     # gather urls from organizations
     if organizations_filter:
-        organizations = Organization.objects.filter(**organizations_filter).only('id')
-        urls = Url.objects.filter(q_configurations_to_scan(),
-                                  Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
-                                  organization__in=organizations,
-                                  **urls_filter).only('id', 'url')
+        organizations = Organization.objects.filter(**organizations_filter).only("id")
+        urls = Url.objects.filter(
+            q_configurations_to_scan(),
+            Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+            organization__in=organizations,
+            **urls_filter,
+        ).only("id", "url")
     elif endpoints_filter:
         # and now retrieve urls from endpoints
-        endpoints = Endpoint.objects.filter(**endpoints_filter).only('id')
-        urls = Url.objects.filter(q_configurations_to_scan(),
-                                  Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
-                                  endpoint__in=endpoints,
-                                  **urls_filter).only('id', 'url')
+        endpoints = Endpoint.objects.filter(**endpoints_filter).only("id")
+        urls = Url.objects.filter(
+            q_configurations_to_scan(),
+            Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+            endpoint__in=endpoints,
+            **urls_filter,
+        ).only("id", "url")
     else:
         # now urls directly
-        urls = Url.objects.filter(q_configurations_to_scan(),
-                                  Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
-                                  **urls_filter).only('id', 'url')
+        urls = Url.objects.filter(
+            q_configurations_to_scan(), Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""), **urls_filter
+        ).only("id", "url")
 
     # Optimize: only required values, unique and randomized
     urls = unique_and_random(urls)
     return urls
 
 
-@app.task(queue='storage')
-def plan_scan(organizations_filter: dict = dict(),
-              urls_filter: dict = dict(),
-              endpoints_filter: dict = dict(),
-              **kwargs):
+@app.task(queue="storage")
+def plan_scan(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    log.info(f'Creating DNSSEC scan task for {len(urls)} urls.')
+    log.info(f"Creating DNSSEC scan task for {len(urls)} urls.")
     plannedscan.request(activity="scan", scanner="dnssec", urls=urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="dnssec", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="scan", scanner="dnssec", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
 
 
-def compose_manual_scan_task(organizations_filter: dict = dict(),
-                             urls_filter: dict = dict(),
-                             endpoints_filter: dict = dict(),
-                             **kwargs):
+def compose_manual_scan_task(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
 
     if not allowed_to_scan("dnssec"):
         return group()
@@ -108,7 +108,7 @@ def compose_manual_scan_task(organizations_filter: dict = dict(),
 
 
 def compose_scan_task(urls) -> Task:
-    """ Compose taskset to scan toplevel domains.
+    """Compose taskset to scan toplevel domains.
 
     DNSSEC is implemented on a (top level) url. It's useless to scan per-endpoint.
     This is the first scanner that uses the UrlGenericScan table, which looks nearly the same as the
@@ -120,15 +120,13 @@ def compose_scan_task(urls) -> Task:
     # Sending entire objects is possible. How signatures (.s and .si) work is documented:
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     task = group(
-        scan_dnssec.si(url.url)
-        | store_dnssec.s(url)
-        | plannedscan.finish.si('scan', 'dnssec', url) for url in urls
+        scan_dnssec.si(url.url) | store_dnssec.s(url) | plannedscan.finish.si("scan", "dnssec", url) for url in urls
     )
 
     return task
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def store_dnssec(result: List[str], url: Url):
     """
 
@@ -136,7 +134,7 @@ def store_dnssec(result: List[str], url: Url):
     """
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
-        return ParentFailed('skipping result parsing because scan failed.', cause=result)
+        return ParentFailed("skipping result parsing because scan failed.", cause=result)
 
     # relevant helps to store the minimum amount of information.
     level, relevant = analyze_result(result)
@@ -147,30 +145,32 @@ def store_dnssec(result: List[str], url: Url):
     # /failmap/map/locale/*/django.po
     # translate them and then run "failmap translate" again.
     messages = {
-        'ERROR': 'DNSSEC is incorrectly or not configured (errors found).',
-        'WARNING': 'DNSSEC is incorrectly configured (warnings found).',
-        'INFO': 'DNSSEC seems to be implemented sufficiently.'
+        "ERROR": "DNSSEC is incorrectly or not configured (errors found).",
+        "WARNING": "DNSSEC is incorrectly configured (warnings found).",
+        "INFO": "DNSSEC seems to be implemented sufficiently.",
     }
 
-    log.debug('Storing result: %s, for url: %s.', result, url)
+    log.debug("Storing result: %s, for url: %s.", result, url)
     # You can save any (string) value and any (string) message.
     # The EndpointScanManager deduplicates the data for you automatically.
     if result:
-        store_url_scan_result('DNSSEC', url, level, messages[level], evidence=",\n".join(result))
+        store_url_scan_result("DNSSEC", url, level, messages[level], evidence=",\n".join(result))
 
     # return something informative
-    return {'status': 'success', 'result': level}
+    return {"status": "success", "result": level}
 
 
 # amsterdam.nl hangs on october 12 2018
 # in some cases this hangs, therefore have a time limit on the task.
 # "The worker processing the task will be killed and replaced with a new one when this is exceeded."
-@app.task(queue='internet',
-          bind=True,
-          default_retry_delay=RETRY_DELAY,
-          retry_kwargs={'max_retries': MAX_RETRIES},
-          expires=EXPIRES,
-          task_time_limit=120)
+@app.task(
+    queue="internet",
+    bind=True,
+    default_retry_delay=RETRY_DELAY,
+    retry_kwargs={"max_retries": MAX_RETRIES},
+    expires=EXPIRES,
+    task_time_limit=120,
+)
 def scan_dnssec(self, url: str):
     """
     Uses the dnssec scanner of dotse, which works pretty well.
@@ -182,12 +182,12 @@ def scan_dnssec(self, url: str):
 
     """
     try:
-        log.info('Start scanning %s', url)
+        log.info("Start scanning %s", url)
 
-        output = subprocess.check_output([settings.TOOLS['dnscheck']['executable'], url]).decode("UTF-8")
+        output = subprocess.check_output([settings.TOOLS["dnscheck"]["executable"], url]).decode("UTF-8")
         content = output.splitlines()
 
-        log.info('Done scanning: %s, result: %s', url, content)
+        log.info("Done scanning: %s, result: %s", url, content)
         return content
 
     # subprocess.CalledProcessError: non zero exit status
@@ -202,7 +202,7 @@ def scan_dnssec(self, url: str):
         except BaseException:
             # If this task still fails after maximum retries the last
             # error will be passed as result to the next task.
-            log.exception('Retried %s times and it still failed', MAX_RETRIES)
+            log.exception("Retried %s times and it still failed", MAX_RETRIES)
             return e
 
 
@@ -231,7 +231,7 @@ def analyze_result(result: List[str]):
     for line in result:
         # remove the cringy timestamp
         line = line.strip()
-        line = line[line.find(" "):len(line)].strip()
+        line = line[line.find(" ") : len(line)].strip()
 
         # log.debug(line)
 
@@ -242,23 +242,23 @@ def analyze_result(result: List[str]):
         if line.startswith("WARNING"):
             # The MISSING_DS is never a problem it seems.
             """
-                This warning means that there INDEED is an OK DNSSEC implementation as long as you check the parent.
+            This warning means that there INDEED is an OK DNSSEC implementation as long as you check the parent.
 
-                NL:
-                descr: "De child gebruikt zo te zien DNSSEC, maar de parent heeft geen veilige delegation op basis
-                van DNSSEC.  Hierdoor is de 'chain of trust' tussen de parent en de child verbroken en 'validating
-                resolvers', die op DNSSEC-juistheid controleren, zullen niet in staat zijn om de antwoorden van de
-                child te valideren."
-                format: 'De Chain of trust voor %s is niet in orde - Er is een DNSKEY aangetroffen bij de child,
-                maar DS record bij de parent.'
+            NL:
+            descr: "De child gebruikt zo te zien DNSSEC, maar de parent heeft geen veilige delegation op basis
+            van DNSSEC.  Hierdoor is de 'chain of trust' tussen de parent en de child verbroken en 'validating
+            resolvers', die op DNSSEC-juistheid controleren, zullen niet in staat zijn om de antwoorden van de
+            child te valideren."
+            format: 'De Chain of trust voor %s is niet in orde - Er is een DNSKEY aangetroffen bij de child,
+            maar DS record bij de parent.'
 
-                EN:
-                descr: 'The child seems to use DNSSEC, but the parent has no secure delegation.  The chain of trust
-                between the parent and the child is broken and validating resolvers will not be able to validate
-                answers from the child.'
-                format: 'Broken chain of trust for %s - DNSKEY found at child, but no DS was found at parent.'
+            EN:
+            descr: 'The child seems to use DNSSEC, but the parent has no secure delegation.  The chain of trust
+            between the parent and the child is broken and validating resolvers will not be able to validate
+            answers from the child.'
+            format: 'Broken chain of trust for %s - DNSKEY found at child, but no DS was found at parent.'
 
-                Search for MISSING_DS here: https://github.com/dotse/dnscheck
+            Search for MISSING_DS here: https://github.com/dotse/dnscheck
             """
 
             if line.startswith("WARNING [DNSSEC:MISSING_DS]"):

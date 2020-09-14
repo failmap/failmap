@@ -6,25 +6,30 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0052_auto_20181122_1510'),
+        ("scanners", "0052_auto_20181122_1510"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='internetnlscan',
-            name='type',
-            field=models.CharField(blank=True, help_text='mail or web', max_length=4, null=True),
+            model_name="internetnlscan",
+            name="type",
+            field=models.CharField(blank=True, help_text="mail or web", max_length=4, null=True),
         ),
         migrations.AlterField(
-            model_name='internetnlscan',
-            name='message',
+            model_name="internetnlscan",
+            name="message",
             field=models.TextField(
-                blank=True, help_text='A status message received from the service', max_length=500, null=True),
+                blank=True, help_text="A status message received from the service", max_length=500, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='internetnlscan',
-            name='status_url',
+            model_name="internetnlscan",
+            name="status_url",
             field=models.TextField(
-                blank=True, help_text='The url where the status of the batch scan can be retrieved.', max_length=500, null=True),
+                blank=True,
+                help_text="The url where the status of the batch scan can be retrieved.",
+                max_length=500,
+                null=True,
+            ),
         ),
     ]

@@ -35,6 +35,7 @@ import logging
 import sys
 
 import urllib3
+
 # websecmap modules
 from constance import config
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
@@ -44,7 +45,7 @@ from websecmap.api.logic import organization_and_url_import
 _all_ = organization_and_url_import
 
 # Periodic task name
-TaskName = 'zorgkaart import (hidden)'
+TaskName = "zorgkaart import (hidden)"
 
 # right now we there is a page limit of 1000 and max 123000 items
 # so the the default limit of 1000 is OK but not future proof
@@ -60,8 +61,13 @@ log = logging.getLogger(__package__)
 def create_task():
     """Adds scraping task to celery jobs"""
     if not PeriodicTask.objects.get(name=TaskName):
-        p = PeriodicTask(**{"name": TaskName, "task": "vendor.tilanus.zorgkaart.scrape",
-                            "crontab": CrontabSchedule.objects.get(id=7)})
+        p = PeriodicTask(
+            **{
+                "name": TaskName,
+                "task": "vendor.tilanus.zorgkaart.scrape",
+                "crontab": CrontabSchedule.objects.get(id=7),
+            }
+        )
         p.save()
         log.info(f"Created Periodic Task for zorgkaart scraper with name: {TaskName}")
 
@@ -69,35 +75,34 @@ def create_task():
 def do_request(url, params={}, previous_items=[]):
     """Internal function, performs API requests and merges paginated data"""
     # default to max limit of API
-    if 'limit' not in params.keys():
-        params['limit'] = 10000
+    if "limit" not in params.keys():
+        params["limit"] = 10000
     # set page
-    if 'page' not in params.keys():
-        params['page'] = 1
+    if "page" not in params.keys():
+        params["page"] = 1
     log.debug(f"Zorgkaart scraper request with parameters: {params}")
     # setup for API call use Debian ca-certificats
-    http = urllib3.PoolManager(
-        cert_reqs='CERT_REQUIRED',
-        ca_certs='/etc/ssl/certs/ca-certificates.crt')
-    headers = urllib3.util.make_headers(basic_auth=config.ZORGKAART_USERNAME+":"+config.ZORGKAART_PASSWORD)
+    http = urllib3.PoolManager(cert_reqs="CERT_REQUIRED", ca_certs="/etc/ssl/certs/ca-certificates.crt")
+    headers = urllib3.util.make_headers(basic_auth=config.ZORGKAART_USERNAME + ":" + config.ZORGKAART_PASSWORD)
     # do request
-    r = http.request('GET', url, headers=headers, fields=params)
+    r = http.request("GET", url, headers=headers, fields=params)
     if not r.status == 200:
         raise Exception(f"Zorgkaart scraper got an non 200 status from zorgkaart: {r.status}")
     # load in python stuctures
-    result = json.loads(r.data.decode('utf8'))
+    result = json.loads(r.data.decode("utf8"))
     # merge with results from reursions above
-    items = previous_items+result["items"]
+    items = previous_items + result["items"]
     # do we have everything
-    if result["count"] > result["page"]*result["limit"]:
+    if result["count"] > result["page"] * result["limit"]:
         # recursion because recursive programming is utterly uncomprehensible but fun
-        params['page'] += 1
+        params["page"] += 1
         log.debug(f"Zorgkaat scraper requesting nest page: {params['page']}")
         items = do_request(url, params, items)
     else:
         if not result["count"] == len(items):
             log.error(
-                f"Zogkaart scraper: Zorgkaart reported {result['count']} records but we recieved {len(items)} records.")
+                f"Zogkaart scraper: Zorgkaart reported {result['count']} records but we recieved {len(items)} records."
+            )
     return items
 
 
@@ -142,18 +147,24 @@ def translate(orglist):
     """
     outlist = []
     for org in orglist:
-        outlist.append({
-            'name': org['name'] + ' (' + org['type'] + ')',
-            'layer': 'Zorg',
-            'country': 'NL',
-            'coordinate_type': 'Point',
-            'coordinate_area': [org['location']['longitude'],
-                                org['location']['latitude']],
-            'address': org['addresses'][0]['address'] + ', ' + org['addresses'][0]['zipcode']
-            + ' ' + org['addresses'][0]['city'] + ', ' + org['addresses'][0]['country'],
-            'surrogate_id': org['name']+'_'+org['type']+'_'+org['id'],
-            'urls': org['websites']
-        })
+        outlist.append(
+            {
+                "name": org["name"] + " (" + org["type"] + ")",
+                "layer": "Zorg",
+                "country": "NL",
+                "coordinate_type": "Point",
+                "coordinate_area": [org["location"]["longitude"], org["location"]["latitude"]],
+                "address": org["addresses"][0]["address"]
+                + ", "
+                + org["addresses"][0]["zipcode"]
+                + " "
+                + org["addresses"][0]["city"]
+                + ", "
+                + org["addresses"][0]["country"],
+                "surrogate_id": org["name"] + "_" + org["type"] + "_" + org["id"],
+                "urls": org["websites"],
+            }
+        )
     return outlist
 
 

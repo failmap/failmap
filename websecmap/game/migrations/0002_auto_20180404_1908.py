@@ -7,14 +7,15 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0001_initial'),
+        ("game", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='submission',
-            name='organization_address_geocoded',
+            model_name="submission",
+            name="organization_address_geocoded",
             field=jsonfield.fields.JSONField(
-                blank=True, help_text='Automatic geocoded organization address.', max_length=5000, null=True),
+                blank=True, help_text="Automatic geocoded organization address.", max_length=5000, null=True
+            ),
         ),
     ]

@@ -11,10 +11,8 @@ def task_processing_status(request):
     return JsonResponse(status())
 
 
-dashboard.urls.register_urls([
-    url(
-        r'^task_processing_status/',
-        task_processing_status,
-        name='task-processing-status'
-    ),
-])
+dashboard.urls.register_urls(
+    [
+        url(r"^task_processing_status/", task_processing_status, name="task-processing-status"),
+    ]
+)

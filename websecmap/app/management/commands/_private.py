@@ -48,15 +48,21 @@ class TaskCommand(BaseCommand):
         """Add common argument for Celery tasks."""
         self.mutual_group = parser.add_mutually_exclusive_group()
 
-        parser.add_argument('-m', '--method', default='direct',
-                            choices=['direct', 'sync', 'async'],
-                            help='Execute the task directly or on remote workers.')
+        parser.add_argument(
+            "-m",
+            "--method",
+            default="direct",
+            choices=["direct", "sync", "async"],
+            help="Execute the task directly or on remote workers.",
+        )
 
-        parser.add_argument('-i', '--interval', default=5, type=int,
-                            help="Interval between status reports (sync only).")
+        parser.add_argument(
+            "-i", "--interval", default=5, type=int, help="Interval between status reports (sync only)."
+        )
 
-        self.mutual_group.add_argument('-t', '--task_id', default='',
-                                       help="Report status for task ID and return result (if available).")
+        self.mutual_group.add_argument(
+            "-t", "--task_id", default="", help="Report status for task ID and return result (if available)."
+        )
 
         self._add_arguments(parser)
 
@@ -67,8 +73,8 @@ class TaskCommand(BaseCommand):
     def handle(self, *args, **options):
         """Command handle logic, eg: logging."""
         # set django loglevel based on `-v` argument
-        verbosity = int(options['verbosity'])
-        root_logger = logging.getLogger('')
+        verbosity = int(options["verbosity"])
+        root_logger = logging.getLogger("")
         if verbosity == 2:
             root_logger.setLevel(logging.DEBUG)
         elif verbosity == 1:
@@ -76,17 +82,17 @@ class TaskCommand(BaseCommand):
         elif verbosity == 0:
             root_logger.setLevel(logging.ERROR)
 
-        self.interval = options['interval']
+        self.interval = options["interval"]
 
-        if options['task_id']:
-            result = self.wait_for_result(ResultSet([AsyncResult(options['task_id'])]))
+        if options["task_id"]:
+            result = self.wait_for_result(ResultSet([AsyncResult(options["task_id"])]))
         else:
             result = self.run_task(*args, **options)
 
         try:
             return json.dumps(result, cls=ResultEncoder)
         except TypeError:
-            return json.dumps({'complex_type': str(result)}, cls=ResultEncoder)
+            return json.dumps({"complex_type": str(result)}, cls=ResultEncoder)
 
     def run_task(self, *args, **options):
         # try to compose task if not specified
@@ -94,24 +100,25 @@ class TaskCommand(BaseCommand):
             self.task = self.compose(*args, **options)
 
         # execute task based on selected method
-        if options['method'] in ['sync', 'async']:
+        if options["method"] in ["sync", "async"]:
             # verify if broker is accessible (eg: might not be started in dev. environment)
             try:
                 app.connection().ensure_connection(max_retries=3)
             except kombu.exceptions.OperationalError:
                 log.warning(
-                    'Connection with task broker %s unavailable, tasks might not be starting.',
-                    settings.CELERY_BROKER_URL)
+                    "Connection with task broker %s unavailable, tasks might not be starting.",
+                    settings.CELERY_BROKER_URL,
+                )
 
             task_id = self.task.apply_async(args=self.args, kwargs=self.kwargs)
-            log.info('Task scheduled for execution.')
+            log.info("Task scheduled for execution.")
             log.debug("Task ID: %s", task_id.id)
 
             # wrap a single task in a resultset to not have 2 ways to handle results
             if not isinstance(task_id, ResultSet):
                 task_id = ResultSet([task_id])
 
-            if options['method'] == 'sync':
+            if options["method"] == "sync":
                 return self.wait_for_result(task_id)
             else:
                 # if async return taskid to allow query for status later on
@@ -119,7 +126,7 @@ class TaskCommand(BaseCommand):
         else:
             # By default execute the task directly without involving celery or a broker.
             # Return all results without raising exceptions.
-            log.info('Executing task directly.')
+            log.info("Executing task directly.")
             return self.task.apply(*self.args, **self.kwargs).get(propagate=False)
 
     def wait_for_result(self, task_id):
@@ -127,7 +134,7 @@ class TaskCommand(BaseCommand):
         # wait for all tasks to be completed
         while not task_id.ready():
             # show intermediate status
-            log.info('Task execution status: %s', dict(Counter([t.state for t in task_id.results])))
+            log.info("Task execution status: %s", dict(Counter([t.state for t in task_id.results])))
             time.sleep(self.interval)
 
         # return final results, don't reraise exceptions
@@ -150,17 +157,21 @@ class GenericTaskCommand(TaskCommand):
         # Given i only needed urls at this moment, i only added urls as a parameter.
 
         # select distinct options...
-        self.mutual_group.add_argument('-o', '--organization_names', nargs='*',
-                                       help="Perform scans on these organizations (default is all).")
+        self.mutual_group.add_argument(
+            "-o", "--organization_names", nargs="*", help="Perform scans on these organizations (default is all)."
+        )
 
-        self.mutual_group.add_argument('-u', '--url_addresses', nargs='*',
-                                       help="Perform scans on these urls (default is all).")
+        self.mutual_group.add_argument(
+            "-u", "--url_addresses", nargs="*", help="Perform scans on these urls (default is all)."
+        )
 
-        self.mutual_group.add_argument('-y', '--organization_type', nargs='*',
-                                       help="Perform scans on these organization types (default is all).")
+        self.mutual_group.add_argument(
+            "-y", "--organization_type", nargs="*", help="Perform scans on these organization types (default is all)."
+        )
 
-        self.mutual_group.add_argument('-c', '--country', nargs='*',
-                                       help="Perform scans on these countries (default is all).")
+        self.mutual_group.add_argument(
+            "-c", "--country", nargs="*", help="Perform scans on these countries (default is all)."
+        )
 
     def compose(self, *args, **options):
         """Compose set of tasks based on provided arguments."""
@@ -170,32 +181,34 @@ class GenericTaskCommand(TaskCommand):
         urls_filter = dict()
         endpoints_filter = dict()  # A choice of ports, ip-version and protocol
 
-        if options['organization_names']:
+        if options["organization_names"]:
             # create a case-insensitive filter to match organizations by name
-            regex = '^(' + '|'.join(options['organization_names']) + ')$'
-            organizations_filter = {'name__iregex': regex}
+            regex = "^(" + "|".join(options["organization_names"]) + ")$"
+            organizations_filter = {"name__iregex": regex}
 
-        if options['url_addresses']:
+        if options["url_addresses"]:
             # create a case-insensitive filter to match organizations by name
-            regex = '^(' + '|'.join(options['url_addresses']) + ')$'
-            urls_filter = {'url__iregex': regex}
+            regex = "^(" + "|".join(options["url_addresses"]) + ")$"
+            urls_filter = {"url__iregex": regex}
 
-        if options['organization_type']:
+        if options["organization_type"]:
             # create a case-insensitive filter to match organizations by name
-            regex = '^(' + '|'.join(options['organization_type']) + ')$'
-            organizations_filter = {'type__name__iregex': regex}
+            regex = "^(" + "|".join(options["organization_type"]) + ")$"
+            organizations_filter = {"type__name__iregex": regex}
 
-        if options['country']:
+        if options["country"]:
             # create a case-insensitive filter to match organizations by name
-            organizations_filter = {'country__in': options['country']}
+            organizations_filter = {"country__in": options["country"]}
 
-        log.debug("organizations_filter: %s, urls_filter: %s, endpoints_filter: %s" % (
-            organizations_filter, urls_filter, endpoints_filter))
+        log.debug(
+            "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s"
+            % (organizations_filter, urls_filter, endpoints_filter)
+        )
 
         # compose set of tasks to be executed
-        return self.scanner_module.compose_task(organizations_filter=organizations_filter,
-                                                urls_filter=urls_filter,
-                                                endpoints_filter=endpoints_filter)
+        return self.scanner_module.compose_task(
+            organizations_filter=organizations_filter, urls_filter=urls_filter, endpoints_filter=endpoints_filter
+        )
 
 
 class ScannerTaskCommand(TaskCommand):
@@ -212,17 +225,21 @@ class ScannerTaskCommand(TaskCommand):
         # Given i only needed urls at this moment, i only added urls as a parameter.
 
         # select distinct options...
-        self.mutual_group.add_argument('-o', '--organization_names', nargs='*',
-                                       help="Perform scans on these organizations (default is all).")
+        self.mutual_group.add_argument(
+            "-o", "--organization_names", nargs="*", help="Perform scans on these organizations (default is all)."
+        )
 
-        self.mutual_group.add_argument('-u', '--url_addresses', nargs='*',
-                                       help="Perform scans on these urls (default is all).")
+        self.mutual_group.add_argument(
+            "-u", "--url_addresses", nargs="*", help="Perform scans on these urls (default is all)."
+        )
 
-        self.mutual_group.add_argument('-y', '--organization_type', nargs='*',
-                                       help="Perform scans on these organization types (default is all).")
+        self.mutual_group.add_argument(
+            "-y", "--organization_type", nargs="*", help="Perform scans on these organization types (default is all)."
+        )
 
-        self.mutual_group.add_argument('-c', '--country', nargs='*',
-                                       help="Perform scans on these countries (default is all).")
+        self.mutual_group.add_argument(
+            "-c", "--country", nargs="*", help="Perform scans on these countries (default is all)."
+        )
 
     def compose(self, *args, **options):
         """Compose set of tasks based on provided arguments."""
@@ -232,32 +249,34 @@ class ScannerTaskCommand(TaskCommand):
         urls_filter = dict()
         endpoints_filter = dict()  # A choice of ports, ip-version and protocol
 
-        if options['organization_names']:
+        if options["organization_names"]:
             # create a case-insensitive filter to match organizations by name
-            regex = '^(' + '|'.join(options['organization_names']) + ')$'
-            organizations_filter = {'name__iregex': regex}
+            regex = "^(" + "|".join(options["organization_names"]) + ")$"
+            organizations_filter = {"name__iregex": regex}
 
-        if options['url_addresses']:
+        if options["url_addresses"]:
             # create a case-insensitive filter to match organizations by name
-            regex = '^(' + '|'.join(options['url_addresses']) + ')$'
-            urls_filter = {'url__iregex': regex}
+            regex = "^(" + "|".join(options["url_addresses"]) + ")$"
+            urls_filter = {"url__iregex": regex}
 
-        if options['organization_type']:
+        if options["organization_type"]:
             # create a case-insensitive filter to match organizations by name
-            regex = '^(' + '|'.join(options['organization_type']) + ')$'
-            organizations_filter = {'type__name__iregex': regex}
+            regex = "^(" + "|".join(options["organization_type"]) + ")$"
+            organizations_filter = {"type__name__iregex": regex}
 
-        if options['country']:
+        if options["country"]:
             # create a case-insensitive filter to match organizations by name
-            organizations_filter = {'country__in': options['country']}
+            organizations_filter = {"country__in": options["country"]}
 
-        log.debug("organizations_filter: %s, urls_filter: %s, endpoints_filter: %s" % (
-            organizations_filter, urls_filter, endpoints_filter))
+        log.debug(
+            "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s"
+            % (organizations_filter, urls_filter, endpoints_filter)
+        )
 
         # compose set of tasks to be executed
-        return self.scanner_module.compose_manual_scan_task(organizations_filter=organizations_filter,
-                                                            urls_filter=urls_filter,
-                                                            endpoints_filter=endpoints_filter)
+        return self.scanner_module.compose_manual_scan_task(
+            organizations_filter=organizations_filter, urls_filter=urls_filter, endpoints_filter=endpoints_filter
+        )
 
 
 class DiscoverTaskCommand(TaskCommand):
@@ -271,47 +290,52 @@ class DiscoverTaskCommand(TaskCommand):
 
     def _add_arguments(self, parser):
         """Add command specific arguments."""
-        self.mutual_group.add_argument('-o', '--organization_names', nargs='*',
-                                       help="Perform scans on these organizations (default is all).")
+        self.mutual_group.add_argument(
+            "-o", "--organization_names", nargs="*", help="Perform scans on these organizations (default is all)."
+        )
 
-        self.mutual_group.add_argument('-u', '--url_addresses', nargs='*',
-                                       help="Perform scans on these urls (default is all).")
+        self.mutual_group.add_argument(
+            "-u", "--url_addresses", nargs="*", help="Perform scans on these urls (default is all)."
+        )
 
-        self.mutual_group.add_argument('-y', '--organization_type', nargs='*',
-                                       help="Perform scans on these organization types (default is all).")
+        self.mutual_group.add_argument(
+            "-y", "--organization_type", nargs="*", help="Perform scans on these organization types (default is all)."
+        )
 
-        self.mutual_group.add_argument('-c', '--country', nargs='*',
-                                       help="Perform scans on these countries (default is all).")
+        self.mutual_group.add_argument(
+            "-c", "--country", nargs="*", help="Perform scans on these countries (default is all)."
+        )
 
     def compose(self, *args, **options):
         """Compose set of tasks based on provided arguments."""
 
         urls_filter = dict()
 
-        if not options['organization_names']:
+        if not options["organization_names"]:
             # by default no filter means all organizations
             organization_filter = dict()
         else:
             # create a case-insensitive filter to match organizations by name
-            regex = '^(' + '|'.join(options['organization_names']) + ')$'
-            organization_filter = {'name__iregex': regex}
+            regex = "^(" + "|".join(options["organization_names"]) + ")$"
+            organization_filter = {"name__iregex": regex}
 
-        if options['url_addresses']:
+        if options["url_addresses"]:
             # create a case-insensitive filter to match organizations by name
-            regex = '^(' + '|'.join(options['url_addresses']) + ')$'
-            urls_filter = {'url__iregex': regex}
+            regex = "^(" + "|".join(options["url_addresses"]) + ")$"
+            urls_filter = {"url__iregex": regex}
 
-        if options['organization_type']:
+        if options["organization_type"]:
             # create a case-insensitive filter to match organizations by name
-            regex = '^(' + '|'.join(options['organization_type']) + ')$'
-            organization_filter = {'type__name__iregex': regex}
+            regex = "^(" + "|".join(options["organization_type"]) + ")$"
+            organization_filter = {"type__name__iregex": regex}
 
-        if options['country']:
+        if options["country"]:
             # create a case-insensitive filter to match organizations by name
-            organization_filter = {'country__in': options['country']}
+            organization_filter = {"country__in": options["country"]}
 
-        log.debug("organizations_filter: %s, urls_filter: %s, endpoints_filter: %s" % (
-            organization_filter, urls_filter, []))
+        log.debug(
+            "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s" % (organization_filter, urls_filter, [])
+        )
 
         # compose set of tasks to be executed
         return self.scanner_module.compose_manual_discover_task(organization_filter, urls_filter)
@@ -324,14 +348,17 @@ class VerifyTaskCommand(TaskCommand):
 
     def _add_arguments(self, parser):
         """Add command specific arguments."""
-        self.mutual_group.add_argument('-o', '--organization_names', nargs='*',
-                                       help="Perform scans on these organizations (default is all).")
+        self.mutual_group.add_argument(
+            "-o", "--organization_names", nargs="*", help="Perform scans on these organizations (default is all)."
+        )
 
-        self.mutual_group.add_argument('-u', '--url_addresses', nargs='*',
-                                       help="Perform scans on these urls (default is all).")
+        self.mutual_group.add_argument(
+            "-u", "--url_addresses", nargs="*", help="Perform scans on these urls (default is all)."
+        )
 
-        self.mutual_group.add_argument('-c', '--country', nargs='*',
-                                       help="Perform scans on these countries (default is all).")
+        self.mutual_group.add_argument(
+            "-c", "--country", nargs="*", help="Perform scans on these countries (default is all)."
+        )
 
     def compose(self, *args, **options):
         """Compose set of tasks based on provided arguments."""
@@ -341,24 +368,26 @@ class VerifyTaskCommand(TaskCommand):
         urls_filter = dict()
         endpoints_filter = dict()  # A choice of ports, ip-version and protocol
 
-        if options['organization_names']:
+        if options["organization_names"]:
             # create a case-insensitive filter to match organizations by name
-            regex = '^(' + '|'.join(options['organization_names']) + ')$'
-            organizations_filter = {'name__iregex': regex}
+            regex = "^(" + "|".join(options["organization_names"]) + ")$"
+            organizations_filter = {"name__iregex": regex}
 
-        if options['url_addresses']:
+        if options["url_addresses"]:
             # create a case-insensitive filter to match organizations by name
-            regex = '^(' + '|'.join(options['url_addresses']) + ')$'
-            urls_filter = {'url__iregex': regex}
+            regex = "^(" + "|".join(options["url_addresses"]) + ")$"
+            urls_filter = {"url__iregex": regex}
 
-        if options['country']:
+        if options["country"]:
             # create a case-insensitive filter to match organizations by name
-            organizations_filter = {'country__in': options['country']}
+            organizations_filter = {"country__in": options["country"]}
 
-        log.debug("organizations_filter: %s, urls_filter: %s, endpoints_filter: %s" % (
-            organizations_filter, urls_filter, endpoints_filter))
+        log.debug(
+            "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s"
+            % (organizations_filter, urls_filter, endpoints_filter)
+        )
 
         # compose set of tasks to be executed
-        return self.scanner_module.compose_manual_verify_task(organizations_filter=organizations_filter,
-                                                              urls_filter=urls_filter,
-                                                              endpoints_filter=endpoints_filter)
+        return self.scanner_module.compose_manual_verify_task(
+            organizations_filter=organizations_filter, urls_filter=urls_filter, endpoints_filter=endpoints_filter
+        )

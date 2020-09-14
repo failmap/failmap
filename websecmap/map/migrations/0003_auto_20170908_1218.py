@@ -8,18 +8,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0002_auto_20170828_1529'),
+        ("map", "0002_auto_20170828_1529"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organizationrating',
-            name='when',
+            model_name="organizationrating",
+            name="when",
             field=models.DateTimeField(db_index=True),
         ),
         migrations.AlterField(
-            model_name='urlrating',
-            name='when',
+            model_name="urlrating",
+            name="when",
             field=models.DateTimeField(db_index=True),
         ),
     ]

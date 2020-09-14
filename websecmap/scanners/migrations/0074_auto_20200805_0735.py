@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0073_plannedscan_plannedscanerror'),
+        ("scanners", "0073_plannedscan_plannedscanerror"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='plannedscan',
-            name='finished_at_when',
-            field=models.DateTimeField(help_text='when finished, timeout, error', null=True),
+            model_name="plannedscan",
+            name="finished_at_when",
+            field=models.DateTimeField(help_text="when finished, timeout, error", null=True),
         ),
     ]

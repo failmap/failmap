@@ -16,10 +16,7 @@ log = logging.getLogger(__package__)
 
 
 def compose_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
-    **kwargs
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ) -> Task:
     """Multi-stage onboarding."""
 
@@ -50,7 +47,7 @@ def compose_task(
         # For item i in a range that is a length of l,
         for i in range(0, len(my_list), n):
             # Create an index range for l of n items:
-            yield my_list[i:i + n]
+            yield my_list[i : i + n]
 
     # Resetting the outdated onboarding has a risk: if the queue takes longer than the onboarding tasks to finish the
     # tasks will be performed multiple time. This can grow fast and large. Therefore a very large time has been taken
@@ -60,7 +57,7 @@ def compose_task(
     default_filter = {"onboarded": "False"}
     urls_filter = {**urls_filter, **default_filter}
 
-    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
+    urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), **urls_filter)
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
 
     log.info("Found %s urls to create tasks for." % len(urls))
@@ -169,24 +166,24 @@ def forward_onboarding_status(url):
     url.save()
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def finish_onboarding(url):
     log.info("Finishing onboarding of %s", url)
     url.onboarded = True
     url.onboarded_on = timezone.now()
     url.onboarding_stage = "onboarded"
     url.onboarding_stage_set_on = datetime.now(pytz.utc)
-    url.save(update_fields=['onboarded_on', 'onboarded', 'onboarding_stage', 'onboarding_stage_set_on'])
+    url.save(update_fields=["onboarded_on", "onboarded", "onboarding_stage", "onboarding_stage_set_on"])
     return True
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def update_stage(urls: List[Url], stage=""):
 
     for url in urls:
         log.info("Updating onboarding_stage of %s from %s to %s", url, url.onboarding_stage, stage)
         url.onboarding_stage = stage
         url.onboarding_stage_set_on = datetime.now(pytz.utc)
-        url.save(update_fields=['onboarding_stage', 'onboarding_stage_set_on'])
+        url.save(update_fields=["onboarding_stage", "onboarding_stage_set_on"])
 
     return True

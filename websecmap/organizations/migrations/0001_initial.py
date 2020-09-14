@@ -8,17 +8,17 @@ from django.db import migrations, models
 
 
 def forward(apps, schema_editor):
-    OrganizationType = apps.get_model('organizations', 'OrganizationType')
-    default = OrganizationType(name='municipality')
+    OrganizationType = apps.get_model("organizations", "OrganizationType")
+    default = OrganizationType(name="municipality")
     default.save()
 
-    Organization = apps.get_model('organizations', 'Organization')
+    Organization = apps.get_model("organizations", "Organization")
     Organization.objects.all().update(type=default.id)
 
 
 def reverse(apps, schema_editor):
-    Organization = apps.get_model('organizations', 'Organization')
-    Organization.objects.all().update(type='municipality')
+    Organization = apps.get_model("organizations", "Organization")
+    Organization.objects.all().update(type="municipality")
 
 
 def noop(apps, schema_editor):
@@ -29,87 +29,77 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.RunPython(noop, reverse),
-
         migrations.CreateModel(
-            name='Coordinate',
+            name="Coordinate",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('geojsontype', models.CharField(blank=True,
-                                                 db_column='geoJsonType', max_length=20, null=True)),
-                ('area', models.CharField(max_length=10000)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("geojsontype", models.CharField(blank=True, db_column="geoJsonType", max_length=20, null=True)),
+                ("area", models.CharField(max_length=10000)),
             ],
             options={
-                'managed': True,
-                'db_table': 'coordinate',
+                "managed": True,
+                "db_table": "coordinate",
             },
         ),
         migrations.CreateModel(
-            name='Organization',
+            name="Organization",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('country', django_countries.fields.CountryField(max_length=2)),
-                ('name', models.CharField(max_length=50)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("country", django_countries.fields.CountryField(max_length=2)),
+                ("name", models.CharField(max_length=50)),
             ],
             options={
-                'managed': True,
-                'db_table': 'organization',
+                "managed": True,
+                "db_table": "organization",
             },
         ),
         migrations.CreateModel(
-            name='OrganizationType',
+            name="OrganizationType",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=255)),
             ],
             options={
-                'managed': True,
+                "managed": True,
             },
         ),
         migrations.CreateModel(
-            name='Url',
+            name="Url",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.CharField(max_length=150)),
-                ('isdead', models.BooleanField(db_column='isDead', default=False)),
-                ('isdeadsince', models.DateTimeField(
-                    blank=True, db_column='isDeadSince', null=True)),
-                ('isdeadreason', models.CharField(blank=True,
-                                                  db_column='isDeadReason', max_length=255, null=True)),
-                ('organization', models.ForeignKey(
-                    on_delete=django.db.models.deletion.PROTECT, to='organizations.Organization')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("url", models.CharField(max_length=150)),
+                ("isdead", models.BooleanField(db_column="isDead", default=False)),
+                ("isdeadsince", models.DateTimeField(blank=True, db_column="isDeadSince", null=True)),
+                ("isdeadreason", models.CharField(blank=True, db_column="isDeadReason", max_length=255, null=True)),
+                (
+                    "organization",
+                    models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="organizations.Organization"),
+                ),
             ],
             options={
-                'db_table': 'url',
-                'managed': True,
+                "db_table": "url",
+                "managed": True,
             },
         ),
         migrations.AddField(
-            model_name='organization',
-            name='type',
+            model_name="organization",
+            name="type",
             field=models.ForeignKey(
-                default=1,
-                on_delete=django.db.models.deletion.PROTECT,
-                to='organizations.OrganizationType'),
+                default=1, on_delete=django.db.models.deletion.PROTECT, to="organizations.OrganizationType"
+            ),
         ),
         migrations.AddField(
-            model_name='coordinate',
-            name='organization',
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT,
-                to='organizations.Organization'),
+            model_name="coordinate",
+            name="organization",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="organizations.Organization"),
         ),
         migrations.AlterUniqueTogether(
-            name='url',
-            unique_together=set([('organization', 'url')]),
+            name="url",
+            unique_together=set([("organization", "url")]),
         ),
         migrations.RunPython(forward, noop),
     ]

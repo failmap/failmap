@@ -33,6 +33,7 @@ from ipaddress import AddressValueError
 
 import pytz
 import requests
+
 # suppress InsecureRequestWarning, we do those request on purpose.
 import urllib3
 from celery import Task, group
@@ -45,28 +46,26 @@ from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, UrlIp
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
-from websecmap.scanners.scanner.__init__ import (allowed_to_discover_endpoints, endpoint_filters,
-                                                 q_configurations_to_scan, unique_and_random)
+from websecmap.scanners.scanner.__init__ import (
+    allowed_to_discover_endpoints,
+    endpoint_filters,
+    q_configurations_to_scan,
+    unique_and_random,
+)
 from websecmap.scanners.timeout import timeout
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 log = logging.getLogger(__package__)
 
-CELERY_IP_VERSION_QUEUE_NAMES = {4: 'ipv4', 6: 'ipv6'}
+CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
 
 # don't contact http/443 and https/80. You can, but that is 99.99 waste data.
 STANDARD_HTTP_PORTS = [80, 8008, 8080]
 STANDARD_HTTPS_PORTS = [443, 8443]
 
 # make sure ALL the ports in preferred port order map to a protocol
-PORT_TO_PROTOCOL = {
-    80: 'http',
-    8008: 'http',
-    8080: 'http',
-    443: 'https',
-    8443: 'https'
-}
+PORT_TO_PROTOCOL = {80: "http", 8008: "http", 8080: "http", 443: "https", 8443: "https"}
 
 PREFERRED_PORT_ORDER = [443, 80, 8443, 8080, 8008]
 
@@ -90,36 +89,30 @@ between bytes sent from the server. In 99.9% of cases, this is the time before t
 READ_TIMEOUT = 10
 
 
-def filter_discover(organizations_filter: dict = dict(),
-                    urls_filter: dict = dict(),
-                    **kwargs):
+def filter_discover(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs):
     # ignore administratively dead domains by default.
-    urls_filter = {'is_dead': False} if not urls_filter else urls_filter
+    urls_filter = {"is_dead": False} if not urls_filter else urls_filter
 
     if organizations_filter:
-        organizations = Organization.objects.filter(**organizations_filter).only('id')
-        log.info(f'Organization filter applied with {len(organizations)} organizations.')
+        organizations = Organization.objects.filter(**organizations_filter).only("id")
+        log.info(f"Organization filter applied with {len(organizations)} organizations.")
 
-        urls = Url.objects.filter(
-            q_configurations_to_scan(),
-            organization__in=organizations,
-            **urls_filter
-        ).only('id', 'url')
+        urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter).only(
+            "id", "url"
+        )
 
     else:
-        urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter).only('id', 'url')
+        urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter).only("id", "url")
 
     # make sure all urls are unique (some are shared between organizations, or a custom query might dupe them)
     urls = unique_and_random(urls)
-    log.info(f'Discovering HTTP endpoints for {len(urls)} urls.')
+    log.info(f"Discovering HTTP endpoints for {len(urls)} urls.")
 
     return urls
 
 
-@app.task(queue='storage')
-def plan_discover(organizations_filter: dict = dict(),
-                  urls_filter: dict = dict(),
-                  **kwargs):
+@app.task(queue="storage")
+def plan_discover(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs):
 
     if not allowed_to_discover_endpoints("http"):
         return group()
@@ -130,17 +123,13 @@ def plan_discover(organizations_filter: dict = dict(),
     return urls
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_discover_task(**kwargs):
-    urls = plannedscan.pickup(activity="discover", scanner="http", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="discover", scanner="http", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
 
 
-def compose_manual_discover_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    **kwargs
-) -> Task:
+def compose_manual_discover_task(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs) -> Task:
     """Discovers HTTP/HTTPS endpoints by attempting to connect to them.
 
     *This is an implementation of `compose_discover_task`.
@@ -162,46 +151,36 @@ def compose_discover_task(urls):
         for port in PREFERRED_PORT_ORDER:
             for url in urls:
                 tasks.append(
-                    can_connect.si(
-                        protocol=PORT_TO_PROTOCOL[port],
-                        url=url,
-                        port=port,
-                        ip_version=ip_version
-                    ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version])
-                    | connect_result.s(
-                        protocol=PORT_TO_PROTOCOL[port],
-                        url=url,
-                        port=port,
-                        ip_version=ip_version
+                    can_connect.si(protocol=PORT_TO_PROTOCOL[port], url=url, port=port, ip_version=ip_version).set(
+                        queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version]
                     )
-                    | plannedscan.finish.si('discover', 'http', url)
+                    | connect_result.s(protocol=PORT_TO_PROTOCOL[port], url=url, port=port, ip_version=ip_version)
+                    | plannedscan.finish.si("discover", "http", url)
                 )
 
     return group(tasks)
 
 
-def filter_verify(organizations_filter: dict = dict(),
-                  urls_filter: dict = dict(),
-                  endpoints_filter: dict = dict(),
-                  **kwargs):
+def filter_verify(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     # todo: do we need a generic resurrect task and also check for , 'is_dead': False here?
     # otherwise we'll be verifying things that existed ages ago and probably will never return. Which makes this
     # scan also extremely slow. - The description says we should.
     default_filter = {"protocol__in": ["https", "http"], "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
-    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
+    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level="endpoint"), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
-    endpoints = endpoints.only('id', 'url__id', 'ip_version', 'port', 'protocol')
+    endpoints = endpoints.only("id", "url__id", "ip_version", "port", "protocol")
 
     endpoints = unique_and_random(endpoints)
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue='storage')
-def plan_verify(organizations_filter: dict = dict(),
-                urls_filter: dict = dict(),
-                endpoints_filter: dict = dict(),
-                **kwargs):
+@app.task(queue="storage")
+def plan_verify(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     if not allowed_to_discover_endpoints("http"):
         return group()
 
@@ -209,17 +188,14 @@ def plan_verify(organizations_filter: dict = dict(),
     plannedscan.request(activity="verify", scanner="http", urls=urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_verify_task(**kwargs):
-    urls = plannedscan.pickup(activity="verify", scanner="http", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="verify", scanner="http", amount=kwargs.get("amount", 25))
     return compose_verify_task(urls)
 
 
 def compose_manual_verify_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
-    **kwargs
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ) -> Task:
     """Verifies existing https and http endpoints. Is pretty quick, as it will not stumble upon non-existing services
     as much.
@@ -233,7 +209,7 @@ def compose_manual_verify_task(
 
 
 def compose_verify_task(urls):
-    endpoints = retrieve_endpoints_from_urls(urls, protocols=['http', 'https'])
+    endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
     endpoints = unique_and_random(endpoints)
 
     # query takes 4 seconds in production on 41857 endpoints (htttp = 20000, https = 22465).
@@ -241,18 +217,14 @@ def compose_verify_task(urls):
 
     tasks = group(
         can_connect.si(
-            protocol=endpoint.protocol,
-            url=endpoint.url,
-            port=endpoint.port,
-            ip_version=endpoint.ip_version
+            protocol=endpoint.protocol, url=endpoint.url, port=endpoint.port, ip_version=endpoint.ip_version
         ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
         | connect_result.s(
-            protocol=endpoint.protocol,
-            url=endpoint.url,
-            port=endpoint.port,
-            ip_version=endpoint.ip_version)
-        | plannedscan.finish.si('verify', 'http', endpoint.url)
-        for endpoint in endpoints)
+            protocol=endpoint.protocol, url=endpoint.url, port=endpoint.port, ip_version=endpoint.ip_version
+        )
+        | plannedscan.finish.si("verify", "http", endpoint.url)
+        for endpoint in endpoints
+    )
 
     log.info(f"Verifying {len(endpoints)} http/https endpoints.")
 
@@ -338,11 +310,12 @@ def get_ipv6(url: str):
 
         # six to four addresses make no sense
         if str(ipv6).startswith("::ffff:"):
-            log.debug("Six-to-Four address %s discovered on %s, "
-                      "did you configure IPv6 connectivity correctly? "
-                      "Removing this IPv6 address from result to prevent "
-                      "database pollution." %
-                      (ipv6, url))
+            log.debug(
+                "Six-to-Four address %s discovered on %s, "
+                "did you configure IPv6 connectivity correctly? "
+                "Removing this IPv6 address from result to prevent "
+                "database pollution." % (ipv6, url)
+            )
             ipv6 = ""
         else:
             log.debug("%s has IPv6 address: %s" % (url, ipv6))
@@ -383,7 +356,7 @@ def get_ipv6(url: str):
 """
 
 
-@app.task(queue="4and6", rate_limit='120/s', bind=True)
+@app.task(queue="4and6", rate_limit="120/s", bind=True)
 def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bool:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
@@ -455,11 +428,13 @@ def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bo
         # Certificate did not match expected hostname: 85.119.104.84.
         Certificate: {'subject': ((('commonName', 'webdiensten.drechtsteden.nl'),),)
         """
-        r = requests.get(uri, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
-                         allow_redirects=False,  # redirect = connection
-                         verify=False,  # any tls = connection
-                         headers={'Host': url.url,
-                                  'User-Agent': get_random_user_agent()})
+        r = requests.get(
+            uri,
+            timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
+            allow_redirects=False,  # redirect = connection
+            verify=False,  # any tls = connection
+            headers={"Host": url.url, "User-Agent": get_random_user_agent()},
+        )
         if r.status_code:
             log.debug("%s: Host: %s Status: %s" % (uri, url.url, r.status_code))
             return True
@@ -487,12 +462,18 @@ def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bo
         log.debug("%s: Exception returned: %s" % (url, Ex))
         strerror = Ex.args  # this can be multiple.  # zit in nested exception?
         strerror = str(strerror)  # Cast whatever we get back to a string. Instead of trace.
-        if any(["BadStatusLine" in strerror,
+        if any(
+            [
+                "BadStatusLine" in strerror,
                 "CertificateError" in strerror,
                 "certificate verify failed" in strerror,
-                "bad handshake" in strerror]):
-            log.debug("Exception indicates that there is a server, but we're not able to "
-                      "communicate with it correctly. Error: %s" % strerror)
+                "bad handshake" in strerror,
+            ]
+        ):
+            log.debug(
+                "Exception indicates that there is a server, but we're not able to "
+                "communicate with it correctly. Error: %s" % strerror
+            )
             return True
         else:
             log.debug("Exception indicates we could not connect to server. Error: %s" % strerror)
@@ -512,12 +493,17 @@ def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bo
 
                 uri = "%s://%s:%s" % (protocol, url.url, port)
 
-                req = Request('GET', uri, headers={'Host': url.url, 'User-Agent': get_random_user_agent()})
+                req = Request("GET", uri, headers={"Host": url.url, "User-Agent": get_random_user_agent()})
                 prepped = s.prepare_request(req)
 
                 # pretty_print_request(prepped)
 
-                s.send(prepped, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), allow_redirects=False,)
+                s.send(
+                    prepped,
+                    verify=False,
+                    timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
+                    allow_redirects=False,
+                )
 
                 return True
             except (ConnectionRefusedError, ConnectionError, HTTPError) as Ex:
@@ -525,10 +511,16 @@ def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bo
                 strerror = Ex.args
                 strerror = str(strerror)
 
-                if any([error in strerror for error in ["BadStatusLine", "CertificateError",
-                                                        "certificate verify failed", "bad handshake"]]):
-                    log.debug("Exception indicates that there is a server, but we're not able to "
-                              "communicate with it correctly. Error: %s" % strerror)
+                if any(
+                    [
+                        error in strerror
+                        for error in ["BadStatusLine", "CertificateError", "certificate verify failed", "bad handshake"]
+                    ]
+                ):
+                    log.debug(
+                        "Exception indicates that there is a server, but we're not able to "
+                        "communicate with it correctly. Error: %s" % strerror
+                    )
                     return True
             except (ConnectTimeout, Timeout, ReadTimeout):
                 return False
@@ -548,15 +540,17 @@ def pretty_print_request(req):
     this function because it is programmed to be pretty
     printed and may differ from the actual request.
     """
-    print('{}\n{}\n{}\n\n{}'.format(
-        '-----------START-----------',
-        req.method + ' ' + req.url,
-        '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
-        req.body,
-    ))
+    print(
+        "{}\n{}\n{}\n\n{}".format(
+            "-----------START-----------",
+            req.method + " " + req.url,
+            "\n".join("{}: {}".format(k, v) for k, v in req.headers.items()),
+            req.body,
+        )
+    )
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def connect_result(result, protocol: str, url: Url, port: int, ip_version: int):
     log.info("%s %s/%s IPv%s: %s" % (url, protocol, port, ip_version, result))
 
@@ -626,7 +620,7 @@ def save_endpoint(protocol: str, url: Url, port: int, ip_version: int):
     return
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def kill_url_task(ips, url: Url):
 
     # only kill if there are no ips.
@@ -644,18 +638,16 @@ def kill_url_task(ips, url: Url):
     url.not_resolvable_reason = "No IPv4 or IPv6 address found in http scanner."
     url.save()
 
-    Endpoint.objects.all().filter(url=url).update(is_dead=True,
-                                                  is_dead_since=datetime.now(pytz.utc),
-                                                  is_dead_reason="Url was killed")
+    Endpoint.objects.all().filter(url=url).update(
+        is_dead=True, is_dead_since=datetime.now(pytz.utc), is_dead_reason="Url was killed"
+    )
 
     UrlIp.objects.all().filter(url=url).update(
-        is_unused=True,
-        is_unused_since=datetime.now(pytz.utc),
-        is_unused_reason="Url was killed"
+        is_unused=True, is_unused_since=datetime.now(pytz.utc), is_unused_reason="Url was killed"
     )
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def store_url_ips(url: Url, ips):
     """
     Todo: method should be stored in manager
@@ -690,9 +682,7 @@ def store_url_ips(url: Url, ips):
 
     # and then clean up all that are not in the current set of ip's.
     UrlIp.objects.all().filter(url=url, is_unused=False).exclude(ip__in=ips).update(
-        is_unused=True,
-        is_unused_since=datetime.now(pytz.utc),
-        is_unused_reason="cleanup at storing new endpoints"
+        is_unused=True, is_unused_since=datetime.now(pytz.utc), is_unused_reason="cleanup at storing new endpoints"
     )
 
 
@@ -706,25 +696,21 @@ def get_rdns_name(ip):
         # host doesn't exist / unknown host
         pass
     except BaseException as e:
-        log.error('Unknown rdns failure %s on ip %s' % (str(e), ip))
+        log.error("Unknown rdns failure %s on ip %s" % (str(e), ip))
 
     return reverse_name
 
 
 def endpoint_exists(url, port, protocol, ip_version):
-    return Endpoint.objects.all().filter(url=url,
-                                         port=port,
-                                         ip_version=ip_version,
-                                         protocol=protocol,
-                                         is_dead=False).count()
+    return (
+        Endpoint.objects.all()
+        .filter(url=url, port=port, ip_version=ip_version, protocol=protocol, is_dead=False)
+        .count()
+    )
 
 
 def kill_endpoint(protocol: str, url: Url, port: int, ip_version: int):
-    eps = Endpoint.objects.all().filter(url=url,
-                                        port=port,
-                                        ip_version=ip_version,
-                                        protocol=protocol,
-                                        is_dead=False)
+    eps = Endpoint.objects.all().filter(url=url, port=port, ip_version=ip_version, protocol=protocol, is_dead=False)
 
     for ep in eps:
         ep.is_dead = True
@@ -733,7 +719,7 @@ def kill_endpoint(protocol: str, url: Url, port: int, ip_version: int):
         ep.save()
 
 
-@app.task(queue='4and6')
+@app.task(queue="4and6")
 def check_network(code_location=""):
     """
     Used to see if a worker can do IPv6. Will trigger an exception when no ipv4 or ipv6 is available,
@@ -754,19 +740,25 @@ def check_network(code_location=""):
     can_ipv6 = can_connect("https", url, 443, 6)
 
     if not can_ipv4 and not can_ipv6:
-        raise ConnectionError("Both ipv6 and ipv4 networks could not be reached via %s."
-                              "IPv4 enabled in config: %s, IPv6 enabled in config: %s" %
-                              (code_location, settings.NETWORK_SUPPORTS_IPV4, settings.NETWORK_SUPPORTS_IPV6))
+        raise ConnectionError(
+            "Both ipv6 and ipv4 networks could not be reached via %s."
+            "IPv4 enabled in config: %s, IPv6 enabled in config: %s"
+            % (code_location, settings.NETWORK_SUPPORTS_IPV4, settings.NETWORK_SUPPORTS_IPV6)
+        )
 
     if not can_ipv4:
-        raise ConnectionError("Could not reach IPv4 Network via %s. IPv4 enabled in config: %s" %
-                              (code_location, settings.NETWORK_SUPPORTS_IPV4))
+        raise ConnectionError(
+            "Could not reach IPv4 Network via %s. IPv4 enabled in config: %s"
+            % (code_location, settings.NETWORK_SUPPORTS_IPV4)
+        )
     else:
         log.info("IPv4 could be reached via %s" % code_location)
 
     if not can_ipv6:
-        raise ConnectionError("Could not reach IPv6 Network via %s. IPv6 enabled in config: %s" %
-                              (code_location, settings.NETWORK_SUPPORTS_IPV6))
+        raise ConnectionError(
+            "Could not reach IPv6 Network via %s. IPv6 enabled in config: %s"
+            % (code_location, settings.NETWORK_SUPPORTS_IPV6)
+        )
     else:
         log.info("IPv6 could be reached via %s" % code_location)
 
@@ -799,16 +791,18 @@ def redirects_to_safety(endpoint: Endpoint):
             timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),  # allow for insane network lag
             allow_redirects=True,  # point is: redirects to safety
             verify=False,  # certificate validity is checked elsewhere, having some https > none
-
             # redirects do NOT overwrite the host headers. Meaning that following a redirect, the
             # host header is set, which is incorrect. The Host header should only be set in the first
             # request, and should be overwritten by all subsequent requests.
             # The reason we set the host header explicitly, is because we want to contact the webserver
             # via the IP address, so we can explicitly contect IPv4 and IPv6 addresses of this domain.
             # issue was logged here: https://github.com/psf/requests/issues/5196
-            headers={'User-Agent': get_random_user_agent(),
-                     # Give some instructions that we want a secure address...
-                     'Upgrade-Insecure-Requests': "1"})
+            headers={
+                "User-Agent": get_random_user_agent(),
+                # Give some instructions that we want a secure address...
+                "Upgrade-Insecure-Requests": "1",
+            },
+        )
 
         if response.history:
             log.debug("Request was redirected, there is hope. Redirect path:")
@@ -825,8 +819,14 @@ def redirects_to_safety(endpoint: Endpoint):
         else:
             log.debug("Request was not redirected, so not going to a safe url.")
             return False
-    except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError, requests.exceptions.TooManyRedirects
-            ) as e:
+    except (
+        ConnectTimeout,
+        HTTPError,
+        ReadTimeout,
+        Timeout,
+        ConnectionError,
+        requests.exceptions.TooManyRedirects,
+    ) as e:
         log.debug("Request resulted into an error, it's not redirecting properly.")
         log.debug(f"The error retrieved was: {e}")
         return False
@@ -850,8 +850,7 @@ def get_random_user_agent():
         # Windows 7
         "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 "
         "(KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36",
-
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:64.0) Gecko/20100101 Firefox/64.0"
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:64.0) Gecko/20100101 Firefox/64.0",
     ]
 
     return random.choice(user_agents)

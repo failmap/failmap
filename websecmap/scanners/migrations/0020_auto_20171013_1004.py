@@ -8,14 +8,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0019_auto_20170927_1222'),
+        ("scanners", "0019_auto_20170927_1222"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpointgenericscan',
-            name='rating',
+            model_name="endpointgenericscan",
+            name="rating",
             field=models.CharField(
-                default=0, help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent.", max_length=6),
+                default=0,
+                help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent.",
+                max_length=6,
+            ),
         ),
     ]

@@ -17,18 +17,19 @@ log = logging.getLogger(__package__)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "websecmap.settings")
 
 app = Celery(__name__)
-app.config_from_object('django.conf:settings', namespace='CELERY')
+app.config_from_object("django.conf:settings", namespace="CELERY")
 # use same result backend as we use for broker url
 # If broker_url is None, you  might not have started websecmap correctly. See docs/source/conf.py for a correct example.
-app.conf.result_backend = app.conf.broker_url.replace('amqp://', 'rpc://')
+app.conf.result_backend = app.conf.broker_url.replace("amqp://", "rpc://")
 
 
 # autodiscover all celery tasks in tasks.py files inside websecmap modules
-appname = __name__.split('.', 1)[0]
+appname = __name__.split(".", 1)[0]
 # As we have two celery configs now, and because of reasons we're using the one from websecmap, this one
 # has some knowledge about the dashboard project:
-app.autodiscover_tasks([app for app in settings.INSTALLED_APPS
-                        if app.startswith('dashboard') or app.startswith('websecmap')])
+app.autodiscover_tasks(
+    [app for app in settings.INSTALLED_APPS if app.startswith("dashboard") or app.startswith("websecmap")]
+)
 
 # http://docs.celeryproject.org/en/master/whatsnew-4.0.html?highlight=priority#redis-priorities-reversed
 # http://docs.celeryproject.org/en/master/history/whatsnew-3.0.html?highlight=priority
@@ -37,9 +38,9 @@ app.autodiscover_tasks([app for app in settings.INSTALLED_APPS
 # https://github.com/celery/celery/blob/f83b072fba7831f60106c81472e3477608baf289/docs/whatsnew-4.0.rst#redis-priorities-reversed
 # contrary to 'documentation' in release notes the redis priorities do not seem aligned with rabbitmq
 app.conf.broker_transport_options = {
-    'priority_steps': [1, 5, 9],
+    "priority_steps": [1, 5, 9],
 }
-if 'redis://' in app.conf.broker_url:
+if "redis://" in app.conf.broker_url:
     PRIO_HIGH = 1
     PRIO_NORMAL = 5
     PRIO_LOW = 9
@@ -50,8 +51,8 @@ else:
 
 # lookup table for routing keys for different IP versions
 IP_VERSION_QUEUE = {
-    4: 'scanners.ipv4',
-    6: 'scanners.ipv6',
+    4: "scanners.ipv4",
+    6: "scanners.ipv6",
 }
 
 
@@ -74,12 +75,12 @@ class ParentFailed(Exception):
         super(ParentFailed, self).__init__(message, *args)
 
 
-@app.task(queue='isolated', bind=True)
+@app.task(queue="isolated", bind=True)
 def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
+    print("Request: {0!r}".format(self.request))
 
 
-@app.task(queue='isolated')
+@app.task(queue="isolated")
 def waitsome(sleep):
     """Wait some time and return epoch at completion."""
 
@@ -87,7 +88,7 @@ def waitsome(sleep):
     return time.time()
 
 
-@app.task(queue='isolated', rate_limit='1/s')
+@app.task(queue="isolated", rate_limit="1/s")
 def rate_limited(sleep):
     """Wait some time but limit to maximum tasks of 1 per second."""
 
@@ -104,20 +105,23 @@ def status():
     active = inspect.active()
     reserved = inspect.reserved()
     active_queues = inspect.active_queues()
-    workers = [{
-        'name': worker_name,
-        'queues': [q['name'] for q in active_queues.get(worker_name, [])],
-        'tasks_processed': sum(worker_stats['total'].values()),
-        'tasks_active': len(active.get(worker_name, [])),
-        'tasks_reserved': len(reserved.get(worker_name, [])),
-        'prefetch_count': worker_stats['prefetch_count'],
-        'concurrency': worker_stats['pool']['max-concurrency'],
-    } for worker_name, worker_stats in stats.items()]
+    workers = [
+        {
+            "name": worker_name,
+            "queues": [q["name"] for q in active_queues.get(worker_name, [])],
+            "tasks_processed": sum(worker_stats["total"].values()),
+            "tasks_active": len(active.get(worker_name, [])),
+            "tasks_reserved": len(reserved.get(worker_name, [])),
+            "prefetch_count": worker_stats["prefetch_count"],
+            "concurrency": worker_stats["pool"]["max-concurrency"],
+        }
+        for worker_name, worker_stats in stats.items()
+    ]
 
-    workers = sorted(workers, key=lambda k: (k['name']), reverse=False)
+    workers = sorted(workers, key=lambda k: (k["name"]), reverse=False)
 
-    if 'redis://' in app.conf.broker_url:
-        queue_names = [q.name for q in QUEUES_MATCHING_ROLES['queuemonitor']]
+    if "redis://" in app.conf.broker_url:
+        queue_names = [q.name for q in QUEUES_MATCHING_ROLES["queuemonitor"]]
 
         # on localhost and remote workers there is no event loop. This causes an exception.
         # Inspired on https://github.com/tornadoweb/tornado/issues/2352 and
@@ -129,6 +133,7 @@ def status():
         # 'solves': RuntimeError: There is no current event loop in thread 'Thread-3'.
         try:
             import asyncio
+
             asyncio.set_event_loop(asyncio.new_event_loop())
         except BaseException:
             # an eventloop already exists.
@@ -143,20 +148,16 @@ def status():
             log.error("Could not connect to flower to retrieve queue stats.")
             log.exception(e)
 
-        queues = [{'name': x['name'], 'tasks_pending': x['messages']} for x in queue_stats]
+        queues = [{"name": x["name"], "tasks_pending": x["messages"]} for x in queue_stats]
     else:
-        raise NotImplementedError('Currently only Redis is supported!')
+        raise NotImplementedError("Currently only Redis is supported!")
 
-    queues = sorted(queues, key=lambda k: (k['name']), reverse=False)
+    queues = sorted(queues, key=lambda k: (k["name"]), reverse=False)
 
     alerts = []
     if not workers:
-        alerts.append('No active workers!')
+        alerts.append("No active workers!")
     if len(workers) > 9000:
-        alerts.append('Number of workers is OVER 9000!!!!1111')
+        alerts.append("Number of workers is OVER 9000!!!!1111")
 
-    return {
-        'alerts': alerts,
-        'workers': workers,
-        'queues': queues
-    }
+    return {"alerts": alerts, "workers": workers, "queues": queues}

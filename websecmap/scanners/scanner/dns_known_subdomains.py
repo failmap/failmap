@@ -19,26 +19,24 @@ from websecmap.scanners.scanner.subdomains import get_subdomains, url_by_filters
 log = logging.getLogger(__package__)
 
 
-def filter_discover(organizations_filter: dict = dict(),
-                    urls_filter: dict = dict(),
-                    endpoints_filter: dict = dict(),
-                    **kwargs):
+def filter_discover(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
 
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
     return unique_and_random(urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_discover_task(**kwargs):
-    urls = plannedscan.pickup(activity="discover", scanner="known_subdomains", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="discover", scanner="known_subdomains", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
 
 
-@app.task(queue='storage')
-def plan_discover(organizations_filter: dict = dict(),
-                  urls_filter: dict = dict(),
-                  endpoints_filter: dict = dict(),
-                  **kwargs):
+@app.task(queue="storage")
+def plan_discover(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
 
     if not allowed_to_discover_urls("dns_known_subdomains"):
         return group()
@@ -58,14 +56,15 @@ def compose_discover_task(urls):
     wordlist = get_subdomains([first_organization.country], None)
 
     # The worker has no way to write / save things. A wordlist can be 10's of thousands of words.
-    task = group(wordlist_scan.si([url], wordlist)
-                 | plannedscan.finish.si('discover', 'known_subdomains', url) for url in urls)
+    task = group(
+        wordlist_scan.si([url], wordlist) | plannedscan.finish.si("discover", "known_subdomains", url) for url in urls
+    )
     return task
 
 
-def compose_manual_discover_task(organizations_filter: dict = dict(),
-                                 urls_filter: dict = dict(),
-                                 endpoints_filter: dict = dict(), **kwargs) -> Task:
+def compose_manual_discover_task(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+) -> Task:
 
     if not allowed_to_discover_urls("dns_known_subdomains"):
         return group()

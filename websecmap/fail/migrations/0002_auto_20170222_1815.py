@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fail', '0001_initial'),
+        ("fail", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='url',
-            name='isdead',
-            field=models.BooleanField(db_column='isDead'),
+            model_name="url",
+            name="isdead",
+            field=models.BooleanField(db_column="isDead"),
         ),
     ]

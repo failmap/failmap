@@ -65,32 +65,32 @@ def test_map_views(organization_type, organization):
     Todo: how is this done in other tests? -> via a docker IP. So these tests will have to be rewritten.
     """
     from django.test.client import RequestFactory
+
     rf = RequestFactory()
-    request = rf.get('/')
+    request = rf.get("/")
     request.csrf_processing_done = True
-    request.META['HTTP_HOST'] = '127.0.0.1'
-    request.LANGUAGE_CODE = 'NL'
+    request.META["HTTP_HOST"] = "127.0.0.1"
+    request.LANGUAGE_CODE = "NL"
 
     # autofill known parameters with some generic values:
     autofill = {
-        'organization_type_name': organization_type.name,
-        'country': organization.country,
-        'organization_type': organization_type.name,
-        'days_back': 0,
-        'weeks_duration': 0,
-        'weeks_back': 0,
-        'organization_id': organization.id,
-        'displayed_issue': '',  # todo: all the known issues from scanners
-        'scan_type': 'plain_https',  # todo: all known scans
-        'request': request,
-        'parameter': '',
-        'args': {},  # LatestScanFeed
-        'kwargs': {'scan_type': 'plain_https'},  # LatestScanFeed
-        'file_format': 'json',
-        'organization_name': organization.name,
-
-        'url': 'http://localhost:8000/',
-        'requests_args': {"params": {"access_token": config.MAPBOX_ACCESS_TOKEN}},
+        "organization_type_name": organization_type.name,
+        "country": organization.country,
+        "organization_type": organization_type.name,
+        "days_back": 0,
+        "weeks_duration": 0,
+        "weeks_back": 0,
+        "organization_id": organization.id,
+        "displayed_issue": "",  # todo: all the known issues from scanners
+        "scan_type": "plain_https",  # todo: all known scans
+        "request": request,
+        "parameter": "",
+        "args": {},  # LatestScanFeed
+        "kwargs": {"scan_type": "plain_https"},  # LatestScanFeed
+        "file_format": "json",
+        "organization_name": organization.name,
+        "url": "http://localhost:8000/",
+        "requests_args": {"params": {"access_token": config.MAPBOX_ACCESS_TOKEN}},
     }
 
     import inspect
@@ -116,8 +116,8 @@ def test_map_views(organization_type, organization):
 
 
 def test_app_commands():
-    call_debug_command('translate')
-    call_debug_command('ver')
+    call_debug_command("translate")
+    call_debug_command("ver")
 
     # celery tested in test cases
     # call_debug_command('celery')
@@ -130,32 +130,32 @@ def test_app_commands():
 def test_map_commands(organization, url):
     # todo: also test game in next game iteration
     # this is going to take a while
-    call_debug_command('rebuild_reports', '-o', organization.name)
-    call_debug_command('report', '-o', organization.name)
-    call_debug_command('timeline', '-u', url.url)
+    call_debug_command("rebuild_reports", "-o", organization.name)
+    call_debug_command("report", "-o", organization.name)
+    call_debug_command("timeline", "-u", url.url)
 
-    call_debug_command('calculate_map_data', '--days', '1')
-    call_debug_command('calculate_vulnerability_graphs', '--days', '1')
-    call_debug_command('check_default_ratings')
-    call_debug_command('clear_cache')
-    call_debug_command('clear_ratings')
-    call_debug_command('import_coordinates', '--list')
-    call_debug_command('import_coordinates', '--country', 'NL', '--region', 'province')
-    call_debug_command('update_coordinates', '--country', 'NL', '--region', 'province')
+    call_debug_command("calculate_map_data", "--days", "1")
+    call_debug_command("calculate_vulnerability_graphs", "--days", "1")
+    call_debug_command("check_default_ratings")
+    call_debug_command("clear_cache")
+    call_debug_command("clear_ratings")
+    call_debug_command("import_coordinates", "--list")
+    call_debug_command("import_coordinates", "--country", "NL", "--region", "province")
+    call_debug_command("update_coordinates", "--country", "NL", "--region", "province")
 
 
 def test_organization_commands(organization):
-    call_debug_command('add_urls', '-u', 'doesnotresolve.faalkaart.nl')
-    call_debug_command('export_organization', '--include_generated', organization.name)
+    call_debug_command("add_urls", "-u", "doesnotresolve.faalkaart.nl")
+    call_debug_command("export_organization", "--include_generated", organization.name)
 
-    call_debug_command('clean_short_outages')
+    call_debug_command("clean_short_outages")
 
-    call_debug_command('reset_autocomputed_fields_in_urls')
-    call_debug_command('update_datamodel_documentation')
+    call_debug_command("reset_autocomputed_fields_in_urls")
+    call_debug_command("update_datamodel_documentation")
 
-    call_debug_command('create_test_dataset', '--output', 'failmap_test_dataset_test')
-    call_debug_command('create_debug_dataset', '--output', 'failmap_debug_dataset_test')
-    call_debug_command('create_dataset', '--output', 'failmap_dataset_test')
+    call_debug_command("create_test_dataset", "--output", "failmap_test_dataset_test")
+    call_debug_command("create_debug_dataset", "--output", "failmap_debug_dataset_test")
+    call_debug_command("create_dataset", "--output", "failmap_dataset_test")
 
     # will not test clear_database, because of disasterous consequences. Could be done in test-database.
     # todo: move to real test environment. Do we have network there? How do we get packages? So yes?
@@ -166,32 +166,35 @@ def test_organization_commands(organization):
 def test_commandline_scanners(url):
     # Calls all scanner commands, except the ones prefixed with one_shot (as they will be removed in the future)
 
-    call_debug_command('check_network')
-    call_debug_command('reset_onboards')
-    call_debug_command('forward_onboards')
+    call_debug_command("check_network")
+    call_debug_command("reset_onboards")
+    call_debug_command("forward_onboards")
 
     # will not perform any db action without the --accept parameter
     # failmap revive endpoint 2018-10-15
-    call_debug_command('revive', 'endpoints', '2018-10-15')
-    call_debug_command('revive', 'urls', '2018-10-15')
+    call_debug_command("revive", "endpoints", "2018-10-15")
+    call_debug_command("revive", "urls", "2018-10-15")
 
     from websecmap.scanners.management.commands.discover import scanners
+
     for scanner in scanners:
-        call_debug_command('discover', scanner, '-u', url.url)
+        call_debug_command("discover", scanner, "-u", url.url)
 
     from websecmap.scanners.management.commands.verify import scanners
+
     for scanner in scanners:
-        call_debug_command('verify', scanner, '-u', url.url)
+        call_debug_command("verify", scanner, "-u", url.url)
 
     from websecmap.scanners.management.commands.scan import scanners
-    for scanner in scanners:
-        call_debug_command('scan', scanner, '-u', url.url)
 
-    call_debug_command('set_latest_scan')
+    for scanner in scanners:
+        call_debug_command("scan", scanner, "-u", url.url)
+
+    call_debug_command("set_latest_scan")
 
 
 def call_debug_command(command_name, *args):
-    log.warning("Calling command: %s %s" % (command_name, ' '.join(args)))
+    log.warning("Calling command: %s %s" % (command_name, " ".join(args)))
     call_command(command_name, *args)
 
 

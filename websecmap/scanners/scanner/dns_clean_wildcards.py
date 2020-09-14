@@ -26,14 +26,13 @@ from websecmap.scanners.scanner.subdomains import discover_wildcard
 log = logging.getLogger(__name__)
 
 
-def filter_scan(organizations_filter: dict = dict(),
-                urls_filter: dict = dict(),
-                endpoints_filter: dict = dict(),
-                **kwargs):
+def filter_scan(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     # Don't care about dead or not resolvable here: The subdomains below this might be very well alive.
     default_filter = {"uses_dns_wildcard": True}
     urls_filter = {**urls_filter, **default_filter}
-    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
+    urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), **urls_filter)
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
     urls = urls.only("url")
 
@@ -42,28 +41,24 @@ def filter_scan(organizations_filter: dict = dict(),
     return urls
 
 
-@app.task(queue='storage')
-def plan_scan(organizations_filter: dict = dict(),
-              urls_filter: dict = dict(),
-              endpoints_filter: dict = dict(),
-              **kwargs
-              ):
+@app.task(queue="storage")
+def plan_scan(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
 
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="scan", scanner="dns_clean_wildcards", urls=urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="dns_clean_wildcards", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="scan", scanner="dns_clean_wildcards", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
 
 
-def compose_manual_scan_task(organizations_filter: dict = dict(),
-                             urls_filter: dict = dict(),
-                             endpoints_filter: dict = dict(),
-                             **kwargs
-                             ) -> Task:
+def compose_manual_scan_task(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+) -> Task:
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_scan_task(urls)
 
@@ -75,7 +70,7 @@ def compose_scan_task(urls):
         tasks.append(
             get_identical_sites_on_wildcard_url.si(url)
             | store.s()
-            | plannedscan.finish.si('scan', 'dns_clean_wildcards', url)
+            | plannedscan.finish.si("scan", "dns_clean_wildcards", url)
         )
 
     return group(tasks)
@@ -86,11 +81,10 @@ def subdomains_under_wildcard(url: Url) -> List[Url]:
     # In this case do care about dead/not resolvable.
     # Dead will not change the state (we don't revive them)...
     # not resolvable will mean slower testing.
-    return list(Url.objects.all().filter(
-        is_dead=False,
-        not_resolvable=False,
-        computed_domain=result.domain,
-        computed_suffix=result.suffix)
+    return list(
+        Url.objects.all().filter(
+            is_dead=False, not_resolvable=False, computed_domain=result.domain, computed_suffix=result.suffix
+        )
     )
 
 
@@ -98,43 +92,47 @@ def site_content(url) -> Dict[str, Any]:
     try:
         # Sites as deventer.nl have a different page every load.
         # Sites as hollandskroon.nl have a different page every load. So can't check that automatically.
-        response = requests.get(f"https://{url}/",
-                                allow_redirects=True,
-                                verify=False,  # certificate validity is checked elsewhere, having some https > none
-                                headers={'User-Agent': get_random_user_agent()},
-                                timeout=(3, 3)
-                                )
+        response = requests.get(
+            f"https://{url}/",
+            allow_redirects=True,
+            verify=False,  # certificate validity is checked elsewhere, having some https > none
+            headers={"User-Agent": get_random_user_agent()},
+            timeout=(3, 3),
+        )
         # remove timestamps from headers, and also include header hash in response.
         # dates are always unique if we check it later...
-        if 'Date' in response.headers:
-            del (response.headers['Date'])
-        if 'date' in response.headers:
-            del (response.headers['date'])
-        return {'headers': response.headers,
-                'content': response.content,
-                'status_code': response.status_code,
-                }
+        if "Date" in response.headers:
+            del response.headers["Date"]
+        if "date" in response.headers:
+            del response.headers["date"]
+        return {
+            "headers": response.headers,
+            "content": response.content,
+            "status_code": response.status_code,
+        }
     except requests.RequestException:
-        return {'headers': None,
-                'content': None,
-                'status_code': None,
-                }
+        return {
+            "headers": None,
+            "content": None,
+            "status_code": None,
+        }
 
 
-@app.task(queue='all_internet')
+@app.task(queue="all_internet")
 def get_identical_sites_on_wildcard_url(wildcard_url: Url) -> List[Url]:
     identical = []
 
     if not discover_wildcard(wildcard_url.url):
         return identical
 
-    wildcard_subdomain = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
+    wildcard_subdomain = "".join(random.choice(string.ascii_lowercase) for i in range(16))
     wildcard_content = site_content(f"{wildcard_subdomain}.{wildcard_url.url}")
 
-    if wildcard_content == {'headers': None,
-                            'content': None,
-                            'status_code': None,
-                            }:
+    if wildcard_content == {
+        "headers": None,
+        "content": None,
+        "status_code": None,
+    }:
         # When there are errors, do not try to get subdomains.
         log.debug(f"{wildcard_url} resulted in an error, skipping.")
         return identical
@@ -147,7 +145,8 @@ def get_identical_sites_on_wildcard_url(wildcard_url: Url) -> List[Url]:
 
     if not all(element == wildcard_content for element in [wildcard_content2, wildcard_content3, wildcard_content4]):
         log.debug(
-            "Address delivers a unique page every time. Therefore automatically checking for wildcards is impossible.")
+            "Address delivers a unique page every time. Therefore automatically checking for wildcards is impossible."
+        )
         return identical
 
     subdomain_urls = subdomains_under_wildcard(wildcard_url)
@@ -175,7 +174,7 @@ def get_identical_sites_on_wildcard_url(wildcard_url: Url) -> List[Url]:
     return identical
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def store(urls: List[Url]):
     log.debug(f"Received {len(urls)} that have been found to be having the same data as a wildcard.")
 

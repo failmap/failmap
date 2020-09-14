@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0036_administrativeregion_import_start_date'),
+        ("map", "0036_administrativeregion_import_start_date"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='administrativeregion',
-            name='import_start_date',
+            model_name="administrativeregion",
+            name="import_start_date",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

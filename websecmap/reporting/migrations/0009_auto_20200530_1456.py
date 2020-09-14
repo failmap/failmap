@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reporting', '0008_auto_20190604_0922'),
+        ("reporting", "0008_auto_20190604_0922"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='urlreport',
-            name='endpoint_error_in_test',
-            field=models.IntegerField(default=0, help_text='Amount of errors in tests performed on this endpoint.'),
+            model_name="urlreport",
+            name="endpoint_error_in_test",
+            field=models.IntegerField(default=0, help_text="Amount of errors in tests performed on this endpoint."),
         ),
         migrations.AddField(
-            model_name='urlreport',
-            name='error_in_test',
+            model_name="urlreport",
+            name="error_in_test",
             field=models.IntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='urlreport',
-            name='url_error_in_test',
-            field=models.IntegerField(default=0, help_text='Amount of errors in tests on this url.'),
+            model_name="urlreport",
+            name="url_error_in_test",
+            field=models.IntegerField(default=0, help_text="Amount of errors in tests on this url."),
         ),
     ]

@@ -6,14 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0057_auto_20200227_0947'),
+        ("organizations", "0057_auto_20200227_0947"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organization',
-            name='surrogate_id',
+            model_name="organization",
+            name="surrogate_id",
             field=models.CharField(
-                blank=True, help_text='Any ID used to identify this organization in an external system. Used in automated imports via the API. Otherwise leave this field empty.', max_length=255, null=True),
+                blank=True,
+                help_text="Any ID used to identify this organization in an external system. Used in automated imports via the API. Otherwise leave this field empty.",
+                max_length=255,
+                null=True,
+            ),
         ),
     ]

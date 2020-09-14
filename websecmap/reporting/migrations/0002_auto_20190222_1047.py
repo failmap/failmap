@@ -6,20 +6,20 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reporting', '0001_initial'),
+        ("reporting", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelTable(
-            name='organizationreport',
+            name="organizationreport",
             table=None,
         ),
         migrations.AlterModelTable(
-            name='urlreport',
+            name="urlreport",
             table=None,
         ),
         migrations.AlterModelTable(
-            name='vulnerabilitystatistic',
+            name="vulnerabilitystatistic",
             table=None,
         ),
     ]

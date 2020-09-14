@@ -13,8 +13,7 @@ import logging
 import xml.etree.ElementTree as ET
 
 from websecmap.celery import app
-from websecmap.organizations.datasources import (download_http_get_no_credentials,
-                                                 generic_dataset_import, read_data)
+from websecmap.organizations.datasources import download_http_get_no_credentials, generic_dataset_import, read_data
 
 log = logging.getLogger(__package__)
 
@@ -27,35 +26,35 @@ def parse_data(dataset, filename):
     found_organizations = []
 
     root = ET.fromstring(data)
-    ns = root.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'].split(' ')[0]
-    log.debug('Using namespace: %s' % ns)
+    ns = root.attrib["{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"].split(" ")[0]
+    log.debug("Using namespace: %s" % ns)
 
     # of course this doesn't work out the box, so how do we autoregister a namespace?
-    ET.register_namespace('p', ns)
+    ET.register_namespace("p", ns)
     # so just fake / overwrite the namespaces variable
-    namespaces = {'p': ns}
+    namespaces = {"p": ns}
 
-    organizations = root.find('p:%s' % dataset['xml_plural'], namespaces)
+    organizations = root.find("p:%s" % dataset["xml_plural"], namespaces)
 
     # why can't i use a similar construct as get?
     # i want: bla = et.find(x. alaternative if not found)
-    for organization in organizations.iterfind('p:%s' % dataset['xml_single'], namespaces):
-        name = emulate_get(organization, 'p:naam', namespaces)
+    for organization in organizations.iterfind("p:%s" % dataset["xml_single"], namespaces):
+        name = emulate_get(organization, "p:naam", namespaces)
         if not name:
             # gemeenschappelijke regelingen has a title, not a name.
-            name = emulate_get(organization, 'p:titel', namespaces)
+            name = emulate_get(organization, "p:titel", namespaces)
 
-        abbreviation = emulate_get(organization, 'p:afkorting', namespaces)
+        abbreviation = emulate_get(organization, "p:afkorting", namespaces)
 
-        contact = organization.find('p:contact', namespaces)
-        bezoekAdres = contact.find('p:bezoekAdres', namespaces)
-        adres = bezoekAdres.find('p:adres', namespaces)
-        straat = emulate_get(adres, 'p:straat', namespaces)
-        huisnummer = emulate_get(adres, 'p:huisnummer', namespaces)
-        postcode = emulate_get(adres, 'p:postcode', namespaces)
-        plaats = emulate_get(adres, 'p:plaats', namespaces)
+        contact = organization.find("p:contact", namespaces)
+        bezoekAdres = contact.find("p:bezoekAdres", namespaces)
+        adres = bezoekAdres.find("p:adres", namespaces)
+        straat = emulate_get(adres, "p:straat", namespaces)
+        huisnummer = emulate_get(adres, "p:huisnummer", namespaces)
+        postcode = emulate_get(adres, "p:postcode", namespaces)
+        plaats = emulate_get(adres, "p:plaats", namespaces)
 
-        site = emulate_get(contact, 'p:internet', namespaces)
+        site = emulate_get(contact, "p:internet", namespaces)
 
         if not postcode and not plaats:
             # try to find something by name... might not have an address...
@@ -65,16 +64,16 @@ def parse_data(dataset, filename):
 
         found_organizations.append(
             {
-                'name': "%s (%s)" % (name, abbreviation) if abbreviation else name,
-                'address': "%s %s, %s, %s" % (straat, huisnummer, postcode, plaats),
+                "name": "%s (%s)" % (name, abbreviation) if abbreviation else name,
+                "address": "%s %s, %s, %s" % (straat, huisnummer, postcode, plaats),
                 # make sure that the geocoder is looking at the Netherlands.
-                'geocoding_hint': geocoding_hint,
-                'websites': [site],
-                'country': dataset['country'],
-                'layer': dataset['layer'],
-                'lat': None,
-                'lng': None,
-                'dataset': dataset
+                "geocoding_hint": geocoding_hint,
+                "websites": [site],
+                "country": dataset["country"],
+                "layer": dataset["layer"],
+                "lat": None,
+                "lng": None,
+                "dataset": dataset,
             }
         )
 
@@ -93,8 +92,8 @@ def emulate_get(xml, element, namespaces):
         return ""
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def import_datasets(**dataset):
-    generic_dataset_import(dataset=dataset,
-                           parser_function=parse_data,
-                           download_function=download_http_get_no_credentials)
+    generic_dataset_import(
+        dataset=dataset, parser_function=parse_data, download_function=download_http_get_no_credentials
+    )

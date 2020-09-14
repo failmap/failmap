@@ -6,19 +6,19 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0040_auto_20190222_1001'),
+        ("map", "0040_auto_20190222_1001"),
     ]
 
     database_operations = [
-        migrations.AlterModelTable('OrganizationReport', 'map_organizationreport'),
-        migrations.AlterModelTable('UrlReport', 'map_urlreport'),
-        migrations.AlterModelTable('VulnerabilityStatistic', 'map_vulnerabilitystatistic'),
+        migrations.AlterModelTable("OrganizationReport", "map_organizationreport"),
+        migrations.AlterModelTable("UrlReport", "map_urlreport"),
+        migrations.AlterModelTable("VulnerabilityStatistic", "map_vulnerabilitystatistic"),
     ]
 
     state_operations = [
-        migrations.DeleteModel('OrganizationReport'),
-        migrations.DeleteModel('UrlReport'),
-        migrations.DeleteModel('VulnerabilityStatistic'),
+        migrations.DeleteModel("OrganizationReport"),
+        migrations.DeleteModel("UrlReport"),
+        migrations.DeleteModel("VulnerabilityStatistic"),
     ]
 
     operations = [

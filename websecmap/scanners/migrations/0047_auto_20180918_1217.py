@@ -6,20 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0046_auto_20180918_1216'),
+        ("scanners", "0046_auto_20180918_1216"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpointgenericscan',
-            name='evidence',
-            field=models.TextField(blank=True, default=0,
-                                   help_text='Content that might help understanding the result.', max_length=9001),
+            model_name="endpointgenericscan",
+            name="evidence",
+            field=models.TextField(
+                blank=True, default=0, help_text="Content that might help understanding the result.", max_length=9001
+            ),
         ),
         migrations.AlterField(
-            model_name='urlgenericscan',
-            name='evidence',
-            field=models.TextField(blank=True, default=0,
-                                   help_text='Content that might help understanding the result.', max_length=9001),
+            model_name="urlgenericscan",
+            name="evidence",
+            field=models.TextField(
+                blank=True, default=0, help_text="Content that might help understanding the result.", max_length=9001
+            ),
         ),
     ]

@@ -7,12 +7,12 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ('pro', '0010_auto_20181220_1857'),
+        ("pro", "0010_auto_20181220_1857"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='SubdomainDataFeed',
-            new_name='UrlDataFeed',
+            old_name="SubdomainDataFeed",
+            new_name="UrlDataFeed",
         ),
     ]

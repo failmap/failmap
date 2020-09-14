@@ -9,68 +9,140 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0030_auto_20180403_1547'),
-        ('game', '0002_auto_20180404_1908'),
+        ("organizations", "0030_auto_20180403_1547"),
+        ("game", "0002_auto_20180404_1908"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='OrganizationSubmission',
+            name="OrganizationSubmission",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('organization_country', django_countries.fields.CountryField(max_length=2)),
-                ('organization_type_name', models.CharField(default='unknown',
-                                                            help_text='The contest the team is participating in.', max_length=42)),
-                ('organization_name', models.CharField(default='unknown',
-                                                       help_text='The contest the team is participating in.', max_length=42)),
-                ('organization_address', models.CharField(default='unknown',
-                                                          help_text='The address of the (main location) of the organization. This will be used for geocoding.', max_length=600)),
-                ('organization_address_geocoded', jsonfield.fields.JSONField(blank=True,
-                                                                             help_text='Automatic geocoded organization address.', max_length=5000, null=True)),
-                ('has_been_accepted', models.BooleanField(default=False,
-                                                          help_text='If the admin likes it, they can accept the submission to be part of the real system')),
-                ('added_on', models.DateTimeField(blank=True,
-                                                  help_text='Automatically filled when creating a new submission.', null=True)),
-                ('added_by_team', models.ForeignKey(blank=True, null=True,
-                                                    on_delete=django.db.models.deletion.CASCADE, to='game.Team')),
-                ('organisation_in_system', models.ForeignKey(blank=True, help_text='This reference will be used to calculate the score and to track imports.',
-                                                             null=True, on_delete=django.db.models.deletion.CASCADE, to='organizations.Organization')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("organization_country", django_countries.fields.CountryField(max_length=2)),
+                (
+                    "organization_type_name",
+                    models.CharField(
+                        default="unknown", help_text="The contest the team is participating in.", max_length=42
+                    ),
+                ),
+                (
+                    "organization_name",
+                    models.CharField(
+                        default="unknown", help_text="The contest the team is participating in.", max_length=42
+                    ),
+                ),
+                (
+                    "organization_address",
+                    models.CharField(
+                        default="unknown",
+                        help_text="The address of the (main location) of the organization. This will be used for geocoding.",
+                        max_length=600,
+                    ),
+                ),
+                (
+                    "organization_address_geocoded",
+                    jsonfield.fields.JSONField(
+                        blank=True, help_text="Automatic geocoded organization address.", max_length=5000, null=True
+                    ),
+                ),
+                (
+                    "has_been_accepted",
+                    models.BooleanField(
+                        default=False,
+                        help_text="If the admin likes it, they can accept the submission to be part of the real system",
+                    ),
+                ),
+                (
+                    "added_on",
+                    models.DateTimeField(
+                        blank=True, help_text="Automatically filled when creating a new submission.", null=True
+                    ),
+                ),
+                (
+                    "added_by_team",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="game.Team"
+                    ),
+                ),
+                (
+                    "organisation_in_system",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="This reference will be used to calculate the score and to track imports.",
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="organizations.Organization",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'organisation submission',
-                'verbose_name_plural': 'organisation submissions',
+                "verbose_name": "organisation submission",
+                "verbose_name_plural": "organisation submissions",
             },
         ),
         migrations.CreateModel(
-            name='UrlSubmission',
+            name="UrlSubmission",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.CharField(help_text='The URL the team has submitted, for review before acceptance.', max_length=500)),
-                ('has_been_accepted', models.BooleanField(default=False,
-                                                          help_text='If the admin likes it, they can accept the submission to be part of the real system')),
-                ('added_on', models.DateTimeField(blank=True,
-                                                  help_text='Automatically filled when creating a new submission.', null=True)),
-                ('added_by_team', models.ForeignKey(blank=True, null=True,
-                                                    on_delete=django.db.models.deletion.CASCADE, to='game.Team')),
-                ('for_organization', models.ForeignKey(blank=True, null=True,
-                                                       on_delete=django.db.models.deletion.CASCADE, to='organizations.Organization')),
-                ('url_in_system', models.ForeignKey(blank=True, help_text='This reference will be used to calculate the score and to track imports.',
-                                                    null=True, on_delete=django.db.models.deletion.CASCADE, to='organizations.Url')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "url",
+                    models.CharField(
+                        help_text="The URL the team has submitted, for review before acceptance.", max_length=500
+                    ),
+                ),
+                (
+                    "has_been_accepted",
+                    models.BooleanField(
+                        default=False,
+                        help_text="If the admin likes it, they can accept the submission to be part of the real system",
+                    ),
+                ),
+                (
+                    "added_on",
+                    models.DateTimeField(
+                        blank=True, help_text="Automatically filled when creating a new submission.", null=True
+                    ),
+                ),
+                (
+                    "added_by_team",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="game.Team"
+                    ),
+                ),
+                (
+                    "for_organization",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="organizations.Organization",
+                    ),
+                ),
+                (
+                    "url_in_system",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="This reference will be used to calculate the score and to track imports.",
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="organizations.Url",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'url submission',
-                'verbose_name_plural': 'url submissions',
+                "verbose_name": "url submission",
+                "verbose_name_plural": "url submissions",
             },
         ),
         migrations.RemoveField(
-            model_name='submission',
-            name='added_by_team',
+            model_name="submission",
+            name="added_by_team",
         ),
         migrations.RemoveField(
-            model_name='submission',
-            name='url_in_system',
+            model_name="submission",
+            name="url_in_system",
         ),
         migrations.DeleteModel(
-            name='Submission',
+            name="Submission",
         ),
     ]

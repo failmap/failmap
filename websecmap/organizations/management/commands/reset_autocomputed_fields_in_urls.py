@@ -8,7 +8,7 @@ log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
-    help = 'Re-calculates autocomputed properties in urls, use to intialize the'
+    help = "Re-calculates autocomputed properties in urls, use to intialize the"
 
     def handle(self, *args, **options):
         urls = Url.objects.all()

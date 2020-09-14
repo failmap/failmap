@@ -8,19 +8,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0012_auto_20170913_1224'),
+        ("scanners", "0012_auto_20170913_1224"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpoint',
-            name='server_name',
-            field=models.CharField(
-                blank=True, help_text='rdns, gift from the scan, deprecated', max_length=255),
+            model_name="endpoint",
+            name="server_name",
+            field=models.CharField(blank=True, help_text="rdns, gift from the scan, deprecated", max_length=255),
         ),
         migrations.AlterField(
-            model_name='tlsqualysscan',
-            name='pending_since',
+            model_name="tlsqualysscan",
+            name="pending_since",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

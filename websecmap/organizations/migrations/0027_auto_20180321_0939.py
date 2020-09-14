@@ -7,20 +7,25 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0026_auto_20180320_1538'),
+        ("organizations", "0026_auto_20180320_1538"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='coordinate',
-            name='edit_area',
+            model_name="coordinate",
+            name="edit_area",
             field=jsonfield.fields.JSONField(
-                help_text="The results of this field are saved in the area and geojsontype. It's possible to edit the area field directly, which overwrites this field. Changing both the manual option takes preference.", max_length=10000, null=True),
+                help_text="The results of this field are saved in the area and geojsontype. It's possible to edit the area field directly, which overwrites this field. Changing both the manual option takes preference.",
+                max_length=10000,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='coordinate',
-            name='area',
+            model_name="coordinate",
+            name="area",
             field=jsonfield.fields.JSONField(
-                help_text='GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to reduce the amount of data to transfer. Editing both this and the edit_area, this will take preference.', max_length=10000),
+                help_text="GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to reduce the amount of data to transfer. Editing both this and the edit_area, this will take preference.",
+                max_length=10000,
+            ),
         ),
     ]

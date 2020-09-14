@@ -7,13 +7,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0004_auto_20171109_2243'),
+        ("app", "0004_auto_20171109_2243"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='job',
-            name='result',
-            field=jsonfield.fields.JSONField(help_text='output of the task as JSON'),
+            model_name="job",
+            name="result",
+            field=jsonfield.fields.JSONField(help_text="output of the task as JSON"),
         ),
     ]

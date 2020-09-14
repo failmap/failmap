@@ -43,12 +43,12 @@ def constance_cached_value(key):
     expired = now - 600  # 10 minute cache, 600 seconds. So changes still affect a rebuild.
 
     if constance_cache.get(key, None):
-        if constance_cache[key]['time'] > expired:
-            return constance_cache[key]['value']
+        if constance_cache[key]["time"] > expired:
+            return constance_cache[key]["value"]
 
     # add value to cache, or update cache
     value = getattr(config, key)
-    constance_cache[key] = {'value': value, 'time': datetime.now(pytz.utc).timestamp()}
+    constance_cache[key] = {"value": value, "time": datetime.now(pytz.utc).timestamp()}
     return value
 
 
@@ -56,8 +56,9 @@ def validate_constance_configuration(CONSTANCE_CONFIG, CONSTANCE_CONFIG_FIELDSET
     # Check for constance configuration issues:
     # All Fields defined above must be in the fieldsets.
     # See also: https://github.com/jazzband/django-constance/issues/293
-    variables_in_fieldsets = [i for sub in [CONSTANCE_CONFIG_FIELDSETS[x] for x in CONSTANCE_CONFIG_FIELDSETS] for i in
-                              sub]
+    variables_in_fieldsets = [
+        i for sub in [CONSTANCE_CONFIG_FIELDSETS[x] for x in CONSTANCE_CONFIG_FIELDSETS] for i in sub
+    ]
     variables_in_config = [x for x in CONSTANCE_CONFIG]
     missing = set(variables_in_config) - set(variables_in_fieldsets)
     if missing:

@@ -14,8 +14,8 @@ def test_periodic_tasks(db):
     tasks are discarded. The goal is to confirm that there are no incorrectly configured periodic tasks.
     """
 
-    verify_periodic_tasks_from_fixture('periodic_tasks.json')
-    verify_periodic_tasks_from_fixture('development_periodic_tasks.json')
+    verify_periodic_tasks_from_fixture("periodic_tasks.json")
+    verify_periodic_tasks_from_fixture("development_periodic_tasks.json")
 
 
 def verify_periodic_tasks_from_fixture(fixture):
@@ -26,11 +26,11 @@ def verify_periodic_tasks_from_fixture(fixture):
     for periodic_task in periodic_tasks:
 
         # only test websecmap modules.
-        if not periodic_task.task.startswith('websecmap'):
+        if not periodic_task.task.startswith("websecmap"):
             continue
 
-        module_name = periodic_task.task[0:periodic_task.task.rfind('.')]
-        method = periodic_task.task.split('.')[-1]
+        module_name = periodic_task.task[0 : periodic_task.task.rfind(".")]
+        method = periodic_task.task.split(".")[-1]
 
         loaded = True
         has_method = False
@@ -46,10 +46,11 @@ def verify_periodic_tasks_from_fixture(fixture):
         assert has_method is True
         assert loaded is True
 
-        if periodic_task.task in ['websecmap.app.models.create_planned_discover_job',
-                                  'websecmap.app.models.create_planned_verify_job',
-                                  'websecmap.app.models.create_planned_scan_job',
-                                  ]:
+        if periodic_task.task in [
+            "websecmap.app.models.create_planned_discover_job",
+            "websecmap.app.models.create_planned_verify_job",
+            "websecmap.app.models.create_planned_scan_job",
+        ]:
 
             # also validate that the argument exists.
             args = json.loads(periodic_task.args)
@@ -64,14 +65,14 @@ def verify_periodic_tasks_from_fixture(fixture):
             assert args[0] == args[0] and loaded is True
 
             # specific types of tasks require specific methods to be present.
-            if args[0] == 'websecmap.app.models.create_planned_verify_job':
-                has_method = hasattr(module, 'create_planned_verify_task')
+            if args[0] == "websecmap.app.models.create_planned_verify_job":
+                has_method = hasattr(module, "create_planned_verify_task")
                 assert args[0] == args[0] and has_method is True
 
-            if args[0] == 'websecmap.app.models.create_planned_discover_job':
-                has_method = hasattr(module, 'compose_planned_discover_task')
+            if args[0] == "websecmap.app.models.create_planned_discover_job":
+                has_method = hasattr(module, "compose_planned_discover_task")
                 assert args[0] == args[0] and has_method is True
 
-            if args[0] == 'websecmap.app.models.create_planned_scan_job':
-                has_method = hasattr(module, 'compose_planned_scan_task')
+            if args[0] == "websecmap.app.models.create_planned_scan_job":
+                has_method = hasattr(module, "compose_planned_scan_task")
                 assert args[0] == args[0] and has_method is True

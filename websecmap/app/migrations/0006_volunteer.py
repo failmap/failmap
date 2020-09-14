@@ -9,18 +9,21 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('app', '0005_auto_20180321_0939'),
+        ("app", "0005_auto_20180321_0939"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Volunteer',
+            name="Volunteer",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('organization', models.CharField(max_length=200)),
-                ('added_by', models.CharField(max_length=200)),
-                ('notes', models.CharField(max_length=2048)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("organization", models.CharField(max_length=200)),
+                ("added_by", models.CharField(max_length=200)),
+                ("notes", models.CharField(max_length=2048)),
+                (
+                    "user",
+                    models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+                ),
             ],
         ),
     ]

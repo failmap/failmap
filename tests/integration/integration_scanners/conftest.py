@@ -16,26 +16,27 @@ TIMEOUT = 30
 def faaloniae():
     """Load test organization fixtures."""
 
-    subprocess.call(['websecmap', 'migrate'])
-    subprocess.call(['websecmap', 'load_dataset', 'faalonie'])
+    subprocess.call(["websecmap", "migrate"])
+    subprocess.call(["websecmap", "load_dataset", "faalonie"])
 
 
-@pytest.fixture(scope='session', params=['prefork', 'eventlet'])
+@pytest.fixture(scope="session", params=["prefork", "eventlet"])
 def worker(request):
     """Run a task worker instance."""
 
     pool = request.param
 
-    worker_command = ['websecmap', 'celery', 'worker', '-l', 'info', '--pool', pool]
-    worker_env = dict(os.environ, WORKER_ROLE='default_ipv4')
-    worker_process = subprocess.Popen(worker_command,
-                                      stdout=sys.stdout.buffer, stderr=sys.stderr.buffer,
-                                      preexec_fn=os.setsid, env=worker_env)
+    worker_command = ["websecmap", "celery", "worker", "-l", "info", "--pool", pool]
+    worker_env = dict(os.environ, WORKER_ROLE="default_ipv4")
+    worker_process = subprocess.Popen(
+        worker_command, stdout=sys.stdout.buffer, stderr=sys.stderr.buffer, preexec_fn=os.setsid, env=worker_env
+    )
     # wrap assert in try/finally to kill worker on failing assert, wrap yield as well for cleaner code
     try:
         # wait for worker to start accepting tasks before turning to test function
-        assert waitsome.apply_async([0], expires=TIMEOUT).get(timeout=TIMEOUT), \
-            "Worker failed to become ready and execute test task."
+        assert waitsome.apply_async([0], expires=TIMEOUT).get(
+            timeout=TIMEOUT
+        ), "Worker failed to become ready and execute test task."
         # give worker stderr time to output into 'Captured stderr setup' and not spill over into 'Captured stderr call'
         time.sleep(0.1)
         yield worker_process

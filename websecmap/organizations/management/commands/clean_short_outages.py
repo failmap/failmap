@@ -32,6 +32,7 @@ class Command(BaseCommand):
     todo: support days parameter.
 
     """
+
     help = __doc__
 
     def handle(self, *args, **options):
@@ -61,20 +62,26 @@ def merge_endpoints_that_recently_died():
             # dead on january 14. Means that identical endpoints < january 21 are actually the same.
             the_timespan = dead_endpoint.is_dead_since + datetime.timedelta(days=7)
 
-            identical_endpoints = Endpoint.objects.all().filter(
-                url=url,
-                ip_version=dead_endpoint.ip_version,
-                port=dead_endpoint.port,
-                protocol=dead_endpoint.protocol,
-                discovered_on__gte=dead_endpoint.is_dead_since,  # it's newer
-                discovered_on__lte=the_timespan,  # but not too new
-            ).order_by("discovered_on")
+            identical_endpoints = (
+                Endpoint.objects.all()
+                .filter(
+                    url=url,
+                    ip_version=dead_endpoint.ip_version,
+                    port=dead_endpoint.port,
+                    protocol=dead_endpoint.protocol,
+                    discovered_on__gte=dead_endpoint.is_dead_since,  # it's newer
+                    discovered_on__lte=the_timespan,  # but not too new
+                )
+                .order_by("discovered_on")
+            )
 
             if not identical_endpoints:
                 continue
 
-            log.info("Found identical endpoints for %s. (created: %s, died: %s)" % (
-                dead_endpoint, dead_endpoint.discovered_on, dead_endpoint.is_dead_since))
+            log.info(
+                "Found identical endpoints for %s. (created: %s, died: %s)"
+                % (dead_endpoint, dead_endpoint.discovered_on, dead_endpoint.is_dead_since)
+            )
             for ep in identical_endpoints:
                 log.info("Identical: %s (created: %s, died: %s)" % (ep, ep.discovered_on, ep.is_dead_since))
 

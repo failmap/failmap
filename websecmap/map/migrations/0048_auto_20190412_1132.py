@@ -6,37 +6,40 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0047_auto_20190401_1358'),
+        ("map", "0047_auto_20190401_1358"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='organizationreport',
-            options={'get_latest_by': 'at_when', 'verbose_name': 'Organization Report',
-                     'verbose_name_plural': 'Organization Reports'},
+            name="organizationreport",
+            options={
+                "get_latest_by": "at_when",
+                "verbose_name": "Organization Report",
+                "verbose_name_plural": "Organization Reports",
+            },
         ),
         migrations.RenameField(
-            model_name='highlevelstatistic',
-            old_name='when',
-            new_name='at_when',
+            model_name="highlevelstatistic",
+            old_name="when",
+            new_name="at_when",
         ),
         migrations.RenameField(
-            model_name='mapdatacache',
-            old_name='when',
-            new_name='at_when',
+            model_name="mapdatacache",
+            old_name="when",
+            new_name="at_when",
         ),
         migrations.RenameField(
-            model_name='organizationreport',
-            old_name='when',
-            new_name='at_when',
+            model_name="organizationreport",
+            old_name="when",
+            new_name="at_when",
         ),
         migrations.RenameField(
-            model_name='vulnerabilitystatistic',
-            old_name='when',
-            new_name='at_when',
+            model_name="vulnerabilitystatistic",
+            old_name="when",
+            new_name="at_when",
         ),
         migrations.AlterIndexTogether(
-            name='organizationreport',
-            index_together={('at_when', 'id')},
+            name="organizationreport",
+            index_together={("at_when", "id")},
         ),
     ]

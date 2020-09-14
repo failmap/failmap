@@ -6,14 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0016_auto_20181203_1053'),
+        ("game", "0016_auto_20181203_1053"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='contest',
-            name='url_organization_discovery_help',
+            model_name="contest",
+            name="url_organization_discovery_help",
             field=models.TextField(
-                default='', help_text='HTML: information where contestants can find good sources of urls / organizations. Displayed on both the URL and Organization adding forms.', max_length=1024),
+                default="",
+                help_text="HTML: information where contestants can find good sources of urls / organizations. Displayed on both the URL and Organization adding forms.",
+                max_length=1024,
+            ),
         ),
     ]

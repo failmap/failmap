@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0034_url_onboarding_stage'),
+        ("organizations", "0034_url_onboarding_stage"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='url',
-            name='onboarding_stage',
-            field=models.CharField(blank=True, help_text='Because of complexity of onboarding, not working with Celery properly, onboarding is done in multiple steps. The last completed step is saved in this value. Empty: nothing. endpoints: endpoints have been found. completed: onboarding is done, also onboarded flag is set.', max_length=150, null=True),
+            model_name="url",
+            name="onboarding_stage",
+            field=models.CharField(
+                blank=True,
+                help_text="Because of complexity of onboarding, not working with Celery properly, onboarding is done in multiple steps. The last completed step is saved in this value. Empty: nothing. endpoints: endpoints have been found. completed: onboarding is done, also onboarded flag is set.",
+                max_length=150,
+                null=True,
+            ),
         ),
     ]

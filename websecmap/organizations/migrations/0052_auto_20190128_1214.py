@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0051_auto_20190128_1205'),
+        ("organizations", "0051_auto_20190128_1205"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='organizationtype',
-            options={'managed': True, 'verbose_name': 'layer', 'verbose_name_plural': 'layers'},
+            name="organizationtype",
+            options={"managed": True, "verbose_name": "layer", "verbose_name_plural": "layers"},
         ),
         migrations.AlterField(
-            model_name='organizationtype',
-            name='name',
-            field=models.CharField(max_length=255, verbose_name='layer'),
+            model_name="organizationtype",
+            name="name",
+            field=models.CharField(max_length=255, verbose_name="layer"),
         ),
     ]

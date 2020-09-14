@@ -20,9 +20,10 @@ def triage_identical():
     organizations = Organization.objects.all().filter(country="NL", type__name="government")
     urls = {}
     for organization in organizations:
-        urls[organization.pk] = set(Url.objects.all().filter(
-            organization=organization, is_dead=False, not_resolvable=False, computed_subdomain=""
-        ).exclude(url="rijksoverheid.nl")
+        urls[organization.pk] = set(
+            Url.objects.all()
+            .filter(organization=organization, is_dead=False, not_resolvable=False, computed_subdomain="")
+            .exclude(url="rijksoverheid.nl")
         )
     # gather all duplicates
     for organization in organizations:

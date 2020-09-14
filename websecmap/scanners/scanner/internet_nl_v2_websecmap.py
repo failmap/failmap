@@ -20,29 +20,37 @@ from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, InternetNLV2Scan, InternetNLV2StateLog
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.internet_nl_v2 import (InternetNLApiSettings, register, result,
-                                                       status)
+from websecmap.scanners.scanner.internet_nl_v2 import InternetNLApiSettings, register, result, status
 
 log = logging.getLogger(__name__)
 
 
 def valid_api_settings(scan: InternetNLV2Scan):
     if not config.INTERNET_NL_API_USERNAME:
-        update_state(scan, "configuration_error",
-                     "Username for internet.nl scan not configured. "
-                     "This setting can be configured in the settings on the admin page.")
+        update_state(
+            scan,
+            "configuration_error",
+            "Username for internet.nl scan not configured. "
+            "This setting can be configured in the settings on the admin page.",
+        )
         return False
 
     if not config.INTERNET_NL_API_PASSWORD:
-        update_state(scan, "configuration_error",
-                     "Password for internet.nl scan not configured. "
-                     "This setting can be configured in the settings on the admin page.")
+        update_state(
+            scan,
+            "configuration_error",
+            "Password for internet.nl scan not configured. "
+            "This setting can be configured in the settings on the admin page.",
+        )
         return False
 
     if not config.INTERNET_NL_API_URL:
-        update_state(scan, "configuration_error",
-                     "No url supplied for internet.nl scans. "
-                     "This setting can be configured in the settings on the admin page.")
+        update_state(
+            scan,
+            "configuration_error",
+            "No url supplied for internet.nl scans. "
+            "This setting can be configured in the settings on the admin page.",
+        )
         return False
 
     # validate the url itself:
@@ -52,17 +60,22 @@ def valid_api_settings(scan: InternetNLV2Scan):
         try:
             ipaddress.ip_address(extract.domain)
         except ValueError:
-            update_state(scan, "configuration_error",
-                         "The internet.nl api url is not a valid url or IP format. Always start with "
-                         "https:// and then the address. "
-                         "This setting can be configured in the settings on the admin page.")
+            update_state(
+                scan,
+                "configuration_error",
+                "The internet.nl api url is not a valid url or IP format. Always start with "
+                "https:// and then the address. "
+                "This setting can be configured in the settings on the admin page.",
+            )
             return False
 
     if not config.INTERNET_NL_MAXIMUM_URLS:
-        update_state(scan,
-                     "configuration_error",
-                     "No maximum supplied for the amount of urls in an internet.nl scans. "
-                     "This setting can be configured in the settings on the admin page.")
+        update_state(
+            scan,
+            "configuration_error",
+            "No maximum supplied for the amount of urls in an internet.nl scans. "
+            "This setting can be configured in the settings on the admin page.",
+        )
         return False
 
     return True
@@ -90,9 +103,12 @@ def initialize_scan(scan_type: str, domains: List[Url]):
 
     max_urls = config.INTERNET_NL_MAXIMUM_URLS
     if len(domains) > max_urls:
-        update_state(scan, "configuration_error",
-                     f"Too many domains: {len(domains)} is more than {max_urls}. Not registering. Try "
-                     f"again with fewer domains or change the maximum accordingly.")
+        update_state(
+            scan,
+            "configuration_error",
+            f"Too many domains: {len(domains)} is more than {max_urls}. Not registering. Try "
+            f"again with fewer domains or change the maximum accordingly.",
+        )
         return scan
 
     # many to many requires an object to exist.
@@ -103,16 +119,16 @@ def initialize_scan(scan_type: str, domains: List[Url]):
     return scan
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def check_running_internet_nl_scans() -> Task:
-    scans = InternetNLV2Scan.objects.all().exclude(state__in=['finished', 'error', 'cancelled'])
+    scans = InternetNLV2Scan.objects.all().exclude(state__in=["finished", "error", "cancelled"])
     log.debug(f"Checking the state of scan {scans}.")
     tasks = [progress_running_scan(scan) for scan in scans]
 
     return group(tasks)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def progress_running_scan(scan: InternetNLV2Scan) -> Task:
     """
     This monitors the state of an internet.nl scan. Depending on the state, it determines if an action is needed and
@@ -155,17 +171,16 @@ def progress_running_scan(scan: InternetNLV2Scan) -> Task:
 
     steps = {
         # complete state progression, using active verbs to come to the next state:
-        "requested":  registering_scan_at_internet_nl,
+        "requested": registering_scan_at_internet_nl,
         "registered": running_scan,
         "running scan": continue_running_scan,
         "scan results ready": storing_scan_results,
         "scan results stored": processing_scan_results,
         # "finished"
-
         # recovery steps in case of (network) errors
         "network_error": recover_and_retry,
         "configuration_error": recover_and_retry,
-        "timeout": recover_and_retry
+        "timeout": recover_and_retry,
     }
 
     with transaction.atomic():
@@ -182,7 +197,7 @@ def progress_running_scan(scan: InternetNLV2Scan) -> Task:
 def recover_and_retry(scan: InternetNLV2Scan):
     # check the latest valid state from progress running scan, set the state to that state.
 
-    valid_states = ['requested', 'registered', 'running scan', 'scan results ready', 'scan results stored']
+    valid_states = ["requested", "registered", "running scan", "scan results ready", "scan results stored"]
     error_states = ["network_error", "configuration_error", "timeout"]
 
     if scan.state in valid_states:
@@ -190,7 +205,7 @@ def recover_and_retry(scan: InternetNLV2Scan):
         return group([])
 
     # get the latest valid state from the scan log:
-    latest_valid = InternetNLV2StateLog.objects.all().filter(scan=scan, state__in=valid_states).order_by('-id').first()
+    latest_valid = InternetNLV2StateLog.objects.all().filter(scan=scan, state__in=valid_states).order_by("-id").first()
 
     log.debug(f"Internet.nl scan #{scan.id} is rolled back to retry from '{scan.state}' to '{latest_valid.state}'.")
 
@@ -208,9 +223,9 @@ def handle_unknown_state(scan):
     # we can however deal with timeouts. If an unknown state is over a certain time, the task should be tried again.
 
     timeouts = {
-        'registering': 3600 * 24,  # 24 hours
-        'storing scan results': 3600 * 24,
-        'processing scan results': 3600 * 24
+        "registering": 3600 * 24,  # 24 hours
+        "storing scan results": 3600 * 24,
+        "processing scan results": 3600 * 24,
     }
 
     # not the state check, but the moment the state was created...
@@ -226,27 +241,16 @@ def registering_scan_at_internet_nl(scan: InternetNLV2Scan):
 
     # todo: get some information about this installation, so we can track requests easier.
     #  For example the target county, organization running the scan.
-    scan_name = {
-        'source': 'Web Security Map',
-        'type': scan.type
-    }
+    scan_name = {"source": "Web Security Map", "type": scan.type}
 
-    scan_types = {
-        'mail': 'mail',
-        'mail_dashboard': 'mail',
-        'web': 'web'
-    }
+    scan_types = {"mail": "mail", "mail_dashboard": "mail", "web": "web"}
 
     if not valid_api_settings(scan):
         return group([])
 
     return (
         get_relevant_urls.si(scan)
-        | register.s(
-            scan_types[scan.type],
-            json.dumps(scan_name),
-            create_api_settings(scan)
-        )
+        | register.s(scan_types[scan.type], json.dumps(scan_name), create_api_settings(scan))
         | registration_administration.s(scan)
     )
 
@@ -257,8 +261,7 @@ def running_scan(scan: InternetNLV2Scan):
     if not valid_api_settings(scan):
         return group([])
 
-    return (status.si(scan.scan_id, create_api_settings(scan))
-            | status_administration.s(scan))
+    return status.si(scan.scan_id, create_api_settings(scan)) | status_administration.s(scan)
 
 
 def continue_running_scan(scan: InternetNLV2Scan):
@@ -266,8 +269,7 @@ def continue_running_scan(scan: InternetNLV2Scan):
     if not valid_api_settings(scan):
         return group([])
 
-    return (status.si(scan.scan_id, create_api_settings(scan))
-            | status_administration.s(scan))
+    return status.si(scan.scan_id, create_api_settings(scan)) | status_administration.s(scan)
 
 
 def storing_scan_results(scan: InternetNLV2Scan):
@@ -276,8 +278,7 @@ def storing_scan_results(scan: InternetNLV2Scan):
     if not valid_api_settings(scan):
         return group([])
 
-    return (result.si(scan.scan_id, create_api_settings(scan))
-            | result_administration.s(scan))
+    return result.si(scan.scan_id, create_api_settings(scan)) | result_administration.s(scan)
 
 
 def processing_scan_results(scan: InternetNLV2Scan):
@@ -326,7 +327,7 @@ def api_has_usable_response(response, scan):
 
     if status_code == 599:
         # using the log the previous actionable state can be retrieved as a recovery strategy.
-        update_state(scan, "network_error", response_content['error']['label'])
+        update_state(scan, "network_error", response_content["error"]["label"])
         return False
 
     if status_code == 500:
@@ -351,9 +352,10 @@ def api_has_usable_response(response, scan):
 #
 ########################################################################################################################
 
+
 @app.task(queue="storage")
 def get_relevant_urls(scan: InternetNLV2Scan) -> List[str]:
-    return list(scan.subject_urls.all().values_list('url', flat=True))
+    return list(scan.subject_urls.all().values_list("url", flat=True))
 
 
 @app.task(queue="storage")
@@ -385,8 +387,8 @@ def registration_administration(response: Tuple[int, dict], scan: InternetNLV2Sc
     status_code, response_content = response
 
     # todo: duplicated "request" in "request".
-    scan.scan_id = response_content['request']['request_id']
-    scan.metadata = response_content['request']
+    scan.scan_id = response_content["request"]["request_id"]
+    scan.metadata = response_content["request"]
 
     # do not update the scan type. The internet.nl scan types are only web and mail, while websecmap and others
     # can use all kinds of tests.
@@ -422,32 +424,32 @@ def status_administration(response: Tuple[int, dict], scan: InternetNLV2Scan):
 
     status_code, response_content = response
 
-    if response_content['request']['status'] == 'registering':
+    if response_content["request"]["status"] == "registering":
         # follow scan progression at internet.nl, update the status message with that information.
-        update_state(scan, "running scan", response_content['request']['status'])
+        update_state(scan, "running scan", response_content["request"]["status"])
         return
 
-    if response_content['request']['status'] == 'running':
+    if response_content["request"]["status"] == "running":
         # follow scan progression at internet.nl, update the status message with that information.
-        update_state(scan, "running scan", response_content['request']['status'])
+        update_state(scan, "running scan", response_content["request"]["status"])
         return
 
-    if response_content['request']['status'] == 'generating':
+    if response_content["request"]["status"] == "generating":
         # follow scan progression at internet.nl, update the status message with that information.
-        update_state(scan, "running scan", response_content['request']['status'])
+        update_state(scan, "running scan", response_content["request"]["status"])
         return
 
-    if response_content['request']['status'] == 'done':
-        update_state(scan, "scan results ready", response_content['request']['status'])
+    if response_content["request"]["status"] == "done":
+        update_state(scan, "scan results ready", response_content["request"]["status"])
         return
 
-    if response_content['request']['status'] == 'error':
-        update_state(scan, "error", response_content['request']['status'])
+    if response_content["request"]["status"] == "error":
+        update_state(scan, "error", response_content["request"]["status"])
         return
 
     # handle any other API result, that does not conform with the API spec. Update the state for debugging information.
     # the progress will most likely hang. Such as with cancelled.
-    update_state(scan, response_content['request']['status'], response_content['request']['status'])
+    update_state(scan, response_content["request"]["status"], response_content["request"]["status"])
 
 
 @app.task(queue="storage")
@@ -470,8 +472,8 @@ def result_administration(response: Tuple[int, dict], scan: InternetNLV2Scan):
 
     status_code, response_content = response
 
-    scan.metadata = response_content['request']
-    scan.retrieved_scan_report = response_content['domains']
+    scan.metadata = response_content["request"]
+    scan.retrieved_scan_report = response_content["domains"]
     scan.save()
 
     update_state(scan, "scan results stored", "")
@@ -481,13 +483,11 @@ def result_administration(response: Tuple[int, dict], scan: InternetNLV2Scan):
 def process_scan_results(scan: InternetNLV2Scan):
     scan_type_to_protocol = {
         # mail is used for web security map, it is a subset of mail servers that dedupes servers on cnames.
-        'mail': 'dns_mx_no_cname',
-
+        "mail": "dns_mx_no_cname",
         # dns soa are internet.nl dashboard scans that have a different requirement set for the mailserver endpoint
-        'mail_dashboard': 'dns_soa',
-
+        "mail_dashboard": "dns_soa",
         # web scans are only used by the internet.nl dashboard...
-        'web': 'dns_a_aaaa'
+        "web": "dns_a_aaaa",
     }
 
     domains = scan.retrieved_scan_report.keys()
@@ -498,7 +498,7 @@ def process_scan_results(scan: InternetNLV2Scan):
             domain=domain,
             scan_data=scan.retrieved_scan_report[domain],
             scan_type=scan.type,
-            endpoint_protocol=scan_type_to_protocol[scan.type]
+            endpoint_protocol=scan_type_to_protocol[scan.type],
         )
 
     update_state(scan, "scan results processed", "")
@@ -558,11 +558,11 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
     # edge cases that are in here by design: we always want to get data from a certain point in time, regardless
     # who started the scan.
     store_endpoint_scan_result(
-        scan_type=f'internet_nl_{scan_type}_overall_score',
+        scan_type=f"internet_nl_{scan_type}_overall_score",
         endpoint=endpoint,
-        rating=scan_data['scoring']['percentage'],
-        message=scan_data['report']['url'],
-        evidence=scan_data['report']['url']
+        rating=scan_data["scoring"]["percentage"],
+        message=scan_data["report"]["url"],
+        evidence=scan_data["report"]["url"],
     )
 
     api_v2_categories_to_v1_categories = {
@@ -572,7 +572,6 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
             "mail_auth": "auth",
             "mail_starttls": "tls",
         },
-
         # this is the same as mail, and a trivial way to write this fallback
         "mail_dashboard": {
             "mail_ipv6": "ipv6",
@@ -580,44 +579,42 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
             "mail_auth": "auth",
             "mail_starttls": "tls",
         },
-
         "web": {
             "web_ipv6": "ipv6",
             "web_dnssec": "dnssec",
             "web_https": "tls",
             "web_appsecpriv": "appsecpriv",
-        }
+        },
     }
 
     # categories (ie, derived from the test results)
     # no technical details here:
-    for category in scan_data['results']['categories'].keys():
+    for category in scan_data["results"]["categories"].keys():
 
         # to keep APIv2 field names in line with APIv1, so we don't have to rename fields and all reports stay valid.
-        scan_type_field = f'internet_nl_{scan_type}_{api_v2_categories_to_v1_categories[scan_type][category]}'
+        scan_type_field = f"internet_nl_{scan_type}_{api_v2_categories_to_v1_categories[scan_type][category]}"
 
         store_endpoint_scan_result(
             scan_type=scan_type_field,
             endpoint=endpoint,
-            rating=scan_data['results']['categories'][category]["status"],
+            rating=scan_data["results"]["categories"][category]["status"],
             message=json.dumps(
-                {'translation': scan_data['results']['categories'][category]["verdict"],
-                 'technical_details_hash': ''}
+                {"translation": scan_data["results"]["categories"][category]["verdict"], "technical_details_hash": ""}
             ),
-            evidence=scan_data['report']['url']
+            evidence=scan_data["report"]["url"],
         )
 
     # standard tests:
-    store_test_results(endpoint, scan_data['results']['tests'])
+    store_test_results(endpoint, scan_data["results"]["tests"])
 
     # prepare for calculated results
-    scan_data['results']['calculated_results'] = {}
+    scan_data["results"]["calculated_results"] = {}
     if scan_type == "web":
         scan_data = calculate_forum_standaardisatie_views_web(scan_data)
-    elif scan_type == 'mail_dashboard':
+    elif scan_type == "mail_dashboard":
         scan_data = calculate_forum_standaardisatie_views_mail(scan_data)
 
-    store_test_results(endpoint, scan_data['results']['calculated_results'])
+    store_test_results(endpoint, scan_data["results"]["calculated_results"])
 
 
 def store_test_results(endpoint, test_results):
@@ -627,7 +624,7 @@ def store_test_results(endpoint, test_results):
     for test_result_key in test_results_keys:
         test_result = test_results[test_result_key]
 
-        scan_type = f'internet_nl_{test_result_key}'
+        scan_type = f"internet_nl_{test_result_key}"
 
         # technical_details can change, and these changes should always be reflected in the data. In our model
         # only rating and message are treated as unique. The technical data is often very long and will not fit
@@ -637,35 +634,34 @@ def store_test_results(endpoint, test_results):
         # may 2020: technical details moved to their own endpoint. Will be relevant in a later
         # version, so all the rest of the stuff is kept.
         dumped_technical_details = ""
-        technical_details_hash = hashlib.md5(dumped_technical_details.encode('utf-8')).hexdigest()
+        technical_details_hash = hashlib.md5(dumped_technical_details.encode("utf-8")).hexdigest()
         store_endpoint_scan_result(
             scan_type=scan_type,
             endpoint=endpoint,
-            rating=test_result['status'],
+            rating=test_result["status"],
             message=json.dumps(
-                {'translation': test_result['verdict'],
-                 'technical_details_hash': technical_details_hash}
+                {"translation": test_result["verdict"], "technical_details_hash": technical_details_hash}
             ),
-            evidence=""
+            evidence="",
         )
 
 
 def add_calculation(scan_data, new_key: str, required_values: List[str]):
     lowest_value = lowest_value_in_results(scan_data, required_values)
 
-    scan_data['results']['calculated_results'][new_key] = {
-        'status': lowest_value,
-        'verdict': lowest_value,
-        'technical_details': [],
+    scan_data["results"]["calculated_results"][new_key] = {
+        "status": lowest_value,
+        "verdict": lowest_value,
+        "technical_details": [],
     }
 
 
 def add_instant_calculation(scan_data, key, value):
 
-    scan_data['results']['calculated_results'][key] = {
-        'status': value,
-        'verdict': value,
-        'technical_details': [],
+    scan_data["results"]["calculated_results"][key] = {
+        "status": value,
+        "verdict": value,
+        "technical_details": [],
     }
 
 
@@ -675,30 +671,30 @@ def add_instant_calculation(scan_data, key, value):
 def lowest_value_in_results(scan_data, test_names: List[str]) -> str:
 
     if not scan_data:
-        raise ValueError('No views provided. Something went wrong in the API response?')
+        raise ValueError("No views provided. Something went wrong in the API response?")
 
     if not test_names:
-        raise ValueError('No values provided. Would always result in True, which could be risky.')
+        raise ValueError("No values provided. Would always result in True, which could be risky.")
 
     severity_order = {
         # Failed is always the worst possible output. It overrules not tested etc.
         # as per: https://github.com/internetstandards/Internet.nl-dashboard/issues/184
-        'failed': -10,
-        'error_in_test': -8,
+        "failed": -10,
+        "error_in_test": -8,
         # error counts as error in test: error_in_test is never returned from the API.
-        'error': -8,
-        'warning': 2,
-        'info': 3,
-        'good_not_tested': 4,
-        'not_applicable': 8,
-        'not_tested': 9,
-        'passed': 10
+        "error": -8,
+        "warning": 2,
+        "info": 3,
+        "good_not_tested": 4,
+        "not_applicable": 8,
+        "not_tested": 9,
+        "passed": 10,
     }
 
     lowest_test_outcome = 10
     lowest_test_status = "passed"
     for test_name in test_names:
-        current_status = scan_data['results']['tests'][test_name]['status']
+        current_status = scan_data["results"]["tests"][test_name]["status"]
         # Never up the status with an unknown status. Those are ignored with the random high value of 9000.
         if severity_order.get(current_status, 9000) < lowest_test_outcome:
             lowest_test_outcome = severity_order[current_status]
@@ -710,68 +706,89 @@ def lowest_value_in_results(scan_data, test_names: List[str]) -> str:
 def calculate_forum_standaardisatie_views_web(scan_data):
     # These values are published in the forum standaardisatie magazine.
 
-    custom_api_field_results = scan_data['results']['custom']
+    custom_api_field_results = scan_data["results"]["custom"]
 
     # DNSSEC
-    add_calculation(scan_data=scan_data, new_key='web_legacy_dnssec',
-                    required_values=['web_dnssec_exist', 'web_dnssec_valid'])
+    add_calculation(
+        scan_data=scan_data, new_key="web_legacy_dnssec", required_values=["web_dnssec_exist", "web_dnssec_valid"]
+    )
 
     # TLS
-    add_calculation(scan_data=scan_data, new_key='web_legacy_tls_available',
-                    required_values=['web_https_http_available'])
+    add_calculation(
+        scan_data=scan_data, new_key="web_legacy_tls_available", required_values=["web_https_http_available"]
+    )
 
     # TLS_NCSC
     # v2: web_https_tls_* 10 and web_https_cert_* 4, not including: web_https_http_available
     add_calculation(
         scan_data=scan_data,
-        new_key='web_legacy_tls_ncsc_web',
-        required_values=['web_https_tls_keyexchange', 'web_https_tls_compress', 'web_https_tls_secreneg',
-                         'web_https_tls_ciphers', 'web_https_tls_clientreneg', 'web_https_tls_version',
-                         'web_https_tls_cipherorder', 'web_https_tls_0rtt', 'web_https_tls_ocsp',
-                         'web_https_tls_keyexchangehash',
-                         'web_https_cert_sig', 'web_https_cert_pubkey', 'web_https_cert_chain',
-                         'web_https_cert_domain'])
+        new_key="web_legacy_tls_ncsc_web",
+        required_values=[
+            "web_https_tls_keyexchange",
+            "web_https_tls_compress",
+            "web_https_tls_secreneg",
+            "web_https_tls_ciphers",
+            "web_https_tls_clientreneg",
+            "web_https_tls_version",
+            "web_https_tls_cipherorder",
+            "web_https_tls_0rtt",
+            "web_https_tls_ocsp",
+            "web_https_tls_keyexchangehash",
+            "web_https_cert_sig",
+            "web_https_cert_pubkey",
+            "web_https_cert_chain",
+            "web_https_cert_domain",
+        ],
+    )
 
     # HTTPS
-    add_calculation(scan_data=scan_data, new_key='web_legacy_https_enforced',
-                    required_values=['web_https_http_redirect'])
+    add_calculation(
+        scan_data=scan_data, new_key="web_legacy_https_enforced", required_values=["web_https_http_redirect"]
+    )
 
     # HSTS
-    add_calculation(scan_data=scan_data, new_key='web_legacy_hsts',
-                    required_values=['web_https_http_hsts'])
+    add_calculation(scan_data=scan_data, new_key="web_legacy_hsts", required_values=["web_https_http_hsts"])
 
     # Not in forum standaardisatie magazine, but used internally
-    add_calculation(scan_data=scan_data, new_key='web_legacy_ipv6_nameserver',
-                    required_values=['web_ipv6_ns_address', 'web_ipv6_ns_reach'])
+    add_calculation(
+        scan_data=scan_data,
+        new_key="web_legacy_ipv6_nameserver",
+        required_values=["web_ipv6_ns_address", "web_ipv6_ns_reach"],
+    )
 
     # Not in forum standaardisatie magazine, but used internally
-    add_calculation(scan_data=scan_data, new_key='web_legacy_ipv6_webserver',
-                    required_values=['web_ipv6_ws_address', 'web_ipv6_ws_reach', 'web_ipv6_ws_similar'])
+    add_calculation(
+        scan_data=scan_data,
+        new_key="web_legacy_ipv6_webserver",
+        required_values=["web_ipv6_ws_address", "web_ipv6_ws_reach", "web_ipv6_ws_similar"],
+    )
 
     # Not in forum standaardisatie magazine, but used internally
     # This is not displayed and can be removed since 2020.
-    add_calculation(scan_data=scan_data, new_key='web_legacy_dane',
-                    required_values=['web_https_dane_exist', 'web_https_dane_valid'])
+    add_calculation(
+        scan_data=scan_data, new_key="web_legacy_dane", required_values=["web_https_dane_exist", "web_https_dane_valid"]
+    )
 
     # TLS 1.3, added in v2
     # todo: add new field to report
-    if custom_api_field_results['tls_1_3_support'] == "yes":
-        add_instant_calculation(scan_data, 'web_legacy_tls_1_3', "passed")
-    elif custom_api_field_results['tls_1_3_support'] == "no":
-        add_instant_calculation(scan_data, 'web_legacy_tls_1_3', "failed")
-    elif custom_api_field_results['tls_1_3_support'] == "undetermined":
-        add_instant_calculation(scan_data, 'web_legacy_tls_1_3', "not_testable")
+    if custom_api_field_results["tls_1_3_support"] == "yes":
+        add_instant_calculation(scan_data, "web_legacy_tls_1_3", "passed")
+    elif custom_api_field_results["tls_1_3_support"] == "no":
+        add_instant_calculation(scan_data, "web_legacy_tls_1_3", "failed")
+    elif custom_api_field_results["tls_1_3_support"] == "undetermined":
+        add_instant_calculation(scan_data, "web_legacy_tls_1_3", "not_testable")
 
     # add custom field for the ipv6 test, so this can be labelled individually
-    add_instant_calculation(scan_data, "web_legacy_category_ipv6",
-                            scan_data['results']['categories']['web_ipv6']['status'])
+    add_instant_calculation(
+        scan_data, "web_legacy_category_ipv6", scan_data["results"]["categories"]["web_ipv6"]["status"]
+    )
 
     return scan_data
 
 
 def calculate_forum_standaardisatie_views_mail(scan_data):
     # These values are published in the forum standaardisatie magazine.
-    custom_api_field_results = scan_data['results']['custom']
+    custom_api_field_results = scan_data["results"]["custom"]
 
     # not all custom fields are defined yet, temporarily all will be false, these fields will be defined next week:
     # v1 mail_non_sending_domain = v2 mail_non_sending_domain
@@ -781,32 +798,33 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     # v1 dane_ta -> v2 removed, is now part of field results.
 
     # DMARC
-    add_calculation(scan_data=scan_data, new_key='mail_legacy_dmarc', required_values=['mail_auth_dmarc_exist'])
+    add_calculation(scan_data=scan_data, new_key="mail_legacy_dmarc", required_values=["mail_auth_dmarc_exist"])
 
     # DKIM
     # api v2: custom field exists.
     # https://github.com/internetstandards/Internet.nl-dashboard/issues/183
-    if scan_data['results']['tests']['mail_auth_dkim_exist']['status'] == "passed":
-        add_calculation(scan_data=scan_data, new_key='mail_legacy_dkim', required_values=['mail_auth_dkim_exist'])
+    if scan_data["results"]["tests"]["mail_auth_dkim_exist"]["status"] == "passed":
+        add_calculation(scan_data=scan_data, new_key="mail_legacy_dkim", required_values=["mail_auth_dkim_exist"])
     else:
-        if custom_api_field_results['mail_non_sending_domain']:
+        if custom_api_field_results["mail_non_sending_domain"]:
             add_instant_calculation(scan_data, "mail_legacy_dkim", "not_applicable")
         else:
-            add_calculation(scan_data=scan_data, new_key='mail_legacy_dkim', required_values=['mail_auth_dkim_exist'])
+            add_calculation(scan_data=scan_data, new_key="mail_legacy_dkim", required_values=["mail_auth_dkim_exist"])
 
     # SPF
-    add_calculation(scan_data=scan_data, new_key='mail_legacy_spf', required_values=['mail_auth_spf_exist'])
+    add_calculation(scan_data=scan_data, new_key="mail_legacy_spf", required_values=["mail_auth_spf_exist"])
 
     # DMARC Policy
     # Api v2 changes:
     # 1a/b mail_auth_dmarc_policy_only has been removed, and can be replaced with internet_nl_mail_auth_dmarc_policy.
     # Todo: get the internet_nl_mail_auth_dmarc_policy data and see if that is passes, else it fails.
     # 2a/b: ignore
-    add_instant_calculation(scan_data, "mail_legacy_dmarc_policy",
-                            scan_data['results']['tests']['mail_auth_dmarc_policy']['status'])
+    add_instant_calculation(
+        scan_data, "mail_legacy_dmarc_policy", scan_data["results"]["tests"]["mail_auth_dmarc_policy"]["status"]
+    )
 
     # SPF Policy
-    add_calculation(scan_data=scan_data, new_key='mail_legacy_spf_policy', required_values=['mail_auth_spf_policy'])
+    add_calculation(scan_data=scan_data, new_key="mail_legacy_spf_policy", required_values=["mail_auth_spf_policy"])
 
     # START TLS
     # Api v2 changes:
@@ -814,116 +832,142 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     # 5: not_testable, A "mail_starttls_tls_available": "failed": ["detail verdict could-not-test"] or
     #  "mail_starttls_tls_available": "warning": ["other"]
     #  if some mailservers not testable_ -> good_not_tested is relevant?
-    if custom_api_field_results['mail_servers_testable_status'] == "no_mx":
-        add_instant_calculation(scan_data, 'mail_legacy_start_tls', "no_mx")
+    if custom_api_field_results["mail_servers_testable_status"] == "no_mx":
+        add_instant_calculation(scan_data, "mail_legacy_start_tls", "no_mx")
         # todo: add new field to repor
-    elif custom_api_field_results['mail_servers_testable_status'] == "unreachable":
-        add_instant_calculation(scan_data, 'mail_legacy_start_tls', "unreachable")
-    elif custom_api_field_results['mail_servers_testable_status'] == "untestable":
-        add_instant_calculation(scan_data, 'mail_legacy_start_tls', "not_testable")
+    elif custom_api_field_results["mail_servers_testable_status"] == "unreachable":
+        add_instant_calculation(scan_data, "mail_legacy_start_tls", "unreachable")
+    elif custom_api_field_results["mail_servers_testable_status"] == "untestable":
+        add_instant_calculation(scan_data, "mail_legacy_start_tls", "not_testable")
     else:
-        add_calculation(scan_data=scan_data, new_key='mail_legacy_start_tls',
-                        required_values=['mail_starttls_tls_available'])
+        add_calculation(
+            scan_data=scan_data, new_key="mail_legacy_start_tls", required_values=["mail_starttls_tls_available"]
+        )
 
     # START TLS NCSC
     # mail_starttls_tls_* 10, mail_starttls_cert_* fields. 4
-    start_tls_ncsc_fields = \
-        ['mail_starttls_tls_available', 'mail_starttls_tls_keyexchange', 'mail_starttls_tls_compress',
-         'mail_starttls_tls_secreneg', 'mail_starttls_tls_ciphers', 'mail_starttls_tls_clientreneg',
-         'mail_starttls_tls_version', 'mail_starttls_tls_cipherorder', 'mail_starttls_tls_keyexchangehash',
-         'mail_starttls_tls_0rtt',
-
-         'mail_starttls_cert_sig', 'mail_starttls_cert_pubkey', 'mail_starttls_cert_chain',
-         'mail_starttls_cert_domain']
+    start_tls_ncsc_fields = [
+        "mail_starttls_tls_available",
+        "mail_starttls_tls_keyexchange",
+        "mail_starttls_tls_compress",
+        "mail_starttls_tls_secreneg",
+        "mail_starttls_tls_ciphers",
+        "mail_starttls_tls_clientreneg",
+        "mail_starttls_tls_version",
+        "mail_starttls_tls_cipherorder",
+        "mail_starttls_tls_keyexchangehash",
+        "mail_starttls_tls_0rtt",
+        "mail_starttls_cert_sig",
+        "mail_starttls_cert_pubkey",
+        "mail_starttls_cert_chain",
+        "mail_starttls_cert_domain",
+    ]
 
     # dane_ta of v1 is removed, that's now included in the above values.
     # todo: no_mx equals not_applicable in the UI and graphs. unreachable, untestable gebruiken we de bolt.
-    if custom_api_field_results['mail_servers_testable_status'] == "no_mx":
-        add_instant_calculation(scan_data, 'mail_legacy_start_tls_ncsc', "no_mx")
-    elif custom_api_field_results['mail_servers_testable_status'] == "unreachable":
-        add_instant_calculation(scan_data, 'mail_legacy_start_tls_ncsc', "unreachable")
-    elif custom_api_field_results['mail_servers_testable_status'] == "untestable":
-        add_instant_calculation(scan_data, 'mail_legacy_start_tls_ncsc', "not_testable")
+    if custom_api_field_results["mail_servers_testable_status"] == "no_mx":
+        add_instant_calculation(scan_data, "mail_legacy_start_tls_ncsc", "no_mx")
+    elif custom_api_field_results["mail_servers_testable_status"] == "unreachable":
+        add_instant_calculation(scan_data, "mail_legacy_start_tls_ncsc", "unreachable")
+    elif custom_api_field_results["mail_servers_testable_status"] == "untestable":
+        add_instant_calculation(scan_data, "mail_legacy_start_tls_ncsc", "not_testable")
     else:
-        add_calculation(scan_data=scan_data, new_key='mail_legacy_start_tls_ncsc',
-                        required_values=start_tls_ncsc_fields)
+        add_calculation(
+            scan_data=scan_data, new_key="mail_legacy_start_tls_ncsc", required_values=start_tls_ncsc_fields
+        )
 
     # Not in forum standardisatie magazine, but used internally
-    add_calculation(scan_data=scan_data, new_key='mail_legacy_dnssec_email_domain',
-                    required_values=['mail_dnssec_mailto_exist', 'mail_dnssec_mailto_valid'])
+    add_calculation(
+        scan_data=scan_data,
+        new_key="mail_legacy_dnssec_email_domain",
+        required_values=["mail_dnssec_mailto_exist", "mail_dnssec_mailto_valid"],
+    )
 
     # DNSSEC MX
-    if custom_api_field_results['mail_servers_testable_status'] == "no_mx":
-        add_instant_calculation(scan_data, 'mail_legacy_dnssec_mx', "no_mx")
+    if custom_api_field_results["mail_servers_testable_status"] == "no_mx":
+        add_instant_calculation(scan_data, "mail_legacy_dnssec_mx", "no_mx")
     else:
-        add_calculation(scan_data=scan_data, new_key='mail_legacy_dnssec_mx',
-                        required_values=['mail_dnssec_mx_exist', 'mail_dnssec_mx_valid'])
+        add_calculation(
+            scan_data=scan_data,
+            new_key="mail_legacy_dnssec_mx",
+            required_values=["mail_dnssec_mx_exist", "mail_dnssec_mx_valid"],
+        )
 
     # DANE
-    if custom_api_field_results['mail_servers_testable_status'] == "no_mx":
-        add_instant_calculation(scan_data, 'mail_legacy_dane', "no_mx")
-    elif custom_api_field_results['mail_servers_testable_status'] == "unreachable":
-        add_instant_calculation(scan_data, 'mail_legacy_dane', "unreachable")
-    elif custom_api_field_results['mail_servers_testable_status'] == "untestable":
-        add_instant_calculation(scan_data, 'mail_legacy_dane', "not_testable")
+    if custom_api_field_results["mail_servers_testable_status"] == "no_mx":
+        add_instant_calculation(scan_data, "mail_legacy_dane", "no_mx")
+    elif custom_api_field_results["mail_servers_testable_status"] == "unreachable":
+        add_instant_calculation(scan_data, "mail_legacy_dane", "unreachable")
+    elif custom_api_field_results["mail_servers_testable_status"] == "untestable":
+        add_instant_calculation(scan_data, "mail_legacy_dane", "not_testable")
     else:
-        add_calculation(scan_data=scan_data, new_key='mail_legacy_dane',
-                        required_values=['mail_starttls_dane_exist', 'mail_starttls_dane_valid'])
+        add_calculation(
+            scan_data=scan_data,
+            new_key="mail_legacy_dane",
+            required_values=["mail_starttls_dane_exist", "mail_starttls_dane_valid"],
+        )
 
     # IPv6 Nameserver
     # Not in forum standardisatie magazine, but used internally
-    if custom_api_field_results['mail_servers_testable_status'] == "no_mx":
-        add_instant_calculation(scan_data, 'mail_legacy_ipv6_nameserver', "no_mx")
+    if custom_api_field_results["mail_servers_testable_status"] == "no_mx":
+        add_instant_calculation(scan_data, "mail_legacy_ipv6_nameserver", "no_mx")
     else:
-        add_calculation(scan_data=scan_data, new_key='mail_legacy_ipv6_nameserver',
-                        required_values=['mail_ipv6_ns_address', 'mail_ipv6_ns_reach'])
+        add_calculation(
+            scan_data=scan_data,
+            new_key="mail_legacy_ipv6_nameserver",
+            required_values=["mail_ipv6_ns_address", "mail_ipv6_ns_reach"],
+        )
 
     # IPv6 Mailserver
     # Not in forum standardisatie magazine, but used internally
-    if custom_api_field_results['mail_servers_testable_status'] == "no_mx":
-        add_instant_calculation(scan_data, 'mail_legacy_ipv6_mailserver', "no_mx")
+    if custom_api_field_results["mail_servers_testable_status"] == "no_mx":
+        add_instant_calculation(scan_data, "mail_legacy_ipv6_mailserver", "no_mx")
     else:
-        add_calculation(scan_data=scan_data, new_key='mail_legacy_ipv6_mailserver',
-                        required_values=['mail_ipv6_mx_address', 'mail_ipv6_mx_reach'])
+        add_calculation(
+            scan_data=scan_data,
+            new_key="mail_legacy_ipv6_mailserver",
+            required_values=["mail_ipv6_mx_address", "mail_ipv6_mx_reach"],
+        )
 
     # V2 New Mail Server status fields, extra fields.
     # TLS 1.3, added in v2
     # todo: add new field to report
-    if custom_api_field_results['tls_1_3_support'] == "yes":
-        add_instant_calculation(scan_data, 'mail_legacy_tls_1_3', "passed")
-    elif custom_api_field_results['tls_1_3_support'] == "no":
-        add_instant_calculation(scan_data, 'mail_legacy_tls_1_3', "failed")
-    elif custom_api_field_results['tls_1_3_support'] == "undetermined":
+    if custom_api_field_results["tls_1_3_support"] == "yes":
+        add_instant_calculation(scan_data, "mail_legacy_tls_1_3", "passed")
+    elif custom_api_field_results["tls_1_3_support"] == "no":
+        add_instant_calculation(scan_data, "mail_legacy_tls_1_3", "failed")
+    elif custom_api_field_results["tls_1_3_support"] == "undetermined":
         # Todo: should be a bolt.
-        add_instant_calculation(scan_data, 'mail_legacy_tls_1_3', "not_testable")
+        add_instant_calculation(scan_data, "mail_legacy_tls_1_3", "not_testable")
 
     # The double negation is solved by renaming these fields. One field is split into three
-    if custom_api_field_results['mail_servers_testable_status'] == "no_mx":
-        add_instant_calculation(scan_data, 'mail_legacy_domain_has_mx', "failed")
+    if custom_api_field_results["mail_servers_testable_status"] == "no_mx":
+        add_instant_calculation(scan_data, "mail_legacy_domain_has_mx", "failed")
     else:
-        add_instant_calculation(scan_data, 'mail_legacy_domain_has_mx', "passed")
+        add_instant_calculation(scan_data, "mail_legacy_domain_has_mx", "passed")
 
-    if custom_api_field_results['mail_servers_testable_status'] == "unreachable":
-        add_instant_calculation(scan_data, 'mail_legacy_mail_server_reachable', "failed")
+    if custom_api_field_results["mail_servers_testable_status"] == "unreachable":
+        add_instant_calculation(scan_data, "mail_legacy_mail_server_reachable", "failed")
     else:
-        add_instant_calculation(scan_data, 'mail_legacy_mail_server_reachable', "passed")
+        add_instant_calculation(scan_data, "mail_legacy_mail_server_reachable", "passed")
 
-    if custom_api_field_results['mail_servers_testable_status'] == "untestable":
-        add_instant_calculation(scan_data, 'mail_legacy_mail_server_testable', "failed")
+    if custom_api_field_results["mail_servers_testable_status"] == "untestable":
+        add_instant_calculation(scan_data, "mail_legacy_mail_server_testable", "failed")
     else:
-        add_instant_calculation(scan_data, 'mail_legacy_mail_server_testable', "passed")
+        add_instant_calculation(scan_data, "mail_legacy_mail_server_testable", "passed")
 
     # Kept the double negation to see if this causes confusion or not.
     # https://github.com/internetstandards/Internet.nl-dashboard/issues/182
     # We want a grey icon when the domain does send email = not_applicable
     # We want a blue info icon when the domain does not send email = info
-    if custom_api_field_results['mail_non_sending_domain']:
-        add_instant_calculation(scan_data, 'mail_legacy_mail_non_sending_domain', "info")
+    if custom_api_field_results["mail_non_sending_domain"]:
+        add_instant_calculation(scan_data, "mail_legacy_mail_non_sending_domain", "info")
     else:
-        add_instant_calculation(scan_data, 'mail_legacy_mail_non_sending_domain', "not_applicable")
+        add_instant_calculation(scan_data, "mail_legacy_mail_non_sending_domain", "not_applicable")
 
     # add custom field for the ipv6 test, so this can be labelled individually
-    add_instant_calculation(scan_data, "mail_legacy_category_ipv6",
-                            scan_data['results']['categories']['mail_ipv6']['status'])
+    add_instant_calculation(
+        scan_data, "mail_legacy_category_ipv6", scan_data["results"]["categories"]["mail_ipv6"]["status"]
+    )
 
     return scan_data

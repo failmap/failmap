@@ -6,20 +6,20 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0053_auto_20181122_1514'),
+        ("scanners", "0053_auto_20181122_1514"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='endpointgenericscan',
-            name='domain',
+            model_name="endpointgenericscan",
+            name="domain",
         ),
         migrations.RemoveField(
-            model_name='screenshot',
-            name='domain',
+            model_name="screenshot",
+            name="domain",
         ),
         migrations.RemoveField(
-            model_name='urlgenericscan',
-            name='domain',
+            model_name="urlgenericscan",
+            name="domain",
         ),
     ]

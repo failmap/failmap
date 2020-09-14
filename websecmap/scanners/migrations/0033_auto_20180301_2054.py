@@ -8,14 +8,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0032_auto_20180208_1318'),
+        ("scanners", "0032_auto_20180208_1318"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpointgenericscan',
-            name='explanation',
+            model_name="endpointgenericscan",
+            name="explanation",
             field=models.CharField(
-                default=0, help_text='Short explanation from the scanner on how the rating came to be.', max_length=9001),
+                default=0, help_text="Short explanation from the scanner on how the rating came to be.", max_length=9001
+            ),
         ),
     ]

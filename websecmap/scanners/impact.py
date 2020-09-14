@@ -15,6 +15,7 @@ log = getLogger(__package__)
 def report_impact_to_commandline():
     print(json.dumps(calculate_impact(), indent=2))
 
+
 # todo: add DNSSEC(!)
 
 
@@ -69,7 +70,7 @@ def calculate_impact():
             "medium": {"high": 0, "medium": 0, "low": 0, "good": 0},
             "low": {"high": 0, "medium": 0, "low": 0, "good": 0},
             "good": {"high": 0, "medium": 0, "low": 0, "good": 0},
-        }
+        },
     }
     published_scans = PUBLISHED_ENDPOINT_SCAN_TYPES + PUBLISHED_URL_SCAN_TYPES
     # we'll ignore explanations
@@ -83,30 +84,43 @@ def calculate_impact():
     # count down id's, so there is some feeling on how long it will take.
     log.debug(f"Calculating impact for country: {config.PROJECT_COUNTRY}.")
     # do not take endpoints that are "switching" on and off, only alive endpoints and urls
-    all_endpoints = Endpoint.objects.all().filter(
-        is_dead=False,
-        url__is_dead=False,
-        url__not_resolvable=False,
-        url__organization__country=config.PROJECT_COUNTRY,
-        url__organization__type__name="municipality",
-    ).only('id').order_by('-id')
-    number_of_changes = EndpointGenericScan.objects.all().filter(
-        endpoint__is_dead=False,
-        endpoint__url__is_dead=False,
-        endpoint__url__not_resolvable=False,
-        endpoint__url__organization__country=config.PROJECT_COUNTRY,
-        endpoint__url__organization__type__name="municipality",
-    ).only('id')
+    all_endpoints = (
+        Endpoint.objects.all()
+        .filter(
+            is_dead=False,
+            url__is_dead=False,
+            url__not_resolvable=False,
+            url__organization__country=config.PROJECT_COUNTRY,
+            url__organization__type__name="municipality",
+        )
+        .only("id")
+        .order_by("-id")
+    )
+    number_of_changes = (
+        EndpointGenericScan.objects.all()
+        .filter(
+            endpoint__is_dead=False,
+            endpoint__url__is_dead=False,
+            endpoint__url__not_resolvable=False,
+            endpoint__url__organization__country=config.PROJECT_COUNTRY,
+            endpoint__url__organization__type__name="municipality",
+        )
+        .only("id")
+    )
     number_of_unique_changes = len(list(set(number_of_changes)))
     impact["metadata"]["recorded_changes"] = number_of_unique_changes
-    number_of_current_scans = EndpointGenericScan.objects.all().filter(
-        endpoint__is_dead=False,
-        endpoint__url__is_dead=False,
-        endpoint__url__not_resolvable=False,
-        endpoint__url__organization__country=config.PROJECT_COUNTRY,
-        endpoint__url__organization__type__name="municipality",
-        is_the_latest_scan=True
-    ).only('id')
+    number_of_current_scans = (
+        EndpointGenericScan.objects.all()
+        .filter(
+            endpoint__is_dead=False,
+            endpoint__url__is_dead=False,
+            endpoint__url__not_resolvable=False,
+            endpoint__url__organization__country=config.PROJECT_COUNTRY,
+            endpoint__url__organization__type__name="municipality",
+            is_the_latest_scan=True,
+        )
+        .only("id")
+    )
     unique_number_of_current_scans = len(list(set(number_of_current_scans)))
     impact["metadata"]["amount_of_current_scans"] = unique_number_of_current_scans
     # duplication because some urls are shared multiple times over organizations, for example rijksoverheid.nl
@@ -147,7 +161,7 @@ def calculate_impact():
                 impact["metadata"]["degradations"] += 1
         # also shows on the first round, with the first analysis, so the first round is not all 0's:
         if index % 1000 == 0:
-            os.system('clear')
+            os.system("clear")
             print(f"{round(index/amount_of_endpoints, 2) * 100}% = {index}/{amount_of_endpoints}.")
             print(json.dumps(impact, indent=2))
     # now create a total:

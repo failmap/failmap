@@ -1,12 +1,16 @@
-
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
 from websecmap.app.common import JSEncoder
 from websecmap.pro.logic import LOGIN_URL
-from websecmap.pro.logic.comply_or_explain import (explain_costs, extend_explanation,
-                                                   get_canned_explanations, get_scan_data,
-                                                   remove_explanation, try_explain)
+from websecmap.pro.logic.comply_or_explain import (
+    explain_costs,
+    extend_explanation,
+    get_canned_explanations,
+    get_scan_data,
+    remove_explanation,
+    try_explain,
+)
 from websecmap.pro.logic.shared import get_account
 
 

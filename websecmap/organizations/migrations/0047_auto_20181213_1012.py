@@ -6,16 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0046_auto_20181213_0854'),
+        ("organizations", "0046_auto_20181213_0854"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='url',
+            name="url",
             unique_together=set(),
         ),
         migrations.RemoveField(
-            model_name='url',
-            name='organization_old',
+            model_name="url",
+            name="organization_old",
         ),
     ]

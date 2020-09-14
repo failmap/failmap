@@ -29,16 +29,17 @@ class MailSignupForm(forms.Form):
     This also implies that the organization isn't handing out emails to anyone who asks. (perhaps only support this for
     the first signup?)
     """
-    field_order = ('email', )
+
+    field_order = ("email",)
 
     email_address = forms.EmailField(required=True)
 
     @transaction.atomic
     def save(self):
 
-        email = self.cleaned_data.get('email_address', None)
+        email = self.cleaned_data.get("email_address", None)
         if not email:
-            raise ValidationError('No e-mail supplied.')
+            raise ValidationError("No e-mail supplied.")
 
         if not account_by_mail_exists(email) and account_by_mail_is_possible(email):
             create_account_with_email(email)
@@ -97,7 +98,7 @@ def create_account_with_email(email):
     account.receive_credits(250, "Automatic signup.")
 
     # create a new user that will be associated to this account
-    password = ''.join(choice("ACDEFGHKLMNPRSTUVWXZ234567") for i in range(20))
+    password = "".join(choice("ACDEFGHKLMNPRSTUVWXZ234567") for i in range(20))
     password = "%s-%s-%s-%s-%s" % (password[0:4], password[4:8], password[8:12], password[12:16], password[16:20])
 
     # usernames might already exist, try a username with the domain. Just increment.
@@ -115,14 +116,16 @@ def create_account_with_email(email):
     if user_number:
         username = "%s_%s" % (username, user_number)
 
-    user = User.objects.create_user(username=username,
-                                    # can log into other things
-                                    is_active=True,
-                                    # No access to admin interface needed
-                                    is_staff=False,
-                                    # No permissions needed anywhere
-                                    is_superuser=False,
-                                    password=password)
+    user = User.objects.create_user(
+        username=username,
+        # can log into other things
+        is_active=True,
+        # No access to admin interface needed
+        is_staff=False,
+        # No permissions needed anywhere
+        is_superuser=False,
+        password=password,
+    )
     user.save()
 
     # associate the user with the account
@@ -187,16 +190,19 @@ The %(project_name)s Pro team
 
 
 """ % {
-        'username': username,
-        'password': password,
-        'project_name': config.PROJECT_NAME,
-        'website': config.PROJECT_WEBSITE
+        "username": username,
+        "password": password,
+        "project_name": config.PROJECT_NAME,
+        "website": config.PROJECT_WEBSITE,
     }
 
     mail_configuration = get_mail_configuration()
     with mail.get_connection(**mail_configuration) as connection:
         mail.EmailMessage(
-            "Your new password for %s Pro" % config.PROJECT_NAME, message, config.PRO_REPLY_TO_MAIL_ADDRESS, [email],
+            "Your new password for %s Pro" % config.PROJECT_NAME,
+            message,
+            config.PRO_REPLY_TO_MAIL_ADDRESS,
+            [email],
             connection=connection,
         ).send()
 
@@ -205,19 +211,18 @@ def get_mail_configuration():
 
     # warning: settings touch database each time when accessed
     configuration = {
-        'host': config.PRO_EMAIL_HOST,
-        'port': config.PRO_EMAIL_PORT,
-        'username': config.PRO_EMAIL_USERNAME,
-        'password': config.PRO_EMAIL_PASSWORD,
+        "host": config.PRO_EMAIL_HOST,
+        "port": config.PRO_EMAIL_PORT,
+        "username": config.PRO_EMAIL_USERNAME,
+        "password": config.PRO_EMAIL_PASSWORD,
         # https://docs.djangoproject.com/en/2.1/ref/settings/#email-use-tls
-        'use_tls': config.PRO_EMAIL_USE_TLS,
-        'use_ssl': config.PRO_EMAIL_USE_SSL,
-
+        "use_tls": config.PRO_EMAIL_USE_TLS,
+        "use_ssl": config.PRO_EMAIL_USE_SSL,
         # should these be in the config, just like other certs?
         # https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-EMAIL_SSL_KEYFILE
-        'ssl_keyfile': config.PRO_EMAIL_SSL_KEYFILE,
+        "ssl_keyfile": config.PRO_EMAIL_SSL_KEYFILE,
         # https://docs.djangoproject.com/en/2.1/ref/settings/#email-ssl-certfile
-        'ssl_certfile': config.PRO_EMAIL_SSL_CERTFILE
+        "ssl_certfile": config.PRO_EMAIL_SSL_CERTFILE,
     }
 
     return configuration

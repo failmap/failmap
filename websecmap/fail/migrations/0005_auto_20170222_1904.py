@@ -9,13 +9,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fail', '0004_auto_20170222_1826'),
+        ("fail", "0004_auto_20170222_1826"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organization',
-            name='country',
+            model_name="organization",
+            name="country",
             field=django_countries.fields.CountryField(max_length=2),
         ),
     ]

@@ -8,14 +8,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0003_auto_20170316_1036'),
+        ("organizations", "0003_auto_20170316_1036"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organization',
-            name='twitter_handle',
+            model_name="organization",
+            name="twitter_handle",
             field=models.CharField(
-                help_text='Used in the top lists to let visitors tweet to theorganization to wake them up.', max_length=150, null=True),
+                help_text="Used in the top lists to let visitors tweet to theorganization to wake them up.",
+                max_length=150,
+                null=True,
+            ),
         ),
     ]

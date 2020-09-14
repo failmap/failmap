@@ -7,14 +7,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0034_auto_20190123_1650'),
+        ("map", "0034_auto_20190123_1650"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='configuration',
-            name='organization_type',
-            field=models.ForeignKey(help_text='Part of the combination shown on the map.',
-                                    on_delete=django.db.models.deletion.CASCADE, to='organizations.OrganizationType', verbose_name='Layer'),
+            model_name="configuration",
+            name="organization_type",
+            field=models.ForeignKey(
+                help_text="Part of the combination shown on the map.",
+                on_delete=django.db.models.deletion.CASCADE,
+                to="organizations.OrganizationType",
+                verbose_name="Layer",
+            ),
         ),
     ]

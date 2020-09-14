@@ -21,8 +21,12 @@ from rdp import rdp
 
 from websecmap.app.progressbar import print_progress_bar
 from websecmap.celery import app
-from websecmap.map.logic.wikidata import (ISO3316_2_COUNTRY_CODE, ISO3316_2_COUNTY_SUBDIVISION_CODE,
-                                          OFFICIAL_WEBSITE, get_property_from_code)
+from websecmap.map.logic.wikidata import (
+    ISO3316_2_COUNTRY_CODE,
+    ISO3316_2_COUNTY_SUBDIVISION_CODE,
+    OFFICIAL_WEBSITE,
+    get_property_from_code,
+)
 from websecmap.map.models import AdministrativeRegion
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType
 
@@ -39,17 +43,22 @@ https://stackoverflow.com/questions/41723087/get-administrative-borders-with-ove
 
 
 def get_resampling_resolution(country: str = "NL", organization_type: str = "municipality"):
-    resolution = AdministrativeRegion.objects.all().filter(
-        country=country,
-        organization_type__name=organization_type).values_list('resampling_resolution', flat=True).first()
+    resolution = (
+        AdministrativeRegion.objects.all()
+        .filter(country=country, organization_type__name=organization_type)
+        .values_list("resampling_resolution", flat=True)
+        .first()
+    )
     return resolution if resolution else DEFAULT_RESAMPLING_RESULUTION
 
 
 def get_region(country: str = "NL", organization_type: str = "municipality"):
-    return AdministrativeRegion.objects.all().filter(
-        country=country,
-        organization_type__name=organization_type
-    ).values_list('admin_level', flat=True).first()
+    return (
+        AdministrativeRegion.objects.all()
+        .filter(country=country, organization_type__name=organization_type)
+        .values_list("admin_level", flat=True)
+        .first()
+    )
 
 
 # making this atomic makes sure that the database is locked in sqlite.
@@ -78,7 +87,7 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
     # paramter hate causes organization_types == [None]
     if not organization_types or organization_types == [None]:
         log.info("Going to get all existing organization types, and try to import them all.")
-        organization_types = list(OrganizationType.objects.all().values_list('name', flat=True))
+        organization_types = list(OrganizationType.objects.all().values_list("name", flat=True))
 
     for country in sorted(countries):
         for organization_type in sorted(organization_types):
@@ -109,18 +118,23 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
                 resampled = resample(feature, resolution)
                 store_new(resampled, country, organization_type, when)
                 message = "Imported %s of %s. %s%% (Currently: %s)" % (
-                    index+1,
+                    index + 1,
                     len(data["features"]),
-                    round(((index+1)/len(data["features"]))*100, 2),
-                    feature["properties"]["name"])
+                    round(((index + 1) / len(data["features"])) * 100, 2),
+                    feature["properties"]["name"],
+                )
                 store_import_message(country, organization_type, message)
 
                 # can't do multiprocessing.pool, given non global functions.
-            store_import_message(country, organization_type, "Import complete. To view your import, go to "
-                                                             "<a href='../configuration/'>map configuration</a> "
-                                                             "and set this to display. Reports are generated in "
-                                                             "the background. On first import everything imported"
-                                                             " will look gray.")
+            store_import_message(
+                country,
+                organization_type,
+                "Import complete. To view your import, go to "
+                "<a href='../configuration/'>map configuration</a> "
+                "and set this to display. Reports are generated in "
+                "the background. On first import everything imported"
+                " will look gray.",
+            )
 
     log.info("Import finished.")
 
@@ -132,12 +146,10 @@ def store_import_message(country, organization_type, message):
 
     log.debug(f"Update message received for ({country}/{organization_type}): {message}")
 
-    region = AdministrativeRegion.objects.filter(
-        country=country,
-        organization_type__name=organization_type).first()
+    region = AdministrativeRegion.objects.filter(country=country, organization_type__name=organization_type).first()
 
     region.import_message = mark_safe(str(message)[0:240])
-    region.save(update_fields=['import_message'])
+    region.save(update_fields=["import_message"])
 
 
 # @transaction.atomic
@@ -145,8 +157,9 @@ def store_import_message(country, organization_type, message):
 def update_coordinates(countries: List[str] = None, organization_types: List[str] = None, when=None):
 
     if not osmtogeojson_available():
-        raise FileNotFoundError("osmtogeojson was not found. Please install it and make sure python can access it. "
-                                "Cannot continue.")
+        raise FileNotFoundError(
+            "osmtogeojson was not found. Please install it and make sure python can access it. " "Cannot continue."
+        )
 
     for country in sorted(countries):
         for organization_type in sorted(organization_types):
@@ -184,7 +197,8 @@ def update_coordinates(countries: List[str] = None, organization_types: List[str
                     index + 1,
                     len(data["features"]),
                     round(((index + 1) / len(data["features"])) * 100, 2),
-                    feature["properties"]["name"])
+                    feature["properties"]["name"],
+                )
                 store_import_message(country, organization_type, message)
 
             store_import_message(country, organization_type, "Update complete")
@@ -258,24 +272,25 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
     # A check on country code is performed to make sure no 'outside of country' websites are loaded and connected
     # to an organization.
     if "wikidata" in properties:
-        iso3316_2_country_code = get_property_from_code(properties['wikidata'], ISO3316_2_COUNTRY_CODE)
+        iso3316_2_country_code = get_property_from_code(properties["wikidata"], ISO3316_2_COUNTRY_CODE)
 
         # some regions are marked by their subdivision code. This is LU-... The first two letters are the country code.
         if not iso3316_2_country_code:
-            iso3316_2_country_code = get_property_from_code(properties['wikidata'], ISO3316_2_COUNTY_SUBDIVISION_CODE)
+            iso3316_2_country_code = get_property_from_code(properties["wikidata"], ISO3316_2_COUNTY_SUBDIVISION_CODE)
             if iso3316_2_country_code:
                 iso3316_2_country_code = iso3316_2_country_code[0:2]
 
         if iso3316_2_country_code and country.upper() != iso3316_2_country_code.upper():
             log.debug(f"According to wikidata the imported region is not in {country} but in {iso3316_2_country_code}.")
-            log.debug('Going to save the region under the new country. You probably got too much data back from OSM')
+            log.debug("Going to save the region under the new country. You probably got too much data back from OSM")
             country = iso3316_2_country_code.upper()
 
     # Verify that this doesn't exist yet to prevent double imports (when mistakes are made).
-    if Organization.objects.all().filter(name=name,
-                                         country=country,
-                                         type__name=organization_type,
-                                         is_dead=False).exists():
+    if (
+        Organization.objects.all()
+        .filter(name=name, country=country, type__name=organization_type, is_dead=False)
+        .exists()
+    ):
         log.debug(f"Organization {name} exists in country {country} and type {organization_type}, skipping.")
         return
 
@@ -295,7 +310,7 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
         organization=new_organization,
         creation_metadata="Automated import via OSM.",
         geojsontype=coordinates["type"],  # polygon or multipolygon
-        area=coordinates["coordinates"]
+        area=coordinates["coordinates"],
     )
     new_coordinate.save()
     log.info(f"Saved new coordinate: {new_coordinate}")
@@ -339,8 +354,9 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
     if not when:
         old_coordinate = Coordinate.objects.filter(organization=matching_organization, is_dead=False)
     else:
-        old_coordinate = Coordinate.objects.filter(organization=matching_organization, is_dead=False,
-                                                   created_on__lte=when)
+        old_coordinate = Coordinate.objects.filter(
+            organization=matching_organization, is_dead=False, created_on__lte=when
+        )
 
     if old_coordinate.count() == 1 and old_coordinate[0].area == coordinates["coordinates"]:
         log.info("Retrieved coordinates are the same, not changing anything.")
@@ -349,8 +365,10 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
     message = ""
 
     if old_coordinate.count() > 1:
-        message = "Automated import does not support multiple coordinates per organization. " \
-                  "New coordinates will be created."
+        message = (
+            "Automated import does not support multiple coordinates per organization. "
+            "New coordinates will be created."
+        )
 
     if old_coordinate.count() == 1:
         message = "New data received in automated import."
@@ -365,8 +383,8 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
 
     # Update the wikipedia references, given we have them now.
     if "wikidata" in coordinates or "wikipedia" in coordinates:
-        matching_organization.wikidata = properties["wikidata"] if "wikidata" in properties else "",
-        matching_organization.wikipedia = properties["wikipedia"] if "wikipedia" in properties else "",
+        matching_organization.wikidata = (properties["wikidata"] if "wikidata" in properties else "",)
+        matching_organization.wikipedia = (properties["wikipedia"] if "wikipedia" in properties else "",)
         matching_organization.save()
 
     Coordinate(
@@ -397,7 +415,8 @@ def match_organization(openstreetmap_properties, country, organization_type):
                 name=openstreetmap_properties[attempted_property],
                 country=country,
                 type__name=organization_type,
-                is_dead=False).first()
+                is_dead=False,
+            ).first()
 
             if matching_organization:
                 return matching_organization
@@ -405,7 +424,8 @@ def match_organization(openstreetmap_properties, country, organization_type):
         except Organization.DoesNotExist:
             log.debug("Could not find organization by property 'name', trying another way.")
 
-    log.info("""
+    log.info(
+        """
     Organization from OSM is currently not found in the database.
 
     This happens when neighbouring countries are also returned from your OSM query. Or when you decided to remove
@@ -413,7 +433,8 @@ def match_organization(openstreetmap_properties, country, organization_type):
     show the Antilles, as that would disproportionally show the map.
 
     You can import the region if you would like to have this information in your system. It will also import everything
-    else currently.""")
+    else currently."""
+    )
 
     return None
 
@@ -435,7 +456,7 @@ def get_data_from_wambachers_zipfile(filename):
     # todo: this is VERY ugly code...
     zip = zipfile.ZipFile(filename)
     files = zip.namelist()
-    f = zip.open(files[0], 'r')
+    f = zip.open(files[0], "r")
     contents = f.read()
     f.close()
     data = json.loads(contents)
@@ -475,8 +496,8 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
     """
 
     # see if we cached a result
-    filename = create_evil_filename([country, organization_type, str(timezone.now().date())], 'zip')
-    filename = settings.TOOLS['openstreetmap']['output_dir'] + filename
+    filename = create_evil_filename([country, organization_type, str(timezone.now().date())], "zip")
+    filename = settings.TOOLS["openstreetmap"]["output_dir"] + filename
 
     log.debug(f"Saving data to {filename}")
 
@@ -492,29 +513,32 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
     country_3_char_isocode = country.alpha3
     if not level:
         raise NotImplementedError(
-            "Combination of country and organization_type does not have a matching OSM query implemented.")
+            "Combination of country and organization_type does not have a matching OSM query implemented."
+        )
 
-    url = f"https://wambachers-osm.website/boundaries/exportBoundaries" \
-        f"?cliVersion=1.0" \
-        f"&cliKey={config.WAMBACHERS_OSM_CLIKEY}" \
-        f"&exportFormat=json" \
-        f"&exportLayout=levels" \
-        f"&exportAreas=land" \
-        f"&union=false" \
-        f"&from_al={level}" \
-        f"&to_al={level}" \
+    url = (
+        f"https://wambachers-osm.website/boundaries/exportBoundaries"
+        f"?cliVersion=1.0"
+        f"&cliKey={config.WAMBACHERS_OSM_CLIKEY}"
+        f"&exportFormat=json"
+        f"&exportLayout=levels"
+        f"&exportAreas=land"
+        f"&union=false"
+        f"&from_al={level}"
+        f"&to_al={level}"
         f"&selected={country_3_char_isocode}"
+    )
 
     # get's a zip file and extract the content. The contents is the result.
     response = requests.get(url, stream=True, timeout=(1200, 1200))
     response.raise_for_status()
 
     # show a nice progress bar when downloading
-    with open(filename, 'wb') as f:
+    with open(filename, "wb") as f:
         i = 0
         for block in response.iter_content(chunk_size=1024):
             i += 1
-            print_progress_bar(i, 100000, 'Wambacher OSM data')
+            print_progress_bar(i, 100000, "Wambacher OSM data")
             if block:
                 f.write(block)
                 f.flush()
@@ -525,7 +549,7 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
 
 def create_evil_filename(properties: List, extension: str):
     # remove everything, except a-zA-Z0-9 (? does it?)
-    properties = [re.sub(r'\W+', '', property) for property in properties]
+    properties = [re.sub(r"\W+", "", property) for property in properties]
 
     return "_".join(properties) + "." + extension
 
@@ -537,8 +561,8 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
     :return: dictionary
     """
 
-    filename = create_evil_filename([country, organization_type, str(timezone.now().date())], 'osm')
-    filename = settings.TOOLS['openstreetmap']['output_dir'] + filename
+    filename = create_evil_filename([country, organization_type, str(timezone.now().date())], "osm")
+    filename = settings.TOOLS["openstreetmap"]["output_dir"] + filename
 
     # if the file has been downloaded recently, don't do that again.
     four_hours_ago = time.time() - 14400
@@ -560,7 +584,8 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
 
     if not admin_level:
         raise NotImplementedError(
-            "Combination of country and organization_type does not have a matching OSM query implemented.")
+            "Combination of country and organization_type does not have a matching OSM query implemented."
+        )
 
     # we used to use the country name, which doesn't work very consistently and requires a greater source of knowledge
     # luckily OSM supports ISO3166-2, just like django countries. So that's a perfect fit.
@@ -569,14 +594,16 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
 
     log.info("Connecting to overpass to download data. Downloading can take a while (minutes)!")
     log.debug(query)
-    response = requests.post("http://www.overpass-api.de/api/interpreter",
-                             data={"data": query, "submit": "Query"},
-                             stream=True,
-                             timeout=(1200, 1200))
+    response = requests.post(
+        "http://www.overpass-api.de/api/interpreter",
+        data={"data": query, "submit": "Query"},
+        stream=True,
+        timeout=(1200, 1200),
+    )
 
     response.raise_for_status()
 
-    with open(filename, 'wb') as f:
+    with open(filename, "wb") as f:
         # total_length = int(response.headers.get('content-length'))
         # we don't get a content length from the api. So, "just" do something to show some progress...
         # {'Date': 'Tue, 20 Mar 2018 09:58:11 GMT', 'Server': 'Apache/2.4.18 (Ubuntu)', 'Vary': 'Accept-Encoding',
@@ -587,7 +614,7 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
         i = 0
         for block in response.iter_content(chunk_size=1024):
             i += 1
-            print_progress_bar(i, 100000, ' Generic OSM data')
+            print_progress_bar(i, 100000, " Generic OSM data")
             if block:
                 f.write(block)
                 f.flush()
@@ -612,7 +639,10 @@ def osmtogeojson_available():
     # todo: this check should be performed on startup?
     try:
         # todo: node --max_old_space_size=4000, for larger imprts... we don't even call node... :(
-        subprocess.check_output(["osmtogeojson", "tesfile.osm"], stderr=subprocess.STDOUT, )
+        subprocess.check_output(
+            ["osmtogeojson", "tesfile.osm"],
+            stderr=subprocess.STDOUT,
+        )
     except CalledProcessError as e:
         if "no such file or directory, open 'tesfile.osm'" in str(e.output):
             return True

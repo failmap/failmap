@@ -8,24 +8,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0017_auto_20170928_0926'),
+        ("organizations", "0017_auto_20170928_0926"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='url',
-            name='is_dead',
+            model_name="url",
+            name="is_dead",
             field=models.BooleanField(
-                default=False, help_text="Dead url's will not be rendered on the map. Scanners can set this check automatically (which might change in the future)"),
+                default=False,
+                help_text="Dead url's will not be rendered on the map. Scanners can set this check automatically (which might change in the future)",
+            ),
         ),
         migrations.AlterField(
-            model_name='url',
-            name='is_dead_reason',
+            model_name="url",
+            name="is_dead_reason",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='url',
-            name='is_dead_since',
+            model_name="url",
+            name="is_dead_since",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

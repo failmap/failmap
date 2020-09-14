@@ -11,7 +11,7 @@ log = logging.getLogger(__package__)
 
 
 def file_get_contents(filepath):
-    with open(filepath, 'r') as content_file:
+    with open(filepath, "r") as content_file:
         return content_file.read()
 
 
@@ -23,8 +23,8 @@ def mocked_requests_get(*args, **kwargs):
             self.content = content
             self.status_code = status_code
 
-    if args[0] == 'https://publicsuffix.org/list/public_suffix_list.dat':
-        return MockResponse(file_get_contents('mocked_http_responses/public_suffix_list.dat').encode(), 200)
+    if args[0] == "https://publicsuffix.org/list/public_suffix_list.dat":
+        return MockResponse(file_get_contents("mocked_http_responses/public_suffix_list.dat").encode(), 200)
 
     return MockResponse(None, 404)
 
@@ -37,25 +37,29 @@ def test_map_datasets(db):
 
     organization_type, created = OrganizationType.objects.all().get_or_create(name="municipality")
 
-    organization, created = Organization.objects.all().get_or_create(name="test", type=organization_type, country="NL",
-                                                                     created_on=timezone.now(), is_dead=False)
+    organization, created = Organization.objects.all().get_or_create(
+        name="test", type=organization_type, country="NL", created_on=timezone.now(), is_dead=False
+    )
 
-    url, created = Url.objects.all().get_or_create(url='test.nl', created_on=timezone.now(), is_dead=False,
-                                                   not_resolvable=False)
-
-    # create the n-n connection between url and organization
-    url.organization.add(organization)
-    url.save()
-
-    url, created = Url.objects.all().get_or_create(url='test2.nl', created_on=timezone.now(), is_dead=False,
-                                                   not_resolvable=False)
+    url, created = Url.objects.all().get_or_create(
+        url="test.nl", created_on=timezone.now(), is_dead=False, not_resolvable=False
+    )
 
     # create the n-n connection between url and organization
     url.organization.add(organization)
     url.save()
 
-    url, created = Url.objects.all().get_or_create(url='test3.nl', created_on=timezone.now(), is_dead=False,
-                                                   not_resolvable=False)
+    url, created = Url.objects.all().get_or_create(
+        url="test2.nl", created_on=timezone.now(), is_dead=False, not_resolvable=False
+    )
+
+    # create the n-n connection between url and organization
+    url.organization.add(organization)
+    url.save()
+
+    url, created = Url.objects.all().get_or_create(
+        url="test3.nl", created_on=timezone.now(), is_dead=False, not_resolvable=False
+    )
     # create the n-n connection between url and organization
     url.organization.add(organization)
     url.save()
@@ -63,9 +67,9 @@ def test_map_datasets(db):
     # test a complete flow
     # we should now be able to export a dataset with a single url
     # The return is a string(!)
-    book = export_urls_only('NL', 'municipality')
+    book = export_urls_only("NL", "municipality")
 
     # there is a filename
-    assert book["data"][1, 1] == 'test.nl'
-    assert book["data"][2, 1] == 'test2.nl'
-    assert book["data"][3, 1] == 'test3.nl'
+    assert book["data"][1, 1] == "test.nl"
+    assert book["data"][2, 1] == "test2.nl"
+    assert book["data"][3, 1] == "test3.nl"

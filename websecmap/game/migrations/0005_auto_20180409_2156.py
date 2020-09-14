@@ -6,19 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0004_auto_20180409_1542'),
+        ("game", "0004_auto_20180409_1542"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organizationsubmission',
-            name='has_been_rejected',
-            field=models.BooleanField(default=False, help_text='Nonsense organizations can be rejected.'),
+            model_name="organizationsubmission",
+            name="has_been_rejected",
+            field=models.BooleanField(default=False, help_text="Nonsense organizations can be rejected."),
         ),
         migrations.AddField(
-            model_name='organizationsubmission',
-            name='organization_evidence',
+            model_name="organizationsubmission",
+            name="organization_evidence",
             field=models.CharField(
-                default='unknown', help_text='Sources of information about this organization.', max_length=600),
+                default="unknown", help_text="Sources of information about this organization.", max_length=600
+            ),
         ),
     ]

@@ -8,19 +8,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0006_endpoint_url'),
+        ("scanners", "0006_endpoint_url"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpoint',
-            name='domain',
+            model_name="endpoint",
+            name="domain",
             field=models.CharField(
-                help_text='This is a legacy field, used by the scanner. Will be obsoleted after the incorrectly migrated domainshave been fixed manually in productionand the scanner is ready.', max_length=255),
+                help_text="This is a legacy field, used by the scanner. Will be obsoleted after the incorrectly migrated domainshave been fixed manually in productionand the scanner is ready.",
+                max_length=255,
+            ),
         ),
         migrations.AlterField(
-            model_name='endpoint',
-            name='server_name',
-            field=models.CharField(help_text='rdns', max_length=255),
+            model_name="endpoint",
+            name="server_name",
+            field=models.CharField(help_text="rdns", max_length=255),
         ),
     ]

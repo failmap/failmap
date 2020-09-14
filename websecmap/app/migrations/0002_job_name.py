@@ -8,14 +8,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0001_initial'),
+        ("app", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='name',
-            field=models.CharField(default='N/A', help_text='name of the job', max_length=255),
+            model_name="job",
+            name="name",
+            field=models.CharField(default="N/A", help_text="name of the job", max_length=255),
             preserve_default=False,
         ),
     ]

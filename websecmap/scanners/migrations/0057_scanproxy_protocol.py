@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0056_scanproxy'),
+        ("scanners", "0056_scanproxy"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='scanproxy',
-            name='protocol',
+            model_name="scanproxy",
+            name="protocol",
             field=models.CharField(
-                default='https', help_text='Whether to see this as a http or https proxy', max_length=10),
+                default="https", help_text="Whether to see this as a http or https proxy", max_length=10
+            ),
         ),
     ]

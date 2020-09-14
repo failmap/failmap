@@ -34,12 +34,13 @@ class Command(BaseCommand):
         # We use the frysian name: Menameradiel instead of Menaldumadeel
         # we should probably change that here, so the update_coordinates also works. (no, it disappears, so who cares)
         # there is no data of this in OSM etc (afaik).
-        merge(source_organizations_names=["Menameradiel", "Franekeradeel", "Het Bildt"],
-              target_organization_name="Waadhoeke",
-              when=merge_date,
-              organization_type="municipality",
-              country="NL"
-              )
+        merge(
+            source_organizations_names=["Menameradiel", "Franekeradeel", "Het Bildt"],
+            target_organization_name="Waadhoeke",
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
+        )
 
         """
         Ook de dorpen Welsrijp, Winsum, Baijum en Spannum van gemeente Littenseradiel,
@@ -47,12 +48,13 @@ class Command(BaseCommand):
 
         Littenseradiel verdwijnt dus. (en waar moeten die heen dan?) De nieuwe gemeenten mogen de erfenis opruimen.
         """
-        dissolve(dissolved_organization_name="Littenseradiel",
-                 target_organization_names=["Waadhoeke", "Leeuwarden", "Súdwest-Fryslân"],
-                 when=merge_date,
-                 organization_type="municipality",
-                 country="NL"
-                 )
+        dissolve(
+            dissolved_organization_name="Littenseradiel",
+            target_organization_names=["Waadhoeke", "Leeuwarden", "Súdwest-Fryslân"],
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
+        )
 
         # todo: do a geographic move. This is done via "update_coordinates"
         # todo: add the geographic updates using update_coordinates on a certain date...
@@ -61,11 +63,13 @@ class Command(BaseCommand):
         De gemeenteraad van Leeuwarderadeel heeft na een referendum in maart 2013 besloten dat de gemeente zal
         opgaan in de gemeente Leeuwarden.
         """
-        merge(source_organizations_names=["Leeuwarderadeel"],
-              target_organization_name="Leeuwarden",
-              when=merge_date,
-              organization_type="municipality",
-              country="NL")
+        merge(
+            source_organizations_names=["Leeuwarderadeel"],
+            target_organization_name="Leeuwarden",
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
+        )
 
         """
         Ook zullen tien dorpen van Littenseradiel aan de nieuwe fusiegemeente toegevoegd worden.
@@ -81,22 +85,26 @@ class Command(BaseCommand):
         De gemeenten Rijnwaarden en Zevenaar hebben in mei 2016 besloten om te fuseren tot de nieuwe gemeente Zevenaar.
         """
         # straightforward geographic move
-        merge(source_organizations_names=["Rijnwaarden"],
-              target_organization_name="Zevenaar",
-              when=merge_date,
-              organization_type="municipality",
-              country="NL")
+        merge(
+            source_organizations_names=["Rijnwaarden"],
+            target_organization_name="Zevenaar",
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
+        )
 
         """
         De gemeenten Vlagtwedde en Bellingwedde hebben in oktober 2015 besloten om te fuseren tot de
         nieuwe gemeente Westerwolde.
         """
         # straightforward geographic move
-        merge(source_organizations_names=["Vlagtwedde", "Bellingwedde"],
-              target_organization_name="Westerwolde",
-              when=merge_date,
-              organization_type="municipality",
-              country="NL")
+        merge(
+            source_organizations_names=["Vlagtwedde", "Bellingwedde"],
+            target_organization_name="Westerwolde",
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
+        )
 
         """
         De gemeenten Hoogezand-Sappemeer, Menterwolde en Slochteren hebben in november 2015 besloten om te fuseren
@@ -104,8 +112,10 @@ class Command(BaseCommand):
         """
 
         # straightforward geographic move
-        merge(source_organizations_names=["Hoogezand-Sappemeer", "Menterwolde", "Slochteren"],
-              target_organization_name="Midden-Groningen",
-              when=merge_date,
-              organization_type="municipality",
-              country="NL")
+        merge(
+            source_organizations_names=["Hoogezand-Sappemeer", "Menterwolde", "Slochteren"],
+            target_organization_name="Midden-Groningen",
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
+        )

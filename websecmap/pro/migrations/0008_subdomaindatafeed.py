@@ -6,16 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pro', '0007_rescanrequest_scan_id'),
+        ("pro", "0007_rescanrequest_scan_id"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SubdomainDataFeed',
+            name="SubdomainDataFeed",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('subdomain', models.CharField(blank=True, max_length=255, null=True)),
-                ('urllist', models.ManyToManyField(to='pro.UrlList')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("subdomain", models.CharField(blank=True, max_length=255, null=True)),
+                ("urllist", models.ManyToManyField(to="pro.UrlList")),
             ],
         ),
     ]

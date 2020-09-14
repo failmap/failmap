@@ -6,14 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0037_auto_20180823_1205'),
+        ("organizations", "0037_auto_20180823_1205"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='url',
-            name='computed_subdomain',
+            model_name="url",
+            name="computed_subdomain",
             field=models.CharField(
-                blank=True, db_index=True, help_text='Automatically computed by tldextract on save. Data entered manually will be overwritten.', max_length=255, null=True),
+                blank=True,
+                db_index=True,
+                help_text="Automatically computed by tldextract on save. Data entered manually will be overwritten.",
+                max_length=255,
+                null=True,
+            ),
         ),
     ]

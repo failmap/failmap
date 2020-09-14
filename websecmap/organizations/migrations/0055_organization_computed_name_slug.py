@@ -6,14 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0054_auto_20190325_1005'),
+        ("organizations", "0054_auto_20190325_1005"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organization',
-            name='computed_name_slug',
+            model_name="organization",
+            name="computed_name_slug",
             field=models.SlugField(
-                default='', help_text='Computed value, a slug translation of the organization name, which can be used in urls.', max_length=250),
+                default="",
+                help_text="Computed value, a slug translation of the organization name, which can be used in urls.",
+                max_length=250,
+            ),
         ),
     ]

@@ -21,14 +21,14 @@ def compose_task(
     """
 
     if endpoints_filter:
-        raise NotImplementedError('This scanner does not work on a endpoint level.')
+        raise NotImplementedError("This scanner does not work on a endpoint level.")
 
     log.info("Organization filter: %s" % organizations_filter)
     log.info("Url filter: %s" % urls_filter)
 
     # Only displayed configurations are reported. Because why have reports on things you don't display?
     # apply filter to organizations (or if no filter, all organizations)
-    organizations = Organization.objects.filter(q_configurations_to_report('organization'), **organizations_filter)
+    organizations = Organization.objects.filter(q_configurations_to_report("organization"), **organizations_filter)
 
     log.debug("Organizations: %s" % len(organizations))
 
@@ -48,15 +48,14 @@ def compose_task(
 
         # Do NOT update the statistics also. This can take long and might not have a desired effect.
         # those updates have to be called explicitly.
-        tasks.append(recreate_url_reports.si(urls)
-                     | recreate_organization_reports.si([organization]))
+        tasks.append(recreate_url_reports.si(urls) | recreate_organization_reports.si([organization]))
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")
         log.debug("Organization filter: %s" % organizations_filter)
         log.debug("Url filter: %s" % urls_filter)
         log.debug("urls to display: %s" % q_configurations_to_report())
-        log.debug("organizatins to display: %s" % q_configurations_to_report('organization'))
+        log.debug("organizatins to display: %s" % q_configurations_to_report("organization"))
         return group()
 
     log.debug("Number of tasks: %s" % len(tasks))

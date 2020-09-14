@@ -17,7 +17,7 @@ from websecmap.scanners.models import Endpoint, PlannedScan, PlannedScanStatisti
 log = logging.getLogger(__name__)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def store_progress():
     """
     Runs every N minutes (periodic task) and stores the latest calculated progress in the db.
@@ -53,7 +53,9 @@ def calculate_progress(days=7) -> List[Dict[str, Any]]:
                 requested_at_when >= '%(when)s'
             GROUP BY
                 scanner, activity, state
-            """ % {'when': when.date()}
+            """ % {
+        "when": when.date()
+    }
 
     cursor = connection.cursor()
     cursor.execute(sql)
@@ -61,12 +63,7 @@ def calculate_progress(days=7) -> List[Dict[str, Any]]:
 
     overview = []
     for row in rows:
-        overview.append({
-            'scanner': row[0],
-            'activity': row[1],
-            'state': row[2],
-            'amount': row[3]
-        })
+        overview.append({"scanner": row[0], "activity": row[1], "state": row[2], "amount": row[3]})
 
     return overview
 
@@ -75,7 +72,7 @@ def reset():
     PlannedScan.objects.all().delete()
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def retry():
     """
     When something is picked up, but not finished in a day, just retry. Something went wrong.
@@ -85,9 +82,8 @@ def retry():
 
     """
     PlannedScan.objects.all().filter(
-        state='picked_up',
-        last_state_change_at__lte=datetime.now(pytz.utc) - timedelta(days=1)
-    ).update(state='requested')
+        state="picked_up", last_state_change_at__lte=datetime.now(pytz.utc) - timedelta(days=1)
+    ).update(state="requested")
 
 
 def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
@@ -138,20 +134,22 @@ def request(activity: str, scanner: str, urls: List[Url]):
 
 
 def already_requested(activity: str, scanner: str, url: Url):
-    return PlannedScan.objects.all().filter(
-        activity=activity, scanner=scanner, url=url, state__in=["requested", "picked_up"]
-    ).exists()
+    return (
+        PlannedScan.objects.all()
+        .filter(activity=activity, scanner=scanner, url=url, state__in=["requested", "picked_up"])
+        .exists()
+    )
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def finish(activity: str, scanner: str, url: Url):
     set_scan_state(activity, scanner, url, "finished")
 
 
 def set_scan_state(activity: str, scanner: str, url: Url, state="finished"):
-    oldest_scan = PlannedScan.objects.all().filter(
-        activity=activity, scanner=scanner, url=url, state="picked_up"
-    ).first()
+    oldest_scan = (
+        PlannedScan.objects.all().filter(activity=activity, scanner=scanner, url=url, state="picked_up").first()
+    )
     if oldest_scan:
         oldest_scan.state = state
         oldest_scan.last_state_change_at = datetime.now(pytz.utc)
@@ -163,7 +161,7 @@ def set_scan_state(activity: str, scanner: str, url: Url, state="finished"):
         log.debug(f"No planned scan found for {url}. Ignored.")
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def finish_multiple(activity: str, scanner: str, urls: List[Url]):
     for url in urls:
         finish(activity, scanner, url)
@@ -174,7 +172,7 @@ def retrieve_endpoints_from_urls(
     protocols: List[str] = None,
     ports: List[int] = None,
     ip_versions: List[int] = None,
-    is_dead: bool = False
+    is_dead: bool = False,
 ) -> List[Endpoint]:
     """
     Given this approach reduces all scans to urls, and some scans require endpoints.
@@ -218,38 +216,41 @@ def list_outdated(published_scan_types):
     for map_configuration in filter_map_configs():
         print(f"Outdated items for {map_configuration['country']}/{map_configuration['organization_type__name']}:")
         organizations_on_map = Organization.objects.all().filter(
-            country=map_configuration['country'],
-            type=map_configuration['organization_type']
+            country=map_configuration["country"], type=map_configuration["organization_type"]
         )
         # Outdated is earlier than the map_health says something is outdated. Otherwise we're always
         # one day behind with scans, and thus is always something outdated.
         outdated = get_outdated_ratings(organizations_on_map, 24 * 5)
-        relevant_outdated = [item for item in outdated if item.get('scan_type', 'unknown') in published_scan_types]
+        relevant_outdated = [item for item in outdated if item.get("scan_type", "unknown") in published_scan_types]
         plan = []
         for outdated_result in relevant_outdated:
-            scanner = SCAN_TYPES_TO_SCANNER[outdated_result['scan_type']]
-            plan.append({
-                'scanner': scanner['name'],
-                'url': outdated_result['url'],
-                'activity': 'scan',
-                'last_scan': outdated_result['last_scan'],
-                'scan': outdated_result['scan'],
-            })
+            scanner = SCAN_TYPES_TO_SCANNER[outdated_result["scan_type"]]
+            plan.append(
+                {
+                    "scanner": scanner["name"],
+                    "url": outdated_result["url"],
+                    "activity": "scan",
+                    "last_scan": outdated_result["last_scan"],
+                    "scan": outdated_result["scan"],
+                }
+            )
         plan = deduplicate_plan(plan)
 
         # update the dates to match:
         for activity in plan:
-            activity['last_scan'] = dateutil.parser.isoparse(activity['last_scan'])
+            activity["last_scan"] = dateutil.parser.isoparse(activity["last_scan"])
 
-        plan = sorted(plan, key=lambda mplan: mplan['last_scan'])
+        plan = sorted(plan, key=lambda mplan: mplan["last_scan"])
         print(f" For a total of {len(plan)} items:")
         print("-------------------------------------------------------------------------------------------------------")
         print(f"{'Last scan':22} {'Scan':9} {'Activity':10} {'Scanner':30} {'Url':60}")
         print("-------------------------------------------------------------------------------------------------------")
 
         for item in plan:
-            print(f"{str(item['last_scan'].strftime('%Y-%m-%d %H:%M:%S')):22} {item['scan']:9} "
-                  f"{item['activity']:10} {item['scanner']:30} {item['url']:60}")
+            print(
+                f"{str(item['last_scan'].strftime('%Y-%m-%d %H:%M:%S')):22} {item['scan']:9} "
+                f"{item['activity']:10} {item['scanner']:30} {item['url']:60}"
+            )
     return
 
 
@@ -272,8 +273,7 @@ def plan_outdated_scans(published_scan_types):
         log.debug(f"Retrieving outdated scans from config: {map_configuration}.")
 
         organizations_on_map = Organization.objects.all().filter(
-            country=map_configuration['country'],
-            type=map_configuration['organization_type']
+            country=map_configuration["country"], type=map_configuration["organization_type"]
         )
 
         log.debug(f"There are {len(organizations_on_map)} organizations on this map.")
@@ -281,37 +281,39 @@ def plan_outdated_scans(published_scan_types):
         # Outdated is earlier than the map_health says something is outdated. Otherwise we're always
         # one day behind with scans, and thus is always something outdated.
         outdated = get_outdated_ratings(organizations_on_map, 24 * 5)
-        relevant_outdated = [item for item in outdated if item.get('scan_type', 'unknown') in published_scan_types]
+        relevant_outdated = [item for item in outdated if item.get("scan_type", "unknown") in published_scan_types]
 
         # plan scans for outdated results:
         plan = []
         for outdated_result in relevant_outdated:
-            scanner = SCAN_TYPES_TO_SCANNER[outdated_result['scan_type']]
-            plan.append({
-                'scanner': scanner['name'],
-                'url': outdated_result['url'],
-                'activity': 'scan',
-            })
+            scanner = SCAN_TYPES_TO_SCANNER[outdated_result["scan_type"]]
+            plan.append(
+                {
+                    "scanner": scanner["name"],
+                    "url": outdated_result["url"],
+                    "activity": "scan",
+                }
+            )
 
             # see if there are requirements for verification or discovery from other scanners:
             # log.debug(f"There are {len(scanner['needs results from'])} underlaying scanners.")
-            for underlaying_scanner in scanner['needs results from']:
+            for underlaying_scanner in scanner["needs results from"]:
                 underlaying_scanner_details = SCANNERS_BY_NAME[underlaying_scanner]
 
-                if any([underlaying_scanner_details['can discover endpoints'],
-                        underlaying_scanner_details['can discover urls']]):
-                    plan.append({
-                        'scanner': underlaying_scanner,
-                        'url': outdated_result['url'],
-                        'activity': 'discover'
-                    })
-                if any([underlaying_scanner_details['can verify endpoints'],
-                        underlaying_scanner_details['can verify urls']]):
-                    plan.append({
-                        'scanner': underlaying_scanner,
-                        'url': outdated_result['url'],
-                        'activity': 'verify'
-                    })
+                if any(
+                    [
+                        underlaying_scanner_details["can discover endpoints"],
+                        underlaying_scanner_details["can discover urls"],
+                    ]
+                ):
+                    plan.append({"scanner": underlaying_scanner, "url": outdated_result["url"], "activity": "discover"})
+                if any(
+                    [
+                        underlaying_scanner_details["can verify endpoints"],
+                        underlaying_scanner_details["can verify urls"],
+                    ]
+                ):
+                    plan.append({"scanner": underlaying_scanner, "url": outdated_result["url"], "activity": "verify"})
 
         # there can be many duplicate tasks, especially when there are multiple scan results from a single scanner.
         clean_plan = deduplicate_plan(plan)
@@ -319,13 +321,13 @@ def plan_outdated_scans(published_scan_types):
         # make sure the urls are actual urls. Only plan for alive urls anyway.
         clean_plan_with_urls = []
         for item in clean_plan:
-            url = Url.objects.all().filter(url=item['url'], is_dead=False, not_resolvable=False).first()
+            url = Url.objects.all().filter(url=item["url"], is_dead=False, not_resolvable=False).first()
             if url:
-                item['url'] = url
+                item["url"] = url
                 clean_plan_with_urls.append(item)
 
         # and finally, plan it...
         for item in clean_plan_with_urls:
-            request(item['activity'], item['scanner'], [item['url']])
+            request(item["activity"], item["scanner"], [item["url"]])
 
         log.debug(f"Planned {len(clean_plan_with_urls)} scans / verify and discovery tasks.")

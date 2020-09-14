@@ -12,36 +12,27 @@ class CalculateCommand(BaseCommand):
 
     def add_arguments(self, parser):
 
-        parser.add_argument("--days",
-                            type=check_positive,
-                            help="Number of days to go back in time.",
-                            required=False)
+        parser.add_argument("--days", type=check_positive, help="Number of days to go back in time.", required=False)
 
-        parser.add_argument("--country",
-                            type=is_iso,
-                            help="2 character iso code of country",
-                            required=False)
+        parser.add_argument("--country", type=is_iso, help="2 character iso code of country", required=False)
 
-        parser.add_argument("--organization_type",
-                            type=str,
-                            help="name of the organization type",
-                            required=False)
+        parser.add_argument("--organization_type", type=str, help="name of the organization type", required=False)
 
     def handle(self, *args, **options):
         """ Short hand for the first time running this """
 
-        if options['days']:
-            days = options['days']
+        if options["days"]:
+            days = options["days"]
         else:
             days = 366
 
-        if options['country']:
-            countries = [options['country']]
+        if options["country"]:
+            countries = [options["country"]]
         else:
             countries = []
 
-        if options['organization_type']:
-            organization_type = [options['organization_type']]
+        if options["organization_type"]:
+            organization_type = [options["organization_type"]]
         else:
             organization_type = []
 

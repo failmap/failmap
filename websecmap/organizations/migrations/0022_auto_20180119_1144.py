@@ -12,61 +12,65 @@ from django.utils.timezone import utc
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0021_auto_20171113_1028'),
+        ("organizations", "0021_auto_20171113_1028"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='coordinate',
-            name='created_on',
+            model_name="coordinate",
+            name="created_on",
             field=models.DateTimeField(blank=True, default=datetime.datetime(2016, 1, 1, 0, 0, tzinfo=utc), null=True),
         ),
         migrations.AddField(
-            model_name='coordinate',
-            name='creation_metadata',
+            model_name="coordinate",
+            name="creation_metadata",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='coordinate',
-            name='is_dead',
+            model_name="coordinate",
+            name="is_dead",
             field=models.BooleanField(
-                default=False, help_text="Dead url's will not be rendered on the map. Scanners can set this check automatically (which might change in the future)"),
+                default=False,
+                help_text="Dead url's will not be rendered on the map. Scanners can set this check automatically (which might change in the future)",
+            ),
         ),
         migrations.AddField(
-            model_name='coordinate',
-            name='is_dead_reason',
+            model_name="coordinate",
+            name="is_dead_reason",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='coordinate',
-            name='is_dead_since',
+            model_name="coordinate",
+            name="is_dead_since",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='organization',
-            name='created_on',
+            model_name="organization",
+            name="created_on",
             field=models.DateTimeField(blank=True, default=datetime.datetime(2016, 1, 1, 0, 0, tzinfo=utc), null=True),
         ),
         migrations.AddField(
-            model_name='organization',
-            name='is_dead',
+            model_name="organization",
+            name="is_dead",
             field=models.BooleanField(
-                default=False, help_text='A dead organization is not shown on the map, depending on the dead_date.'),
+                default=False, help_text="A dead organization is not shown on the map, depending on the dead_date."
+            ),
         ),
         migrations.AddField(
-            model_name='organization',
-            name='is_dead_reason',
+            model_name="organization",
+            name="is_dead_reason",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='organization',
-            name='is_dead_since',
+            model_name="organization",
+            name="is_dead_since",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='url',
-            name='organization_old',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT,
-                                    to='organizations.Organization'),
+            model_name="url",
+            name="organization_old",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.PROTECT, to="organizations.Organization"
+            ),
         ),
     ]

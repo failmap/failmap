@@ -20,7 +20,7 @@ log = logging.getLogger(__package__)
 
 
 class ContestForm(forms.Form):
-    field_order = ('id', )
+    field_order = ("id",)
 
     id = forms.IntegerField()
 
@@ -29,7 +29,10 @@ class ContestForm(forms.Form):
         id = cleaned_data.get("id")
 
         if not Contest.objects.all().filter(pk=id).exists():
-            raise ValidationError(_('This contest does not exist.'), code='invalid',)
+            raise ValidationError(
+                _("This contest does not exist."),
+                code="invalid",
+            )
 
         """
         We don't care if it's expired, as long as you cannot add things to expired contests it's fine. Some people that
@@ -50,18 +53,17 @@ class TeamForm(forms.Form):
     contest = Contest()
 
     def __init__(self, *args, **kwargs):
-        self.contest = kwargs.pop('contest', 0)
-        self.user = kwargs.pop('user', None)
+        self.contest = kwargs.pop("contest", 0)
+        self.user = kwargs.pop("user", None)
         super(TeamForm, self).__init__(*args, **kwargs)
-        self.fields['team'] = forms.ModelChoiceField(
+        self.fields["team"] = forms.ModelChoiceField(
             widget=forms.RadioSelect,
-            queryset=Team.objects.all().filter(
-                allowed_to_submit_things=True, participating_in_contest=self.contest),
+            queryset=Team.objects.all().filter(allowed_to_submit_things=True, participating_in_contest=self.contest),
         )
 
-        self.fields['secret'] = forms.CharField(widget=forms.PasswordInput)
+        self.fields["secret"] = forms.CharField(widget=forms.PasswordInput)
 
-        self.order_fields(['team', 'secret'])
+        self.order_fields(["team", "secret"])
 
     def clean(self):
         cleaned_data = super().clean()
@@ -76,20 +78,17 @@ class TeamForm(forms.Form):
         # it's possible NOT to select a team, in that case, don't try and validate secret.
         if team:
             try:
-                if has_permission('skip_team_secret', self.user):
+                if has_permission("skip_team_secret", self.user):
                     return
 
                 team = Team.objects.all().get(
-                    id=team.id,
-                    secret=secret,
-                    allowed_to_submit_things=True,
-                    participating_in_contest=self.contest
+                    id=team.id, secret=secret, allowed_to_submit_things=True, participating_in_contest=self.contest
                 )
 
             except Team.DoesNotExist:
                 raise ValidationError(
-                    _('Incorrect secret or team. Try again!'),
-                    code='invalid',
+                    _("Incorrect secret or team. Try again!"),
+                    code="invalid",
                 )
 
 
@@ -98,7 +97,7 @@ def has_permission(permission_code, user):
     if not user:
         return False
 
-    if user.is_superuser and permission_code in ['skip_team_secret']:
+    if user.is_superuser and permission_code in ["skip_team_secret"]:
         return True
 
 
@@ -109,23 +108,26 @@ class OrganisationSubmissionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
 
-        self.contest = kwargs.pop('contest', None)
-        self.team = kwargs.pop('team', None)
+        self.contest = kwargs.pop("contest", None)
+        self.team = kwargs.pop("team", None)
 
         super(OrganisationSubmissionForm, self).__init__(*args, **kwargs)
 
     field_order = (
         # Fields to enter manually
-        'suggested_urls', 'organization_type_name',
-
+        "suggested_urls",
+        "organization_type_name",
         # Fields entered automatically
-        'organization_name', 'latitude', 'longitude', 'organization_address', 'organization_wikipedia',
-        'organization_wikidata', 'organization_evidence',
+        "organization_name",
+        "latitude",
+        "longitude",
+        "organization_address",
+        "organization_wikipedia",
+        "organization_wikidata",
+        "organization_evidence",
     )
 
-    organization_name = forms.CharField(
-        label="Name"
-    )
+    organization_name = forms.CharField(label="Name")
 
     latitude = forms.DecimalField(
         max_digits=21,
@@ -149,39 +151,39 @@ class OrganisationSubmissionForm(forms.Form):
     organization_wikipedia = forms.URLField(
         label="Wikipedia page",
         help_text="Autofilled. Might be wrong. To quickly find the correct wiki page, start a search by "
-                  "clicking <a href='https://en.wikipedia.org/w/index.php?search="
-                  "ministry+van+binnenlandse+zaken&title=Special:Search&go=Go'>here: search wikipedia</a>.",
-        required=False
+        "clicking <a href='https://en.wikipedia.org/w/index.php?search="
+        "ministry+van+binnenlandse+zaken&title=Special:Search&go=Go'>here: search wikipedia</a>.",
+        required=False,
     )
 
     organization_wikidata = forms.CharField(
         label="Wikidata code",
         help_text="Autofilled. Might be wrong. Find a Q code on <a href='https://www.wikidata.org/wiki/"
-                  "Wikidata:Main_Page' target='_blank'>wikidata</a>.",
-        required=False
+        "Wikidata:Main_Page' target='_blank'>wikidata</a>.",
+        required=False,
     )
 
     organization_type_name = forms.ModelChoiceField(
         queryset=OrganizationType.objects.all(),
-        widget=autocomplete.ModelSelect2(url='/game/autocomplete/organization-type-autocomplete/'),
+        widget=autocomplete.ModelSelect2(url="/game/autocomplete/organization-type-autocomplete/"),
         label="Map Layer",
         help_text="On what layer this organization should be shown.",
-        initial=2
+        initial=2,
     )
 
     organization_evidence = forms.CharField(
         widget=forms.Textarea,
         label="Sources verifying the existence of this organization",
         required=False,
-        help_text=""
+        help_text="",
     )
 
     suggested_urls = forms.CharField(
         widget=Select2TagWidget,
         label="Comma separated list of urls that you want to add to this organization when the organization has been"
-              " accepted.",
+        " accepted.",
         required=False,
-        help_text=""
+        help_text="",
     )
 
     # todo: clean the geolocated address to fit the rest of the system.
@@ -194,26 +196,34 @@ class OrganisationSubmissionForm(forms.Form):
         country = self.contest.target_country
 
         # todo: normalize the name for checking if it exists
-        exists = Organization.objects.all().filter(
-            type=organization_type_name, name__iexact=name, is_dead=False, country=country).exists()
+        exists = (
+            Organization.objects.all()
+            .filter(type=organization_type_name, name__iexact=name, is_dead=False, country=country)
+            .exists()
+        )
 
         if exists:
             raise ValidationError(
-                _('This organization %(organization)s already exists in the database for this type / layer.'),
-                code='invalid',
-                params={'organization': name},
+                _("This organization %(organization)s already exists in the database for this type / layer."),
+                code="invalid",
+                params={"organization": name},
             )
 
-        exists = OrganizationSubmission.objects.all().filter(
-            organization_type_name=organization_type_name,
-            organization_name__iexact=name,
-            organization_country=country).exists()
+        exists = (
+            OrganizationSubmission.objects.all()
+            .filter(
+                organization_type_name=organization_type_name,
+                organization_name__iexact=name,
+                organization_country=country,
+            )
+            .exists()
+        )
 
         if exists:
             raise ValidationError(
-                _('This organization %(organization)s has been suggested already.'),
-                code='invalid',
-                params={'organization': name},
+                _("This organization %(organization)s has been suggested already."),
+                code="invalid",
+                params={"organization": name},
             )
 
         # team not participating in contest
@@ -227,15 +237,15 @@ class OrganisationSubmissionForm(forms.Form):
     @transaction.atomic
     def save(self, team):
         organization_country = self.contest.target_country
-        organization_name = self.cleaned_data.get('organization_name', None)
-        lat = self.cleaned_data.get('latitude', None)
-        lng = self.cleaned_data.get('longitude', None)
-        organization_address = self.cleaned_data.get('organization_address', None)
-        organization_wikipedia = self.cleaned_data.get('organization_wikipedia', None)
-        organization_wikidata = self.cleaned_data.get('organization_wikidata', None)
-        organization_type_name = self.cleaned_data.get('organization_type_name', None)
-        organization_evidence = self.cleaned_data.get('organization_evidence', None)
-        organization_suggested_urls = self.cleaned_data.get('suggested_urls', None)
+        organization_name = self.cleaned_data.get("organization_name", None)
+        lat = self.cleaned_data.get("latitude", None)
+        lng = self.cleaned_data.get("longitude", None)
+        organization_address = self.cleaned_data.get("organization_address", None)
+        organization_wikipedia = self.cleaned_data.get("organization_wikipedia", None)
+        organization_wikidata = self.cleaned_data.get("organization_wikidata", None)
+        organization_type_name = self.cleaned_data.get("organization_type_name", None)
+        organization_evidence = self.cleaned_data.get("organization_evidence", None)
+        organization_suggested_urls = self.cleaned_data.get("suggested_urls", None)
 
         submission = OrganizationSubmission(
             added_by_team=Team.objects.get(pk=team),
@@ -250,7 +260,7 @@ class OrganisationSubmissionForm(forms.Form):
             suggested_urls=organization_suggested_urls,
             added_on=timezone.now(),
             has_been_accepted=False,
-            has_been_rejected=False
+            has_been_rejected=False,
         )
         submission.save()
 
@@ -258,7 +268,7 @@ class OrganisationSubmissionForm(forms.Form):
     # Loading this JS AFTER via the media options doesn't work...
     class Media:
         css = {
-            'all': ('css/location_picker.css',),
+            "all": ("css/location_picker.css",),
         }
 
 
@@ -269,18 +279,18 @@ class UrlSubmissionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
 
-        self.contest = kwargs.pop('contest', None)
-        self.team = kwargs.pop('team', None)
+        self.contest = kwargs.pop("contest", None)
+        self.team = kwargs.pop("team", None)
 
         super(UrlSubmissionForm, self).__init__(*args, **kwargs)
 
-        self.fields['for_organization'] = forms.ModelMultipleChoiceField(
+        self.fields["for_organization"] = forms.ModelMultipleChoiceField(
             label="Organizations",
-            queryset=Organization.objects.all().filter(country=self.contest.target_country, is_dead=False
-                                                       ).order_by(Lower('name')),
+            queryset=Organization.objects.all()
+            .filter(country=self.contest.target_country, is_dead=False)
+            .order_by(Lower("name")),
             widget=autocomplete.ModelSelect2Multiple(
-                url='/game/autocomplete/organization-autocomplete/',
-                forward=['organization_type_name', 'country']
+                url="/game/autocomplete/organization-autocomplete/", forward=["organization_type_name", "country"]
             ),
             help_text="""
             Hints:"
@@ -294,13 +304,13 @@ class UrlSubmissionForm(forms.Form):
                     organization.</li>
                     <li>Urls entered below will be added to all organizations selected here.</li>
                 </ul>
-            """
+            """,
         )
 
         # try and inject values into the tagswidget
         valid = []
         try:
-            sites = self.data.getlist('websites', [])
+            sites = self.data.getlist("websites", [])
             incomplete, not_resolvable, valid = self.filter_websites(sites)
             # log.debug("incomplete: %s, not_resolvable: %s, valid: %s" % (incomplete, not_resolvable, valid))
             initial = valid
@@ -324,18 +334,18 @@ class UrlSubmissionForm(forms.Form):
             self.data._mutable = True
             # have to add multiple... one each. A MultiValueDict...
             # remove all values from any websites keys, and only add the valid ones as possible data.
-            self.data.pop('websites')
+            self.data.pop("websites")
 
             for site in valid:
                 # this only overwrites the first one...
                 # https://kite.com/python/docs/django.http.request.QueryDict
-                self.data.update({'websites': site})
+                self.data.update({"websites": site})
 
         # https://github.com/applegrew/django-select2/issues/33
         # finding this took me two hours :) but it's still faster than developing it yourself.
         # The issue was the documentation was not online.
 
-        self.fields['websites'] = forms.MultipleChoiceField(
+        self.fields["websites"] = forms.MultipleChoiceField(
             widget=Select2TagWidget,
             choices=choices,
             initial=initial,
@@ -356,16 +366,16 @@ class UrlSubmissionForm(forms.Form):
                 <li>It's not possible to enter IP addresses: the IP's behind services/organizations often change.</li>
                 <li>Urls that don't resolve or are in incorrect format will be automatically removed.</li>
                 </ul>
-            """
+            """,
         )
 
         # Helps Django Autocomplete light with selecting the right autocompleted values.
-        self.fields['country'] = CountryField().formfield(
+        self.fields["country"] = CountryField().formfield(
             label="🔍 Filter organization by country",
             required=False,
             help_text="This only helps finding the correct organization.",
             initial=self.contest.target_country,
-            widget=forms.HiddenInput()
+            widget=forms.HiddenInput(),
         )
 
     """
@@ -393,8 +403,7 @@ class UrlSubmissionForm(forms.Form):
             url = url.replace("https://", "")
             url = url.replace("http://", "")
 
-            extract = \
-                tldextract.extract(url)
+            extract = tldextract.extract(url)
             if not extract.suffix:
                 incomplete.append(url)
                 continue
@@ -415,66 +424,74 @@ class UrlSubmissionForm(forms.Form):
 
     def clean_websites(self):
         try:
-            sites = self.data.getlist('websites', [])
+            sites = self.data.getlist("websites", [])
             incomplete, not_resolvable, valid = self.filter_websites(sites)
         except AttributeError:
             # nothing submitted
             incomplete, not_resolvable, valid = [], [], []
 
         if incomplete and not_resolvable:
-            raise ValidationError('Please review your submission and try again. '
-                                  'Removed because of being incomplete addresses: '
-                                  '%s. Removed because not resolvable: %s. '
-                                  '' %
-                                  (', '.join(incomplete), ', '.join(not_resolvable)),
-                                  code='not_complete_and_not_resolvable')
+            raise ValidationError(
+                "Please review your submission and try again. "
+                "Removed because of being incomplete addresses: "
+                "%s. Removed because not resolvable: %s. "
+                "" % (", ".join(incomplete), ", ".join(not_resolvable)),
+                code="not_complete_and_not_resolvable",
+            )
 
         if incomplete:
-            raise ValidationError('The following websites are not complete and have been removed: '
-                                  '%s. Please review your submission and try again.' % incomplete, code='not_complete')
+            raise ValidationError(
+                "The following websites are not complete and have been removed: "
+                "%s. Please review your submission and try again." % incomplete,
+                code="not_complete",
+            )
 
         if not_resolvable:
-            raise ValidationError('The following sites are not resolvable and have been removed: %s. '
-                                  'Please review your submission and try again.'
-                                  % not_resolvable,
-                                  code='not_resolvable')
+            raise ValidationError(
+                "The following sites are not resolvable and have been removed: %s. "
+                "Please review your submission and try again." % not_resolvable,
+                code="not_resolvable",
+            )
 
         return valid
 
     def clean_for_organization(self):
         if not self.contest:
-            raise ValidationError('You\'re not in a contest', 'no_contest')
+            raise ValidationError("You're not in a contest", "no_contest")
 
         # mandatory check is done elsewhere.
         # You'll be getting a list of numbers.
         try:
-            organizations = self.data.getlist('for_organization', [])
+            organizations = self.data.getlist("for_organization", [])
         except AttributeError:
             organizations = []
 
         existing = []
 
         for organization in organizations:
-            if not Organization.objects.filter(pk=organization,
-                                               country=self.contest.target_country, is_dead=False).exists():
+            if not Organization.objects.filter(
+                pk=organization, country=self.contest.target_country, is_dead=False
+            ).exists():
                 continue
             else:
                 existing.append(organization)
 
         if not existing:
-            raise forms.ValidationError('No existing organizations selected. ALl non-existing organizations have been'
-                                        'filtered out of below input to save you some time.')
+            raise forms.ValidationError(
+                "No existing organizations selected. ALl non-existing organizations have been"
+                "filtered out of below input to save you some time."
+            )
 
         return existing
 
     def clean(self):
         try:
-            organizations = self.data.getlist('for_organization', [])
+            organizations = self.data.getlist("for_organization", [])
         except AttributeError:
             organizations = []
 
         # clean_websites already has been called automatically...
-        websites = self.data.getlist('websites', [])
+        websites = self.data.getlist("websites", [])
 
         if not organizations:
             raise forms.ValidationError("Organization missing!")
@@ -506,7 +523,7 @@ class UrlSubmissionForm(forms.Form):
                 if website not in new:
                     new.append(website)
 
-        self.cleaned_data['websites'] = new
+        self.cleaned_data["websites"] = new
 
     @transaction.atomic
     def save(self):
@@ -515,16 +532,20 @@ class UrlSubmissionForm(forms.Form):
         # we can also check if the data is not in the db yet, which is nicer as it potentially saves a lot of time
         self.clean()
 
-        organizations = self.cleaned_data.get('for_organization', None)
-        websites = self.cleaned_data.get('websites', None)
+        organizations = self.cleaned_data.get("for_organization", None)
+        websites = self.cleaned_data.get("websites", None)
 
         for organization in organizations:
             for website in websites:
 
-                exists = UrlSubmission.objects.all().filter(
-                    for_organization=Organization.objects.get(pk=organization),
-                    url=website,
-                ).exists()
+                exists = (
+                    UrlSubmission.objects.all()
+                    .filter(
+                        for_organization=Organization.objects.get(pk=organization),
+                        url=website,
+                    )
+                    .exists()
+                )
 
                 if exists:
                     continue
