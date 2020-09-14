@@ -18,8 +18,7 @@ from django.utils.text import slugify
 from django.views.decorators.cache import cache_page
 
 from websecmap.app.common import JSEncoder
-from websecmap.game.forms import (ContestForm, OrganisationSubmissionForm, TeamForm,
-                                  UrlSubmissionForm)
+from websecmap.game.forms import ContestForm, OrganisationSubmissionForm, TeamForm, UrlSubmissionForm
 from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.reporting.severity import get_severity
@@ -37,16 +36,18 @@ ten_minutes = 60 * 10
 # workaround to start a contest view, has to be rewritten to use the configured default and fallback etc
 def get_default_contest(request):
     try:
-        if request.session.get('contest', 0):
+        if request.session.get("contest", 0):
             # log.debug("Returning a contest from session.")
-            return Contest.objects.get(id=request.session['contest'])
+            return Contest.objects.get(id=request.session["contest"])
         else:
             # get the first contest that is currently active, if nothing is active, get the first contest.
             try:
                 # log.debug("Trying to find the earliest active contest")
-                return Contest.objects.all().filter(
-                    until_moment__gte=datetime.now(pytz.utc),
-                    from_moment__lte=datetime.now(pytz.utc)).first()
+                return (
+                    Contest.objects.all()
+                    .filter(until_moment__gte=datetime.now(pytz.utc), from_moment__lte=datetime.now(pytz.utc))
+                    .first()
+                )
             except ObjectDoesNotExist:
                 # log.debug("Get the first contest ever")
                 return Contest.objects.first()
@@ -57,17 +58,17 @@ def get_default_contest(request):
 
 
 # todo: what about urls that are being added through another contest?
-@login_required(login_url='/authentication/login/')
+@login_required(login_url="/authentication/login/")
 def submit_url(request):
 
     # validate you're in a session
-    if not request.session.get('team'):
-        return redirect('/game/team/')
+    if not request.session.get("team"):
+        return redirect("/game/team/")
 
     contest = get_default_contest(request)
 
     if request.POST:
-        form = UrlSubmissionForm(request.POST, team=request.session.get('team'), contest=get_default_contest(request))
+        form = UrlSubmissionForm(request.POST, team=request.session.get("team"), contest=get_default_contest(request))
 
         if form.is_valid():
             # manually saving the form, this is not your normal 1 to 1 save.
@@ -75,62 +76,80 @@ def submit_url(request):
 
             # don't add the URL, so you can quickly add urls to the same organization.
             # this will cause some noise, but also more entries.
-            added_url = form.cleaned_data.get('websites')
-            form = UrlSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request))
+            added_url = form.cleaned_data.get("websites")
+            form = UrlSubmissionForm(team=request.session.get("team"), contest=get_default_contest(request))
 
-            return render(request, 'game/submit_url.html', {'form': form, 'success': True,
-                                                            'url': ', '.join(added_url), })
+            return render(
+                request,
+                "game/submit_url.html",
+                {
+                    "form": form,
+                    "success": True,
+                    "url": ", ".join(added_url),
+                },
+            )
 
     else:
-        form = UrlSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request))
+        form = UrlSubmissionForm(team=request.session.get("team"), contest=get_default_contest(request))
 
-    return render(request, 'game/submit_url.html', {'form': form,
-                                                    'error': form.errors,
-                                                    'contest': contest})
+    return render(request, "game/submit_url.html", {"form": form, "error": form.errors, "contest": contest})
 
 
-@login_required(login_url='/authentication/login/')
+@login_required(login_url="/authentication/login/")
 def submit_organisation(request):
 
     # validate you're in a session
-    if not request.session.get('team'):
-        return redirect('/game/team/')
+    if not request.session.get("team"):
+        return redirect("/game/team/")
 
     contest = get_default_contest(request)
     language = languages.get_official_languages(contest.target_country)[0]
 
     if request.POST:
-        form = OrganisationSubmissionForm(request.POST, team=request.session.get('team'), contest=contest)
+        form = OrganisationSubmissionForm(request.POST, team=request.session.get("team"), contest=contest)
 
         if form.is_valid():
             # manually saving the form, this is not your normal 1 to 1 save.
-            form.save(team=request.session.get('team'))
+            form.save(team=request.session.get("team"))
 
             # Reset some values
             log.debug(request.POST)
 
             form = OrganisationSubmissionForm(
                 # reuse the form values, is this really the way this should be done?
-                {'organization_type_name': [request.POST.get('organization_type_name', None)]},
-                team=request.session.get('team'),
+                {"organization_type_name": [request.POST.get("organization_type_name", None)]},
+                team=request.session.get("team"),
                 contest=contest,
             )
-            return render(request, 'game/submit_organisation.html',
-                          {'form': form,
-                           'success': True,
-                           'GOOGLE_MAPS_API_KEY': config.GOOGLE_MAPS_API_KEY,
-                           'target_country': contest.target_country,
-                           'language': language
-                           })
+            return render(
+                request,
+                "game/submit_organisation.html",
+                {
+                    "form": form,
+                    "success": True,
+                    "GOOGLE_MAPS_API_KEY": config.GOOGLE_MAPS_API_KEY,
+                    "target_country": contest.target_country,
+                    "language": language,
+                },
+            )
 
     else:
-        form = OrganisationSubmissionForm(team=request.session.get('team'), contest=contest,)
+        form = OrganisationSubmissionForm(
+            team=request.session.get("team"),
+            contest=contest,
+        )
 
-    return render(request, 'game/submit_organisation.html', {'form': form,
-                                                             'GOOGLE_MAPS_API_KEY': config.GOOGLE_MAPS_API_KEY,
-                                                             'target_country': contest.target_country,
-                                                             'language': language,
-                                                             'contest': contest})
+    return render(
+        request,
+        "game/submit_organisation.html",
+        {
+            "form": form,
+            "GOOGLE_MAPS_API_KEY": config.GOOGLE_MAPS_API_KEY,
+            "target_country": contest.target_country,
+            "language": language,
+            "contest": contest,
+        },
+    )
 
 
 @cache_page(one_minute)
@@ -138,7 +157,7 @@ def scores(request):
 
     # todo: this param handling code is absolutely disgusting, it should be more beautiful.
     # todo: should we just get the last contest if there is no contest at all?
-    submitted_contest = request.GET.get('contest', "")
+    submitted_contest = request.GET.get("contest", "")
     if submitted_contest is not None and submitted_contest.isnumeric():
         submitted_contest = int(submitted_contest)
     else:
@@ -163,64 +182,80 @@ def scores(request):
         will change in a day or two. On the long run it might increase the score a bit when incorrect fixes are applied
         or a new error is found. If the discovered issue is fixed it doesn't deliver additional points.
         """
-        scans = list(EndpointGenericScan.objects.all().filter(
-            endpoint__url__urlsubmission__added_by_team=team.id,
-            endpoint__url__urlsubmission__has_been_accepted=True,
-            rating_determined_on__lte=contest.until_moment,
-            type__in=ENDPOINT_SCAN_TYPES
-        ))
+        scans = list(
+            EndpointGenericScan.objects.all().filter(
+                endpoint__url__urlsubmission__added_by_team=team.id,
+                endpoint__url__urlsubmission__has_been_accepted=True,
+                rating_determined_on__lte=contest.until_moment,
+                type__in=ENDPOINT_SCAN_TYPES,
+            )
+        )
 
-        scans += list(UrlGenericScan.objects.all().filter(
-            url__urlsubmission__added_by_team=team.id,
-            url__urlsubmission__has_been_accepted=True,
-            rating_determined_on__lte=contest.until_moment,
-            type__in=URL_SCAN_TYPES
-        ))
+        scans += list(
+            UrlGenericScan.objects.all().filter(
+                url__urlsubmission__added_by_team=team.id,
+                url__urlsubmission__has_been_accepted=True,
+                rating_determined_on__lte=contest.until_moment,
+                type__in=URL_SCAN_TYPES,
+            )
+        )
 
-        added_urls = UrlSubmission.objects.all().filter(
-            added_by_team=team.id,
-            has_been_accepted=True,
-            has_been_rejected=False,
-        ).count()
+        added_urls = (
+            UrlSubmission.objects.all()
+            .filter(
+                added_by_team=team.id,
+                has_been_accepted=True,
+                has_been_rejected=False,
+            )
+            .count()
+        )
 
-        added_organizations = OrganizationSubmission.objects.all().filter(
-            added_by_team=team.id,
-            has_been_accepted=True,
-            has_been_rejected=False
-        ).count()
+        added_organizations = (
+            OrganizationSubmission.objects.all()
+            .filter(added_by_team=team.id, has_been_accepted=True, has_been_rejected=False)
+            .count()
+        )
 
-        rejected_organizations = OrganizationSubmission.objects.all().filter(
-            added_by_team=team.id,
-            has_been_accepted=False,
-            has_been_rejected=True,
-        ).count()
+        rejected_organizations = (
+            OrganizationSubmission.objects.all()
+            .filter(
+                added_by_team=team.id,
+                has_been_accepted=False,
+                has_been_rejected=True,
+            )
+            .count()
+        )
 
-        rejected_urls = UrlSubmission.objects.all().filter(
-            added_by_team=team.id,
-            has_been_accepted=False,
-            has_been_rejected=True,
-        ).count()
+        rejected_urls = (
+            UrlSubmission.objects.all()
+            .filter(
+                added_by_team=team.id,
+                has_been_accepted=False,
+                has_been_rejected=True,
+            )
+            .count()
+        )
 
         final_calculation = {
-            'high': 0,
-            'medium': 0,
-            'low': 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
         }
 
         for scan in scans:
             temp_calculation = get_severity(scan)
-            final_calculation['high'] += temp_calculation['high']
-            final_calculation['medium'] += temp_calculation['medium']
-            final_calculation['low'] += temp_calculation['low']
+            final_calculation["high"] += temp_calculation["high"]
+            final_calculation["medium"] += temp_calculation["medium"]
+            final_calculation["low"] += temp_calculation["low"]
 
         score_multiplier = {
-            'low': 100,
-            'medium': 250,
-            'high': 1000,
-            'rejected_organization': 1337,
-            'rejected_url': 1337,
-            'organization': 500,
-            'url': 250,
+            "low": 100,
+            "medium": 250,
+            "high": 1000,
+            "rejected_organization": 1337,
+            "rejected_url": 1337,
+            "organization": 500,
+            "url": 250,
         }
 
         # if you're too lazy to enter a color.
@@ -235,51 +270,52 @@ def scores(request):
             color_code = "#FFFFFF"
 
         score = {
-            'team': team.name,
-            'team_color': team.color,
+            "team": team.name,
+            "team_color": team.color,
             # transparency makes it lighter and more beautiful.
-            'team_color_soft': "%s%s" % (color_code, '33'),
-            'high': final_calculation['high'],
-            'high_multiplier': score_multiplier['high'],
-            'high_score': final_calculation['high'] * score_multiplier['high'],
-            'medium': final_calculation['medium'],
-            'medium_multiplier': score_multiplier['medium'],
-            'medium_score': final_calculation['medium'] * score_multiplier['medium'],
-            'low': final_calculation['low'],
-            'low_multiplier': score_multiplier['low'],
-            'low_score': final_calculation['low'] * score_multiplier['low'],
-            'added_organizations': added_organizations,
-            'added_organizations_multiplier': score_multiplier['organization'],
-            'added_organizations_score': added_organizations * score_multiplier['organization'],
-            'added_urls': added_urls,
-            'added_urls_multiplier': score_multiplier['url'],
-            'added_urls_score': added_urls * score_multiplier['url'],
-            'rejected_organizations': rejected_organizations,
-            'rejected_organizations_multiplier': score_multiplier['rejected_organization'],
-            'rejected_organizations_score': rejected_organizations * score_multiplier['rejected_organization'],
-            'rejected_urls': rejected_urls,
-            'rejected_urls_multiplier': score_multiplier['rejected_url'],
-            'rejected_urls_score': rejected_urls * score_multiplier['rejected_url'],
-            'total_score':
-                final_calculation['high'] * score_multiplier['high'] +
-                final_calculation['medium'] * score_multiplier['medium'] +
-                final_calculation['low'] * score_multiplier['low'] +
-                added_organizations * score_multiplier['organization'] +
-                added_urls * score_multiplier['url'] - (
-                rejected_urls * score_multiplier['rejected_url'] +
-                rejected_organizations * score_multiplier['rejected_organization']
-            )
+            "team_color_soft": "%s%s" % (color_code, "33"),
+            "high": final_calculation["high"],
+            "high_multiplier": score_multiplier["high"],
+            "high_score": final_calculation["high"] * score_multiplier["high"],
+            "medium": final_calculation["medium"],
+            "medium_multiplier": score_multiplier["medium"],
+            "medium_score": final_calculation["medium"] * score_multiplier["medium"],
+            "low": final_calculation["low"],
+            "low_multiplier": score_multiplier["low"],
+            "low_score": final_calculation["low"] * score_multiplier["low"],
+            "added_organizations": added_organizations,
+            "added_organizations_multiplier": score_multiplier["organization"],
+            "added_organizations_score": added_organizations * score_multiplier["organization"],
+            "added_urls": added_urls,
+            "added_urls_multiplier": score_multiplier["url"],
+            "added_urls_score": added_urls * score_multiplier["url"],
+            "rejected_organizations": rejected_organizations,
+            "rejected_organizations_multiplier": score_multiplier["rejected_organization"],
+            "rejected_organizations_score": rejected_organizations * score_multiplier["rejected_organization"],
+            "rejected_urls": rejected_urls,
+            "rejected_urls_multiplier": score_multiplier["rejected_url"],
+            "rejected_urls_score": rejected_urls * score_multiplier["rejected_url"],
+            "total_score": final_calculation["high"] * score_multiplier["high"]
+            + final_calculation["medium"] * score_multiplier["medium"]
+            + final_calculation["low"] * score_multiplier["low"]
+            + added_organizations * score_multiplier["organization"]
+            + added_urls * score_multiplier["url"]
+            - (
+                rejected_urls * score_multiplier["rejected_url"]
+                + rejected_organizations * score_multiplier["rejected_organization"]
+            ),
         }
 
         scores.append(score)
 
     # order the scores from high to low.
-    scores = sorted(scores, key=lambda k: (k['total_score'], k['high'], k['medium'], k['low']), reverse=True)
+    scores = sorted(scores, key=lambda k: (k["total_score"], k["high"], k["medium"], k["low"]), reverse=True)
 
-    return render(request, 'game/scores.html', {'team': get_team_info(request),
-                                                'scores': scores,
-                                                'contest': contest,
-                                                'menu_selected': 'scores'})
+    return render(
+        request,
+        "game/scores.html",
+        {"team": get_team_info(request), "scores": scores, "contest": contest, "menu_selected": "scores"},
+    )
 
 
 @cache_page(one_minute)
@@ -289,38 +325,34 @@ def contests(request):
         form = ContestForm(request.POST)
 
         if form.is_valid():
-            if form.cleaned_data['id']:
-                request.session['contest'] = form.cleaned_data['id']
-                request.session['team'] = None  # resetting the team when switching
-                return redirect('/game/team/')
+            if form.cleaned_data["id"]:
+                request.session["contest"] = form.cleaned_data["id"]
+                request.session["team"] = None  # resetting the team when switching
+                return redirect("/game/team/")
             else:
-                request.session['contest'] = None
+                request.session["contest"] = None
     else:
         form = ContestForm()
 
-    expired_contests = Contest.objects.all().filter(
-        until_moment__lt=datetime.now(pytz.utc)
-    ).annotate(
-        teams=Count('team', distinct=True)
-    ).annotate(
-        urls=Count('team__urlsubmission')
+    expired_contests = (
+        Contest.objects.all()
+        .filter(until_moment__lt=datetime.now(pytz.utc))
+        .annotate(teams=Count("team", distinct=True))
+        .annotate(urls=Count("team__urlsubmission"))
     )
 
-    active_contests = Contest.objects.all().filter(
-        from_moment__lt=datetime.now(pytz.utc),
-        until_moment__gte=datetime.now(pytz.utc)
-    ).annotate(
-        teams=Count('team', distinct=True)
-    ).annotate(
-        urls=Count('team__urlsubmission')
+    active_contests = (
+        Contest.objects.all()
+        .filter(from_moment__lt=datetime.now(pytz.utc), until_moment__gte=datetime.now(pytz.utc))
+        .annotate(teams=Count("team", distinct=True))
+        .annotate(urls=Count("team__urlsubmission"))
     )
 
-    future_contests = Contest.objects.all().filter(
-        from_moment__gte=datetime.now(pytz.utc)
-    ).annotate(
-        teams=Count('team', distinct=True)
-    ).annotate(
-        urls=Count('team__urlsubmission')
+    future_contests = (
+        Contest.objects.all()
+        .filter(from_moment__gte=datetime.now(pytz.utc))
+        .annotate(teams=Count("team", distinct=True))
+        .annotate(urls=Count("team__urlsubmission"))
     )
 
     # don't select a contest if you don't have one in your session.
@@ -331,13 +363,18 @@ def contests(request):
     except Contest.DoesNotExist:
         contest = None
 
-    return render(request, 'game/contests.html', {
-        'contest': contest,
-        'expired_contests': expired_contests,
-        'active_contests': active_contests,
-        'future_contests': future_contests,
-        'error': form.errors
-    })
+    return render(
+        request,
+        "game/contests.html",
+        {
+            "contest": contest,
+            "expired_contests": expired_contests,
+            "active_contests": active_contests,
+            "future_contests": future_contests,
+            "error": form.errors,
+        },
+    )
+
 
 # todo: validate organizatio type name...
 
@@ -346,20 +383,30 @@ def contests(request):
 def submitted_organizations(request):
     contest = get_default_contest(request)
 
-    submitted_organizations = OrganizationSubmission.objects.all().filter(
-        added_by_team__participating_in_contest=contest
-    ).annotate(
-        num_urls=Count('organization_in_system__u_many_o_upgrade')
-    ).order_by('organization_type_name', 'organization_name')
+    submitted_organizations = (
+        OrganizationSubmission.objects.all()
+        .filter(added_by_team__participating_in_contest=contest)
+        .annotate(num_urls=Count("organization_in_system__u_many_o_upgrade"))
+        .order_by("organization_type_name", "organization_name")
+    )
 
     # not excluding the organizations submitted in this contest, as that IN filter will become too large.
-    already_known_organizations = Organization.objects.all().filter(
-        country=contest.target_country).select_related('type').order_by('type__name', 'name')
+    already_known_organizations = (
+        Organization.objects.all()
+        .filter(country=contest.target_country)
+        .select_related("type")
+        .order_by("type__name", "name")
+    )
 
-    return render(request, 'game/submitted_organizations.html', {
-        'submitted_organizations': submitted_organizations,
-        'already_known_organizations': already_known_organizations,
-        'contest': get_default_contest(request)})
+    return render(
+        request,
+        "game/submitted_organizations.html",
+        {
+            "submitted_organizations": submitted_organizations,
+            "already_known_organizations": already_known_organizations,
+            "contest": get_default_contest(request),
+        },
+    )
 
 
 @cache_page(one_minute)
@@ -378,50 +425,66 @@ def submitted_urls(request):
     # the IN query will be too long, and that means exceptions. so an in query to exclude the submitted
     # urls has been removed.
     # you can see the adding date for this :)
-    already_known_urls = Url.objects.all().filter(
-        organization__country=contest.target_country,
-        computed_subdomain="",
-        organization__is_dead=False,
-    ).order_by('-created_on').values('url', 'onboarding_stage', 'not_resolvable', 'organization__country',
-                                     'organization__name', 'created_on')
+    already_known_urls = (
+        Url.objects.all()
+        .filter(
+            organization__country=contest.target_country,
+            computed_subdomain="",
+            organization__is_dead=False,
+        )
+        .order_by("-created_on")
+        .values(
+            "url", "onboarding_stage", "not_resolvable", "organization__country", "organization__name", "created_on"
+        )
+    )
 
-    return render(request, 'game/submitted_urls.html',
-                  {'submitted_urls': submitted_urls,
-                   'already_known_urls': already_known_urls,
-                   'contest': contest})
+    return render(
+        request,
+        "game/submitted_urls.html",
+        {"submitted_urls": submitted_urls, "already_known_urls": already_known_urls, "contest": contest},
+    )
 
 
 def rules_help(request):
-    return render(request, 'game/rules_help.html')
+    return render(request, "game/rules_help.html")
 
 
 @cache_page(one_minute)
 def map(request):
     contest = get_default_contest(request)
 
-    submitted_organizations = OrganizationSubmission.objects.all().filter(
-        added_by_team__participating_in_contest=contest
-    ).annotate(
-        num_urls=Count('organization_in_system__u_many_o_upgrade')
-    ).order_by('organization_type_name', 'organization_name')
+    submitted_organizations = (
+        OrganizationSubmission.objects.all()
+        .filter(added_by_team__participating_in_contest=contest)
+        .annotate(num_urls=Count("organization_in_system__u_many_o_upgrade"))
+        .order_by("organization_type_name", "organization_name")
+    )
 
-    return render(request, 'game/map.html', {
-        'contest': contest,
-        'team': get_team_info(request),
-        'submitted_urls': get_submitted_urls(contest),
-        'submitted_organizations': submitted_organizations,
-    })
+    return render(
+        request,
+        "game/map.html",
+        {
+            "contest": contest,
+            "team": get_team_info(request),
+            "submitted_urls": get_submitted_urls(contest),
+            "submitted_organizations": submitted_organizations,
+        },
+    )
 
 
 def get_submitted_urls(contest):
     # Don't use to_attr or prefetch related, as it is not maintainable code and i could not get it to work at all for
     # hours. which was such a waste.
 
-    submitted_urls = UrlSubmission.objects.all().filter(
-        added_by_team__participating_in_contest=contest).order_by(
-        'for_organization', '-added_on', 'url'
-    ).select_related(
-        'added_by_team', 'for_organization', 'url_in_system',
+    submitted_urls = (
+        UrlSubmission.objects.all()
+        .filter(added_by_team__participating_in_contest=contest)
+        .order_by("for_organization", "-added_on", "url")
+        .select_related(
+            "added_by_team",
+            "for_organization",
+            "url_in_system",
+        )
     )
 
     # here are some example attempts:
@@ -448,15 +511,23 @@ def get_submitted_urls(contest):
     # )
 
     # the old school way, it's easier to read and still very fast.
-    url_scans = list(UrlGenericScan.objects.all().filter(
-        url__urlsubmission__added_by_team__participating_in_contest=contest,
-        rating_determined_on__lte=contest.until_moment
-    ).select_related('url'))
+    url_scans = list(
+        UrlGenericScan.objects.all()
+        .filter(
+            url__urlsubmission__added_by_team__participating_in_contest=contest,
+            rating_determined_on__lte=contest.until_moment,
+        )
+        .select_related("url")
+    )
 
-    endpoint_scans = list(EndpointGenericScan.objects.all().filter(
-        endpoint__url__urlsubmission__added_by_team__participating_in_contest=contest,
-        rating_determined_on__lte=contest.until_moment
-    ).select_related('endpoint__url'))
+    endpoint_scans = list(
+        EndpointGenericScan.objects.all()
+        .filter(
+            endpoint__url__urlsubmission__added_by_team__participating_in_contest=contest,
+            rating_determined_on__lte=contest.until_moment,
+        )
+        .select_related("endpoint__url")
+    )
 
     # create a sorting table where all relevant scans are ordered by url_id, thus search results are instant, save loops
     lookup_table = {}
@@ -464,14 +535,14 @@ def get_submitted_urls(contest):
         key = url_scan.url.pk
         # initialize if it doesn't exist yet for this url
         if key not in lookup_table:
-            lookup_table[key] = {'url_scans': [], 'endpoint_scans': []}
-        lookup_table[key]['url_scans'].append(url_scan)
+            lookup_table[key] = {"url_scans": [], "endpoint_scans": []}
+        lookup_table[key]["url_scans"].append(url_scan)
 
     for endpoint_scan in endpoint_scans:
         key = endpoint_scan.endpoint.url.id
         if key not in lookup_table:
-            lookup_table[key] = {'url_scans': [], 'endpoint_scans': []}
-        lookup_table[key]['endpoint_scans'].append(endpoint_scan)
+            lookup_table[key] = {"url_scans": [], "endpoint_scans": []}
+        lookup_table[key]["endpoint_scans"].append(endpoint_scan)
 
     custom_submitted_urls = []
     for submitted_url in submitted_urls:
@@ -482,15 +553,11 @@ def get_submitted_urls(contest):
 
             # some urls might not have scans yet
             if submitted_url.url_in_system.pk in lookup_table:
-                relevant_urls_scans = lookup_table[submitted_url.url_in_system.pk]['url_scans']
-                relevant_endpoint_scans = lookup_table[submitted_url.url_in_system.pk]['endpoint_scans']
+                relevant_urls_scans = lookup_table[submitted_url.url_in_system.pk]["url_scans"]
+                relevant_endpoint_scans = lookup_table[submitted_url.url_in_system.pk]["endpoint_scans"]
 
         custom_submitted_urls.append(
-            {
-                'url': submitted_url,
-                'url_scans': relevant_urls_scans,
-                'endpoint_scans': relevant_endpoint_scans
-            }
+            {"url": submitted_url, "url_scans": relevant_urls_scans, "endpoint_scans": relevant_endpoint_scans}
         )
 
     return custom_submitted_urls
@@ -517,15 +584,8 @@ def contest_map_data(request):
             "data_from_time": datetime.now(pytz.utc),
             "remark": "yolo",
         },
-        "crs":
-            {
-                "type": "name",
-                "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}
-        },
-        "features":
-            [
-
-        ]
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
+        "features": [],
     }
 
     # won't i lose "last scan moment" as it overstretches the competition boundaries? Should use created on?
@@ -537,29 +597,39 @@ def contest_map_data(request):
     # We don't filter out only top level domains, because we might want to add some special subdomains from
     # third party service suppliers. For example: organization.thirdpartysupplier.com.
     # normal contests prohibit these subdomains.
-    endpoint_scans = list(EndpointGenericScan.objects.all().filter(
-        endpoint__url__urlsubmission__added_by_team__participating_in_contest=contest.pk,
-        endpoint__url__urlsubmission__has_been_accepted=True,
-        type__in=ENDPOINT_SCAN_TYPES,
-        rating_determined_on__lte=contest.until_moment
-    ).prefetch_related('endpoint__url__organization').order_by('endpoint__url__organization'))
+    endpoint_scans = list(
+        EndpointGenericScan.objects.all()
+        .filter(
+            endpoint__url__urlsubmission__added_by_team__participating_in_contest=contest.pk,
+            endpoint__url__urlsubmission__has_been_accepted=True,
+            type__in=ENDPOINT_SCAN_TYPES,
+            rating_determined_on__lte=contest.until_moment,
+        )
+        .prefetch_related("endpoint__url__organization")
+        .order_by("endpoint__url__organization")
+    )
 
-    url_scans = list(UrlGenericScan.objects.all().filter(
-        url__urlsubmission__added_by_team__participating_in_contest=contest.pk,
-        url__urlsubmission__has_been_accepted=True,
-        type__in=URL_SCAN_TYPES,
-        rating_determined_on__lte=contest.until_moment
-    ).prefetch_related('url__organization').order_by('url__organization'))
+    url_scans = list(
+        UrlGenericScan.objects.all()
+        .filter(
+            url__urlsubmission__added_by_team__participating_in_contest=contest.pk,
+            url__urlsubmission__has_been_accepted=True,
+            type__in=URL_SCAN_TYPES,
+            rating_determined_on__lte=contest.until_moment,
+        )
+        .prefetch_related("url__organization")
+        .order_by("url__organization")
+    )
 
     features = []
 
     # organizations / urls without scans... / organizations withouts urls
     # not relevant for scores.
-    bare_organizations = list(OrganizationSubmission.objects.all().filter(
-        has_been_accepted=False,
-        has_been_rejected=False,
-        added_by_team__participating_in_contest=contest.pk
-    ).distinct())
+    bare_organizations = list(
+        OrganizationSubmission.objects.all()
+        .filter(has_been_accepted=False, has_been_rejected=False, added_by_team__participating_in_contest=contest.pk)
+        .distinct()
+    )
     for bare_organization in bare_organizations:
         features.append(get_bare_organization_feature(bare_organization))
 
@@ -574,23 +644,27 @@ def contest_map_data(request):
     #    features.append(get_bare_organization_feature(bare_organization))
 
     # organizations that have been accepted, do have urls, but don't have a scan yet
-    bare_organizations = list(OrganizationSubmission.objects.all().filter(
-        has_been_accepted=True,
-        organization_in_system__u_many_o_upgrade__urlgenericscan__isnull=True,
-        organization_in_system__u_many_o_upgrade__endpoint__endpointgenericscan__isnull=True,
-        added_by_team__participating_in_contest=contest.pk
-    ).distinct())
+    bare_organizations = list(
+        OrganizationSubmission.objects.all()
+        .filter(
+            has_been_accepted=True,
+            organization_in_system__u_many_o_upgrade__urlgenericscan__isnull=True,
+            organization_in_system__u_many_o_upgrade__endpoint__endpointgenericscan__isnull=True,
+            added_by_team__participating_in_contest=contest.pk,
+        )
+        .distinct()
+    )
 
     # todo: this can have the real ID, real mapping information.
     for bare_organization in bare_organizations:
         features.append(get_bare_organization_feature(bare_organization))
 
     # submitted url is always for a single organization, it's stored like that to reduce complexity.
-    bare_urls = list(UrlSubmission.objects.all().filter(
-        has_been_accepted=False,
-        has_been_rejected=False,
-        added_by_team__participating_in_contest=contest.pk
-    ).prefetch_related('for_organization__coordinate_set'))
+    bare_urls = list(
+        UrlSubmission.objects.all()
+        .filter(has_been_accepted=False, has_been_rejected=False, added_by_team__participating_in_contest=contest.pk)
+        .prefetch_related("for_organization__coordinate_set")
+    )
     features = add_bare_url_features(features, bare_urls)
 
     # loop over the organizations and calculate the ratings.
@@ -610,8 +684,8 @@ def contest_map_data(request):
     for feature in features:
         # also check that there is something stored at all...
         # not stored as geojsonfield anymore, because of implicit hate of that field.
-        if isinstance(feature['geometry']['coordinates'], str) and feature['geometry']['coordinates']:
-            feature['geometry']['coordinates'] = json.loads(feature['geometry']['coordinates'])
+        if isinstance(feature["geometry"]["coordinates"], str) and feature["geometry"]["coordinates"]:
+            feature["geometry"]["coordinates"] = json.loads(feature["geometry"]["coordinates"])
             updated_features.append(feature)
         else:
             updated_features.append(feature)
@@ -631,7 +705,7 @@ def add_or_update_features(features, scan):
     existing_features = []
     for organization in organizations:
         for feature in features:
-            if feature.get('properties', {}).get('organization_id', None) == organization.pk:
+            if feature.get("properties", {}).get("organization_id", None) == organization.pk:
                 # todo: should also be able to add scan results here, as it exists anyway
                 new_features.append(update_feature(feature, scan))
                 existing_features.append(organization.pk)
@@ -647,7 +721,7 @@ def add_or_update_features(features, scan):
 
     # copy the features that where not relevant to this scan
     for feature in features:
-        if feature['properties']['organization_id'] not in existing_features:
+        if feature["properties"]["organization_id"] not in existing_features:
             new_features.append(feature)
 
     return new_features
@@ -657,14 +731,21 @@ def update_feature(feature, scan):
     # log.debug('Updating feature %s, with scan %s' % (feature['properties']['organization_id'], scan))
     calculation = get_severity(scan)
 
-    feature['properties']['high'] += calculation['high']
-    feature['properties']['medium'] += calculation['medium']
-    feature['properties']['low'] += calculation['low']
+    feature["properties"]["high"] += calculation["high"]
+    feature["properties"]["medium"] += calculation["medium"]
+    feature["properties"]["low"] += calculation["low"]
 
-    color = "red" if feature['properties']['high'] else "orange" if feature['properties'][
-        'medium'] else "yellow" if feature['properties']['low'] else "green"
+    color = (
+        "red"
+        if feature["properties"]["high"]
+        else "orange"
+        if feature["properties"]["medium"]
+        else "yellow"
+        if feature["properties"]["low"]
+        else "green"
+    )
 
-    feature['properties']['color'] = color
+    feature["properties"]["color"] = color
 
     return feature
 
@@ -672,32 +753,30 @@ def update_feature(feature, scan):
 def get_bare_organization_feature(submitted_organization):
     return {
         "type": "Feature",
-        "properties":
-            {
-                # can't use ID of submission, because this does not match per call.
-                "organization_id": "pending_%s" % submitted_organization.organization_type_name,
-                "organization_type": submitted_organization.organization_type_name,
-                "organization_name": submitted_organization.organization_name,
-                "organization_slug": slugify(submitted_organization.organization_name),
-                "overall": 0,
-                "high": 0,
-                "medium": 0,
-                "low": 0,
-                "data_from": 0,
-                "color": "pending",
-                "total_urls": 0,
-                "high_urls": 0,
-                "medium_urls": 0,
-                "low_urls": 0,
-                "origin": "get_bare_organization_feature"
-            },
-        "geometry":
-            {
-                "type": "Point",  # nothing else supported yet, as entering coordinates is hard enough already
-                # Sometimes the data is a string, sometimes it's a list. The admin
-                # interface might influence this.
-                "coordinates": submitted_organization.organization_address_geocoded
-            }
+        "properties": {
+            # can't use ID of submission, because this does not match per call.
+            "organization_id": "pending_%s" % submitted_organization.organization_type_name,
+            "organization_type": submitted_organization.organization_type_name,
+            "organization_name": submitted_organization.organization_name,
+            "organization_slug": slugify(submitted_organization.organization_name),
+            "overall": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "data_from": 0,
+            "color": "pending",
+            "total_urls": 0,
+            "high_urls": 0,
+            "medium_urls": 0,
+            "low_urls": 0,
+            "origin": "get_bare_organization_feature",
+        },
+        "geometry": {
+            "type": "Point",  # nothing else supported yet, as entering coordinates is hard enough already
+            # Sometimes the data is a string, sometimes it's a list. The admin
+            # interface might influence this.
+            "coordinates": submitted_organization.organization_address_geocoded,
+        },
     }
 
 
@@ -725,31 +804,29 @@ def add_bare_url_features(features, submitted_urls):
 
         feature = {
             "type": "Feature",
-            "properties":
-                {
-                    "organization_id": "%s" % submitted_url.for_organization.pk,
-                    "organization_type": submitted_url.for_organization.type.name,
-                    "organization_name": submitted_url.for_organization.name,
-                    "organization_slug": slugify(submitted_url.for_organization.name),
-                    "overall": 0,
-                    "high": 0,
-                    "medium": 0,
-                    "low": 0,
-                    "data_from": 0,
-                    "color": "pending",
-                    "total_urls": 0,
-                    "high_urls": 0,
-                    "medium_urls": 0,
-                    "low_urls": 0,
-                    "origin": "add_bare_url_features"
-                },
-            "geometry":
-                {
-                    "type": geojsontype,
-                    # Sometimes the data is a string, sometimes it's a list. The admin
-                    # interface might influence this.
-                    "coordinates": area
-                }
+            "properties": {
+                "organization_id": "%s" % submitted_url.for_organization.pk,
+                "organization_type": submitted_url.for_organization.type.name,
+                "organization_name": submitted_url.for_organization.name,
+                "organization_slug": slugify(submitted_url.for_organization.name),
+                "overall": 0,
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "data_from": 0,
+                "color": "pending",
+                "total_urls": 0,
+                "high_urls": 0,
+                "medium_urls": 0,
+                "low_urls": 0,
+                "origin": "add_bare_url_features",
+            },
+            "geometry": {
+                "type": geojsontype,
+                # Sometimes the data is a string, sometimes it's a list. The admin
+                # interface might influence this.
+                "coordinates": area,
+            },
         }
 
         features.append(feature)
@@ -760,7 +837,7 @@ def organization_in_features(organization, features):
     id = str(organization.pk)  # stored as string in the feature
 
     for feature in features:
-        if feature['properties']['organization_id'] == id:
+        if feature["properties"]["organization_id"] == id:
             return True
 
     # not in there
@@ -771,13 +848,20 @@ def make_new_feature(organization, scan):
     # log.debug('Making new feature %s, with scan %s' % (organization, scan))
 
     calculation = get_severity(scan)
-    color = "red" if calculation['high'] else "orange" if calculation['medium'] else "yellow" if calculation[
-        'low'] else "green"
+    color = (
+        "red"
+        if calculation["high"]
+        else "orange"
+        if calculation["medium"]
+        else "yellow"
+        if calculation["low"]
+        else "green"
+    )
 
     from websecmap.organizations.models import Coordinate
 
     # only one multipoint or multipolygon. Unfortunately one query per organization :((((((((((((
-    coordinate = Coordinate.objects.all().filter(organization=organization).order_by('-created_on').first()
+    coordinate = Coordinate.objects.all().filter(organization=organization).order_by("-created_on").first()
 
     # early contest didn't require the pinpointing of a location, later contests an organization is always required
     if not coordinate:
@@ -789,31 +873,29 @@ def make_new_feature(organization, scan):
 
     return {
         "type": "Feature",
-        "properties":
-            {
-                "organization_id": organization.pk,
-                "organization_type": organization.type.name,
-                "organization_name": organization.name,
-                "organization_slug": slugify(organization.name),
-                "overall": 0,
-                "high": calculation['high'],
-                "medium": calculation['medium'],
-                "low": calculation['low'],
-                "data_from": scan.last_scan_moment,
-                "color": color,
-                "total_urls": 0,  # = 100%
-                "high_urls": 0,
-                "medium_urls": 0,
-                "low_urls": 0,
-                "origin": "make_new_feature"
-            },
-        "geometry":
-            {
-                "type": geojsontype,
-                # Sometimes the data is a string, sometimes it's a list. The admin
-                # interface might influence this.
-                "coordinates": area
-            }
+        "properties": {
+            "organization_id": organization.pk,
+            "organization_type": organization.type.name,
+            "organization_name": organization.name,
+            "organization_slug": slugify(organization.name),
+            "overall": 0,
+            "high": calculation["high"],
+            "medium": calculation["medium"],
+            "low": calculation["low"],
+            "data_from": scan.last_scan_moment,
+            "color": color,
+            "total_urls": 0,  # = 100%
+            "high_urls": 0,
+            "medium_urls": 0,
+            "low_urls": 0,
+            "origin": "make_new_feature",
+        },
+        "geometry": {
+            "type": geojsontype,
+            # Sometimes the data is a string, sometimes it's a list. The admin
+            # interface might influence this.
+            "coordinates": area,
+        },
     }
 
 
@@ -824,39 +906,39 @@ def get_organizations(scan):
         return scan.url.organization.all()
 
 
-@login_required(login_url='/authentication/login/')
+@login_required(login_url="/authentication/login/")
 def teams(request):
 
     # if you don't have a contest selected, you're required to do so...
     # contest 0 can exist. ?
-    if request.session.get('contest', -1) < 0:
-        return redirect('/game/contests/')
+    if request.session.get("contest", -1) < 0:
+        return redirect("/game/contests/")
 
     if request.POST:
         form = TeamForm(request.POST, contest=get_default_contest(request), user=request.user)
 
         if form.is_valid():
-            if form.cleaned_data['team']:
-                request.session['team'] = form.cleaned_data['team'].id
-                return redirect('/game/scores/')
+            if form.cleaned_data["team"]:
+                request.session["team"] = form.cleaned_data["team"].id
+                return redirect("/game/scores/")
             else:
-                request.session['team'] = None
+                request.session["team"] = None
 
             request.session.modified = True
             request.session.save()
-            form = TeamForm(initial={'team': get_team_id(request)},
-                            contest=get_default_contest(request),
-                            user=request.user)
+            form = TeamForm(
+                initial={"team": get_team_id(request)}, contest=get_default_contest(request), user=request.user
+            )
 
     else:
-        form = TeamForm(initial={'team': get_team_id(request)}, contest=get_default_contest(request), user=request.user)
+        form = TeamForm(initial={"team": get_team_id(request)}, contest=get_default_contest(request), user=request.user)
 
-    return render(request, 'game/team.html', {'form': form, 'team': get_team_info(request)})
+    return render(request, "game/team.html", {"form": form, "team": get_team_info(request)})
 
 
 def get_team_id(request):
     try:
-        team = Team.objects.get(pk=request.session.get('team', 0))
+        team = Team.objects.get(pk=request.session.get("team", 0))
     except (ObjectDoesNotExist, ValueError):
         team = {"id": "-"}
     return team
@@ -864,7 +946,7 @@ def get_team_id(request):
 
 def get_team_info(request):
     try:
-        team = Team.objects.get(pk=request.session.get('team', 0))
+        team = Team.objects.get(pk=request.session.get("team", 0))
     except (ObjectDoesNotExist, ValueError):
         team = {"name": "-"}
     return team
@@ -877,10 +959,10 @@ class OrganizationAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
 
-        qs = Organization.objects.all().filter(is_dead=False).order_by(Lower('name'))
+        qs = Organization.objects.all().filter(is_dead=False).order_by(Lower("name"))
 
-        organization_type = self.forwarded.get('organization_type_name', None)
-        country = self.forwarded.get('country', None)
+        organization_type = self.forwarded.get("organization_type_name", None)
+        country = self.forwarded.get("country", None)
 
         if organization_type:
             qs = qs.filter(type=organization_type)
@@ -913,7 +995,7 @@ class OrganizationTypeAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
 
-        qs = OrganizationType.objects.all().filter().order_by('name')
+        qs = OrganizationType.objects.all().filter().order_by("name")
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)

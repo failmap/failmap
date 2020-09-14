@@ -10,14 +10,19 @@ import websecmap.organizations.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0005_auto_20170906_0929'),
+        ("organizations", "0005_auto_20170906_0929"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organization',
-            name='twitter_handle',
-            field=models.CharField(blank=True, help_text='Include the @ symbol. Used in the top lists to let visitors tweet to theorganization to wake them up.',
-                                   max_length=150, null=True, validators=[websecmap.organizations.models.validate_twitter]),
+            model_name="organization",
+            name="twitter_handle",
+            field=models.CharField(
+                blank=True,
+                help_text="Include the @ symbol. Used in the top lists to let visitors tweet to theorganization to wake them up.",
+                max_length=150,
+                null=True,
+                validators=[websecmap.organizations.models.validate_twitter],
+            ),
         ),
     ]

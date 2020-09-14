@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0035_auto_20180718_1814'),
+        ("organizations", "0035_auto_20180718_1814"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='url',
-            name='onboarding_stage_set_on',
+            model_name="url",
+            name="onboarding_stage_set_on",
             field=models.DateTimeField(
-                blank=True, help_text='When the onboarding stage was hit. Helps with time-outs.', null=True),
+                blank=True, help_text="When the onboarding stage was hit. Helps with time-outs.", null=True
+            ),
         ),
     ]

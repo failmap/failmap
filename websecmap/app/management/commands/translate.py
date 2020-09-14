@@ -36,14 +36,15 @@ class Command(BaseCommand):
         # only show a pointer to the file, instead of file+line number. The line number causes pollution when updating
         # and it's pretty easy to discover the translation anyway.
         log.debug("Making messages for all locales from *.py, *.html and *.txt files.")
-        call_command('makemessages', '--ignore', 'vendor', '--ignore', '.tox',  '-a', '--add-location', 'file')
+        call_command("makemessages", "--ignore", "vendor", "--ignore", ".tox", "-a", "--add-location", "file")
 
         # -d djangojs =
         # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/#creating-message-files-from-js-code
         # Now add messages for *.js files
         log.debug("Making messages for all locales from *.js files.")
-        call_command('makemessages', '--ignore', 'vendor', '--ignore', '.tox',
-                     '--add-location', 'file', '-a', '-d', 'djangojs')
+        call_command(
+            "makemessages", "--ignore", "vendor", "--ignore", ".tox", "--add-location", "file", "-a", "-d", "djangojs"
+        )
 
         log.debug("Compiling messages")
         for language in settings.LANGUAGES:
@@ -55,10 +56,10 @@ class Command(BaseCommand):
             # waste of time and obfuscates output.
             # https://code.djangoproject.com/ticket/29973#ticket
             # Ready for checkin :) Awesome features, saves a lot of time
-            call_command('compilemessages', '-l', language[0])
+            call_command("compilemessages", "-l", language[0])
 
-        log.info('You can find the locale files in ./locale/(language code)/LC_MESSAGES/django(js).po')
-        log.info('Compiled files are located in ./locale/(language code)/LC_MESSAGES/django(js).mo')
-        log.info('')
-        log.info('Run this command again to have your changes compiled.')
-        log.info('Remember to keep the amount of translations in javascript as low as possible. Design > translation.')
+        log.info("You can find the locale files in ./locale/(language code)/LC_MESSAGES/django(js).po")
+        log.info("Compiled files are located in ./locale/(language code)/LC_MESSAGES/django(js).mo")
+        log.info("")
+        log.info("Run this command again to have your changes compiled.")
+        log.info("Remember to keep the amount of translations in javascript as low as possible. Design > translation.")

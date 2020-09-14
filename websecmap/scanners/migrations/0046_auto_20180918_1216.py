@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0045_auto_20180918_0859'),
+        ("scanners", "0045_auto_20180918_0859"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tlsscan',
-            name='evidence',
-            field=models.TextField(blank=True, default=0,
-                                   help_text='Content that might help understanding the result.', max_length=9001),
+            model_name="tlsscan",
+            name="evidence",
+            field=models.TextField(
+                blank=True, default=0, help_text="Content that might help understanding the result.", max_length=9001
+            ),
         ),
     ]

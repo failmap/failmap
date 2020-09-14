@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0019_auto_20181207_1142'),
+        ("game", "0019_auto_20181207_1142"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organizationsubmission',
-            name='organization_name',
+            model_name="organizationsubmission",
+            name="organization_name",
             field=models.CharField(
-                default='unknown', help_text='The contest the team is participating in.', max_length=250),
+                default="unknown", help_text="The contest the team is participating in.", max_length=250
+            ),
         ),
     ]

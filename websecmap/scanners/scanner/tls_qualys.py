@@ -37,11 +37,15 @@ from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
-from websecmap.scanners.proxy import (claim_proxy, release_proxy, service_provider_status,
-                                      store_check_result, timeout_claims)
+from websecmap.scanners.proxy import (
+    claim_proxy,
+    release_proxy,
+    service_provider_status,
+    store_check_result,
+    timeout_claims,
+)
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import (allowed_to_scan, chunks2, q_configurations_to_scan,
-                                                 unique_and_random)
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_configurations_to_scan, unique_and_random
 from websecmap.scanners.scanner.http import store_url_ips
 
 # There is a balance between network timeout and qualys result cache.
@@ -62,7 +66,7 @@ New architecture:
 """
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def plan_scan(urls_filter: dict = dict(), **kwargs):
 
     if not allowed_to_scan("tls_qualys"):
@@ -70,25 +74,32 @@ def plan_scan(urls_filter: dict = dict(), **kwargs):
 
     # fuck the django orm, for making the following more complicated than it needs to be:
     # Plan scans for endpoints that never have been scanned
-    urls = Url.objects.filter(
-        q_configurations_to_scan(),
-        is_dead=False,
-        not_resolvable=False,
-        endpoint__protocol="https",
-        endpoint__port=443,
-        endpoint__is_dead=False,
-        **urls_filter
-    ).exclude(
-        # remove any url that has an endpoint scan on tls_qualys
-        id__in=Url.objects.filter(
+    urls = (
+        Url.objects.filter(
+            q_configurations_to_scan(),
             is_dead=False,
             not_resolvable=False,
             endpoint__protocol="https",
             endpoint__port=443,
             endpoint__is_dead=False,
-            endpoint__endpointgenericscan__type__in=['tls_qualys_encryption_quality', 'tls_qualys_certificate_trusted']
+            **urls_filter,
         )
-    ).only('id', 'url')
+        .exclude(
+            # remove any url that has an endpoint scan on tls_qualys
+            id__in=Url.objects.filter(
+                is_dead=False,
+                not_resolvable=False,
+                endpoint__protocol="https",
+                endpoint__port=443,
+                endpoint__is_dead=False,
+                endpoint__endpointgenericscan__type__in=[
+                    "tls_qualys_encryption_quality",
+                    "tls_qualys_certificate_trusted",
+                ],
+            )
+        )
+        .only("id", "url")
+    )
 
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
     plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(urls))
@@ -97,14 +108,8 @@ def plan_scan(urls_filter: dict = dict(), **kwargs):
     # Scan the bad ones more frequently than the good ones, to reduce the amount of requests.
     # todo: parameterize using settings in constance.
     parameter_sets = [
-        {
-            "exclude_urls_scanned_in_the_last_n_days": 7,
-            "quality_levels": ["A", "A+", "A-", "trusted"]
-        },
-        {
-            "exclude_urls_scanned_in_the_last_n_days": 3,
-            "quality_levels": ["F", "C", "B", "not trusted"]
-        }
+        {"exclude_urls_scanned_in_the_last_n_days": 7, "quality_levels": ["A", "A+", "A-", "trusted"]},
+        {"exclude_urls_scanned_in_the_last_n_days": 3, "quality_levels": ["F", "C", "B", "not trusted"]},
     ]
 
     for parameter_set in parameter_sets:
@@ -116,20 +121,17 @@ def plan_scan(urls_filter: dict = dict(), **kwargs):
             endpoint__port=443,
             endpoint__is_dead=False,
             endpoint__endpointgenericscan__is_the_latest_scan=True,
-
             # an exclude filter here will not work, as you will exclude so much...
-            endpoint__endpointgenericscan__last_scan_moment__lte=timezone.now() - timedelta(
-                days=parameter_set['exclude_urls_scanned_in_the_last_n_days']),
-            endpoint__endpointgenericscan__rating__in=parameter_set['quality_levels'],
-            **urls_filter
-        ).only('id', 'url')
+            endpoint__endpointgenericscan__last_scan_moment__lte=timezone.now()
+            - timedelta(days=parameter_set["exclude_urls_scanned_in_the_last_n_days"]),
+            endpoint__endpointgenericscan__rating__in=parameter_set["quality_levels"],
+            **urls_filter,
+        ).only("id", "url")
 
         plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(urls))
 
 
-def compose_manual_scan_task(organizations_filter: dict = dict(),
-                             urls_filter: dict = dict(),
-                             **kwargs):
+def compose_manual_scan_task(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs):
     if not allowed_to_scan("tls_qualys"):
         return group()
 
@@ -145,46 +147,50 @@ def compose_manual_scan_task(organizations_filter: dict = dict(),
 
         # scan only once in seven days. an emergency fix to make sure everything is scanned.
         # todo: force re-scan, where days is < 7, with 5000 scanning takes a while and a lot still goes wrong.
-        urls = Url.objects.filter(
-            q_configurations_to_scan(),
-            is_dead=False,
-            not_resolvable=False,
-            endpoint__protocol="https",
-            endpoint__port=443,
-            endpoint__is_dead=False,
-            organization__in=organizations,  # when empty, no results...
-            **urls_filter
-        ).order_by(
-            '-endpoint__endpointgenericscan__latest_scan_moment'
-        ).only('id', 'url')
+        urls = (
+            Url.objects.filter(
+                q_configurations_to_scan(),
+                is_dead=False,
+                not_resolvable=False,
+                endpoint__protocol="https",
+                endpoint__port=443,
+                endpoint__is_dead=False,
+                organization__in=organizations,  # when empty, no results...
+                **urls_filter,
+            )
+            .order_by("-endpoint__endpointgenericscan__latest_scan_moment")
+            .only("id", "url")
+        )
     else:
         # use order by to get a few of the most outdated results...
-        urls = Url.objects.filter(
-            q_configurations_to_scan(),
-            is_dead=False,
-            not_resolvable=False,
-            endpoint__protocol="https",
-            endpoint__port=443,
-            endpoint__is_dead=False,
-            **urls_filter
-        ).order_by(
-            '-endpoint__endpointgenericscan__latest_scan_moment'
-        ).only('id', 'url')
+        urls = (
+            Url.objects.filter(
+                q_configurations_to_scan(),
+                is_dead=False,
+                not_resolvable=False,
+                endpoint__protocol="https",
+                endpoint__port=443,
+                endpoint__is_dead=False,
+                **urls_filter,
+            )
+            .order_by("-endpoint__endpointgenericscan__latest_scan_moment")
+            .only("id", "url")
+        )
 
     # Urls are ordered randomly.
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
     urls = unique_and_random(urls)
 
     if not urls:
-        log.warning('Applied filters resulted in no urls, thus no tls qualys tasks!')
+        log.warning("Applied filters resulted in no urls, thus no tls qualys tasks!")
         return group()
 
-    log.info('Creating qualys scan task for %s urls for %s organizations.', len(urls), len(organizations))
+    log.info("Creating qualys scan task for %s urls for %s organizations.", len(urls), len(organizations))
 
     return compose_scan_task(urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs) -> Task:
     # If you run this every 10 minutes, there will be little problems with 'toctou' problems, claiming
     # a proxy is free, while it has been claimed by other results of this method (in the call before).
@@ -194,22 +200,28 @@ def compose_planned_scan_task(**kwargs) -> Task:
 
     timeout_claims()
 
-    proxies_available = ScanProxy.objects.all().filter(
-        is_dead=False,
-        currently_used_in_tls_qualys_scan=False,
-        manually_disabled=False,
-        request_speed_in_ms__gte=1,
-        # the upper speed should be configurable. When running N proxy checks at a time theywill be slower.
-        # more checks at the same time = slower > 3000ms.
-        # request_speed_in_ms__lte=2000,
-    ).order_by('request_speed_in_ms')
+    proxies_available = (
+        ScanProxy.objects.all()
+        .filter(
+            is_dead=False,
+            currently_used_in_tls_qualys_scan=False,
+            manually_disabled=False,
+            request_speed_in_ms__gte=1,
+            # the upper speed should be configurable. When running N proxy checks at a time theywill be slower.
+            # more checks at the same time = slower > 3000ms.
+            # request_speed_in_ms__lte=2000,
+        )
+        .order_by("request_speed_in_ms")
+    )
 
     # size for the proxies and such is 25 / each.
     amount_to_scan = len(proxies_available) * 25
 
     if not amount_to_scan:
-        log.info("No free proxies available for TLS qualys scans, try again later (when scans are finished or the "
-                 "claims on proxies have timed out.")
+        log.info(
+            "No free proxies available for TLS qualys scans, try again later (when scans are finished or the "
+            "claims on proxies have timed out."
+        )
         return group()
 
     # using this method proxy claiming does not need to be rate limited anymore.
@@ -227,10 +239,14 @@ def compose_scan_task(urls):
     tasks = []
     for chunk in chunks:
 
-        tasks.append(group(claim_proxy.s(chunk[0])
-                           | qualys_scan_bulk.s(chunk)
-                           | release_proxy.s(chunk[0])
-                           | plannedscan.finish_multiple.si('scan', 'tls_qualys', chunk)))
+        tasks.append(
+            group(
+                claim_proxy.s(chunk[0])
+                | qualys_scan_bulk.s(chunk)
+                | release_proxy.s(chunk[0])
+                | plannedscan.finish_multiple.si("scan", "tls_qualys", chunk)
+            )
+        )
 
     return group(tasks)
 
@@ -246,12 +262,12 @@ def compose_scan_task(urls):
 # 12 / hour = 1 every 5 minutes. In 30 minutes 6 scans will run at the same time. We used to have 10.
 # 20 / hour = 1 every 3 minutes. In 30 minutes 10 scans will run at the same time.
 # 30 / hours = 1 every 2 minutes. In 30 minutes 15 scans will run at the same time.
-@app.task(queue='qualys', acks_late=True)
+@app.task(queue="qualys", acks_late=True)
 def qualys_scan_bulk(proxy: ScanProxy, urls: List[Url]):
 
-    log.debug('Initiating bulk scan')
-    log.debug('Received proxy: %s' % proxy)
-    log.debug('Received urls: %s' % urls)
+    log.debug("Initiating bulk scan")
+    log.debug("Received proxy: %s" % proxy)
+    log.debug("Received urls: %s" % urls)
 
     # Using this all scans stay on the same server (so no ip-hopping between scans, which limits the available
     # capacity severely.
@@ -268,7 +284,7 @@ def qualys_scan_bulk(proxy: ScanProxy, urls: List[Url]):
 
             try:
                 api_results = service_provider_status(proxy)
-                while api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
+                while api_results["max"] < 20 or api_results["this-client-max"] < 20 or api_results["current"] > 19:
                     log.debug("Running out of capacity, waiting to start new scan.")
                     sleep(70)
                     api_results = service_provider_status(proxy)
@@ -278,8 +294,9 @@ def qualys_scan_bulk(proxy: ScanProxy, urls: List[Url]):
 
             except RetryError:
                 log.debug("Retry error. Could not connect to proxy anymore.")
-                store_check_result.apply_async([proxy, "Retry error. Proxy died while scanning.", True,
-                                                datetime.now(pytz.utc)])
+                store_check_result.apply_async(
+                    [proxy, "Retry error. Proxy died while scanning.", True, datetime.now(pytz.utc)]
+                )
 
         pool.close()
         pool.join()
@@ -306,7 +323,7 @@ def qualys_scan_thread(proxy, url):
     while True:
         try:
             api_result = service_provider_scan_via_api_with_limits(proxy, url.url)
-            data = api_result['data']
+            data = api_result["data"]
         except requests.RequestException:
             # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
             # ex: EOF occurred in violation of protocol (_ssl.c:749)
@@ -320,9 +337,9 @@ def qualys_scan_thread(proxy, url):
         report_to_console(url.url, data)
 
         # Qualys is already running a scan on this url
-        if 'status' in data:
+        if "status" in data:
             # Qualys has completed the scan of the url and has a result.
-            if data['status'] in ["READY", "ERROR"]:
+            if data["status"] in ["READY", "ERROR"]:
                 # scan completed
                 # store the result on the storage queue.
                 log.debug(f"Qualys scan finished on {url.url}.")
@@ -339,7 +356,7 @@ def qualys_scan_thread(proxy, url):
 
         # The API is in error state, let's see if we can be nice and recover.
         if "errors" in data:
-            error_message = data['errors'][0]['message']
+            error_message = data["errors"][0]["message"]
             # {'errors': [{'message': 'Running at full capacity. Please try again later.'}], 'status': 'FAILURE'}
             # Don't increase the amount of waiting time yet... try again in a minute.
             if error_message == "Running at full capacity. Please try again later.":
@@ -351,9 +368,11 @@ def qualys_scan_thread(proxy, url):
 
             # We're going too fast with new assessments. Back off.
             if error_message.startswith("Concurrent assessment limit reached"):
-                log.error(f"Too many concurrent assessments: Are you running multiple scans from the same IP? "
-                          f"Concurrent scans slowly lower the concurrency limit of 25 concurrent scans to zero. "
-                          f"Slow down. {data['errors'][0]['message']}")
+                log.error(
+                    f"Too many concurrent assessments: Are you running multiple scans from the same IP? "
+                    f"Concurrent scans slowly lower the concurrency limit of 25 concurrent scans to zero. "
+                    f"Slow down. {data['errors'][0]['message']}"
+                )
                 if error_waiting_time < max_waiting_time:
                     error_waiting_time += 60
                     sleep(error_waiting_time)
@@ -376,7 +395,7 @@ def qualys_scan_thread(proxy, url):
         sleep(error_waiting_time)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def process_qualys_result(data, url):
     """Receive the JSON response from Qualys API, processes this result and stores it in database."""
 
@@ -384,17 +403,17 @@ def process_qualys_result(data, url):
     # log.info(dir(data))
 
     # a normal completed scan.
-    if data['status'] == "READY" and 'endpoints' in data.keys():
+    if data["status"] == "READY" and "endpoints" in data.keys():
         save_scan(url, data)
         return
 
     # missing endpoints: url propably resolves but has no TLS?
-    elif data['status'] == "READY":
+    elif data["status"] == "READY":
         scratch(url, data)
         raise ValueError("Found no endpoints in ready scan. Todo: How to handle this?")
 
     # Not resolving
-    if data['status'] == "ERROR":
+    if data["status"] == "ERROR":
         """
         Error is usually "unable to resolve domain". Will be cleaned with endpoint discovery. It's very possible that
         the qualys scanner is blocked by the hosts. This is one of the reasons why Qualys SSL labs is not reliable.
@@ -417,20 +436,20 @@ def report_to_console(domain, data):
     :return:
     """
 
-    status = data.get('status', 'unknown')
+    status = data.get("status", "unknown")
 
     if status == "READY":
-        for endpoint in data['endpoints']:
-            log.debug("%s (IP: %s) = %s" % (domain, endpoint['ipAddress'], endpoint.get('grade', 'No TLS')))
+        for endpoint in data["endpoints"]:
+            log.debug("%s (IP: %s) = %s" % (domain, endpoint["ipAddress"], endpoint.get("grade", "No TLS")))
 
-    if status in ['DNS', 'ERROR']:
-        log.debug("%s %s: Got message: %s", domain, data['status'], data.get('statusMessage', 'unknown'))
+    if status in ["DNS", "ERROR"]:
+        log.debug("%s %s: Got message: %s", domain, data["status"], data.get("statusMessage", "unknown"))
 
-    if data['status'] == "IN_PROGRESS":
-        for endpoint in data['endpoints']:
-            log.debug("%s, ep: %s. status: %s" % (domain, endpoint['ipAddress'], endpoint.get('statusMessage', '0')))
+    if data["status"] == "IN_PROGRESS":
+        for endpoint in data["endpoints"]:
+            log.debug("%s, ep: %s. status: %s" % (domain, endpoint["ipAddress"], endpoint.get("statusMessage", "0")))
 
-    if status == 'unknown':
+    if status == "unknown":
         log.error("Unexpected data received for domain: %s, %s" % (domain, data))
 
 
@@ -440,13 +459,13 @@ def report_to_console(domain, data):
 def service_provider_scan_via_api_with_limits(proxy, domain):
     # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
     payload = {
-        'host': domain,  # host that will be scanned for tls
-        'publish': "off",  # will not be published on the front page of the ssllabs site
-        'startNew': "off",  # that's done automatically when needed by service provider
-        'fromCache': "off",  # cache can have mismatches, but is ignored when startnew. We prefer cache as the cache on
+        "host": domain,  # host that will be scanned for tls
+        "publish": "off",  # will not be published on the front page of the ssllabs site
+        "startNew": "off",  # that's done automatically when needed by service provider
+        "fromCache": "off",  # cache can have mismatches, but is ignored when startnew. We prefer cache as the cache on
         # qualys is not long lived. We prefer it because it might give back a result faster.
-        'ignoreMismatch': "on",  # continue a scan, even if the certificate is for another domain
-        'all': "done"  # ?
+        "ignoreMismatch": "on",  # continue a scan, even if the certificate is for another domain
+        "all": "done",  # ?
     }
 
     response = requests.get(
@@ -454,29 +473,32 @@ def service_provider_scan_via_api_with_limits(proxy, domain):
         params=payload,
         timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
         headers={
-            'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
-                          "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
-            'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-            'Accept-Language': 'en-US,en;q=0.5',
-            'DNT': '1',
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
+            "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "DNT": "1",
         },
         proxies={proxy.protocol: proxy.address},
-        cookies={}
+        cookies={},
     )
 
     # log.debug(vars(response))  # extreme debugging
-    log.debug("Assessments: max: %s, current: %s, this client: %s, this: %s, proxy: %s",
-              response.headers.get('X-Max-Assessments', 25),
-              response.headers.get('X-Current-Assessments', 0),
-              response.headers.get('X-ClientMaxAssessments', 25),
-              domain,
-              proxy
-              )
+    log.debug(
+        "Assessments: max: %s, current: %s, this client: %s, this: %s, proxy: %s",
+        response.headers.get("X-Max-Assessments", 25),
+        response.headers.get("X-Current-Assessments", 0),
+        response.headers.get("X-ClientMaxAssessments", 25),
+        domain,
+        proxy,
+    )
 
-    return {'max': int(response.headers.get('X-Max-Assessments', 25)),
-            'current': int(response.headers.get('X-Current-Assessments', 0)),
-            'this-client-max': int(response.headers.get('X-ClientMaxAssessments', 25)),
-            'data': response.json()}
+    return {
+        "max": int(response.headers.get("X-Max-Assessments", 25)),
+        "current": int(response.headers.get("X-Current-Assessments", 0)),
+        "this-client-max": int(response.headers.get("X-ClientMaxAssessments", 25)),
+        "data": response.json(),
+    }
 
 
 def save_scan(url, data):
@@ -497,20 +519,20 @@ def save_scan(url, data):
     log.debug(f"Found {len(data['endpoints'])} endpoints in data.")
 
     # Scan can contain multiple IPv4 and IPv6 endpoints, for example, four of each.
-    for qualys_endpoint in data['endpoints']:
+    for qualys_endpoint in data["endpoints"]:
         """
         qep['grade']  # T, if trust issues.
         qep['gradeTrustIgnored']  # A+ to F
         """
 
         # Prevent storage of more than one result for either IPv4 and IPv6.
-        if stored_ipv6 and ":" in qualys_endpoint['ipAddress']:
+        if stored_ipv6 and ":" in qualys_endpoint["ipAddress"]:
             continue
 
-        if stored_ipv4 and ":" not in qualys_endpoint['ipAddress']:
+        if stored_ipv4 and ":" not in qualys_endpoint["ipAddress"]:
             continue
 
-        if ":" in qualys_endpoint['ipAddress']:
+        if ":" in qualys_endpoint["ipAddress"]:
             stored_ipv6 = True
             ip_version = 6
         else:
@@ -518,20 +540,21 @@ def save_scan(url, data):
             ip_version = 4
         # End prevent duplicates
 
-        message = qualys_endpoint['statusMessage']
+        message = qualys_endpoint["statusMessage"]
         log.debug(f"Message for endpoint {qualys_endpoint['ipAddress']} is {message}.")
 
         # Qualys might discover endpoints we don't have yet. In that case, be pragmatic and create the endpoint.
-        failmap_endpoint = Endpoint.force_get(url, ip_version, 'https', 443)
+        failmap_endpoint = Endpoint.force_get(url, ip_version, "https", 443)
 
         if message in [
-                "Unable to connect to the server",
-                "Failed to communicate with the secure server",
-                "Unexpected failure",
-                "Failed to obtain certificate",
-                "IP address is from private address space (RFC 1918)",
-                "No secure protocols supported",
-                "Certificate not valid for domain name"]:
+            "Unable to connect to the server",
+            "Failed to communicate with the secure server",
+            "Unexpected failure",
+            "Failed to obtain certificate",
+            "IP address is from private address space (RFC 1918)",
+            "No secure protocols supported",
+            "Certificate not valid for domain name",
+        ]:
             # Note: Certificate not valid for domain name can be ignored with correct API setting.
             # Nothing to store: something went wrong at the API side and we can't fix that.
             # Example; werkplek.alkmaar.nl, cannot be scanned with this scanner, and will result in an error.
@@ -539,31 +562,31 @@ def save_scan(url, data):
             # this server DOES respond on ipv6, but not on ipv4. Creating a very old, and never deleted ipv4 endpoint.
             # even worse: the http verify scanner sees that it exists, and if you type it in in the browser, it
             # does exist. So perhaps they blocked the qualys scanner, which is perfectly possible of course.
-            store_endpoint_scan_result('tls_qualys_certificate_trusted', failmap_endpoint, "scan_error", message)
-            store_endpoint_scan_result('tls_qualys_encryption_quality', failmap_endpoint, "scan_error", message)
+            store_endpoint_scan_result("tls_qualys_certificate_trusted", failmap_endpoint, "scan_error", message)
+            store_endpoint_scan_result("tls_qualys_encryption_quality", failmap_endpoint, "scan_error", message)
             continue
 
         if message not in ["Ready"]:
             continue
 
-        rating = qualys_endpoint['grade']
-        rating_no_trust = qualys_endpoint['gradeTrustIgnored']
+        rating = qualys_endpoint["grade"]
+        rating_no_trust = qualys_endpoint["gradeTrustIgnored"]
 
         if rating == "T":
             trust = "not trusted"
         else:
             trust = "trusted"
 
-        store_endpoint_scan_result('tls_qualys_certificate_trusted', failmap_endpoint, trust, "")
-        store_endpoint_scan_result('tls_qualys_encryption_quality', failmap_endpoint, rating_no_trust, "")
+        store_endpoint_scan_result("tls_qualys_certificate_trusted", failmap_endpoint, trust, "")
+        store_endpoint_scan_result("tls_qualys_encryption_quality", failmap_endpoint, rating_no_trust, "")
 
     # Store IP address of the scan as metadata
-    ips = [ipaddress.ip_address(endpoint['ipAddress']).compressed for endpoint in data['endpoints']]
+    ips = [ipaddress.ip_address(endpoint["ipAddress"]).compressed for endpoint in data["endpoints"]]
     store_url_ips(url, ips)
     return
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def scratch(domain, data):
     log.debug("Scratching data for %s", domain)
     scratchpad = TlsQualysScratchpad()

@@ -8,14 +8,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0026_auto_20171110_1237'),
+        ("scanners", "0026_auto_20171110_1237"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpoint',
-            name='is_dead',
+            model_name="endpoint",
+            name="is_dead",
             field=models.BooleanField(
-                default=False, help_text='If the port is closed, or the endpoint is otherwisenot reachable over the specified protocol, then markit as dead. A scanner for this port/protocol can alsodeclare it dead. This port is closed on this protocol.'),
+                default=False,
+                help_text="If the port is closed, or the endpoint is otherwisenot reachable over the specified protocol, then markit as dead. A scanner for this port/protocol can alsodeclare it dead. This port is closed on this protocol.",
+            ),
         ),
     ]

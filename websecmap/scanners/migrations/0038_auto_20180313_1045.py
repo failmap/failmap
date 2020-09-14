@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0037_merge_20180313_1044'),
+        ("scanners", "0037_merge_20180313_1044"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpointgenericscan',
-            name='domain',
-            field=models.CharField(help_text='Deprecated. Text value representing the url scanned.', max_length=255),
+            model_name="endpointgenericscan",
+            name="domain",
+            field=models.CharField(help_text="Deprecated. Text value representing the url scanned.", max_length=255),
         ),
     ]

@@ -1491,11 +1491,11 @@ eleven_Region = """
 
 class Command(BaseCommand):
     # This is a very quick and dirty script that might skip or break things.
-    help = 'Downloads Administrative Region from the OSM wiki and imports them into AdministrativeRegion'
+    help = "Downloads Administrative Region from the OSM wiki and imports them into AdministrativeRegion"
 
     def handle(self, *args, **options):
 
-        organization_types = dict(OrganizationType.objects.all().values_list('pk', 'name', flat=False))
+        organization_types = dict(OrganizationType.objects.all().values_list("pk", "name", flat=False))
         matches = []
 
         # the data in this template is slow.
@@ -1510,16 +1510,23 @@ class Command(BaseCommand):
 
             # try to get the organization types we know to the rest of the lines. Do not import the very small
             # Region such as cities, parish and other micro scale stuff as the system cannot handle that yet.
-            for counter, line in enumerate(region_lines[2:len(region_lines)]):
+            for counter, line in enumerate(region_lines[2 : len(region_lines)]):
                 for organization_type in organization_types.values():
                     # allow matching on different spaces, spellings and longer layer names etc...
-                    if ''.join(ch for ch in organization_type.lower() if ch.isalnum()) in \
-                            ''.join(ch for ch in line.lower() if ch.isalnum()):
-                        log.debug("Match, administrative region %s is a %s in %s" %
-                                  (counter+3, organization_type, country_code))
-                        matches.append({'organization_type': organization_type,
-                                        'country': country_code,
-                                        'admin_level': counter+3})
+                    if "".join(ch for ch in organization_type.lower() if ch.isalnum()) in "".join(
+                        ch for ch in line.lower() if ch.isalnum()
+                    ):
+                        log.debug(
+                            "Match, administrative region %s is a %s in %s"
+                            % (counter + 3, organization_type, country_code)
+                        )
+                        matches.append(
+                            {
+                                "organization_type": organization_type,
+                                "country": country_code,
+                                "admin_level": counter + 3,
+                            }
+                        )
                         continue
 
         log.info("Found %s matches." % len(matches))
@@ -1531,25 +1538,26 @@ def import_matches(matches):
 
     for match in matches:
 
-        otype = OrganizationType.objects.all().filter(name=match['organization_type']).first()
+        otype = OrganizationType.objects.all().filter(name=match["organization_type"]).first()
         if not AdministrativeRegion.objects.all().filter(
-                country=match['country'], organization_type=otype, admin_level=match['admin_level']):
+            country=match["country"], organization_type=otype, admin_level=match["admin_level"]
+        ):
 
             administrative_region = AdministrativeRegion()
-            administrative_region.country = match['country']
-            administrative_region.admin_level = match['admin_level']
+            administrative_region.country = match["country"]
+            administrative_region.admin_level = match["admin_level"]
             administrative_region.organization_type = otype
             administrative_region.save()
-            log.info("Saved: %s %s = %s" % (
-                match['country'], match['organization_type'], match['admin_level']))
+            log.info("Saved: %s %s = %s" % (match["country"], match["organization_type"], match["admin_level"]))
 
         else:
-            log.info("Exists already: %s %s = %s" % (
-                match['country'], match['organization_type'], match['admin_level']))
+            log.info(
+                "Exists already: %s %s = %s" % (match["country"], match["organization_type"], match["admin_level"])
+            )
 
 
 def figure_out_country(lines: List[str]):
-    country = re.findall('lagicon\|([^}]*)', lines[1], re.MULTILINE)
+    country = re.findall("lagicon\|([^}]*)", lines[1], re.MULTILINE)
     if not country:
         # probably a comment line or some sorts
         log.debug("No country found in line %s." % lines[1])
@@ -1562,13 +1570,25 @@ def figure_out_country(lines: List[str]):
         # mismatches with the 3166 library, as the OSM just does things
         # some countries on the OSM list don't exist anymore... oh well :)
 
-        alternatives = {'United Kingdom': 'GB', 'Vietnam': 'VN', 'Bolivia': 'BO',
-                        'United States': 'US', 'Tanzania': 'TZ', 'Syria': 'SY',
-                        'South Korea': 'KR', 'Russia': 'RU', 'the Philippines': 'PH',
-                        'North Korea': 'KP', 'Moldova': 'MD', 'Macedonia': 'MK',
-                        'Iran': 'IR', 'Democratic Republic of the Congo': 'CG',
-                        'Czech Republic': 'CZ', 'the Central African Republic': 'CF',
-                        'Brunei': 'BN'}
+        alternatives = {
+            "United Kingdom": "GB",
+            "Vietnam": "VN",
+            "Bolivia": "BO",
+            "United States": "US",
+            "Tanzania": "TZ",
+            "Syria": "SY",
+            "South Korea": "KR",
+            "Russia": "RU",
+            "the Philippines": "PH",
+            "North Korea": "KP",
+            "Moldova": "MD",
+            "Macedonia": "MK",
+            "Iran": "IR",
+            "Democratic Republic of the Congo": "CG",
+            "Czech Republic": "CZ",
+            "the Central African Republic": "CF",
+            "Brunei": "BN",
+        }
 
         if country[0] in alternatives:
             return alternatives[country[0]]

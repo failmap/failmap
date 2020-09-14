@@ -7,17 +7,17 @@ from django.db import migrations, models
 
 
 def forward(apps, schema_editor):
-    OrganizationType = apps.get_model('fail', 'OrganizationType')
-    default = OrganizationType(name='municipality')
+    OrganizationType = apps.get_model("fail", "OrganizationType")
+    default = OrganizationType(name="municipality")
     default.save()
 
-    Organization = apps.get_model('fail', 'Organization')
+    Organization = apps.get_model("fail", "Organization")
     Organization.objects.all().update(type=default.id)
 
 
 def reverse(apps, schema_editor):
-    Organization = apps.get_model('fail', 'Organization')
-    Organization.objects.all().update(type='municipality')
+    Organization = apps.get_model("fail", "Organization")
+    Organization.objects.all().update(type="municipality")
 
 
 def noop(apps, schema_editor):
@@ -27,24 +27,22 @@ def noop(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fail', '0008_merge_20170222_2030'),
+        ("fail", "0008_merge_20170222_2030"),
     ]
 
     operations = [
         migrations.RunPython(noop, reverse),
         migrations.CreateModel(
-            name='OrganizationType',
+            name="OrganizationType",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=255)),
             ],
         ),
         migrations.AlterField(
-            model_name='organization',
-            name='type',
-            field=models.ForeignKey(
-                default=1, on_delete=django.db.models.deletion.PROTECT, to='fail.OrganizationType'),
+            model_name="organization",
+            name="type",
+            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, to="fail.OrganizationType"),
         ),
         migrations.RunPython(forward, noop),
     ]

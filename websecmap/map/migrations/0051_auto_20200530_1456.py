@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0050_landingpage'),
+        ("map", "0050_landingpage"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organizationreport',
-            name='endpoint_error_in_test',
-            field=models.IntegerField(default=0, help_text='Amount of errors in tests performed on this endpoint.'),
+            model_name="organizationreport",
+            name="endpoint_error_in_test",
+            field=models.IntegerField(default=0, help_text="Amount of errors in tests performed on this endpoint."),
         ),
         migrations.AddField(
-            model_name='organizationreport',
-            name='error_in_test',
+            model_name="organizationreport",
+            name="error_in_test",
             field=models.IntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='organizationreport',
-            name='url_error_in_test',
-            field=models.IntegerField(default=0, help_text='Amount of errors in tests on this url.'),
+            model_name="organizationreport",
+            name="url_error_in_test",
+            field=models.IntegerField(default=0, help_text="Amount of errors in tests on this url."),
         ),
     ]

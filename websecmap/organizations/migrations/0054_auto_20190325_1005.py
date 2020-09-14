@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0053_url_do_not_find_subdomains'),
+        ("organizations", "0053_url_do_not_find_subdomains"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='dataset',
-            name='file_source',
-            field=models.FileField(blank=True, help_text="Fill out either the URL or File source. - A file upload has to be in a specific Excel format. You can download this format here: <a href='/static/websecmap/empty_organizations_import_file.xlsx'>empty file</a>. You can also download an example that shows how to enter the data correctly. You can download the example here: <a href='/static/websecmap/example_organizations_import_file.xlsx'>example file</a>", null=True, upload_to=''),
+            model_name="dataset",
+            name="file_source",
+            field=models.FileField(
+                blank=True,
+                help_text="Fill out either the URL or File source. - A file upload has to be in a specific Excel format. You can download this format here: <a href='/static/websecmap/empty_organizations_import_file.xlsx'>empty file</a>. You can also download an example that shows how to enter the data correctly. You can download the example here: <a href='/static/websecmap/example_organizations_import_file.xlsx'>example file</a>",
+                null=True,
+                upload_to="",
+            ),
         ),
     ]

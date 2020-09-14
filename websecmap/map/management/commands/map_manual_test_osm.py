@@ -24,8 +24,6 @@ class Command(BaseCommand):
             data={"data": query, "submit": "Query"},
             stream=True,
             timeout=(1200, 1200),
-
-
         )
 
         log.debug("Response from server:")

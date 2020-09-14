@@ -11,8 +11,10 @@ log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
-    help = "Connects to OSM and gets a set of coordinates. Example:" \
-           "failmap import_coordinates --country=SE --region=municipality --date=2018-01-01"
+    help = (
+        "Connects to OSM and gets a set of coordinates. Example:"
+        "failmap import_coordinates --country=SE --region=municipality --date=2018-01-01"
+    )
 
     # NL, province: failmap import_coordinates --country=NL --region=province --date=2018-01-01
     # LU, all: failmap import_coordinates --country=LU --date=2018-01-01
@@ -20,28 +22,25 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
 
-        parser.add_argument("--country",
-                            help="Country code. Eg: NL, DE, EN",
-                            required=False)
+        parser.add_argument("--country", help="Country code. Eg: NL, DE, EN", required=False)
 
-        parser.add_argument("--region",
-                            help="Region: municipality, province, water\ board ...",
-                            required=False)
+        parser.add_argument("--region", help="Region: municipality, province, water\ board ...", required=False)
 
-        parser.add_argument("--date",
-                            help="Date since when the import should be effective. - format YYYY-MM-DD",
-                            required=False,
-                            type=valid_date)
+        parser.add_argument(
+            "--date",
+            help="Date since when the import should be effective. - format YYYY-MM-DD",
+            required=False,
+            type=valid_date,
+        )
 
-        parser.add_argument("--list",
-                            help="Lists the currently available regions and countries.",
-                            required=False,
-                            action='store_true')
+        parser.add_argument(
+            "--list", help="Lists the currently available regions and countries.", required=False, action="store_true"
+        )
 
     # https://nl.wikipedia.org/wiki/Gemeentelijke_herindelingen_in_Nederland#Komende_herindelingen
     def handle(self, *app_labels, **options):
 
-        if options['list']:
+        if options["list"]:
             log.info("Currently available administrative regions:")
             log.info("Hint: add the via the admin interface.")
             x = AdministrativeRegion.objects.all()
@@ -53,9 +52,8 @@ class Command(BaseCommand):
 
         else:
             import_from_scratch(
-                countries=[options["country"]],
-                organization_types=[options["region"]],
-                when=options["date"])
+                countries=[options["country"]], organization_types=[options["region"]], when=options["date"]
+            )
 
 
 def valid_date(s):

@@ -21,46 +21,48 @@ from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
-from websecmap.scanners.scanner.__init__ import (add_model_filter, endpoint_filters,
-                                                 q_configurations_to_scan, unique_and_random,
-                                                 url_filters)
+from websecmap.scanners.scanner.__init__ import (
+    add_model_filter,
+    endpoint_filters,
+    q_configurations_to_scan,
+    unique_and_random,
+    url_filters,
+)
 from websecmap.scanners.scanner.http import connect_result
 
 log = logging.getLogger(__name__)
 
 
 # cloudflare, google, quad9, cisco.
-NAMESERVERS = ['1.1.1.1', '8.8.8.8', '9.9.9.9', '208.67.222.222']
+NAMESERVERS = ["1.1.1.1", "8.8.8.8", "9.9.9.9", "208.67.222.222"]
 
 # since you'll be asking a lot of DNS questions, use a set of (public) resolvers:
 resolver = Resolver()
 resolver.nameservers = NAMESERVERS
 
 
-def filter_discover(organizations_filter: dict = dict(),
-                    urls_filter: dict = dict(),
-                    endpoints_filter: dict = dict(),
-                    **kwargs):
+def filter_discover(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
 
     default_filter = {"is_dead": False, "not_resolvable": False}
     urls_filter = {**urls_filter, **default_filter}
-    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter).only('id', 'url')
+    urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), **urls_filter).only("id", "url")
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
     urls = add_model_filter(urls, **kwargs)
 
     return unique_and_random(urls)
 
 
-def filter_verify(organizations_filter: dict = dict(),
-                  urls_filter: dict = dict(),
-                  endpoints_filter: dict = dict(),
-                  **kwargs):
+def filter_verify(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
 
     default_filter = {"protocol__in": ["dns_mx_no_cname", "dns_soa", "dns_a_aaaa"], "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
-    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
+    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level="endpoint"), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
-    endpoints = endpoints.only('id', 'url__id', 'url__url')
+    endpoints = endpoints.only("id", "url__id", "url__url")
 
     endpoints = unique_and_random(endpoints)
     return unique_and_random([endpoint.url for endpoint in endpoints])
@@ -81,7 +83,7 @@ def compose_new_discover_task(urls):
             | connect_result.s(protocol="dns_soa", url=url, port=0, ip_version=0)
             | has_a_or_aaaa.si(url.url)
             | connect_result.s(protocol="dns_a_aaaa", url=url, port=0, ip_version=0)
-            | plannedscan.finish.si('discover', 'dns_endpoints', url)
+            | plannedscan.finish.si("discover", "dns_endpoints", url)
         )
 
     return group(tasks)
@@ -99,62 +101,57 @@ def compose_new_verify_task(urls):
             | connect_result.s(protocol="dns_soa", url=endpoint.url, port=0, ip_version=0)
             | has_a_or_aaaa.si(endpoint.url.url)
             | connect_result.s(protocol="dns_a_aaaa", url=endpoint.url, port=0, ip_version=0)
-            | plannedscan.finish.si('verify', 'dns_endpoints', endpoint.url)
+            | plannedscan.finish.si("verify", "dns_endpoints", endpoint.url)
         )
     return group(tasks)
 
 
-@app.task(queue='storage')
-def plan_discover(organizations_filter: dict = dict(),
-                  urls_filter: dict = dict(),
-                  endpoints_filter: dict = dict(),
-                  **kwargs):
+@app.task(queue="storage")
+def plan_discover(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="discover", scanner="dns_endpoints", urls=urls)
 
 
-@app.task(queue='storage')
-def plan_verify(organizations_filter: dict = dict(),
-                urls_filter: dict = dict(),
-                endpoints_filter: dict = dict(),
-                **kwargs):
+@app.task(queue="storage")
+def plan_verify(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
 
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="verify", scanner="dns_endpoints", urls=urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_verify_task(**kwargs):
-    urls = plannedscan.pickup(activity="verify", scanner="dns_endpoints", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="verify", scanner="dns_endpoints", amount=kwargs.get("amount", 25))
     return compose_new_verify_task(urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_discover_task(**kwargs):
-    urls = plannedscan.pickup(activity="discover", scanner="dns_endpoints", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="discover", scanner="dns_endpoints", amount=kwargs.get("amount", 25))
     return compose_new_discover_task(urls)
 
 
-def compose_manual_verify_task(organizations_filter: dict = dict(),
-                               urls_filter: dict = dict(),
-                               endpoints_filter: dict = dict(), **kwargs) -> Task:
+def compose_manual_verify_task(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+) -> Task:
 
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_new_verify_task(urls)
 
 
-def compose_manual_discover_task(organizations_filter: dict = dict(),
-                                 urls_filter: dict = dict(),
-                                 endpoints_filter: dict = dict(), **kwargs) -> Task:
+def compose_manual_discover_task(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+) -> Task:
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_new_discover_task(urls)
 
 
 def compose_discover_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
-    **kwargs
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ) -> Task:
     # this method is here for backwards compatibility in the internet.nl dashboard
 
@@ -163,10 +160,7 @@ def compose_discover_task(
 
 
 def compose_verify_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
-    **kwargs
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ) -> Task:
     # this method is here for backwards compatibility in the internet.nl dashboard
 
@@ -272,7 +266,7 @@ def has_soa(url: str):
     :return:
     """
 
-    answer = get_dns_records_accepting_no_answer(url, 'SOA')
+    answer = get_dns_records_accepting_no_answer(url, "SOA")
     if answer is None:
         return False
 
@@ -309,12 +303,12 @@ def has_mx_without_cname(url: str) -> bool:
     ;; OPT PSEUDOSECTION:
     ; EDNS: version: 0, flags:; udp: 512
     ;; QUESTION SECTION:
-    ;www.basisbeveiliging.nl.	IN	MX
+    ;www.basisbeveiliging.nl.   IN  MX
 
     ;; ANSWER SECTION:
-    www.basisbeveiliging.nl. 21599	IN	CNAME	basisbeveiliging.nl.
-    basisbeveiliging.nl.	299	IN	MX	20 mx2.forwardmx.io.
-    basisbeveiliging.nl.	299	IN	MX	10 mx1.forwardmx.io.
+    www.basisbeveiliging.nl. 21599  IN  CNAME   basisbeveiliging.nl.
+    basisbeveiliging.nl.    299 IN  MX  20 mx2.forwardmx.io.
+    basisbeveiliging.nl.    299 IN  MX  10 mx1.forwardmx.io.
 
     ;; Query time: 38 msec
     ;; SERVER: 8.8.8.8#53(8.8.8.8)
@@ -322,10 +316,10 @@ def has_mx_without_cname(url: str) -> bool:
     ;; MSG SIZE  rcvd: 118
 
     """
-    if get_dns_records(url, 'CNAME'):
+    if get_dns_records(url, "CNAME"):
         return False
 
-    if get_dns_records(url, 'MX'):
+    if get_dns_records(url, "MX"):
         return True
 
     return False
@@ -341,15 +335,18 @@ def has_a_or_aaaa(url: str) -> bool:
     :param url:
     :return:
     """
-    if get_dns_records(url, 'A'):
+    if get_dns_records(url, "A"):
         return True
-    if get_dns_records(url, 'AAAA'):
+    if get_dns_records(url, "AAAA"):
         return True
     return False
 
 
-@retry(wait=wait_exponential(multiplier=1, min=0, max=10),
-       stop=stop_after_attempt(3), before=before_log(log, logging.DEBUG))
+@retry(
+    wait=wait_exponential(multiplier=1, min=0, max=10),
+    stop=stop_after_attempt(3),
+    before=before_log(log, logging.DEBUG),
+)
 def get_dns_records(url: str, record_type):
     try:
         # a little delay to be friendly towards the server
@@ -371,8 +368,11 @@ def get_dns_records(url: str, record_type):
         return False
 
 
-@retry(wait=wait_exponential(multiplier=1, min=0, max=10),
-       stop=stop_after_attempt(3), before=before_log(log, logging.DEBUG))
+@retry(
+    wait=wait_exponential(multiplier=1, min=0, max=10),
+    stop=stop_after_attempt(3),
+    before=before_log(log, logging.DEBUG),
+)
 def get_dns_records_accepting_no_answer(url: str, record_type):
     try:
         # a little delay to be friendly towards the server

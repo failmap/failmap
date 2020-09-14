@@ -16,21 +16,33 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='SIDNUpload',
+            name="SIDNUpload",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('at_when', models.DateTimeField(blank=True, help_text='When the transaction was made.', null=True)),
-                ('status', models.CharField(default='new', max_length=120)),
-                ('posted_data', models.TextField(
-                    default='', help_text='This is the raw CSV data that is uploaded. This is well in the megabytes (3 reasonably large municipal domains = ±1 MB)')),
-                ('newly_added_domains', jsonfield.fields.JSONField(
-                    help_text='A list of strings containing what domains have been added with this upload.')),
-                ('amount_of_newly_added_domains', models.PositiveIntegerField(default=0)),
-                ('by_user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("at_when", models.DateTimeField(blank=True, help_text="When the transaction was made.", null=True)),
+                ("status", models.CharField(default="new", max_length=120)),
+                (
+                    "posted_data",
+                    models.TextField(
+                        default="",
+                        help_text="This is the raw CSV data that is uploaded. This is well in the megabytes (3 reasonably large municipal domains = ±1 MB)",
+                    ),
+                ),
+                (
+                    "newly_added_domains",
+                    jsonfield.fields.JSONField(
+                        help_text="A list of strings containing what domains have been added with this upload."
+                    ),
+                ),
+                ("amount_of_newly_added_domains", models.PositiveIntegerField(default=0)),
+                (
+                    "by_user",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+                ),
             ],
             options={
-                'ordering': ('-at_when',),
-                'get_latest_by': 'at_when',
+                "ordering": ("-at_when",),
+                "get_latest_by": "at_when",
             },
         ),
     ]

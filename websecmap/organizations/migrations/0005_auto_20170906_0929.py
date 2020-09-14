@@ -8,14 +8,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0004_organization_twitter_handle'),
+        ("organizations", "0004_organization_twitter_handle"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organization',
-            name='twitter_handle',
+            model_name="organization",
+            name="twitter_handle",
             field=models.CharField(
-                blank=True, help_text='Used in the top lists to let visitors tweet to theorganization to wake them up.', max_length=150, null=True),
+                blank=True,
+                help_text="Used in the top lists to let visitors tweet to theorganization to wake them up.",
+                max_length=150,
+                null=True,
+            ),
         ),
     ]

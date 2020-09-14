@@ -8,20 +8,20 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0029_auto_20171113_1233'),
+        ("scanners", "0029_auto_20171113_1233"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='endpoint',
-            name='domain',
+            model_name="endpoint",
+            name="domain",
         ),
         migrations.RemoveField(
-            model_name='endpoint',
-            name='ip',
+            model_name="endpoint",
+            name="ip",
         ),
         migrations.RemoveField(
-            model_name='endpoint',
-            name='server_name',
+            model_name="endpoint",
+            name="server_name",
         ),
     ]

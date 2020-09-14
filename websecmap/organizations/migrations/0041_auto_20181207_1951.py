@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0040_url_dns_supports_mx'),
+        ("organizations", "0040_url_dns_supports_mx"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organization',
-            name='name',
+            model_name="organization",
+            name="name",
             field=models.CharField(db_index=True, max_length=250),
         ),
     ]

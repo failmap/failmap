@@ -17,25 +17,26 @@ from tenacity import before_log, retry, wait_fixed
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
-from websecmap.scanners.scanner.__init__ import (q_configurations_to_scan, unique_and_random,
-                                                 url_filters)
+from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, unique_and_random, url_filters
 from websecmap.scanners.scanner.http import get_ips
 
 # Include DNSRecon code from an external dependency. This is cloned recursively and placed outside the django app.
-sys.path.append(settings.VENDOR_DIR + '/dnsrecon/')
+sys.path.append(settings.VENDOR_DIR + "/dnsrecon/")
 
 log = logging.getLogger(__package__)
 
 
 def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict()) -> List:
     # only include what is allowed to be scanned, and reduce the amount of retrieved fields to a minimum.
-    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter).only("id", "url")
+    urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), **urls_filter).only("id", "url")
 
     if organizations_filter:
-        organizations = Organization.objects.filter(**organizations_filter).only('id')
-        urls = urls.filter(Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
-                           organization__in=organizations,
-                           do_not_find_subdomains=False)
+        organizations = Organization.objects.filter(**organizations_filter).only("id")
+        urls = urls.filter(
+            Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+            organization__in=organizations,
+            do_not_find_subdomains=False,
+        )
     else:
         urls = urls.filter(Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""), do_not_find_subdomains=False)
 
@@ -44,68 +45,69 @@ def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict
     return urls
 
 
-@app.task(queue='storage')
-def plan_discover(organizations_filter: dict = dict(),
-                  urls_filter: dict = dict(),
-                  endpoints_filter: dict = dict(),
-                  **kwargs):
+@app.task(queue="storage")
+def plan_discover(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
     plannedscan.request(activity="discover", scanner="subdomains", urls=urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_discover_task(**kwargs):
-    urls = plannedscan.pickup(activity="discover", scanner="subdomains", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="discover", scanner="subdomains", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
 
 
 def compose_manual_discover_task(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs):
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
-    log.info(f'Discovering subdomains on {len(urls)} urls.')
+    log.info(f"Discovering subdomains on {len(urls)} urls.")
     return compose_discover_task(urls)
 
 
 def compose_discover_task(urls) -> Task:
-    task = group(certificate_transparency_scan.si([url]) | nsec_scan.si(
-        [url]) | plannedscan.finish.si('discover', 'subdomains', url) for url in urls)
+    task = group(
+        certificate_transparency_scan.si([url])
+        | nsec_scan.si([url])
+        | plannedscan.finish.si("discover", "subdomains", url)
+        for url in urls
+    )
     return task
 
 
-def filter_verify(organizations_filter: dict = dict(),
-                  urls_filter: dict = dict(),
-                  endpoints_filter: dict = dict(),
-                  **kwargs):
+def filter_verify(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
 
     default_filter = {"not_resolvable": False}
     # The urls filter will overwrite the default filter in this case. Used in verify unresolvable
     urls_filter = {**default_filter, **urls_filter}
 
-    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'))
-    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter).only('id', 'url', 'not_resolvable')
+    urls = Url.objects.all().filter(q_configurations_to_scan(level="url"))
+    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter).only("id", "url", "not_resolvable")
 
     return unique_and_random(urls)
 
 
-@app.task(queue='storage')
-def plan_verify(organizations_filter: dict = dict(),
-                urls_filter: dict = dict(),
-                endpoints_filter: dict = dict(),
-                **kwargs):
+@app.task(queue="storage")
+def plan_verify(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
 
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="verify", scanner="subdomains", urls=urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_verify_task(**kwargs):
-    urls = plannedscan.pickup(activity="verify", scanner="subdomains", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="verify", scanner="subdomains", amount=kwargs.get("amount", 25))
     return compose_verify_task(urls)
 
 
 # it will not revive anything(!) Should that be a revive task?
-def compose_manual_verify_task(organizations_filter: dict = dict(),
-                               urls_filter: dict = dict(),
-                               endpoints_filter: dict = dict(), **kwargs) -> Task:
+def compose_manual_verify_task(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+) -> Task:
 
     # instead of only checking by domain, just accept the filters as they are handled in any other scenario...
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
@@ -115,21 +117,23 @@ def compose_manual_verify_task(organizations_filter: dict = dict(),
 
 
 def compose_verify_task(urls):
-    task = group(url_resolves.si(url.url) | handle_resolves.s(url) |
-                 plannedscan.finish.si('verify', 'subdomains', url) for url in urls)
+    task = group(
+        url_resolves.si(url.url) | handle_resolves.s(url) | plannedscan.finish.si("verify", "subdomains", url)
+        for url in urls
+    )
     return task
 
 
-def filter_discover(organizations_filter: dict = dict(),
-                    urls_filter: dict = dict(),
-                    endpoints_filter: dict = dict(), **kwargs):
+def filter_discover(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
 
     default_filter = {"not_resolvable": False}
     # The urls filter will overwrite the default filter in this case. Used in verify unresolvable
     urls_filter = {**default_filter, **urls_filter}
 
-    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'))
-    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter).only('id', 'url', 'not_resolvable')
+    urls = Url.objects.all().filter(q_configurations_to_scan(level="url"))
+    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter).only("id", "url", "not_resolvable")
 
     urls = list(set(urls))
     random.shuffle(urls)
@@ -166,16 +170,13 @@ def handle_resolves(resolves, url):
 
 
 def toplevel_urls(organizations):
-    return Url.objects.all().filter(organization__in=organizations,
-                                    computed_subdomain="")
+    return Url.objects.all().filter(organization__in=organizations, computed_subdomain="")
 
 
 # This helps to determine at database level if the DNS uses wildcards, so it can be dealt
 # with in another way.
 def toplevel_urls_without_wildcards(organizations: List):
-    return Url.objects.all().filter(organization__in=organizations,
-                                    computed_subdomain="",
-                                    uses_dns_wildcard=False)
+    return Url.objects.all().filter(organization__in=organizations, computed_subdomain="", uses_dns_wildcard=False)
 
 
 def remove_and_save_wildcards(urls: List[Url]):
@@ -184,7 +185,7 @@ def remove_and_save_wildcards(urls: List[Url]):
 
 
 def has_wildcards(urls: List[Url]):
-    """ Run this when adding a new url.
+    """Run this when adding a new url.
 
     So you can be sure that there are no wildcards if you don't want them.
 
@@ -205,8 +206,10 @@ def has_wildcards(urls: List[Url]):
             url.save()
             urls_without_wildcards.append(url)
 
-    log.debug("Of the %s urls, %s had a wildcard and %s did not." % (len(urls), len(urls_with_wildcards),
-                                                                     len(urls_without_wildcards)))
+    log.debug(
+        "Of the %s urls, %s had a wildcard and %s did not."
+        % (len(urls), len(urls_with_wildcards), len(urls_without_wildcards))
+    )
 
     return urls_without_wildcards, urls_with_wildcards
 
@@ -224,7 +227,7 @@ def discover_wildcard(url: str):
     In some cases DNSrecon makes a wrong assumption about wildcard usage. This is hopefully a bit better.
     """
     # import DNSRecon using evil methods
-    sys.path.append(settings.VENDOR_DIR + '/dnsrecon/')
+    sys.path.append(settings.VENDOR_DIR + "/dnsrecon/")
     from lib.dnshelper import DnsHelper
 
     log.debug("Checking for DNS wildcards on domain: %s" % url)
@@ -234,8 +237,8 @@ def discover_wildcard(url: str):
     resolver = DnsHelper(url, get_random_dns_resolver_ip(), 3)
 
     # Do this test twice, there are dns servers that say NO the first time, but say yes the second (i mean wtf)
-    ips_1 = resolver.get_a("%s.%s" % (''.join(random.choice(string.ascii_lowercase) for i in range(16)), url))
-    ips_2 = resolver.get_a("%s.%s" % (''.join(random.choice(string.ascii_lowercase) for i in range(16)), url))
+    ips_1 = resolver.get_a("%s.%s" % ("".join(random.choice(string.ascii_lowercase) for i in range(16)), url))
+    ips_2 = resolver.get_a("%s.%s" % ("".join(random.choice(string.ascii_lowercase) for i in range(16)), url))
 
     if len(ips_1) > 0 or len(ips_2) > 0:
         log.debug("%s has wildcards enabled." % url)
@@ -247,6 +250,7 @@ def discover_wildcard(url: str):
 def import_dnsrecon_report(url: Url, path: str):
     # note: the order of the records in the report matters(!)
     import json
+
     with open(path) as data_file:
         data = json.load(data_file)
         addedlist = dnsrecon_parse_report_contents(url, data)
@@ -266,7 +270,7 @@ def dnsrecon_parse_report_contents(url: Url, contents: List):
         # ns_server: nameserver used
         bad = ["arguments", "ns_server", "mname", "Version", "exchange", "strings", "target"]
         my_list = list(record.keys())
-        if [e for e in bad if e in '\n'.join(my_list)]:
+        if [e for e in bad if e in "\n".join(my_list)]:
             continue
 
         # "address": "no_ip",
@@ -274,10 +278,10 @@ def dnsrecon_parse_report_contents(url: Url, contents: List):
             continue
 
         if record["name"].endswith(url.url) and record["name"].lower() != url.url.lower():
-            subdomain = record["name"][0:-len(url.url) - 1]
+            subdomain = record["name"][0 : -len(url.url) - 1]
             # remove wildcards: "name": "*.woonsubsidie.amsterdam.nl",
             if subdomain[0:2] == "*.":
-                subdomain = subdomain[2:len(subdomain)]
+                subdomain = subdomain[2 : len(subdomain)]
 
             # will check for resolve and if this is a wildcard.
             added = url.add_subdomain(subdomain.lower())
@@ -288,7 +292,7 @@ def dnsrecon_parse_report_contents(url: Url, contents: List):
 
 
 # place it on the IPv4 queue, so it can scale using cloud workers :)
-@app.task(ignore_result=True, queue="ipv4", rate_limit='6/h')
+@app.task(ignore_result=True, queue="ipv4", rate_limit="6/h")
 def wordlist_scan(urls: List[Url], wordlist: List[str]):
     """
 
@@ -297,7 +301,7 @@ def wordlist_scan(urls: List[Url], wordlist: List[str]):
     :return:
     """
     # import DNSRecon using evil methods
-    sys.path.append(settings.VENDOR_DIR + '/dnsrecon/')
+    sys.path.append(settings.VENDOR_DIR + "/dnsrecon/")
     from dnsrecon import ThreadPool, brute_domain
     from lib.dnshelper import DnsHelper
 
@@ -342,8 +346,9 @@ def wordlist_scan(urls: List[Url], wordlist: List[str]):
             # Using the filter option, only adds the addresses that don't go to the wildcard record.
             # In the logfile all dns responses are shown, but in the list of really resolving urls only the ones
             # that deviate from the wildcard IP are stored.
-            found_hosts = brute_domain(resolver, tmp_wordlist.name, url.url,
-                                       filter=True, verbose=False, ignore_wildcard=True)
+            found_hosts = brute_domain(
+                resolver, tmp_wordlist.name, url.url, filter=True, verbose=False, ignore_wildcard=True
+            )
 
             # some hosts rotate a set of IP's when providing wildcards. This is an annoying practice.
             # We can filter those out with some statistics. We cut off everything that resolve to the top IP's.
@@ -372,18 +377,18 @@ def remove_wildcards_using_statistics(found_hosts, url):
     for host in found_hosts:
 
         # Points to a A / AAAA record
-        if 'address' in host:
-            if host['address'] not in ip_stats:
-                ip_stats[host['address']] = 1
+        if "address" in host:
+            if host["address"] not in ip_stats:
+                ip_stats[host["address"]] = 1
             else:
-                ip_stats[host['address']] += 1
+                ip_stats[host["address"]] += 1
 
         # points to a certain CNAME
-        if 'target' in host:
-            if host['target'] not in ip_stats:
-                ip_stats[host['target']] = 1
+        if "target" in host:
+            if host["target"] not in ip_stats:
+                ip_stats[host["target"]] = 1
             else:
-                ip_stats[host['target']] += 1
+                ip_stats[host["target"]] += 1
 
     log.debug("Ip Stats")
     log.debug(ip_stats)
@@ -403,12 +408,12 @@ def remove_wildcards_using_statistics(found_hosts, url):
     # remove all found hosts that are on the banned IP list:
     for host in found_hosts:
 
-        if 'address' in host:
-            if host['address'] not in banned_ips:
+        if "address" in host:
+            if host["address"] not in banned_ips:
                 interesting_found_hosts.append(host)
 
-        if 'target' in host:
-            if host['target'] not in banned_ips:
+        if "target" in host:
+            if host["target"] not in banned_ips:
                 interesting_found_hosts.append(host)
 
     log.debug("Interesting hosts")
@@ -440,12 +445,12 @@ def get_random_dns_resolver_ip():
     # 8.26.56.26 == 8.20.247.20 (comodo)
     # 149.112.112.112 == 9.9.9.9 (quad9)
 
-    return random.choice(['1.1.1.1', '9.9.9.9', '8.8.8.8', '8.26.56.26'])
+    return random.choice(["1.1.1.1", "9.9.9.9", "8.8.8.8", "8.26.56.26"])
 
 
 # don't overload the crt.sh service, rate limit
 # todo: create a generic: go to $page with $parameter and scrape all urls.
-@app.task(ignore_result=True, queue="internet", rate_limit='2/m')
+@app.task(ignore_result=True, queue="internet", rate_limit="2/m")
 @retry(wait=wait_fixed(30), before=before_log(log, logging.INFO))
 def certificate_transparency_scan(urls: List[Url]):
     """
@@ -480,17 +485,17 @@ def certificate_transparency_scan(urls: List[Url]):
             # brute force dns scan and some other places. Adding the logic here will increase complexity.
             match = match.replace("*.", "")
             if match != url.url:
-                subdomains.append(match[0:len(match) - len(url.url) - 1])  # wraps around
+                subdomains.append(match[0 : len(match) - len(url.url) - 1])  # wraps around
 
         subdomains = [x.lower() for x in subdomains]  # do lowercase normalization elsewhere
         subdomains = set(subdomains)
 
         # 25 and '' are created due to the percentage and empty subdomains. Remove them
         # wildcards (*) are also not allowed.
-        if '' in subdomains:
-            subdomains.remove('')
-        if '25' in subdomains:
-            subdomains.remove('25')
+        if "" in subdomains:
+            subdomains.remove("")
+        if "25" in subdomains:
+            subdomains.remove("25")
 
         log.debug("Found subdomains: %s" % subdomains)
 
@@ -502,7 +507,7 @@ def certificate_transparency_scan(urls: List[Url]):
 
 
 # this is a fairly safe scanner, and can be run pretty quiclkly (no clue if parralelisation works)
-@app.task(ignore_result=True, queue="internet", rate_limit='4/m')
+@app.task(ignore_result=True, queue="internet", rate_limit="4/m")
 def nsec_scan(urls: List[Url]):
     """
     Tries to use nsec (dnssec) walking. Does not use nsec3 (hashes).
@@ -518,12 +523,12 @@ def nsec_scan(urls: List[Url]):
     :return:
     """
     # import DNSRecon using evil methods
-    sys.path.append(settings.VENDOR_DIR + '/dnsrecon/')
+    sys.path.append(settings.VENDOR_DIR + "/dnsrecon/")
     from dnsrecon import ds_zone_walk
     from lib.dnshelper import DnsHelper
 
     for url in urls:
-        resolver = DnsHelper(url.url, '8.8.8.8', 30)
+        resolver = DnsHelper(url.url, "8.8.8.8", 30)
         records = ds_zone_walk(resolver, url.url)
         log.info(records)
         dnsrecon_parse_report_contents.apply_async([url, records])
@@ -539,13 +544,39 @@ def get_subdomains(countries: List, organization_types: List = None):
     if organization_types:
         urls = urls.filter(organization__type__name__in=organization_types)
 
-    return urls.values_list('computed_subdomain', flat=True).distinct()
+    return urls.values_list("computed_subdomain", flat=True).distinct()
 
 
 def make_threeletter_wordlist():
-    alphabets = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-    threeletters = [''.join(i) for i in itertools.product(alphabets, repeat=3)]
-    twoletters = [''.join(i) for i in itertools.product(alphabets, repeat=2)]
+    alphabets = [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "q",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "w",
+        "x",
+        "y",
+        "z",
+    ]
+    threeletters = ["".join(i) for i in itertools.product(alphabets, repeat=3)]
+    twoletters = ["".join(i) for i in itertools.product(alphabets, repeat=2)]
 
     return alphabets + threeletters + twoletters

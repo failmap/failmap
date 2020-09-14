@@ -6,32 +6,40 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0010_auto_20180806_0838'),
+        ("game", "0010_auto_20180806_0838"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organizationsubmission',
-            name='has_been_accepted',
+            model_name="organizationsubmission",
+            name="has_been_accepted",
             field=models.BooleanField(
-                db_index=True, default=False, help_text='If the admin likes it, they can accept the submission to be part of the real system'),
+                db_index=True,
+                default=False,
+                help_text="If the admin likes it, they can accept the submission to be part of the real system",
+            ),
         ),
         migrations.AlterField(
-            model_name='organizationsubmission',
-            name='has_been_rejected',
-            field=models.BooleanField(db_index=True, default=False,
-                                      help_text='Nonsense organizations can be rejected.'),
-        ),
-        migrations.AlterField(
-            model_name='urlsubmission',
-            name='has_been_accepted',
+            model_name="organizationsubmission",
+            name="has_been_rejected",
             field=models.BooleanField(
-                db_index=True, default=False, help_text='If the admin likes it, they can accept the submission to be part of the real system'),
+                db_index=True, default=False, help_text="Nonsense organizations can be rejected."
+            ),
         ),
         migrations.AlterField(
-            model_name='urlsubmission',
-            name='has_been_rejected',
-            field=models.BooleanField(db_index=True, default=False,
-                                      help_text='Rejected urls makes for deduction in points.'),
+            model_name="urlsubmission",
+            name="has_been_accepted",
+            field=models.BooleanField(
+                db_index=True,
+                default=False,
+                help_text="If the admin likes it, they can accept the submission to be part of the real system",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="urlsubmission",
+            name="has_been_rejected",
+            field=models.BooleanField(
+                db_index=True, default=False, help_text="Rejected urls makes for deduction in points."
+            ),
         ),
     ]

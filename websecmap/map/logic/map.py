@@ -29,8 +29,9 @@ def get_reports_by_ids(ids):
     return reports
 
 
-def get_map_data(country: str = "NL", organization_type: str = "municipality", days_back: int = 0,
-                 displayed_issue: str = None):
+def get_map_data(
+    country: str = "NL", organization_type: str = "municipality", days_back: int = 0, displayed_issue: str = None
+):
 
     when = datetime.now(pytz.utc) - relativedelta(days=int(days_back))
 
@@ -49,16 +50,28 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         desired_endpoint_scans = ENDPOINT_SCAN_TYPES
 
         # look if we have data in the cache, which will save some calculations and a slower query
-        cached = MapDataCache.objects.all().filter(country=country,
-                                                   organization_type=get_organization_type(organization_type),
-                                                   at_when=when,
-                                                   filters=['all']).first()
+        cached = (
+            MapDataCache.objects.all()
+            .filter(
+                country=country,
+                organization_type=get_organization_type(organization_type),
+                at_when=when,
+                filters=["all"],
+            )
+            .first()
+        )
     else:
         # look if we have data in the cache, which will save some calculations and a slower query
-        cached = MapDataCache.objects.all().filter(country=country,
-                                                   organization_type=get_organization_type(organization_type),
-                                                   at_when=when,
-                                                   filters=desired_url_scans + desired_endpoint_scans).first()
+        cached = (
+            MapDataCache.objects.all()
+            .filter(
+                country=country,
+                organization_type=get_organization_type(organization_type),
+                at_when=when,
+                filters=desired_url_scans + desired_endpoint_scans,
+            )
+            .first()
+        )
 
     if cached:
         return cached.dataset
@@ -80,17 +93,10 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
             "remark": remark,
             "applied filter": displayed_issue,
             "layer": organization_type,
-            "country": country
+            "country": country,
         },
-        "crs":
-            {
-                "type": "name",
-                "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}
-        },
-        "features":
-            [
-
-        ]
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
+        "features": [],
     }
 
     cursor = connection.cursor()
@@ -182,8 +188,11 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY map_organizationreport.at_when ASC
-        """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
-               "country": get_country(country)}
+        """ % {
+        "when": when,
+        "OrganizationTypeId": get_organization_type(organization_type),
+        "country": get_country(country),
+    }
 
     cursor.execute(sql)
     rows = cursor.fetchall()
@@ -218,24 +227,28 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
 
         calculation = json.loads(reports[i[6]])
 
-        for url in calculation['organization']['urls']:
-            for url_rating in url['ratings']:
-                if url_rating['type'] in desired_url_scans and \
-                        url_rating.get('comply_or_explain_valid_at_time_of_report', False) is False:
-                    high += url_rating['high']
-                    medium += url_rating['medium']
-                    low += url_rating['low']
-                    ok += url_rating['ok']
+        for url in calculation["organization"]["urls"]:
+            for url_rating in url["ratings"]:
+                if (
+                    url_rating["type"] in desired_url_scans
+                    and url_rating.get("comply_or_explain_valid_at_time_of_report", False) is False
+                ):
+                    high += url_rating["high"]
+                    medium += url_rating["medium"]
+                    low += url_rating["low"]
+                    ok += url_rating["ok"]
 
             # it's possible the url doesn't have ratings.
-            for endpoint in url['endpoints']:
-                for endpoint_rating in endpoint['ratings']:
-                    if endpoint_rating['type'] in desired_endpoint_scans and \
-                            endpoint_rating.get('comply_or_explain_valid_at_time_of_report', False) is False:
-                        high += endpoint_rating['high']
-                        medium += endpoint_rating['medium']
-                        low += endpoint_rating['low']
-                        ok += endpoint_rating['ok']
+            for endpoint in url["endpoints"]:
+                for endpoint_rating in endpoint["ratings"]:
+                    if (
+                        endpoint_rating["type"] in desired_endpoint_scans
+                        and endpoint_rating.get("comply_or_explain_valid_at_time_of_report", False) is False
+                    ):
+                        high += endpoint_rating["high"]
+                        medium += endpoint_rating["medium"]
+                        low += endpoint_rating["low"]
+                        ok += endpoint_rating["ok"]
 
         # figure out if red, orange or green:
         # #162, only make things red if there is a critical issue.
@@ -249,35 +262,32 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
 
         dataset = {
             "type": "Feature",
-            "properties":
-                {
-                    "organization_id": i[5],
-                    "organization_type": i[2],
-                    "organization_name": i[1],
-                    "organization_name_lowercase": i[1].lower(),
-                    "organization_slug": slugify(i[1]),
-                    "additional_keywords": extract_domains(calculation),
-                    "high": high,
-                    "medium": medium,
-                    "low": low,
-                    "data_from": when.isoformat(),
-                    "severity": severity,
-                    "total_urls": i[11],  # = 100%
-                    "high_urls": i[12],
-                    "medium_urls": i[13],
-                    "low_urls": i[14],
-                },
-            "geometry":
-                {
-                    # the coordinate ID makes it easy to check if the geometry has changed shape/location.
-                    "coordinate_id": i[15],
-
-                    "type": i[4],
-                    # Sometimes the data is a string, sometimes it's a list. The admin
-                    # interface might influence this. The fastest would be to use a string, instead of
-                    # loading some json.
-                    "coordinates": proper_coordinate(i[3], i[4])
-                }
+            "properties": {
+                "organization_id": i[5],
+                "organization_type": i[2],
+                "organization_name": i[1],
+                "organization_name_lowercase": i[1].lower(),
+                "organization_slug": slugify(i[1]),
+                "additional_keywords": extract_domains(calculation),
+                "high": high,
+                "medium": medium,
+                "low": low,
+                "data_from": when.isoformat(),
+                "severity": severity,
+                "total_urls": i[11],  # = 100%
+                "high_urls": i[12],
+                "medium_urls": i[13],
+                "low_urls": i[14],
+            },
+            "geometry": {
+                # the coordinate ID makes it easy to check if the geometry has changed shape/location.
+                "coordinate_id": i[15],
+                "type": i[4],
+                # Sometimes the data is a string, sometimes it's a list. The admin
+                # interface might influence this. The fastest would be to use a string, instead of
+                # loading some json.
+                "coordinates": proper_coordinate(i[3], i[4]),
+            },
         }
 
         # calculate some statistics, so the frontends do not have to...
@@ -287,14 +297,14 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
             high_urls = int(i[12])
             medium_urls = int(i[13])
             low_urls = int(i[14])
-            dataset['properties']['percentages'] = {
+            dataset["properties"]["percentages"] = {
                 "high_urls": round(high_urls / total_urls, 2) * 100,
                 "medium_urls": round(medium_urls / total_urls, 2) * 100,
                 "low_urls": round(low_urls / total_urls, 2) * 100,
                 "good_urls": round((total_urls - (high_urls + medium_urls + low_urls)) / total_urls, 2) * 100,
             }
         else:
-            dataset['properties']['percentages'] = {
+            dataset["properties"]["percentages"] = {
                 "high_urls": 0,
                 "medium_urls": 0,
                 "low_urls": 0,
@@ -308,8 +318,9 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
 
 def proper_coordinate(coordinate, geojsontype):
     # Not all data is as cleanly stored
-    coordinate = json.loads(coordinate) \
-        if isinstance(json.loads(coordinate), list) else json.loads(json.loads(coordinate))
+    coordinate = (
+        json.loads(coordinate) if isinstance(json.loads(coordinate), list) else json.loads(json.loads(coordinate))
+    )
 
     # Points in geojson are stored in lng,lat. Leaflet wants to show it the other way around.
     # https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
@@ -336,8 +347,8 @@ def extract_domains(calculation):
 
     words = []
 
-    for url in calculation['organization']['urls']:
-        words += url['url'].split(".")
+    for url in calculation["organization"]["urls"]:
+        words += url["url"].split(".")
 
     # unique words only.
     words = list(set(words))

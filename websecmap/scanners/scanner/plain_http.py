@@ -15,14 +15,18 @@ from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import (allowed_to_scan, q_configurations_to_scan,
-                                                 unique_and_random)
-from websecmap.scanners.scanner.http import (can_connect, connect_result, redirects_to_safety,
-                                             resolves_on_v4, resolves_on_v6)
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
+from websecmap.scanners.scanner.http import (
+    can_connect,
+    connect_result,
+    redirects_to_safety,
+    resolves_on_v4,
+    resolves_on_v6,
+)
 
 log = logging.getLogger(__package__)
 
-CELERY_IP_VERSION_QUEUE_NAMES = {4: 'ipv4', 6: 'ipv6'}
+CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
 
 # These messages are translated and expected lateron. Don't edit them unless you're also editing them in the reporting
 # etc etc.
@@ -32,36 +36,33 @@ saved_by_the_bell = "Redirects to a secure site, while a secure counterpart on t
 no_https_at_all = "Site does not redirect to secure url, and has no secure alternative on a standard port."
 
 
-def filter_scan(organizations_filter: dict = dict(),
-                urls_filter: dict = dict(),
-                endpoints_filter: dict = dict(),
-                **kwargs):
+def filter_scan(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
 
     if organizations_filter:
-        organizations = Organization.objects.filter(is_dead=False, **organizations_filter).only('id')
+        organizations = Organization.objects.filter(is_dead=False, **organizations_filter).only("id")
         urls = Url.objects.filter(
             q_configurations_to_scan(),
             organization__in=organizations,
             is_dead=False,
             not_resolvable=False,
-            **urls_filter
-        ).only('id', 'url')
-        log.info(f'Creating scan task {len(urls)} urls for {len(organizations)} organizations.')
+            **urls_filter,
+        ).only("id", "url")
+        log.info(f"Creating scan task {len(urls)} urls for {len(organizations)} organizations.")
     else:
-        urls = Url.objects.filter(
-            q_configurations_to_scan(), is_dead=False, not_resolvable=False, **urls_filter
-        ).only('id', 'url')
-        log.info(f'Creating scan plain http task {len(urls)} urls.')
+        urls = Url.objects.filter(q_configurations_to_scan(), is_dead=False, not_resolvable=False, **urls_filter).only(
+            "id", "url"
+        )
+        log.info(f"Creating scan plain http task {len(urls)} urls.")
 
     return unique_and_random(urls)
 
 
-@app.task(queue='storage')
-def plan_scan(organizations_filter: dict = dict(),
-              urls_filter: dict = dict(),
-              endpoints_filter: dict = dict(),
-              **kwargs
-              ):
+@app.task(queue="storage")
+def plan_scan(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     if not allowed_to_scan("plain_http"):
         return group()
 
@@ -69,17 +70,14 @@ def plan_scan(organizations_filter: dict = dict(),
     plannedscan.request(activity="scan", scanner="plain_http", urls=urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="plain_http", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="scan", scanner="plain_http", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
 
 
 def compose_manual_scan_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
-    **kwargs
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ) -> Task:
 
     # We might not be allowed to scan for this at all.
@@ -96,24 +94,22 @@ def compose_scan_task(urls):
         complete_endpoints, incomplete_endpoints = get_endpoints_with_missing_encryption(url)
 
         for complete_endpoint in complete_endpoints:
-            tasks.append(well_done.si(complete_endpoint) | plannedscan.finish.si('scan', 'plain_http', url))
+            tasks.append(well_done.si(complete_endpoint) | plannedscan.finish.si("scan", "plain_http", url))
 
         for incomplete_endpoint in incomplete_endpoints:
             tasks.append(
-                scan.si(
-                    incomplete_endpoint
-                ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[incomplete_endpoint.ip_version])
+                scan.si(incomplete_endpoint).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[incomplete_endpoint.ip_version])
                 | store.s(incomplete_endpoint)
-                | plannedscan.finish.si('scan', 'plain_http', url)
+                | plannedscan.finish.si("scan", "plain_http", url)
             )
 
     if not tasks:
-        log.warning('Applied filters resulted in no urls, thus no plain http tasks!')
+        log.warning("Applied filters resulted in no urls, thus no plain http tasks!")
 
     return group(tasks)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def get_endpoints_with_missing_encryption(url):
     """
     Finds a list of endpoints that are missing an encrypted counterpart. Takes in account ip_version.
@@ -124,10 +120,10 @@ def get_endpoints_with_missing_encryption(url):
     :return:
     """
 
-    endpoints = Endpoint.objects.all().filter(
-        url=url, is_dead=False
-    ).only(
-        'id', 'protocol', 'port', 'ip_version', 'url__id', 'url__url'
+    endpoints = (
+        Endpoint.objects.all()
+        .filter(url=url, is_dead=False)
+        .only("id", "protocol", "port", "ip_version", "url__id", "url__url")
     )
 
     has_http_v4, has_https_v4, has_http_v6, has_https_v6 = False, False, False, False
@@ -163,7 +159,7 @@ def get_endpoints_with_missing_encryption(url):
     return complete_endpoints, incomplete_endpoints
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def well_done(endpoint):
     if endpoint_has_scans("plain_https", endpoint):
         store_endpoint_scan_result("plain_https", endpoint, "0", cleaned_up)
@@ -220,7 +216,7 @@ def scan(endpoint):
     return resolves, can_connect_result, redirects_to_safety_result
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def store(results, endpoint):
 
     resolves, can_connect_result, redirects_to_safety_result = results
@@ -229,8 +225,10 @@ def store(results, endpoint):
         # Don't administrate endpoints that don't resolve, that is a task for the http verify scanner. Here we just
         # don't try to redirect to safety or otherwise miscalculate the result. If the http verify scanner is not run
         # there will be mismatches between this (or previous results) and reality.
-        log.debug("Endpoint on %s doesn't resolve anymore. "
-                  "Run the DNS verify scanner to prevent scanning non resolving endpoints." % endpoint)
+        log.debug(
+            "Endpoint on %s doesn't resolve anymore. "
+            "Run the DNS verify scanner to prevent scanning non resolving endpoints." % endpoint
+        )
         return
 
     connect_result(can_connect_result, protocol="https", url=endpoint.url, port=443, ip_version=endpoint.ip_version)

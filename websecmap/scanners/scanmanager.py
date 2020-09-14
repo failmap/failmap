@@ -13,7 +13,7 @@ def store_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rating: str, 
 
     # Check if the latest scan has the same rating or not:
     try:
-        gs = EndpointGenericScan.objects.all().filter(type=scan_type, endpoint=endpoint).latest('last_scan_moment')
+        gs = EndpointGenericScan.objects.all().filter(type=scan_type, endpoint=endpoint).latest("last_scan_moment")
         exists = True
     except ObjectDoesNotExist:
         exists = False
@@ -24,7 +24,7 @@ def store_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rating: str, 
     if gs.explanation == str(message) and gs.rating == str(rating):
         log.debug("Scan had the same rating and message, updating last_scan_moment only.")
         gs.last_scan_moment = datetime.now(pytz.utc)
-        gs.save(update_fields=['last_scan_moment'])
+        gs.save(update_fields=["last_scan_moment"])
         return
 
     # message and rating changed for this scan_type, so it's worth while to save the scan.
@@ -45,12 +45,7 @@ def store_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rating: str, 
     gs.save()
 
     # Set all the previous endpoint scans of this endpoint + type to NOT be the latest scan.
-    EndpointGenericScan.objects.all().filter(
-        endpoint=gs.endpoint,
-        type=gs.type
-    ).exclude(
-        pk=gs.pk
-    ).update(
+    EndpointGenericScan.objects.all().filter(endpoint=gs.endpoint, type=gs.type).exclude(pk=gs.pk).update(
         is_the_latest_scan=False
     )
 
@@ -59,10 +54,14 @@ def store_url_scan_result(scan_type: str, url: Url, rating: str, message: str, e
 
     # Check if the latest scan has the same rating or not:
     try:
-        gs = UrlGenericScan.objects.all().filter(
-            type=scan_type,
-            url=url,
-        ).latest('last_scan_moment')
+        gs = (
+            UrlGenericScan.objects.all()
+            .filter(
+                type=scan_type,
+                url=url,
+            )
+            .latest("last_scan_moment")
+        )
     except ObjectDoesNotExist:
         gs = UrlGenericScan()
 
@@ -75,7 +74,7 @@ def store_url_scan_result(scan_type: str, url: Url, rating: str, message: str, e
     if gs.explanation == str(message) and gs.rating == str(rating):
         log.debug("Scan had the same rating and message, updating last_scan_moment only.")
         gs.last_scan_moment = datetime.now(pytz.utc)
-        gs.save(update_fields=['last_scan_moment'])
+        gs.save(update_fields=["last_scan_moment"])
     else:
         # message and rating changed for this scan_type, so it's worth while to save the scan.
         log.debug("Message or rating changed: making a new generic scan.")
@@ -90,12 +89,19 @@ def store_url_scan_result(scan_type: str, url: Url, rating: str, message: str, e
         gs.is_the_latest_scan = True
         gs.save()
 
-        UrlGenericScan.objects.all().filter(url=gs.url, type=gs.type).exclude(
-            pk=gs.pk).update(is_the_latest_scan=False)
+        UrlGenericScan.objects.all().filter(url=gs.url, type=gs.type).exclude(pk=gs.pk).update(is_the_latest_scan=False)
 
 
-def store_historic_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rating: str, message: str, evidence: str,
-                                        rating_determined_on, last_scan_moment, is_latest):
+def store_historic_endpoint_scan_result(
+    scan_type: str,
+    endpoint: Endpoint,
+    rating: str,
+    message: str,
+    evidence: str,
+    rating_determined_on,
+    last_scan_moment,
+    is_latest,
+):
     """
     Warning: the ID of the endpointscans is relevant. So when using this, make sure that the oldest values are
     imported first(!).
@@ -112,11 +118,11 @@ def store_historic_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rati
     """
     # Check if the latest scan has the same rating or not:
     try:
-        gs = EndpointGenericScan.objects.all().filter(
-            type=scan_type,
-            endpoint=endpoint,
-            rating_determined_on__lte=rating_determined_on
-        ).latest('last_scan_moment')
+        gs = (
+            EndpointGenericScan.objects.all()
+            .filter(type=scan_type, endpoint=endpoint, rating_determined_on__lte=rating_determined_on)
+            .latest("last_scan_moment")
+        )
     except ObjectDoesNotExist:
         gs = EndpointGenericScan()
 
@@ -144,8 +150,9 @@ def store_historic_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rati
         gs.last_scan_moment = last_scan_moment
         gs.save()
 
-        EndpointGenericScan.objects.all().filter(endpoint=gs.endpoint, type=gs.type).exclude(
-            pk=gs.pk).update(is_the_latest_scan=False)
+        EndpointGenericScan.objects.all().filter(endpoint=gs.endpoint, type=gs.type).exclude(pk=gs.pk).update(
+            is_the_latest_scan=False
+        )
 
 
 def endpoint_has_scans(scan_type: str, endpoint: Endpoint):
@@ -158,10 +165,14 @@ def endpoint_has_scans(scan_type: str, endpoint: Endpoint):
     """
 
     try:
-        gs = EndpointGenericScan.objects.all().filter(
-            type=scan_type,
-            endpoint=endpoint,
-        ).latest('last_scan_moment')
+        gs = (
+            EndpointGenericScan.objects.all()
+            .filter(
+                type=scan_type,
+                endpoint=endpoint,
+            )
+            .latest("last_scan_moment")
+        )
         if gs.rating:
             return True
     except ObjectDoesNotExist:

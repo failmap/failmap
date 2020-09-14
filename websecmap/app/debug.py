@@ -15,6 +15,7 @@ def count_queries(message: str = ""):
     :return:
     """
     from django.db import connection
+
     queries_performed = len(connection.queries)
     if queries_performed > 9000:
         log.debug("Maximum number of queries reached.")
@@ -22,15 +23,17 @@ def count_queries(message: str = ""):
     length_short, length_medium, length_long = 0, 0, 0
 
     for query in connection.queries:
-        if len(query['sql']) <= 100:
+        if len(query["sql"]) <= 100:
             length_short += 1
-        if 100 < len(query['sql']) < 300:
+        if 100 < len(query["sql"]) < 300:
             length_medium += 1
-        if len(query['sql']) >= 300:
+        if len(query["sql"]) >= 300:
             length_long += 1
 
-    log.debug("# queries: %3s L: %2s, M %2s, S:%2s(%s)" %
-              (len(connection.queries), length_long, length_medium, length_short, message))
+    log.debug(
+        "# queries: %3s L: %2s, M %2s, S:%2s(%s)"
+        % (len(connection.queries), length_long, length_medium, length_short, message)
+    )
 
 
 def show_last_query():
@@ -44,6 +47,7 @@ def show_last_query():
 
 def show_queries():
     from django.db import connection
+
     log.debug(connection.queries)
 
 
@@ -71,5 +75,5 @@ def query_contains_begin():
     from django.db import connection
 
     for query in connection.queries:
-        if query['sql'] == 'BEGIN':
-            log.error('BEGIN')
+        if query["sql"] == "BEGIN":
+            log.error("BEGIN")

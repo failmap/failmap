@@ -6,25 +6,31 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0003_auto_20180407_1611'),
+        ("game", "0003_auto_20180407_1611"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='urlsubmission',
-            name='has_been_rejected',
-            field=models.BooleanField(default=False, help_text='Rejected urls makes for deduction in points.'),
+            model_name="urlsubmission",
+            name="has_been_rejected",
+            field=models.BooleanField(default=False, help_text="Rejected urls makes for deduction in points."),
         ),
         migrations.AlterField(
-            model_name='contest',
-            name='name',
-            field=models.CharField(help_text='Whatever name the team wants. Must be at least PEGI 88.',
-                                   max_length=42, verbose_name='Contest name'),
+            model_name="contest",
+            name="name",
+            field=models.CharField(
+                help_text="Whatever name the team wants. Must be at least PEGI 88.",
+                max_length=42,
+                verbose_name="Contest name",
+            ),
         ),
         migrations.AlterField(
-            model_name='team',
-            name='name',
-            field=models.CharField(help_text='Whatever name the team wants. Must be at least PEGI 88.',
-                                   max_length=42, verbose_name='Team name'),
+            model_name="team",
+            name="name",
+            field=models.CharField(
+                help_text="Whatever name the team wants. Must be at least PEGI 88.",
+                max_length=42,
+                verbose_name="Team name",
+            ),
         ),
     ]

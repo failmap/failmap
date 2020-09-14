@@ -9,7 +9,7 @@ log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
-    help = 'Clear all caches'
+    help = "Clear all caches"
 
     def handle(self, *args, **options):
         organizations_with_wikidata = Organization.objects.all().filter(wikidata__isnull=False)

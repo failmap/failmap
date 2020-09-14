@@ -6,18 +6,18 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0062_auto_20190411_1504'),
+        ("scanners", "0062_auto_20190411_1504"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='endpointgenericscanscratchpad',
-            old_name='when',
-            new_name='at_when',
+            model_name="endpointgenericscanscratchpad",
+            old_name="when",
+            new_name="at_when",
         ),
         migrations.RenameField(
-            model_name='tlsqualysscratchpad',
-            old_name='when',
-            new_name='at_when',
+            model_name="tlsqualysscratchpad",
+            old_name="when",
+            new_name="at_when",
         ),
     ]

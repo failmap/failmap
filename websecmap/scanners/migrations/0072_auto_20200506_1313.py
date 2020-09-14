@@ -7,18 +7,18 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0071_auto_20200506_1308'),
+        ("scanners", "0071_auto_20200506_1308"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='internetnlv2scan',
-            name='metadata',
+            model_name="internetnlv2scan",
+            name="metadata",
             field=jsonfield.fields.JSONField(blank=True, default=None, null=True),
         ),
         migrations.AlterField(
-            model_name='internetnlv2scan',
-            name='retrieved_scan_report',
+            model_name="internetnlv2scan",
+            name="retrieved_scan_report",
             field=jsonfield.fields.JSONField(blank=True, default=None, null=True),
         ),
     ]

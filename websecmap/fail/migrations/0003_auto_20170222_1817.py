@@ -8,19 +8,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fail', '0002_auto_20170222_1815'),
+        ("fail", "0002_auto_20170222_1815"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='url',
-            name='isdeadreason',
-            field=models.CharField(
-                blank=True, db_column='isDeadReason', max_length=255),
+            model_name="url",
+            name="isdeadreason",
+            field=models.CharField(blank=True, db_column="isDeadReason", max_length=255),
         ),
         migrations.AlterField(
-            model_name='url',
-            name='isdeadsince',
-            field=models.DateTimeField(blank=True, db_column='isDeadSince'),
+            model_name="url",
+            name="isdeadsince",
+            field=models.DateTimeField(blank=True, db_column="isDeadSince"),
         ),
     ]

@@ -4,8 +4,7 @@ from datetime import datetime
 import pytz
 from freezegun import freeze_time
 
-from websecmap.map.report import (reduce_to_days, reduce_to_months, reduce_to_save_data,
-                                  reduce_to_weeks)
+from websecmap.map.report import reduce_to_days, reduce_to_months, reduce_to_save_data, reduce_to_weeks
 
 
 def test_reduce_to_days():
@@ -103,7 +102,6 @@ def test_reduce_to_save_data():
             datetime(2020, 1, 2, 23, 0, 0, tzinfo=pytz.utc),
             datetime(2020, 1, 2, 0, 0, 0, tzinfo=pytz.utc),
             datetime(2020, 1, 2, 1, 0, 0, tzinfo=pytz.utc),
-
             # weeks last year:
             #  will reduce to two weeks
             # from 2018-06-01 to 2019-06-01
@@ -116,7 +114,6 @@ def test_reduce_to_save_data():
             datetime(2019, 1, 7, 0, 0, 0, tzinfo=pytz.utc),
             datetime(2019, 1, 8, 0, 0, 0, tzinfo=pytz.utc),
             datetime(2019, 1, 9, 0, 0, 0, tzinfo=pytz.utc),
-
             # months two years ago and before:
             #  will reduce to two months
             # earlier than 2018-06-01
@@ -136,18 +133,18 @@ def test_reduce_to_save_data():
         new_dates = reduce_to_save_data(dates)
         print(sorted(new_dates))
 
-        assert sorted(new_dates) == sorted([
-            # days
-            datetime(2020, 1, 1, 23, 59, 59, 999999, tzinfo=pytz.utc),
-            datetime(2020, 1, 2, 23, 59, 59, 999999, tzinfo=pytz.utc),
-
-            # weeks
-            datetime(2019, 1, 7, 23, 59, 59, 999999, tzinfo=pytz.utc),
-            datetime(2019, 1, 14, 23, 59, 59, 999999, tzinfo=pytz.utc),
-
-            # months
-            datetime(2018, 1, 31, 23, 59, 59, 999999, tzinfo=pytz.utc),
-            datetime(2018, 2, 28, 23, 59, 59, 999999, tzinfo=pytz.utc),
-        ])
+        assert sorted(new_dates) == sorted(
+            [
+                # days
+                datetime(2020, 1, 1, 23, 59, 59, 999999, tzinfo=pytz.utc),
+                datetime(2020, 1, 2, 23, 59, 59, 999999, tzinfo=pytz.utc),
+                # weeks
+                datetime(2019, 1, 7, 23, 59, 59, 999999, tzinfo=pytz.utc),
+                datetime(2019, 1, 14, 23, 59, 59, 999999, tzinfo=pytz.utc),
+                # months
+                datetime(2018, 1, 31, 23, 59, 59, 999999, tzinfo=pytz.utc),
+                datetime(2018, 2, 28, 23, 59, 59, 999999, tzinfo=pytz.utc),
+            ]
+        )
 
         assert reduce_to_save_data([]) == []

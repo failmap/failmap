@@ -34,7 +34,7 @@ class ResetUserWidgetConfiguration:
                     column=column,
                     order=order,
                     settings=module.dump_settings(),
-                    children=module.dump_children()
+                    children=module.dump_children(),
                 )
                 module_models.append(obj)
                 i += 1
@@ -44,7 +44,7 @@ class ResetUserWidgetConfiguration:
         return module_models
 
     def load_modules(self):
-        module_models = self.get_or_create_module_models(self.context['request'].user)
+        module_models = self.get_or_create_module_models(self.context["request"].user)
 
         loaded_modules = []
 
@@ -64,57 +64,60 @@ class CustomIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
         self.available_children.append(modules.LinkList)
 
         # append an app list module for "Applications"
-        self.children.append(modules.AppList(
-            _('Content'),
-            exclude=('auth.*', 'django_celery_beat.*',),
-            column=1,
-            order=0
-        ))
+        self.children.append(
+            modules.AppList(
+                _("Content"),
+                exclude=(
+                    "auth.*",
+                    "django_celery_beat.*",
+                ),
+                column=1,
+                order=0,
+            )
+        )
 
         # append an app list module for "Administration"
-        self.children.append(modules.AppList(
-            _('Administration'),
-            models=('auth.*', 'django_celery_beat.*',),
-            column=2,
-            order=0
-        ))
+        self.children.append(
+            modules.AppList(
+                _("Administration"),
+                models=(
+                    "auth.*",
+                    "django_celery_beat.*",
+                ),
+                column=2,
+                order=0,
+            )
+        )
 
         # append a recent actions module
-        self.children.append(modules.RecentActions(
-            _('Recent Actions'),
-            10,
-            column=0,
-            order=1
-        ))
+        self.children.append(modules.RecentActions(_("Recent Actions"), 10, column=0, order=1))
 
-        self.children.append(dashboard_modules.TaskProcessing(
-            _('Task Processing Status (WIP)'),
-            column=0,
-            order=0
-        ))
+        self.children.append(dashboard_modules.TaskProcessing(_("Task Processing Status (WIP)"), column=0, order=0))
 
-        self.children.append(modules.LinkList(
-            _('Failmap resources'),
-            children=[
-                {
-                    'title': _('Gitlab Repository'),
-                    'url': 'https://gitlab.com/failmap/',
-                    'external': True,
-                },
-                {
-                    'title': _('Admin repository'),
-                    'url': 'https://gitlab.com/failmap/failmap',
-                    'external': True,
-                },
-                {
-                    'title': _('Failmap Website'),
-                    'url': 'https://faalkaart.nl',
-                    'external': True,
-                },
-            ],
-            column=2,
-            order=2
-        ), )
+        self.children.append(
+            modules.LinkList(
+                _("Failmap resources"),
+                children=[
+                    {
+                        "title": _("Gitlab Repository"),
+                        "url": "https://gitlab.com/failmap/",
+                        "external": True,
+                    },
+                    {
+                        "title": _("Admin repository"),
+                        "url": "https://gitlab.com/failmap/failmap",
+                        "external": True,
+                    },
+                    {
+                        "title": _("Failmap Website"),
+                        "url": "https://faalkaart.nl",
+                        "external": True,
+                    },
+                ],
+                column=2,
+                order=2,
+            ),
+        )
 
 
 class CustomAppIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
@@ -122,39 +125,40 @@ class CustomAppIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
 
     def init_with_context(self, context):
         self.available_children.append(modules.RecentActions)
-        self.children.append(modules.RecentActions(
-            _('Recent Actions for %s' % context['app_label'].capitalize()),
-            40,
-            column=1,
-            order=0,
-            include_list=[context['app_label'] + '.*'],
-        ))
-
-        if context['app_label'] == "game":
-            self.children.append(modules.LinkList(
-                _('Quick Actions'),
-                children=[
-                    {
-                        'title': _('Verify New Urls'),
-                        'url': '/admin/game/urlsubmission/?'
-                               'has_been_accepted__exact=0&has_been_rejected__exact=0&o=-6.2.3',
-                        'external': False,
-                    },
-                    {
-                        'title': _('Verify New Organizations'),
-                        'url': '/admin/game/organizationsubmission/?'
-                               'has_been_accepted__exact=0&has_been_rejected__exact=0&o=-5',
-                        'external': False,
-                    },
-                ],
-                column=0,
+        self.children.append(
+            modules.RecentActions(
+                _("Recent Actions for %s" % context["app_label"].capitalize()),
+                40,
+                column=1,
                 order=0,
-                layout='stacked'
-            ))
+                include_list=[context["app_label"] + ".*"],
+            )
+        )
 
-        self.children.append(modules.AppList(
-            _('Applications'),
-            models=('%s.*' % context['app_label'],),
-            column=0,
-            order=1
-        ))
+        if context["app_label"] == "game":
+            self.children.append(
+                modules.LinkList(
+                    _("Quick Actions"),
+                    children=[
+                        {
+                            "title": _("Verify New Urls"),
+                            "url": "/admin/game/urlsubmission/?"
+                            "has_been_accepted__exact=0&has_been_rejected__exact=0&o=-6.2.3",
+                            "external": False,
+                        },
+                        {
+                            "title": _("Verify New Organizations"),
+                            "url": "/admin/game/organizationsubmission/?"
+                            "has_been_accepted__exact=0&has_been_rejected__exact=0&o=-5",
+                            "external": False,
+                        },
+                    ],
+                    column=0,
+                    order=0,
+                    layout="stacked",
+                )
+            )
+
+        self.children.append(
+            modules.AppList(_("Applications"), models=("%s.*" % context["app_label"],), column=0, order=1)
+        )

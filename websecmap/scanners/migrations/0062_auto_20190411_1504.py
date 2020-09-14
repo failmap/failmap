@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0061_auto_20190327_1017'),
+        ("scanners", "0061_auto_20190327_1017"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='internetnlscan',
-            name='type',
-            field=models.CharField(blank=True, help_text='mail, mail_dashboard or web', max_length=30, null=True),
+            model_name="internetnlscan",
+            name="type",
+            field=models.CharField(blank=True, help_text="mail, mail_dashboard or web", max_length=30, null=True),
         ),
     ]

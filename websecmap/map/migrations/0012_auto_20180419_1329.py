@@ -9,31 +9,46 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0032_auto_20180410_0957'),
-        ('map', '0011_administrativeregions'),
+        ("organizations", "0032_auto_20180410_0957"),
+        ("map", "0011_administrativeregions"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AdministrativeRegion',
+            name="AdministrativeRegion",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('country', django_countries.fields.CountryField(db_index=True, max_length=2)),
-                ('admin_level', models.IntegerField(default=8, help_text="The administrative level as documented on the OSM Wiki. Note that each country uses a different way to organize the same thing. Some use municipalities on level 8, other on level 4 etc. Really do check the wiki before adding any missing organization. <a href='https://wiki.openstreetmap.org/wiki/Tag:boundary=administrative' target='_blank'>Visit the OSM wiki</a>.",
-                                                    validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(11)])),
-                ('organization_type', models.ForeignKey(help_text='The organization type desired to import. Not all organization types might be present in this list by default. Create new onesaccordingly.',
-                                                        on_delete=django.db.models.deletion.CASCADE, to='organizations.OrganizationType')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("country", django_countries.fields.CountryField(db_index=True, max_length=2)),
+                (
+                    "admin_level",
+                    models.IntegerField(
+                        default=8,
+                        help_text="The administrative level as documented on the OSM Wiki. Note that each country uses a different way to organize the same thing. Some use municipalities on level 8, other on level 4 etc. Really do check the wiki before adding any missing organization. <a href='https://wiki.openstreetmap.org/wiki/Tag:boundary=administrative' target='_blank'>Visit the OSM wiki</a>.",
+                        validators=[
+                            django.core.validators.MinValueValidator(1),
+                            django.core.validators.MaxValueValidator(11),
+                        ],
+                    ),
+                ),
+                (
+                    "organization_type",
+                    models.ForeignKey(
+                        help_text="The organization type desired to import. Not all organization types might be present in this list by default. Create new onesaccordingly.",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="organizations.OrganizationType",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'administrative_region',
-                'verbose_name_plural': 'administrative_regions',
+                "verbose_name": "administrative_region",
+                "verbose_name_plural": "administrative_regions",
             },
         ),
         migrations.RemoveField(
-            model_name='administrativeregions',
-            name='organization_type',
+            model_name="administrativeregions",
+            name="organization_type",
         ),
         migrations.DeleteModel(
-            name='AdministrativeRegions',
+            name="AdministrativeRegions",
         ),
     ]

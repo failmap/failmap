@@ -6,20 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0049_auto_20181031_1300'),
+        ("scanners", "0049_auto_20181031_1300"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpointgenericscan',
-            name='rating',
+            model_name="endpointgenericscan",
+            name="rating",
             field=models.CharField(
-                default=0, help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent.", max_length=16),
+                default=0,
+                help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent.",
+                max_length=16,
+            ),
         ),
         migrations.AlterField(
-            model_name='urlgenericscan',
-            name='rating',
+            model_name="urlgenericscan",
+            name="rating",
             field=models.CharField(
-                default=0, help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent.", max_length=16),
+                default=0,
+                help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent.",
+                max_length=16,
+            ),
         ),
     ]

@@ -18,7 +18,7 @@ SLEEP = 0.1
 # and not cause flaky test behaviour when a infinite prefetch is used (ie: it should be high)
 SAMPLES = settings.CELERY_WORKER_CONCURRENCY * settings.CELERY_WORKER_CONCURRENCY
 
-assert SAMPLES > 10, 'with current settings this test might not provide reliable results!'
+assert SAMPLES > 10, "with current settings this test might not provide reliable results!"
 
 TASK_EXPIRY_TIME = SAMPLES * SLEEP
 

@@ -80,30 +80,27 @@ def backward(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0002_auto_20170226_2007'),
-        ('scanners', '0005_auto_20170310_0910'),
+        ("organizations", "0002_auto_20170226_2007"),
+        ("scanners", "0005_auto_20170310_0910"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='endpoint',
-            name='url',
+            model_name="endpoint",
+            name="url",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='organizations.Url'),
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="organizations.Url"
+            ),
         ),
-
         migrations.RunPython(forward, backward),
-
         # now drop the existing field
         # nope: can't drop it here, you still need it to move the data. Next migration buddy.
         # also: with the existing fields all software will still work and can be migrated safely
         # AND you can fix all conversion errors by hand in the production data.
         # congratulations: you've just created your first legacy column! :))
         # migrations.RemoveField(model_name='endpoint', name='domain'),
-
         # decided not to rename url to domain, since it can be confusion. We are now working with
         # urls, and not domains (or subdomains, toplevel domains and such).
         # and rename the new field to "domain" (this also has implications on the scanners :'()
         # migrations.RenameField(model_name='endpoint', old_name='url', new_name='domain'),
-
     ]

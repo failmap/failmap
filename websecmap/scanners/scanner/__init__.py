@@ -38,12 +38,12 @@ def add_model_filter(queryset, **kwargs):
     # we expect a Object_filters in kwargs in order for it to work.
     # dashboard.internet_nl_dashboard.models.Account
     # This is probably one of the ugliest ways to do this :)
-    model_filters = str(queryset.model).replace("'>", "").split('.')[-1].lower() + '_filters'
-    log.debug('Checking for filters: %s' % model_filters)
+    model_filters = str(queryset.model).replace("'>", "").split(".")[-1].lower() + "_filters"
+    log.debug("Checking for filters: %s" % model_filters)
 
     if kwargs.get(model_filters, None):
         filters = kwargs.get(model_filters)
-        log.debug('Filtering on: %s' % filters)
+        log.debug("Filtering on: %s" % filters)
         queryset = queryset.filter(**filters)
 
     return queryset
@@ -61,13 +61,13 @@ def allowed_to_scan(scanner_name: str = ""):
     if not config.SCAN_AT_ALL:
         return False
 
-    if scanner_name == 'dummy':
+    if scanner_name == "dummy":
         return True
 
     try:
         return getattr(config, "USE_SCANNER_%s" % scanner_name.upper())
     except AttributeError:
-        log.debug('Scanner %s is not allowed to scan due to setting.' % scanner_name)
+        log.debug("Scanner %s is not allowed to scan due to setting." % scanner_name)
         return False
 
 
@@ -75,7 +75,7 @@ def allowed_to_discover_urls(scanner_name: str = ""):
     try:
         return getattr(config, "DISCOVER_URLS_USING_%s" % scanner_name.upper())
     except AttributeError:
-        log.debug('Scanner %s is not allowed to discover urls due to setting.' % scanner_name)
+        log.debug("Scanner %s is not allowed to discover urls due to setting." % scanner_name)
         return False
 
 
@@ -83,11 +83,11 @@ def allowed_to_discover_endpoints(scanner_name: str = ""):
     try:
         return getattr(config, "DISCOVER_ENDPOINTS_USING_%s" % scanner_name.upper())
     except AttributeError:
-        log.debug('Scanner %s is not allowed to discover endpoints due to setting.' % scanner_name)
+        log.debug("Scanner %s is not allowed to discover endpoints due to setting." % scanner_name)
         return False
 
 
-def q_configurations_to_scan(level: str = 'url'):
+def q_configurations_to_scan(level: str = "url"):
     """
     Retrieves configurations and makes q-queries for them. You can select if you want to have the q-queries directly
     for the organization tables, or with a join from url to organization.
@@ -100,33 +100,43 @@ def q_configurations_to_scan(level: str = 'url'):
     :param level:
     :return:
     """
-    configurations = list(Configuration.objects.all().filter(is_scanned=True).values('country', 'organization_type'))
+    configurations = list(Configuration.objects.all().filter(is_scanned=True).values("country", "organization_type"))
     if not configurations:
-        log.debug('No scanning configuration defined, not filtering.')
+        log.debug("No scanning configuration defined, not filtering.")
         return Q()
 
     # log.debug('Adding %s level configurations: %s' % (level, configurations))
 
     qs = Q()
 
-    if level == 'organization':
+    if level == "organization":
         for configuration in configurations:
-            qs.add(Q(type=configuration['organization_type'], country=configuration['country']), Q.OR)
+            qs.add(Q(type=configuration["organization_type"], country=configuration["country"]), Q.OR)
 
-    if level == 'url':
+    if level == "url":
         for configuration in configurations:
-            qs.add(Q(organization__type=configuration['organization_type'],
-                     organization__country=configuration['country']), Q.OR)
+            qs.add(
+                Q(
+                    organization__type=configuration["organization_type"],
+                    organization__country=configuration["country"],
+                ),
+                Q.OR,
+            )
 
-    if level == 'endpoint':
+    if level == "endpoint":
         for configuration in configurations:
-            qs.add(Q(url__organization__type=configuration['organization_type'],
-                     url__organization__country=configuration['country']), Q.OR)
+            qs.add(
+                Q(
+                    url__organization__type=configuration["organization_type"],
+                    url__organization__country=configuration["country"],
+                ),
+                Q.OR,
+            )
 
     return qs
 
 
-def q_configurations_to_report(level: str = 'url'):
+def q_configurations_to_report(level: str = "url"):
     """
     Retrieves configurations and makes q-queries for them. You can select if you want to have the q-queries directly
     for the organization tables, or with a join from url to organization.
@@ -138,22 +148,27 @@ def q_configurations_to_report(level: str = 'url'):
     :param level:
     :return:
     """
-    configurations = list(Configuration.objects.all().filter(is_reported=True).values('country', 'organization_type'))
+    configurations = list(Configuration.objects.all().filter(is_reported=True).values("country", "organization_type"))
     qs = Q()
 
-    if level == 'organization':
+    if level == "organization":
         for configuration in configurations:
-            qs.add(Q(type=configuration['organization_type'], country=configuration['country']), Q.OR)
+            qs.add(Q(type=configuration["organization_type"], country=configuration["country"]), Q.OR)
 
-    if level == 'url':
+    if level == "url":
         for configuration in configurations:
-            qs.add(Q(organization__type=configuration['organization_type'],
-                     organization__country=configuration['country']), Q.OR)
+            qs.add(
+                Q(
+                    organization__type=configuration["organization_type"],
+                    organization__country=configuration["country"],
+                ),
+                Q.OR,
+            )
 
     return qs
 
 
-def q_configurations_to_display(level: str = 'url'):
+def q_configurations_to_display(level: str = "url"):
     """
     Retrieves configurations and makes q-queries for them. You can select if you want to have the q-queries directly
     for the organization tables, or with a join from url to organization.
@@ -163,17 +178,22 @@ def q_configurations_to_display(level: str = 'url'):
     :param level:
     :return:
     """
-    configurations = list(Configuration.objects.all().filter(is_displayed=True).values('country', 'organization_type'))
+    configurations = list(Configuration.objects.all().filter(is_displayed=True).values("country", "organization_type"))
     qs = Q()
 
-    if level == 'organization':
+    if level == "organization":
         for configuration in configurations:
-            qs.add(Q(type=configuration['organization_type'], country=configuration['country']), Q.OR)
+            qs.add(Q(type=configuration["organization_type"], country=configuration["country"]), Q.OR)
 
-    if level == 'url':
+    if level == "url":
         for configuration in configurations:
-            qs.add(Q(organization__type=configuration['organization_type'],
-                     organization__country=configuration['country']), Q.OR)
+            qs.add(
+                Q(
+                    organization__type=configuration["organization_type"],
+                    organization__country=configuration["country"],
+                ),
+                Q.OR,
+            )
 
     return qs
 
@@ -219,7 +239,7 @@ def chunks2(my_list, n):
     # For item i in a range that is a length of l,
     for i in range(0, len(my_list), n):
         # Create an index range for l of n items:
-        yield my_list[i:i + n]
+        yield my_list[i : i + n]
 
 
 def unique_and_random(items: List):

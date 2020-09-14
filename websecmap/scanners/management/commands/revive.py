@@ -33,24 +33,24 @@ class Command(BaseCommand):
     help = __doc__
 
     subjects = {
-        'endpoints': 'endpoints',
-        'urls': 'urls',
+        "endpoints": "endpoints",
+        "urls": "urls",
     }
 
     def add_arguments(self, parser):
-        parser.add_argument('subject', nargs=1, help='The object type you want to revive.', choices=self.subjects)
+        parser.add_argument("subject", nargs=1, help="The object type you want to revive.", choices=self.subjects)
         parser.add_argument("date", help="The date things went haywire", type=valid_date)
-        parser.add_argument("--accept", help="To actually perform this", action='store_false', dest='preview')
+        parser.add_argument("--accept", help="To actually perform this", action="store_false", dest="preview")
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
 
         try:
-            if options['subject'][0] not in self.subjects:
+            if options["subject"][0] not in self.subjects:
                 print("Subject cannot be revived, no code for that: %s " % self.subjects.keys())
                 return
 
-            revive(options['subject'][0], options['date'], options['preview'])
+            revive(options["subject"][0], options["date"], options["preview"])
 
         except KeyboardInterrupt:
             log.info("Received keyboard interrupt. Stopped.")
@@ -93,4 +93,4 @@ def revive(object_type, date, preview: bool = True):
         dead_object.is_dead = False
         dead_object.is_dead_since = None
         dead_object.is_dead_reason = "Revived on %s" % datetime.now(pytz.utc)
-        dead_object.save(update_fields=['is_dead', 'is_dead_since', 'is_dead_reason'])
+        dead_object.save(update_fields=["is_dead", "is_dead_since", "is_dead_reason"])

@@ -6,14 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0012_auto_20180419_1329'),
+        ("map", "0012_auto_20180419_1329"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='administrativeregion',
-            name='imported',
+            model_name="administrativeregion",
+            name="imported",
             field=models.BooleanField(
-                default=False, help_text='When imported, this is checked. Helps with importing a larger number of regions manually.'),
+                default=False,
+                help_text="When imported, this is checked. Helps with importing a larger number of regions manually.",
+            ),
         ),
     ]

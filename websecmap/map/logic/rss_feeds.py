@@ -29,18 +29,32 @@ class UpdatesOnOrganizationFeed(Feed):
 
     # it seems weird to do this.
     def get_object(self, request, *args, **kwargs):
-        return kwargs.get('organization_id', 0)
+        return kwargs.get("organization_id", 0)
 
     # second parameter via magic
     def items(self, organization_id):
         return latest_updates(organization_id).get("scans", [])
 
     def item_title(self, item):
-        rating = _("Perfect") if not any([item['high'], item['medium'], item['low']]) else \
-            _("High") if item['high'] else _("Medium") if item['medium'] else _("Low")
+        rating = (
+            _("Perfect")
+            if not any([item["high"], item["medium"], item["low"]])
+            else _("High")
+            if item["high"]
+            else _("Medium")
+            if item["medium"]
+            else _("Low")
+        )
 
-        badge = "✅" if not any([item['high'], item['medium'], item['low']]) else \
-            "🔴" if item['high'] else "🔶" if item['medium'] else "🍋"
+        badge = (
+            "✅"
+            if not any([item["high"], item["medium"], item["low"]])
+            else "🔴"
+            if item["high"]
+            else "🔶"
+            if item["medium"]
+            else "🍋"
+        )
 
         return "%s %s - %s: %s" % (badge, rating, item["url"], item["service"])
 
@@ -53,18 +67,22 @@ class UpdatesOnOrganizationFeed(Feed):
     # item_link is only needed if NewsItem has no get_absolute_url method.
     # unique links are required to properly display a feed.
     def item_link(self, item):
-        return "%s/#report-%s/%s/%s/%s" % \
-               (config.PROJECT_WEBSITE,
-                item["organization_id"], item["url"], item["service"], item["rating_determined_on"])
+        return "%s/#report-%s/%s/%s/%s" % (
+            config.PROJECT_WEBSITE,
+            item["organization_id"],
+            item["url"],
+            item["service"],
+            item["rating_determined_on"],
+        )
 
 
 class LatestScanFeed(Feed):
     """
-        Setting a parameter such as self.scan_type in the get_object will cause concurrency problems.
+    Setting a parameter such as self.scan_type in the get_object will cause concurrency problems.
 
-        The manual is lacking how to get variables to the item_title and such functions: only to "items" it is somewhat
-        clear. This is probably because i don't know enough python. Why would this extra parameter work at the "items"
-        functions but not anywhere else? (signature issues).
+    The manual is lacking how to get variables to the item_title and such functions: only to "items" it is somewhat
+    clear. This is probably because i don't know enough python. Why would this extra parameter work at the "items"
+    functions but not anywhere else? (signature issues).
     """
 
     description = "Overview of the latest scans."
@@ -72,7 +90,7 @@ class LatestScanFeed(Feed):
     # magic
     def get_object(self, request, *args, **kwargs):
         # print("args: %s" % kwargs['scan_type'])
-        return kwargs.get('scan_type', '')
+        return kwargs.get("scan_type", "")
 
     def title(self, scan_type: str = ""):
         if scan_type:
@@ -90,21 +108,35 @@ class LatestScanFeed(Feed):
     def items(self, scan_type):
         # print(scan_type)
         if scan_type in ENDPOINT_SCAN_TYPES:
-            return EndpointGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]
+            return EndpointGenericScan.objects.filter(type=scan_type).order_by("-last_scan_moment")[0:30]
 
         if scan_type in URL_SCAN_TYPES:
-            return UrlGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]
+            return UrlGenericScan.objects.filter(type=scan_type).order_by("-last_scan_moment")[0:30]
 
     def item_title(self, item):
         calculation = get_severity(item)
         if not calculation:
             return ""
 
-        rating = _("Perfect") if not any([calculation['high'], calculation['medium'], calculation['low']]) else \
-            _("High") if calculation['high'] else _("Medium") if calculation['medium'] else _("Low")
+        rating = (
+            _("Perfect")
+            if not any([calculation["high"], calculation["medium"], calculation["low"]])
+            else _("High")
+            if calculation["high"]
+            else _("Medium")
+            if calculation["medium"]
+            else _("Low")
+        )
 
-        badge = "✅" if not any([calculation['high'], calculation['medium'], calculation['low']]) else \
-            "🔴" if calculation['high'] else "🔶" if calculation['medium'] else "🍋"
+        badge = (
+            "✅"
+            if not any([calculation["high"], calculation["medium"], calculation["low"]])
+            else "🔴"
+            if calculation["high"]
+            else "🔶"
+            if calculation["medium"]
+            else "🍋"
+        )
 
         if item.type in URL_SCAN_TYPES:
             # url generic scan:
@@ -155,62 +187,68 @@ def latest_updates(organization_id):
     }
 
     # semi-union, given not all columns are the same. (not python/django-esque solution)
-    generic_endpoint_scans = list(EndpointGenericScan.objects.filter(
-        endpoint__url__organization=organization,
-        type__in=ENDPOINT_SCAN_TYPES
-    ).order_by('-rating_determined_on')[0:60])
-    url_endpoint_scans = list(UrlGenericScan.objects.filter(
-        url__organization=organization,
-        type__in=URL_SCAN_TYPES
-    ).order_by('-rating_determined_on')[0:60])
+    generic_endpoint_scans = list(
+        EndpointGenericScan.objects.filter(
+            endpoint__url__organization=organization, type__in=ENDPOINT_SCAN_TYPES
+        ).order_by("-rating_determined_on")[0:60]
+    )
+    url_endpoint_scans = list(
+        UrlGenericScan.objects.filter(url__organization=organization, type__in=URL_SCAN_TYPES).order_by(
+            "-rating_determined_on"
+        )[0:60]
+    )
 
     scans = generic_endpoint_scans + url_endpoint_scans
 
-    scans = sorted(scans, key=lambda k: getattr(k, 'rating_determined_on', datetime.now(pytz.utc)), reverse=True)
+    scans = sorted(scans, key=lambda k: getattr(k, "rating_determined_on", datetime.now(pytz.utc)), reverse=True)
 
     for scan in scans:
         scan_type = scan.type
         calculation = get_severity(scan)
         if scan_type in URL_SCAN_TYPES:
             # url scans
-            dataset["scans"].append({
-                "organization": organization.name,
-                "organization_id": organization.pk,
-                "url": scan.url.url,
-                "service": "%s" % scan.url.url,
-                "protocol": scan_type,
-                "port": "",
-                "ip_version": "",
-                "scan_type": scan_type,
-                "explanation": calculation.get("explanation", ""),  # sometimes you dont get one.
-                "high": calculation.get("high", 0),
-                "medium": calculation.get("medium", 0),
-                "low": calculation.get("low", 0),
-                "rating_determined_on_humanized": naturaltime(scan.rating_determined_on),
-                "rating_determined_on": scan.rating_determined_on,
-                "last_scan_humanized": naturaltime(scan.last_scan_moment),
-                "last_scan_moment": scan.last_scan_moment.isoformat()
-            })
+            dataset["scans"].append(
+                {
+                    "organization": organization.name,
+                    "organization_id": organization.pk,
+                    "url": scan.url.url,
+                    "service": "%s" % scan.url.url,
+                    "protocol": scan_type,
+                    "port": "",
+                    "ip_version": "",
+                    "scan_type": scan_type,
+                    "explanation": calculation.get("explanation", ""),  # sometimes you dont get one.
+                    "high": calculation.get("high", 0),
+                    "medium": calculation.get("medium", 0),
+                    "low": calculation.get("low", 0),
+                    "rating_determined_on_humanized": naturaltime(scan.rating_determined_on),
+                    "rating_determined_on": scan.rating_determined_on,
+                    "last_scan_humanized": naturaltime(scan.last_scan_moment),
+                    "last_scan_moment": scan.last_scan_moment.isoformat(),
+                }
+            )
 
         else:
             # endpoint scans
-            dataset["scans"].append({
-                "organization": organization.name,
-                "organization_id": organization.pk,
-                "url": scan.endpoint.url.url,
-                "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
-                "protocol": scan.endpoint.protocol,
-                "port": scan.endpoint.port,
-                "ip_version": scan.endpoint.ip_version,
-                "scan_type": scan_type,
-                "explanation": calculation.get("explanation", ""),  # sometimes you dont get one.
-                "high": calculation.get("high", 0),
-                "medium": calculation.get("medium", 0),
-                "low": calculation.get("low", 0),
-                "rating_determined_on_humanized": naturaltime(scan.rating_determined_on),
-                "rating_determined_on": scan.rating_determined_on,
-                "last_scan_humanized": naturaltime(scan.last_scan_moment),
-                "last_scan_moment": scan.last_scan_moment.isoformat()
-            })
+            dataset["scans"].append(
+                {
+                    "organization": organization.name,
+                    "organization_id": organization.pk,
+                    "url": scan.endpoint.url.url,
+                    "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
+                    "protocol": scan.endpoint.protocol,
+                    "port": scan.endpoint.port,
+                    "ip_version": scan.endpoint.ip_version,
+                    "scan_type": scan_type,
+                    "explanation": calculation.get("explanation", ""),  # sometimes you dont get one.
+                    "high": calculation.get("high", 0),
+                    "medium": calculation.get("medium", 0),
+                    "low": calculation.get("low", 0),
+                    "rating_determined_on_humanized": naturaltime(scan.rating_determined_on),
+                    "rating_determined_on": scan.rating_determined_on,
+                    "last_scan_humanized": naturaltime(scan.last_scan_moment),
+                    "last_scan_moment": scan.last_scan_moment.isoformat(),
+                }
+            )
 
     return dataset

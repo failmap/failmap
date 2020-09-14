@@ -19,8 +19,9 @@ def filter_map_configs(countries: List = None, organization_types: List = None):
     if organization_types:
         configs = configs.filter(organization_type__name__in=organization_types)
 
-    return configs.order_by('display_order').values(
-        'country', 'organization_type__name', 'organization_type', 'organization_type__id')
+    return configs.order_by("display_order").values(
+        "country", "organization_type__name", "organization_type", "organization_type__id"
+    )
 
 
 def retrieve(country: str, organization_type_id: int):

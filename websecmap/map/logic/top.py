@@ -26,7 +26,7 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", week
     when = get_when(weeks_back)
 
     cursor = connection.cursor()
-    sql = '''
+    sql = """
             SELECT
               low,
               organization.name,
@@ -70,8 +70,11 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", week
             GROUP BY organization.name
             HAVING high = 0 AND medium = 0
             ORDER BY low ASC, total_endpoints DESC, organization.name ASC
-            ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
-                   "country": get_country(country)}
+            """ % {
+        "when": when,
+        "OrganizationTypeId": get_organization_type(organization_type),
+        "country": get_country(country),
+    }
 
     # log.debug(sql)
     cursor.execute(sql)
@@ -84,7 +87,7 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", wee
     when = get_when(weeks_back)
     cursor = connection.cursor()
 
-    sql = '''
+    sql = """
             SELECT
                 low,
                 organization.name,
@@ -127,8 +130,11 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", wee
             GROUP BY organization.name
             HAVING high > 0 or medium > 0
             ORDER BY high DESC, medium DESC, medium DESC, organization.name ASC
-            ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
-                   "country": get_country(country)}
+            """ % {
+        "when": when,
+        "OrganizationTypeId": get_organization_type(organization_type),
+        "country": get_country(country),
+    }
 
     # log.debug(sql)
     cursor.execute(sql)
@@ -144,10 +150,7 @@ def rows_to_dataset(rows, when):
             "data_from_time": when,
             "remark": remark,
         },
-        "ranking":
-            [
-
-        ]
+        "ranking": [],
     }
 
     rank = 1
@@ -167,10 +170,14 @@ def rows_to_dataset(rows, when):
             "high_div_endpoints": "%s" % ceil((int(i[6]) / int(i[10])) * 100) if i[10] else 0,
             "mid_div_endpoints": "%s" % ceil((int(i[7]) / int(i[10])) * 100) if i[10] else 0,
             "low_div_endpoints": "%s" % ceil((int(i[8]) / int(i[10])) * 100) if i[10] else 0,
-
             # Add all percentages, which is sort of an indication how bad / well the organization is doing overall.
-            "relative": (ceil((int(i[6]) / int(i[10])) * 1000) + ceil((int(i[7]) / int(i[10])) * 100) +
-                         ceil((int(i[8]) / int(i[10])) * 10)) if i[10] else 0
+            "relative": (
+                ceil((int(i[6]) / int(i[10])) * 1000)
+                + ceil((int(i[7]) / int(i[10])) * 100)
+                + ceil((int(i[8]) / int(i[10])) * 10)
+            )
+            if i[10]
+            else 0,
         }
         rank = rank + 1
 

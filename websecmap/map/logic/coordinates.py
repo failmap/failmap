@@ -16,28 +16,28 @@ log = logging.getLogger(__package__)
 
 
 GEOFENCES = {
-    'NL': [
+    "NL": [
         {
-            'description': 'The Netherlands',
-            'topleft': {'lat': 53.814923, 'lng': 2.975974},
-            'bottomright': {'lat': 50.598581, 'lng': 7.544157}
+            "description": "The Netherlands",
+            "topleft": {"lat": 53.814923, "lng": 2.975974},
+            "bottomright": {"lat": 50.598581, "lng": 7.544157},
         },
         {
             # these are close together, but are legally different types of entities at the time of writing
-            'description': 'Aruba, Curaçao, Bonaire',
-            'topleft': {'lat': 12.787964, 'lng': -70.209741},
-            'bottomright': {'lat': 11.792349, 'lng': -67.971954}
+            "description": "Aruba, Curaçao, Bonaire",
+            "topleft": {"lat": 12.787964, "lng": -70.209741},
+            "bottomright": {"lat": 11.792349, "lng": -67.971954},
         },
         {
-            'description': 'Saba, Sint Eustatius',
-            'topleft': {'lat': 17.760588, 'lng': -63.414997},
-            'bottomright': {'lat': 17.319307, 'lng': -62.923775}
+            "description": "Saba, Sint Eustatius",
+            "topleft": {"lat": 17.760588, "lng": -63.414997},
+            "bottomright": {"lat": 17.319307, "lng": -62.923775},
         },
         {
-            'description': 'Sint Maarten',
-            'topleft': {'lat': 18.072169, 'lng': -63.245902},
-            'bottomright': {'lat': 17.906288, 'lng': -62.956277}
-        }
+            "description": "Sint Maarten",
+            "topleft": {"lat": 18.072169, "lng": -63.245902},
+            "bottomright": {"lat": 17.906288, "lng": -62.956277},
+        },
     ]
 }
 
@@ -56,26 +56,30 @@ def repair_corrupted_coordinate(coordinate):
     if coordinate.area is None:
         organizations = Organization.objects.all().filter(coordinate=coordinate)
 
-        log.error(f"Discovered a point without a coordinate: ID: {coordinate}. Used by the following "
-                  f"organizations: {organizations}.")
+        log.error(
+            f"Discovered a point without a coordinate: ID: {coordinate}. Used by the following "
+            f"organizations: {organizations}."
+        )
 
         log.info("Erroneous coordinate has been deleted.")
         coordinate.delete()
         return
 
-    print(f"Inspecting coordinate: {coordinate}, "
-          f"type: {coordinate.geojsontype}, area: {coordinate.area}, a[0]: {a[0]}.")
+    print(
+        f"Inspecting coordinate: {coordinate}, "
+        f"type: {coordinate.geojsontype}, area: {coordinate.area}, a[0]: {a[0]}."
+    )
 
     if a[0] == "[":
         # the coordinate is a string, which is not valid. It should have been stored in a different way.
         # example string input: [4.8264312999999675, 52.3454862]
-        arr = a.replace("[", "").replace(']', "").replace(",", "").split(" ")
+        arr = a.replace("[", "").replace("]", "").replace(",", "").split(" ")
         arr[0] = float(arr[0])
         arr[1] = float(arr[1])
         print(f"Repairing coordinate: {coordinate}, proposed fix: {arr}")
 
         coordinate.area = arr
-        coordinate.save(update_fields=['area'])
+        coordinate.save(update_fields=["area"])
 
     a = coordinate.area
     if a[0] == "[":
@@ -89,10 +93,7 @@ def attach_coordinate(organization, latitude, longitude):
     coordinate.geojsontype = "Point"
     coordinate.organization = organization
     coordinate.area = [longitude, latitude]
-    coordinate.edit_area = {
-        "type": "Point",
-        "coordinates": [longitude, latitude]
-    }
+    coordinate.edit_area = {"type": "Point", "coordinates": [longitude, latitude]}
     coordinate.save()
 
 
@@ -103,10 +104,7 @@ def switch_latlng(coordinate):
 
     coordinate.area = [a[1], a[0]]
 
-    coordinate.edit_area = {
-        "type": "Point",
-        "coordinates": [a[1], a[0]]
-    }
+    coordinate.edit_area = {"type": "Point", "coordinates": [a[1], a[0]]}
 
     coordinate.save()
 
@@ -119,10 +117,12 @@ def move_coordinates_to_country(coordinates, country: str = "NL"):
             coordinate = switch_latlng(coordinate)
             if not coordinate_is_in_country(coordinate, "NL"):
                 organizations = Organization.objects.all().filter(coordinate=coordinate)
-                log.error(f"Coordinate {coordinate} is not in {country} at all, even if we flip it's axis. "
-                          f"This coordinate is being used by {organizations}. The coordinate area is: {coordinate.area}"
-                          f" Is your geofence correct? Or are you missing parts of your country? "
-                          f"(Overseas territories?)")
+                log.error(
+                    f"Coordinate {coordinate} is not in {country} at all, even if we flip it's axis. "
+                    f"This coordinate is being used by {organizations}. The coordinate area is: {coordinate.area}"
+                    f" Is your geofence correct? Or are you missing parts of your country? "
+                    f"(Overseas territories?)"
+                )
 
 
 def coordinate_is_in_country(coordinate, country: str = "NL"):
@@ -167,17 +167,17 @@ def coordinate_is_in_country(coordinate, country: str = "NL"):
         horizontally_matching: False  # lat
 
         # 0, 0 is somewhere near the middle of africa. Some parts are negative to positive, others vice versa
-        if fence['topleft']['lng'] > fence['bottomright']['lng']:
-            vertically_matching = fence['topleft']['lng'] > lng > fence['bottomright']['lng']
+        if fence["topleft"]["lng"] > fence["bottomright"]["lng"]:
+            vertically_matching = fence["topleft"]["lng"] > lng > fence["bottomright"]["lng"]
 
-        if fence['bottomright']['lng'] > fence['topleft']['lng']:
-            vertically_matching = fence['bottomright']['lng'] > lng > fence['topleft']['lng']
+        if fence["bottomright"]["lng"] > fence["topleft"]["lng"]:
+            vertically_matching = fence["bottomright"]["lng"] > lng > fence["topleft"]["lng"]
 
-        if fence['topleft']['lat'] > fence['bottomright']['lat']:
-            horizontally_matching = fence['topleft']['lat'] > lat > fence['bottomright']['lat']
+        if fence["topleft"]["lat"] > fence["bottomright"]["lat"]:
+            horizontally_matching = fence["topleft"]["lat"] > lat > fence["bottomright"]["lat"]
 
-        if fence['bottomright']['lat'] > fence['topleft']['lat']:
-            horizontally_matching = fence['bottomright']['lat'] > lng > fence['topleft']['lat']
+        if fence["bottomright"]["lat"] > fence["topleft"]["lat"]:
+            horizontally_matching = fence["bottomright"]["lat"] > lng > fence["topleft"]["lat"]
 
         if horizontally_matching and vertically_matching:
             return True
@@ -208,6 +208,8 @@ def dedupe_coordinates():
 
         # todo: what if one has less precision than the other one? How do we figure that out, if that is a problem?
         if coordinates[0].area == coordinates[1].area:
-            log.error(f"The first two coordinates of {organization} have the same location. "
-                      f"Both are {coordinates[1].area}. We've deleted the second one.")
+            log.error(
+                f"The first two coordinates of {organization} have the same location. "
+                f"Both are {coordinates[1].area}. We've deleted the second one."
+            )
             coordinates[1].delete()

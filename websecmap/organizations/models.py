@@ -23,8 +23,8 @@ class OrganizationType(models.Model):
 
     class Meta:
         managed = True
-        verbose_name = _('layer')
-        verbose_name_plural = _('layers')
+        verbose_name = _("layer")
+        verbose_name_plural = _("layers")
 
     def __str__(self):
         return self.name
@@ -32,16 +32,13 @@ class OrganizationType(models.Model):
 
 def validate_twitter(value):
     if value[0:1] != "@":
-        raise ValidationError('Twitter handle needs to start with an @ symbol.')
+        raise ValidationError("Twitter handle needs to start with an @ symbol.")
 
 
 class Organization(models.Model):
     country = CountryField(db_index=True)
 
-    type = models.ForeignKey(
-        OrganizationType,
-        on_delete=models.PROTECT,
-        default=1)
+    type = models.ForeignKey(OrganizationType, on_delete=models.PROTECT, default=1)
 
     name = models.CharField(max_length=250, db_index=True)
 
@@ -54,8 +51,8 @@ class Organization(models.Model):
     internal_notes = models.TextField(
         max_length=2500,
         help_text="These notes can contain information on WHY this organization was added. Can be handy if it's not "
-                  "straightforward. This helps with answering questions why the organization was added lateron. "
-                  "These notes will not be published, but are also not secret.",
+        "straightforward. This helps with answering questions why the organization was added lateron. "
+        "These notes will not be published, but are also not secret.",
         blank=True,
         null=True,
     )
@@ -63,10 +60,10 @@ class Organization(models.Model):
     twitter_handle = models.CharField(
         max_length=150,
         help_text="Include the @ symbol. Used in the top lists to let visitors tweet to the"
-                  "organization to wake them up.",
+        "organization to wake them up.",
         null=True,
         blank=True,
-        validators=[validate_twitter]
+        validators=[validate_twitter],
     )
 
     # stacking is_dead pattern
@@ -75,31 +72,19 @@ class Organization(models.Model):
         blank=True,
         null=True,
         default=datetime(year=2016, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc),
-        db_index=True
+        db_index=True,
     )
 
-    is_dead_since = models.DateTimeField(
-        blank=True,
-        null=True,
-        db_index=True
-    )
+    is_dead_since = models.DateTimeField(blank=True, null=True, db_index=True)
 
     is_dead = models.BooleanField(
-        default=False,
-        help_text="A dead organization is not shown on the map, depending on the dead_date."
+        default=False, help_text="A dead organization is not shown on the map, depending on the dead_date."
     )
 
-    is_dead_reason = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True
-    )
+    is_dead_reason = models.CharField(max_length=255, blank=True, null=True)
 
     wikidata = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True,
-        help_text="Reference to the wikidata project. Example:Q9928"
+        max_length=255, blank=True, null=True, help_text="Reference to the wikidata project. Example:Q9928"
     )
 
     wikipedia = models.CharField(
@@ -107,7 +92,7 @@ class Organization(models.Model):
         blank=True,
         null=True,
         help_text="Reference to the wikipedia article, including the correct wiki. "
-                  "Example: nl:Heemstede (Noord-Holland)"
+        "Example: nl:Heemstede (Noord-Holland)",
     )
 
     surrogate_id = models.CharField(
@@ -115,14 +100,14 @@ class Organization(models.Model):
         blank=True,
         null=True,
         help_text="Any ID used to identify this organization in an external system. Used in automated imports via "
-                  "the API. Otherwise leave this field empty."
+        "the API. Otherwise leave this field empty.",
     )
 
     class Meta:
         managed = True
-        db_table = 'organization'
-        verbose_name = _('organization')
-        verbose_name_plural = _('organizations')
+        db_table = "organization"
+        verbose_name = _("organization")
+        verbose_name_plural = _("organizations")
 
     # todo: find a smarter way to get the organization type name, instead of a related query... cached enums?
     # this list resets per restart. So if you do complex changes in these layers / types...
@@ -158,23 +143,18 @@ class Organization(models.Model):
 
 
 GEOJSON_TYPES = (
-    ('MultiPolygon', 'MultiPolygon'),
-    ('MultiLineString', 'MultiLineString'),
-    ('MultiPoint', 'MultiPoint'),
-    ('Polygon', 'Polygon'),
-    ('LineString', 'LineString'),
-    ('Point', 'Point'),
+    ("MultiPolygon", "MultiPolygon"),
+    ("MultiLineString", "MultiLineString"),
+    ("MultiPoint", "MultiPoint"),
+    ("Polygon", "Polygon"),
+    ("LineString", "LineString"),
+    ("Point", "Point"),
 )
 
 
 class Coordinate(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    geojsontype = models.CharField(
-        db_column='geoJsonType',
-        max_length=20,
-        blank=True,
-        null=True,
-        choices=GEOJSON_TYPES)
+    geojsontype = models.CharField(db_column="geoJsonType", max_length=20, blank=True, null=True, choices=GEOJSON_TYPES)
 
     # Note that points are stored in lng, lat format
     # https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
@@ -182,8 +162,8 @@ class Coordinate(models.Model):
         max_length=10000,
         blank=True,
         help_text="GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to "
-                  "reduce the amount of data to transfer. Editing both this and the edit_area, this will take "
-                  "preference."
+        "reduce the amount of data to transfer. Editing both this and the edit_area, this will take "
+        "preference.",
     )
 
     # 9e107d9d372bb6826bd81d3542a419d6 (16 bytes, or a string of 32 characters)
@@ -192,11 +172,11 @@ class Coordinate(models.Model):
         blank=True,
         null=True,
         help_text="Automatically calculated hash of the area field using the MD5 algorithm. This is used to"
-                  " try and optimize grouping on area (which is a very long text field, which is slow). The "
-                  " hope is that this field will increase the speed of which grouping happens. If it doesn't, "
-                  " we could calculate an even simpler hash by using the date + organization name."
-                  " Note that if only one field is used for an organization (multipolygon, etc) "
-                  "this field is not required... We still developed it because we forgot what we made..."
+        " try and optimize grouping on area (which is a very long text field, which is slow). The "
+        " hope is that this field will increase the speed of which grouping happens. If it doesn't, "
+        " we could calculate an even simpler hash by using the date + organization name."
+        " Note that if only one field is used for an organization (multipolygon, etc) "
+        "this field is not required... We still developed it because we forgot what we made...",
     )
 
     edit_area = JSONField(
@@ -204,7 +184,7 @@ class Coordinate(models.Model):
         null=True,
         blank=True,
         help_text="The results of this field are saved in the area and geojsontype. It's possible to edit the area"
-                  " field directly, which overwrites this field. Changing both the manual option takes preference."
+        " field directly, which overwrites this field. Changing both the manual option takes preference.",
     )
 
     # stacking pattern for coordinates.
@@ -212,125 +192,99 @@ class Coordinate(models.Model):
         blank=True,
         null=True,
         db_index=True,
-        default=datetime(year=2016, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
+        default=datetime(year=2016, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc),
     )
-    creation_metadata = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True)
+    creation_metadata = models.CharField(max_length=255, blank=True, null=True)
     is_dead = models.BooleanField(
         default=False,
         help_text="Dead url's will not be rendered on the map. Scanners can set this check "
-                  "automatically (which might change in the future)")
-    is_dead_since = models.DateTimeField(
-        blank=True,
-        null=True,
-        db_index=True
+        "automatically (which might change in the future)",
     )
-    is_dead_reason = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True
-    )
+    is_dead_since = models.DateTimeField(blank=True, null=True, db_index=True)
+    is_dead_reason = models.CharField(max_length=255, blank=True, null=True)
 
     def save(self, *args, **kwarg):
         # handle computed values
-        self.calculated_area_hash = hashlib.md5(str(self.area).encode('utf-8')).hexdigest()
+        self.calculated_area_hash = hashlib.md5(str(self.area).encode("utf-8")).hexdigest()
         super(Coordinate, self).save(*args, **kwarg)
 
     class Meta:
         managed = True
-        db_table = 'coordinate'
-        verbose_name = _('coordinate')
-        verbose_name_plural = _('coordinates')
+        db_table = "coordinate"
+        verbose_name = _("coordinate")
+        verbose_name_plural = _("coordinates")
 
 
 class Url(models.Model):
-    organization = models.ManyToManyField(
-        Organization,
-        related_name="u_many_o_upgrade"
-    )
+    organization = models.ManyToManyField(Organization, related_name="u_many_o_upgrade")
 
     url = models.CharField(
-        max_length=255,
-        help_text="Lowercase url name. For example: mydomain.tld or subdomain.domain.tld"
+        max_length=255, help_text="Lowercase url name. For example: mydomain.tld or subdomain.domain.tld"
     )
 
     internal_notes = models.TextField(
         max_length=500,
         help_text="These notes can contain information on WHY this URL was added. Can be handy if it's not "
-                  "straightforward. This helps with answering questions why the URL was added lateron. For example: "
-                  "some urls are owned via a 100% shareholder construction by a state company / municipality "
-                  "while the company itself is private. These notes will not be published, but are also not secret.",
+        "straightforward. This helps with answering questions why the URL was added lateron. For example: "
+        "some urls are owned via a 100% shareholder construction by a state company / municipality "
+        "while the company itself is private. These notes will not be published, but are also not secret.",
         blank=True,
         null=True,
     )
 
-    created_on = models.DateTimeField(
-        auto_now_add=True,
-        blank=True,
-        null=True
-    )
+    created_on = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     not_resolvable = models.BooleanField(
         default=False,
         help_text="Url is not resolvable (anymore) and will not be picked up by scanners anymore."
-                  "When the url is not resolvable, ratings from the past will still be shown(?)#")
-
-    not_resolvable_since = models.DateTimeField(
-        blank=True,
-        null=True
+        "When the url is not resolvable, ratings from the past will still be shown(?)#",
     )
+
+    not_resolvable_since = models.DateTimeField(blank=True, null=True)
 
     not_resolvable_reason = models.CharField(
         max_length=255,
         blank=True,
         null=True,
-        help_text="A scanner might find this not resolvable, "
-                  "some details about that are placed here."
+        help_text="A scanner might find this not resolvable, " "some details about that are placed here.",
     )
 
     is_dead = models.BooleanField(
         default=False,
         help_text="Dead url's will not be rendered on the map. Scanners can set this check "
-                  "automatically (which might change in the future)"
+        "automatically (which might change in the future)",
     )
 
-    is_dead_since = models.DateTimeField(
-        blank=True, null=True
-    )
+    is_dead_since = models.DateTimeField(blank=True, null=True)
 
-    is_dead_reason = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True
-    )
+    is_dead_reason = models.CharField(max_length=255, blank=True, null=True)
 
     uses_dns_wildcard = models.BooleanField(
         default=False,
         help_text="When true, this domain uses a DNS wildcard and any subdomain will resolve to "
-                  "something on this host."
+        "something on this host.",
     )
 
     do_not_find_subdomains = models.BooleanField(
         default=False,
         help_text="If you do not want to automatically find subdomains, check this. This might be useful when "
-                  "a very, very large number of subdomains will be added for an organization and you only want to "
-                  "monitor a few urls that are relevant."
+        "a very, very large number of subdomains will be added for an organization and you only want to "
+        "monitor a few urls that are relevant.",
     )
 
     dns_supports_mx = models.BooleanField(
         default=False,
         help_text="If there is at least one MX record available, so we can perform mail generic mail scans. (for these"
-                  "scans we don't need to know what mail-ports and protocols/endpoints are available).")
+        "scans we don't need to know what mail-ports and protocols/endpoints are available).",
+    )
 
     onboarding_stage = models.CharField(
         max_length=150,
         blank=True,
         null=True,
         help_text="Because of complexity of onboarding, not working with Celery properly, onboarding is done in "
-                  "multiple steps. The last completed step is saved in this value. Empty: nothing. endpoints: endpoints"
-                  " have been found. completed: onboarding is done, also onboarded flag is set."
+        "multiple steps. The last completed step is saved in this value. Empty: nothing. endpoints: endpoints"
+        " have been found. completed: onboarding is done, also onboarded flag is set.",
     )
 
     computed_subdomain = models.CharField(
@@ -338,44 +292,39 @@ class Url(models.Model):
         blank=True,
         null=True,
         help_text="Automatically computed by tldextract on save. Data entered manually will be overwritten.",
-        db_index=True
+        db_index=True,
     )
 
     computed_domain = models.CharField(
         max_length=255,
         blank=True,
         null=True,
-        help_text="Automatically computed by tldextract on save. Data entered manually will be overwritten."
+        help_text="Automatically computed by tldextract on save. Data entered manually will be overwritten.",
     )
 
     computed_suffix = models.CharField(
         max_length=255,
         blank=True,
         null=True,
-        help_text="Automatically computed by tldextract on save. Data entered manually will be overwritten."
+        help_text="Automatically computed by tldextract on save. Data entered manually will be overwritten.",
     )
 
     onboarding_stage_set_on = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="When the onboarding stage was hit. Helps with time-outs."
+        blank=True, null=True, help_text="When the onboarding stage was hit. Helps with time-outs."
     )
 
     onboarded = models.BooleanField(
         default=False,
         help_text="After adding a url, there is an onboarding process that runs a set of tests."
-                  "These tests are usually run very quickly to get a first glimpse of the url."
-                  "This test is run once.")
-
-    onboarded_on = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="The moment the onboard process finished."
+        "These tests are usually run very quickly to get a first glimpse of the url."
+        "This test is run once.",
     )
+
+    onboarded_on = models.DateTimeField(blank=True, null=True, help_text="The moment the onboard process finished.")
 
     class Meta:
         managed = True
-        db_table = 'url'
+        db_table = "url"
 
     def __str__(self):
         if self.is_dead:
@@ -392,10 +341,10 @@ class Url(models.Model):
     def clean(self):
 
         if self.is_dead and (not self.is_dead_since or not self.is_dead_reason):
-            raise ValidationError(_('When telling this is dead, also enter the date and reason for it.'))
+            raise ValidationError(_("When telling this is dead, also enter the date and reason for it."))
 
         if Url.objects.all().filter(url=self.url, is_dead=False, not_resolvable=False).exclude(pk=self.pk).exists():
-            raise ValidationError(_('Url already exists, existing url is alive and resolvable.'))
+            raise ValidationError(_("Url already exists, existing url is alive and resolvable."))
 
         # urls must be lowercase
         self.url = self.url.lower()
@@ -456,8 +405,10 @@ class Url(models.Model):
         # we found something that gives the idea that transactions are not working.
         u, created = Url.objects.get_or_create(url=new_url)
         if not created:
-            log.warning("The url already existed in the database, even while all prior checks in "
-                        "this transaction told us otherwise.")
+            log.warning(
+                "The url already existed in the database, even while all prior checks in "
+                "this transaction told us otherwise."
+            )
 
         # A Url needs to have a value for field "id" before a many-to-many relationship can be used.
         for organization in self.organization.all():
@@ -485,7 +436,7 @@ class Url(models.Model):
         # them yourself. luckily:
         # 'аренда.орг' -> 'xn--80aald4bq.xn--c1avg'
         # 'google.com' -> 'google.com'
-        valid_domain = domain(url.encode('idna').decode())
+        valid_domain = domain(url.encode("idna").decode())
         if valid_domain is not True:
             return False
 
@@ -495,8 +446,10 @@ class Url(models.Model):
     def add(url: str):
 
         if not Url.is_valid_url(url):
-            raise ValueError("Url is not valid. It does not follow idna spec or does not have a valid suffix. "
-                             "IP Addresses are not valid at this moment.")
+            raise ValueError(
+                "Url is not valid. It does not follow idna spec or does not have a valid suffix. "
+                "IP Addresses are not valid at this moment."
+            )
 
         existing_url = Url.objects.all().filter(url=url, is_dead=False).first()
         if not existing_url:
@@ -521,27 +474,30 @@ class Dataset(models.Model):
     Allows you to define URL datasources to download and import into the system. This acts as a memory of what you
     have imported. You can even re-import the things listed here. It will use the generic/excel importer.
     """
+
     url_source = models.URLField(
         null=True,
         blank=True,
         help_text="Fill out either the URL or File source. - A url source hosts the data you wish to process, this "
-                  "can be an excel file. You can also upload the excel file below. This works great with online data "
-                  "sources that are published regularly. Make sure the parser exists as you cannot process any "
-                  "arbritrary download."
+        "can be an excel file. You can also upload the excel file below. This works great with online data "
+        "sources that are published regularly. Make sure the parser exists as you cannot process any "
+        "arbritrary download.",
     )
 
     file_source = models.FileField(
         null=True,
         blank=True,
         help_text="Fill out either the URL or File source. - "
-                  "A file upload has to be in a specific Excel format. You can download this format here: "
-                  "<a href='/static/websecmap/empty_organizations_import_file.xlsx'>empty file</a>. "
-                  "You can also download "
-                  "an example that shows how to enter the data correctly. You can download the example here: "
-                  "<a href='/static/websecmap/example_organizations_import_file.xlsx'>example file</a>"
+        "A file upload has to be in a specific Excel format. You can download this format here: "
+        "<a href='/static/websecmap/empty_organizations_import_file.xlsx'>empty file</a>. "
+        "You can also download "
+        "an example that shows how to enter the data correctly. You can download the example here: "
+        "<a href='/static/websecmap/example_organizations_import_file.xlsx'>example file</a>",
     )
 
-    is_imported = models.BooleanField(default=False,)
+    is_imported = models.BooleanField(
+        default=False,
+    )
     imported_on = models.DateTimeField(blank=True, null=True)
     type = models.CharField(
         max_length=255,
@@ -549,7 +505,7 @@ class Dataset(models.Model):
         null=True,
         choices=[("excel", "Excel"), ("dutch_government", "Dutch Government")],
         help_text="To determine what importer is needed.",
-        default='excel'
+        default="excel",
     )
 
     kwargs = models.TextField(
@@ -557,6 +513,6 @@ class Dataset(models.Model):
         blank=True,
         null=True,
         help_text="A JSON / dictionary with extra options for the parser to handle the dataset. "
-                  "This is different per parser. This field is highly coupled with the code of the parser.",
-        default='{}'
+        "This is different per parser. This field is highly coupled with the code of the parser.",
+        default="{}",
     )

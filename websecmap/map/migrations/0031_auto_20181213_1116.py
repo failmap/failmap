@@ -6,16 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0030_configuration_is_reported'),
+        ("map", "0030_configuration_is_reported"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='organizationrating',
-            name='rating',
+            model_name="organizationrating",
+            name="rating",
         ),
         migrations.RemoveField(
-            model_name='urlrating',
-            name='rating',
+            model_name="urlrating",
+            name="rating",
         ),
     ]

@@ -16,55 +16,55 @@ from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import (allowed_to_scan, q_configurations_to_scan,
-                                                 unique_and_random)
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
 from websecmap.scanners.scanner.http import get_random_user_agent
 
 log = logging.getLogger(__name__)
 
-CELERY_IP_VERSION_QUEUE_NAMES = {4: 'ipv4', 6: 'ipv6'}
+CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
 
-SECURITY_HEADER_SCAN_TYPES = ['http_security_header_strict_transport_security',
-                              'http_security_header_x_content_type_options',
-                              'http_security_header_x_frame_options',
-                              'http_security_header_x_xss_protection']
+SECURITY_HEADER_SCAN_TYPES = [
+    "http_security_header_strict_transport_security",
+    "http_security_header_x_content_type_options",
+    "http_security_header_x_frame_options",
+    "http_security_header_x_xss_protection",
+]
 
 
-def filter_scan(organizations_filter: dict = dict(),
-                urls_filter: dict = dict(),
-                endpoints_filter: dict = dict(),
-                **kwargs):
+def filter_scan(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     # apply filter to organizations (or if no filter, all organizations)
     # apply filter to urls in organizations (or if no filter, all urls)
     organizations = []
     if organizations_filter:
-        organizations = Organization.objects.filter(**organizations_filter).only('id')
+        organizations = Organization.objects.filter(**organizations_filter).only("id")
         urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
     else:
         urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter)
 
     # We only perform an IN query, and need nothing of these urls except the ID:
-    urls = urls.only('id')
+    urls = urls.only("id")
 
     # select endpoints to scan based on filters
     endpoints = Endpoint.objects.filter(
         # apply filter to endpoints (or if no filter, all endpoints)
-        url__in=urls, **endpoints_filter,
+        url__in=urls,
+        **endpoints_filter,
         # also apply mandatory filters to only select valid endpoints for this action
-        is_dead=False, protocol__in=['http', 'https']
-    ).only('id', 'port', 'protocol', 'ip_version', 'url__id', 'url__url')
+        is_dead=False,
+        protocol__in=["http", "https"],
+    ).only("id", "port", "protocol", "ip_version", "url__id", "url__url")
 
     # unique endpoints only
     endpoints = unique_and_random(endpoints)
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue='storage')
-def plan_scan(organizations_filter: dict = dict(),
-              urls_filter: dict = dict(),
-              endpoints_filter: dict = dict(),
-              **kwargs
-              ):
+@app.task(queue="storage")
+def plan_scan(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     if not allowed_to_scan("security_headers"):
         return group()
 
@@ -72,20 +72,16 @@ def plan_scan(organizations_filter: dict = dict(),
     plannedscan.request(activity="scan", scanner="security_headers", urls=urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="security_headers", amount=kwargs.get('amount', 25))
+    urls = plannedscan.pickup(activity="scan", scanner="security_headers", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
 
 
 def compose_manual_scan_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
-    **kwargs
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ) -> Task:
-    """Compose taskset to scan specified endpoints.
-    """
+    """Compose taskset to scan specified endpoints."""
     if not allowed_to_scan("security_headers"):
         return group()
 
@@ -94,19 +90,17 @@ def compose_manual_scan_task(
 
 
 def compose_scan_task(urls):
-    endpoints = retrieve_endpoints_from_urls(urls, protocols=['http', 'https'])
+    endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
 
     endpoints = unique_and_random(endpoints)
-    log.info(f'Scanning security headers on {len(endpoints)} endpoints, {len(urls)} urls')
+    log.info(f"Scanning security headers on {len(endpoints)} endpoints, {len(urls)} urls")
 
     tasks = []
     for endpoint in endpoints:
         tasks.append(
-            get_headers.si(
-                endpoint.uri_url()
-            ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
+            get_headers.si(endpoint.uri_url()).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
             | analyze_headers.s(endpoint)
-            | plannedscan.finish.si('scan', 'security_headers', endpoint.url)
+            | plannedscan.finish.si("scan", "security_headers", endpoint.url)
         )
 
     return group(tasks)
@@ -121,7 +115,7 @@ def discover_service_type(headers: Dict = None):
     :return:
     """
     if not headers:
-        log.debug('No headers present, falling back to service type HTTP.')
+        log.debug("No headers present, falling back to service type HTTP.")
         return "HTTP"
 
     # Soap messages, they don't need any standard http web headers at all.
@@ -129,7 +123,7 @@ def discover_service_type(headers: Dict = None):
     # We trust that this header is not just set to circumvent HTTP security checks in the meanwhile.
     # Soap security checks are harder, and headers are much harder to implement correctly.
     if "X-SOAP-Enabled" in headers:
-        log.debug('Service type to be discovered as: SOAP.')
+        log.debug("Service type to be discovered as: SOAP.")
         return "SOAP"
 
     # Do not assume headers for sites with Basic Authentication and login portals. The application behind the
@@ -140,20 +134,29 @@ def discover_service_type(headers: Dict = None):
     # In the future we _CAN_ however list insecure authentication methods as such, meaning getting rid of
     # basic authentication.
     if "www-authenticate" in headers:
-        log.debug('Authentication required to discover headers. Reporting this as unknown.')
+        log.debug("Authentication required to discover headers. Reporting this as unknown.")
         return "RESTRICTED"
 
     # We're going to ignore all service types, except whatever looks like html/xhtml/etc
     # So text/plain, text/json and such are ignored.
-    content_type = headers.get('Content-Type', "UNKNOWN")
-    html_content_types = ['text/html; charset=utf-8', 'text/html', 'application/xhtml+xml', 'application/xhtml',
-                          'html', 'htm', 'xhtml', 'application/xhtml + xml', 'text/html;charset=utf-8']
+    content_type = headers.get("Content-Type", "UNKNOWN")
+    html_content_types = [
+        "text/html; charset=utf-8",
+        "text/html",
+        "application/xhtml+xml",
+        "application/xhtml",
+        "html",
+        "htm",
+        "xhtml",
+        "application/xhtml + xml",
+        "text/html;charset=utf-8",
+    ]
 
     # text/html can have many charsets, such as us-ascii.
-    if content_type.lower() in html_content_types or 'text/html' in content_type.lower():
+    if content_type.lower() in html_content_types or "text/html" in content_type.lower():
         return "HTTP"
 
-    log.debug('Unknown service type discovered.')
+    log.debug("Unknown service type discovered.")
     return "UNKNOWN"
 
 
@@ -178,11 +181,12 @@ def analyze_headers(result: requests.Response, endpoint):
         """
 
         existing_header_scans = EndpointGenericScan.objects.all().filter(
-            endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True)
+            endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True
+        )
 
         # Do not store 'corrections' when there are no scans already.
         if not existing_header_scans:
-            return ParentFailed('Skipping http header result parsing because scan failed.', cause=result)
+            return ParentFailed("Skipping http header result parsing because scan failed.", cause=result)
 
         # There used to be stringent filtering here: for oserror and ECONNRESET in the exception, but the fact is
         # that there are so many possible network errors, that it's always a struggle to keep up to date.
@@ -190,9 +194,9 @@ def analyze_headers(result: requests.Response, endpoint):
         # and that the evidence shows what went wrong for later debugging reasons.
 
         for scan in existing_header_scans:
-            store_endpoint_scan_result(scan.type, endpoint, 'Unreachable', "Address became unreachable.", str(result))
+            store_endpoint_scan_result(scan.type, endpoint, "Unreachable", "Address became unreachable.", str(result))
 
-        return {'status': 'success'}
+        return {"status": "success"}
 
     response = result
 
@@ -204,10 +208,11 @@ def analyze_headers(result: requests.Response, endpoint):
     if service_type == "SOAP":
         return analyze_soap_headers(endpoint, response)
     if service_type == "UNKNOWN":
-        return clean_up_existing_headers(endpoint, response, service_type=service_type, reason='unknown_content_type')
+        return clean_up_existing_headers(endpoint, response, service_type=service_type, reason="unknown_content_type")
     if service_type == "RESTRICTED":
-        return clean_up_existing_headers(endpoint, response, service_type=service_type,
-                                         reason='authentication_required')
+        return clean_up_existing_headers(
+            endpoint, response, service_type=service_type, reason="authentication_required"
+        )
 
 
 def analyze_soap_headers(endpoint, response):
@@ -227,12 +232,13 @@ def analyze_soap_headers(endpoint, response):
 
     # clean up existing web headers and set them to being not relevant for soap:
     existing_header_scans = EndpointGenericScan.objects.all().filter(
-        endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True)
+        endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True
+    )
 
     for scan in existing_header_scans:
-        store_endpoint_scan_result(scan.type, endpoint, 'SOAP', "Header not relevant for SOAP service.")
+        store_endpoint_scan_result(scan.type, endpoint, "SOAP", "Header not relevant for SOAP service.")
 
-    return {'status': 'success'}
+    return {"status": "success"}
 
 
 def clean_up_existing_headers(endpoint, response, service_type: str, reason: str):
@@ -250,12 +256,13 @@ def clean_up_existing_headers(endpoint, response, service_type: str, reason: str
 
     # clean up existing web headers and set them to being not relevant for soap:
     existing_header_scans = EndpointGenericScan.objects.all().filter(
-        endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True)
+        endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True
+    )
 
     for scan in existing_header_scans:
         store_endpoint_scan_result(scan.type, endpoint, service_type, reason)
 
-    return {'status': 'success'}
+    return {"status": "success"}
 
 
 def analyze_website_headers(endpoint, response):
@@ -277,9 +284,9 @@ def analyze_website_headers(endpoint, response):
     # We've removed conditional scans in scannerss, as more scan data is better.
     # you can cohose not to display or report it. Below used to be conditional scans.
 
-    generic_check_using_csp_fallback(endpoint, response.headers, 'X-XSS-Protection')
-    generic_check_using_csp_fallback(endpoint, response.headers, 'X-Frame-Options')
-    generic_check(endpoint, response.headers, 'X-Content-Type-Options')
+    generic_check_using_csp_fallback(endpoint, response.headers, "X-XSS-Protection")
+    generic_check_using_csp_fallback(endpoint, response.headers, "X-Frame-Options")
+    generic_check(endpoint, response.headers, "X-Content-Type-Options")
 
     """
     https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
@@ -310,19 +317,26 @@ def analyze_website_headers(endpoint, response):
         # runs any unsecured http service? (on ANY port).
         unsecure_services = Endpoint.objects.all().filter(url=endpoint.url, protocol="http", is_dead=False).exists()
         if unsecure_services:
-            generic_check(endpoint, response.headers, 'Strict-Transport-Security')
+            generic_check(endpoint, response.headers, "Strict-Transport-Security")
         else:
-            if 'Strict-Transport-Security' in response.headers:
-                log.debug('Has Strict-Transport-Security')
-                store_endpoint_scan_result('http_security_header_strict_transport_security', endpoint, 'True',
-                                           response.headers['Strict-Transport-Security'])
+            if "Strict-Transport-Security" in response.headers:
+                log.debug("Has Strict-Transport-Security")
+                store_endpoint_scan_result(
+                    "http_security_header_strict_transport_security",
+                    endpoint,
+                    "True",
+                    response.headers["Strict-Transport-Security"],
+                )
             else:
-                log.debug('Has no Strict-Transport-Security, yet offers no insecure http service.')
-                store_endpoint_scan_result('http_security_header_strict_transport_security', endpoint, 'False',
-                                           "Security Header not present: Strict-Transport-Security, "
-                                           "yet offers no insecure http service.")
+                log.debug("Has no Strict-Transport-Security, yet offers no insecure http service.")
+                store_endpoint_scan_result(
+                    "http_security_header_strict_transport_security",
+                    endpoint,
+                    "False",
+                    "Security Header not present: Strict-Transport-Security, " "yet offers no insecure http service.",
+                )
 
-    return {'status': 'success'}
+    return {"status": "success"}
 
 
 def generic_check(endpoint: Endpoint, headers, header):
@@ -331,11 +345,11 @@ def generic_check(endpoint: Endpoint, headers, header):
     scan_type = "http_security_header_%s" % header.lower().replace("-", "_")
 
     if header in headers.keys():
-        log.debug('Has %s' % header)
-        store_endpoint_scan_result(scan_type, endpoint, 'True', headers[header])
+        log.debug("Has %s" % header)
+        store_endpoint_scan_result(scan_type, endpoint, "True", headers[header])
     else:
-        log.debug('Has no %s' % header)
-        store_endpoint_scan_result(scan_type, endpoint, 'False', "Security Header not present: %s" % header)
+        log.debug("Has no %s" % header)
+        store_endpoint_scan_result(scan_type, endpoint, "False", "Security Header not present: %s" % header)
 
 
 def generic_check_using_csp_fallback(endpoint: Endpoint, headers, header):
@@ -343,34 +357,33 @@ def generic_check_using_csp_fallback(endpoint: Endpoint, headers, header):
 
     # this is case insensitive
     if header in headers.keys():
-        log.debug('Has %s' % header)
-        store_endpoint_scan_result(scan_type, endpoint, 'True', headers[header])
+        log.debug("Has %s" % header)
+        store_endpoint_scan_result(scan_type, endpoint, "True", headers[header])
     else:
         # CSP fallback:
-        log.debug('CSP fallback used for %s' % header)
+        log.debug("CSP fallback used for %s" % header)
         if "Content-Security-Policy" in headers.keys():
             store_endpoint_scan_result(
                 scan_type=scan_type,
                 endpoint=endpoint,
-                rating='Using CSP',
+                rating="Using CSP",
                 message="Content-Security-Policy header found, which can handle the security from %s."
-                        "Value (possibly truncated): %s..." %
-                        (header, headers["Content-Security-Policy"][0:80]),
-                evidence=headers["Content-Security-Policy"]
+                "Value (possibly truncated): %s..." % (header, headers["Content-Security-Policy"][0:80]),
+                evidence=headers["Content-Security-Policy"],
             )
 
         else:
-            log.debug('Has no %s' % header)
+            log.debug("Has no %s" % header)
             store_endpoint_scan_result(
                 scan_type=scan_type,
                 endpoint=endpoint,
-                rating='False',
-                message="Security Header not present: %s, alternative header Content-Security-Policy not present." %
-                        header
+                rating="False",
+                message="Security Header not present: %s, alternative header Content-Security-Policy not present."
+                % header,
             )
 
 
-@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3})
+@app.task(bind=True, default_retry_delay=1, retry_kwargs={"max_retries": 3})
 def get_headers(self, uri_uri):
     try:
         return get_headers_request(uri_uri)
@@ -390,8 +403,16 @@ def get_headers(self, uri_uri):
     # possibly an error in requests.
     #
     # Possibly tooManyRedirects could be plotted on the map, given this is a configuration error
-    except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError, ValueError,
-            requests.TooManyRedirects, urllib3.exceptions.LocationValueError) as e:
+    except (
+        ConnectTimeout,
+        HTTPError,
+        ReadTimeout,
+        Timeout,
+        ConnectionError,
+        ValueError,
+        requests.TooManyRedirects,
+        urllib3.exceptions.LocationValueError,
+    ) as e:
         # If an expected error is encountered put this task back on the queue to be retried.
         # This will keep the chained logic in place (saving result after successful scan).
         # Retry delay and total number of attempts is configured in the task decorator.
@@ -435,22 +456,20 @@ def get_headers_request(uri_url):
     :return: requests.response
     """
 
-    log.debug('Getting headers for %s' % uri_url)
+    log.debug("Getting headers for %s" % uri_url)
 
     # ignore wrong certificates, those are handled in a different scan.
     # 10 seconds for network delay, 10 seconds for the site to respond.
-    response = requests.get(uri_url,
-                            timeout=(10, 10),
-                            allow_redirects=True,
-                            verify=False,
-                            headers={'User-Agent': get_random_user_agent()})
+    response = requests.get(
+        uri_url, timeout=(10, 10), allow_redirects=True, verify=False, headers={"User-Agent": get_random_user_agent()}
+    )
 
     # redirects are followed, this gives an indication on how many redirects are followed, and what url the
     # headers are taken from:
     for index, resp in enumerate(response.history):
         log.debug(f"- Redirect {index}: {resp.url}.")
 
-    log.debug(f'- You are now at {response.url}.')
+    log.debug(f"- You are now at {response.url}.")
 
     # Removed: only continue for valid responses (eg: 200)
     # Error pages, such as 404 are super fancy, with forms and all kinds of content.
@@ -460,5 +479,5 @@ def get_headers_request(uri_url):
     # response.raise_for_status()
 
     for header in response.headers:
-        log.debug('Received header: %s' % header)
+        log.debug("Received header: %s" % header)
     return response

@@ -28,8 +28,8 @@ import websecmap.app.dashboard_module_views  # noqa
 # Django 1.10 http://stackoverflow.com/questions/38744285/
 # django-urls-error-view-must-be-a-callable-or-a-list-tuple-in-the-case-of-includ#38744286
 
-admin.site.site_header = 'Web Security Map Admin'
-admin.site.site_title = 'Web Security Map Admin'
+admin.site.site_header = "Web Security Map Admin"
+admin.site.site_title = "Web Security Map Admin"
 
 
 def trigger_error(request):
@@ -38,25 +38,22 @@ def trigger_error(request):
 
 
 admin_urls = [
-    path('sentry-debug/', trigger_error),
-    path('jet/', include('jet.urls', 'jet')),  # Django JET URLS
-    path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),  # Django JET dashboard URLS
-
-
-
-    url(r'^admin/', admin.site.urls),
-    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^nested_admin/', include('nested_admin.urls')),
+    path("sentry-debug/", trigger_error),
+    path("jet/", include("jet.urls", "jet")),  # Django JET URLS
+    path("jet/dashboard/", include("jet.dashboard.urls", "jet-dashboard")),  # Django JET dashboard URLS
+    url(r"^admin/", admin.site.urls),
+    url(r"^admin/doc/", include("django.contrib.admindocs.urls")),
+    url(r"^nested_admin/", include("nested_admin.urls")),
 ]
 frontend_urls = [
-    url('', include('websecmap.map.urls')),
-    url(r'^api/', include('websecmap.api.urls')),
-    url(r'^game/', include('websecmap.game.urls')),
-    url(r'^pro/', include('websecmap.pro.urls')),
-    path('pro/', include('django.contrib.auth.urls')),
+    url("", include("websecmap.map.urls")),
+    url(r"^api/", include("websecmap.api.urls")),
+    url(r"^game/", include("websecmap.game.urls")),
+    url(r"^pro/", include("websecmap.pro.urls")),
+    path("pro/", include("django.contrib.auth.urls")),
 ]
 interactive_urls = [
-    path('authentication/', include('django.contrib.auth.urls')),
+    path("authentication/", include("django.contrib.auth.urls")),
     # not using helpdesk anymore, might in the future.
     # url(r'helpdesk/', include('helpdesk.urls')),
 ]
@@ -76,8 +73,9 @@ if settings.DEBUG:
 
     try:
         import debug_toolbar
+
         urlpatterns = [
-            url(r'^__debug__/', include(debug_toolbar.urls)),
+            url(r"^__debug__/", include(debug_toolbar.urls)),
         ] + urlpatterns
     except ImportError:
         pass
@@ -100,21 +98,21 @@ def handler500(request):
     """
 
     context = {
-        'request': request,
-        'admin_instance': settings.ADMIN,
+        "request": request,
+        "admin_instance": settings.ADMIN,
     }
 
     # on privileged instance show the actual error message to hopefully be useful for the user
     if settings.ADMIN:
         _, value, _ = sys.exc_info()
-        context['exception_message'] = value
+        context["exception_message"] = value
 
-    template_name = '500.html'  # You need to create a 500.html template.
+    template_name = "500.html"  # You need to create a 500.html template.
     return TemplateResponse(request, template_name, context, status=500)
 
 
 if settings.DEBUG:
     urlpatterns = [
         # test urls for error pages (cause normally we don't have them, ahum)
-        url(r'^500/$', handler500),
+        url(r"^500/$", handler500),
     ] + urlpatterns

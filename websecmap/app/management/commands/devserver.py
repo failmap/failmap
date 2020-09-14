@@ -17,7 +17,7 @@ from websecmap.celery import app
 
 log = logging.getLogger(__name__)
 
-SOURCE_DIRECTORY = abspath(join(dirname(abspath(__file__)), '../' * 3))
+SOURCE_DIRECTORY = abspath(join(dirname(abspath(__file__)), "../" * 3))
 
 TIMEOUT = timedelta(seconds=30)
 KILL_TIMEOUT = timedelta(seconds=3)
@@ -39,20 +39,21 @@ make run_no_backend
 
 """
 
-DEVELOPMENT_FIXTURES = 'development_user,development_scandata,development_periodic_tasks,testdata'
+DEVELOPMENT_FIXTURES = "development_user,development_scandata,development_periodic_tasks,testdata"
 
 
 def start_borker(uuid):
 
-    name = 'websecmap-broker-%s' % str(uuid.int)
+    name = "websecmap-broker-%s" % str(uuid.int)
 
-    borker_command = 'docker run --rm --name=%s -p 6379 redis' % name
+    borker_command = "docker run --rm --name=%s -p 6379 redis" % name
     borker_process = subprocess.Popen(borker_command.split(), stdout=subprocess.DEVNULL, stderr=sys.stderr.buffer)
 
     @retry(tries=10, delay=1)
     def get_container_port():
-        command = 'docker port %s 6379/tcp' % name
-        return subprocess.check_output(command, shell=True, universal_newlines=True).split(':')[-1]
+        command = "docker port %s 6379/tcp" % name
+        return subprocess.check_output(command, shell=True, universal_newlines=True).split(":")[-1]
+
     time.sleep(1)  # small delay to prevent first warning
     port = int(get_container_port())
 
@@ -60,11 +61,17 @@ def start_borker(uuid):
 
 
 def start_worker(broker_port, silent=True):
-    watchdog = ('watchmedo auto-restart --directory={} --pattern=*.py'
-                ' --recursive --signal=SIGKILL -- ').format(SOURCE_DIRECTORY).split()
+    watchdog = (
+        ("watchmedo auto-restart --directory={} --pattern=*.py" " --recursive --signal=SIGKILL -- ")
+        .format(SOURCE_DIRECTORY)
+        .split()
+    )
     # watchdog = 'tools/autoreload.sh'
-    worker_command = ('websecmap celery worker --loglevel=info --pool=eventlet'
-                      ' --concurrency=1 --broker redis://localhost:{}/0').format(broker_port).split()
+    worker_command = (
+        ("websecmap celery worker --loglevel=info --pool=eventlet" " --concurrency=1 --broker redis://localhost:{}/0")
+        .format(broker_port)
+        .split()
+    )
 
     worker_process = subprocess.Popen(watchdog + worker_command, stdout=sys.stdout.buffer, stderr=sys.stderr.buffer)
 
@@ -91,12 +98,19 @@ class Command(RunserverCommand):
     processes = []
 
     def add_arguments(self, parser):
-        parser.add_argument('-l', '--loaddata', default=DEVELOPMENT_FIXTURES, type=str,
-                            help='Comma separated list of data fixtures to load.')
-        parser.add_argument('--no-backend', action='store_true',
-                            help='Do not start backend services (redis broker & task worker).')
-        parser.add_argument('--no-data', action='store_true',
-                            help='Do not update database or load data (quicker start).')
+        parser.add_argument(
+            "-l",
+            "--loaddata",
+            default=DEVELOPMENT_FIXTURES,
+            type=str,
+            help="Comma separated list of data fixtures to load.",
+        )
+        parser.add_argument(
+            "--no-backend", action="store_true", help="Do not start backend services (redis broker & task worker)."
+        )
+        parser.add_argument(
+            "--no-data", action="store_true", help="Do not update database or load data (quicker start)."
+        )
 
         super().add_arguments(parser)
 
@@ -104,7 +118,7 @@ class Command(RunserverCommand):
         """Wrap in exception handler to perform cleanup."""
 
         # detect if we run inside the autoreloader's second thread
-        inner_run = os.environ.get('RUN_MAIN', False)
+        inner_run = os.environ.get("RUN_MAIN", False)
         if inner_run:
             # only run the runserver in inner loop
             super().handle(*args, **options)
@@ -122,45 +136,45 @@ class Command(RunserverCommand):
         uuid = uuid1()
 
         # suppress celery DEBUG warning
-        if options['verbosity'] < 2:
+        if options["verbosity"] < 2:
             warnings.filterwarnings("ignore")
 
-        if not options['no_backend']:
+        if not options["no_backend"]:
             # Make sure all requirements for devserver are met.
             try:
                 # docker should be installed, daemon should be configured and running
-                subprocess.check_call('docker info', shell=True, stdout=subprocess.DEVNULL)
+                subprocess.check_call("docker info", shell=True, stdout=subprocess.DEVNULL)
             except BaseException:
                 print(REDIS_INFO)
                 sys.exit(1)
 
             # start backend services
             broker_process, broker_port = start_borker(uuid)
-            log.info('Starting broker')
+            log.info("Starting broker")
             self.processes.append(broker_process)
-            log.info('Starting worker')
-            self.processes.append(start_worker(broker_port, options['verbosity'] < 2))
+            log.info("Starting worker")
+            self.processes.append(start_worker(broker_port, options["verbosity"] < 2))
 
             # set celery broker url
-            settings.CELERY_BROKER_URL = 'redis://localhost:%d/0' % broker_port
+            settings.CELERY_BROKER_URL = "redis://localhost:%d/0" % broker_port
             # set as environment variable for the inner_run
-            os.environ['BROKER'] = settings.CELERY_BROKER_URL
+            os.environ["BROKER"] = settings.CELERY_BROKER_URL
 
             # wait for worker to be ready
-            log.info('Waiting for worker to be ready')
+            log.info("Waiting for worker to be ready")
             for _ in range(TIMEOUT.seconds * 2):
                 if app.control.ping(timeout=0.5):
                     break
-            log.info('Worker ready')
+            log.info("Worker ready")
 
-        log.info('Updating database tables')
-        call_command('migrate')
+        log.info("Updating database tables")
+        call_command("migrate")
 
-        if not options['no_data']:
+        if not options["no_data"]:
             # initialize/update dataset
-            log.info('Loading fixture data')
-            call_command('load_dataset', *options['loaddata'].split(','))
+            log.info("Loading fixture data")
+            call_command("load_dataset", *options["loaddata"].split(","))
 
         # start the runserver command
-        log.info('Starting webserver')
+        log.info("Starting webserver")
         super().handle(*args, **options)

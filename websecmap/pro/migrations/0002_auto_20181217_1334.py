@@ -6,48 +6,48 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pro', '0001_initial'),
+        ("pro", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='urllist',
-            name='notification_receipients',
-            field=models.CharField(blank=True, default='', max_length=800, null=True),
+            model_name="urllist",
+            name="notification_receipients",
+            field=models.CharField(blank=True, default="", max_length=800, null=True),
         ),
         migrations.AddField(
-            model_name='urllist',
-            name='report_receipients',
-            field=models.CharField(blank=True, default='', max_length=800, null=True),
+            model_name="urllist",
+            name="report_receipients",
+            field=models.CharField(blank=True, default="", max_length=800, null=True),
         ),
         migrations.AddField(
-            model_name='urllist',
-            name='send_notification_on_new_issue_with_high_risk',
+            model_name="urllist",
+            name="send_notification_on_new_issue_with_high_risk",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='urllist',
-            name='send_notification_on_new_issue_with_low_risk',
+            model_name="urllist",
+            name="send_notification_on_new_issue_with_low_risk",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='urllist',
-            name='send_notification_on_new_issue_with_medium_risk',
+            model_name="urllist",
+            name="send_notification_on_new_issue_with_medium_risk",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='urllist',
-            name='send_notifications',
+            model_name="urllist",
+            name="send_notifications",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='urllist',
-            name='send_report_format',
-            field=models.CharField(choices=[('html_inline', 'Inline HTML')], default='html_inline', max_length=40),
+            model_name="urllist",
+            name="send_report_format",
+            field=models.CharField(choices=[("html_inline", "Inline HTML")], default="html_inline", max_length=40),
         ),
         migrations.AddField(
-            model_name='urllist',
-            name='send_reports',
+            model_name="urllist",
+            name="send_reports",
             field=models.BooleanField(default=False),
         ),
     ]

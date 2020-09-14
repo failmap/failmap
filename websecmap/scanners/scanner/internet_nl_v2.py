@@ -37,20 +37,18 @@ def return_safe_response(answer):
 
 
 @app.task(queue="storage")
-def register(domains: List[str], scan_type: str, tracking_information: str,
-             settings: InternetNLApiSettings) -> (str, str):
+def register(
+    domains: List[str], scan_type: str, tracking_information: str, settings: InternetNLApiSettings
+) -> (str, str):
 
-    data = {
-        "type": scan_type,
-        "name": tracking_information,
-        "domains": domains
-    }
+    data = {"type": scan_type, "name": tracking_information, "domains": domains}
 
     try:
         response = requests.post(
-            f'{settings.url}/requests',
+            f"{settings.url}/requests",
             json=data,
-            auth=HTTPBasicAuth(settings.username, settings.password), timeout=(300, 300)
+            auth=HTTPBasicAuth(settings.username, settings.password),
+            timeout=(300, 300),
         )
     except requests.RequestException as e:
         # This is returned as a catch all for network errors. A network error can be retried.
@@ -61,22 +59,22 @@ def register(domains: List[str], scan_type: str, tracking_information: str,
 
 @app.task(queue="storage")
 def metadata(settings: InternetNLApiSettings):
-    return generic_internet_nl_api_request("get", f'{settings.url}/metadata/report', settings)
+    return generic_internet_nl_api_request("get", f"{settings.url}/metadata/report", settings)
 
 
 @app.task(queue="storage")
 def status(scan_id: int, settings: InternetNLApiSettings):
-    return generic_internet_nl_api_request("get", f'{settings.url}/requests/{scan_id}', settings)
+    return generic_internet_nl_api_request("get", f"{settings.url}/requests/{scan_id}", settings)
 
 
 @app.task(queue="storage")
 def cancel(scan_id: int, settings: InternetNLApiSettings):
-    return generic_internet_nl_api_request("patch", f'{settings.url}/requests/{scan_id}', settings)
+    return generic_internet_nl_api_request("patch", f"{settings.url}/requests/{scan_id}", settings)
 
 
 @app.task(queue="storage")
 def result(scan_id: int, settings: InternetNLApiSettings):
-    return generic_internet_nl_api_request("get", f'{settings.url}/requests/{scan_id}/results', settings)
+    return generic_internet_nl_api_request("get", f"{settings.url}/requests/{scan_id}/results", settings)
 
 
 def generic_internet_nl_api_request(operation, url, settings):

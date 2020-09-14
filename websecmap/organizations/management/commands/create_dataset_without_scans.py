@@ -4,16 +4,17 @@ from datetime import datetime
 import pytz
 from django.core.management.commands.dumpdata import Command as DumpDataCommand
 
-from websecmap.organizations.management.commands.support.datasethelpers import \
-    check_referential_integrity
+from websecmap.organizations.management.commands.support.datasethelpers import check_referential_integrity
 
 log = logging.getLogger(__package__)
 
 
 # Remove ALL organization and URL ratings and rebuild them
 class Command(DumpDataCommand):
-    help = "A dataset that is free of things that are easy to recreate. Such things are all logs from scanners," \
-           "screenshots and such."
+    help = (
+        "A dataset that is free of things that are easy to recreate. Such things are all logs from scanners,"
+        "screenshots and such."
+    )
 
     FILENAME = "failmap_dataset_{}.{options[format]}"
 
@@ -84,17 +85,14 @@ class Command(DumpDataCommand):
         check_referential_integrity()
 
         # generate unique filename for every export
-        filename = self.FILENAME.format(
-            datetime.now(pytz.utc).strftime("%Y%m%d_%H%M%S"),
-            options=options
-        )
+        filename = self.FILENAME.format(datetime.now(pytz.utc).strftime("%Y%m%d_%H%M%S"), options=options)
 
         # if no output specified use default file
-        if not options['output']:
+        if not options["output"]:
             options["output"] = filename
         # allow to output to stdout to enable gzip compression if needed
-        if options['output'] == '-':
-            options['output'] = None
+        if options["output"] == "-":
+            options["output"] = None
 
         # unless specified on the commandline, use default set of apps to export
         if not app_labels:

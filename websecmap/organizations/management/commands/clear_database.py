@@ -7,15 +7,22 @@ from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubm
 from websecmap.map.models import OrganizationReport
 from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url
 from websecmap.reporting.models import UrlReport
-from websecmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
-                                       InternetNLV2Scan, InternetNLV2StateLog, ScanProxy,
-                                       Screenshot, UrlGenericScan)
+from websecmap.scanners.models import (
+    Endpoint,
+    EndpointGenericScan,
+    EndpointGenericScanScratchpad,
+    InternetNLV2Scan,
+    InternetNLV2StateLog,
+    ScanProxy,
+    Screenshot,
+    UrlGenericScan,
+)
 
 log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
-    help = 'Deletes map, organization and scanner data from the database.'
+    help = "Deletes map, organization and scanner data from the database."
 
     def handle(self, *args, **options):
         askreset()

@@ -8,13 +8,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0021_auto_20171030_1703'),
+        ("scanners", "0021_auto_20171030_1703"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpoint',
-            name='ip_version',
-            field=models.IntegerField(default=4, help_text="Either IPv4 or IPv6. There are basically two possibilities to reach the endpoint, which due to immaturity often look very different. The old way is using IPv4addresses (4) and the newer method is uing IPv6 (6). The internet looks a whole lotdifferent between IPv4 or IPv6. That shouldn't be the case, but it is."),
+            model_name="endpoint",
+            name="ip_version",
+            field=models.IntegerField(
+                default=4,
+                help_text="Either IPv4 or IPv6. There are basically two possibilities to reach the endpoint, which due to immaturity often look very different. The old way is using IPv4addresses (4) and the newer method is uing IPv6 (6). The internet looks a whole lotdifferent between IPv4 or IPv6. That shouldn't be the case, but it is.",
+            ),
         ),
     ]

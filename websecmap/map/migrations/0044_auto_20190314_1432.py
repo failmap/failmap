@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0043_vulnerabilitystatistic_ok'),
+        ("map", "0043_vulnerabilitystatistic_ok"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='vulnerabilitystatistic',
-            old_name='ok',
-            new_name='ok_endpoints',
+            model_name="vulnerabilitystatistic",
+            old_name="ok",
+            new_name="ok_endpoints",
         ),
         migrations.AddField(
-            model_name='vulnerabilitystatistic',
-            name='ok_urls',
+            model_name="vulnerabilitystatistic",
+            name="ok_urls",
             field=models.PositiveIntegerField(default=0),
         ),
     ]

@@ -6,19 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0074_auto_20200805_0735'),
+        ("scanners", "0074_auto_20200805_0735"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='plannedscan',
-            name='last_state_change_at',
+            model_name="plannedscan",
+            name="last_state_change_at",
             field=models.DateTimeField(null=True),
         ),
         migrations.AlterField(
-            model_name='plannedscan',
-            name='scanner',
+            model_name="plannedscan",
+            name="scanner",
             field=models.CharField(
-                db_index=True, default='', help_text='tlsq, dnssec, http_security_headers, plain_http, internet_nl_mail, dnssec, ftp, dns_endpoints', max_length=30),
+                db_index=True,
+                default="",
+                help_text="tlsq, dnssec, http_security_headers, plain_http, internet_nl_mail, dnssec, ftp, dns_endpoints",
+                max_length=30,
+            ),
         ),
     ]

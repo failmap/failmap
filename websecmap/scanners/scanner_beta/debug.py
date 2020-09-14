@@ -10,10 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def compose_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
-    **kwargs
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ) -> Task:
     """
     Helps with identifying issues with scanners. It shows the relevant permissions, configurations and lists the
@@ -42,22 +39,29 @@ def compose_task(
     log.info("Scan configurations (regions set allowed to be scanned)")
     log.info("Can be adjusted in the admin interface at __MAP__ Configuration")
     log.info("Empty means nothing will be scanned (basically exceptions)")
-    log.info("Organizations: %s" % q_configurations_to_scan(level='organization'))
-    log.info("Urls: %s" % q_configurations_to_scan(level='url'))
-    log.info("Endpoints: %s" % q_configurations_to_scan(level='endpoint'))
+    log.info("Organizations: %s" % q_configurations_to_scan(level="organization"))
+    log.info("Urls: %s" % q_configurations_to_scan(level="url"))
+    log.info("Endpoints: %s" % q_configurations_to_scan(level="endpoint"))
 
     # todo: show list of selected urls, endpoints and organizations.
     log.info("")
     log.info("Endpoints that are selected based on parameters:")
     log.info("Other filters may apply depending on selected scanner. For example: scan ftp only selects ftp endpoints")
-    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
+    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level="endpoint"), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
 
     for endpoint in endpoints:
-        log.info("%-3s %-20s %-30s: IPv%-1s %s/%s" % (endpoint.url.organization.first().country,
-                                                      endpoint.url.organization.first().name,
-                                                      endpoint.url.url,
-                                                      endpoint.ip_version, endpoint.protocol, endpoint.port))
+        log.info(
+            "%-3s %-20s %-30s: IPv%-1s %s/%s"
+            % (
+                endpoint.url.organization.first().country,
+                endpoint.url.organization.first().name,
+                endpoint.url.url,
+                endpoint.ip_version,
+                endpoint.protocol,
+                endpoint.port,
+            )
+        )
 
     log.info("")
     log.info("End of scan debug")

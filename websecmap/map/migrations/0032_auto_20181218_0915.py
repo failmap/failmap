@@ -6,13 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0031_auto_20181213_1116'),
+        ("map", "0031_auto_20181213_1116"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='organizationrating',
-            options={'get_latest_by': 'when', 'verbose_name': 'Organization Rating',
-                     'verbose_name_plural': 'Organization Ratings'},
+            name="organizationrating",
+            options={
+                "get_latest_by": "when",
+                "verbose_name": "Organization Rating",
+                "verbose_name_plural": "Organization Ratings",
+            },
         ),
     ]

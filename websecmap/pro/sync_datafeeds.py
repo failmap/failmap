@@ -13,8 +13,11 @@ from websecmap.pro.models import FailmapOrganizationDataFeed, UrlDataFeed
 log = logging.getLogger(__package__)
 
 
-def compose_task(organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(),
-                 ) -> Task:
+def compose_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+) -> Task:
     feeds = FailmapOrganizationDataFeed.objects.all()
     tasks = [sync_failmap_datafeed.si(feed) for feed in feeds]
 
@@ -24,7 +27,7 @@ def compose_task(organizations_filter: dict = dict(), urls_filter: dict = dict()
     return group(tasks)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def sync_failmap_datafeed(failmapOrganizationDataFeed: FailmapOrganizationDataFeed):
     # we cannot use _in queries as the resultset may be too large. So we have to use a stupid and simple approach that
     # is slower but works.
@@ -39,7 +42,7 @@ def sync_failmap_datafeed(failmapOrganizationDataFeed: FailmapOrganizationDataFe
                 urllist.save()
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def sync_subdomain_datafeed(urlDataFeed: UrlDataFeed):
     # we cannot use _in queries as the resultset may be too large. So we have to use a stupid and simple approach that
     # is slower but works.

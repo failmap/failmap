@@ -6,14 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0066_internetnlscan_last_check'),
+        ("scanners", "0066_internetnlscan_last_check"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='screenshot',
-            name='image',
-            field=models.ImageField(default=None, height_field='height_pixels', null=True,
-                                    upload_to='screenshot', width_field='width_pixels'),
+            model_name="screenshot",
+            name="image",
+            field=models.ImageField(
+                default=None,
+                height_field="height_pixels",
+                null=True,
+                upload_to="screenshot",
+                width_field="width_pixels",
+            ),
         ),
     ]

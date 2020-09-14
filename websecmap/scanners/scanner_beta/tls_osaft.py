@@ -1,3 +1,6 @@
+"""
+Code kept for future planning reasons: may be used or inspired to make an independent implementation tls scanner.
+
 import json
 import logging
 import os
@@ -16,6 +19,7 @@ from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configuration
 from websecmap.scanners.timeout import timeout
 
 log = logging.getLogger(__package__)
+"""
 
 """
 This scanner currently uses:
@@ -134,6 +138,8 @@ BREACH: todo. Disable HTTP compression, which is mandatory already
 What we should have used: https://www.owasp.org/index.php/O-Saft ... nah
 
 """
+
+"""
 osaft_JSON = settings.TOOLS['osaft']['json']
 
 
@@ -226,7 +232,7 @@ def get_standard_out(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     (standardout, junk) = process.communicate()
     return standardout.decode('utf-8')
-
+"""
 
 """
 Using this construction the container will run out of memory and CPU. A slow CPU means that scans don't finish in time
@@ -248,7 +254,7 @@ very important that all the tasks in this scan are performed more or less sequen
 So wait until it's finished, and don't start too many tasks. Otherwise your system WILL crash.
 """
 
-
+"""
 # todo: **WARNING: 201: Can\'t get IP for host \'raad.zutphen.nl:443\'; host ignored :)
 @app.task(queue="4and6")
 def run_osaft_scan_shared_container(address, port):
@@ -296,7 +302,7 @@ def run_osaft_scan_shared_container(address, port):
 def run_osaft_scan(address, port):
     return run_osaft_scan_shared_container(address, port)
 
-
+"""
 """
 Say goodbye to your ram when using this function :)
 25 containers at the same time? HMMMMMMMMMMMM... nope :)
@@ -327,7 +333,7 @@ d21abdb679ca        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago    
 c867bf514f17        owasp/o-saft     "perl /O-Saft/o-saft…"   17 hours ago        Up 17 hours    boring_edison
 """
 
-
+"""
 def run_osaft_scan_dedicated_container(address, port):
     # we're expecting SNI running everywhere. So we cant connect on IP alone, an equiv of http "host-header" is required
     # We're not storing anything on the filesystem and expect no dependencies on the O-Saft system. All post-processing
@@ -376,11 +382,13 @@ def gawk(string):
 @app.task(queue="4and6", priority=PRIO_NORMAL)
 def ammend_unsuported_issues(osaft_report, address, port=443):
     """
-    A scan takes about a minute to complete and can be run against any TLS website and many other services.
-    :param address: string, internet address, not an url object(!)
-    :param port: integer, port number.
-    :return:
-    """
+"""
+A scan takes about a minute to complete and can be run against any TLS website and many other services.
+:param address: string, internet address, not an url object(!)
+:param port: integer, port number.
+:return:
+"""
+"""
 
     # todo: does O-Saft support hostnames and separate IP's? So you can test on IPv4 and IPv6?
     # todo: what about hangs? What is a timeout?
@@ -488,13 +496,15 @@ def security_label(report, key):
 
 @app.task(queue="storage", priority=PRIO_HIGH)
 def determine_grade(report):
-    """
-    Use the docker build of OSaft, otherwise you'll be building SSL until you've met all dependencies.
-    O-Saft very neatly performs a lot of checks that we don't have to do anymore ourselves, wrongly.
+"""
+"""
+Use the docker build of OSaft, otherwise you'll be building SSL until you've met all dependencies.
+O-Saft very neatly performs a lot of checks that we don't have to do anymore ourselves, wrongly.
 
-    :param report: json report from O-Saft with injections
-    :return: two lists of grades.
-    """
+:param report: json report from O-Saft with injections
+:return: two lists of grades.
+"""
+"""
     # todo: A+ DNS Certification Authority Authorization (CAA) Policy found for this domain.
 
     if not report:
@@ -529,6 +539,7 @@ def determine_grade(report):
     ratings.append(security_check(report, "poodle", "yes", "F", "Vulnerable to CVE_2014_3566 (POOODLE)."))
 
     """
+"""
     https://sweet32.info/
 
     You can use the scanning tool form Qualys SSL Labs. In the "Handshake Simulation" section, you should see 3DES or
@@ -547,6 +558,7 @@ def determine_grade(report):
     cipher_selected = ECDHE-RSA-AES256-GCM-SHA384 HIGH
     We're splitting that into:
     """
+"""
     selected_cipher = security_label(report, "cipher_selected")
     log.debug("Connection has selected cipher: %s" % selected_cipher)
 
@@ -558,12 +570,14 @@ def determine_grade(report):
         ratings.append(security_check(report, "sweet32", "yes", "F", "Vulnerable to Sweet32."))
 
     """
+"""
     https://en.wikipedia.org/wiki/Lucky_Thirteen_attack
 
     Also focuses on CBC ciphers first. As such it is not listed in Qualys report. You see that both sweet32 and lucky13
     have the same ciphers that cause trouble in scans. The same logic is applied: this is only a problem if the client
     is weak / vulnerable.
     """
+"""
     if selected_cipher in security_value(report, "lucky13"):
         ratings.append(security_check(report, "lucky13", "yes", "F", "Vulnerable to Lucky 13."))
 
@@ -647,11 +661,13 @@ def determine_grade(report):
 
     # todo: check what these things do in qualys.
     """
+"""
     "key":"Target does not accept NULL ciphers:","label":"yes","value":"yes"},
       {"typ":"check","line":"341","key":"Target does not accept EXPORT ciphers:","label":"yes","value":"yes"},
       {"typ":"check","line":"342","key":"Target does not accept CBC ciphers:","label":"yes","value":"yes"},
       {"typ":"check","line":"343","key":"Target does not accept DES ciphers:","label":"yes","value":"yes"}
     """
+"""
 
     # todo: check on weak DH parameters, there is some info about it in the results
     # Weak diffie helman, now seen as 1024, might be > 768 < 2048?
@@ -664,6 +680,7 @@ def determine_grade(report):
 
         # See if we can go for A+ when HSTS is implemented (i think https should be the default... oh well)
         """
+"""
           {"typ":"check","line":"408","key":"Target does not send STS in meta tag:","label":"yes","value":"yes"},
           {"typ":"check","line":"409","key":"Target sends STS header:","label":"yes","value":"yes"},
           {"typ":"check","line":"410","key":"Target sends STS and no Location header:","label":"yes","value":"yes"},
@@ -678,6 +695,7 @@ def determine_grade(report):
           {"typ":"check","line":"419","key":"STS max-age more than one year:","label":"no (< 99999999)","value":"no (< 9
           {"typ":"check","line":"420","key":"STS max-age < certificate's validity:","label":"no (1531304486 + 31536000 >
         """
+"""
         # HSTS is only sensible on the "final" site, so redirects we can ignore.
         if all([security_value(report, "hsts_sts") == "yes",
                 security_value(report, "hsts_location") == "yes",
@@ -803,11 +821,6 @@ def test_cve_2016_9244(url, port):
 
 @timeout(10)
 def cert_chain_is_complete(url, port):
-    """
-    :param url:
-    :param port:
-    :return:
-    """
 
     openssl = settings.TOOLS['openssl']['executable'][platform.system()]
 
@@ -916,3 +929,4 @@ def test_determine_grade():
     testcase('A5')
     testcase('A6')
     testcase('A7')
+    """

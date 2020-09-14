@@ -36,31 +36,31 @@ from websecmap.organizations.models import Coordinate, Organization, Organizatio
 from websecmap.scanners.scanner.http import resolves
 
 log = logging.getLogger(__package__)
-DOWNLOAD_DIRECTORY = settings.TOOLS['organizations']['import_data_dir']
+DOWNLOAD_DIRECTORY = settings.TOOLS["organizations"]["import_data_dir"]
 SKIP_GEO = False
 
 
 def get_data(dataset, download_function):
 
     # support downloads:
-    if dataset['url']:
+    if dataset["url"]:
 
-        filename = url_to_filename(dataset['url'])
+        filename = url_to_filename(dataset["url"])
         log.debug("Data will be stored in: %s" % filename)
 
         if is_cached(filename):
-            log.debug('Getting cached file for: %s' % dataset['url'])
+            log.debug("Getting cached file for: %s" % dataset["url"])
             return filename
 
-        download_function(dataset['url'], filename_to_save=filename)
+        download_function(dataset["url"], filename_to_save=filename)
 
-        log.debug('Filename with data: %s' % filename)
+        log.debug("Filename with data: %s" % filename)
         return filename
 
     # support file uploads
-    if dataset['file']:
-        log.debug('Filename with data: %s' % dataset['file'].name)
-        return settings.MEDIA_ROOT + dataset['file'].name
+    if dataset["file"]:
+        log.debug("Filename with data: %s" % dataset["file"].name)
+        return settings.MEDIA_ROOT + dataset["file"].name
 
 
 def generic_dataset_import(dataset, parser_function, download_function):
@@ -81,7 +81,7 @@ def generic_dataset_import(dataset, parser_function, download_function):
 
 
 def read_data(filename):
-    with open(filename, 'r') as myfile:
+    with open(filename, "r") as myfile:
         data = myfile.read()
 
     return data
@@ -97,12 +97,12 @@ def url_to_filename(url: str):
     # keep the extension as some importers do magic with that
 
     m = hashlib.md5()
-    m.update(("%s" % url).encode('utf-8'))
+    m.update(("%s" % url).encode("utf-8"))
 
     # make sure the directory for processing files exists
     makedirs(DOWNLOAD_DIRECTORY, exist_ok=True)
 
-    return DOWNLOAD_DIRECTORY + m.hexdigest() + '.' + max(url.split('.'))
+    return DOWNLOAD_DIRECTORY + m.hexdigest() + "." + max(url.split("."))
 
 
 def check_environment():
@@ -110,19 +110,23 @@ def check_environment():
     # we may ignore, and geolocate_organizations afterwards the organizations that don't have a geolocation yet?
     # is there are more generic library?
     if not config.GOOGLE_MAPS_API_KEY:
-        raise ValueError('The google maps API key is not set, but is required for this feature. Set the '
-                         'API key in your configuration, '
-                         '<a target="_blank"  href="/admin/constance/config/">here</a>.')
+        raise ValueError(
+            "The google maps API key is not set, but is required for this feature. Set the "
+            "API key in your configuration, "
+            '<a target="_blank"  href="/admin/constance/config/">here</a>.'
+        )
 
     # See if the API is usable, it might be restricted (aka, wrong IP etc).
     try:
         gmaps = googlemaps.Client(key=config.GOOGLE_MAPS_API_KEY)
         gmaps.geocode("Rijksmuseum, Amsterdam, The Netherlands")
     except googlemaps.exceptions.ApiError as e:
-        raise ValueError("The google API returned an error with a test geolocation query. The error received was:"
-                         "%s. You can configure the google API "
-                         "<a target='_blank' href='https://console.cloud.google.com/google/maps-apis/"
-                         "apis/geocoding-backend.googleapis.com/credentials'>here</a>." % str(e))
+        raise ValueError(
+            "The google API returned an error with a test geolocation query. The error received was:"
+            "%s. You can configure the google API "
+            "<a target='_blank' href='https://console.cloud.google.com/google/maps-apis/"
+            "apis/geocoding-backend.googleapis.com/credentials'>here</a>." % str(e)
+        )
 
 
 def find_suggested_site(search_string):
@@ -151,7 +155,7 @@ def geolocate_organizations(organizations: List):
         #     continue
 
         # implies the lat/lng are actually correct and valid.
-        if organization['lat'] and organization['lng']:
+        if organization["lat"] and organization["lng"]:
             geocoded_addresses.append(organizations)
             continue
 
@@ -160,7 +164,7 @@ def geolocate_organizations(organizations: List):
         # https://console.cloud.google.com/google/maps-apis/apis/geocoding-backend.googleapis.com/credentials
         # todo: country code to apply restrictions?
         try:
-            geocode_result = gmaps.geocode("%s, %s" % (organization['address'], organization['geocoding_hint']))
+            geocode_result = gmaps.geocode("%s, %s" % (organization["address"], organization["geocoding_hint"]))
 
             # give a little slack, so the server is not overburdened.
             sleep(0.1)
@@ -170,11 +174,11 @@ def geolocate_organizations(organizations: List):
             # while it is.
             # single retry would be enough. Otherwise there are real issues. We don't want to retry a lot because
             # it costs money.
-            log.debug('Error received from API, trying again in 10 seconds.')
+            log.debug("Error received from API, trying again in 10 seconds.")
             log.debug(e)
             sleep(10)
 
-            geocode_result = gmaps.geocode("%s, %s" % (organization['address'], organization['geocoding_hint']))
+            geocode_result = gmaps.geocode("%s, %s" % (organization["address"], organization["geocoding_hint"]))
 
         """
         [{'address_components': [
@@ -198,14 +202,14 @@ def geolocate_organizations(organizations: List):
         """
         if geocode_result:
             # let's hope the first result is correct.
-            lat = geocode_result[0]['geometry']['location']['lat']
-            lng = geocode_result[0]['geometry']['location']['lng']
+            lat = geocode_result[0]["geometry"]["location"]["lat"]
+            lng = geocode_result[0]["geometry"]["location"]["lng"]
             # log.debug('Received coordinate for %s: lat: %s lng: %s' % (organization['name'], lat, lng))
 
-            print_progress_bar(index, len(organizations), ' geo')
+            print_progress_bar(index, len(organizations), " geo")
 
-            organization['lat'] = lat
-            organization['lng'] = lng
+            organization["lat"] = lat
+            organization["lng"] = lng
 
         geocoded_addresses.append(organization)
 
@@ -215,29 +219,29 @@ def geolocate_organizations(organizations: List):
 def store_data(organizations: List):
 
     for iteration, o in enumerate(organizations):
-        print_progress_bar(iteration, len(organizations), ' store')
+        print_progress_bar(iteration, len(organizations), " store")
 
         # determine if type exists, if not, create it. Don't waste a nice dataset if the layer is not available.
-        organization_type = save_organization_type(o['layer'])
+        organization_type = save_organization_type(o["layer"])
         failmap_organization = save_organization(o, organization_type)
 
         # attach optional coordinate if not exists.
-        if o['lat'] and o['lng']:
-            save_coordinate(failmap_organization, o['lat'], o['lng'], o['address'])
+        if o["lat"] and o["lng"]:
+            save_coordinate(failmap_organization, o["lat"], o["lng"], o["address"])
 
-        save_websites(failmap_organization, o['websites'])
+        save_websites(failmap_organization, o["websites"])
 
 
 def download_http_get_no_credentials(url, filename_to_save):
     response = requests.get(url, stream=True, timeout=(1200, 1200))
     response.raise_for_status()
 
-    with open(filename_to_save, 'wb') as f:
+    with open(filename_to_save, "wb") as f:
         filename = f.name
         i = 0
         for chunk in response.iter_content(chunk_size=1024):
             i += 1
-            print_progress_bar(1, 100, ' download')
+            print_progress_bar(1, 100, " download")
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
 
@@ -276,16 +280,16 @@ def save_coordinate(organization, lat, lng, address):
             # https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
             area=[lng, lat],
             edit_area={"type": "Point", "coordinates": [lng, lat]},
-            is_dead=False
+            is_dead=False,
         )
 
         if created:
             coordinate.created_on = datetime.now(pytz.utc)
             coordinate.creation_metadata = address
-            coordinate.save(update_fields=['created_on', 'creation_metadata'])
+            coordinate.save(update_fields=["created_on", "creation_metadata"])
 
     except Coordinate.MultipleObjectsReturned:
-        log.debug('Coordinate is multiple times in the database. Unclear which one to fix.')
+        log.debug("Coordinate is multiple times in the database. Unclear which one to fix.")
 
         # should we reduce the amount of coordinates?
 
@@ -302,25 +306,29 @@ def save_organization(o, organization_type):
     try:
         failmap_organization, created = Organization.objects.all().get_or_create(
             is_dead=False,
-            name=o['name'],
+            name=o["name"],
             type=organization_type,
-            country=o['country'],
+            country=o["country"],
         )
     except Organization.MultipleObjectsReturned:
         created = False
-        log.debug('Organization %s is multiple times in the database.' % o['name'])
-        failmap_organization = Organization.objects.all().filter(
-            is_dead=False,
-            name=o['name'],
-            type=organization_type,
-            country=o['country'],
-        ).first()
+        log.debug("Organization %s is multiple times in the database." % o["name"])
+        failmap_organization = (
+            Organization.objects.all()
+            .filter(
+                is_dead=False,
+                name=o["name"],
+                type=organization_type,
+                country=o["country"],
+            )
+            .first()
+        )
 
     # a new organization does not have the created_on fields set. These have to be set.
     if created:
-        failmap_organization.internal_notes = o['dataset']
+        failmap_organization.internal_notes = o["dataset"]
         failmap_organization.created_on = datetime.now(pytz.utc)
-        failmap_organization.save(update_fields=['created_on'])
+        failmap_organization.save(update_fields=["created_on"])
 
     return failmap_organization
 
@@ -329,7 +337,7 @@ def save_organization_type(name):
     try:
         organization_type, created = OrganizationType.objects.all().get_or_create(name=name)
     except OrganizationType.MultipleObjectsReturned:
-        log.debug('Layer %s is multiple times in the database.' % name)
+        log.debug("Layer %s is multiple times in the database." % name)
         organization_type = OrganizationType.objects.all().filter(name=name).first()
 
     return organization_type
@@ -348,7 +356,7 @@ def save_url(website, failmap_organization):
         )
     except Url.MultipleObjectsReturned:
         created = False
-        log.debug('Url %s is multiple times in the database.' % website)
+        log.debug("Url %s is multiple times in the database." % website)
         url = Url.objects.all().filter(url=website, is_dead=False).first()
 
     if created:
@@ -364,4 +372,4 @@ def save_url(website, failmap_organization):
 def debug_organizations(organizations):
     log.debug("This is the current content of all found organizations (%s): " % len(organizations))
     for o in organizations:
-        log.debug('%s, %s, %s, %s, %s' % (o['name'], o['address'], o['lat'], o['lng'], o['websites']))
+        log.debug("%s, %s, %s, %s, %s" % (o["name"], o["address"], o["lat"], o["lng"], o["websites"]))

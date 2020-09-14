@@ -6,17 +6,21 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0020_auto_20180824_1558'),
+        ("map", "0020_auto_20180824_1558"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='organizationrating',
-            options={'get_latest_by': 'when', 'managed': True, 'verbose_name': 'Organization Rating',
-                     'verbose_name_plural': 'Organization Ratings'},
+            name="organizationrating",
+            options={
+                "get_latest_by": "when",
+                "managed": True,
+                "verbose_name": "Organization Rating",
+                "verbose_name_plural": "Organization Ratings",
+            },
         ),
         migrations.AlterModelOptions(
-            name='urlrating',
-            options={'managed': True, 'verbose_name': 'Url Rating', 'verbose_name_plural': 'Url Ratings'},
+            name="urlrating",
+            options={"managed": True, "verbose_name": "Url Rating", "verbose_name_plural": "Url Ratings"},
         ),
     ]

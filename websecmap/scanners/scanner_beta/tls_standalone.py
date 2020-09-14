@@ -120,22 +120,42 @@ What we should have used: https://www.owasp.org/index.php/O-Saft ... nah
 """
 
 
-sslscan = settings.TOOLS['sslscan']['executable'][platform.system()]
-output = settings.TOOLS['sslscan']['report_output_dir']
+sslscan = settings.TOOLS["sslscan"]["executable"][platform.system()]
+output = settings.TOOLS["sslscan"]["report_output_dir"]
 
-anonymous_ciphers = ['ADH-AES256-SHA', 'ADH-AES128-SHA', 'ADH-RC4-MD5', 'ADH-DES-CBC3-SHA',
-                     'ADH-DES-CBC-SHA', 'EXP-ADH-DES-CBC-SHA', 'EXP-ADH-RC4-MD5', ]
+anonymous_ciphers = [
+    "ADH-AES256-SHA",
+    "ADH-AES128-SHA",
+    "ADH-RC4-MD5",
+    "ADH-DES-CBC3-SHA",
+    "ADH-DES-CBC-SHA",
+    "EXP-ADH-DES-CBC-SHA",
+    "EXP-ADH-RC4-MD5",
+]
 
-anon_ciphers = ['0xc016', '0xc017', '0xc018', '0xc019']
-weak_ciphers = ['0xa', '0x7', '0xa', '0xc012', '0x16', '0xc012']  # low bits.
-insecure_ciphers = ['0x4', '0x5', '0xc011', '0x9', '0x15', '0x64', '0x10080', '0x30080', '0x700c0',
-                    '0x60040', '0x20080', '0x40080']
+anon_ciphers = ["0xc016", "0xc017", "0xc018", "0xc019"]
+weak_ciphers = ["0xa", "0x7", "0xa", "0xc012", "0x16", "0xc012"]  # low bits.
+insecure_ciphers = [
+    "0x4",
+    "0x5",
+    "0xc011",
+    "0x9",
+    "0x15",
+    "0x64",
+    "0x10080",
+    "0x30080",
+    "0x700c0",
+    "0x60040",
+    "0x20080",
+    "0x40080",
+]
 
 
 # todo: options, host zetten. Anders SSLScan, dat valt op.
 
+
 def scan_url(url):
-    endpoints = Endpoint.objects.all().filter(url=url, protocol='https')
+    endpoints = Endpoint.objects.all().filter(url=url, protocol="https")
     for endpoint in endpoints:
         report = scan_endpoint(endpoint)
         rating, trust_rating = determine_grade(report, endpoint.url.url)
@@ -152,13 +172,13 @@ def scan_real_url(url, port=443):
     """
     url_and_port = "%s:%s" % (url, port)
     now = str(datetime.now(pytz.utc).strftime("_%Y%m%d_%H%M%S_%f"))
-    filename = str(re.sub(r'[^a-zA-Z0-9_]', '', url_and_port + now)) + '.xml'
+    filename = str(re.sub(r"[^a-zA-Z0-9_]", "", url_and_port + now)) + ".xml"
     out = output + filename
-    subprocess.call([sslscan, '--show-certificate', '--xml=' + out, url_and_port])
+    subprocess.call([sslscan, "--show-certificate", "--xml=" + out, url_and_port])
 
     # add some things to the XML file about external tools.
     # hacky hacky code :)
-    file = open(out, 'r')
+    file = open(out, "r")
     lines = file.readlines()
     lines = lines[:-2]
     try:
@@ -181,8 +201,8 @@ def scan_real_url(url, port=443):
     file.close()
 
     # overwrite it with the new "xml".
-    with open(out, 'w') as f:
-        f.write(''.join(lines))
+    with open(out, "w") as f:
+        f.write("".join(lines))
 
     return out
 
@@ -194,35 +214,35 @@ def scan_endpoint(endpoint, IPv6=False):
 def test_determine_grade():
     # sslscan --show-certificate --xml=A7.xml support.url:443 1>/dev/null &
 
-    testcase('sha1_selfsigned_expired')
-    testcase('Fanon_cypers')
-    testcase('F_notrust_signature_ssl2_poodle_DH_rc4_chain')
-    testcase('F_padding_oracle_C_pooldle_weakdh_nofs')
-    testcase('F_insecure_ciphers_C_64bit_block_cipher_B_rc4_B_chain')
-    testcase('F_ssl2_C_poodle_B_weakdh_C_no12_B_RC4')
-    testcase('F_ssl2_F_ciphers_F_FREAK_B_SSL3_etc')
-    testcase('F_ticketbleed_paddingoracle')
-    testcase('C_RC4_modern_C_64_bit_block_nofs')
-    testcase('B_weak_dh')
-    testcase('B_weakdh_B_RC4_older_protocols')
-    testcase('B_weakdh_NoFS')
-    testcase('T_notInTrustStore_lolchain')  # should be A.
-    testcase('A1')
-    testcase('A2')
-    testcase('A3')
-    testcase('A4')
-    testcase('A5')
-    testcase('A6')
-    testcase('A7')
+    testcase("sha1_selfsigned_expired")
+    testcase("Fanon_cypers")
+    testcase("F_notrust_signature_ssl2_poodle_DH_rc4_chain")
+    testcase("F_padding_oracle_C_pooldle_weakdh_nofs")
+    testcase("F_insecure_ciphers_C_64bit_block_cipher_B_rc4_B_chain")
+    testcase("F_ssl2_C_poodle_B_weakdh_C_no12_B_RC4")
+    testcase("F_ssl2_F_ciphers_F_FREAK_B_SSL3_etc")
+    testcase("F_ticketbleed_paddingoracle")
+    testcase("C_RC4_modern_C_64_bit_block_nofs")
+    testcase("B_weak_dh")
+    testcase("B_weakdh_B_RC4_older_protocols")
+    testcase("B_weakdh_NoFS")
+    testcase("T_notInTrustStore_lolchain")  # should be A.
+    testcase("A1")
+    testcase("A2")
+    testcase("A3")
+    testcase("A4")
+    testcase("A5")
+    testcase("A6")
+    testcase("A7")
 
 
-def testcase(filename, domain='example.com'):
+def testcase(filename, domain="example.com"):
     log.info(filename)
-    rating, trust_rating = determine_grade(output + 'testcases/' + filename + '.xml', domain)
+    rating, trust_rating = determine_grade(output + "testcases/" + filename + ".xml", domain)
     debug_grade(rating, trust_rating)
 
 
-def test_real(url='faalkaart.nl', port=443):
+def test_real(url="faalkaart.nl", port=443):
     report = scan_real_url(url, port)
     rating, trust_rating = determine_grade(report, url)
     debug_grade(rating, trust_rating)
@@ -247,11 +267,11 @@ def determine_grade(report, url):
     trust_rating = []
 
     if not url:
-        log.error('No url given: %s' % url)
+        log.error("No url given: %s" % url)
         return
 
     if not report:
-        log.error('No report given: %s' % report)
+        log.error("No report given: %s" % report)
         return
 
     raise NotImplementedError
@@ -261,7 +281,7 @@ def determine_grade(report, url):
         # removed untangle, as this was the only file using it, and this is here for legacy purposes.
         obj = {}
     except Exception:
-        log.error('Something wrong with report file: %s' % report)
+        log.error("Something wrong with report file: %s" % report)
         return
 
     # Used the --show-certificate option
@@ -273,56 +293,60 @@ def determine_grade(report, url):
         # ratings.append(['B', "Chain of trust missing."]) -> you never see the full list.
         certificate = obj.document.ssltest.certificate
 
-    if hasattr(certificate, "self_signed") and certificate.self_signed.cdata == 'true':
-        trust_rating.append(['False', "Certificate is self signed."])
+    if hasattr(certificate, "self_signed") and certificate.self_signed.cdata == "true":
+        trust_rating.append(["False", "Certificate is self signed."])
 
-    if certificate.expired.cdata == 'true':
-        trust_rating.append(['False', "Certificate expired."])
+    if certificate.expired.cdata == "true":
+        trust_rating.append(["False", "Certificate expired."])
 
-    if 'sha1' in certificate.signature_algorithm.cdata:
-        trust_rating.append(['False', "SHA1 signature Algorithm is obsolete."])
+    if "sha1" in certificate.signature_algorithm.cdata:
+        trust_rating.append(["False", "SHA1 signature Algorithm is obsolete."])
 
     # check if there is a mismatch, including all wildcard options
     testurls = []
     testurls.append(url)
     myurl = url
-    while myurl.count('.') > 1:
-        h, s, t, = myurl.partition('.')
+    while myurl.count(".") > 1:
+        (
+            h,
+            s,
+            t,
+        ) = myurl.partition(".")
         myurl = t
-        testurls.append('*.' + t)
+        testurls.append("*." + t)
 
     altnames = certificate.altnames.cdata if hasattr(certificate, "altnames") else ""
     name_or_wildcard_found = False
 
     for testurl in testurls:
         # can be a wildcard certificate with one of the valid urls in altnames.
-        if url == certificate.subject.cdata or ':' + testurl in altnames:
+        if url == certificate.subject.cdata or ":" + testurl in altnames:
             name_or_wildcard_found = True
 
     if not name_or_wildcard_found:
-        trust_rating.append(['False', "Certificate name mismatch."])
+        trust_rating.append(["False", "Certificate name mismatch."])
 
     # Heartbleed
     for heartbleed in obj.document.ssltest.heartbleed:
-        if heartbleed['vulnerable'] == '1':
-            ratings.append(['F', "Vulnerable to heartbleed on %s." % heartbleed['sslversion']])
+        if heartbleed["vulnerable"] == "1":
+            ratings.append(["F", "Vulnerable to heartbleed on %s." % heartbleed["sslversion"]])
 
     # Insecure renegotiation
-    if obj.document.ssltest.renegotiation['supported'] == '1' and \
-            obj.document.ssltest.renegotiation['secure'] == '0':
-        ratings.append(['F', "Server does not support secure session renegotiation, "
-                             "a Man In The Middle attack is possible."])
+    if obj.document.ssltest.renegotiation["supported"] == "1" and obj.document.ssltest.renegotiation["secure"] == "0":
+        ratings.append(
+            ["F", "Server does not support secure session renegotiation, " "a Man In The Middle attack is possible."]
+        )
 
     # check for sslv2.
     for cipher in obj.document.ssltest.cipher:
-        if cipher['sslversion'] == 'SSLv2':
-            ratings.append(['F', "Insecure/Obsolete protocol supported (SSLv2)."])
+        if cipher["sslversion"] == "SSLv2":
+            ratings.append(["F", "Insecure/Obsolete protocol supported (SSLv2)."])
             break
 
     # check for sslv3, poodle (this doesn't work that way)
     for cipher in obj.document.ssltest.cipher:
-        if cipher['sslversion'] == 'SSLv3':
-            ratings.append(['B', "Insecure/Obsolete protocol supported (SSLv3)."])
+        if cipher["sslversion"] == "SSLv3":
+            ratings.append(["B", "Insecure/Obsolete protocol supported (SSLv3)."])
             break
 
     # poodle = sslv3 and not using 0x5 cipher.
@@ -331,71 +355,71 @@ def determine_grade(report, url):
     # todo: rewrite to more readable code without flag
     supports_tlsv12 = False
     for cipher in reversed(obj.document.ssltest.cipher):
-        if cipher['sslversion'] == 'TLSv1.2':
+        if cipher["sslversion"] == "TLSv1.2":
             supports_tlsv12 = True
             break
 
     if not supports_tlsv12:
-        ratings.append(['C', "Only older protocols are supported, but not the safest: TLSv1.2."])
+        ratings.append(["C", "Only older protocols are supported, but not the safest: TLSv1.2."])
 
     # Check for CRIME / TLS compression (BREACH?)
     # https://en.wikipedia.org/wiki/CRIME
     # todo: rating still unclear for compression enabled
-    if obj.document.ssltest.compression['supported'] == '1':
-        ratings.append(['C', "Vulnerable to CRIME attack, due to compression used."])
+    if obj.document.ssltest.compression["supported"] == "1":
+        ratings.append(["C", "Vulnerable to CRIME attack, due to compression used."])
 
     # cipher checks
     ciphers = obj.document.ssltest.cipher
 
     # logjam (weak DH parameters), https://weakdh.org/ Everythiung under 1024 -preferably under 2048
     for cipher in ciphers:
-        if cipher['dhebits'] and int(cipher['dhebits']) < 1024:
-            ratings.append(['F', "Insecure Diffie-Hellman parameters used."])
+        if cipher["dhebits"] and int(cipher["dhebits"]) < 1024:
+            ratings.append(["F", "Insecure Diffie-Hellman parameters used."])
             break
 
     # Weak diffie helman, now seen as 1024, might be > 768 < 2048?
     for cipher in ciphers:
-        if cipher['dhebits'] and int(cipher['dhebits']) == 1024:
-            ratings.append(['B', "Weak Diffie-Hellman parameters used."])
+        if cipher["dhebits"] and int(cipher["dhebits"]) == 1024:
+            ratings.append(["B", "Weak Diffie-Hellman parameters used."])
             break
 
     # RC4 for newer protocols (1.1, 1.2)
     for cipher in ciphers:
-        if "RC4" in cipher['cipher'] and cipher['sslversion'] in ['TLSv1.2', 'TLSv1.1']:
-            ratings.append(['C', "RC4 cipher accepted in modern protocols."])
+        if "RC4" in cipher["cipher"] and cipher["sslversion"] in ["TLSv1.2", "TLSv1.1"]:
+            ratings.append(["C", "RC4 cipher accepted in modern protocols."])
             break
 
     # RC4 for older protocls (2, 3, 1.0)
     for cipher in ciphers:
-        if "RC4" in cipher['cipher'] and cipher['sslversion'] in ['TLSv1.0', 'SSLv3', 'SSLv2']:
-            ratings.append(['B', "RC4 cipher accepted in older protocols."])
+        if "RC4" in cipher["cipher"] and cipher["sslversion"] in ["TLSv1.0", "SSLv3", "SSLv2"]:
+            ratings.append(["B", "RC4 cipher accepted in older protocols."])
             break
 
     # https://github.com/rbsec/sslscan/blob/master/sslscan.c
     # Null ciphers (insecure)
     for cipher in ciphers:
-        if "NULL" == cipher['cipher']:
-            ratings.append(['F', "NULL Cipher supported."])
+        if "NULL" == cipher["cipher"]:
+            ratings.append(["F", "NULL Cipher supported."])
             break
 
     # AnonymousDH or AnonymousECDH
     for cipher in ciphers:
-        if "ADH" in cipher['cipher'] or "AECDH" in cipher['cipher']:
-            ratings.append(['F', "Anonymous (insecure) suites used."])
+        if "ADH" in cipher["cipher"] or "AECDH" in cipher["cipher"]:
+            ratings.append(["F", "Anonymous (insecure) suites used."])
             break
 
     # insecure ciphers (low bits)
     for cipher in ciphers:
-        if cipher['bits'] and int(cipher['bits']) < 56:
-            ratings.append(['F', "Insecure ciphers used (low number of bits)."])
+        if cipher["bits"] and int(cipher["bits"]) < 56:
+            ratings.append(["F", "Insecure ciphers used (low number of bits)."])
             break
 
     # FREAK attack (RSA EXPORT) ciphers. The default sslscan will not find ALL these ciphers(!)
     # Multiple times the EXPORT ciphers are not visible in SSL3, and TLS. Only in SSLv2 and only
     # a few versus a complete set.
     for cipher in ciphers:
-        if "EXP" in cipher['cipher'] or "EXPORT" in cipher['cipher']:
-            ratings.append(['F', "RSA Export ciphers present, might be vulnerable to FREAK."])
+        if "EXP" in cipher["cipher"] or "EXPORT" in cipher["cipher"]:
+            ratings.append(["F", "RSA Export ciphers present, might be vulnerable to FREAK."])
             break
 
     # weak ciphers (low bits)
@@ -407,32 +431,32 @@ def determine_grade(report, url):
 
     # other insecure ciphers.
     for cipher in ciphers:
-        if cipher['id'] in insecure_ciphers:
-            ratings.append(['F', "Insecure ciphers used (known weak id)."])
+        if cipher["id"] in insecure_ciphers:
+            ratings.append(["F", "Insecure ciphers used (known weak id)."])
             break
 
     # check for old 64 bit stuff:
-    low_bit_things = ['3DES', 'RC4', 'IDEA', 'RC2']
+    low_bit_things = ["3DES", "RC4", "IDEA", "RC2"]
     for cipher in ciphers:
-        if cipher['sslversion'] in ['TLSv1.2', 'TLSv1.1', 'TLSv1.0']:
+        if cipher["sslversion"] in ["TLSv1.2", "TLSv1.1", "TLSv1.0"]:
             for low_bit_thing in low_bit_things:
-                if low_bit_thing in cipher['cipher']:
+                if low_bit_thing in cipher["cipher"]:
                     ratings.append(
-                        ['C', 'Using old 64-bit block cipher(s) (3DES / DES / RC2 / IDEA) '
-                              'with modern protocols.'])
+                        ["C", "Using old 64-bit block cipher(s) (3DES / DES / RC2 / IDEA) " "with modern protocols."]
+                    )
                     break
 
     # Check for padding oracle vulnerability
     # <CVE-2016-2107>False</CVE-2016-2107>
     if hasattr(obj.document.ssltest, "CVE_2016_2107"):
-        if obj.document.ssltest.CVE_2016_2107.cdata == 'True':
-            ratings.append(['F', 'Vulnerable to CVE_2016-2107 (padding oracle).'])
+        if obj.document.ssltest.CVE_2016_2107.cdata == "True":
+            ratings.append(["F", "Vulnerable to CVE_2016-2107 (padding oracle)."])
 
     # Check for ticketbleed vulnerability
     # <CVE-2016_9244>False</CVE-2016_9244>
     if hasattr(obj.document.ssltest, "CVE_2016_9244"):
-        if obj.document.ssltest.CVE_2016_9244.cdata == 'True':
-            ratings.append(['F', 'Vulnerable to CVE_2016_9244 (ticketbleed).'])
+        if obj.document.ssltest.CVE_2016_9244.cdata == "True":
+            ratings.append(["F", "Vulnerable to CVE_2016_9244 (ticketbleed)."])
 
     # Check for POODLE (CVE-2014-3566)
     # SSLv3 + CBC ciphersuites
@@ -440,16 +464,14 @@ def determine_grade(report, url):
     # this is incorrect? Or has this to do with the discovered software / server?
     # windows is not vulnerable?
     for cipher in ciphers:
-        if cipher['sslversion'] in ['SSLv3'] and "CBC" in cipher['cipher']:
-            ratings.append(
-                ['C', 'Vulnerable to CVE_2014_3566 (POOODLE) on SSLv3. Remove CBC ciphers.'])
+        if cipher["sslversion"] in ["SSLv3"] and "CBC" in cipher["cipher"]:
+            ratings.append(["C", "Vulnerable to CVE_2014_3566 (POOODLE) on SSLv3. Remove CBC ciphers."])
             break
 
     # Poodle on TLS v1 (this is incorrect...) todo: other scan. Can have CBC, but specific thing?
     for cipher in ciphers:
-        if cipher['sslversion'] in ['TLSv1.0'] and "CBC" in cipher['cipher']:
-            ratings.append(
-                ['F', 'Vulnerable to CVE_2014_3566 (POOODLE) on TLS. Remove CBC ciphers.'])
+        if cipher["sslversion"] in ["TLSv1.0"] and "CBC" in cipher["cipher"]:
+            ratings.append(["F", "Vulnerable to CVE_2014_3566 (POOODLE) on TLS. Remove CBC ciphers."])
             break
     # the preferred cipher is relevant. If preferred cipher is weak... i mean...
 
@@ -458,50 +480,50 @@ def determine_grade(report, url):
     # however, we don't check on hpkp.
 
     if not ratings:
-        ratings.append(['A', "Looks good!"])
+        ratings.append(["A", "Looks good!"])
     # DES
 
     return ratings, trust_rating
 
 
 def debug_grade(ratings, trust_ratings):
-    lowest_rating = 'A'
+    lowest_rating = "A"
     trust = True
-    log.debug('-------------------------------------------------------------------')
-    log.debug('Trust')
+    log.debug("-------------------------------------------------------------------")
+    log.debug("Trust")
     for rating in trust_ratings:
         log.debug("  %s: %s" % (rating[0], rating[1]))
         trust = False
-    log.debug('')
-    log.debug('Trust:  %s' % trust)
-    log.debug('')
+    log.debug("")
+    log.debug("Trust:  %s" % trust)
+    log.debug("")
 
-    log.debug('Vulnerabilities')
+    log.debug("Vulnerabilities")
     for rating in ratings:
         log.debug("  %s: %s" % (rating[0], rating[1]))
         if rating[0] > lowest_rating:
             lowest_rating = rating[0]
-    log.debug('')
-    log.debug('Rating: %s' % lowest_rating)
-    log.debug('')
+    log.debug("")
+    log.debug("Rating: %s" % lowest_rating)
+    log.debug("")
 
 
 def store_grade(ratings, trust_ratings, endpoint):
-    lowest_rating = 'A'
+    lowest_rating = "A"
     trust = True
 
-    log.debug('Trust')
+    log.debug("Trust")
     for rating in trust_ratings:
         log.debug("%s: %s" % (rating[0], rating[1]))
         trust = False
 
-    log.debug('Vulnerabilities')
+    log.debug("Vulnerabilities")
     for rating in ratings:
         log.debug("%s: %s" % (rating[0], rating[1]))
         if rating[0] > lowest_rating:
             lowest_rating = rating[0]
 
-    log.debug('Conlcusion: rated %s with trust?: %s', (lowest_rating, trust))
+    log.debug("Conlcusion: rated %s with trust?: %s", (lowest_rating, trust))
 
     # store_endpoint_scan_result('ssl_tls', endpoint, grade, explanation)
 
@@ -513,11 +535,11 @@ def test_cve_2016_2107(url, port):
     # get the first line output.
 
     # writes to stderror by default.
-    process = subprocess.Popen(['go',
-                                'run',
-                                settings.TOOLS['TLS']['cve_2016_2107'],
-                                "%s:%s" % (url, port)],
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(
+        ["go", "run", settings.TOOLS["TLS"]["cve_2016_2107"], "%s:%s" % (url, port)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
     # get last word of first line. Can be true or false. Should only get one line.
     out, err = process.communicate()
     print(out)
@@ -532,11 +554,11 @@ def test_cve_2016_9244(url, port):
     # The script will timeout sometimes.
     # run GO package. go run main.go tweakers.net
     # get the first line output.
-    process = subprocess.Popen(['go',
-                                'run',
-                                settings.TOOLS['TLS']['cve_2016_9244'],
-                                "%s:%s" % (url, port)],
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(
+        ["go", "run", settings.TOOLS["TLS"]["cve_2016_9244"], "%s:%s" % (url, port)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
     out, err = process.communicate()
     # print(out)
     if "is vulnerable to Ticketbleed" in str(err) or "is vulnerable to Ticketbleed" in str(out):

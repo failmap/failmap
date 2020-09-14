@@ -8,20 +8,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0011_screenshot'),
+        ("scanners", "0011_screenshot"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tlsqualysscan',
-            name='qualys_message',
+            model_name="tlsqualysscan",
+            name="qualys_message",
             field=models.CharField(
-                blank=True, help_text='Whatever Qualys said about the endpoint', max_length=255, null=True),
+                blank=True, help_text="Whatever Qualys said about the endpoint", max_length=255, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='endpoint',
-            name='is_dead',
+            model_name="endpoint",
+            name="is_dead",
             field=models.IntegerField(
-                default=False, help_text='If the port is closed, or the endpoint is otherwisenot reachable over the specified protocol, then markit as dead. A scanner for this port/protocol can alsodeclare it dead. This port is closed on this protocol.'),
+                default=False,
+                help_text="If the port is closed, or the endpoint is otherwisenot reachable over the specified protocol, then markit as dead. A scanner for this port/protocol can alsodeclare it dead. This port is closed on this protocol.",
+            ),
         ),
     ]

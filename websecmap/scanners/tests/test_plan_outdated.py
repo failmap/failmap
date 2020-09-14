@@ -6,8 +6,7 @@ from websecmap.map.models import Configuration, OrganizationReport
 from websecmap.organizations.models import OrganizationType
 from websecmap.scanners.models import PlannedScan
 from websecmap.scanners.plannedscan import plan_outdated_scans
-from websecmap.scanners.tests.test_plannedscan import (create_organization, create_url,
-                                                       link_url_to_organization)
+from websecmap.scanners.tests.test_plannedscan import create_organization, create_url, link_url_to_organization
 
 
 def test_plan_outdated_scans(db):
@@ -44,22 +43,31 @@ def test_plan_outdated_scans(db):
                     "endpoints": [
                         {
                             "ratings": [
-                                {"type": "http_security_header_strict_transport_security",
-                                 "since": "2010-08-05T18:57:53.873815+00:00",
-                                 "last_scan": "2010-08-07T14:34:56.917953+00:00",
-                                 "scan_type": "http_security_header_strict_transport_security"},
-                                {"type": "http_security_header_x_frame_options",
-                                 "since": "2010-08-05T18:57:53.856580+00:00",
-                                 "last_scan": "2010-08-07T14:34:56.898717+00:00",
-                                 "scan_type": "http_security_header_x_frame_options"},
-                                {"type": "http_security_header_x_content_type_options",
-                                 "since": "2010-08-05T18:57:53.864561+00:00",
-                                 "last_scan": "2010-08-07T14:34:56.907224+00:00",
-                                 "scan_type": "http_security_header_x_content_type_options"},
-                                {"type": "http_security_header_x_xss_protection",
-                                 "since": "2020-08-05T18:57:53.845210+00:00",
-                                 "last_scan": "2020-08-07T14:34:56.881692+00:00",
-                                 "scan_type": "http_security_header_x_xss_protection"}],
+                                {
+                                    "type": "http_security_header_strict_transport_security",
+                                    "since": "2010-08-05T18:57:53.873815+00:00",
+                                    "last_scan": "2010-08-07T14:34:56.917953+00:00",
+                                    "scan_type": "http_security_header_strict_transport_security",
+                                },
+                                {
+                                    "type": "http_security_header_x_frame_options",
+                                    "since": "2010-08-05T18:57:53.856580+00:00",
+                                    "last_scan": "2010-08-07T14:34:56.898717+00:00",
+                                    "scan_type": "http_security_header_x_frame_options",
+                                },
+                                {
+                                    "type": "http_security_header_x_content_type_options",
+                                    "since": "2010-08-05T18:57:53.864561+00:00",
+                                    "last_scan": "2010-08-07T14:34:56.907224+00:00",
+                                    "scan_type": "http_security_header_x_content_type_options",
+                                },
+                                {
+                                    "type": "http_security_header_x_xss_protection",
+                                    "since": "2020-08-05T18:57:53.845210+00:00",
+                                    "last_scan": "2020-08-07T14:34:56.881692+00:00",
+                                    "scan_type": "http_security_header_x_xss_protection",
+                                },
+                            ],
                         }
                     ],
                 }
@@ -72,12 +80,14 @@ def test_plan_outdated_scans(db):
     r.at_when = datetime.now(pytz.utc) - timedelta(days=100)
     r.save()
 
-    assert len(r.calculation['organization']) == 1
+    assert len(r.calculation["organization"]) == 1
 
     assert PlannedScan.objects.all().count() == 0
 
-    published_scan_types = ['http_security_header_strict_transport_security',
-                            'http_security_header_x_content_type_options']
+    published_scan_types = [
+        "http_security_header_strict_transport_security",
+        "http_security_header_x_content_type_options",
+    ]
     plan_outdated_scans(published_scan_types)
 
     """

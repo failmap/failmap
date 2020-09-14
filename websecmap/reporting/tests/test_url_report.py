@@ -23,15 +23,22 @@ def test_url_report(db):
     # day_8 = datetime(day=9, month=1, year=2000, tzinfo=pytz.utc)
     # Url test.nl could not be found anymore
     # day_9 = datetime(day=10, month=1, year=2000, tzinfo=pytz.utc)
-    url, created = Url.objects.all().get_or_create(url='test.nl', created_on=day_0, not_resolvable=False)
+    url, created = Url.objects.all().get_or_create(url="test.nl", created_on=day_0, not_resolvable=False)
 
     # a standard HTTPS endpoint
     first_endpoint, created = Endpoint.objects.all().get_or_create(
-        url=url, protocol='https', port='443', ip_version=4, discovered_on=day_1, is_dead=False)
+        url=url, protocol="https", port="443", ip_version=4, discovered_on=day_1, is_dead=False
+    )
 
     perfect_scan, created = EndpointGenericScan.objects.all().get_or_create(
-        endpoint=first_endpoint, type='tls_qualys_encryption_quality', rating='A+', rating_determined_on=day_1,
-        last_scan_moment=day_1, comply_or_explain_is_explained=False, is_the_latest_scan=True)
+        endpoint=first_endpoint,
+        type="tls_qualys_encryption_quality",
+        rating="A+",
+        rating_determined_on=day_1,
+        last_scan_moment=day_1,
+        comply_or_explain_is_explained=False,
+        is_the_latest_scan=True,
+    )
 
     UrlReport.objects.all().delete()
     create_url_report(create_timeline(url), url)
@@ -53,14 +60,25 @@ def test_url_report(db):
     perfect_scan.save()
 
     error_scan, created = EndpointGenericScan.objects.all().get_or_create(
-        endpoint=first_endpoint, type='tls_qualys_encryption_quality', rating='F', rating_determined_on=day_2,
-        last_scan_moment=day_2, comply_or_explain_is_explained=False, is_the_latest_scan=True)
+        endpoint=first_endpoint,
+        type="tls_qualys_encryption_quality",
+        rating="F",
+        rating_determined_on=day_2,
+        last_scan_moment=day_2,
+        comply_or_explain_is_explained=False,
+        is_the_latest_scan=True,
+    )
 
     # a not testable scan fron internet.nl is also stored:
     error_scan, created = EndpointGenericScan.objects.all().get_or_create(
-        endpoint=first_endpoint, type='internet_nl_mail_starttls_tls_available',
-        rating='required~not_testable', rating_determined_on=day_2,
-        last_scan_moment=day_2, comply_or_explain_is_explained=False, is_the_latest_scan=True)
+        endpoint=first_endpoint,
+        type="internet_nl_mail_starttls_tls_available",
+        rating="required~not_testable",
+        rating_determined_on=day_2,
+        last_scan_moment=day_2,
+        comply_or_explain_is_explained=False,
+        is_the_latest_scan=True,
+    )
 
     # We always rebuild the entire set of reports, as it's crazy fast.
     UrlReport.objects.all().delete()
@@ -69,10 +87,10 @@ def test_url_report(db):
     count = UrlReport.objects.all().count()
     assert count == 2
 
-    report = UrlReport.objects.all().order_by('pk').last()
+    report = UrlReport.objects.all().order_by("pk").last()
     assert report.total_endpoints == 1
     # make sure that the endpoints are actually there.
-    assert len(report.calculation['endpoints']) == 1
+    assert len(report.calculation["endpoints"]) == 1
     assert report.ok == 0
     assert report.high == 1
     assert report.not_testable == 1
@@ -91,12 +109,12 @@ def test_url_report(db):
     count = UrlReport.objects.all().count()
     assert count == 3
 
-    report = UrlReport.objects.all().order_by('pk').last()
+    report = UrlReport.objects.all().order_by("pk").last()
     assert report.total_endpoints == 0
-    assert report.calculation['ratings'] == []
-    assert report.calculation['endpoints'] == []
+    assert report.calculation["ratings"] == []
+    assert report.calculation["endpoints"] == []
     # Check that some statistics have been generated
-    assert report.calculation['high'] == 0
+    assert report.calculation["high"] == 0
     assert report.high == 0
     assert report.ok == 0
 
@@ -107,17 +125,24 @@ def test_aggegrate_error_in_report(db):
     some_later_time = datetime(day=2, month=1, year=2000, tzinfo=pytz.utc)
     even_later = datetime(day=3, month=1, year=2000, tzinfo=pytz.utc)
 
-    url, created = Url.objects.all().get_or_create(url='test.nl', created_on=some_time, not_resolvable=False)
+    url, created = Url.objects.all().get_or_create(url="test.nl", created_on=some_time, not_resolvable=False)
     first_endpoint, created = Endpoint.objects.all().get_or_create(
-        url=url, protocol='https', port='443', ip_version=4, discovered_on=some_later_time, is_dead=False)
+        url=url, protocol="https", port="443", ip_version=4, discovered_on=some_later_time, is_dead=False
+    )
 
     # any internet.nl scan is enough
     EndpointGenericScan.objects.all().get_or_create(
-        endpoint=first_endpoint, type='internet_nl_web_appsecpriv_csp', rating='error', rating_determined_on=even_later,
-        last_scan_moment=even_later, comply_or_explain_is_explained=False, is_the_latest_scan=True)
+        endpoint=first_endpoint,
+        type="internet_nl_web_appsecpriv_csp",
+        rating="error",
+        rating_determined_on=even_later,
+        last_scan_moment=even_later,
+        comply_or_explain_is_explained=False,
+        is_the_latest_scan=True,
+    )
 
     create_url_report(create_timeline(url), url)
-    report = UrlReport.objects.all().order_by('pk').last()
+    report = UrlReport.objects.all().order_by("pk").last()
 
     assert report.endpoint_error_in_test == 1
     # This is 0 because this is not an endpoint level error, but an url_level_error

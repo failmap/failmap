@@ -9,18 +9,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0014_state'),
+        ("scanners", "0014_state"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='screenshot',
-            name='url',
+            model_name="screenshot",
+            name="url",
         ),
         migrations.AddField(
-            model_name='screenshot',
-            name='endpoint',
+            model_name="screenshot",
+            name="endpoint",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='scanners.Endpoint'),
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="scanners.Endpoint"
+            ),
         ),
     ]

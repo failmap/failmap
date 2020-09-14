@@ -6,18 +6,21 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0015_configuration'),
+        ("map", "0015_configuration"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='configuration',
-            options={'ordering': ('display_order',), 'verbose_name': 'configuration',
-                     'verbose_name_plural': 'configurations'},
+            name="configuration",
+            options={
+                "ordering": ("display_order",),
+                "verbose_name": "configuration",
+                "verbose_name_plural": "configurations",
+            },
         ),
         migrations.RenameField(
-            model_name='configuration',
-            old_name='is_displayed_as_default',
-            new_name='is_default_for_this_country',
+            model_name="configuration",
+            old_name="is_displayed_as_default",
+            new_name="is_default_for_this_country",
         ),
     ]

@@ -25,13 +25,12 @@ def test_internet_nl_standard_calculation(db):
         "high": 0,
         "medium": 0,
         "low": 0,
-
         # If all are 0, then it's ok.
         "ok": 1,
         "not_testable": False,
         "not_applicable": False,
         "error_in_test": False,
-        'test_result': 0,
+        "test_result": 0,
     }
 
     value = standard_calculation_for_internet_nl(scan, '{"translation": "test"}', 0, 0, 0, False, False, False)
@@ -39,7 +38,7 @@ def test_internet_nl_standard_calculation(db):
     assert value == {
         "type": "test",
         "translation": "test",
-        "explanation": '',
+        "explanation": "",
         "technical_details": 0,
         "since": now.isoformat(),
         "last_scan": now.isoformat(),
@@ -50,5 +49,5 @@ def test_internet_nl_standard_calculation(db):
         "not_testable": False,
         "not_applicable": False,
         "error_in_test": False,
-        'test_result': 0,
+        "test_result": 0,
     }

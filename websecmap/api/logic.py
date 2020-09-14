@@ -25,24 +25,27 @@ log = logging.getLogger(__package__)
 def get_map_configuration():
     # Using this, it's possible to get the right params for 2ndlevel domains
 
-    configs = Configuration.objects.all().filter(
-        is_displayed=True,
-        is_the_default_option=True
-    ).order_by('display_order')
+    configs = (
+        Configuration.objects.all().filter(is_displayed=True, is_the_default_option=True).order_by("display_order")
+    )
 
     data = []
     for map_config in configs:
-        data.append({'country': map_config.country.code, 'layer': map_config.organization_type.name})
+        data.append({"country": map_config.country.code, "layer": map_config.organization_type.name})
 
     return data
 
 
 def get_2ndlevel_domains(country, layer):
-    urls = Url.objects.all().filter(
-        Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
-        organization__country=get_country(country),
-        organization__type=get_organization_type(layer)
-    ).values_list('url', flat=True)
+    urls = (
+        Url.objects.all()
+        .filter(
+            Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+            organization__country=get_country(country),
+            organization__type=get_organization_type(layer),
+        )
+        .values_list("url", flat=True)
+    )
 
     urls = list(set(urls))
 
@@ -51,41 +54,49 @@ def get_2ndlevel_domains(country, layer):
 
 def get_uploads(user):
     # last 500 should be enough...
-    uploads = SIDNUpload.objects.all().filter(by_user=user).defer('posted_data')[0:500]
+    uploads = SIDNUpload.objects.all().filter(by_user=user).defer("posted_data")[0:500]
 
     serialable_uploads = []
     for upload in uploads:
-        serialable_uploads.append({
-            'when': upload.at_when.isoformat(),
-            'state': upload.state,
-            'amount_of_newly_added_domains': upload.amount_of_newly_added_domains,
-            'newly_added_domains': upload.newly_added_domains,
-        })
+        serialable_uploads.append(
+            {
+                "when": upload.at_when.isoformat(),
+                "state": upload.state,
+                "amount_of_newly_added_domains": upload.amount_of_newly_added_domains,
+                "newly_added_domains": upload.newly_added_domains,
+            }
+        )
 
     return list(serialable_uploads)
 
 
 def get_uploads_with_results(user):
-    uploads = SIDNUpload.objects.all().filter(by_user=user, amount_of_newly_added_domains__gt=0
-                                              ).defer('posted_data').order_by('-at_when')
+    uploads = (
+        SIDNUpload.objects.all()
+        .filter(by_user=user, amount_of_newly_added_domains__gt=0)
+        .defer("posted_data")
+        .order_by("-at_when")
+    )
 
     serialable_uploads = []
     for upload in uploads:
-        serialable_uploads.append({
-            'when': upload.at_when.isoformat(),
-            'state': upload.state,
-            'amount_of_newly_added_domains': upload.amount_of_newly_added_domains,
-            'newly_added_domains': upload.newly_added_domains,
-        })
+        serialable_uploads.append(
+            {
+                "when": upload.at_when.isoformat(),
+                "state": upload.state,
+                "amount_of_newly_added_domains": upload.amount_of_newly_added_domains,
+                "newly_added_domains": upload.newly_added_domains,
+            }
+        )
 
     return list(serialable_uploads)
 
 
 def remove_last_dot(my_text):
-    return my_text[0:len(my_text)-1] if my_text[len(my_text)-1:len(my_text)] == "." else my_text
+    return my_text[0 : len(my_text) - 1] if my_text[len(my_text) - 1 : len(my_text)] == "." else my_text
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def sidn_domain_upload(user, csv_data):
     """
     If the domain exists in the db, any subdomain will be added.
@@ -118,7 +129,7 @@ def sidn_domain_upload(user, csv_data):
     sidn_handle_domain_upload(upload.id)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def sidn_handle_domain_upload(upload_id: int):
 
     upload = SIDNUpload.objects.all().filter(id=upload_id).first()
@@ -129,7 +140,7 @@ def sidn_handle_domain_upload(upload_id: int):
     csv_data = upload.posted_data
 
     f = StringIO(csv_data)
-    reader = csv.reader(f, delimiter=',')
+    reader = csv.reader(f, delimiter=",")
     added = []
 
     for row in reader:
@@ -137,15 +148,20 @@ def sidn_handle_domain_upload(upload_id: int):
         if len(row) < 4:
             continue
 
-        if row[1] == '2ndlevel':
+        if row[1] == "2ndlevel":
             continue
 
-        log.debug(f'Processing {row[2]}.')
+        log.debug(f"Processing {row[2]}.")
 
-        existing_second_level_url = Url.objects.all().filter(
-            Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
-            url=remove_last_dot(row[1]), is_dead=False
-        ).first()
+        existing_second_level_url = (
+            Url.objects.all()
+            .filter(
+                Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+                url=remove_last_dot(row[1]),
+                is_dead=False,
+            )
+            .first()
+        )
 
         if not existing_second_level_url:
             log.debug(f"Url '{remove_last_dot(row[1])}' is not in the database yet, so cannot add a subdomain.")
@@ -166,9 +182,9 @@ def sidn_handle_domain_upload(upload_id: int):
             continue
 
         # the entire domain is included, len of new subdomain + dot (1).
-        new_subdomain = new_subdomain[0:(len(new_subdomain) - 1) - len(row[1])]
+        new_subdomain = new_subdomain[0 : (len(new_subdomain) - 1) - len(row[1])]
 
-        log.debug(f'Going to try to add add {new_subdomain} as a subdomain to {row[1]}. Pending to correctness.')
+        log.debug(f"Going to try to add add {new_subdomain} as a subdomain to {row[1]}. Pending to correctness.")
 
         has_been_added = existing_second_level_url.add_subdomain(new_subdomain)
         if has_been_added:
@@ -253,71 +269,81 @@ def organization_and_url_import(flat_organizations: List[Dict[str, Any]]):
 
         # try to handle updates to existing organizations.
         # id is unique, only one organization has this id.
-        if flat_organization.get('id', None):
-            existing_organizations = Organization.objects.all().filter(id=flat_organization['id']).first()
+        if flat_organization.get("id", None):
+            existing_organizations = Organization.objects.all().filter(id=flat_organization["id"]).first()
             if existing_organizations:
                 update_flat_organization(flat_organization, existing_organizations=[existing_organizations])
-                add_urls_to_organizations(organizations=existing_organizations, urls=flat_organization.get('urls', []))
+                add_urls_to_organizations(organizations=existing_organizations, urls=flat_organization.get("urls", []))
                 continue
 
         # multiple organizations can have the same surrogate_id
-        if flat_organization.get('surrogate_id', None):
-            existing_organizations = list(Organization.objects.all().filter(
-                surrogate_id=flat_organization['surrogate_id']))
+        if flat_organization.get("surrogate_id", None):
+            existing_organizations = list(
+                Organization.objects.all().filter(surrogate_id=flat_organization["surrogate_id"])
+            )
             if existing_organizations:
                 update_flat_organization(flat_organization, existing_organizations=existing_organizations)
-                add_urls_to_organizations(organizations=existing_organizations, urls=flat_organization.get('urls', []))
+                add_urls_to_organizations(organizations=existing_organizations, urls=flat_organization.get("urls", []))
                 continue
 
         new_organization = add_flat_organization(flat_organization)
-        add_urls_to_organizations(organizations=[new_organization], urls=flat_organization.get('urls', []))
+        add_urls_to_organizations(organizations=[new_organization], urls=flat_organization.get("urls", []))
 
 
 def validate_flat_organization(flat_organization: Dict):
-    layer = OrganizationType.objects.all().filter(name=flat_organization.get('layer', '')).first()
+    layer = OrganizationType.objects.all().filter(name=flat_organization.get("layer", "")).first()
     if not layer:
-        raise ValueError(f"Layer {flat_organization.get('layer', '')} "
-                         f"not defined. Is this layer defined in this installation?")
+        raise ValueError(
+            f"Layer {flat_organization.get('layer', '')} " f"not defined. Is this layer defined in this installation?"
+        )
 
-    if flat_organization.get('country', '') not in countries_by_alpha2:
-        raise ValueError('Country is required and needs to be an ISO3166-2 code.')
+    if flat_organization.get("country", "") not in countries_by_alpha2:
+        raise ValueError("Country is required and needs to be an ISO3166-2 code.")
 
-    if not flat_organization.get('name', None):
+    if not flat_organization.get("name", None):
         raise ValueError("Added organization does not have a name, can not create organization.")
 
-    if flat_organization.get('coordinate_type', None) not in ['Point', 'MultiPolygon', 'Polygon']:
-        raise ValueError("Geojsontype not supported yet, or invalid geojson type. Valid are: "
-                         "['Point', 'MultiPolygon', 'Polygon']")
+    if flat_organization.get("coordinate_type", None) not in ["Point", "MultiPolygon", "Polygon"]:
+        raise ValueError(
+            "Geojsontype not supported yet, or invalid geojson type. Valid are: " "['Point', 'MultiPolygon', 'Polygon']"
+        )
 
-    if flat_organization.get('id', None) and flat_organization.get('surrogate_id', None):
-        raise ValueError("When setting both the id and surrogate_id, it's not possible to determine what object"
-                         "needs changing. ID is unique, surrogate_id can be many. Choose an approach and try again.")
+    if flat_organization.get("id", None) and flat_organization.get("surrogate_id", None):
+        raise ValueError(
+            "When setting both the id and surrogate_id, it's not possible to determine what object"
+            "needs changing. ID is unique, surrogate_id can be many. Choose an approach and try again."
+        )
 
 
 def add_flat_organization(flat_organization: Dict) -> Organization:
-    o = Organization(**{
-        'name': flat_organization['name'],
-        'internal_notes': flat_organization.get('address', ''),
-        'type': OrganizationType.objects.all().filter(name=flat_organization.get('layer', '')).first(),
-        'country': flat_organization['country'],
-        'surrogate_id': flat_organization['surrogate_id']
-    })
+    o = Organization(
+        **{
+            "name": flat_organization["name"],
+            "internal_notes": flat_organization.get("address", ""),
+            "type": OrganizationType.objects.all().filter(name=flat_organization.get("layer", "")).first(),
+            "country": flat_organization["country"],
+            "surrogate_id": flat_organization["surrogate_id"],
+        }
+    )
     o.save()
 
-    if flat_organization['coordinate_area'] == [0, 0] and flat_organization['coordinate_type'] == "Point":
-        flat_organization['coordinate_area'] = retrieve_geocode(
-            f"{flat_organization['name']}, {flat_organization.get('address', '')}")
+    if flat_organization["coordinate_area"] == [0, 0] and flat_organization["coordinate_type"] == "Point":
+        flat_organization["coordinate_area"] = retrieve_geocode(
+            f"{flat_organization['name']}, {flat_organization.get('address', '')}"
+        )
 
         # still no coordinate? then don't save one:
-        if flat_organization['coordinate_area'] == [0, 0]:
+        if flat_organization["coordinate_area"] == [0, 0]:
             return o
 
     # add coordinate
-    c = Coordinate(**{
-        'geojsontype': flat_organization['coordinate_type'],
-        'area': flat_organization['coordinate_area'],
-        'organization': o,
-    })
+    c = Coordinate(
+        **{
+            "geojsontype": flat_organization["coordinate_type"],
+            "area": flat_organization["coordinate_area"],
+            "organization": o,
+        }
+    )
     c.save()
 
     return o
@@ -331,7 +357,7 @@ def retrieve_geocode(string):
     geocode_result = gmaps.geocode(string)
 
     if geocode_result:
-        return [geocode_result[0]['geometry']['location']['lng'], geocode_result[0]['geometry']['location']['lat']]
+        return [geocode_result[0]["geometry"]["location"]["lng"], geocode_result[0]["geometry"]["location"]["lat"]]
 
     return [0, 0]
 
@@ -340,23 +366,29 @@ def update_flat_organization(flat_organization: Dict, existing_organizations=Lis
     # name, address, coordinate_type, coordinate can be updated.
 
     for existing_organization in existing_organizations:
-        existing_organization.name = flat_organization['name']
-        existing_organization.internal_notes = flat_organization.get('address', existing_organization.internal_notes)
+        existing_organization.name = flat_organization["name"]
+        existing_organization.internal_notes = flat_organization.get("address", existing_organization.internal_notes)
         existing_organization.save()
 
         existing_coordinate = Coordinate.objects.all().filter(organization=existing_organization).first()
         # try to upgrade coordinates that are now 0, 0 and are also given 0, 0
-        if all([existing_coordinate, flat_organization['coordinate_area'] == [0, 0],
-                flat_organization['coordinate_type'] == "Point"]):
-            flat_organization['coordinate_area'] = \
-                retrieve_geocode(f"{flat_organization['name']}, {flat_organization.get('address', '')}")
+        if all(
+            [
+                existing_coordinate,
+                flat_organization["coordinate_area"] == [0, 0],
+                flat_organization["coordinate_type"] == "Point",
+            ]
+        ):
+            flat_organization["coordinate_area"] = retrieve_geocode(
+                f"{flat_organization['name']}, {flat_organization.get('address', '')}"
+            )
 
         # and now update the coordinate that match this organization
         # and make sure that the coordinate is plotable.
-        if flat_organization['coordinate_area'] != [0, 0]:
+        if flat_organization["coordinate_area"] != [0, 0]:
             cs = Coordinate.objects.all().filter(organization=existing_organization).first()
-            cs.geojsontype = flat_organization['coordinate_type']
-            cs.area = flat_organization['coordinate_area']
+            cs.geojsontype = flat_organization["coordinate_type"]
+            cs.area = flat_organization["coordinate_area"]
             cs.save()
 
 

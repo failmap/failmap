@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0025_map_data_cache'),
+        ("map", "0025_map_data_cache"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='map_data_cache',
-            name='filters',
-            field=models.CharField(blank=True, db_index=True,
-                                   help_text='Any set of desired scan_types', max_length=767, null=True),
+            model_name="map_data_cache",
+            name="filters",
+            field=models.CharField(
+                blank=True, db_index=True, help_text="Any set of desired scan_types", max_length=767, null=True
+            ),
         ),
     ]

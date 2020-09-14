@@ -7,14 +7,17 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0028_auto_20180321_1000'),
+        ("organizations", "0028_auto_20180321_1000"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='coordinate',
-            name='area',
+            model_name="coordinate",
+            name="area",
             field=jsonfield.fields.JSONField(
-                blank=True, help_text='GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to reduce the amount of data to transfer. Editing both this and the edit_area, this will take preference.', max_length=10000),
+                blank=True,
+                help_text="GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to reduce the amount of data to transfer. Editing both this and the edit_area, this will take preference.",
+                max_length=10000,
+            ),
         ),
     ]

@@ -21,12 +21,12 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Add arguments."""
-        parser.add_argument('-u', '--urls', type=str, nargs='+', help='space separated urls')
+        parser.add_argument("-u", "--urls", type=str, nargs="+", help="space separated urls")
         super(Command, self).add_arguments(parser)
 
     def handle(self, *args, **options):
 
-        new_urls = get_new_urls(options['urls'])
+        new_urls = get_new_urls(options["urls"])
 
         if not new_urls:
             return
@@ -63,8 +63,10 @@ def get_new_urls(urls: List[str]):
         else:
             # check for wildcard dns...
             if discover_wildcard(url):
-                log.info("Cannot add %s because it's DNS has wildcards enabled. This means everything resolves. "
-                         "Use -F to override this check and still add the url. (todo: support -f) :) lolopensource")
+                log.info(
+                    "Cannot add %s because it's DNS has wildcards enabled. This means everything resolves. "
+                    "Use -F to override this check and still add the url. (todo: support -f) :) lolopensource"
+                )
             else:
                 if resolves(url):
                     log.debug("Does not exist in the database, it resolved: %s" % url)

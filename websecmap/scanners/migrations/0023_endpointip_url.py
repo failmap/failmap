@@ -9,15 +9,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0018_auto_20171017_1317'),
-        ('scanners', '0022_auto_20171030_1716'),
+        ("organizations", "0018_auto_20171017_1317"),
+        ("scanners", "0022_auto_20171030_1716"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='endpointip',
-            name='url',
-            field=models.ForeignKey(blank=True, null=True,
-                                    on_delete=django.db.models.deletion.CASCADE, to='organizations.Url'),
+            model_name="endpointip",
+            name="url",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="organizations.Url"
+            ),
         ),
     ]

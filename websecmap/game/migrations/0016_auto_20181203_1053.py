@@ -6,14 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0015_auto_20181203_1052'),
+        ("game", "0015_auto_20181203_1052"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='team',
-            name='name',
-            field=models.CharField(help_text='Whatever name the team wants. Must be at least PEGI 88.',
-                                   max_length=42, verbose_name='Team name'),
+            model_name="team",
+            name="name",
+            field=models.CharField(
+                help_text="Whatever name the team wants. Must be at least PEGI 88.",
+                max_length=42,
+                verbose_name="Team name",
+            ),
         ),
     ]

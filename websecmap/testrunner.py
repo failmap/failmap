@@ -15,9 +15,8 @@ class PytestTestRunner(DiscoverRunner):
     @classmethod
     def add_arguments(cls, parser):
         parser.add_argument(
-            '--pdb',
-            action='store_true', default=False, dest='pdb',
-            help='Drop into PDB on test failure.')
+            "--pdb", action="store_true", default=False, dest="pdb", help="Drop into PDB on test failure."
+        )
         DiscoverRunner.add_arguments(parser)
 
     def run_tests(self, test_labels):
@@ -29,17 +28,17 @@ class PytestTestRunner(DiscoverRunner):
 
         argv = []
         if self.verbosity == 0:
-            argv.append('--quiet')
+            argv.append("--quiet")
         if self.verbosity == 2:
-            argv.append('--verbose')
+            argv.append("--verbose")
         if self.verbosity == 3:
-            argv.append('-vv')
+            argv.append("-vv")
         if self.failfast:
-            argv.append('--exitfirst')
+            argv.append("--exitfirst")
         if self.keepdb:
-            argv.append('--reuse-db')
+            argv.append("--reuse-db")
         if self.pdb:
-            argv.append('--pdb')
+            argv.append("--pdb")
 
         argv.extend(test_labels)
         return pytest.main(argv)

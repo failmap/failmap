@@ -11,39 +11,40 @@ from websecmap.scanners.scanner.subdomains import discover_wildcard, url_by_filt
 log = logging.getLogger(__package__)
 
 
-def filter_discover(organizations_filter: dict = dict(),
-                    urls_filter: dict = dict(),
-                    endpoints_filter: dict = dict(),
-                    **kwargs):
+def filter_discover(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
     return unique_and_random(urls)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def compose_planned_discover_task(**kwargs):
-    urls = plannedscan.pickup(activity="discover", scanner="dns_wildcard", amount=kwargs.get('amount', 200))
+    urls = plannedscan.pickup(activity="discover", scanner="dns_wildcard", amount=kwargs.get("amount", 200))
     return compose_discover_task(urls)
 
 
-@app.task(queue='storage')
-def plan_discover(organizations_filter: dict = dict(),
-                  urls_filter: dict = dict(),
-                  endpoints_filter: dict = dict(),
-                  **kwargs):
+@app.task(queue="storage")
+def plan_discover(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="discover", scanner="dns_wildcard", urls=urls)
 
 
 def compose_discover_task(urls):
-    task = group(discover_wildcard.si(url.url)
-                 | store_wildcard.s(url.id)
-                 | plannedscan.finish.si('discover', 'dns_wildcard', url) for url in urls)
+    task = group(
+        discover_wildcard.si(url.url)
+        | store_wildcard.s(url.id)
+        | plannedscan.finish.si("discover", "dns_wildcard", url)
+        for url in urls
+    )
     return task
 
 
-def compose_manual_discover_task(organizations_filter: dict = dict(),
-                                 urls_filter: dict = dict(),
-                                 endpoints_filter: dict = dict(), **kwargs) -> Task:
+def compose_manual_discover_task(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+) -> Task:
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
 
     # a heuristic

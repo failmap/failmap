@@ -8,14 +8,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0009_auto_20170913_1420'),
+        ("organizations", "0009_auto_20170913_1420"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='url',
-            name='uses_dns_wildcard',
+            model_name="url",
+            name="uses_dns_wildcard",
             field=models.BooleanField(
-                default=False, help_text='When true, this domain uses a DNS wildcard and any subdomain will resolve to something on this host.'),
+                default=False,
+                help_text="When true, this domain uses a DNS wildcard and any subdomain will resolve to something on this host.",
+            ),
         ),
     ]

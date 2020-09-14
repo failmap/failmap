@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0009_endpoint_discovered_on'),
+        ("scanners", "0009_endpoint_discovered_on"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpoint',
-            name='discovered_on',
+            model_name="endpoint",
+            name="discovered_on",
             field=models.DateTimeField(auto_now_add=True, null=True),
         ),
     ]

@@ -8,25 +8,31 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0007_url_created_on'),
+        ("organizations", "0007_url_created_on"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='url',
-            name='not_resolvable',
+            model_name="url",
+            name="not_resolvable",
             field=models.BooleanField(
-                default=False, help_text='Url is not resolvable (anymore) and will not be picked up by scanners anymore.When the url is not resolvable, ratings from the past will still be shown(?)#'),
+                default=False,
+                help_text="Url is not resolvable (anymore) and will not be picked up by scanners anymore.When the url is not resolvable, ratings from the past will still be shown(?)#",
+            ),
         ),
         migrations.AddField(
-            model_name='url',
-            name='not_resolvable_reason',
+            model_name="url",
+            name="not_resolvable_reason",
             field=models.CharField(
-                blank=True, help_text='A scanner might find this not resolvable, some details about that are placed here.', max_length=255, null=True),
+                blank=True,
+                help_text="A scanner might find this not resolvable, some details about that are placed here.",
+                max_length=255,
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='url',
-            name='not_resolvable_since',
+            model_name="url",
+            name="not_resolvable_since",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

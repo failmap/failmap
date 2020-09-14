@@ -13,7 +13,7 @@ class Command(VerifyTaskCommand):
     help = __doc__
 
     def handle(self, *args, **options):
-        log.info('Deleting not used scan types.')
+        log.info("Deleting not used scan types.")
 
         deleted = EndpointGenericScan.objects.all().filter().exclude(type__in=ENDPOINT_SCAN_TYPES).delete()
         log.info(deleted)
@@ -21,4 +21,4 @@ class Command(VerifyTaskCommand):
         deleted = UrlGenericScan.objects.all().filter().exclude(type__in=URL_SCAN_TYPES).delete()
         log.info(deleted)
 
-        log.info('Done')
+        log.info("Done")

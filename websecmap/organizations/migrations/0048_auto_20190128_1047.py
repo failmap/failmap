@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0047_auto_20181213_1012'),
+        ("organizations", "0047_auto_20181213_1012"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='dataset',
-            name='file_source',
-            field=models.FileField(null=True, upload_to=''),
+            model_name="dataset",
+            name="file_source",
+            field=models.FileField(null=True, upload_to=""),
         ),
         migrations.AlterField(
-            model_name='dataset',
-            name='source',
+            model_name="dataset",
+            name="source",
             field=models.URLField(null=True),
         ),
     ]

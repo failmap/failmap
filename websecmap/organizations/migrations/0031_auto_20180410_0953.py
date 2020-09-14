@@ -7,13 +7,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0030_auto_20180403_1547'),
+        ("organizations", "0030_auto_20180403_1547"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organization',
-            name='country',
+            model_name="organization",
+            name="country",
             field=django_countries.fields.CountryField(db_index=True, max_length=2),
         ),
     ]

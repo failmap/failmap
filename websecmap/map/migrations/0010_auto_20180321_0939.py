@@ -7,20 +7,22 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0009_merge_20180313_1044'),
+        ("map", "0009_merge_20180313_1044"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organizationrating',
-            name='calculation',
+            model_name="organizationrating",
+            name="calculation",
             field=jsonfield.fields.JSONField(
-                help_text='Contains JSON with a calculation of all scanners at this moment, for all urls of this organization. This can be a lot.'),
+                help_text="Contains JSON with a calculation of all scanners at this moment, for all urls of this organization. This can be a lot."
+            ),
         ),
         migrations.AlterField(
-            model_name='urlrating',
-            name='calculation',
+            model_name="urlrating",
+            name="calculation",
             field=jsonfield.fields.JSONField(
-                help_text='Contains JSON with a calculation of all scanners at this moment. The rating can be spread out over multiple endpoints, which might look a bit confusing. Yet it is perfectly possible as some urls change their IP every five minutes and scans are spread out over days.'),
+                help_text="Contains JSON with a calculation of all scanners at this moment. The rating can be spread out over multiple endpoints, which might look a bit confusing. Yet it is perfectly possible as some urls change their IP every five minutes and scans are spread out over days."
+            ),
         ),
     ]

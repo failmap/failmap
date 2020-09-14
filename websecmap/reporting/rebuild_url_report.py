@@ -11,9 +11,7 @@ from websecmap.scanners.scanner.__init__ import q_configurations_to_report
 log = logging.getLogger(__package__)
 
 
-def compose_task(
-    **kwargs
-) -> Task:
+def compose_task(**kwargs) -> Task:
 
     urls = Url.objects.filter(q_configurations_to_report())
     urls = add_model_filter(urls, **kwargs)

@@ -25,17 +25,21 @@ COUNTRIES = iso3166.countries_by_alpha2
 
 
 remark = "Get the code and all data from our gitlab repo: https://gitlab.com/internet-cleanup-foundation/"
-DEFAULT_COUNTRY = 'NL'
-DEFAULT_LAYER = 'municipality'
+DEFAULT_COUNTRY = "NL"
+DEFAULT_LAYER = "municipality"
 
 
 def get_organization_type(name: str):
     try:
         return OrganizationType.objects.get(name=name).id
     except OrganizationType.DoesNotExist:
-        default = Configuration.objects.all().filter(
-            is_displayed=True, is_the_default_option=True
-        ).order_by('display_order').values_list('organization_type__id', flat=True).first()
+        default = (
+            Configuration.objects.all()
+            .filter(is_displayed=True, is_the_default_option=True)
+            .order_by("display_order")
+            .values_list("organization_type__id", flat=True)
+            .first()
+        )
 
         return default if default else 1
 
@@ -60,22 +64,28 @@ def get_country(code: str):
 
 
 def get_defaults():
-    data = Configuration.objects.all().filter(
-        is_displayed=True,
-        is_the_default_option=True
-    ).order_by('display_order').values('country', 'organization_type__name').first()
+    data = (
+        Configuration.objects.all()
+        .filter(is_displayed=True, is_the_default_option=True)
+        .order_by("display_order")
+        .values("country", "organization_type__name")
+        .first()
+    )
 
     if not data:
-        return {'country': DEFAULT_COUNTRY, 'layer': DEFAULT_LAYER}
+        return {"country": DEFAULT_COUNTRY, "layer": DEFAULT_LAYER}
 
-    return {'country': data['country'], 'layer': data['organization_type__name']}
+    return {"country": data["country"], "layer": data["organization_type__name"]}
 
 
 def get_default_country():
-    country = Configuration.objects.all().filter(
-        is_displayed=True,
-        is_the_default_option=True
-    ).order_by('display_order').values_list('country', flat=True).first()
+    country = (
+        Configuration.objects.all()
+        .filter(is_displayed=True, is_the_default_option=True)
+        .order_by("display_order")
+        .values_list("country", flat=True)
+        .first()
+    )
 
     if not country:
         return [config.PROJECT_COUNTRY]
@@ -85,10 +95,13 @@ def get_default_country():
 
 def get_default_layer():
 
-    organization_type = Configuration.objects.all().filter(
-        is_displayed=True,
-        is_the_default_option=True
-    ).order_by('display_order').values_list('organization_type__name', flat=True).first()
+    organization_type = (
+        Configuration.objects.all()
+        .filter(is_displayed=True, is_the_default_option=True)
+        .order_by("display_order")
+        .values_list("organization_type__name", flat=True)
+        .first()
+    )
 
     if not organization_type:
         return [DEFAULT_LAYER]
@@ -98,10 +111,13 @@ def get_default_layer():
 
 def get_default_layer_for_country(country: str = "NL"):
 
-    organization_type = Configuration.objects.all().filter(
-        is_displayed=True,
-        country=get_country(country)
-    ).order_by('display_order').values_list('organization_type__name', flat=True).first()
+    organization_type = (
+        Configuration.objects.all()
+        .filter(is_displayed=True, country=get_country(country))
+        .order_by("display_order")
+        .values_list("organization_type__name", flat=True)
+        .first()
+    )
 
     if not organization_type:
         return [DEFAULT_LAYER]
@@ -113,8 +129,12 @@ def get_default_layer_for_country(country: str = "NL"):
 def get_countries():
     # sqllite doens't do distinct on, workaround
 
-    confs = Configuration.objects.all().filter(
-        is_displayed=True).order_by('display_order').values_list('country', flat=True)
+    confs = (
+        Configuration.objects.all()
+        .filter(is_displayed=True)
+        .order_by("display_order")
+        .values_list("country", flat=True)
+    )
 
     list = []
     for conf in confs:
@@ -126,10 +146,12 @@ def get_countries():
 
 def get_layers(country: str = "NL"):
 
-    layers = Configuration.objects.all().filter(
-        country=get_country(country),
-        is_displayed=True
-    ).order_by('display_order').values_list('organization_type__name', flat=True)
+    layers = (
+        Configuration.objects.all()
+        .filter(country=get_country(country), is_displayed=True)
+        .order_by("display_order")
+        .values_list("organization_type__name", flat=True)
+    )
 
     return list(layers)
 
@@ -150,9 +172,12 @@ def get_initial_countries():
 
     :return:
     """
-    confs = Configuration.objects.all().filter(
-        is_displayed=True
-    ).order_by('display_order').values_list('country', flat=True)
+    confs = (
+        Configuration.objects.all()
+        .filter(is_displayed=True)
+        .order_by("display_order")
+        .values_list("country", flat=True)
+    )
 
     inital_countries = []
     for conf in confs:

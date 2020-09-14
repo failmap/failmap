@@ -85,44 +85,52 @@ def get_security_header_calculation(scan: Union[EndpointGenericScan, UrlGenericS
     high, medium, low = 0, 0, 0
 
     header = {
-        'http_security_header_strict_transport_security': 'Strict-Transport-Security',
-        'http_security_header_x_content_type_options': 'X-Content-Type-Options',
-        'http_security_header_x_frame_options': 'X-Frame-Options',
-        'http_security_header_x_xss_protection': 'X-XSS-Protection',
+        "http_security_header_strict_transport_security": "Strict-Transport-Security",
+        "http_security_header_x_content_type_options": "X-Content-Type-Options",
+        "http_security_header_x_frame_options": "X-Frame-Options",
+        "http_security_header_x_xss_protection": "X-XSS-Protection",
     }[scan.type]
 
     # We add what is done well, so it's more obvious it's checked.
     if scan.rating == "Unreachable":
-        return standard_calculation(scan, "Web server content became unreachable. No HTTP content present.",
-                                    high, medium, low, error_in_test=True)
+        return standard_calculation(
+            scan,
+            "Web server content became unreachable. No HTTP content present.",
+            high,
+            medium,
+            low,
+            error_in_test=True,
+        )
 
     if scan.rating == "RESTRICTED":
-        return standard_calculation(scan,
-                                    "Web server requires authorization to access, headers are not publicly visible.",
-                                    high, medium, low)
+        return standard_calculation(
+            scan, "Web server requires authorization to access, headers are not publicly visible.", high, medium, low
+        )
 
     if scan.rating == "UNKNOWN":
-        return standard_calculation(scan,
-                                    "Non HTTP response found, which does not require HTTP security headers.",
-                                    high, medium, low)
+        return standard_calculation(
+            scan, "Non HTTP response found, which does not require HTTP security headers.", high, medium, low
+        )
 
     if scan.rating == "SOAP":
-        return standard_calculation(scan, "Header not relevant for SOAP service.",
-                                    high, medium, low)
+        return standard_calculation(scan, "Header not relevant for SOAP service.", high, medium, low)
 
     if scan.rating == "True":
         explanation = header + " header present."
     elif scan.rating == "Using CSP":
-        explanation = "Content-Security-Policy header found, which covers the security aspect of the %s header." \
-                      % header
+        explanation = (
+            "Content-Security-Policy header found, which covers the security aspect of the %s header." % header
+        )
     else:
         explanation = "Missing " + header + " header."
 
         if header in ["Strict-Transport-Security"]:
 
             # special case when no insecure alternatives are offered
-            if scan.explanation == "Security Header not present: Strict-Transport-Security, " \
-                                   "yet offers no insecure http service.":
+            if (
+                scan.explanation == "Security Header not present: Strict-Transport-Security, "
+                "yet offers no insecure http service."
+            ):
                 explanation = "Missing " + header + " header. Offers no insecure alternative service."
                 medium += 0
             else:
@@ -175,9 +183,9 @@ def ftp(scan: Union[EndpointGenericScan, UrlGenericScan]):
 
 def DNSSEC(scan: Union[EndpointGenericScan, UrlGenericScan]):
     """
-        See: https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions
+    See: https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions
 
-        In short: DNSSEC quarantees that a domain name matches a certain IP address.
+    In short: DNSSEC quarantees that a domain name matches a certain IP address.
     """
     high, medium, low = 0, 0, 0
 
@@ -235,8 +243,9 @@ def internet_nl_mail_starttls_tls_available(scan: Union[EndpointGenericScan, Url
         return standard_calculation(scan=scan, explanation="STARTTLS Available", high=0, medium=0, low=0)
     elif scan.rating == "mx removed":
         # can we just ignore these types of scans / give no severity etc?
-        return standard_calculation(scan=scan, explanation="Not relevant. This address does not receive mail anymore.",
-                                    high=0, medium=0, low=0)
+        return standard_calculation(
+            scan=scan, explanation="Not relevant. This address does not receive mail anymore.", high=0, medium=0, low=0
+        )
     elif scan.rating == "False":
         return standard_calculation(scan=scan, explanation="STARTTLS Missing", high=1, medium=0, low=0)
 
@@ -247,8 +256,9 @@ def internet_nl_mail_auth_spf_exist(scan: Union[EndpointGenericScan, UrlGenericS
         return standard_calculation(scan=scan, explanation="SPF Available", high=0, medium=0, low=0)
     elif scan.rating == "mx removed":
         # can we just ignore these types of scans / give no severity etc?
-        return standard_calculation(scan=scan, explanation="Not relevant. This address does not receive mail anymore.",
-                                    high=0, medium=0, low=0)
+        return standard_calculation(
+            scan=scan, explanation="Not relevant. This address does not receive mail anymore.", high=0, medium=0, low=0
+        )
     elif scan.rating == "False":
         return standard_calculation(scan=scan, explanation="SPF Missing", high=0, medium=1, low=0)
 
@@ -258,8 +268,9 @@ def internet_nl_mail_auth_dkim_exist(scan: Union[EndpointGenericScan, UrlGeneric
         return standard_calculation(scan=scan, explanation="DKIM Available", high=0, medium=0, low=0)
     elif scan.rating == "mx removed":
         # can we just ignore these types of scans / give no severity etc?
-        return standard_calculation(scan=scan, explanation="Not relevant. This address does not receive mail anymore.",
-                                    high=0, medium=0, low=0)
+        return standard_calculation(
+            scan=scan, explanation="Not relevant. This address does not receive mail anymore.", high=0, medium=0, low=0
+        )
     elif scan.rating == "False":
         return standard_calculation(scan=scan, explanation="DKIM Missing", high=0, medium=1, low=0)
 
@@ -269,8 +280,9 @@ def internet_nl_mail_auth_dmarc_exist(scan: Union[EndpointGenericScan, UrlGeneri
         return standard_calculation(scan=scan, explanation="DMARC Available", high=0, medium=0, low=0)
     elif scan.rating == "mx removed":
         # can we just ignore these types of scans / give no severity etc?
-        return standard_calculation(scan=scan, explanation="Not relevant. This address does not receive mail anymore.",
-                                    high=0, medium=0, low=0)
+        return standard_calculation(
+            scan=scan, explanation="Not relevant. This address does not receive mail anymore.", high=0, medium=0, low=0
+        )
     elif scan.rating == "False":
         return standard_calculation(scan=scan, explanation="DMARC Missing", high=0, medium=1, low=0)
 
@@ -280,31 +292,37 @@ def internet_nl_generic_boolean_value(scan: Union[EndpointGenericScan, UrlGeneri
     # old school:
     if scan.rating in ["True", "False"]:
         if scan.rating == "True":
-            return standard_calculation_for_internet_nl(scan=scan, explanation="%s available" % scan.type,
-                                                        high=0, medium=0, low=0)
+            return standard_calculation_for_internet_nl(
+                scan=scan, explanation="%s available" % scan.type, high=0, medium=0, low=0
+            )
 
         # medium and low don't impact percentages. Therefore, categories that are not complete should be treaded as high
-        return standard_calculation_for_internet_nl(scan=scan, explanation="%s missing" % scan.type,
-                                                    high=1, medium=0, low=0)
+        return standard_calculation_for_internet_nl(
+            scan=scan, explanation="%s missing" % scan.type, high=1, medium=0, low=0
+        )
 
     # API V2 has a better and more nuanced approach to category output.
     return internet_nl_requirement_tilde_value_format(scan)
 
 
-def change_internet_nl_severity_to_websecmap_severity(scan: Union[EndpointGenericScan, UrlGenericScan],
-                                                      original_requirement_level):
+def change_internet_nl_severity_to_websecmap_severity(
+    scan: Union[EndpointGenericScan, UrlGenericScan], original_requirement_level
+):
     # Only affected when in settings APPLICATION_NAME = "websecmap", since other apps use
     # other setting files, this would work.
     # how does this code quickly recognize being a standalone websecmap, and not something else.
     # it relies on the APPLICATION_NAME field in settings.py.
-    if not hasattr(settings, 'APPLICATION_NAME'):
+    if not hasattr(settings, "APPLICATION_NAME"):
         return original_requirement_level
 
-    if settings.APPLICATION_NAME != 'websecmap':
+    if settings.APPLICATION_NAME != "websecmap":
         return original_requirement_level
 
-    if scan.type in ['internet_nl_mail_auth_spf_exist', 'internet_nl_mail_auth_dkim_exist',
-                     'internet_nl_mail_auth_dmarc_exist']:
+    if scan.type in [
+        "internet_nl_mail_auth_spf_exist",
+        "internet_nl_mail_auth_dkim_exist",
+        "internet_nl_mail_auth_dmarc_exist",
+    ]:
         # we see starttls as being the most important mail setting.
         return "recommended"
 
@@ -320,37 +338,35 @@ def internet_nl_requirement_tilde_value_format(scan: Union[EndpointGenericScan, 
     # New metrics are a lot simpler, let's hope it stays that way :)
 
     # the explanation contains the translation and technical details and can be used elsewhere.
-    if scan.rating in ['passed', 'good_not_tested']:
+    if scan.rating in ["passed", "good_not_tested"]:
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=0, low=0)
 
-    if scan.rating == 'failed':
+    if scan.rating == "failed":
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=1, medium=0, low=0)
 
-    if scan.rating == 'warning':
+    if scan.rating == "warning":
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=1, low=0)
 
-    if scan.rating == 'info':
+    if scan.rating == "info":
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=0, low=1)
 
-    if scan.rating in ['not_tested', 'not_testable']:
+    if scan.rating in ["not_tested", "not_testable"]:
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_testable=True)
 
-    if scan.rating in ['error']:
+    if scan.rating in ["error"]:
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, error_in_test=True)
 
     # todo: this is probably wrong.
-    if scan.rating in ['not_applicable']:
+    if scan.rating in ["not_applicable"]:
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_applicable=True)
 
     # new internet.nl values for special case. They cannot be aggregated, and are moved into not_applicable
     # so there are still stats made for them. Perhaps they can be removed as they complicate things?
-    if scan.rating in ['unreachable']:
-        return standard_calculation_for_internet_nl(
-            scan=scan, explanation=scan.explanation, not_testable=True)
+    if scan.rating in ["unreachable"]:
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_testable=True)
 
-    if scan.rating in ['no_mx']:
-        return standard_calculation_for_internet_nl(
-            scan=scan, explanation=scan.explanation, not_applicable=True)
+    if scan.rating in ["no_mx"]:
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_applicable=True)
 
     raise ValueError(f"Rating {scan.rating} not supported for scan {scan}.")
 
@@ -368,7 +384,7 @@ def internet_nl_api_v1_requirement_tilde_value_format(scan: Union[EndpointGeneri
     :param scan:
     :return:
     """
-    requirement_level, scan_value = scan.rating.split('~')
+    requirement_level, scan_value = scan.rating.split("~")
 
     requirement_level = change_internet_nl_severity_to_websecmap_severity(scan, requirement_level)
 
@@ -377,7 +393,7 @@ def internet_nl_api_v1_requirement_tilde_value_format(scan: Union[EndpointGeneri
         explanation += f" Because {scan.explanation}."
 
     # Just pass the values from sending domain...
-    if requirement_level == 'observed_state':
+    if requirement_level == "observed_state":
         """
         Observed state is not really a sane representation and it's hard to express in
         graphs. For example: mail_non_sending_domain -> true, what does that mean?
@@ -393,34 +409,34 @@ def internet_nl_api_v1_requirement_tilde_value_format(scan: Union[EndpointGeneri
         'mail_servers_testable'
         'mail_starttls_dane_ta'
         """
-        if scan_value == 'passed':
+        if scan_value == "passed":
             return standard_calculation(scan=scan, explanation=scan_value, high=0, medium=0, low=0)
         else:
             return standard_calculation(scan=scan, explanation=scan_value, high=1, medium=0, low=0)
 
-    if scan_value == 'passed':
+    if scan_value == "passed":
         return standard_calculation(scan=scan, explanation=explanation, high=0, medium=0, low=0)
 
-    if scan_value == 'failed':
-        if requirement_level == 'required':
+    if scan_value == "failed":
+        if requirement_level == "required":
             return standard_calculation(scan=scan, explanation=explanation, high=1, medium=0, low=0)
-        if requirement_level == 'recommended':
+        if requirement_level == "recommended":
             return standard_calculation(scan=scan, explanation=explanation, high=0, medium=1, low=0)
-        if requirement_level == 'optional':
+        if requirement_level == "optional":
             return standard_calculation(scan=scan, explanation=explanation, high=0, medium=0, low=1)
 
     # Not applicable and not testable are fine additions to the set of severity levels we use now.
     # This way scanners can be even more flexible.
-    if scan_value == 'not_testable':
+    if scan_value == "not_testable":
         return standard_calculation(scan=scan, explanation=explanation, not_testable=True)
 
     # error_in_test is not used in api V1 and backwards compatibility is not needed.
 
     # todo: is this used? And is that used correctly?
-    if scan_value == 'not_applicable':
+    if scan_value == "not_applicable":
         return standard_calculation(scan=scan, explanation=explanation, not_applicable=True)
 
-    raise ValueError(f'Cannot determine severity for internet.nl scan type {scan.type}')
+    raise ValueError(f"Cannot determine severity for internet.nl scan type {scan.type}")
 
 
 def internet_nl_score(scan: Union[EndpointGenericScan, UrlGenericScan]):
@@ -449,9 +465,16 @@ def dummy_calculated_values(scan: Union[EndpointGenericScan, UrlGenericScan]):
     return standard_calculation(scan, explanation, high, medium, low)
 
 
-def standard_calculation(scan: Union[EndpointGenericScan, UrlGenericScan],
-                         explanation: str, high: int = 0, medium: int = 0, low: int = 0,
-                         not_testable: bool = False, not_applicable: bool = False, error_in_test: bool = False):
+def standard_calculation(
+    scan: Union[EndpointGenericScan, UrlGenericScan],
+    explanation: str,
+    high: int = 0,
+    medium: int = 0,
+    low: int = 0,
+    not_testable: bool = False,
+    not_applicable: bool = False,
+    error_in_test: bool = False,
+):
 
     ok = 0 if any([high, medium, low, not_testable, not_testable, error_in_test]) else 1
 
@@ -466,14 +489,20 @@ def standard_calculation(scan: Union[EndpointGenericScan, UrlGenericScan],
         "ok": ok,
         "not_testable": not_testable,
         "not_applicable": not_applicable,
-        "error_in_test": error_in_test
+        "error_in_test": error_in_test,
     }
 
 
-def standard_calculation_for_internet_nl(scan: Union[EndpointGenericScan, UrlGenericScan], explanation: str,
-                                         high: int = 0, medium: int = 0, low: int = 0,
-                                         not_testable: bool = False, not_applicable: bool = False,
-                                         error_in_test: bool = False):
+def standard_calculation_for_internet_nl(
+    scan: Union[EndpointGenericScan, UrlGenericScan],
+    explanation: str,
+    high: int = 0,
+    medium: int = 0,
+    low: int = 0,
+    not_testable: bool = False,
+    not_applicable: bool = False,
+    error_in_test: bool = False,
+):
 
     # the explanation is a bunch of json, that is not really workable. These fields are split into separate data
     # and should be the same for everything except the score.
@@ -484,8 +513,8 @@ def standard_calculation_for_internet_nl(scan: Union[EndpointGenericScan, UrlGen
     if explanation[0:1] == "{":
         try:
             data = json.loads(explanation)
-            calc['translation'] = data.get('translation', "")
-            calc['technical_details'] = scan.evidence
+            calc["translation"] = data.get("translation", "")
+            calc["technical_details"] = scan.evidence
         except json.decoder.JSONDecodeError:
             # not a json value, nothing is done with the explanation field otherwise
             pass
@@ -493,153 +522,140 @@ def standard_calculation_for_internet_nl(scan: Union[EndpointGenericScan, UrlGen
     # The original value contains more nuance than the agregation to high, medium and low. So use the translation but
     # also the original rating to show the correct icon. This is also used to determine the progression compared to
     # the previous scan. This nuance is important as good > good_not_tested.
-    calc['test_result'] = scan.rating
+    calc["test_result"] = scan.rating
 
     return calc
 
 
 # don't re-create the dict every time.
 calculation_methods = {
-    'http_security_header_strict_transport_security': get_security_header_calculation,
-    'http_security_header_x_content_type_options': get_security_header_calculation,
-    'http_security_header_x_frame_options': get_security_header_calculation,
-    'http_security_header_x_xss_protection': get_security_header_calculation,
-    'plain_https': plain_https,
-    'DNSSEC': DNSSEC,
-    'ftp': ftp,
-    'tls_qualys_certificate_trusted': tls_qualys_certificate_trusted,
-    'tls_qualys_encryption_quality': tls_qualys_encryption_quality,
-    'Dummy': dummy_calculated_values,
-
+    "http_security_header_strict_transport_security": get_security_header_calculation,
+    "http_security_header_x_content_type_options": get_security_header_calculation,
+    "http_security_header_x_frame_options": get_security_header_calculation,
+    "http_security_header_x_xss_protection": get_security_header_calculation,
+    "plain_https": plain_https,
+    "DNSSEC": DNSSEC,
+    "ftp": ftp,
+    "tls_qualys_certificate_trusted": tls_qualys_certificate_trusted,
+    "tls_qualys_encryption_quality": tls_qualys_encryption_quality,
+    "Dummy": dummy_calculated_values,
     # todo: the new format will change the translation fields of the UI somewhat...
-    'internet_nl_mail_starttls_tls_available': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_auth_spf_exist': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_auth_dkim_exist': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_auth_dmarc_exist': internet_nl_requirement_tilde_value_format,
-
-    'internet_nl_mail_ipv6_mx_reach': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_ipv6_ns_reach': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_ipv6_ns_address': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_ipv6_mx_address': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_dnssec_mx_exist': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_dnssec_mx_valid': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_dnssec_mailto_valid': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_dnssec_mailto_exist': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_auth_spf_policy': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_auth_dmarc_policy': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_tls_keyexchange': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_tls_compress': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_cert_sig': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_cert_pubkey': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_dane_rollover': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_tls_secreneg': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_dane_exist': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_dane_valid': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_tls_ciphers': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_tls_clientreneg': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_cert_chain': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_tls_version': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_cert_domain': internet_nl_requirement_tilde_value_format,
-
+    "internet_nl_mail_starttls_tls_available": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_auth_spf_exist": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_auth_dkim_exist": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_auth_dmarc_exist": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_ipv6_mx_reach": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_ipv6_ns_reach": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_ipv6_ns_address": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_ipv6_mx_address": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_dnssec_mx_exist": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_dnssec_mx_valid": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_dnssec_mailto_valid": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_dnssec_mailto_exist": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_auth_spf_policy": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_auth_dmarc_policy": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_tls_keyexchange": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_tls_compress": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_cert_sig": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_cert_pubkey": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_dane_rollover": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_tls_secreneg": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_dane_exist": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_dane_valid": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_tls_ciphers": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_tls_clientreneg": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_cert_chain": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_tls_version": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_cert_domain": internet_nl_requirement_tilde_value_format,
     # categories use the old format
-    'internet_nl_mail_dashboard_tls': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dashboard_auth': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dashboard_dnssec': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dashboard_ipv6': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dashboard_overall_score': internet_nl_score,
-
-    'internet_nl_mail_legacy_dmarc': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_dkim': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_spf': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_dmarc_policy': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_spf_policy': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_start_tls': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_start_tls_ncsc': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_dnssec_email_domain': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_dnssec_mx': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_dane': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_ipv6_nameserver': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_ipv6_mailserver': internet_nl_requirement_tilde_value_format,
-
-
+    "internet_nl_mail_dashboard_tls": internet_nl_generic_boolean_value,
+    "internet_nl_mail_dashboard_auth": internet_nl_generic_boolean_value,
+    "internet_nl_mail_dashboard_dnssec": internet_nl_generic_boolean_value,
+    "internet_nl_mail_dashboard_ipv6": internet_nl_generic_boolean_value,
+    "internet_nl_mail_dashboard_overall_score": internet_nl_score,
+    "internet_nl_mail_legacy_dmarc": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_dkim": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_spf": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_dmarc_policy": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_spf_policy": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_start_tls": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_start_tls_ncsc": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_dnssec_email_domain": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_dnssec_mx": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_dane": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_ipv6_nameserver": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_ipv6_mailserver": internet_nl_requirement_tilde_value_format,
     # internet nl web has: 23 views, 1 score, 3 categories, 7 auto generated = 34
-    'internet_nl_web_ipv6_ws_similar': internet_nl_requirement_tilde_value_format,
-
-    'internet_nl_web_ipv6_ws_address': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_ipv6_ns_reach': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_ipv6_ws_reach': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_ipv6_ns_address': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_dnssec_valid': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_dnssec_exist': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_tls_keyexchange': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_tls_compress': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_cert_sig': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_cert_pubkey': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_dane_valid': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_tls_secreneg': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_http_hsts': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_http_compress': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_dane_exist': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_http_available': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_tls_ciphers': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_tls_clientreneg': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_tls_version': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_cert_chain': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_http_redirect': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_cert_domain': internet_nl_requirement_tilde_value_format,
-
+    "internet_nl_web_ipv6_ws_similar": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_ipv6_ws_address": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_ipv6_ns_reach": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_ipv6_ws_reach": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_ipv6_ns_address": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_dnssec_valid": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_dnssec_exist": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_tls_keyexchange": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_tls_compress": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_cert_sig": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_cert_pubkey": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_dane_valid": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_tls_secreneg": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_http_hsts": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_http_compress": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_dane_exist": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_http_available": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_tls_ciphers": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_tls_clientreneg": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_tls_version": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_cert_chain": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_http_redirect": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_cert_domain": internet_nl_requirement_tilde_value_format,
     # api v2.0 renamed 1 web field and added four new fields, todo: this should be rolled back to the old name:
     # this will be rolled back
-    'internet_nl_web_https_tls_compression': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_tls_cipherorder': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_tls_0rtt': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_tls_ocsp': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_https_tls_keyexchangehash': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_tls_cipherorder': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_tls_keyexchangehash': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_starttls_tls_0rtt': internet_nl_requirement_tilde_value_format,
-
+    "internet_nl_web_https_tls_compression": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_tls_cipherorder": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_tls_0rtt": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_tls_ocsp": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_https_tls_keyexchangehash": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_tls_cipherorder": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_tls_keyexchangehash": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_starttls_tls_0rtt": internet_nl_requirement_tilde_value_format,
     # Categories have an old format
-    'internet_nl_web_tls': internet_nl_generic_boolean_value,
-    'internet_nl_web_dnssec': internet_nl_generic_boolean_value,
-    'internet_nl_web_ipv6': internet_nl_generic_boolean_value,
-    'internet_nl_web_overall_score': internet_nl_score,
-
-    'internet_nl_web_legacy_dnssec': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_legacy_tls_available': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_legacy_tls_ncsc_web': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_legacy_https_enforced': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_legacy_hsts': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_legacy_ipv6_nameserver': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_legacy_ipv6_webserver': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_legacy_dane': internet_nl_requirement_tilde_value_format,
-
+    "internet_nl_web_tls": internet_nl_generic_boolean_value,
+    "internet_nl_web_dnssec": internet_nl_generic_boolean_value,
+    "internet_nl_web_ipv6": internet_nl_generic_boolean_value,
+    "internet_nl_web_overall_score": internet_nl_score,
+    "internet_nl_web_legacy_dnssec": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_legacy_tls_available": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_legacy_tls_ncsc_web": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_legacy_https_enforced": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_legacy_hsts": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_legacy_ipv6_nameserver": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_legacy_ipv6_webserver": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_legacy_dane": internet_nl_requirement_tilde_value_format,
     # Feature flags are not reported, these are the feature flags that should not be in any report. Only
     # the consequences of these flags will be visible.
     # these flags are removed in api 2.0, are kept for parsing old reports if need be.
-    'internet_nl_mail_non_sending_domain': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-    'internet_nl_mail_server_configured': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-    'internet_nl_mail_servers_testable': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-    'internet_nl_mail_starttls_dane_ta': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-
-    'internet_nl_mail_auth_dmarc_policy_only': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-    'internet_nl_mail_auth_dmarc_ext_destination': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-    'internet_nl_web_appsecpriv': internet_nl_generic_boolean_value,  # Added 24th of May 2019
-    'internet_nl_web_appsecpriv_csp': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-    'internet_nl_web_appsecpriv_referrer_policy': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-    'internet_nl_web_appsecpriv_x_content_type_options': internet_nl_requirement_tilde_value_format,  # Added 24th of Ma
-    'internet_nl_web_appsecpriv_x_frame_options': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-    'internet_nl_web_appsecpriv_x_xss_protection': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-
+    "internet_nl_mail_non_sending_domain": internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    "internet_nl_mail_server_configured": internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    "internet_nl_mail_servers_testable": internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    "internet_nl_mail_starttls_dane_ta": internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    "internet_nl_mail_auth_dmarc_policy_only": internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    "internet_nl_mail_auth_dmarc_ext_destination": internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    "internet_nl_web_appsecpriv": internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    "internet_nl_web_appsecpriv_csp": internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    "internet_nl_web_appsecpriv_referrer_policy": internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    "internet_nl_web_appsecpriv_x_content_type_options": internet_nl_requirement_tilde_value_format,  # Added 24th of Ma
+    "internet_nl_web_appsecpriv_x_frame_options": internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    "internet_nl_web_appsecpriv_x_xss_protection": internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
     # Extra fields in API 2.0:
-    'internet_nl_web_legacy_tls_1_3': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_mail_non_sending_domain': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_mail_server_testable': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_mail_server_reachable': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_domain_has_mx': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_tls_1_3': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_legacy_category_ipv6': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_legacy_category_ipv6': internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_legacy_tls_1_3": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_mail_non_sending_domain": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_mail_server_testable": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_mail_server_reachable": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_domain_has_mx": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_tls_1_3": internet_nl_requirement_tilde_value_format,
+    "internet_nl_mail_legacy_category_ipv6": internet_nl_requirement_tilde_value_format,
+    "internet_nl_web_legacy_category_ipv6": internet_nl_requirement_tilde_value_format,
 }
 
 
@@ -651,29 +667,31 @@ def get_severity(scan: Union[EndpointGenericScan, UrlGenericScan]):
     calculation = calculation_methods[scan.type](scan)
 
     if not calculation:
-        raise ValueError(f'No calculation created for scan {scan.type}')
+        raise ValueError(f"No calculation created for scan {scan.type}")
 
     # handle comply or explain
     # only when an explanation is given AND the explanation is still valid when creating the report.
-    calculation['is_explained'] = scan.comply_or_explain_is_explained
-    calculation['comply_or_explain_explanation'] = scan.comply_or_explain_explanation
+    calculation["is_explained"] = scan.comply_or_explain_is_explained
+    calculation["comply_or_explain_explanation"] = scan.comply_or_explain_explanation
     if scan.comply_or_explain_explained_on:
-        calculation['comply_or_explain_explained_on'] = scan.comply_or_explain_explained_on.isoformat()
+        calculation["comply_or_explain_explained_on"] = scan.comply_or_explain_explained_on.isoformat()
     else:
-        calculation['comply_or_explain_explained_on'] = ""
+        calculation["comply_or_explain_explained_on"] = ""
 
     if scan.comply_or_explain_explanation_valid_until:
-        calculation['comply_or_explain_explanation_valid_until'] = \
-            scan.comply_or_explain_explanation_valid_until.isoformat()
+        calculation[
+            "comply_or_explain_explanation_valid_until"
+        ] = scan.comply_or_explain_explanation_valid_until.isoformat()
     else:
-        calculation['comply_or_explain_explanation_valid_until'] = ""
+        calculation["comply_or_explain_explanation_valid_until"] = ""
 
     valid = scan.comply_or_explain_is_explained and (
-        scan.comply_or_explain_explanation_valid_until > datetime.now(pytz.utc))
-    calculation['comply_or_explain_valid_at_time_of_report'] = valid
+        scan.comply_or_explain_explanation_valid_until > datetime.now(pytz.utc)
+    )
+    calculation["comply_or_explain_valid_at_time_of_report"] = valid
 
     # tracking information for the scan (which also might allow upgrading the scan in the future)
-    calculation['scan'] = scan.pk
-    calculation['scan_type'] = scan.type
+    calculation["scan"] = scan.pk
+    calculation["scan_type"] = scan.type
 
     return calculation

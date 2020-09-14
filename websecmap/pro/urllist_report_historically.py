@@ -12,14 +12,17 @@ from websecmap.pro.urllist_report import rate_urllist_on_moment
 log = logging.getLogger(__package__)
 
 
-def compose_task(organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(),
-                 ) -> Task:
+def compose_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+) -> Task:
     urllists = UrlList.objects.filter()
     tasks = [rate_urllists_historically.si([urllist]) for urllist in urllists]
     return group(tasks)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def rate_urllists_historically(urllists: List[UrlList]):
 
     # take into account it's possible urls have been added that influence the history of this rating.

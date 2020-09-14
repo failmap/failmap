@@ -6,13 +6,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0016_auto_20180420_0812'),
+        ("map", "0016_auto_20180420_0812"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='configuration',
-            old_name='is_default_for_this_country',
-            new_name='is_the_default_option',
+            model_name="configuration",
+            old_name="is_default_for_this_country",
+            new_name="is_the_default_option",
         ),
     ]

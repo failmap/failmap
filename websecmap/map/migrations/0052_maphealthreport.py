@@ -8,21 +8,27 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0051_auto_20200530_1456'),
+        ("map", "0051_auto_20200530_1456"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MapHealthReport',
+            name="MapHealthReport",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('at_when', models.DateField()),
-                ('percentage_up_to_date', models.FloatField()),
-                ('percentage_out_of_date', models.FloatField()),
-                ('outdate_period_in_hours', models.IntegerField()),
-                ('detailed_report', jsonfield.fields.JSONField()),
-                ('map_configuration', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                                        to='map.Configuration', verbose_name='Map Configuration')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("at_when", models.DateField()),
+                ("percentage_up_to_date", models.FloatField()),
+                ("percentage_out_of_date", models.FloatField()),
+                ("outdate_period_in_hours", models.IntegerField()),
+                ("detailed_report", jsonfield.fields.JSONField()),
+                (
+                    "map_configuration",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="map.Configuration",
+                        verbose_name="Map Configuration",
+                    ),
+                ),
             ],
         ),
     ]

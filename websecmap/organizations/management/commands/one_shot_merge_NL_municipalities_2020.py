@@ -28,7 +28,9 @@ class Command(BaseCommand):
         merge(
             source_organizations_names=["Dongeradeel", "Ferwerderadiel", "Kollumerland en Nieuwkruisland"],
             target_organization_name="Noardeast-Fryslân",
-            when=merge_date, organization_type="municipality", country="NL"
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
         )
 
         """
@@ -37,7 +39,9 @@ class Command(BaseCommand):
         merge(
             source_organizations_names=["Geldermalsen", "Lingewaal", "Neerijnen"],
             target_organization_name="West Betuwe",
-            when=merge_date, organization_type="municipality", country="NL"
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
         )
 
         """
@@ -47,7 +51,9 @@ class Command(BaseCommand):
         merge(
             source_organizations_names=["Haren", "Ten Boer"],
             target_organization_name="Groningen",
-            when=merge_date, organization_type="municipality", country="NL"
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
         )
 
         """
@@ -57,7 +63,9 @@ class Command(BaseCommand):
         merge(
             source_organizations_names=["Bedum", "De Marne", "Eemsmond", "Winsum"],
             target_organization_name="Het Hogeland",
-            when=merge_date, organization_type="municipality", country="NL"
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
         )
 
         """
@@ -68,7 +76,9 @@ class Command(BaseCommand):
         merge(
             source_organizations_names=["Grootegast", "Leek", "Marum", "Zuidhorn"],
             target_organization_name="Westerkwartier",
-            when=merge_date, organization_type="municipality", country="NL"
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
         )
 
         """
@@ -77,7 +87,9 @@ class Command(BaseCommand):
         merge(
             source_organizations_names=["Nuth", "Onderbanken", "Schinnen"],
             target_organization_name="Beekdaelen",
-            when=merge_date, organization_type="municipality", country="NL"
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
         )
 
         """
@@ -86,7 +98,9 @@ class Command(BaseCommand):
         merge(
             source_organizations_names=["Aalburg", "Werkendam", "Woudrichem"],
             target_organization_name="Altena",
-            when=merge_date, organization_type="municipality", country="NL"
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
         )
 
         """
@@ -97,7 +111,9 @@ class Command(BaseCommand):
         merge(
             source_organizations_names=["Haarlemmerliede en Spaarnwoude"],
             target_organization_name="Haarlemmermeer",
-            when=merge_date, organization_type="municipality", country="NL"
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
         )
 
         """
@@ -108,7 +124,9 @@ class Command(BaseCommand):
         merge(
             source_organizations_names=["Leerdam", "Zederik", "Vianen"],
             target_organization_name="Vijfheerenlanden",
-            when=merge_date, organization_type="municipality", country="NL"
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
         )
 
         """
@@ -118,7 +136,9 @@ class Command(BaseCommand):
         merge(
             source_organizations_names=["Binnenmaas", "Cromstrijen", "Korendijk", "Oud-Beijerland", "Strijen"],
             target_organization_name="Hoeksche Waard",
-            when=merge_date, organization_type="municipality", country="NL"
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
         )
 
         """
@@ -127,7 +147,9 @@ class Command(BaseCommand):
         merge(
             source_organizations_names=["Giessenlanden", "Molenwaard"],
             target_organization_name="Molenlanden",
-            when=merge_date, organization_type="municipality", country="NL"
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
         )
 
         """
@@ -137,25 +159,32 @@ class Command(BaseCommand):
         merge(
             source_organizations_names=["Noordwijkerhout"],
             target_organization_name="Noordwijk",
-            when=merge_date, organization_type="municipality", country="NL"
+            when=merge_date,
+            organization_type="municipality",
+            country="NL",
         )
 
         update_coordinates(countries=["NL"], organization_types=["municipality"], when=merge_date)
 
-        organizations = Organization.objects.all().filter(name__in=[
-            "Noardeast-Fryslân",
-            "West Betuwe",
-            "Groningen",
-            "Het Hogeland",
-            "Westerkwartier",
-            "Beekdaelen",
-            "Altena",
-            "Haarlemmermeer",
-            "Vijfheerenlanden",
-            "Hoeksche Waard",
-            "Molenlanden",
-            "Noordwijk"
-        ], is_dead=False, country="NL", type__name="municipality")
+        organizations = Organization.objects.all().filter(
+            name__in=[
+                "Noardeast-Fryslân",
+                "West Betuwe",
+                "Groningen",
+                "Het Hogeland",
+                "Westerkwartier",
+                "Beekdaelen",
+                "Altena",
+                "Haarlemmermeer",
+                "Vijfheerenlanden",
+                "Hoeksche Waard",
+                "Molenlanden",
+                "Noordwijk",
+            ],
+            is_dead=False,
+            country="NL",
+            type__name="municipality",
+        )
 
         recreate_organization_reports(organizations)
 

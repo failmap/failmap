@@ -8,31 +8,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0004_auto_20170927_1222'),
+        ("map", "0004_auto_20170927_1222"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organizationrating',
-            name='calculation',
+            model_name="organizationrating",
+            name="calculation",
             field=models.TextField(
-                help_text='Contains JSON with a calculation of all scanners at this moment, for all urls of this organization. This can be a lot.'),
+                help_text="Contains JSON with a calculation of all scanners at this moment, for all urls of this organization. This can be a lot."
+            ),
         ),
         migrations.AlterField(
-            model_name='organizationrating',
-            name='rating',
+            model_name="organizationrating",
+            name="rating",
             field=models.IntegerField(
-                help_text='Amount of points scored by the organization based on a sum of all URL ratings at this moment. Rating -1 is used as a default first rating, which are displayed in gray on the map. All next ratings are between 0 (perfect) and 2147483647.'),
+                help_text="Amount of points scored by the organization based on a sum of all URL ratings at this moment. Rating -1 is used as a default first rating, which are displayed in gray on the map. All next ratings are between 0 (perfect) and 2147483647."
+            ),
         ),
         migrations.AlterField(
-            model_name='urlrating',
-            name='calculation',
-            field=models.TextField(help_text='Contains JSON with a calculation of all scanners at this moment. The rating can be spread out over multiple endpoints, which might look a bit confusing. Yet it is perfectly possible as some urls change their IP every five minutes and scans are spread out over days.'),
+            model_name="urlrating",
+            name="calculation",
+            field=models.TextField(
+                help_text="Contains JSON with a calculation of all scanners at this moment. The rating can be spread out over multiple endpoints, which might look a bit confusing. Yet it is perfectly possible as some urls change their IP every five minutes and scans are spread out over days."
+            ),
         ),
         migrations.AlterField(
-            model_name='urlrating',
-            name='rating',
+            model_name="urlrating",
+            name="rating",
             field=models.IntegerField(
-                help_text="Amount of points scored after rating the URL. Ratings are usually positive, yet this is not a positive integerfield because we might use -1 as an 'unknown' default value for when there are no ratings at all. Ratings can go from 0 up to 2147483647."),
+                help_text="Amount of points scored after rating the URL. Ratings are usually positive, yet this is not a positive integerfield because we might use -1 as an 'unknown' default value for when there are no ratings at all. Ratings can go from 0 up to 2147483647."
+            ),
         ),
     ]

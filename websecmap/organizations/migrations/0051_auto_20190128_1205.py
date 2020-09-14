@@ -6,14 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0050_auto_20190128_1055'),
+        ("organizations", "0050_auto_20190128_1055"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='dataset',
-            name='type',
-            field=models.CharField(blank=True, choices=[('excel', 'Excel'), ('dutch_government', 'Dutch Government')],
-                                   default='excel', help_text='To determine what importer is needed.', max_length=255, null=True),
+            model_name="dataset",
+            name="type",
+            field=models.CharField(
+                blank=True,
+                choices=[("excel", "Excel"), ("dutch_government", "Dutch Government")],
+                default="excel",
+                help_text="To determine what importer is needed.",
+                max_length=255,
+                null=True,
+            ),
         ),
     ]

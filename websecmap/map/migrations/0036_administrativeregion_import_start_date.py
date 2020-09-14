@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0035_auto_20190124_1824'),
+        ("map", "0035_auto_20190124_1824"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='administrativeregion',
-            name='import_start_date',
+            model_name="administrativeregion",
+            name="import_start_date",
             field=models.DateTimeField(blank=True, default=datetime.datetime.now),
         ),
     ]

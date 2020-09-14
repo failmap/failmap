@@ -8,18 +8,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0003_tlsqualysscan_rating_determined_on'),
+        ("scanners", "0003_tlsqualysscan_rating_determined_on"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpoint',
-            name='is_dead_reason',
+            model_name="endpoint",
+            name="is_dead_reason",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='endpoint',
-            name='is_dead_since',
+            model_name="endpoint",
+            name="is_dead_since",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

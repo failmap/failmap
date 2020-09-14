@@ -7,24 +7,38 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0040_auto_20180523_1856'),
+        ("scanners", "0040_auto_20180523_1856"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TlsScan',
+            name="TlsScan",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('rating', models.CharField(default='', help_text='F, D, C, B, A-, A, A+, T', max_length=3)),
-                ('rating_no_trust', models.CharField(default='', help_text='rating when trust issues are ignored', max_length=3)),
-                ('explanation', models.CharField(default=0,
-                                                 help_text='Short explanation from the scanner on how the rating came to be.', max_length=255)),
-                ('evidence', models.TextField(default=0, help_text='Content that might help understanding the result.', max_length=9001)),
-                ('scan_date', models.DateField(auto_now_add=True)),
-                ('scan_time', models.TimeField(auto_now_add=True)),
-                ('last_scan_moment', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('rating_determined_on', models.DateTimeField()),
-                ('endpoint', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='scanners.Endpoint')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("rating", models.CharField(default="", help_text="F, D, C, B, A-, A, A+, T", max_length=3)),
+                (
+                    "rating_no_trust",
+                    models.CharField(default="", help_text="rating when trust issues are ignored", max_length=3),
+                ),
+                (
+                    "explanation",
+                    models.CharField(
+                        default=0,
+                        help_text="Short explanation from the scanner on how the rating came to be.",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "evidence",
+                    models.TextField(
+                        default=0, help_text="Content that might help understanding the result.", max_length=9001
+                    ),
+                ),
+                ("scan_date", models.DateField(auto_now_add=True)),
+                ("scan_time", models.TimeField(auto_now_add=True)),
+                ("last_scan_moment", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("rating_determined_on", models.DateTimeField()),
+                ("endpoint", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="scanners.Endpoint")),
             ],
         ),
     ]

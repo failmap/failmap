@@ -10,7 +10,8 @@ log = logging.getLogger(__package__)
 
 def _update_map_health_reports(days: int = 366, countries: List = None, organization_types: List = None):
     update_map_health_reports(
-        PUBLISHED_SCAN_TYPES, days=days, countries=countries, organization_types=organization_types)
+        PUBLISHED_SCAN_TYPES, days=days, countries=countries, organization_types=organization_types
+    )
 
 
 class Command(CalculateCommand):

@@ -8,14 +8,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0003_auto_20171109_1427'),
+        ("app", "0003_auto_20171109_1427"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='job',
-            name='result_id',
-            field=models.CharField(blank=True, help_text='celery asyncresult ID for tracing task',
-                                   max_length=255, null=True, unique=True),
+            model_name="job",
+            name="result_id",
+            field=models.CharField(
+                blank=True, help_text="celery asyncresult ID for tracing task", max_length=255, null=True, unique=True
+            ),
         ),
     ]

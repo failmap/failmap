@@ -8,12 +8,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0001_initial'),
+        ("map", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='organizationrating',
-            options={'get_latest_by': 'when', 'managed': True},
+            name="organizationrating",
+            options={"get_latest_by": "when", "managed": True},
         ),
     ]

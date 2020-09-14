@@ -21,9 +21,9 @@ PROXY_SERVER_TIMEOUT = 30
 log = logging.getLogger(__name__)
 
 
-@app.task(queue='claim_proxy')
+@app.task(queue="claim_proxy")
 def claim_proxy(tracing_label=""):
-    """ A proxy should first be claimed and then checked. If not, several scans might use the same proxy and thus
+    """A proxy should first be claimed and then checked. If not, several scans might use the same proxy and thus
     crash.
 
     This is run on a dedicated worker as this is a blocking task.
@@ -43,17 +43,21 @@ def claim_proxy(tracing_label=""):
             with transaction.atomic():
 
                 # proxies can die if they are limited too often.
-                proxy = ScanProxy.objects.all().filter(
-                    is_dead=False,
-                    currently_used_in_tls_qualys_scan=False,
-                    manually_disabled=False,
-                    request_speed_in_ms__gte=1,
-
-                    # proxies that are too slow tend to have timeout errors
-                    # self hosted proxies are between 150 and 300 ms.
-                    # more proxy checks at the same time make slower results... disabled for now
-                    # request_speed_in_ms__lte=2000
-                ).order_by('request_speed_in_ms').first()
+                proxy = (
+                    ScanProxy.objects.all()
+                    .filter(
+                        is_dead=False,
+                        currently_used_in_tls_qualys_scan=False,
+                        manually_disabled=False,
+                        request_speed_in_ms__gte=1,
+                        # proxies that are too slow tend to have timeout errors
+                        # self hosted proxies are between 150 and 300 ms.
+                        # more proxy checks at the same time make slower results... disabled for now
+                        # request_speed_in_ms__lte=2000
+                    )
+                    .order_by("request_speed_in_ms")
+                    .first()
+                )
 
                 if proxy:
 
@@ -61,7 +65,7 @@ def claim_proxy(tracing_label=""):
                     log.debug(f"Proxy {proxy.id} claimed for {tracing_label} et al...")
                     proxy.currently_used_in_tls_qualys_scan = True
                     proxy.last_claim_at = datetime.now(pytz.utc)
-                    proxy.save(update_fields=['currently_used_in_tls_qualys_scan', 'last_claim_at'])
+                    proxy.save(update_fields=["currently_used_in_tls_qualys_scan", "last_claim_at"])
 
                     # we can't check for proxy quality here, as that will fill up the strorage with long tasks.
                     # instead run the proxy checking worker every hour or so to make sure the list stays fresh.
@@ -78,8 +82,10 @@ def claim_proxy(tracing_label=""):
                     # to get a proxy every 2 minutes (30/h). This can lead up to 30.000 issues per day.
                     # When you have over 500 proxy requests, things are off. It's better to start with a clean
                     # slate then.
-                    log.debug(f'No proxies available for {tracing_label} et al. '
-                              f'You can add more proxies to solve this. Will try again in 60 seconds.')
+                    log.debug(
+                        f"No proxies available for {tracing_label} et al. "
+                        f"You can add more proxies to solve this. Will try again in 60 seconds."
+                    )
 
         except BaseException as e:
             # In some rare cases this method crashes, while it should be as reliable as can be.
@@ -90,15 +96,15 @@ def claim_proxy(tracing_label=""):
         sleep(60)
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def release_proxy(proxy: ScanProxy, tracing_label=""):
     """As the claim proxy queue is ALWAYS filled, you cannot insert release proxy commands there..."""
     log.debug(f"Releasing proxy {proxy.id} claimed for {tracing_label} et al...")
     proxy.currently_used_in_tls_qualys_scan = False
-    proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
+    proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
 
 
-@app.task(queue='storage')
+@app.task(queue="storage")
 def check_all_proxies():
     # celery doesn't work with asyncio. But it does work with threadpools.
 
@@ -122,14 +128,15 @@ def release_claim_after_timeout(proxy: ScanProxy):
     # And in bad cases only double that. So let's quadruple that time and then just release the proxy automatically
     # because of a timeout. Last claim at can be empty.
     if proxy.last_claim_at:
-        if all([proxy.last_claim_at < datetime.now(pytz.utc) - timedelta(hours=3),
-                proxy.currently_used_in_tls_qualys_scan]):
+        if all(
+            [proxy.last_claim_at < datetime.now(pytz.utc) - timedelta(hours=3), proxy.currently_used_in_tls_qualys_scan]
+        ):
             log.warning(f"Force released proxy {proxy} because of a claim timeout period of 3 hours.")
             proxy.currently_used_in_tls_qualys_scan = False
-            proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
+            proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
 
 
-@app.task(queue='internet')
+@app.task(queue="internet")
 def check_proxy(proxy: ScanProxy):
     # todo: service_provider_status should stop after a certain amount of requests.
     # Note that you MUST USE HTTPS proxies for HTTPS traffic! Otherwise your normal IP is used.
@@ -153,18 +160,19 @@ def check_proxy(proxy: ScanProxy):
             proxies={proxy.protocol: proxy.address},
             timeout=(PROXY_NETWORK_TIMEOUT, PROXY_SERVER_TIMEOUT),
             headers={
-                'User-Agent': f"Request through proxy {proxy.id}",
-                'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                'Accept-Language': 'en-US,en;q=0.5',
-                'DNT': '1',
-            }
+                "User-Agent": f"Request through proxy {proxy.id}",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.5",
+                "DNT": "1",
+            },
         )
 
     # Storage is handled async, because you might not be on the machine that is able to save data.
     except ProxyError:
         log.debug("ProxyError, Perhaps because: proxy does not support https.")
-        store_check_result.apply_async([proxy, "ProxyError, Perhaps because: proxy does not support https.", True,
-                                        datetime.now(pytz.utc)])
+        store_check_result.apply_async(
+            [proxy, "ProxyError, Perhaps because: proxy does not support https.", True, datetime.now(pytz.utc)]
+        )
         return False
     except SSLError:
         log.debug("SSL error received.")
@@ -203,28 +211,56 @@ def check_proxy(proxy: ScanProxy):
         store_check_result.apply_async([proxy, "No result, proxy not reachable?", True, datetime.now(pytz.utc)])
         return False
 
-    if api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
+    if api_results["max"] < 20 or api_results["this-client-max"] < 20 or api_results["current"] > 19:
         log.debug("Out of capacity %s." % proxy)
-        store_check_result.apply_async([proxy, "Out of capacity.", True, datetime.now(pytz.utc),
-                                        api_results['current'], api_results['max'], api_results['this-client-max']])
+        store_check_result.apply_async(
+            [
+                proxy,
+                "Out of capacity.",
+                True,
+                datetime.now(pytz.utc),
+                api_results["current"],
+                api_results["max"],
+                api_results["this-client-max"],
+            ]
+        )
         return False
     else:
         # todo: Request time via the proxy. Just getting google.com might take a lot of time...
         try:
-            speed = requests.get('https://apple.com',
-                                 proxies={proxy.protocol: proxy.address},
-                                 timeout=(PROXY_NETWORK_TIMEOUT, PROXY_SERVER_TIMEOUT)
-                                 ).elapsed.total_seconds()
+            speed = requests.get(
+                "https://apple.com",
+                proxies={proxy.protocol: proxy.address},
+                timeout=(PROXY_NETWORK_TIMEOUT, PROXY_SERVER_TIMEOUT),
+            ).elapsed.total_seconds()
             log.debug("Website retrieved.")
         except ProxyError:
             log.debug("Could not retrieve website.")
-            store_check_result.apply_async([proxy, "Could not retrieve website.", True, datetime.now(pytz.utc),
-                                            api_results['current'], api_results['max'], api_results['this-client-max']])
+            store_check_result.apply_async(
+                [
+                    proxy,
+                    "Could not retrieve website.",
+                    True,
+                    datetime.now(pytz.utc),
+                    api_results["current"],
+                    api_results["max"],
+                    api_results["this-client-max"],
+                ]
+            )
             return False
         except ConnectTimeout:
             log.debug("Proxy too slow for standard site.")
-            store_check_result.apply_async([proxy, "Proxy too slow for standard site.", True, datetime.now(pytz.utc),
-                                            api_results['current'], api_results['max'], api_results['this-client-max']])
+            store_check_result.apply_async(
+                [
+                    proxy,
+                    "Proxy too slow for standard site.",
+                    True,
+                    datetime.now(pytz.utc),
+                    api_results["current"],
+                    api_results["max"],
+                    api_results["this-client-max"],
+                ]
+            )
             return False
 
         # todo: how to check the headers the proxy sends to the client? That requires a server to receive
@@ -232,16 +268,32 @@ def check_proxy(proxy: ScanProxy):
         # otherwise the data will be coupled to a single client.
 
         log.debug(f"Proxy accessible. Capacity available. {proxy.id}.")
-        store_check_result.apply_async([proxy, "Proxy accessible. Capacity available.", False, datetime.now(pytz.utc),
-                                        api_results['current'], api_results['max'], api_results['this-client-max'],
-                                        int(speed * 1000)])
+        store_check_result.apply_async(
+            [
+                proxy,
+                "Proxy accessible. Capacity available.",
+                False,
+                datetime.now(pytz.utc),
+                api_results["current"],
+                api_results["max"],
+                api_results["this-client-max"],
+                int(speed * 1000),
+            ]
+        )
         return True
 
 
 @app.task(queue="storage")
-def store_check_result(proxy: ScanProxy, check_result, is_dead: bool, check_result_date,
-                       qualys_capacity_current=-1, qualys_capacity_max=-1,
-                       qualys_capacity_this_client=-1, request_speed_in_ms=-1):
+def store_check_result(
+    proxy: ScanProxy,
+    check_result,
+    is_dead: bool,
+    check_result_date,
+    qualys_capacity_current=-1,
+    qualys_capacity_max=-1,
+    qualys_capacity_this_client=-1,
+    request_speed_in_ms=-1,
+):
     """Separates this to storage, so that capacity scans can be performed on another worker."""
 
     proxy.is_dead = is_dead
@@ -263,15 +315,15 @@ def service_provider_status(proxy):
         params={},
         timeout=(PROXY_NETWORK_TIMEOUT, PROXY_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
         headers={
-            'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) "
-                          "Chrome/79.0.3945.130 Safari/537.36",
-            'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,"
-                      "*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-            'Accept-Language': 'en-US,en;q=0.5',
-            'DNT': '1',
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/79.0.3945.130 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,"
+            "*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "Accept-Language": "en-US,en;q=0.5",
+            "DNT": "1",
         },
         proxies={proxy.protocol: proxy.address},
-        cookies={}
+        cookies={},
     )
 
     # inspect to see if there are cookies or other tracking variables.
@@ -318,13 +370,17 @@ def service_provider_status(proxy):
     # log.debug(vars(response))  # extreme debugging
     # The x-max-assements etc have been removed from the response headers in december 2019.
     # always return the max available. And make sure the claiming works as intended.
-    log.debug("Status: max: %s, current: %s, this client: %s, proxy: %s",
-              response.headers.get('X-Max-Assessments', 25),
-              response.headers.get('X-Current-Assessments', 0),
-              response.headers.get('X-ClientMaxAssessments', 25),
-              proxy.id)
+    log.debug(
+        "Status: max: %s, current: %s, this client: %s, proxy: %s",
+        response.headers.get("X-Max-Assessments", 25),
+        response.headers.get("X-Current-Assessments", 0),
+        response.headers.get("X-ClientMaxAssessments", 25),
+        proxy.id,
+    )
 
-    return {'max': int(response.headers.get('X-Max-Assessments', 25)),
-            'current': int(response.headers.get('X-Current-Assessments', 0)),
-            'this-client-max': int(response.headers.get('X-ClientMaxAssessments', 25)),
-            'data': response.json()}
+    return {
+        "max": int(response.headers.get("X-Max-Assessments", 25)),
+        "current": int(response.headers.get("X-Current-Assessments", 0)),
+        "this-client-max": int(response.headers.get("X-ClientMaxAssessments", 25)),
+        "data": response.json(),
+    }

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0029_auto_20181029_0946'),
+        ("map", "0029_auto_20181029_0946"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='configuration',
-            name='is_reported',
-            field=models.BooleanField(default=False, help_text='Whether this combination is shown on the map.'),
+            model_name="configuration",
+            name="is_reported",
+            field=models.BooleanField(default=False, help_text="Whether this combination is shown on the map."),
         ),
     ]

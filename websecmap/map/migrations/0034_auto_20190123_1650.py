@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map', '0033_auto_20190123_1613'),
+        ("map", "0033_auto_20190123_1613"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='administrativeregion',
-            name='import_message',
+            model_name="administrativeregion",
+            name="import_message",
             field=models.CharField(
-                default='', help_text='Information returned from the import features.', max_length=255),
+                default="", help_text="Information returned from the import features.", max_length=255
+            ),
         ),
     ]

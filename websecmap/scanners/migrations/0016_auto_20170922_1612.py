@@ -9,69 +9,100 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0015_auto_20170915_0944'),
+        ("scanners", "0015_auto_20170915_0944"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='EndpointGenericScan',
+            name="EndpointGenericScan",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(
-                    help_text='The type of scan that was performed. Instead of having different tables for eachscan, this label separates the scans.', max_length=60)),
-                ('domain', models.CharField(help_text='Used when there is no known endpoint.', max_length=255)),
-                ('rating', models.CharField(
-                    default=0, help_text='Preferably an integer. Keep ratings over time consistent.', max_length=3)),
-                ('explanation', models.CharField(
-                    default=0, help_text='Short explanation from the scanner on how the rating came to be.', max_length=255)),
-                ('last_scan_moment', models.DateTimeField(auto_now_add=True, db_index=True,
-                                                          help_text='This gets updated when all the other fields stay the same. If one changes, anew scan will be saved, obsoleting the older ones.')),
-                ('rating_determined_on', models.DateTimeField(
-                    help_text='This is when the current rating was first discovered. It may be obsoleted byanother rating or explanation (which might have the same rating).')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "type",
+                    models.CharField(
+                        help_text="The type of scan that was performed. Instead of having different tables for eachscan, this label separates the scans.",
+                        max_length=60,
+                    ),
+                ),
+                ("domain", models.CharField(help_text="Used when there is no known endpoint.", max_length=255)),
+                (
+                    "rating",
+                    models.CharField(
+                        default=0, help_text="Preferably an integer. Keep ratings over time consistent.", max_length=3
+                    ),
+                ),
+                (
+                    "explanation",
+                    models.CharField(
+                        default=0,
+                        help_text="Short explanation from the scanner on how the rating came to be.",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "last_scan_moment",
+                    models.DateTimeField(
+                        auto_now_add=True,
+                        db_index=True,
+                        help_text="This gets updated when all the other fields stay the same. If one changes, anew scan will be saved, obsoleting the older ones.",
+                    ),
+                ),
+                (
+                    "rating_determined_on",
+                    models.DateTimeField(
+                        help_text="This is when the current rating was first discovered. It may be obsoleted byanother rating or explanation (which might have the same rating)."
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='EndpointGenericScanScratchpad',
+            name="EndpointGenericScanScratchpad",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(
-                    help_text='The type of scan that was performed. Instead of having different tables for eachscan, this label separates the scans.', max_length=60)),
-                ('domain', models.CharField(help_text='Used when there is no known Endpoint.', max_length=255)),
-                ('when', models.DateTimeField(auto_now_add=True)),
-                ('data', models.TextField(help_text='Whatever data to dump for debugging purposes.')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "type",
+                    models.CharField(
+                        help_text="The type of scan that was performed. Instead of having different tables for eachscan, this label separates the scans.",
+                        max_length=60,
+                    ),
+                ),
+                ("domain", models.CharField(help_text="Used when there is no known Endpoint.", max_length=255)),
+                ("when", models.DateTimeField(auto_now_add=True)),
+                ("data", models.TextField(help_text="Whatever data to dump for debugging purposes.")),
             ],
         ),
         migrations.RemoveField(
-            model_name='tlsqualysscan',
-            name='pending',
+            model_name="tlsqualysscan",
+            name="pending",
         ),
         migrations.RemoveField(
-            model_name='tlsqualysscan',
-            name='pending_since',
+            model_name="tlsqualysscan",
+            name="pending_since",
         ),
         migrations.AlterField(
-            model_name='endpoint',
-            name='ip',
+            model_name="endpoint",
+            name="ip",
             field=models.CharField(
-                help_text='IPv4 or IPv6 Address. Addresses have to be normalized to the compressed representation: removing as many zeros as possible. For example:  IPv6: abcd:0000:0000:00fd becomes abcd::fd, or IPv4: 127.000.000.001 = 127.0.0.1', max_length=255),
+                help_text="IPv4 or IPv6 Address. Addresses have to be normalized to the compressed representation: removing as many zeros as possible. For example:  IPv6: abcd:0000:0000:00fd becomes abcd::fd, or IPv4: 127.000.000.001 = 127.0.0.1",
+                max_length=255,
+            ),
         ),
         migrations.AlterField(
-            model_name='endpoint',
-            name='port',
-            field=models.IntegerField(default=443, help_text='Ports range from 1 to 65535.'),
+            model_name="endpoint",
+            name="port",
+            field=models.IntegerField(default=443, help_text="Ports range from 1 to 65535."),
         ),
         migrations.AlterField(
-            model_name='endpoint',
-            name='protocol',
+            model_name="endpoint",
+            name="protocol",
             field=models.CharField(
-                help_text='Mostly application layer protocols, such as HTTP, FTP,SSH and so on. For more, read here: https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol', max_length=20),
+                help_text="Mostly application layer protocols, such as HTTP, FTP,SSH and so on. For more, read here: https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol",
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='endpointgenericscan',
-            name='endpoint',
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to='scanners.Endpoint'),
+            model_name="endpointgenericscan",
+            name="endpoint",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="scanners.Endpoint"),
         ),
     ]

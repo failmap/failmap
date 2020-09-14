@@ -11,37 +11,37 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('organizations', '0003_auto_20170316_1036'),
+        ("organizations", "0003_auto_20170316_1036"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='OrganizationRating',
+            name="OrganizationRating",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('rating', models.IntegerField()),
-                ('when', models.DateTimeField()),
-                ('calculation', models.TextField()),
-                ('organization', models.ForeignKey(
-                    on_delete=django.db.models.deletion.PROTECT, to='organizations.Organization')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("rating", models.IntegerField()),
+                ("when", models.DateTimeField()),
+                ("calculation", models.TextField()),
+                (
+                    "organization",
+                    models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="organizations.Organization"),
+                ),
             ],
             options={
-                'managed': True,
+                "managed": True,
             },
         ),
         migrations.CreateModel(
-            name='UrlRating',
+            name="UrlRating",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('rating', models.IntegerField()),
-                ('when', models.DateTimeField()),
-                ('calculation', models.TextField()),
-                ('url', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='organizations.Url')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("rating", models.IntegerField()),
+                ("when", models.DateTimeField()),
+                ("calculation", models.TextField()),
+                ("url", models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="organizations.Url")),
             ],
             options={
-                'managed': True,
+                "managed": True,
             },
         ),
     ]

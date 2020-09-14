@@ -6,28 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0059_scanproxy_manually_disabled'),
+        ("scanners", "0059_scanproxy_manually_disabled"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='scanproxy',
-            name='qualys_capacity_current',
+            model_name="scanproxy",
+            name="qualys_capacity_current",
             field=models.IntegerField(default=-1),
         ),
         migrations.AddField(
-            model_name='scanproxy',
-            name='qualys_capacity_max',
+            model_name="scanproxy",
+            name="qualys_capacity_max",
             field=models.IntegerField(default=-1),
         ),
         migrations.AddField(
-            model_name='scanproxy',
-            name='qualys_capacity_this_client',
+            model_name="scanproxy",
+            name="qualys_capacity_this_client",
             field=models.IntegerField(default=-1),
         ),
         migrations.AddField(
-            model_name='scanproxy',
-            name='request_speed_in_ms',
+            model_name="scanproxy",
+            name="request_speed_in_ms",
             field=models.IntegerField(default=-1),
         ),
     ]

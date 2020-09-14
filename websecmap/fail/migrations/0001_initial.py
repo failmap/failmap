@@ -10,105 +10,96 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Coordinate',
+            name="Coordinate",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('geojsontype', models.CharField(blank=True,
-                                                 db_column='geoJsonType',
-                                                 max_length=20, null=True)),
-                ('area', models.CharField(max_length=10000)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("geojsontype", models.CharField(blank=True, db_column="geoJsonType", max_length=20, null=True)),
+                ("area", models.CharField(max_length=10000)),
             ],
             options={
-                'db_table': 'coordinate',
-                'managed': True,
+                "db_table": "coordinate",
+                "managed": True,
             },
         ),
         migrations.CreateModel(
-            name='Organization',
+            name="Organization",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('country', models.CharField(max_length=255)),
-                ('type', models.CharField(max_length=40)),
-                ('name', models.CharField(max_length=50)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("country", models.CharField(max_length=255)),
+                ("type", models.CharField(max_length=40)),
+                ("name", models.CharField(max_length=50)),
             ],
             options={
-                'db_table': 'organization',
-                'managed': True,
+                "db_table": "organization",
+                "managed": True,
             },
         ),
         migrations.CreateModel(
-            name='ScansDnssec',
+            name="ScansDnssec",
             fields=[
-                ('id', models.IntegerField(primary_key=True, serialize=False)),
-                ('url', models.CharField(max_length=150)),
-                ('has_dnssec', models.IntegerField()),
-                ('scanmoment', models.DateTimeField()),
-                ('rawoutput', models.TextField()),
+                ("id", models.IntegerField(primary_key=True, serialize=False)),
+                ("url", models.CharField(max_length=150)),
+                ("has_dnssec", models.IntegerField()),
+                ("scanmoment", models.DateTimeField()),
+                ("rawoutput", models.TextField()),
             ],
             options={
-                'db_table': 'scans_dnssec',
-                'managed': True,
+                "db_table": "scans_dnssec",
+                "managed": True,
             },
         ),
         migrations.CreateModel(
-            name='ScansSsllabs',
+            name="ScansSsllabs",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.CharField(max_length=255)),
-                ('servernaam', models.CharField(max_length=255)),
-                ('ipadres', models.CharField(max_length=255)),
-                ('poort', models.IntegerField()),
-                ('scandate', models.DateField()),
-                ('scantime', models.TimeField()),
-                ('scanmoment', models.DateTimeField()),
-                ('rating', models.CharField(max_length=3)),
-                ('ratingnotrust', models.CharField(
-                    db_column='ratingNoTrust', max_length=3)),
-                ('rawdata', models.TextField(db_column='rawData')),
-                ('isdead', models.IntegerField(db_column='isDead')),
-                ('isdeadsince', models.DateTimeField(db_column='isDeadSince')),
-                ('isdeadreason', models.CharField(
-                    db_column='isDeadReason', max_length=255)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("url", models.CharField(max_length=255)),
+                ("servernaam", models.CharField(max_length=255)),
+                ("ipadres", models.CharField(max_length=255)),
+                ("poort", models.IntegerField()),
+                ("scandate", models.DateField()),
+                ("scantime", models.TimeField()),
+                ("scanmoment", models.DateTimeField()),
+                ("rating", models.CharField(max_length=3)),
+                ("ratingnotrust", models.CharField(db_column="ratingNoTrust", max_length=3)),
+                ("rawdata", models.TextField(db_column="rawData")),
+                ("isdead", models.IntegerField(db_column="isDead")),
+                ("isdeadsince", models.DateTimeField(db_column="isDeadSince")),
+                ("isdeadreason", models.CharField(db_column="isDeadReason", max_length=255)),
             ],
             options={
-                'db_table': 'scans_ssllabs',
-                'managed': True,
+                "db_table": "scans_ssllabs",
+                "managed": True,
             },
         ),
         migrations.CreateModel(
-            name='Url',
+            name="Url",
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.CharField(max_length=150)),
-                ('isdead', models.IntegerField(db_column='isDead')),
-                ('isdeadsince', models.DateTimeField(db_column='isDeadSince')),
-                ('isdeadreason', models.CharField(
-                    db_column='isDeadReason', max_length=255)),
-                ('organization', models.ForeignKey(
-                    on_delete=django.db.models.deletion.CASCADE, to='fail.Organization')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("url", models.CharField(max_length=150)),
+                ("isdead", models.IntegerField(db_column="isDead")),
+                ("isdeadsince", models.DateTimeField(db_column="isDeadSince")),
+                ("isdeadreason", models.CharField(db_column="isDeadReason", max_length=255)),
+                (
+                    "organization",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="fail.Organization"),
+                ),
             ],
             options={
-                'db_table': 'url',
-                'managed': True,
+                "db_table": "url",
+                "managed": True,
             },
         ),
         migrations.AddField(
-            model_name='coordinate',
-            name='organization',
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to='fail.Organization'),
+            model_name="coordinate",
+            name="organization",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="fail.Organization"),
         ),
         migrations.AlterUniqueTogether(
-            name='url',
-            unique_together=set([('organization', 'url')]),
+            name="url",
+            unique_together=set([("organization", "url")]),
         ),
     ]

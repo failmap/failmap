@@ -9,38 +9,45 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0031_auto_20171116_1451'),
+        ("scanners", "0031_auto_20171116_1451"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='endpointgenericscan',
-            name='domain',
+            model_name="endpointgenericscan",
+            name="domain",
             field=models.CharField(
-                blank=True, help_text='Deprecated. Used when there is no known endpoint.', max_length=255),
+                blank=True, help_text="Deprecated. Used when there is no known endpoint.", max_length=255
+            ),
         ),
         migrations.AlterField(
-            model_name='endpointgenericscan',
-            name='endpoint',
-            field=models.ForeignKey(blank=True, null=True,
-                                    on_delete=django.db.models.deletion.CASCADE, to='scanners.Endpoint'),
+            model_name="endpointgenericscan",
+            name="endpoint",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="scanners.Endpoint"
+            ),
         ),
         migrations.AlterField(
-            model_name='endpointgenericscanscratchpad',
-            name='domain',
+            model_name="endpointgenericscanscratchpad",
+            name="domain",
             field=models.CharField(
-                blank=True, help_text='Deprecated. Used when there is no known Endpoint.', max_length=255),
+                blank=True, help_text="Deprecated. Used when there is no known Endpoint.", max_length=255
+            ),
         ),
         migrations.AlterField(
-            model_name='screenshot',
-            name='domain',
+            model_name="screenshot",
+            name="domain",
             field=models.CharField(
-                blank=True, help_text='Deprecated. Used when there is no known URL.', max_length=255),
+                blank=True, help_text="Deprecated. Used when there is no known URL.", max_length=255
+            ),
         ),
         migrations.AlterField(
-            model_name='urlip',
-            name='rdns_name',
+            model_name="urlip",
+            name="rdns_name",
             field=models.CharField(
-                blank=True, help_text='The reverse name can be a server name, containing a provider or anything else.It might contain the name of a yet undiscovered url or hint to a service.', max_length=255),
+                blank=True,
+                help_text="The reverse name can be a server name, containing a provider or anything else.It might contain the name of a yet undiscovered url or hint to a service.",
+                max_length=255,
+            ),
         ),
     ]

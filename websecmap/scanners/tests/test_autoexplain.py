@@ -10,47 +10,51 @@ from cryptography.x509.oid import NameOID
 
 import websecmap
 from websecmap.organizations.models import Url
-from websecmap.scanners.autoexplain import (autoexplain_trust_microsoft,
-                                            certificate_matches_microsoft_exception_policy)
+from websecmap.scanners.autoexplain import autoexplain_trust_microsoft, certificate_matches_microsoft_exception_policy
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
-log = logging.getLogger('websecmap')
+log = logging.getLogger("websecmap")
 
 
 def test_autoexplain_certificate(db):
-    url, created = Url.objects.all().get_or_create(url='autodiscover.arnhem.nl')
-    endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='https', port='443', ip_version=4)
+    url, created = Url.objects.all().get_or_create(url="autodiscover.arnhem.nl")
+    endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol="https", port="443", ip_version=4)
     endpointscan, created = EndpointGenericScan.objects.all().get_or_create(
         endpoint=endpoint,
-        rating='not trusted',
+        rating="not trusted",
         rating_determined_on=datetime.datetime.now(pytz.utc),
         is_the_latest_scan=True,
-        type='tls_qualys_certificate_trusted'
+        type="tls_qualys_certificate_trusted",
     )
 
     applicable_subdomains = {
-        'autodiscover': ['accepted.test.example'],
+        "autodiscover": ["accepted.test.example"],
     }
     trusted_organization = "Nonsense Corporation"
 
     # wrong subject
     assert False is certificate_matches_microsoft_exception_policy(
-        generate_certificate('subject'), endpointscan, applicable_subdomains, trusted_organization)
+        generate_certificate("subject"), endpointscan, applicable_subdomains, trusted_organization
+    )
 
     # wrong issuer
     assert False is certificate_matches_microsoft_exception_policy(
-        generate_certificate('issuer'), endpointscan, applicable_subdomains, trusted_organization)
+        generate_certificate("issuer"), endpointscan, applicable_subdomains, trusted_organization
+    )
 
     # valid in the future
     assert False is certificate_matches_microsoft_exception_policy(
-        generate_certificate('future'), endpointscan, applicable_subdomains, trusted_organization)
+        generate_certificate("future"), endpointscan, applicable_subdomains, trusted_organization
+    )
 
     # expired
     assert False is certificate_matches_microsoft_exception_policy(
-        generate_certificate('expired'), endpointscan, applicable_subdomains, trusted_organization)
+        generate_certificate("expired"), endpointscan, applicable_subdomains, trusted_organization
+    )
 
     assert True is certificate_matches_microsoft_exception_policy(
-        generate_certificate(), endpointscan, applicable_subdomains, trusted_organization)
+        generate_certificate(), endpointscan, applicable_subdomains, trusted_organization
+    )
 
 
 def generate_certificate(failure_mode: str = ""):
@@ -63,16 +67,18 @@ def generate_certificate(failure_mode: str = ""):
     builder = x509.CertificateBuilder()
 
     if failure_mode == "subject":
-        builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, u'some.other.subdomain')]))
+        builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, u"some.other.subdomain")]))
     else:
-        builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, u'accepted.test.example')]))
+        builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, u"accepted.test.example")]))
 
     if failure_mode == "issuer":
-        builder = builder.issuer_name(x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME,
-                                                                    u'Failure Corporation')]))
+        builder = builder.issuer_name(
+            x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"Failure Corporation")])
+        )
     else:
-        builder = builder.issuer_name(x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME,
-                                                                    u'Nonsense Corporation')]))
+        builder = builder.issuer_name(
+            x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"Nonsense Corporation")])
+        )
 
     if failure_mode == "future":
         builder = builder.not_valid_before(datetime.datetime.today() + one_day)
@@ -87,7 +93,7 @@ def generate_certificate(failure_mode: str = ""):
 
     builder = builder.serial_number(x509.random_serial_number())
     builder = builder.public_key(public_key)
-    builder = builder.add_extension(x509.SubjectAlternativeName([x509.DNSName(u'cryptography.io')]), critical=False)
+    builder = builder.add_extension(x509.SubjectAlternativeName([x509.DNSName(u"cryptography.io")]), critical=False)
     builder = builder.add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
     certificate = builder.sign(private_key=private_key, algorithm=hashes.SHA256(), backend=default_backend())
 
@@ -106,7 +112,7 @@ def generate_specific_certificate(subject="", issuer=""):
     builder = builder.not_valid_after(datetime.datetime.today() + (one_day * 30))
     builder = builder.serial_number(x509.random_serial_number())
     builder = builder.public_key(public_key)
-    builder = builder.add_extension(x509.SubjectAlternativeName([x509.DNSName(u'cryptography.io')]), critical=False)
+    builder = builder.add_extension(x509.SubjectAlternativeName([x509.DNSName(u"cryptography.io")]), critical=False)
     builder = builder.add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
     certificate = builder.sign(private_key=private_key, algorithm=hashes.SHA256(), backend=default_backend())
 
@@ -119,28 +125,28 @@ def fake_retrieve_certificate(*args, **kwargs):
 
 
 def test_autoexplain_including_headers(db, monkeypatch):
-    url, created = Url.objects.all().get_or_create(url='lyncdiscover.arnhem.nl')
-    endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='https', port='443', ip_version=4)
+    url, created = Url.objects.all().get_or_create(url="lyncdiscover.arnhem.nl")
+    endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol="https", port="443", ip_version=4)
     endpointscan, created = EndpointGenericScan.objects.all().get_or_create(
         endpoint=endpoint,
-        rating='not trusted',
+        rating="not trusted",
         rating_determined_on=datetime.datetime.now(pytz.utc),
         is_the_latest_scan=True,
-        type='tls_qualys_certificate_trusted'
+        type="tls_qualys_certificate_trusted",
     )
     header_scan_new, created = EndpointGenericScan.objects.all().get_or_create(
         endpoint=endpoint,
-        rating='not trusted',
+        rating="not trusted",
         rating_determined_on=datetime.datetime.now(pytz.utc),
         is_the_latest_scan=True,
-        type='http_security_header_x_content_type_options'
+        type="http_security_header_x_content_type_options",
     )
     header_scan_old, created = EndpointGenericScan.objects.all().get_or_create(
         endpoint=endpoint,
-        rating='not trusted',
+        rating="not trusted",
         rating_determined_on=datetime.datetime.now(pytz.utc),
         is_the_latest_scan=False,
-        type='http_security_header_x_content_type_options'
+        type="http_security_header_x_content_type_options",
     )
 
     assert endpointscan.comply_or_explain_is_explained is False

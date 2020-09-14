@@ -1,19 +1,18 @@
 import logging
 
 from websecmap.app.management.commands._private import DiscoverTaskCommand
-from websecmap.scanners.scanner import (dns_endpoints, dns_known_subdomains, dns_wildcards, ftp,
-                                        http, subdomains)
+from websecmap.scanners.scanner import dns_endpoints, dns_known_subdomains, dns_wildcards, ftp, http, subdomains
 
 log = logging.getLogger(__name__)
 
 
 scanners = {
-    'ftp': ftp,
-    'http': http,
-    'subdomains': subdomains,
-    'known_subdomains': dns_known_subdomains,
-    'dns_endpoints': dns_endpoints,
-    'wildcards': dns_wildcards,
+    "ftp": ftp,
+    "http": http,
+    "subdomains": subdomains,
+    "known_subdomains": dns_known_subdomains,
+    "dns_endpoints": dns_endpoints,
+    "wildcards": dns_wildcards,
 }
 
 
@@ -23,17 +22,17 @@ class Command(DiscoverTaskCommand):
     help = __doc__
 
     def add_arguments(self, parser):
-        parser.add_argument('scanner', nargs=1, help='The scanner you want to use.', choices=scanners)
+        parser.add_argument("scanner", nargs=1, help="The scanner you want to use.", choices=scanners)
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
 
         try:
-            if options['scanner'][0] not in scanners:
+            if options["scanner"][0] not in scanners:
                 print("Scanner does not exist. Please specify a scanner: %s " % scanners.keys())
                 return
 
-            self.scanner_module = scanners[options['scanner'][0]]
+            self.scanner_module = scanners[options["scanner"][0]]
             return super().handle(self, *args, **options)
 
         except KeyboardInterrupt:

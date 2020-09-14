@@ -8,7 +8,7 @@ from pytz import timezone
 
 log = logging.getLogger(__package__)
 
-AMSTERDAM = timezone('Europe/Amsterdam')
+AMSTERDAM = timezone("Europe/Amsterdam")
 
 
 class Command(BaseCommand):
@@ -20,8 +20,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        with open("websecmap/organizations/fixtures/testdata.yaml", 'r'
-                  ) as yaml_in, open("websecmap/organizations/fixtures/testdata.json", "w") as json_out:
+        with open("websecmap/organizations/fixtures/testdata.yaml", "r") as yaml_in, open(
+            "websecmap/organizations/fixtures/testdata.json", "w"
+        ) as json_out:
 
             yaml_object = yaml.safe_load(yaml_in)  # yaml_object will be a list or a dict
 

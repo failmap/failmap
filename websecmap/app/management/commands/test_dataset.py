@@ -21,16 +21,18 @@ class Command(BaseCommand):
 
         # suppress pyyaml warnings (which doesn't support timezoned datetimes)
         warnings.filterwarnings(
-            'ignore', r"DateTimeField .* received a naive datetime",
-            RuntimeWarning, r'django\.db\.models\.fields',
+            "ignore",
+            r"DateTimeField .* received a naive datetime",
+            RuntimeWarning,
+            r"django\.db\.models\.fields",
         )
 
-        print('+ Running migrations')
+        print("+ Running migrations")
         # run migrate quietly as testing/debugging migrations is not priority
         # here.
-        call_command('migrate', '-v0')
-        print('+ Flusing old data')
-        call_command('flush', '--no-input')
-        print('+ Importing fixture ' + argv[2])
-        call_command('load_dataset', argv[2])
-        print('Done')
+        call_command("migrate", "-v0")
+        print("+ Flusing old data")
+        call_command("flush", "--no-input")
+        print("+ Importing fixture " + argv[2])
+        call_command("load_dataset", argv[2])
+        print("Done")

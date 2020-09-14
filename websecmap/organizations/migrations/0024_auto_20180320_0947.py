@@ -6,20 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0023_merge_20180313_1044'),
+        ("organizations", "0023_merge_20180313_1044"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organization',
-            name='wikidata',
+            model_name="organization",
+            name="wikidata",
             field=models.CharField(
-                blank=True, help_text='Reference to the wikidata project. Example:Q9928', max_length=255, null=True),
+                blank=True, help_text="Reference to the wikidata project. Example:Q9928", max_length=255, null=True
+            ),
         ),
         migrations.AddField(
-            model_name='organization',
-            name='wikipedia',
+            model_name="organization",
+            name="wikipedia",
             field=models.CharField(
-                blank=True, help_text='Reference to the wikipedia article, including the correct wiki. Example: nl:Heemstede (Noord-Holland)', max_length=255, null=True),
+                blank=True,
+                help_text="Reference to the wikipedia article, including the correct wiki. Example: nl:Heemstede (Noord-Holland)",
+                max_length=255,
+                null=True,
+            ),
         ),
     ]

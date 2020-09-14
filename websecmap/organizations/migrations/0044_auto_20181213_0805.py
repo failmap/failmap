@@ -6,20 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0043_dataset'),
+        ("organizations", "0043_dataset"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='dataset',
-            name='kwargs',
+            model_name="dataset",
+            name="kwargs",
             field=models.CharField(
-                blank=True, help_text='A dictionary with extra options for the parser to handle the dataset. This is different per parser.This field is highly coupled with the code of the parser.', max_length=5000, null=True),
+                blank=True,
+                help_text="A dictionary with extra options for the parser to handle the dataset. This is different per parser.This field is highly coupled with the code of the parser.",
+                max_length=5000,
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='dataset',
-            name='type',
+            model_name="dataset",
+            name="type",
             field=models.CharField(
-                blank=True, help_text='To determine what importer is needed: xls, xlsx, json, dutch_government.', max_length=255, null=True),
+                blank=True,
+                help_text="To determine what importer is needed: xls, xlsx, json, dutch_government.",
+                max_length=255,
+                null=True,
+            ),
         ),
     ]

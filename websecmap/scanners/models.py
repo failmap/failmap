@@ -37,58 +37,41 @@ class Endpoint(models.Model):
 
     # imported using a string, to avoid circular imports, which happens in complexer models
     # https://stackoverflow.com/questions/4379042/django-circular-model-import-issue
-    url = models.ForeignKey(
-        Url,
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE
-    )
+    url = models.ForeignKey(Url, null=True, blank=True, on_delete=models.CASCADE)
 
     ip_version = models.IntegerField(
         help_text="Either 4: IPv4 or 6: IPv6. There are basically two possibilities to reach the endpoint, "
-                  "which due to immaturity often look very different. The old way is using IPv4"
-                  "addresses (4) and the newer method is uing IPv6 (6). The internet looks a whole lot"
-                  "different between IPv4 or IPv6. That shouldn't be the case, but it is.",
-        default=4
+        "which due to immaturity often look very different. The old way is using IPv4"
+        "addresses (4) and the newer method is uing IPv6 (6). The internet looks a whole lot"
+        "different between IPv4 or IPv6. That shouldn't be the case, but it is.",
+        default=4,
     )
 
-    port = models.IntegerField(
-        default=443,
-        help_text="Ports range from 1 to 65535.")  # 1 to 65535
+    port = models.IntegerField(default=443, help_text="Ports range from 1 to 65535.")  # 1 to 65535
 
     protocol = models.CharField(
         max_length=20,
         help_text="Lowercase. Mostly application layer protocols, such as HTTP, FTP,"
-                  "SSH and so on. For more, read here: "
-                  "https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol",
+        "SSH and so on. For more, read here: "
+        "https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol",
     )
 
-    discovered_on = models.DateTimeField(
-        blank=True,
-        null=True
-    )
+    discovered_on = models.DateTimeField(blank=True, null=True)
 
     # Till when the endpoint existed and why it was deleted (or didn't exist at all).
     is_dead = models.BooleanField(
         default=False,
         help_text="Use the 'declare dead' button to autofill the date. "
-                  "If the port is closed, or the endpoint is otherwise"
-                  "not reachable over the specified protocol, then mark"
-                  "it as dead. A scanner for this port/protocol can also"
-                  "declare it dead. This port is closed on this protocol."
-                  ""
+        "If the port is closed, or the endpoint is otherwise"
+        "not reachable over the specified protocol, then mark"
+        "it as dead. A scanner for this port/protocol can also"
+        "declare it dead. This port is closed on this protocol."
+        "",
     )
 
-    is_dead_since = models.DateTimeField(
-        blank=True,
-        null=True
-    )
+    is_dead_since = models.DateTimeField(blank=True, null=True)
 
-    is_dead_reason = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True
-    )
+    is_dead_reason = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         if self.is_dead:
@@ -108,12 +91,11 @@ class Endpoint(models.Model):
 
     @staticmethod
     def force_get(url, ip_version, protocol, port):
-        endpoints = Endpoint.objects.all().filter(
-            protocol=protocol,
-            url=url,
-            port=port,
-            ip_version=ip_version,
-            is_dead=False).order_by('-discovered_on')
+        endpoints = (
+            Endpoint.objects.all()
+            .filter(protocol=protocol, url=url, port=port, ip_version=ip_version, is_dead=False)
+            .order_by("-discovered_on")
+        )
 
         count = endpoints.count()
         # >0: update the endpoint with the current information, always add to the newest one, even if there are dupes
@@ -140,11 +122,11 @@ class Endpoint(models.Model):
     # while being extermely slow, it sort of works... It's better than waiting for the whole list to download.
     # jet only feature: http://jet.readthedocs.io/en/latest/autocomplete.html
     def autocomplete_search_fields():
-        return 'url__url',
+        return ("url__url",)
 
     class Meta:
-        verbose_name = _('endpoint')
-        verbose_name_plural = _('endpoint')
+        verbose_name = _("endpoint")
+        verbose_name_plural = _("endpoint")
 
 
 class ScanProxy(models.Model):
@@ -164,65 +146,45 @@ class ScanProxy(models.Model):
     # todo: do we have to support socks proxies? It's possible and allows name resolution.
 
     protocol = models.CharField(
-        max_length=10,
-        help_text="Whether to see this as a http or https proxy",
-        default='https'
+        max_length=10, help_text="Whether to see this as a http or https proxy", default="https"
     )
 
     address = models.CharField(
         max_length=255,
         help_text="An internet address, including the http/https scheme. Works only on IP. Username / pass can be"
-                  "added in the address. For example: https://username:password@192.168.1.1:1337/"
+        "added in the address. For example: https://username:password@192.168.1.1:1337/",
     )
 
     currently_used_in_tls_qualys_scan = models.BooleanField(
         default=False,
         help_text="Set's the proxy as in use, so that another scanner knows that this proxy is being used at this "
-                  "moment. After a scan is completed, the flag has to be disabled. This of course goes wrong with "
-                  "crashes. So once in a while, if things fail or whatever, this might have to be resetted."
+        "moment. After a scan is completed, the flag has to be disabled. This of course goes wrong with "
+        "crashes. So once in a while, if things fail or whatever, this might have to be resetted.",
     )
 
     is_dead = models.BooleanField(
         default=False,
         help_text="Use the 'declare dead' button to autofill the date. "
-                  "If the port is closed, or the endpoint is otherwise"
-                  "not reachable over the specified protocol, then mark"
-                  "it as dead. A scanner for this port/protocol can also"
-                  "declare it dead. This port is closed on this protocol."
-                  ""
+        "If the port is closed, or the endpoint is otherwise"
+        "not reachable over the specified protocol, then mark"
+        "it as dead. A scanner for this port/protocol can also"
+        "declare it dead. This port is closed on this protocol."
+        "",
     )
 
-    manually_disabled = models.BooleanField(
-        default=False,
-        help_text="Proxy will not be used if manually disabled."
-    )
+    manually_disabled = models.BooleanField(default=False, help_text="Proxy will not be used if manually disabled.")
 
-    is_dead_since = models.DateTimeField(
-        blank=True,
-        null=True
-    )
+    is_dead_since = models.DateTimeField(blank=True, null=True)
 
-    is_dead_reason = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True
-    )
+    is_dead_reason = models.CharField(max_length=255, blank=True, null=True)
 
     check_result = models.CharField(
-        max_length=60,
-        help_text="The result of the latest 'check proxy' call.",
-        default='Unchecked.'
+        max_length=60, help_text="The result of the latest 'check proxy' call.", default="Unchecked."
     )
 
-    check_result_date = models.DateTimeField(
-        blank=True,
-        null=True
-    )
+    check_result_date = models.DateTimeField(blank=True, null=True)
 
-    last_claim_at = models.DateTimeField(
-        blank=True,
-        null=True
-    )
+    last_claim_at = models.DateTimeField(blank=True, null=True)
 
     request_speed_in_ms = models.IntegerField(
         default=-1,
@@ -243,7 +205,7 @@ class ScanProxy(models.Model):
     out_of_resource_counter = models.IntegerField(
         default=0,
         help_text="Every time the proxy has not enough resources, this number will increase with one. A too high "
-                  "number makes it easy not to use this proxy anymore."
+        "number makes it easy not to use this proxy anymore.",
     )
 
     @staticmethod
@@ -251,7 +213,7 @@ class ScanProxy(models.Model):
         if not ScanProxy.objects.all().filter(address=address).exists():
             proxy = ScanProxy()
             proxy.address = address
-            proxy.protocol = 'https'
+            proxy.protocol = "https"
             proxy.save()
 
     def __str__(self):
@@ -278,34 +240,32 @@ class UrlIp(models.Model):
     done in the next version as it increases complexity slightly.
     """
 
-    url = models.ForeignKey(
-        Url,
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE
-    )
+    url = models.ForeignKey(Url, blank=True, null=True, on_delete=models.CASCADE)
 
     ip = models.CharField(
         max_length=255,
         help_text="IPv4 or IPv6 Address. Addresses have to be normalized to the compressed "
-                  "representation: removing as many zeros as possible. For example:  "
-                  "IPv6: abcd:0000:0000:00fd becomes abcd::fd, or "
-                  "IPv4: 127.000.000.001 = 127.0.0.1")
+        "representation: removing as many zeros as possible. For example:  "
+        "IPv6: abcd:0000:0000:00fd becomes abcd::fd, or "
+        "IPv4: 127.000.000.001 = 127.0.0.1",
+    )
 
     rdns_name = models.CharField(
         max_length=255,
         help_text="The reverse name can be a server name, containing a provider or anything else."
-                  "It might contain the name of a yet undiscovered url or hint to a service.",
-        blank=True
+        "It might contain the name of a yet undiscovered url or hint to a service.",
+        blank=True,
     )
 
     discovered_on = models.DateTimeField(blank=True, null=True)
 
-    is_unused = models.IntegerField(default=False,
-                                    help_text="If the address was used in the past, but not anymore."
-                                              "It's possible that the same address is more than once "
-                                              "associated with and endpoint over time, as some providers"
-                                              "rotate a set of IP addresses.")
+    is_unused = models.IntegerField(
+        default=False,
+        help_text="If the address was used in the past, but not anymore."
+        "It's possible that the same address is more than once "
+        "associated with and endpoint over time, as some providers"
+        "rotate a set of IP addresses.",
+    )
 
     is_unused_since = models.DateTimeField(blank=True, null=True)
 
@@ -315,8 +275,8 @@ class UrlIp(models.Model):
         return "%s %s" % (self.ip, self.discovered_on.date())
 
     class Meta:
-        verbose_name = _('urlip')
-        verbose_name_plural = _('urlip')
+        verbose_name = _("urlip")
+        verbose_name_plural = _("urlip")
 
 
 def one_year_in_the_future():
@@ -364,27 +324,27 @@ class ExplainMixin(models.Model):
     comply_or_explain_is_explained = models.BooleanField(
         default=False,
         help_text="Shorthand to indicate that something is explained. Only when this field is set to True, the "
-                  "explanation is ",
+        "explanation is ",
         verbose_name="is explained",
     )
 
     comply_or_explain_explanation_valid_until = models.DateTimeField(
         help_text="Set to one year in the future. "
-                  "Will expire automatically after a scan finds a change on this service. "
-                  "As long as the rating stays the same, the finding is explained and the issue ignored.",
+        "Will expire automatically after a scan finds a change on this service. "
+        "As long as the rating stays the same, the finding is explained and the issue ignored.",
         verbose_name="explanation valid until",
         null=True,
-        blank=True
+        blank=True,
     )
 
     comply_or_explain_explanation = models.TextField(
         max_length=2048,
         help_text="Text that helps explain why this result is not counted in the report. For example: "
-                  "a broken scanner or another edge-case that is mainly on the side of the scanning party.",
+        "a broken scanner or another edge-case that is mainly on the side of the scanning party.",
         verbose_name="explanation",
         default="",
         null=True,
-        blank=True
+        blank=True,
     )
 
     comply_or_explain_explained_by = models.CharField(
@@ -393,34 +353,31 @@ class ExplainMixin(models.Model):
         verbose_name="explained by",
         default="",
         null=True,
-        blank=True
+        blank=True,
     )
 
     comply_or_explain_explained_on = models.DateTimeField(
-        help_text="From this moment the rating will be muted.",
-        verbose_name="explained on",
-        null=True,
-        blank=True
+        help_text="From this moment the rating will be muted.", verbose_name="explained on", null=True, blank=True
     )
 
     comply_or_explain_case_handled_by = models.CharField(
         max_length=512,
         help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in "
-                  "case of follow-ups.",
+        "case of follow-ups.",
         verbose_name="case handled by",
         default="",
         null=True,
-        blank=True
+        blank=True,
     )
 
     comply_or_explain_case_additional_notes = models.TextField(
         max_length=9000,
         help_text="Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info."
-                  "Will not be exported, but are not secret.",
+        "Will not be exported, but are not secret.",
         verbose_name="additional case notes",
         default="",
         null=True,
-        blank=True
+        blank=True,
     )
 
     class Meta:
@@ -437,10 +394,8 @@ class PlannedScan(models.Model):
     A planned scan is always performed per url, even if the scan itself is about endpoints. The endpoints can be
     retrieved at a later state,
     """
-    url = models.ForeignKey(
-        Url,
-        on_delete=models.CASCADE
-    )
+
+    url = models.ForeignKey(Url, on_delete=models.CASCADE)
 
     activity = models.CharField(
         max_length=10,
@@ -461,48 +416,33 @@ class PlannedScan(models.Model):
     )
 
     state = models.CharField(
-        max_length=10,
-        default="",
-        db_index=True,
-        help_text="requested, picked_up, finished, error, timeout"
+        max_length=10, default="", db_index=True, help_text="requested, picked_up, finished, error, timeout"
     )
 
     """
         WHERE
         requested_at_when >= '%(when)s'
     """
-    requested_at_when = models.DateTimeField(
-        db_index=False
-    )
+    requested_at_when = models.DateTimeField(db_index=False)
 
     last_state_change_at = models.DateTimeField(
         null=True,
     )
 
-    finished_at_when = models.DateTimeField(
-        null=True,
-        help_text="when finished, timeout, error"
-    )
+    finished_at_when = models.DateTimeField(null=True, help_text="when finished, timeout, error")
 
     # add joined index over scanner, activity, state, so queries are faster:
     # see: https://docs.djangoproject.com/en/3.0/ref/models/options/#indexes
     class Meta:
-        indexes = [
-            models.Index(fields=['scanner', 'activity', 'state'])
-        ]
+        indexes = [models.Index(fields=["scanner", "activity", "state"])]
 
 
 class PlannedScanError(models.Model):
     # since many plannedscans will run just fine, don't add this information to that model.
 
-    planned_scan = models.ForeignKey(
-        PlannedScan,
-        on_delete=models.CASCADE
-    )
+    planned_scan = models.ForeignKey(PlannedScan, on_delete=models.CASCADE)
 
-    debug_information = models.CharField(
-        max_length=512
-    )
+    debug_information = models.CharField(max_length=512)
 
 
 # https://docs.djangoproject.com/en/dev/topics/db/models/#id6
@@ -510,20 +450,20 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
     """
     This is a fact, a point in time.
     """
+
     type = models.CharField(
         max_length=60,
         db_index=True,
         help_text="The type of scan that was performed. Instead of having different tables for each"
-                  "scan, this label separates the scans.")
+        "scan, this label separates the scans.",
+    )
     rating = models.CharField(
         max_length=128,
         default=0,
-        help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent."
+        help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent.",
     )
     explanation = models.CharField(
-        max_length=255,
-        default=0,
-        help_text="Short explanation from the scanner on how the rating came to be."
+        max_length=255, default=0, help_text="Short explanation from the scanner on how the rating came to be."
     )
     evidence = models.TextField(
         max_length=9001,
@@ -535,12 +475,12 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
         auto_now_add=True,
         db_index=True,
         help_text="This gets updated when all the other fields stay the same. If one changes, a"
-                  "new scan will be saved, obsoleting the older ones."
+        "new scan will be saved, obsoleting the older ones.",
     )
     rating_determined_on = models.DateTimeField(
         help_text="This is when the current rating was first discovered. It may be obsoleted by"
-                  "another rating or explanation (which might have the same rating). This date "
-                  "cannot change once it's set."
+        "another rating or explanation (which might have the same rating). This date "
+        "cannot change once it's set."
     )
 
     class Meta:
@@ -552,14 +492,18 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
         become abstract classes themselves. Of course, you can make an abstract base class that inherits from
         another abstract base class. You just need to remember to explicitly set abstract=True each time.
         """
+
         abstract = True
-        ordering = ['-rating_determined_on', ]
+        ordering = [
+            "-rating_determined_on",
+        ]
 
 
 class EndpointGenericScan(GenericScanMixin):
     """
     Only changes are saved as a scan.
     """
+
     endpoint = models.ForeignKey(
         Endpoint,
         on_delete=models.CASCADE,
@@ -575,12 +519,8 @@ class UrlGenericScan(GenericScanMixin):
     """
     Only changes are saved as a scan.
     """
-    url = models.ForeignKey(
-        Url,
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE
-    )
+
+    url = models.ForeignKey(Url, null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return "%s: %s %s on %s" % (self.rating_determined_on.date(), self.type, self.rating, self.url)
@@ -591,31 +531,26 @@ class EndpointGenericScanScratchpad(models.Model):
     A debugging channel for generic scans.
     You can easily truncate this log after 30 days.
     """
+
     type = models.CharField(
         max_length=60,
         db_index=True,
         help_text="The type of scan that was performed. Instead of having different tables for each"
-                  "scan, this label separates the scans.")
+        "scan, this label separates the scans.",
+    )
     domain = models.CharField(
-        max_length=255,
-        help_text="Deprecated. Used when there is no known Endpoint.",
-        blank=True,
-        null=True
+        max_length=255, help_text="Deprecated. Used when there is no known Endpoint.", blank=True, null=True
     )
-    at_when = models.DateTimeField(
-        auto_now_add=True
-    )
-    data = models.TextField(
-        help_text="Whatever data to dump for debugging purposes."
-    )
+    at_when = models.DateTimeField(auto_now_add=True)
+    data = models.TextField(help_text="Whatever data to dump for debugging purposes.")
 
 
 class Screenshot(models.Model):
-    endpoint = models.ForeignKey(
-        Endpoint, null=True, blank=True, on_delete=models.CASCADE)
+    endpoint = models.ForeignKey(Endpoint, null=True, blank=True, on_delete=models.CASCADE)
     filename = models.CharField(max_length=255)
-    image = models.ImageField(upload_to="screenshots/", height_field="height_pixels", width_field="width_pixels",
-                              default=None, null=True)
+    image = models.ImageField(
+        upload_to="screenshots/", height_field="height_pixels", width_field="width_pixels", default=None, null=True
+    )
     width_pixels = models.IntegerField(default=0)
     height_pixels = models.IntegerField(default=0)
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -627,18 +562,14 @@ class InternetNLV2Scan(models.Model):
     Version 2 of the Internet.nl API is implemented here.
 
     """
-    type = models.CharField(
-        max_length=30,
-        help_text="mail, mail_dashboard or web",
-        blank=True,
-        null=True
-    )
+
+    type = models.CharField(max_length=30, help_text="mail, mail_dashboard or web", blank=True, null=True)
 
     scan_id = models.CharField(
         max_length=32,
         help_text="The scan ID that is used to request status and report information.",
         blank=True,
-        null=True
+        null=True,
     )
 
     # registered, scanning, finished
@@ -646,46 +577,30 @@ class InternetNLV2Scan(models.Model):
         max_length=200,
         help_text="where the scan is: registered, scanning, creating_report, finished, failed",
         blank=True,
-        null=True
+        null=True,
     )
 
     state_message = models.CharField(
-        max_length=200,
-        help_text="Information about the status, for example error information.",
-        blank=True,
-        null=True
+        max_length=200, help_text="Information about the status, for example error information.", blank=True, null=True
     )
 
-    last_state_check = models.DateTimeField(
-        blank=True,
-        null=True
-    )
+    last_state_check = models.DateTimeField(blank=True, null=True)
 
     last_state_change = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="When this state changed the last time, so no in-between updates about the state."
+        help_text="When this state changed the last time, so no in-between updates about the state.",
     )
 
     # metadata returned from the scan, contains info about the api version, tracking info, scan type etc.
-    metadata = JSONField(
-        default=None,
-        blank=True,
-        null=True
-    )
+    metadata = JSONField(default=None, blank=True, null=True)
 
     # this allows filtering during the creation of a scan.
     # todo: what if a url is deleted, this relation should also be deleted, is that happening?
-    subject_urls = models.ManyToManyField(
-        Url
-    )
+    subject_urls = models.ManyToManyField(Url)
 
     # for error recovery and debugging reasons, store the entire result (which can be pretty huge).
-    retrieved_scan_report = JSONField(
-        default=None,
-        blank=True,
-        null=True
-    )
+    retrieved_scan_report = JSONField(default=None, blank=True, null=True)
 
     def __str__(self):
         return "%s: %s %s" % (self.pk, self.scan_id, self.state)
@@ -698,29 +613,18 @@ class InternetNLV2StateLog(models.Model):
     )
 
     state = models.CharField(
-        max_length=255,
-        blank=True,
-        default="",
-        help_text="The state that was registered at a certain moment in time."
+        max_length=255, blank=True, default="", help_text="The state that was registered at a certain moment in time."
     )
 
     state_message = models.CharField(
-        max_length=200,
-        help_text="Information about the status, for example error information.",
-        blank=True,
-        null=True
+        max_length=200, help_text="Information about the status, for example error information.", blank=True, null=True
     )
 
     last_state_check = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="Last time this state was written to this field, which can happen regularly."
+        blank=True, null=True, help_text="Last time this state was written to this field, which can happen regularly."
     )
 
-    at_when = models.DateTimeField(
-        blank=True,
-        null=True
-    )
+    at_when = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return "%s.%s: %s" % (self.scan.pk, self.pk, self.state)
@@ -735,6 +639,7 @@ class TlsQualysScratchpad(models.Model):
     A debugging channel for all communications with Qualys.
     You can easily truncate this log after 30 days.
     """
+
     domain = models.CharField(max_length=255)
     at_when = models.DateTimeField(auto_now_add=True)
     data = models.TextField()
