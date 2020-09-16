@@ -68,7 +68,7 @@ def start_worker(broker_port, silent=True):
     )
     # watchdog = 'tools/autoreload.sh'
     worker_command = (
-        ("websecmap celery worker --loglevel=info --pool=eventlet" " --concurrency=1 --broker redis://localhost:{}/0")
+        ("websecmap celery worker --loglevel=info --pool=gevent" " --concurrency=1 --broker redis://localhost:{}/0")
         .format(broker_port)
         .split()
     )
