@@ -482,31 +482,37 @@ COMPRESS_OFFLINE = not DEBUG
 #####
 # Celery 4.0 settings
 #
+# From the manual: https://docs.celeryproject.org/en/stable/django/first-steps-with-django.html#using-celery-with-django
+# The uppercase name-space means that all Celery configuration options must be specified in uppercase instead of
+# lowercase, and start with CELERY_, so for example the task_always_eager setting becomes CELERY_TASK_ALWAYS_EAGER,
+# nd the broker_url setting becomes CELERY_BROKER_URL. This also applies to the workers settings, for instance,
+# the worker_concurrency setting becomes CELERY_WORKER_CONCURRENCY.
+#
 # Pickle can work, but you need to use certificates to communicate (to verify the right origin)
 # It's preferable not to use pickle, yet it's overly convenient as the normal serializer can not
 # even serialize dicts.
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html
-accept_content = ["pickle"]
-task_serializer = "pickle"
-result_serializer = "pickle"
+CELERY_ACCEPT_CONTENT = ["pickle"]
+CELERY_TASK_SERIALIZER = "pickle"
+CELERY_RESULT_SERIALIZER = "pickle"
 
-broker_url = os.environ.get("BROKER", "redis://localhost:6379/0")
-enable_utc = True
+CELERY_BROKER_URL = os.environ.get("BROKER", "redis://localhost:6379/0")
+CELERY_ENABLE_UTC = True
 
 # Any data transfered with pickle needs to be over tls... you can inject arbitrary objects with
 # this stuff... message signing makes it a bit better, not perfect as it peels the onion.
 # see: https://blog.nelhage.com/2011/03/exploiting-pickle/
 # Yet pickle is the only convenient way of transporting objects without having to lean in all kinds
 # of directions to get the job done. Intermediate tables to store results could be an option.
-timezone = "UTC"
+CELERY_TIMEZONE = "UTC"
 
-beat_scheduler = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # how many times to retry connecting to the broker after failure: this is the cause of non-reconnecting
 # workers. So this will be set to infinite and it will retry ad infinitum
-broker_connection_retry = True
-broker_connection_max_retries = 400
-result_expires = timedelta(hours=4)
+CELERY_BROKER_CONNECTION_RETRY = True
+CELERY_BROKER_CONNECTION_MAX_RETRIES = 400
+CELERY_RESULT_EXPIRES = timedelta(hours=4)
 
 # Use the value of 2 for celery prefetch multiplier. Previous was 1. The
 # assumption is that 1 will block a worker thread until the current (rate
@@ -520,10 +526,10 @@ result_expires = timedelta(hours=4)
 # queues. The value of 2 is currently selected because it higher than 1,
 # behaviour needs to be observed to decide if raising this results in
 # further improvements without impacting the priority feature.
-worker_prefetch_multiplier = 2
+CELERY_WORKER_PREFETCH_MULTIPLIER = 2
 
 # numer of tasks to be executed in parallel by celery
-worker_concurrency = 10
+CELERY_WORKER_CONCURRENCY = 10
 
 # Workers will scale up and scale down depending on the number of tasks
 # available. To prevent workers from scaling down while still doing work,
@@ -532,7 +538,7 @@ worker_concurrency = 10
 # issues where tasks that don't finish or crash keep being executed:
 # thus for tasks that are not programmed perfectly it will raise a number
 # of repeated exceptions which will need to be debugged.
-task_acks_late = True
+CELERY_TASK_ACKS_LATE = True
 #
 # End of celery settings
 #####
