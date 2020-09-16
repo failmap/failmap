@@ -30,7 +30,7 @@ def faaloniae_integration():
     subprocess.call(["websecmap", "load_dataset", "faalonie"])
 
 
-@pytest.fixture(scope="session", params=["prefork", "eventlet"])
+@pytest.fixture(scope="session", params=["prefork", "gevent"])
 def worker(request):
     """Run a task worker instance."""
 

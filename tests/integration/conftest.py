@@ -26,7 +26,7 @@ def celery_app():
     yield app
 
 
-@pytest.fixture(params=["prefork", "eventlet"])
+@pytest.fixture(params=["prefork", "gevent"])
 def celery_worker(queues, request):
     """Spawn celery worker to be used during test.
 
