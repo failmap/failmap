@@ -479,45 +479,34 @@ COMPRESS_OFFLINE = not DEBUG
 # https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_ENABLED
 # Enabled when debug is off by default.
 
+#####
 # Celery 4.0 settings
+#
 # Pickle can work, but you need to use certificates to communicate (to verify the right origin)
 # It's preferable not to use pickle, yet it's overly convenient as the normal serializer can not
 # even serialize dicts.
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html
-CELERY_accept_content = ["pickle", "yaml"]
-CELERY_task_serializer = "pickle"
-CELERY_result_serializer = "pickle"
+accept_content = ["pickle"]
+task_serializer = "pickle"
+result_serializer = "pickle"
 
-
-# Celery config
-CELERY_BROKER_URL = os.environ.get("BROKER", "redis://localhost:6379/0")
-ENABLE_UTC = True
+broker_url = os.environ.get("BROKER", "redis://localhost:6379/0")
+enable_utc = True
 
 # Any data transfered with pickle needs to be over tls... you can inject arbitrary objects with
-# this stuff... message signing makes it a bit better, not perfect as it peels the onion.
 # this stuff... message signing makes it a bit better, not perfect as it peels the onion.
 # see: https://blog.nelhage.com/2011/03/exploiting-pickle/
 # Yet pickle is the only convenient way of transporting objects without having to lean in all kinds
 # of directions to get the job done. Intermediate tables to store results could be an option.
-CELERY_ACCEPT_CONTENT = ["pickle"]
-CELERY_TASK_SERIALIZER = "pickle"
-CELERY_RESULT_SERIALIZER = "pickle"
-CELERY_TIMEZONE = "UTC"
+timezone = "UTC"
 
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+beat_scheduler = "django_celery_beat.schedulers:DatabaseScheduler"
 
-CELERY_BROKER_CONNECTION_MAX_RETRIES = 1
-CELERY_BROKER_CONNECTION_RETRY = False
-CELERY_RESULT_EXPIRES = timedelta(hours=4)
-
-# Solve "assert {'error': 'DatabaseError', 'message': "DatabaseWrapper objects created in a thread can only be used in
-# that same thread. The object with alias 'default' was created in thread id 140582651898312 and this is thread id
-# 140582746599800."} is None"
-# according to: https://stackoverflow.com/questions/60179472/
-# Which might not be the best approach according to: https://docs.celeryproject.org/en/stable/userguide/testing.html
-# According to the documentation this should be set to False in production, unless you don't want to use queues.
-# How do we detect we're in a test?
-# CELERY_TASK_ALWAYS_EAGER = True
+# how many times to retry connecting to the broker after failure: this is the cause of non-reconnecting
+# workers. So this will be set to infinite and it will retry ad infinitum
+broker_connection_retry = True
+broker_connection_max_retries = 400
+result_expires = timedelta(hours=4)
 
 # Use the value of 2 for celery prefetch multiplier. Previous was 1. The
 # assumption is that 1 will block a worker thread until the current (rate
@@ -531,10 +520,10 @@ CELERY_RESULT_EXPIRES = timedelta(hours=4)
 # queues. The value of 2 is currently selected because it higher than 1,
 # behaviour needs to be observed to decide if raising this results in
 # further improvements without impacting the priority feature.
-CELERY_WORKER_PREFETCH_MULTIPLIER = 2
+worker_prefetch_multiplier = 2
 
 # numer of tasks to be executed in parallel by celery
-CELERY_WORKER_CONCURRENCY = 10
+worker_concurrency = 10
 
 # Workers will scale up and scale down depending on the number of tasks
 # available. To prevent workers from scaling down while still doing work,
@@ -543,8 +532,10 @@ CELERY_WORKER_CONCURRENCY = 10
 # issues where tasks that don't finish or crash keep being executed:
 # thus for tasks that are not programmed perfectly it will raise a number
 # of repeated exceptions which will need to be debugged.
-CELERY_ACKS_LATE = True
-
+task_acks_late = True
+#
+# End of celery settings
+#####
 
 # Settings for statsd metrics collection. Statsd defaults over UDP port 8125.
 # https://django-statsd.readthedocs.io/en/latest/#celery-signals-integration
