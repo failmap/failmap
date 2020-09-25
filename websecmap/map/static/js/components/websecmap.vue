@@ -106,17 +106,15 @@
                 <div style="max-width: 300px; overflow:hidden;" class="info table-light">
                     <button class="btn btn-secondary btn-small" style='width: 100%' type="button" data-toggle="collapse" data-target="#collapseFilters" aria-expanded="false" aria-controls="collapseExample">
                         <template v-if="['clear_filter_option', ''].includes(displayed_issue)">{{ $t("map.filter.title") }}</template>
-                        <template v-if="displayed_issue !== 'clear_filter_option'">
+                        <template v-if="displayed_issue !== ''">
                             <span v-if='loading'><div class="loader" style="width: 24px; height: 24px; float: left;"></div></span>
                             {{ $t(displayed_issue) }}
                         </template>
                     </button>
 
                     <div class="collapse" id="collapseFilters" style="margin-top:10px;">
-                        <template>
-                            <input type='radio' v-model="displayed_issue" name="displayed_issue" value="" id="clear_filter_option">
-                            <label for="clear_filter_option">{{ $t("map.filter.show_everything") }}</label>
-                        </template>
+                        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="" id="clear_filter_option">
+                        <label for="clear_filter_option">{{ $t("map.filter.show_everything") }}</label>
                         <div v-for="issue in issues" style="white-space: nowrap;">
                             <input type='radio' v-model="displayed_issue" name="displayed_issue" :value="issue.name" :id="issue.name">
                             <label :for="issue.name" v-html="translate(issue.name)"></label>
@@ -535,6 +533,10 @@ const WebSecMap = Vue.component('websecmap', {
 
             map_health: null,
             show_map_health: false,
+
+            // initial map data is overwritten by the filtering methods. So store a copy here of the first load,
+            // so we can easily switch back.
+            initial_map_data_copy: Object,
         }
     },
 
@@ -549,11 +551,15 @@ const WebSecMap = Vue.component('websecmap', {
 
         // the initial data saves a load. This is not very beautiful but it makes the site respond a lot faster.
         initial_map_data: Object,
+
         initial_layer: String,
         initial_country: String,
     },
 
     mounted: function(){
+        // store the original map data in a copy, as this library overwrites the values for quicker updates:
+        // unfortunately with an ugly approach
+        this.initial_map_data_copy = JSON.parse(JSON.stringify(this.initial_map_data));
 
         // https://codingexplained.com/coding/front-end/vue-js/accessing-dom-refs
         this.$nextTick(() => {
@@ -643,15 +649,18 @@ const WebSecMap = Vue.component('websecmap', {
             this.loading = true;
 
             if (this.initial_layer === this.state.layer && this.initial_country === this.state.country && this.state.week === 0 && this.displayed_issue === ""){
-                this.handle_map_data(this.initial_map_data);
+                // This direct copy of initial_map_data cannot be given directly, as its values will be overwritten
+                // by update functions. Instead the data is copied again, so the original data stays in tact.
+                this.handle_map_data(JSON.parse(JSON.stringify(this.initial_map_data_copy)));
+                this.loading = false;
                 return;
             }
 
-            this.loading = true;
             let url = `/data/map/${this.state.country}/${this.state.layer}/${this.state.week * 7}/${this.displayed_issue}/`;
             console.log(`Loading websecmap data from: ${url}`);
             fetch(url).then(response => response.json()).then(data => {
                 this.handle_map_data(data);
+                this.loading = false;
             }).catch((fail) => {
                 console.log('A map loading error occurred: ' + fail);
                 // allow you to load again:
@@ -739,12 +748,11 @@ const WebSecMap = Vue.component('websecmap', {
                 })
             });
 
-            this.loading = false;
-
             store.commit('change', {organizations: organizations});
         },
 
         plotdata: function (mapdata, fitbounds=true) {
+            console.log("Plotting map data.")
             let geodata = this.split_point_and_polygons(mapdata);
 
             // if there is one already, overwrite the attributes...
@@ -754,6 +762,7 @@ const WebSecMap = Vue.component('websecmap', {
                 // the brutal way would be like this, which would not allow transitions:
                 // map.markers.clearLayers();
                 // map.add_points(points);
+                // Todo: a map data hash would help to determine if we need to check this at all.
                 this.add_new_layers_remove_non_used(geodata.points, this.markers, "markers");
                 this.add_new_layers_remove_non_used(geodata.polygons, this.polygons, "polygons");
 
