@@ -186,7 +186,7 @@ def sidn_handle_domain_upload(upload_id: int):
 
         log.debug(f"Going to try to add add {new_subdomain} as a subdomain to {row[1]}. Pending to correctness.")
 
-        has_been_added = existing_second_level_url.add_subdomain(new_subdomain)
+        has_been_added = existing_second_level_url.add_subdomain(new_subdomain, "added via SIDN")
         if has_been_added:
             added.append(has_been_added)
 

@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import pytz
 import tldextract
 from django.core.exceptions import ValidationError
-from django.db import models, transaction
+from django.db import models, transaction, IntegrityError
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
@@ -381,7 +381,7 @@ class Url(models.Model):
         return False
 
     @transaction.atomic
-    def add_subdomain(self, subdomain):
+    def add_subdomain(self, subdomain, internal_notes: str = ""):
         # import here to prevent circular/cyclic imports, this module imports Url.
         from websecmap.scanners.scanner.http import resolves
 
@@ -402,13 +402,23 @@ class Url(models.Model):
             log.debug("New subdomain did not resolve on either ipv4 and ipv6: %s" % new_url)
             return
 
-        # we found something that gives the idea that transactions are not working.
-        u, created = Url.objects.get_or_create(url=new_url)
-        if not created:
-            log.warning(
-                "The url already existed in the database, even while all prior checks in "
-                "this transaction told us otherwise."
-            )
+        try:
+            with transaction.atomic():
+                # we found something that gives the idea that transactions are not working.
+                u, created = Url.objects.get_or_create(url=new_url)
+                if not created:
+                    log.warning(
+                        "The url already existed in the database, even while all prior checks in "
+                        "this transaction told us otherwise."
+                    )
+                    return
+        except IntegrityError as e:
+            log.error(e)
+            return
+
+        if internal_notes:
+            u.internal_notes = internal_notes
+            u.save()
 
         # A Url needs to have a value for field "id" before a many-to-many relationship can be used.
         for organization in self.organization.all():
