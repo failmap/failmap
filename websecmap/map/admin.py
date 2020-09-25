@@ -442,6 +442,12 @@ class MapHealthReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.MapDataCache)
 class MapDataCacheAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    def get_queryset(self, request):
+        # textfields are extremely slow in mysql. Prevent the text field.
+        qs = super(MapDataCacheAdmin, self).get_queryset(request)
+        qs = qs.defer("dataset")
+        return qs
+
     list_display = ("pk", "country", "organization_type", "filters", "at_when")
     list_filter = ["country", "organization_type", "filters", "at_when"][::-1]
     search_fields = ["country", "organization_type", "filters"]

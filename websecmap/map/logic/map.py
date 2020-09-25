@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 import pytz
 import simplejson as json
@@ -29,6 +30,45 @@ def get_reports_by_ids(ids):
     return reports
 
 
+def get_cached_map_data(
+    country: str = "NL", organization_type: str = "municipality", days_back: int = 0, filters: List[str] = None
+):
+    """
+    Caching is split up into two queries. This is done on purpose, as MySQL cannot deal with text fields efficiently.
+
+    MySQL will be very slow if there are filtering conditions if there is a Textfield in the result. Even if the
+    textfield is not filtered on directly.
+
+    To given an impression: this query used to take 7 seconds with just 20.000 records in the database and 760 in
+    the corresponding key. After splitting it up into two queries, the total of both would be <0.5 seconds.
+    """
+
+    # prevent mutable default
+    if not filters:
+        filters = ["all"]
+
+    cached = (
+        MapDataCache.objects.all()
+        .filter(
+            country=country,
+            organization_type=get_organization_type(organization_type),
+            at_when=datetime.now(pytz.utc) - relativedelta(days=int(days_back)),
+            filters=filters,
+        )
+        .defer("dataset")
+        .first()
+    )
+
+    if not cached:
+        return False
+
+    my_dataset = MapDataCache.objects.only("id", "dataset").get(id=cached.id)
+    if not my_dataset:
+        return False
+
+    return my_dataset.dataset
+
+
 def get_map_data(
     country: str = "NL", organization_type: str = "municipality", days_back: int = 0, displayed_issue: str = None
 ):
@@ -49,32 +89,14 @@ def get_map_data(
         desired_url_scans = URL_SCAN_TYPES
         desired_endpoint_scans = ENDPOINT_SCAN_TYPES
 
-        # look if we have data in the cache, which will save some calculations and a slower query
-        cached = (
-            MapDataCache.objects.all()
-            .filter(
-                country=country,
-                organization_type=get_organization_type(organization_type),
-                at_when=when,
-                filters=["all"],
-            )
-            .first()
-        )
+        filters = ["all"]
     else:
-        # look if we have data in the cache, which will save some calculations and a slower query
-        cached = (
-            MapDataCache.objects.all()
-            .filter(
-                country=country,
-                organization_type=get_organization_type(organization_type),
-                at_when=when,
-                filters=desired_url_scans + desired_endpoint_scans,
-            )
-            .first()
-        )
+        filters = desired_url_scans + desired_endpoint_scans
+
+    cached = get_cached_map_data(country, organization_type, days_back, filters)
 
     if cached:
-        return cached.dataset
+        return cached
 
     """
     Returns a json structure containing all current map data.
