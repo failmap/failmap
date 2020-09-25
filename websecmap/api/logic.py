@@ -121,12 +121,22 @@ def sidn_domain_upload(user, csv_data):
     # all mashed up in a single routine, should be separate tasks...
     upload = SIDNUpload()
     upload.at_when = datetime.now(pytz.utc)
-    upload.state = "processing"
+    upload.state = "new"
     upload.by_user = user
     upload.posted_data = csv_data
     upload.save()
 
-    sidn_handle_domain_upload(upload.id)
+
+@app.task(queue="storage")
+def sidn_process_upload(amount: int = 25):
+    uploads = SIDNUpload.objects.all().filter(state__in=["processing", "new"])[0:amount]
+    for upload in uploads:
+        # make sure it's not happening twice:
+        # Unfortunately no 'timeout and reset feature if failed', not enough time to build that.
+        # just set that manually.
+        upload.state = "being_processed"
+        upload.save()
+        sidn_handle_domain_upload.apply_async([upload.id])
 
 
 @app.task(queue="storage")
