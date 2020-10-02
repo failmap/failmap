@@ -969,8 +969,15 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
         add_instant_calculation(scan_data, "mail_legacy_mail_sending_domain", "passed")
 
     # add custom field for the ipv6 test, so this can be labelled individually
-    add_instant_calculation(
-        scan_data, "mail_legacy_category_ipv6", scan_data["results"]["categories"]["mail_ipv6"]["status"]
-    )
+    # internet.nl dashboard #205:
+    # In the category IPv6 field (only in Extra fields) values should become no_mx if the IPv6 mailserver is also no_mx
+    # -> mail_legacy_ipv6_mailserver depends on mail_servers_testable_status.
+    # There is no separate check for ipv4/ipv6 mail_servers_testable_status
+    if custom_api_field_results["mail_servers_testable_status"] == "no_mx":
+        add_instant_calculation(scan_data, "mail_legacy_category_ipv6", "no_mx")
+    else:
+        add_instant_calculation(
+            scan_data, "mail_legacy_category_ipv6", scan_data["results"]["categories"]["mail_ipv6"]["status"]
+        )
 
     return scan_data
