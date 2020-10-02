@@ -902,8 +902,10 @@ def test_legacy_calculations():
     mail_results["dommel2.nl"] = copy(mail_results["dommel.nl"])
     mail_results["dommel2.nl"]["results"]["custom"]["mail_non_sending_domain"] = False
     assert data["results"]["calculated_results"]["mail_legacy_mail_non_sending_domain"]["status"] == "info"
+    assert data["results"]["calculated_results"]["mail_legacy_mail_sending_domain"]["status"] == "failed"
     data = calculate_forum_standaardisatie_views_mail(mail_results["dommel2.nl"])
     assert data["results"]["calculated_results"]["mail_legacy_mail_non_sending_domain"]["status"] == "not_applicable"
+    assert data["results"]["calculated_results"]["mail_legacy_mail_sending_domain"]["status"] == "passed"
 
     # https://github.com/internetstandards/Internet.nl-dashboard/issues/185
     # the test result gave "passed" while it was an error.

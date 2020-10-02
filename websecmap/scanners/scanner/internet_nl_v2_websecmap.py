@@ -960,10 +960,17 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     # https://github.com/internetstandards/Internet.nl-dashboard/issues/182
     # We want a grey icon when the domain does send email = not_applicable
     # We want a blue info icon when the domain does not send email = info
+    # per #205:
+    # Non email sending domain' becomes 'Email sending domain'
+    # We want passed when the domain does send email
+    # We want failed when the domain does not send email
+    # This might affect the logic that is used to indicate no_mx
     if custom_api_field_results["mail_non_sending_domain"]:
         add_instant_calculation(scan_data, "mail_legacy_mail_non_sending_domain", "info")
+        add_instant_calculation(scan_data, "mail_legacy_mail_sending_domain", "failed")
     else:
         add_instant_calculation(scan_data, "mail_legacy_mail_non_sending_domain", "not_applicable")
+        add_instant_calculation(scan_data, "mail_legacy_mail_sending_domain", "passed")
 
     # add custom field for the ipv6 test, so this can be labelled individually
     add_instant_calculation(
