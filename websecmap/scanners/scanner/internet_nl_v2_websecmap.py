@@ -908,15 +908,11 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
         )
 
     # IPv6 Nameserver
-    # Not in forum standardisatie magazine, but used internally
-    if custom_api_field_results["mail_servers_testable_status"] == "no_mx":
-        add_instant_calculation(scan_data, "mail_legacy_ipv6_nameserver", "no_mx")
-    else:
-        add_calculation(
-            scan_data=scan_data,
-            new_key="mail_legacy_ipv6_nameserver",
-            required_values=["mail_ipv6_ns_address", "mail_ipv6_ns_reach"],
-        )
+    add_calculation(
+        scan_data=scan_data,
+        new_key="mail_legacy_ipv6_nameserver",
+        required_values=["mail_ipv6_ns_address", "mail_ipv6_ns_reach"],
+    )
 
     # IPv6 Mailserver
     # Not in forum standardisatie magazine, but used internally
