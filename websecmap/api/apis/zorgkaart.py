@@ -1,209 +1,55 @@
-import csv
-import logging
-from datetime import datetime
-from io import StringIO
+#!/usr/bin/python3
+# Note: run make fix and make check before committing code.
+
+"""
+Scrapes organisations from Zorgkaart Nederland API
+provides the task: vendor.tilanus.zorgkaart.scrape
+uses websecmap config as parameters
+
+organisations()
+    Returns list of organsations in data structure
+    as returned by zorgkaart Nederland. Applies
+    filters as set in config.
+    DANGER LOTS OF OUTPUT WHEN NOT FILTERED
+
+organisation_types()
+    Returns a list of organisation types as currently
+    present in the zorgkaart Nederland database.
+
+translate(organisation_list)
+    Translates the Zorgkaart Nederland organisations list
+    to a list that can be imprted into WebSecMap.
+
+scrape()
+    Retrieves list of organisations (applying filter in
+    WebSecMap config) and translates and inserts/updates
+    them into the database of WebSecMap.
+
+create_task()
+    Inserts a periodic task for running the scraper weekly
+    into the WebSecMap configuration.
+"""
+
+import json
+import sys
 from time import sleep
-from typing import Any, Dict, List
+from typing import List, Dict, Any
 
 import googlemaps
-import pytz
 import tldextract
+import logging
+
+import urllib3
+
+# websecmap modules
 from constance import config
 from django.db import transaction
-from django.db.models import Q
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from iso3166 import countries_by_alpha2
 
-from websecmap.api.models import SIDNUpload
-from websecmap.celery import app
-from websecmap.map.logic.map_defaults import get_country, get_organization_type
-from websecmap.map.models import Configuration
-from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
+from websecmap.organizations.models import Organization, OrganizationType, Coordinate, Url
 
 log = logging.getLogger(__package__)
-
-
-def get_map_configuration():
-    # Using this, it's possible to get the right params for 2ndlevel domains
-
-    configs = (
-        Configuration.objects.all().filter(is_displayed=True, is_the_default_option=True).order_by("display_order")
-    )
-
-    data = []
-    for map_config in configs:
-        data.append({"country": map_config.country.code, "layer": map_config.organization_type.name})
-
-    return data
-
-
-def get_2ndlevel_domains(country, layer):
-    urls = (
-        Url.objects.all()
-        .filter(
-            Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
-            organization__country=get_country(country),
-            organization__type=get_organization_type(layer),
-        )
-        .values_list("url", flat=True)
-    )
-
-    urls = list(set(urls))
-
-    return urls
-
-
-def get_uploads(user):
-    # last 500 should be enough...
-    uploads = SIDNUpload.objects.all().filter(by_user=user).defer("posted_data")[0:500]
-
-    serialable_uploads = []
-    for upload in uploads:
-        serialable_uploads.append(
-            {
-                "when": upload.at_when.isoformat(),
-                "state": upload.state,
-                "amount_of_newly_added_domains": upload.amount_of_newly_added_domains,
-                "newly_added_domains": upload.newly_added_domains,
-            }
-        )
-
-    return list(serialable_uploads)
-
-
-def get_uploads_with_results(user):
-    uploads = (
-        SIDNUpload.objects.all()
-        .filter(by_user=user, amount_of_newly_added_domains__gt=0)
-        .defer("posted_data")
-        .order_by("-at_when")
-    )
-
-    serialable_uploads = []
-    for upload in uploads:
-        serialable_uploads.append(
-            {
-                "when": upload.at_when.isoformat(),
-                "state": upload.state,
-                "amount_of_newly_added_domains": upload.amount_of_newly_added_domains,
-                "newly_added_domains": upload.newly_added_domains,
-            }
-        )
-
-    return list(serialable_uploads)
-
-
-def remove_last_dot(my_text):
-    return my_text[0 : len(my_text) - 1] if my_text[len(my_text) - 1 : len(my_text)] == "." else my_text
-
-
-@app.task(queue="storage")
-def sidn_domain_upload(user, csv_data):
-    """
-    If the domain exists in the db, any subdomain will be added.
-    As per usual, adding a subdomain will check if the domain is valid and resolvable.
-
-    Format:
-    ,2ndlevel,qname,distinct_asns
-    *censored number*,arnhem.nl.,*.arnhem.nl.,*censored number*
-    *censored number*,arnhem.nl.,01.arnhem.nl.,*censored number*
-    *censored number*,arnhem.nl.,sdfg.arnhem.nl.,*censored number*
-    *censored number*,arnhem.nl.,03.arnhem.nl.,*censored number*
-    *censored number*,arnhem.nl.,04www.arnhem.nl.,*censored number*
-    *censored number*,arnhem.nl.,sdfgs.arnhem.nl.,*censored number*
-    *censored number*,arnhem.nl.,10.255.254.35www.arnhem.nl.,*censored number*
-    *censored number*,arnhem.nl.,12.arnhem.nl.,*censored number*
-    :return:
-    """
-
-    if not csv_data:
-        return
-
-    # all mashed up in a single routine, should be separate tasks...
-    upload = SIDNUpload()
-    upload.at_when = datetime.now(pytz.utc)
-    upload.state = "new"
-    upload.by_user = user
-    upload.posted_data = csv_data
-    upload.save()
-
-
-@app.task(queue="storage")
-def sidn_process_upload(amount: int = 25):
-    uploads = SIDNUpload.objects.all().filter(state__in=["processing", "new"])[0:amount]
-    for upload in uploads:
-        # make sure it's not happening twice:
-        # Unfortunately no 'timeout and reset feature if failed', not enough time to build that.
-        # just set that manually.
-        upload.state = "being_processed"
-        upload.save()
-        sidn_handle_domain_upload.apply_async([upload.id])
-
-
-@app.task(queue="storage")
-def sidn_handle_domain_upload(upload_id: int):
-
-    upload = SIDNUpload.objects.all().filter(id=upload_id).first()
-
-    if not upload:
-        return
-
-    csv_data = upload.posted_data
-
-    f = StringIO(csv_data)
-    reader = csv.reader(f, delimiter=",")
-    added = []
-
-    for row in reader:
-
-        if len(row) < 4:
-            continue
-
-        if row[1] == "2ndlevel":
-            continue
-
-        log.debug(f"Processing {row[2]}.")
-
-        existing_second_level_url = (
-            Url.objects.all()
-            .filter(
-                Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
-                url=remove_last_dot(row[1]),
-                is_dead=False,
-            )
-            .first()
-        )
-
-        if not existing_second_level_url:
-            log.debug(f"Url '{remove_last_dot(row[1])}' is not in the database yet, so cannot add a subdomain.")
-            continue
-
-        if existing_second_level_url.uses_dns_wildcard:
-            log.debug(f"Url '{existing_second_level_url}' uses a wildcard, so cannot verify if this is a real domain.")
-            continue
-
-        if existing_second_level_url.do_not_find_subdomains:
-            log.debug(f"Url '{existing_second_level_url}' is not configures to allow new subdomains, skipping.")
-            continue
-
-        new_subdomain = remove_last_dot(row[2])
-
-        if new_subdomain == remove_last_dot(row[1]):
-            log.debug("New subdomain is the same as domain, skipping.")
-            continue
-
-        # the entire domain is included, len of new subdomain + dot (1).
-        new_subdomain = new_subdomain[0 : (len(new_subdomain) - 1) - len(row[1])]
-
-        log.debug(f"Going to try to add add {new_subdomain} as a subdomain to {row[1]}. Pending to correctness.")
-
-        has_been_added = existing_second_level_url.add_subdomain(new_subdomain, "added via SIDN")
-        if has_been_added:
-            added.append(has_been_added)
-
-    upload.state = "done"
-    upload.amount_of_newly_added_domains = len(added)
-    upload.newly_added_domains = [url.url for url in added]
-    upload.save()
 
 
 @transaction.atomic
@@ -298,6 +144,145 @@ def organization_and_url_import(flat_organizations: List[Dict[str, Any]]):
 
         new_organization = add_flat_organization(flat_organization)
         add_urls_to_organizations(organizations=[new_organization], urls=flat_organization.get("urls", []))
+
+
+_all_ = organization_and_url_import
+
+# Periodic task name
+TaskName = "zorgkaart import (hidden)"
+
+# right now we there is a page limit of 1000 and max 123000 items
+# so the the default limit of 1000 is OK but not future proof
+# raise it for all security
+sys.setrecursionlimit(10000)
+
+# logging
+log = logging.getLogger(__package__)
+
+# debug error info
+
+
+def create_task():
+    """Adds scraping task to celery jobs"""
+    if not PeriodicTask.objects.get(name=TaskName):
+        p = PeriodicTask(
+            **{
+                "name": TaskName,
+                "task": "vendor.tilanus.zorgkaart.scrape",
+                "crontab": CrontabSchedule.objects.get(id=7),
+            }
+        )
+        p.save()
+        log.info(f"Created Periodic Task for zorgkaart scraper with name: {TaskName}")
+
+
+def do_request(url, params={}, previous_items=[]):
+    """Internal function, performs API requests and merges paginated data"""
+    # default to max limit of API
+    if "limit" not in params.keys():
+        params["limit"] = 10000
+    # set page
+    if "page" not in params.keys():
+        params["page"] = 1
+    log.debug(f"Zorgkaart scraper request with parameters: {params}")
+    # setup for API call use Debian ca-certificats
+    http = urllib3.PoolManager(cert_reqs="CERT_REQUIRED", ca_certs="/etc/ssl/certs/ca-certificates.crt")
+    headers = urllib3.util.make_headers(basic_auth=config.ZORGKAART_USERNAME + ":" + config.ZORGKAART_PASSWORD)
+    # do request
+    r = http.request("GET", url, headers=headers, fields=params)
+    if not r.status == 200:
+        raise Exception(f"Zorgkaart scraper got an non 200 status from zorgkaart: {r.status}")
+    # load in python stuctures
+    result = json.loads(r.data.decode("utf8"))
+    # merge with results from reursions above
+    items = previous_items + result["items"]
+    # do we have everything
+    if result["count"] > result["page"] * result["limit"]:
+        # recursion because recursive programming is utterly uncomprehensible but fun
+        params["page"] += 1
+        log.debug(f"Zorgkaat scraper requesting nest page: {params['page']}")
+        items = do_request(url, params, items)
+    else:
+        if not result["count"] == len(items):
+            log.error(
+                f"Zogkaart scraper: Zorgkaart reported {result['count']} records but we recieved {len(items)} records."
+            )
+    return items
+
+
+def organisations():
+    """
+    Get a list of organisations as present in Zorgkaart
+
+    returns:
+        a list of dicts, datastructure as provided by Zorgkaart
+    """
+    params = json.loads(config.ZORGKAART_FILTER)
+    if not type(params) == dict:
+        log.error(f"Zorgkaat scrape: invalid filter ({params}), ignoring")
+        params = {}
+    log.debug(f"Zorgkaart scraper requesting organisations using filter: {params}")
+    items = do_request(config.ZORGKAART_ENDPOINT, params)
+    return items
+
+
+def organisation_types():
+    """
+    get a list of organisation types present in Zorgkaart
+
+    returns:
+        a list of dicts with keys: 'id' (str) and 'name' (str)
+    """
+    url = "https://api.zorgkaartnederland.nl/api/v1/companies/types"
+    items = do_request(url)
+    return items
+
+
+def translate(orglist):
+    """
+    translates a list of organisations as provided by Zorgkaart into a list of
+    organisations that can be imported into WebSecMap.
+
+    arguments:
+        orglist - a list Zorgkaart-type list of organisations
+
+    Returns:
+        a list of dicts containing data that can be imported into WebSecMap.
+    """
+    outlist = []
+    for org in orglist:
+        outlist.append(
+            {
+                "name": org["name"] + " (" + org["type"] + ")",
+                "layer": "Zorg",
+                "country": "NL",
+                "coordinate_type": "Point",
+                "coordinate_area": [org["location"]["longitude"], org["location"]["latitude"]],
+                "address": org["addresses"][0]["address"]
+                + ", "
+                + org["addresses"][0]["zipcode"]
+                + " "
+                + org["addresses"][0]["city"]
+                + ", "
+                + org["addresses"][0]["country"],
+                "surrogate_id": org["name"] + "_" + org["type"] + "_" + org["id"],
+                "urls": org["websites"],
+            }
+        )
+    return outlist
+
+
+def scrape():
+    """
+    Retrieves list of organisations (applying the filter in
+    WebSecMap config) and translates and inserts/updates
+    them into the database of WebSecMap.
+    """
+    orglist = organisations()
+    wsmlist = translate(orglist)
+    organization_and_url_import(wsmlist)
+    log.info(f"Zorgkaart scrape updated organisations. Current organisation count: {len(orglist)}")
+    return
 
 
 def validate_flat_organization(flat_organization: Dict):

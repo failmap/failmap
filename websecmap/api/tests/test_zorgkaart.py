@@ -1,7 +1,7 @@
 import logging
 
 import websecmap
-from websecmap.api.logic import organization_and_url_import
+from websecmap.api.apis.zorgkaart import organization_and_url_import
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 
 log = logging.getLogger("websecmap")

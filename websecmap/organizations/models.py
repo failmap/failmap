@@ -366,6 +366,7 @@ class Url(models.Model):
         # handle computed values
 
         result = tldextract.extract(self.url)
+        log.debug(result)
         self.computed_subdomain = result.subdomain
         self.computed_domain = result.domain
         self.computed_suffix = result.suffix
@@ -433,10 +434,12 @@ class Url(models.Model):
 
         # empty strings, etc
         if not url:
+            log.debug("Domain is empty, so not valid.")
             return False
 
         extract = tldextract.extract(url)
         if not extract.suffix:
+            log.debug("Domain has no suffix, so not valid.")
             return False
 
         # Validators catches 'most' invalid urls, but there are some issues and exceptions that are not really likely
