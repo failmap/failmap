@@ -14,7 +14,7 @@ def default_coordinate(argument):
 def test_add_flat_organizations(db, monkeypatch):
 
     # don't connect to google during a test
-    monkeypatch.setattr(websecmap.api.logic, "retrieve_geocode", default_coordinate)
+    monkeypatch.setattr(websecmap.api.apis.zorgkaart, "retrieve_geocode", default_coordinate)
 
     z = OrganizationType(**{"name": "Zorg"})
     z.save()

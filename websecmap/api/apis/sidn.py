@@ -111,7 +111,7 @@ def sidn_handle_domain_upload(upload_id: int):
     upload = SIDNUpload.objects.all().filter(id=upload_id).first()
 
     if not upload:
-        log.debug(f"Could not find upload.")
+        log.debug(f"Could not find upload {upload_id}.")
         return
 
     csv_data = upload.posted_data
@@ -125,6 +125,7 @@ def sidn_handle_domain_upload(upload_id: int):
         if len(row) < 4:
             continue
 
+        # skip header row
         if row[1] == "2ndlevel":
             continue
 
@@ -152,14 +153,21 @@ def sidn_handle_domain_upload(upload_id: int):
             log.debug(f"Url '{existing_second_level_url}' is not configures to allow new subdomains, skipping.")
             continue
 
-        new_subdomain = remove_last_dot(row[2])
+        if row[2] == row[1]:
+            log.debug("New subdomain is the same as domain, skipping.")
+            continue
 
-        if new_subdomain == remove_last_dot(row[1]):
+        if remove_last_dot(row[2]) == remove_last_dot(row[1]):
             log.debug("New subdomain is the same as domain, skipping.")
             continue
 
         # the entire domain is included, len of new subdomain + dot (1).
-        new_subdomain = new_subdomain[0 : (len(new_subdomain) - 1) - len(row[1])]
+        new_subdomain = extract_subdomain(row[2], row[1])
+
+        # domains like *.arnhem.nl are useless:
+        if "*" in new_subdomain:
+            log.debug("Wildcard found in subdomain, skipping.")
+            continue
 
         log.debug(f"Going to try to add add {new_subdomain} as a subdomain to {row[1]}. Pending to correctness.")
 
@@ -171,6 +179,17 @@ def sidn_handle_domain_upload(upload_id: int):
     upload.amount_of_newly_added_domains = len(added)
     upload.newly_added_domains = [url.url for url in added]
     upload.save()
+
+
+def extract_subdomain(new_subdomain, domain):
+    """
+    IN: 01daf671c183434584727ff1c0c29af1.arnhem.nl, arnhem.nl.
+    OUT: 01daf671c183434584727ff1c0c29af1
+    """
+    log.debug(f"Extracting subdomain, new_subdomain: {new_subdomain}, domain: {domain}")
+    extracted = new_subdomain[0 : (len(new_subdomain) - 1) - len(domain)]
+    log.debug(f"Extracted: {extracted}")
+    return extracted
 
 
 def get_map_configuration():

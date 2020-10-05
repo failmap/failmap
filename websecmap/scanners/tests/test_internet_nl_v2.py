@@ -768,7 +768,8 @@ def test_internet_nl_store_testresults(db):
 
     assert EndpointGenericScan.objects.all().filter(type="nonsense").count() == 0
 
-    assert EndpointGenericScan.objects.all().count() == 94 + 53
+    # +1 due to adding mail_sending_domain
+    assert EndpointGenericScan.objects.all().count() == 94 + 53 + 1
 
     create_url_report(create_timeline(url1), url1)
 
