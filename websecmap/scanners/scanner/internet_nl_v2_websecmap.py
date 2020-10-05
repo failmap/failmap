@@ -720,34 +720,62 @@ def calculate_forum_standaardisatie_views_web(scan_data):
 
     # TLS_NCSC
     # v2: web_https_tls_* 10 and web_https_cert_* 4, not including: web_https_http_available
-    add_calculation(
-        scan_data=scan_data,
-        new_key="web_legacy_tls_ncsc_web",
-        required_values=[
-            "web_https_tls_keyexchange",
-            "web_https_tls_compress",
-            "web_https_tls_secreneg",
-            "web_https_tls_ciphers",
-            "web_https_tls_clientreneg",
-            "web_https_tls_version",
-            "web_https_tls_cipherorder",
-            "web_https_tls_0rtt",
-            "web_https_tls_ocsp",
-            "web_https_tls_keyexchangehash",
-            "web_https_cert_sig",
-            "web_https_cert_pubkey",
-            "web_https_cert_chain",
-            "web_https_cert_domain",
-        ],
-    )
+    # #205 -> if starttls_failed failed, then dane test is not performed.
+    if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
+        add_instant_calculation(
+            scan_data, "web_legacy_tls_ncsc_web", "failed"
+        )
+    elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
+        add_instant_calculation(
+            scan_data, "web_legacy_tls_ncsc_web", "error"
+        )
+    else:
+        add_calculation(
+            scan_data=scan_data,
+            new_key="web_legacy_tls_ncsc_web",
+            required_values=[
+                "web_https_tls_keyexchange",
+                "web_https_tls_compress",
+                "web_https_tls_secreneg",
+                "web_https_tls_ciphers",
+                "web_https_tls_clientreneg",
+                "web_https_tls_version",
+                "web_https_tls_cipherorder",
+                "web_https_tls_0rtt",
+                "web_https_tls_ocsp",
+                "web_https_tls_keyexchangehash",
+                "web_https_cert_sig",
+                "web_https_cert_pubkey",
+                "web_https_cert_chain",
+                "web_https_cert_domain",
+            ],
+        )
 
-    # HTTPS
-    add_calculation(
-        scan_data=scan_data, new_key="web_legacy_https_enforced", required_values=["web_https_http_redirect"]
-    )
+    # HTTPS Redirect
+    if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
+        add_instant_calculation(
+            scan_data, "web_legacy_https_enforced", "failed"
+        )
+    elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
+        add_instant_calculation(
+            scan_data, "web_legacy_https_enforced", "error"
+        )
+    else:
+        add_calculation(
+            scan_data=scan_data, new_key="web_legacy_https_enforced", required_values=["web_https_http_redirect"]
+        )
 
     # HSTS
-    add_calculation(scan_data=scan_data, new_key="web_legacy_hsts", required_values=["web_https_http_hsts"])
+    if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
+        add_instant_calculation(
+            scan_data, "web_legacy_hsts", "failed"
+        )
+    elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
+        add_instant_calculation(
+            scan_data, "web_legacy_hsts", "error"
+        )
+    else:
+        add_calculation(scan_data=scan_data, new_key="web_legacy_hsts", required_values=["web_https_http_hsts"])
 
     # Not in forum standaardisatie magazine, but used internally
     add_calculation(
@@ -819,12 +847,24 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     # 1a/b mail_auth_dmarc_policy_only has been removed, and can be replaced with internet_nl_mail_auth_dmarc_policy.
     # Todo: get the internet_nl_mail_auth_dmarc_policy data and see if that is passes, else it fails.
     # 2a/b: ignore
-    add_instant_calculation(
-        scan_data, "mail_legacy_dmarc_policy", scan_data["results"]["tests"]["mail_auth_dmarc_policy"]["status"]
-    )
+    # #205: make sure not_tested values are not in the report, because the test failed if the parent (dmarc) failed.
+    if scan_data["results"]["tests"]["mail_auth_dmarc_exist"]["status"] == "failed":
+        add_instant_calculation(
+            scan_data, "mail_legacy_dmarc_policy", "failed"
+        )
+    else:
+        add_instant_calculation(
+            scan_data, "mail_legacy_dmarc_policy", scan_data["results"]["tests"]["mail_auth_dmarc_policy"]["status"]
+        )
 
     # SPF Policy
-    add_calculation(scan_data=scan_data, new_key="mail_legacy_spf_policy", required_values=["mail_auth_spf_policy"])
+    # #205 -> Do not use not_tested as a report value, if the 'parent (=spf_exists)' failed, the policy also fails.
+    if scan_data["results"]["tests"]["mail_auth_spf_exist"]["status"] == "failed":
+        add_instant_calculation(
+            scan_data, "mail_legacy_spf_policy", "failed"
+        )
+    else:
+        add_calculation(scan_data=scan_data, new_key="mail_legacy_spf_policy", required_values=["mail_auth_spf_policy"])
 
     # START TLS
     # Api v2 changes:
@@ -901,11 +941,17 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     elif custom_api_field_results["mail_servers_testable_status"] == "untestable":
         add_instant_calculation(scan_data, "mail_legacy_dane", "not_testable")
     else:
-        add_calculation(
-            scan_data=scan_data,
-            new_key="mail_legacy_dane",
-            required_values=["mail_starttls_dane_exist", "mail_starttls_dane_valid"],
-        )
+        # #205 -> if starttls_failed failed, then dane test is not performed.
+        if scan_data["results"]["tests"]["mail_starttls_tls_available"]["status"] == "failed":
+            add_instant_calculation(
+                scan_data, "mail_legacy_dane", "failed"
+            )
+        else:
+            add_calculation(
+                scan_data=scan_data,
+                new_key="mail_legacy_dane",
+                required_values=["mail_starttls_dane_exist", "mail_starttls_dane_valid"],
+            )
 
     # IPv6 Nameserver
     add_calculation(
