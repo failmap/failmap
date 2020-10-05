@@ -1,10 +1,15 @@
-import pytest
 from django.contrib.auth.models import User
 from django.test import TestCase
 
 import websecmap
-from websecmap.api.apis.sidn import get_map_configuration, sidn_domain_upload, sidn_handle_domain_upload, \
-    get_2ndlevel_domains
+from websecmap.api.apis.sidn import (
+    get_map_configuration,
+    sidn_domain_upload,
+    sidn_handle_domain_upload,
+    get_2ndlevel_domains,
+    remove_last_dot,
+    extract_subdomain,
+)
 from websecmap.api.models import SIDNUpload
 from websecmap.organizations.models import Url
 
@@ -19,29 +24,20 @@ class ApiTest(TestCase):
         mapconfigs = get_map_configuration()
         assert len(mapconfigs) == 1
 
-        domains = get_2ndlevel_domains('NL', 'municipality')
+        domains = get_2ndlevel_domains("NL", "municipality")
         assert len(domains) == 6
         assert "arnhem.nl" in domains
         assert sorted(domains) == sorted(
-            ['vng.nl', 'zutphen.nl', 'arnhem.nl', 'texel.nl', 'veere.nl', 'vngrealisatie.nl'])
+            ["vng.nl", "zutphen.nl", "arnhem.nl", "texel.nl", "veere.nl", "vngrealisatie.nl"]
+        )
 
 
 def test_domain_upload(db, requests_mock, current_path):
     # the first answer is cached indefinitely. So the first request has to be correct.
 
     requests_mock.get(
-        "https://publicsuffix.org/list/public_suffix_list.dat",
-        text=text(f"{current_path}/public_suffix_list.dat")
+        "https://publicsuffix.org/list/public_suffix_list.dat", text=text(f"{current_path}/public_suffix_list.dat")
     )
-    # todo: encoding with 'idna' codec failed (UnicodeError: label empty or too long)  Due to
-    # 'www..bergen.nl' There is a problem with parsing domain data. Happens with:
-    """
-    ,2ndlevel,qname,distinct_asns
-    1155,bergen.nl.,surve.bergen.nl.,1
-    1823,bergen.nl.,bto.bergen.nl.,1
-    2042,bergen.nl.,www.h.bergen.nl.,1
-    2167,bergen.nl.,1585059155773.bergen.nl.,1
-    """
 
     u = Url()
     u.url = "arnhem.nl"
@@ -85,12 +81,32 @@ def test_domain_upload(db, requests_mock, current_path):
     first_upload = SIDNUpload.objects.first()
     assert first_upload.state == "done"
     assert sorted(first_upload.newly_added_domains) == sorted(
-        ["01.arnhem.nl", "01daf671c183434584727ff1c0c29af1.arnhem.nl", "www.arnhem.nl", "14809963d1b7.arnhem.nl"]
+        [
+            "01.arnhem.nl",
+            "01daf671c183434584727ff1c0c29af1.arnhem.nl",
+            "www.h.arnhem.nl",
+            "www.arnhem.nl",
+            "14809963d1b7.arnhem.nl",
+        ]
     )
-    assert first_upload.amount_of_newly_added_domains == 4
+    assert first_upload.amount_of_newly_added_domains == 5
 
 
 def text(filepath: str):
     with open(filepath, "r") as f:
         data = f.read()
     return data
+
+
+def test_remove_last_dot():
+    assert remove_last_dot("www.h.arnhem.nl.") == "www.h.arnhem.nl"
+    assert remove_last_dot("www.arnhem.nl.") == "www.arnhem.nl"
+    assert remove_last_dot("w.arnhem.nl.") == "w.arnhem.nl"
+    assert remove_last_dot("www.www.www.www.arnhem.nl.") == "www.www.www.www.arnhem.nl"
+
+
+def test_extract_subdomain():
+    assert extract_subdomain("www.arnhem.nl.", "arnhem.nl.") == "www"
+    assert extract_subdomain("www.h.arnhem.nl.", "arnhem.nl.") == "www.h"
+    assert extract_subdomain("w.arnhem.nl.", "arnhem.nl.") == "w"
+    assert extract_subdomain("www.www.www.www.arnhem.nl.", "arnhem.nl.") == "www.www.www.www"
