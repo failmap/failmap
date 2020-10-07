@@ -64,6 +64,8 @@ def remove_last_dot(my_text):
 @app.task(queue="storage")
 def sidn_domain_upload(user, csv_data):
     """
+    Moved to reporting due to more room for delays on that queue.
+
     If the domain exists in the db, any subdomain will be added.
     As per usual, adding a subdomain will check if the domain is valid and resolvable.
 
@@ -92,8 +94,9 @@ def sidn_domain_upload(user, csv_data):
     upload.save()
 
 
-@app.task(queue="storage")
+@app.task(queue="reporting")
 def sidn_process_upload(amount: int = 25):
+    # Moved to reporting due to more room for delays on that queue.
     uploads = SIDNUpload.objects.all().filter(state__in=["processing", "new"])[0:amount]
     for upload in uploads:
         # make sure it's not happening twice:
@@ -104,7 +107,7 @@ def sidn_process_upload(amount: int = 25):
         sidn_handle_domain_upload.apply_async([upload.id])
 
 
-@app.task(queue="storage")
+@app.task(queue="reporting")
 def sidn_handle_domain_upload(upload_id: int):
     log.debug(f"Processing sidn data from {upload_id}")
 
