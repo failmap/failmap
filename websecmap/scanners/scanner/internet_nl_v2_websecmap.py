@@ -295,7 +295,9 @@ def update_state(scan: InternetNLV2Scan, new_state: str, new_state_message: str)
     if existing_log:
 
         # in case there is already a scan, and no state change:
-        if existing_log.state == new_state and existing_log.state_message == new_state_message:
+        # Scan.state needs to be taken into account: there could be a mismatch between the log and the scan,
+        # and the scan is leading. The same issue is fixed in the internet.nl dashboard, see "test_scan".
+        if existing_log.state == new_state == scan.state and existing_log.state_message == new_state_message:
             scan.last_state_check = datetime.now(pytz.utc)
             scan.save()
 
@@ -722,13 +724,9 @@ def calculate_forum_standaardisatie_views_web(scan_data):
     # v2: web_https_tls_* 10 and web_https_cert_* 4, not including: web_https_http_available
     # #205 -> if starttls_failed failed, then dane test is not performed.
     if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
-        add_instant_calculation(
-            scan_data, "web_legacy_tls_ncsc_web", "failed"
-        )
+        add_instant_calculation(scan_data, "web_legacy_tls_ncsc_web", "failed")
     elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
-        add_instant_calculation(
-            scan_data, "web_legacy_tls_ncsc_web", "error"
-        )
+        add_instant_calculation(scan_data, "web_legacy_tls_ncsc_web", "error")
     else:
         add_calculation(
             scan_data=scan_data,
@@ -753,13 +751,9 @@ def calculate_forum_standaardisatie_views_web(scan_data):
 
     # HTTPS Redirect
     if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
-        add_instant_calculation(
-            scan_data, "web_legacy_https_enforced", "failed"
-        )
+        add_instant_calculation(scan_data, "web_legacy_https_enforced", "failed")
     elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
-        add_instant_calculation(
-            scan_data, "web_legacy_https_enforced", "error"
-        )
+        add_instant_calculation(scan_data, "web_legacy_https_enforced", "error")
     else:
         add_calculation(
             scan_data=scan_data, new_key="web_legacy_https_enforced", required_values=["web_https_http_redirect"]
@@ -767,13 +761,9 @@ def calculate_forum_standaardisatie_views_web(scan_data):
 
     # HSTS
     if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
-        add_instant_calculation(
-            scan_data, "web_legacy_hsts", "failed"
-        )
+        add_instant_calculation(scan_data, "web_legacy_hsts", "failed")
     elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
-        add_instant_calculation(
-            scan_data, "web_legacy_hsts", "error"
-        )
+        add_instant_calculation(scan_data, "web_legacy_hsts", "error")
     else:
         add_calculation(scan_data=scan_data, new_key="web_legacy_hsts", required_values=["web_https_http_hsts"])
 
@@ -849,9 +839,7 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     # 2a/b: ignore
     # #205: make sure not_tested values are not in the report, because the test failed if the parent (dmarc) failed.
     if scan_data["results"]["tests"]["mail_auth_dmarc_exist"]["status"] == "failed":
-        add_instant_calculation(
-            scan_data, "mail_legacy_dmarc_policy", "failed"
-        )
+        add_instant_calculation(scan_data, "mail_legacy_dmarc_policy", "failed")
     else:
         add_instant_calculation(
             scan_data, "mail_legacy_dmarc_policy", scan_data["results"]["tests"]["mail_auth_dmarc_policy"]["status"]
@@ -860,9 +848,7 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     # SPF Policy
     # #205 -> Do not use not_tested as a report value, if the 'parent (=spf_exists)' failed, the policy also fails.
     if scan_data["results"]["tests"]["mail_auth_spf_exist"]["status"] == "failed":
-        add_instant_calculation(
-            scan_data, "mail_legacy_spf_policy", "failed"
-        )
+        add_instant_calculation(scan_data, "mail_legacy_spf_policy", "failed")
     else:
         add_calculation(scan_data=scan_data, new_key="mail_legacy_spf_policy", required_values=["mail_auth_spf_policy"])
 
@@ -943,9 +929,7 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     else:
         # #205 -> if starttls_failed failed, then dane test is not performed.
         if scan_data["results"]["tests"]["mail_starttls_tls_available"]["status"] == "failed":
-            add_instant_calculation(
-                scan_data, "mail_legacy_dane", "failed"
-            )
+            add_instant_calculation(scan_data, "mail_legacy_dane", "failed")
         else:
             add_calculation(
                 scan_data=scan_data,
