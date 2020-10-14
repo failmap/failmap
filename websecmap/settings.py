@@ -539,6 +539,18 @@ CELERY_WORKER_CONCURRENCY = 10
 # thus for tasks that are not programmed perfectly it will raise a number
 # of repeated exceptions which will need to be debugged.
 CELERY_TASK_ACKS_LATE = True
+
+"""
+This number can be tweaked depending on the number of threads/green-threads (eventlet/gevent) using a connection.
+For example running eventlet with 1000 greenlets that use a connection to the broker, contention can arise and you
+should consider increasing the limit.
+We use 20 greenthreads or so. The error we see is:
+redis.exceptions.ConnectionError: Error 104 while writing to socket. Connection reset by peer.
+The error is not visible when running a single task or just a scan, or progressing the individual task where the crash
+occurs. So probably connection limits are the issue.
+"""
+CELERY_BROKER_POOL_LIMIT = 30
+
 #
 # End of celery settings
 #####
