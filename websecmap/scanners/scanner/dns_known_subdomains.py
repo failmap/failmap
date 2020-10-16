@@ -14,7 +14,7 @@ from celery import Task, group
 from websecmap.celery import app
 from websecmap.scanners import plannedscan
 from websecmap.scanners.scanner.__init__ import allowed_to_discover_urls, unique_and_random
-from websecmap.scanners.scanner.subdomains import get_subdomains, url_by_filters, wordlist_scan
+from websecmap.scanners.scanner.subdomains import url_by_filters, wordlist_scan, get_popular_subdomains
 
 log = logging.getLogger(__package__)
 
@@ -53,7 +53,7 @@ def compose_discover_task(urls):
     first_organization = first_url.organization.all().first()
 
     # The country is more then enough to get a sort of feasible list of subdomains.
-    wordlist = get_subdomains([first_organization.country], None)
+    wordlist = get_popular_subdomains(first_organization.country.code)
 
     # The worker has no way to write / save things. A wordlist can be 10's of thousands of words.
     task = group(

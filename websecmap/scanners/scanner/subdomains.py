@@ -11,10 +11,12 @@ from typing import List
 import pytz
 from celery import Task, group
 from django.conf import settings
+from django.db import connection
 from django.db.models import Q
 from tenacity import before_log, retry, wait_fixed
 
 from websecmap.celery import app
+from websecmap.map.logic.map_defaults import get_country
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, unique_and_random, url_filters
@@ -544,7 +546,117 @@ def get_subdomains(countries: List, organization_types: List = None):
     if organization_types:
         urls = urls.filter(organization__type__name__in=organization_types)
 
-    return urls.values_list("computed_subdomain", flat=True).distinct()
+    # make sure no queryset is returned
+    return list(urls.values_list("computed_subdomain", flat=True).distinct().order_by("computed_subdomain"))
+
+
+def get_popular_subdomains(country: str = "NL"):
+    """
+    Returns the domains that are used the most: some subdomains are used over and over because of popular vendors.
+    Or just because of stupid luck.
+
+    This saves a lot of guessing of subdomains that are unpopular. Because Django is hard to use in this case,
+    we're using a plain and simple SQL query that works everywhere. Here is an overview of what you can expect. So
+    you only have to find five to find the other hundred.
+
+    +-----------------------------+--------+
+    | computed_subdomain          | amount |
+    +-----------------------------+--------+
+    | www                         |   2631 |
+    | autodiscover                |    439 |
+    | mail                        |    418 |
+    | webmail                     |    344 |
+    | sip                         |    253 |
+    | lyncdiscover                |    204 |
+    | intranet                    |    184 |
+    | digikoppeling               |    165 |
+    | test                        |    153 |
+    | iburgerzaken                |    151 |
+    | portal                      |    150 |
+    | ibzpink                     |    149 |
+    | mijn                        |    141 |
+    | simsite                     |    141 |
+    | afspraken                   |    140 |
+    | opendata                    |    138 |
+    | vpn                         |    131 |
+    | ftp                         |    129 |
+    | adfs                        |    123 |
+    | preproductie                |    118 |
+    | feeds                       |    115 |
+    | acceptatie                  |    114 |
+    | secure                      |    105 |
+    | enterpriseregistration      |    104 |
+    | enterpriseenrollment        |     93 |
+    | remote                      |     93 |
+    | meet                        |     91 |
+    | werkplek                    |     82 |
+    | acc                         |     81 |
+    | formulieren                 |     77 |
+    | edienstenburgerzaken        |     76 |
+    | edienstenburgerzaken-test   |     75 |
+    | smtp                        |     68 |
+    | sts                         |     68 |
+    | geo                         |     66 |
+    | mdm                         |     66 |
+    | afspraak                    |     61 |
+    | login                       |     60 |
+    | loket                       |     60 |
+    | simcms                      |     59 |
+    | dialin                      |     55 |
+    | a-www                       |     54 |
+    | english                     |     51 |
+    | a-opendata                  |     50 |
+    | hybrid                      |     50 |
+    ...
+    +-----------------------------+--------+
+    490 rows in set (0.20 sec)
+
+    > 3 =
+    > 2 = 1635
+    > 1 = 2911 urls
+    > 0 = 21535 urls
+
+    Country and organization type have a lot of influence in this, as each have their own specific set of subdomains.
+    Resulting in > 5 = 457 rows.
+    """
+
+    # some really basic validation to prevent injections and such
+    country = get_country(country)
+
+    # i'm _DONE_ with the obscuring of group_by and counts using terrible abstractions.
+    # so here is a raw query that just works on all databases and is trivially simple to understand.
+    # The popularity of a domain per country is still an unknown.
+    sql = """SELECT
+                 computed_subdomain, count(computed_subdomain) as amount
+             FROM
+                 url
+             WHERE
+                 url.is_dead=false
+                 AND url.not_resolvable=false
+                 AND url.computed_subdomain != ""
+                 /* not making a carthesian product where a domain is used over and over. */
+                 AND computed_subdomain in (
+                    SELECT DISTINCT computed_subdomain FROM url
+                    INNER JOIN url_organization on url_organization.url_id = url.id
+                    INNER JOIN organization on url_organization.organization_id = organization.id
+                    WHERE organization.is_dead=false
+                    AND organization.country = "%(country)s"
+                )
+             GROUP BY
+                 computed_subdomain
+             /* No need to filter as a LIMIT is used, so this also works with very small datasets.
+                but make sure no 'one shots' are added, as there will be a lot of those. */
+             HAVING amount > 1
+             ORDER BY amount DESC
+             LIMIT 1000
+             """ % {
+        "country": country
+    }
+
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    return sorted([row[0] for row in rows])
 
 
 def make_threeletter_wordlist():
