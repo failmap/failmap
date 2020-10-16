@@ -633,14 +633,14 @@ def get_popular_subdomains(country: str = "NL"):
              WHERE
                  url.is_dead=false
                  AND url.not_resolvable=false
-                 AND url.computed_subdomain != ""
+                 AND url.computed_subdomain != ''
                  /* not making a carthesian product where a domain is used over and over. */
                  AND computed_subdomain in (
                     SELECT DISTINCT computed_subdomain FROM url
                     INNER JOIN url_organization on url_organization.url_id = url.id
                     INNER JOIN organization on url_organization.organization_id = organization.id
                     WHERE organization.is_dead=false
-                    AND organization.country = "%(country)s"
+                    AND organization.country = '%(country)s'
                 )
              GROUP BY
                  computed_subdomain
