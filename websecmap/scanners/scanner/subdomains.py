@@ -646,9 +646,9 @@ def get_popular_subdomains(country: str = "NL"):
                  computed_subdomain
              /* No need to filter as a LIMIT is used, so this also works with very small datasets.
                 but make sure no 'one shots' are added, as there will be a lot of those. */
-             HAVING amount > 1
-             ORDER BY amount DESC
-             LIMIT 1000
+             HAVING count(computed_subdomain) > 1
+             ORDER BY count(computed_subdomain) DESC
+             LIMIT 500
              """ % {
         "country": country
     }
