@@ -8,7 +8,6 @@ from websecmap.api.apis.sidn import (
     sidn_handle_domain_upload,
     get_2ndlevel_domains,
     remove_last_dot,
-    extract_subdomain,
 )
 from websecmap.api.models import SIDNUpload
 from websecmap.organizations.models import Url
@@ -61,13 +60,29 @@ def test_domain_upload(db, requests_mock, current_path):
     requests_mock.get("", text="1")
     websecmap.scanners.scanner.http.resolves = lambda x: True
 
+    # 0,arnhem.nl,www.ris.zeewolde.nl.,1 -> qname not matching 2ndlevel, results in qname domain, but no match in test
+    # 334,zeewolde.nl,www.ris.arnhem.nl.,1 -> qname not matching 2ndlevel, results in qname domain, including match
+    # Will be skipped as there is no new info: 335,arnhem.nl.,arnhem.nl.,1
     csv_data = """,2ndlevel,qname,distinct_asns
 123,arnhem.nl.,*.arnhem.nl.,1
 124,arnhem.nl.,01.arnhem.nl.,1
 163,arnhem.nl.,01daf671c183434584727ff1c0c29af1.arnhem.nl.,1
 2123,arnhem.nl.,www.arnhem.nl.,1
+2123,arnhem.nl.,www.arnhem.nl.,1
+2123,arnhem.nl.,www.arnhem.nl.,1
+2123,arnhem.nl.,www.arnhem.nl.,1
+2123,arnhem.nl.,www.arnhem.nl.,1
+2123,arnhem.nl.,www.arnhem.nl.,1
 2124,arnhem.nl.,www.h.arnhem.nl.,1
-325,arnhem.nl.,14809963d1b7.arnhem.nl.,1"""
+2124,arnhem.nl.,www.ris.arnhem.nl.,1
+2124,arnhem.nl.,a.b.c.d.e.f.h.arnhem.nl.,1
+2124,arnhem.nl.,a.bb.ccc.dddd.eeeee.ffffff.h.arnhem.nl.,1
+2124,arnhem.nl.,a.*.ccc.dddd.eeeee.ffffff.h.arnhem.nl.,1
+325,arnhem.nl.,14809963d1b7.arnhem.nl.,1
+333,arnhem.nl,www.myris.zeewolde.nl.,1
+334,zeewolde.nl,www.myris.arnhem.nl.,1
+335,arnhem.nl.,arnhem.nl.,1
+"""
     assert SIDNUpload.objects.all().count() == 0
     user = User()
     user.first_name = ""
@@ -87,9 +102,13 @@ def test_domain_upload(db, requests_mock, current_path):
             "www.h.arnhem.nl",
             "www.arnhem.nl",
             "14809963d1b7.arnhem.nl",
+            "www.ris.arnhem.nl",
+            "a.b.c.d.e.f.h.arnhem.nl",
+            "a.bb.ccc.dddd.eeeee.ffffff.h.arnhem.nl",
+            "www.myris.arnhem.nl",
         ]
     )
-    assert first_upload.amount_of_newly_added_domains == 5
+    assert first_upload.amount_of_newly_added_domains == 9
 
 
 def text(filepath: str):
@@ -103,10 +122,3 @@ def test_remove_last_dot():
     assert remove_last_dot("www.arnhem.nl.") == "www.arnhem.nl"
     assert remove_last_dot("w.arnhem.nl.") == "w.arnhem.nl"
     assert remove_last_dot("www.www.www.www.arnhem.nl.") == "www.www.www.www.arnhem.nl"
-
-
-def test_extract_subdomain():
-    assert extract_subdomain("www.arnhem.nl.", "arnhem.nl.") == "www"
-    assert extract_subdomain("www.h.arnhem.nl.", "arnhem.nl.") == "www.h"
-    assert extract_subdomain("w.arnhem.nl.", "arnhem.nl.") == "w"
-    assert extract_subdomain("www.www.www.www.arnhem.nl.", "arnhem.nl.") == "www.www.www.www"

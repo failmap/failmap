@@ -3,6 +3,7 @@ from datetime import datetime
 from io import StringIO
 
 import pytz
+import tldextract
 from django.db.models import Q
 
 import logging
@@ -13,8 +14,12 @@ from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import Url
 
-
 log = logging.getLogger(__package__)
+
+FIELD_ID = 0
+FIELD_SECOND_LEVEL = 1
+FIELD_QNAME = 2
+FIELD_ASNS = 3
 
 
 def get_uploads(user):
@@ -117,66 +122,9 @@ def sidn_handle_domain_upload(upload_id: int):
         log.debug(f"Could not find upload {upload_id}.")
         return
 
-    csv_data = upload.posted_data
-
-    f = StringIO(csv_data)
-    reader = csv.reader(f, delimiter=",")
-    added = []
-
-    for row in reader:
-
-        if len(row) < 4:
-            continue
-
-        # skip header row
-        if row[1] == "2ndlevel":
-            continue
-
-        log.debug(f"Processing {row[2]}.")
-
-        existing_second_level_url = (
-            Url.objects.all()
-            .filter(
-                Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
-                url=remove_last_dot(row[1]),
-                is_dead=False,
-            )
-            .first()
-        )
-
-        if not existing_second_level_url:
-            log.debug(f"Url '{remove_last_dot(row[1])}' is not in the database yet, so cannot add a subdomain.")
-            continue
-
-        if existing_second_level_url.uses_dns_wildcard:
-            log.debug(f"Url '{existing_second_level_url}' uses a wildcard, so cannot verify if this is a real domain.")
-            continue
-
-        if existing_second_level_url.do_not_find_subdomains:
-            log.debug(f"Url '{existing_second_level_url}' is not configures to allow new subdomains, skipping.")
-            continue
-
-        if row[2] == row[1]:
-            log.debug("New subdomain is the same as domain, skipping.")
-            continue
-
-        if remove_last_dot(row[2]) == remove_last_dot(row[1]):
-            log.debug("New subdomain is the same as domain, skipping.")
-            continue
-
-        # the entire domain is included, len of new subdomain + dot (1).
-        new_subdomain = extract_subdomain(row[2], row[1])
-
-        # domains like *.arnhem.nl are useless:
-        if "*" in new_subdomain:
-            log.debug("Wildcard found in subdomain, skipping.")
-            continue
-
-        log.debug(f"Going to try to add add {new_subdomain} as a subdomain to {row[1]}. Pending to correctness.")
-
-        has_been_added = existing_second_level_url.add_subdomain(new_subdomain, "added via SIDN")
-        if has_been_added:
-            added.append(has_been_added)
+    added = set(process_SIDN_row(row) for row in csv.reader(StringIO(upload.posted_data), delimiter=","))
+    # remove all error situations, which return None
+    added.remove(None)
 
     upload.state = "done"
     upload.amount_of_newly_added_domains = len(added)
@@ -184,15 +132,53 @@ def sidn_handle_domain_upload(upload_id: int):
     upload.save()
 
 
-def extract_subdomain(new_subdomain, domain):
-    """
-    IN: 01daf671c183434584727ff1c0c29af1.arnhem.nl, arnhem.nl.
-    OUT: 01daf671c183434584727ff1c0c29af1
-    """
-    log.debug(f"Extracting subdomain, new_subdomain: {new_subdomain}, domain: {domain}")
-    extracted = new_subdomain[0 : (len(new_subdomain) - 1) - len(domain)]
-    log.debug(f"Extracted: {extracted}")
-    return extracted
+def process_SIDN_row(row):
+    if len(row) < 4:
+        log.debug("Row does not have the correct length.")
+        return
+
+    # skip header row
+    if row[FIELD_SECOND_LEVEL] == "2ndlevel":
+        log.debug("Ignoring header field.")
+        return
+
+    log.debug(f"Processing {row[FIELD_QNAME]}.")
+
+    # We only care about the qname, field, which can be a very long domain
+    # it might also not match the 2nd level in case of old domains.
+    # for example: 333,arnhem.nl,www.myris.zeewolde.nl.,1 -> the 2nd level should be ignored there.
+    # Do not roll your own domain extraction.
+    extracted = tldextract.extract(remove_last_dot(row[FIELD_QNAME]))
+
+    if not extracted.subdomain:
+        log.debug("No subdomain found in query. Skipping.")
+        return
+
+    if "*" in extracted.subdomain:
+        log.debug("Found wildcard in subdomain. Not adding this.")
+        return
+
+    second_level_domain = f"{extracted.domain}.{extracted.suffix}"
+    existing_second_level_url = (
+        Url.objects.all()
+        .filter(
+            Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+            url=second_level_domain,
+            is_dead=False,
+            # We cannot verify if this is a real subdomain, as wildcards always resolve. There are ways with overhead.
+            uses_dns_wildcard=False,
+            # Some domains should not add new subdomains, for example large organizations with 5000 real subdomains.
+            do_not_find_subdomains=False,
+        )
+        .first()
+    )
+
+    if not existing_second_level_url:
+        log.debug(f"Url '{second_level_domain}' is not in the database yet, so cannot add a subdomain.")
+        return
+
+    log.debug(f"Attempting to add {extracted.subdomain} as a subdomain of {second_level_domain}.")
+    return existing_second_level_url.add_subdomain(extracted.subdomain, "added via SIDN")
 
 
 def get_map_configuration():
