@@ -440,10 +440,14 @@ def internet_nl_api_v1_requirement_tilde_value_format(scan: Union[EndpointGeneri
 
 
 def internet_nl_score(scan: Union[EndpointGenericScan, UrlGenericScan]):
-    # Todo: these numbers are completely chosen at random and need to be defined.
-    # todo: how to add the score and url to each url in a report? / other special values?
-    score = int(scan.rating)
+    # There might not be a score, but a test error.
+    if scan.rating == "error":
+        return standard_calculation(
+            scan=scan, explanation=f"{scan.rating} {scan.evidence}", high=0, medium=0, low=0, error_in_test=True
+        )
 
+    # Todo: these numbers are completely chosen at random and need to be defined.
+    score = int(scan.rating)
     if score == 100:
         return standard_calculation(scan=scan, explanation=f"{scan.rating} {scan.evidence}", high=0, medium=0, low=0)
 
