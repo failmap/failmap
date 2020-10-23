@@ -18,7 +18,7 @@ from django.db import transaction
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import Endpoint, InternetNLV2Scan, InternetNLV2StateLog
+from websecmap.scanners.models import Endpoint, InternetNLV2Scan, InternetNLV2StateLog, EndpointGenericScan
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.internet_nl_v2 import InternetNLApiSettings, register, result, status
 
@@ -507,20 +507,45 @@ def process_scan_results(scan: InternetNLV2Scan):
     update_state(scan, "finished", "")
 
 
+def reuse_last_fields_and_set_them_to_error(endpoint):
+
+    if not endpoint:
+        return
+
+    # get all latest fields from this endpoint.
+    # This does not interfere with other scans, as they happen on different endpoints.
+    fields = EndpointGenericScan.objects.all().filter(endpoint=endpoint).values_list("type", flat=True).distinct()
+    for field in fields:
+        store_endpoint_scan_result(
+            scan_type=field,
+            endpoint=endpoint,
+            rating="error",
+            message=json.dumps({"translation": "error", "technical_details_hash": ""}),
+            evidence="Error retrieving scan result data, something went wrong during the scan.",
+        )
+
+
 @app.task(queue="storage")
 def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endpoint_protocol: str):
     """
+        The error status only occurs when there was a crash during the scanning of a domain. This is usually
+        a bug in the internet.nl scanner, which has to be fixed over time. An error will be emitted when
+        an error is found. All last metrics from the domain (whatever the metric will be, even outdated metrics),
+        will be updated with a test-error value.
+        'vitesse.nl': {
+            'status': 'error'
+        },
+
 
         "internet.nl": {
             "domain": "api.internet.nl",
-            "status": "success",
+            "status": "ok",
             "score": {
                 "percentage": 80
             },
             "report":
             {
-                "id": 0,
-                "address": "https://api.internet.nl/web/api.internet.nl/4423123/"
+                "url": "https://api.internet.nl/web/api.internet.nl/4423123/"
             },
             "results":
             {
@@ -528,7 +553,7 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
                 {
                     "test": "web_ipv6_ns_address",
                     "verdict": "good",
-                    "test_result": "pass",
+                    "test_result": "passed", // failed etc...
                     "translation": {
                         "key": "string"
                     }
@@ -549,6 +574,15 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
 
     if not endpoint:
         log.debug("No matching endpoint found, perhaps this was deleted / resolvable meanwhile. Skipping")
+        return
+
+    if scan_data["status"] == "error":
+        log.error(
+            f"Domain {domain} received an error from internet.nl. "
+            f"There is probably a bug in the internet.nl scanner. All previous scan results from this"
+            f"endpoint are set to error."
+        )
+        reuse_last_fields_and_set_them_to_error(endpoint)
         return
 
     # link changes every time, so can't save that as message. -> _wrong_

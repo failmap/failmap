@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from websecmap.organizations.models import Url
 from websecmap.reporting.report import create_timeline, create_url_report
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, InternetNLV2Scan, InternetNLV2StateLog
+from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import (
     add_calculation,
     calculate_forum_standaardisatie_views_mail,
@@ -14,9 +15,39 @@ from websecmap.scanners.scanner.internet_nl_v2_websecmap import (
     process_scan_results,
     progress_running_scan,
     update_state,
+    reuse_last_fields_and_set_them_to_error,
 )
 
 log = logging.getLogger("websecmap")
+
+
+def test_reuse_last_fields_and_set_them_to_error(db):
+    url, created = Url.objects.all().get_or_create(url="example.nl")
+    endpoint, created = Endpoint.objects.all().get_or_create(port=443, protocol="http", ip_version=4, url=url)
+
+    # nothing happens, no crash etc.
+    reuse_last_fields_and_set_them_to_error(endpoint)
+
+    store_endpoint_scan_result(scan_type="test1", endpoint=endpoint, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test2", endpoint=endpoint, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test3", endpoint=endpoint, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test4", endpoint=endpoint, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test5", endpoint=endpoint, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test1", endpoint=endpoint, rating="some_value", message="")
+
+    # add some values that should not be changed:
+    safe_ep, created = Endpoint.objects.all().get_or_create(port=443, protocol="http", ip_version=6, url=url)
+    store_endpoint_scan_result(scan_type="test1", endpoint=safe_ep, rating="some_value", message="")
+
+    # more values that should not be changed:
+    safe_ep, created = Endpoint.objects.all().get_or_create(port=0, protocol="dns", ip_version=6, url=url)
+    store_endpoint_scan_result(scan_type="test1", endpoint=safe_ep, rating="some_value", message="")
+
+    reuse_last_fields_and_set_them_to_error(endpoint)
+
+    # 7 from above (note 1 is overwritten), and 5 overwritten with error.
+    assert EndpointGenericScan.objects.all().count() == 7 + 5
+    assert EndpointGenericScan.objects.all().filter(rating="error").count() == 5
 
 
 def test_internet_nl_logging(db):
@@ -91,6 +122,7 @@ def test_internet_nl_logging(db):
 def test_internet_nl_store_testresults(db):
     test_results = {
         "secure.aalten.nl": {
+            "status": "ok",
             "report": {"url": "https://dev.batch.internet.nl/site/secure.aalten.nl/665357/"},
             "scoring": {"percentage": 48},
             "results": {
@@ -207,6 +239,7 @@ def test_internet_nl_store_testresults(db):
         },
         "lyncdiscover.vng.nl": {
             "report": {"url": "https://dev.batch.internet.nl/site/lyncdiscover.vng.nl/665166/"},
+            "status": "ok",
             "scoring": {"percentage": 66},
             "results": {
                 "categories": {
