@@ -898,7 +898,7 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     elif custom_api_field_results["mail_servers_testable_status"] == "unreachable":
         add_instant_calculation(scan_data, "mail_legacy_start_tls", "unreachable")
     elif custom_api_field_results["mail_servers_testable_status"] == "untestable":
-        add_instant_calculation(scan_data, "mail_legacy_start_tls", "not_testable")
+        add_instant_calculation(scan_data, "mail_legacy_start_tls", "untestable")
     else:
         add_calculation(
             scan_data=scan_data, new_key="mail_legacy_start_tls", required_values=["mail_starttls_tls_available"]
@@ -930,7 +930,7 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     elif custom_api_field_results["mail_servers_testable_status"] == "unreachable":
         add_instant_calculation(scan_data, "mail_legacy_start_tls_ncsc", "unreachable")
     elif custom_api_field_results["mail_servers_testable_status"] == "untestable":
-        add_instant_calculation(scan_data, "mail_legacy_start_tls_ncsc", "not_testable")
+        add_instant_calculation(scan_data, "mail_legacy_start_tls_ncsc", "untestable")
     else:
         add_calculation(
             scan_data=scan_data, new_key="mail_legacy_start_tls_ncsc", required_values=start_tls_ncsc_fields
@@ -959,7 +959,7 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     elif custom_api_field_results["mail_servers_testable_status"] == "unreachable":
         add_instant_calculation(scan_data, "mail_legacy_dane", "unreachable")
     elif custom_api_field_results["mail_servers_testable_status"] == "untestable":
-        add_instant_calculation(scan_data, "mail_legacy_dane", "not_testable")
+        add_instant_calculation(scan_data, "mail_legacy_dane", "untestable")
     else:
         # #205 -> if starttls_failed failed, then dane test is not performed.
         if scan_data["results"]["tests"]["mail_starttls_tls_available"]["status"] == "failed":
