@@ -350,7 +350,8 @@ def internet_nl_requirement_tilde_value_format(scan: Union[EndpointGenericScan, 
     if scan.rating == "info":
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=0, low=1)
 
-    if scan.rating in ["not_tested", "not_testable"]:
+    # In the bar charts, group not_tested results in a separate category not_tested (UI and totals row Excel)
+    if scan.rating in ["not_tested"]:
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_testable=True)
 
     if scan.rating in ["error"]:
@@ -362,8 +363,11 @@ def internet_nl_requirement_tilde_value_format(scan: Union[EndpointGenericScan, 
 
     # new internet.nl values for special case. They cannot be aggregated, and are moved into not_applicable
     # so there are still stats made for them. Perhaps they can be removed as they complicate things?
-    if scan.rating in ["unreachable"]:
-        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_testable=True)
+    # In the bar charts, group unreachable and untestable (and regular error) into a category test error
+    # (UI and totals row Excel)
+    # not_testable was renamed to untestable in the api 2.0.
+    if scan.rating in ["unreachable", "not_testable", "untestable"]:
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, error_in_test=True)
 
     if scan.rating in ["no_mx"]:
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_applicable=True)
