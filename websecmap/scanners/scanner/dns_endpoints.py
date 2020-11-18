@@ -364,7 +364,7 @@ def get_dns_records(url: str, record_type):
         sleep(20)
     except Timeout:
         # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
-        log.error(f"Timeout received for DNS query to {url}.")
+        log.debug(f"Timeout received for DNS query to {url}.")
         return False
 
 
@@ -393,7 +393,7 @@ def get_dns_records_accepting_no_answer(url: str, record_type):
         sleep(20)
     except Timeout:
         # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
-        log.error(f"Timeout received for DNS query to {url}.")
+        log.debug(f"Timeout received for DNS query to {url}.")
         return False
 
 
