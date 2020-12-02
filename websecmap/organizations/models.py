@@ -449,10 +449,15 @@ class Url(models.Model):
         # them yourself. luckily:
         # 'аренда.орг' -> 'xn--80aald4bq.xn--c1avg'
         # 'google.com' -> 'google.com'
-        valid_domain = domain(url.encode("idna").decode())
-        if valid_domain is not True:
+        try:
+            valid_domain = domain(url.encode("idna").decode())
+            if valid_domain is not True:
+                return False
+        except UnicodeError:
+            # encoding with 'idna' codec failed (UnicodeError: label empty or too long)
+            # .apple.com for example: this label is incorrect as it starts with a dot. You should sanitize this
+            # beforehand.
             return False
-
         return True
 
     @staticmethod
