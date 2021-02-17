@@ -45,7 +45,7 @@ pytz
 
 # task processing framework
 django-celery-beat
-celery[redis,gevent]
+celery[redis,gevent]<5
 flower
 
 # Feature usage statistics
