@@ -45,6 +45,7 @@ pytz
 
 # task processing framework
 django-celery-beat
+# limit to version 4 as 5 has conflicting requirements with available flower atm.
 celery[redis,gevent]<5
 flower
 
@@ -141,6 +142,5 @@ pyexcel-ods
 mysqlclient
 psycopg2-binary # binary package installs wheel, avoiding compiling
 
-# wsgi server
-uwsgi
-django-uwsgi
+# Apple Silicon compat
+numpy>=1.20
