@@ -17,7 +17,11 @@ $(info Virtualenv path: ${VIRTUAL_ENV})
 
 # variables for environment
 bin = ${VIRTUAL_ENV}/bin
+ifeq ($(shell uname -m),arm64)
+env = env PATH=${bin}:$$PATH /usr/bin/arch -x86_64
+else
 env = env PATH=${bin}:$$PATH
+endif
 
 # shortcuts for common used binaries
 python = ${bin}/python
@@ -194,15 +198,18 @@ clean_virtualenv:  ## cleanup virtualenv and installed app/dependencies
 mrproper: clean clean_virtualenv ## thorough cleanup, also removes virtualenv
 
 ${VIRTUAL_ENV}/.requirements.installed: requirements.txt requirements-dev.txt| ${pip-sync}
-	${pip-sync} $^
+	${env} ${pip-sync} $^
 	@touch $@
 
+requirements = requirements.txt requirements-dev.txt requirements-deploy.txt
+requirements: ${requirements}
+
 # perform 'pip freeze' on first class requirements in .in files.
-requirements.txt requirements-dev.txt: %.txt: %.in | ${pip-compile}
-	${pip-compile} ${pip_compile_args} --output-file $@ $<
+${requirements}: %.txt: %.in | ${pip-compile}
+	${env} ${pip-compile} ${pip_compile_args} --output-file $@ $<
 
 update_requirements: pip_compile_args=--upgrade
-update_requirements: _mark_outdated requirements.txt requirements-dev.txt _commit_update
+update_requirements: _mark_outdated requirements.txt requirements-dev.txt requirements-deploy.txt _commit_update
 
 _mark_outdated:
 	touch requirements*.in
@@ -212,14 +219,14 @@ _commit_update: requirements.txt
 	git commit -m "Updated requirements."
 
 ${pip-compile} ${pip-sync}: | ${pip}
-	${pip} install --quiet pip-tools
+	${env} ${pip} install --quiet pip-tools
 
 ${python} ${pip}:
 	@if ! command -v python3 &>/dev/null;then \
 		echo "Python 3 is not available. Please refer to installation instructions in README.md"; \
 	fi
 	# create virtualenv
-	python3 -mvenv ${VIRTUAL_ENV}
+	${env} python3 -mvenv ${VIRTUAL_ENV}
 
 # utility
 help:           ## Show this help.

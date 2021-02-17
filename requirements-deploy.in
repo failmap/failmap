@@ -1,0 +1,7 @@
+# dependencies not required during development
+
+# make sure there are no version conflicts with requirements.txt
+-c requirements.txt
+
+uwsgi
+django-uwsgi

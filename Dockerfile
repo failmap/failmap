@@ -41,9 +41,10 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 RUN python3 -mvenv /pyenv
 ENV VIRTUAL_ENV /pyenv
 ENV PATH $VIRTUAL_ENV/bin:$PATH
+ENV CRYPTOGRAPHY_DONT_BUILD_RUST 1
 
-COPY requirements.txt /source/
-RUN pip install -qr /source/requirements.txt
+COPY requirements.txt requirements-deploy.txt /source/
+RUN pip install -qr /source/requirements.txt -r /source/requirements-deploy.txt
 
 # restart with a clean image
 FROM alpine:3.12
