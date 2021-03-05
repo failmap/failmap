@@ -48,7 +48,7 @@ def requirements(extra=None):
     """Return list of required package names from requirements.txt."""
     # strip trailing comments, and extract package name from git urls.
     if extra:
-        filename = 'requirements.' + extra + '.txt'
+        filename = 'requirements-' + extra + '.txt'
     else:
         filename = 'requirements.txt'
     requirements = [r.strip().split(' ', 1)[0].split('egg=', 1)[-1]
@@ -61,6 +61,9 @@ setup(
     version=get_version(),
     packages=find_packages(),
     install_requires=requirements(),
+    extras_require={
+        'deploy': requirements(extra='deploy'),
+    },
     entry_points={
         'console_scripts': [
             'websecmap = websecmap.manage:main',
