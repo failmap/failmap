@@ -87,7 +87,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 | update_coordinates.si([str(region.country)], [region.organization_type.name])
                 | set_imported.si(region)
                 | report_country.si(organization_filter)
-                | prepare_map(region.country, region.organization_type)
+                | prepare_map.si(region.country, region.organization_type)
             )
 
         task_name = "%s (%s) " % ("Update region", ",".join(map(str, list(queryset))))

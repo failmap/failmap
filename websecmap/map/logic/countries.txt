@@ -1,0 +1,221 @@
+-303427, Afghanistan
+-53292, Albania
+-192756, Algeria
+-9407, Andorra
+-195267, Angola
+-2177161, Anguilla
+-536900, Antigua and Barbuda
+-286393, Argentina
+-364066, Armenia
+-80500, Australia
+-16239, Austria
+-364110, Azerbaijan
+-378734, Bahrain
+159002389, Ban Than (Zhongzhou) Reef
+-184640, Bangladesh
+-547511, Barbados
+-59065, Belarus
+-52411, Belgium
+-287827, Belize
+-192784, Benin
+-1993208, Bermuda
+-184629, Bhutan
+-252645, Bolivia
+-2528142, Bosnia and Herzegovina
+-1889339, Botswana
+-59470, Brazil
+-1993867, British Indian Ocean Territory
+-3263728, British Sovereign Base Areas
+-285454, British Virgin Islands
+-2103120, Brunei
+-186382, Bulgaria
+-192783, Burkina Faso
+-195269, Burundi
+-49898, Cambodia
+-192830, Cameroon
+-1428125, Canada
+-535774, Cape Verde
+-2185366, Cayman Islands
+-192790, Central African Republic
+-2361304, Chad
+-167454, Chile
+-270056, China
+-120027, Colombia
+-535790, Comoros
+-192794, Congo-Brazzaville
+-2184233, Cook Islands
+-287667, Costa Rica
+-214885, Croatia
+-307833, Cuba
+-307787, Cyprus
+-51684, Czechia
+-192779, Côte d'Ivoire
+-192795, Democratic Republic of the Congo
+-50046, Denmark
+-192801, Djibouti
+-307823, Dominica
+-307828, Dominican Republic
+-305142, East Timor
+-108089, Ecuador
+-1473947, Egypt
+-1520612, El Salvador
+-192791, Equatorial Guinea
+-296961, Eritrea
+-79510, Estonia
+-88210, Eswatini
+-192800, Ethiopia
+-2185374, Falkland Islands
+-52939, Faroe Islands
+-571802, Federated States of Micronesia
+-571747, Fiji
+-54224, Finland
+-2202162, France
+-192793, Gabon
+-28699, Georgia
+-51477, Germany
+-192781, Ghana
+-1278736, Gibraltar
+-192307, Greece
+-2184073, Greenland
+-550727, Grenada
+-1521463, Guatemala
+-270009, Guernsey
+-192778, Guinea
+-192776, Guinea-Bissau
+-287083, Guyana
+-307829, Haiti
+-287670, Honduras
+-21335, Hungary
+-299133, Iceland
+-304716, India
+-304751, Indonesia
+-304938, Iran
+-304934, Iraq
+-62273, Ireland
+-62269, Isle of Man
+-1473946, Israel
+-365331, Italy
+-555017, Jamaica
+-382313, Japan
+-367988, Jersey
+-184818, Jordan
+-214665, Kazakhstan
+-192798, Kenya
+-571178, Kiribati
+-2088990, Kosovo
+-305099, Kuwait
+-178009, Kyrgyzstan
+-49903, Laos
+-72594, Latvia
+-184843, Lebanon
+-2093234, Lesotho
+-192780, Liberia
+-192758, Libya
+-1155955, Liechtenstein
+-72596, Lithuania
+-2171347, Luxembourg
+-447325, Madagascar
+-195290, Malawi
+-2108121, Malaysia
+-536773, Maldives
+-192785, Mali
+-365307, Malta
+-571771, Marshall Islands
+-192763, Mauritania
+-535828, Mauritius
+367540794, Mengalum Island
+-114686, Mexico
+-58974, Moldova
+-1124039, Monaco
+-161033, Mongolia
+-53296, Montenegro
+-537257, Montserrat
+-3630439, Morocco
+-195273, Mozambique
+-50371, Myanmar
+-195266, Namibia
+-571804, Nauru
+-184633, Nepal
+-2323309, Netherlands
+-556706, New Zealand
+-287666, Nicaragua
+-192786, Niger
+-192787, Nigeria
+-1558556, Niue
+-192734, North Korea
+-53293, North Macedonia
+-2978650, Norway
+-305138, Oman
+-307573, Pakistan
+-571805, Palau
+-287668, Panama
+-307866, Papua New Guinea
+-287077, Paraguay
+-288247, Peru
+-443174, Philippines
+-2185375, Pitcairn Islands
+-49715, Poland
+-295480, Portugal
+-305095, Qatar
+-90689, Romania
+-60189, Russia
+-171496, Rwanda
+-1964272, Saint Helena, Ascension and Tristan da Cunha
+-536899, Saint Kitts and Nevis
+-550728, Saint Lucia
+-550725, Saint Vincent and the Grenadines
+-1872673, Samoa
+-54624, San Marino
+-307584, Saudi Arabia
+-192775, Senegal
+-1741311, Serbia
+-536765, Seychelles
+-192777, Sierra Leone
+-536780, Singapore
+-14296, Slovakia
+-218657, Slovenia
+-1857436, Solomon Islands
+-192799, Somalia
+-87565, South Africa
+-1983628, South Georgia and the South Sandwich Islands
+-307756, South Korea
+-1656678, South Sudan
+-1311341, Spain
+-536807, Sri Lanka
+-192789, Sudan
+-287082, Suriname
+-5220687, Swallow Reef
+-52822, Sweden
+-51701, Switzerland
+-184840, Syria
+-535880, São Tomé and Príncipe
+741647339, Taiping Island
+-449220, Taiwan
+-214626, Tajikistan
+-195270, Tanzania
+-2067731, Thailand
+-547469, The Bahamas
+-192774, The Gambia
+-192782, Togo
+-2186600, Tokelau
+-2186665, Tonga
+-555717, Trinidad and Tobago
+-192757, Tunisia
+-174737, Turkey
+-223026, Turkmenistan
+-547479, Turks and Caicos Islands
+-2177266, Tuvalu
+-192796, Uganda
+-60199, Ukraine
+-307763, United Arab Emirates
+-62149, United Kingdom
+-148838, United States
+-287072, Uruguay
+-196240, Uzbekistan
+-2177246, Vanuatu
+-36989, Vatican City
+-272644, Venezuela
+-49915, Vietnam
+-305092, Yemen
+-195271, Zambia
+-195272, Zimbabwe
