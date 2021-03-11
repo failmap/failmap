@@ -65,6 +65,8 @@ def autoexplain_dutch_untrusted_cert():
     # It can be ANY untrusted (sub)domain, which is frustrating. There is no standard where the cert can be used.
     # This may cause a lot of overhead.
     scans = EndpointGenericScan.objects.all().filter(
+        # Assuming this is for the dutch market only. Strictly speaking it could be anything, yet highly unusual.
+        endpoint__url__computed_suffix="nl",
         type="tls_qualys_certificate_trusted",
         is_the_latest_scan=True,
         comply_or_explain_is_explained=False,
@@ -324,7 +326,7 @@ def autoexplain_trust_microsoft():
             "http_security_header_strict_transport_security",
             "http_security_header_x_content_type_options",
             "http_security_header_x_frame_options",
-            "http_security_header_x_xss_protection",
+            "http_security_header_x_xss_protection"
         ]
         for header_scan in header_scans:
             latest_scan = get_latest_endpoint_scan(endpoint=scan.endpoint, scan_type=header_scan)
