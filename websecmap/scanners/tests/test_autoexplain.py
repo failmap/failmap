@@ -18,6 +18,7 @@ from websecmap.scanners.autoexplain import (
     certificate_matches_microsoft_exception_policy,
     autoexplain_no_https_microsoft,
     certificate_chain_ends_on_non_trusted_dutch_root_ca,
+    explain_headers_for_explained_microsoft_trusted_tls_certificates,
 )
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
@@ -242,3 +243,12 @@ def test_autoexplain_including_headers(db, monkeypatch):
     assert updated_endpoint.comply_or_explain_is_explained is True
     updated_endpoint = EndpointGenericScan.objects.get(id=header_scan_old.id)
     assert updated_endpoint.comply_or_explain_is_explained is False
+
+    # Verify that headers are explained even when the TLS certificate has been explained
+    egs = EndpointGenericScan.objects.get(id=header_scan_new.id)
+    egs.comply_or_explain_is_explained = False
+    egs.save()
+
+    explain_headers_for_explained_microsoft_trusted_tls_certificates()
+    egs = EndpointGenericScan.objects.get(id=header_scan_new.id)
+    egs.comply_or_explain_is_explained = True
