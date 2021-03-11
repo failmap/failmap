@@ -57,7 +57,7 @@ def autoexplain_dutch_untrusted_cert():
     https://www.pkioverheid.nl
     """
 
-    if timezone.now() > datetime(2028, 11, 14):
+    if timezone.now() > datetime(2028, 11, 14, tzinfo=pytz.utc):
         # Can't add explanations when the certificate is not valid anymore.
         return
 
@@ -286,7 +286,12 @@ def autoexplain_trust_microsoft():
         ],
     }
 
-    possible_urls = Url.objects.all().filter(computed_subdomain__in=applicable_subdomains.keys())
+    # Fix #294: A subdomain can be sub-sub-sub domain. So perform a few more queries and get be sure that
+    # all subdomains are accounted for.
+    possible_urls = []
+    for subdomain in applicable_subdomains.keys():
+        log.debug(f"Finding subdomains starting with: {subdomain}")
+        possible_urls += list(Url.objects.all().filter(computed_subdomain__startswith=f"{subdomain}."))
 
     # Only check this on the latest scans, do not alter existing explanations
     scans = EndpointGenericScan.objects.all().filter(
@@ -306,23 +311,25 @@ def autoexplain_trust_microsoft():
             certificate, scan, applicable_subdomains, trusted_organization
         )
 
-        if matches_exception_policy:
-            # when all checks pass, and indeed the SSL_ERROR_BAD_CERT_DOMAIN was found, the finding is explained
-            log.debug(f"Scan {scan} fits all criteria to be auto explained for incorrect cert usage.")
-            add_bot_explanation(scan, standard_explanation, explanation_duration)
+        if not matches_exception_policy:
+            continue
 
-            # Also retrieve all http security headers, they are never correct. The only thing that is actually
-            # tested is the encryption quality here.
-            header_scans = [
-                "http_security_header_strict_transport_security",
-                "http_security_header_x_content_type_options",
-                "http_security_header_x_frame_options",
-                "http_security_header_x_xss_protection",
-            ]
-            for header_scan in header_scans:
-                latest_scan = get_latest_endpoint_scan(endpoint=scan.endpoint, scan_type=header_scan)
-                if latest_scan:
-                    add_bot_explanation(latest_scan, intended_for_devices, explanation_duration)
+        # when all checks pass, and indeed the SSL_ERROR_BAD_CERT_DOMAIN was found, the finding is explained
+        log.debug(f"Scan {scan} fits all criteria to be auto explained for incorrect cert usage.")
+        add_bot_explanation(scan, standard_explanation, explanation_duration)
+
+        # Also retrieve all http security headers, they are never correct. The only thing that is actually
+        # tested is the encryption quality here.
+        header_scans = [
+            "http_security_header_strict_transport_security",
+            "http_security_header_x_content_type_options",
+            "http_security_header_x_frame_options",
+            "http_security_header_x_xss_protection",
+        ]
+        for header_scan in header_scans:
+            latest_scan = get_latest_endpoint_scan(endpoint=scan.endpoint, scan_type=header_scan)
+            if latest_scan:
+                add_bot_explanation(latest_scan, intended_for_devices, explanation_duration)
 
 
 def get_latest_endpoint_scan(endpoint, scan_type):
