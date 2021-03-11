@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 
 import pytz
@@ -7,6 +8,8 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
+from base64 import b64decode
+from OpenSSL.crypto import load_certificate, FILETYPE_PEM
 
 import websecmap
 from websecmap.organizations.models import Url
@@ -14,10 +17,35 @@ from websecmap.scanners.autoexplain import (
     autoexplain_trust_microsoft,
     certificate_matches_microsoft_exception_policy,
     autoexplain_no_https_microsoft,
+    certificate_chain_ends_on_non_trusted_dutch_root_ca,
 )
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 log = logging.getLogger("websecmap")
+
+
+def test_certificate_chain_ends_on_non_trusted_dutch_root_ca(current_path):
+    """
+    To create a test chain:
+    certificates = get_cert_chain('secure-t.sittard-geleen.nl', 443)
+    dump = [b64encode(dump_certificate(FILETYPE_PEM, certificate)).decode('UTF-8') for certificate in certificates]
+    """
+
+    # Validate a complete chain that ends in the desired root certificate
+    with open(f"{current_path}/websecmap/scanners/tests/autoexplain/valid_chain.json") as f:
+        certificate_data = json.load(f)
+    real_certs = [load_certificate(FILETYPE_PEM, b64decode(certificate)) for certificate in certificate_data]
+    assert certificate_chain_ends_on_non_trusted_dutch_root_ca(real_certs) is True
+
+    # Fail to validate something that does not end in the root certificate
+    with open(f"{current_path}/websecmap/scanners/tests/autoexplain/missing_root.json") as f:
+        certificate_data = json.load(f)
+    real_certs = [load_certificate(FILETYPE_PEM, b64decode(certificate)) for certificate in certificate_data]
+    assert certificate_chain_ends_on_non_trusted_dutch_root_ca(real_certs) is False
+
+    # Supplying garbage causes no problems / crashes:
+    assert certificate_chain_ends_on_non_trusted_dutch_root_ca([]) is False
+    assert certificate_chain_ends_on_non_trusted_dutch_root_ca("asdasd") is False
 
 
 def test_autoexplain_no_https_microsoft(db, mocker):
@@ -119,17 +147,15 @@ def generate_certificate(failure_mode: str = ""):
     builder = x509.CertificateBuilder()
 
     if failure_mode == "subject":
-        builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, u"some.other.subdomain")]))
+        builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "some.other.subdomain")]))
     else:
-        builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, u"accepted.test.example")]))
+        builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "accepted.test.example")]))
 
     if failure_mode == "issuer":
-        builder = builder.issuer_name(
-            x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"Failure Corporation")])
-        )
+        builder = builder.issuer_name(x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Failure Corporation")]))
     else:
         builder = builder.issuer_name(
-            x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"Nonsense Corporation")])
+            x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Nonsense Corporation")])
         )
 
     if failure_mode == "future":
@@ -145,7 +171,7 @@ def generate_certificate(failure_mode: str = ""):
 
     builder = builder.serial_number(x509.random_serial_number())
     builder = builder.public_key(public_key)
-    builder = builder.add_extension(x509.SubjectAlternativeName([x509.DNSName(u"cryptography.io")]), critical=False)
+    builder = builder.add_extension(x509.SubjectAlternativeName([x509.DNSName("cryptography.io")]), critical=False)
     builder = builder.add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
     certificate = builder.sign(private_key=private_key, algorithm=hashes.SHA256(), backend=default_backend())
 
@@ -164,7 +190,7 @@ def generate_specific_certificate(subject="", issuer=""):
     builder = builder.not_valid_after(datetime.datetime.today() + (one_day * 30))
     builder = builder.serial_number(x509.random_serial_number())
     builder = builder.public_key(public_key)
-    builder = builder.add_extension(x509.SubjectAlternativeName([x509.DNSName(u"cryptography.io")]), critical=False)
+    builder = builder.add_extension(x509.SubjectAlternativeName([x509.DNSName("cryptography.io")]), critical=False)
     builder = builder.add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
     certificate = builder.sign(private_key=private_key, algorithm=hashes.SHA256(), backend=default_backend())
 
@@ -173,7 +199,7 @@ def generate_specific_certificate(subject="", issuer=""):
 
 # overwrite the retrieve_certificate method in autoexplain. Otherwise it tries to access the internet.
 def fake_retrieve_certificate(*args, **kwargs):
-    return generate_specific_certificate(u"*.online.lync.com", u"Microsoft Corporation")
+    return generate_specific_certificate("*.online.lync.com", "Microsoft Corporation")
 
 
 def test_autoexplain_including_headers(db, monkeypatch):

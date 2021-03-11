@@ -35,7 +35,8 @@ def test_domain_upload(db, requests_mock, current_path):
     # the first answer is cached indefinitely. So the first request has to be correct.
 
     requests_mock.get(
-        "https://publicsuffix.org/list/public_suffix_list.dat", text=text(f"{current_path}/public_suffix_list.dat")
+        "https://publicsuffix.org/list/public_suffix_list.dat",
+        text=text(f"{current_path}/websecmap/api/tests/public_suffix_list.dat"),
     )
 
     u = Url()

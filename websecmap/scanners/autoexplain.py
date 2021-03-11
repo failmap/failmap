@@ -1,3 +1,6 @@
+# Copyright 2021 Internet Cleanup Foundation
+# SPDX-License-Identifier: AGPL-3.0-only
+
 """
 These automated explanations match standardardized IT infrastructure. For all other comply or explain actions, use
 the management interface to quickly add explanations.
@@ -11,11 +14,16 @@ Local, non-vendor policies are not taken into account: they should standardize a
 import logging
 import ssl
 from datetime import datetime, timedelta
+from typing import List, Any
+import socket
 
+import OpenSSL
 import pytz
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID
+from django.utils import timezone
+from OpenSSL import SSL
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
@@ -32,9 +40,106 @@ def autoexplain():
     more autoexplains are added.
     :return:
     """
-
+    autoexplain_dutch_untrusted_cert()
     autoexplain_trust_microsoft()
     autoexplain_no_https_microsoft()
+
+
+def autoexplain_dutch_untrusted_cert():
+    """
+    The Dutch state publishes a non-trusted certificate for a certain group of trusted users.
+    "De Staat der Nederlanden Private Root CA – G1 wordt NIET publiekelijk vertrouwd door browsers en
+    andere applicaties."
+
+    Docs:
+    https://gitlab.com/internet-cleanup-foundation/web-security-map/-/issues/293
+    https://zoek.officielebekendmakingen.nl/stcrt-2015-6676.html
+    https://www.pkioverheid.nl
+    """
+
+    if timezone.now() > datetime(2028, 11, 14):
+        # Can't add explanations when the certificate is not valid anymore.
+        return
+
+    # To find this certificate, connections are needed to all untrusted domains in the Netherlands.
+    # It can be ANY untrusted (sub)domain, which is frustrating. There is no standard where the cert can be used.
+    # This may cause a lot of overhead.
+    scans = EndpointGenericScan.objects.all().filter(
+        type="tls_qualys_certificate_trusted",
+        is_the_latest_scan=True,
+        comply_or_explain_is_explained=False,
+        endpoint__protocol="https",
+        rating="not trusted",
+    )
+
+    scans = list(set(scans))
+    log.info(f"Going to check {len(scans)} to see if it contains a Dutch governmental certificates.")
+
+    for scan in scans:
+        log.debug(f"Going to check {scan} to see if it contains a Dutch governmental certificate.")
+        certificates = get_cert_chain(url=scan.endpoint.url.url, port=scan.endpoint.port)
+        if certificate_chain_ends_on_non_trusted_dutch_root_ca(certificates):
+            # Trust to the moment of expiration
+            add_bot_explanation(scan, "state_trusted_root_ca", datetime(2028, 11, 14) - timezone.now())
+
+
+def get_cert_chain(url, port) -> List[Any]:
+    # https://stackoverflow.com/questions/19145097/getting-certificate-chain-with-python-3-3-ssl-module
+    # Relatively new Dutch governmental sites relying on anything less < TLS 1.2 is insane.
+    log.debug(f"Retrieving certificate chain from {url}:{port}.")
+    try:
+        conn = SSL.Connection(
+            context=SSL.Context(SSL.TLSv1_2_METHOD), socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        )
+        conn.connect((url, port))
+        conn.do_handshake()
+        chain = conn.get_peer_cert_chain()
+        return chain if chain else []
+    except Exception:  # noqa
+        # Any connection error, cert error, verification error, whatever.
+        return []
+
+
+def certificate_chain_ends_on_non_trusted_dutch_root_ca(certificates: List[OpenSSL.crypto.X509]):
+    # Example: https://secure-t.sittard-geleen.nl
+    # https://www.pyopenssl.org/en/stable/api/crypto.html
+    if not certificates:
+        return False
+
+    last_cert: OpenSSL.crypto.X509 = certificates[-1]
+
+    if not isinstance(last_cert, OpenSSL.crypto.X509):
+        return False
+
+    expected_digest = b"C6:C1:BB:C7:1D:4F:30:C7:6D:4D:B3:AF:B5:D0:66:DE:49:9E:9A:2D"
+    expected_serial = 10004001
+    expected_issuer = "/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Root CA - G1"
+    expected_subject = "/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Root CA - G1"
+    expected_notafter = b"20281113230000Z"  # Date in UTC, not in dutch time :)
+
+    if last_cert.get_notAfter() != expected_notafter:
+        log.error(last_cert.get_notAfter())
+        return False
+
+    if last_cert.digest("sha1") != expected_digest:
+        return False
+
+    if last_cert.get_serial_number() != expected_serial:
+        return False
+
+    issuer = "".join(
+        "/{0:s}={1:s}".format(name.decode(), value.decode()) for name, value in last_cert.get_issuer().get_components()
+    )
+    if issuer != expected_issuer:
+        return False
+
+    subject = "".join(
+        "/{0:s}={1:s}".format(name.decode(), value.decode()) for name, value in last_cert.get_subject().get_components()
+    )
+    if subject != expected_subject:
+        return False
+
+    return True
 
 
 def autoexplain_no_https_microsoft():
