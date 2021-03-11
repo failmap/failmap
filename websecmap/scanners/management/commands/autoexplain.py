@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from websecmap.scanners.autoexplain import autoexplain_trust_microsoft
+from websecmap.scanners.autoexplain import autoexplain
 
 log = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         try:
-            autoexplain_trust_microsoft()
+            autoexplain()
             log.info("Autoexplain finished!")
 
         except KeyboardInterrupt:
