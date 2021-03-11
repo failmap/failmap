@@ -78,7 +78,6 @@ test: .make.test	## run test suite
 	${env} coverage html
 	# ensure no model updates are commited without migrations
 	${env} ${app} makemigrations --check
-	@touch $@
 
 check: .make.check.py .make.check.sh  ## code quality checks
 .make.check.py: ${pysrc} ${app}
@@ -86,12 +85,10 @@ check: .make.check.py .make.check.sh  ## code quality checks
 	${env} pylama ${pysrcdirs} --skip "**/migrations/*"
 	# check formatting
 	${env} black --line-length 120 --check ${pysrcdirs}
-	@touch $@
 
 .make.check.sh: ${shsrc}
 	# shell script checks (if installed)
 	if command -v shellcheck &>/dev/null;then ${env} shellcheck --version; ${env} shellcheck ${shsrc}; fi
-	@touch $@
 
 autofix fix: .make.fix  ## automatic fix of trivial code quality issues
 .make.fix: ${pysrc} ${app}
@@ -106,7 +103,6 @@ autofix fix: .make.fix  ## automatic fix of trivial code quality issues
 	# replaced by black: ${env} isort -rc ${pysrcdirs}
 	# do a check after autofixing to show remaining problems
 	${MAKE} check
-	@touch $@
 
 run: ${app}  ## run complete application stack (frontend, worker, broker)
 	# start server (this can take a while)
@@ -138,8 +134,7 @@ run-broker:  ## only run broker
 testcase: ${app}
 	# run specific testcase
 	# example: make testcase case=test_openstreetmaps
-	${env} DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 \
-		${env} pytest -vv --log-cli-level=10 -k ${case}
+	${env} DB_NAME=test.sqlite3 ${env} pytest -vv --log-cli-level=10 -k ${case} --settings=${app_name}.settings
 
 test_integration: ${app}
 	# run integration tests

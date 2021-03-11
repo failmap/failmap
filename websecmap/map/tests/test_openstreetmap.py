@@ -36,8 +36,8 @@ def mocked_requests_get(*args, **kwargs):
             # simulate the iterator :)
             yield self.content
 
-    if args[0].startswith("https://wambachers-osm.website/"):
-        return MockResponse(file_get_contents(f"{path}/openstreetmap/AL_county.zip"), 200)
+    if args[0].startswith("https://osm-boundaries.com/"):
+        return MockResponse(file_get_contents(f"{path}/openstreetmap/AL_county.gz"), 200)
 
     if args[0].startswith("http://www.overpass-api.de/api/interpreter"):
         return MockResponse(file_get_contents(f"{path}/openstreetmap/AL_county.osm"), 200)

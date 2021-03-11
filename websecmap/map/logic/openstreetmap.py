@@ -1,10 +1,10 @@
+import gzip
 import json
 import logging
 import os.path
 import re
 import subprocess
 import time
-import zipfile
 from datetime import datetime
 from subprocess import CalledProcessError
 from typing import Dict, List
@@ -349,7 +349,8 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
     if not matching_organization:
         return
 
-    add_official_websites(matching_organization, properties["wikidata"])
+    if "wikidata" in properties:
+        add_official_websites(matching_organization, properties["wikidata"])
 
     if not when:
         old_coordinate = Coordinate.objects.filter(organization=matching_organization, is_dead=False)
@@ -453,14 +454,8 @@ def add_official_websites(organization, wikidata_code):
 
 
 def get_data_from_wambachers_zipfile(filename):
-    # todo: this is VERY ugly code...
-    zip = zipfile.ZipFile(filename)
-    files = zip.namelist()
-    f = zip.open(files[0], "r")
-    contents = f.read()
-    f.close()
-    data = json.loads(contents)
-    return data
+    with gzip.open(filename, "rt") as f:
+        return json.loads(f.read())
 
 
 def get_osm_data_wambachers(country: str = "NL", organization_type: str = "municipality"):
@@ -472,6 +467,8 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
     # a more complete and better set of queries. For example; it DOES get northern ireland and it clips out the sea,
     # which makes it very nice to look at.
     # yes, i've donated, and so should you :)
+
+    This has been replaced with the osm-boundaries.com service. Looks very alike.
 
     :param country:
     :param organization_type:
@@ -495,7 +492,7 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
     :return:
     """
 
-    # see if we cached a result
+    # see if we cached a resultwikidata
     filename = create_evil_filename([country, organization_type, str(timezone.now().date())], "zip")
     filename = settings.TOOLS["openstreetmap"]["output_dir"] + filename
 
@@ -510,23 +507,24 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
 
     level = get_region(country, organization_type)
     country = countries.get(country)
-    country_3_char_isocode = country.alpha3
     if not level:
         raise NotImplementedError(
             "Combination of country and organization_type does not have a matching OSM query implemented."
         )
 
+    # todo: probably db changes over time.
     url = (
-        f"https://wambachers-osm.website/boundaries/exportBoundaries"
-        f"?cliVersion=1.0"
-        f"&cliKey={config.WAMBACHERS_OSM_CLIKEY}"
-        f"&exportFormat=json"
-        f"&exportLayout=levels"
-        f"&exportAreas=land"
-        f"&union=false"
-        f"&from_al={level}"
-        f"&to_al={level}"
-        f"&selected={country_3_char_isocode}"
+        f"https://osm-boundaries.com/Download/Submit"
+        f"?apiKey={config.WAMBACHERS_OSM_CLIKEY}"
+        f"&db=osm20210104&"
+        f"&osmIds={country_to_osm_number(country)}"
+        f"&recursive"
+        f"&minAdminLevel={level}"
+        f"&maxAdminLevel={level}"
+        f"&landOnly"
+        f"&includeAllTags"
+        # todo: use the resampling option here, instead of using the rdp algorithm.
+        f"&simplify=0.001"
     )
 
     # get's a zip file and extract the content. The contents is the result.
@@ -545,6 +543,239 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
 
     # unzip the file and return it's geojson contents.
     return get_data_from_wambachers_zipfile(filename)
+
+
+def country_to_osm_number(country):
+    # returns the country code osm-boundaries needs:
+    # list taken from: https://osm-boundaries.com/
+    countries = {
+        "Afghanistan": -303427,
+        "Albania": -53292,
+        "Algeria": -192756,
+        "Andorra": -9407,
+        "Angola": -195267,
+        "Anguilla": -2177161,
+        "Antigua and Barbuda": -536900,
+        "Argentina": -286393,
+        "Armenia": -364066,
+        "Australia": -80500,
+        "Austria": -16239,
+        "Azerbaijan": -364110,
+        "Bahrain": -378734,
+        "Ban Than (Zhongzhou) Reef": 159002389,
+        "Bangladesh": -184640,
+        "Barbados": -547511,
+        "Belarus": -59065,
+        "Belgium": -52411,
+        "Belize": -287827,
+        "Benin": -192784,
+        "Bermuda": -1993208,
+        "Bhutan": -184629,
+        "Bolivia": -252645,
+        "Bosnia and Herzegovina": -2528142,
+        "Botswana": -1889339,
+        "Brazil": -59470,
+        "British Indian Ocean Territory": -1993867,
+        "British Sovereign Base Areas": -3263728,
+        "British Virgin Islands": -285454,
+        "Brunei": -2103120,
+        "Bulgaria": -186382,
+        "Burkina Faso": -192783,
+        "Burundi": -195269,
+        "Cambodia": -49898,
+        "Cameroon": -192830,
+        "Canada": -1428125,
+        "Cape Verde": -535774,
+        "Cayman Islands": -2185366,
+        "Central African Republic": -192790,
+        "Chad": -2361304,
+        "Chile": -167454,
+        "China": -270056,
+        "Colombia": -120027,
+        "Comoros": -535790,
+        "Congo-Brazzaville": -192794,
+        "Cook Islands": -2184233,
+        "Costa Rica": -287667,
+        "Croatia": -214885,
+        "Cuba": -307833,
+        "Cyprus": -307787,
+        "Czechia": -51684,
+        "Côte d'Ivoire": -192779,
+        "Democratic Republic of the Congo": -192795,
+        "Denmark": -50046,
+        "Djibouti": -192801,
+        "Dominica": -307823,
+        "Dominican Republic": -307828,
+        "East Timor": -305142,
+        "Ecuador": -108089,
+        "Egypt": -1473947,
+        "El Salvador": -1520612,
+        "Equatorial Guinea": -192791,
+        "Eritrea": -296961,
+        "Estonia": -79510,
+        "Eswatini": -88210,
+        "Ethiopia": -192800,
+        "Falkland Islands": -2185374,
+        "Faroe Islands": -52939,
+        "Federated States of Micronesia": -571802,
+        "Fiji": -571747,
+        "Finland": -54224,
+        "France": -2202162,
+        "Gabon": -192793,
+        "Georgia": -28699,
+        "Germany": -51477,
+        "Ghana": -192781,
+        "Gibraltar": -1278736,
+        "Greece": -192307,
+        "Greenland": -2184073,
+        "Grenada": -550727,
+        "Guatemala": -1521463,
+        "Guernsey": -270009,
+        "Guinea": -192778,
+        "Guinea-Bissau": -192776,
+        "Guyana": -287083,
+        "Haiti": -307829,
+        "Honduras": -287670,
+        "Hungary": -21335,
+        "Iceland": -299133,
+        "India": -304716,
+        "Indonesia": -304751,
+        "Iran": -304938,
+        "Iraq": -304934,
+        "Ireland": -62273,
+        "Isle of Man": -62269,
+        "Israel": -1473946,
+        "Italy": -365331,
+        "Jamaica": -555017,
+        "Japan": -382313,
+        "Jersey": -367988,
+        "Jordan": -184818,
+        "Kazakhstan": -214665,
+        "Kenya": -192798,
+        "Kiribati": -571178,
+        "Kosovo": -2088990,
+        "Kuwait": -305099,
+        "Kyrgyzstan": -178009,
+        "Laos": -49903,
+        "Latvia": -72594,
+        "Lebanon": -184843,
+        "Lesotho": -2093234,
+        "Liberia": -192780,
+        "Libya": -192758,
+        "Liechtenstein": -1155955,
+        "Lithuania": -72596,
+        "Luxembourg": -2171347,
+        "Madagascar": -447325,
+        "Malawi": -195290,
+        "Malaysia": -2108121,
+        "Maldives": -536773,
+        "Mali": -192785,
+        "Malta": -365307,
+        "Marshall Islands": -571771,
+        "Mauritania": -192763,
+        "Mauritius": -535828,
+        "Mengalum Island": 367540794,
+        "Mexico": -114686,
+        "Moldova": -58974,
+        "Monaco": -1124039,
+        "Mongolia": -161033,
+        "Montenegro": -53296,
+        "Montserrat": -537257,
+        "Morocco": -3630439,
+        "Mozambique": -195273,
+        "Myanmar": -50371,
+        "Namibia": -195266,
+        "Nauru": -571804,
+        "Nepal": -184633,
+        "Netherlands": -2323309,
+        "New Zealand": -556706,
+        "Nicaragua": -287666,
+        "Niger": -192786,
+        "Nigeria": -192787,
+        "Niue": -1558556,
+        "North Korea": -192734,
+        "North Macedonia": -53293,
+        "Norway": -2978650,
+        "Oman": -305138,
+        "Pakistan": -307573,
+        "Palau": -571805,
+        "Panama": -287668,
+        "Papua New Guinea": -307866,
+        "Paraguay": -287077,
+        "Peru": -288247,
+        "Philippines": -443174,
+        "Pitcairn Islands": -2185375,
+        "Poland": -49715,
+        "Portugal": -295480,
+        "Qatar": -305095,
+        "Romania": -90689,
+        "Russia": -60189,
+        "Rwanda": -171496,
+        "Saint Helena, Ascension and Tristan da Cunha": -1964272,
+        "Saint Kitts and Nevis": -536899,
+        "Saint Lucia": -550728,
+        "Saint Vincent and the Grenadines": -550725,
+        "Samoa": -1872673,
+        "San Marino": -54624,
+        "Saudi Arabia": -307584,
+        "Senegal": -192775,
+        "Serbia": -1741311,
+        "Seychelles": -536765,
+        "Sierra Leone": -192777,
+        "Singapore": -536780,
+        "Slovakia": -14296,
+        "Slovenia": -218657,
+        "Solomon Islands": -1857436,
+        "Somalia": -192799,
+        "South Africa": -87565,
+        "South Georgia and the South Sandwich Islands": -1983628,
+        "South Korea": -307756,
+        "South Sudan": -1656678,
+        "Spain": -1311341,
+        "Sri Lanka": -536807,
+        "Sudan": -192789,
+        "Suriname": -287082,
+        "Swallow Reef": -5220687,
+        "Sweden": -52822,
+        "Switzerland": -51701,
+        "Syria": -184840,
+        "São Tomé and Príncipe": -535880,
+        "Taiping Island": 741647339,
+        "Taiwan": -449220,
+        "Tajikistan": -214626,
+        "Tanzania": -195270,
+        "Thailand": -2067731,
+        "The Bahamas": -547469,
+        "The Gambia": -192774,
+        "Togo": -192782,
+        "Tokelau": -2186600,
+        "Tonga": -2186665,
+        "Trinidad and Tobago": -555717,
+        "Tunisia": -192757,
+        "Turkey": -174737,
+        "Turkmenistan": -223026,
+        "Turks and Caicos Islands": -547479,
+        "Tuvalu": -2177266,
+        "Uganda": -192796,
+        "Ukraine": -60199,
+        "United Arab Emirates": -307763,
+        "United Kingdom": -62149,
+        "United States": -148838,
+        "Uruguay": -287072,
+        "Uzbekistan": -196240,
+        "Vanuatu": -2177246,
+        "Vatican City": -36989,
+        "Venezuela": -272644,
+        "Vietnam": -49915,
+        "Yemen": -305092,
+        "Zambia": -195271,
+        "Zimbabwe": -195272,
+    }
+
+    country = countries.get(country.name, countries.get(country.apolitical_name, None))
+    if not country:
+        raise ValueError(f"Country not found by name {country.name}.")
+    return country
 
 
 def create_evil_filename(properties: List, extension: str):
