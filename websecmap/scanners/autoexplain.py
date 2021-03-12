@@ -122,7 +122,6 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(certificates: List[OpenS
     expected_notafter = b"20281113230000Z"  # Date in UTC, not in dutch time :)
 
     if last_cert.get_notAfter() != expected_notafter:
-        log.error(last_cert.get_notAfter())
         return False
 
     if last_cert.digest("sha1") != expected_digest:
