@@ -13,12 +13,15 @@ Local, non-vendor policies are not taken into account: they should standardize a
 
 import logging
 import ssl
+from base64 import b64encode, b64decode
 from datetime import datetime, timedelta
-from typing import List, Any
+from typing import List
 import socket
 
 import OpenSSL
 import pytz
+from OpenSSL.crypto import FILETYPE_PEM, dump_certificate, load_certificate
+from celery import group
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID
@@ -79,40 +82,59 @@ def autoexplain_dutch_untrusted_cert():
     scans = list(set(scans))
     log.info(f"Going to check {len(scans)} to see if it contains a Dutch governmental certificates.")
 
-    for scan in scans:
-        log.debug(f"Going to check {scan} to see if it contains a Dutch governmental certificate.")
-        certificates = get_cert_chain(url=scan.endpoint.url.url, port=scan.endpoint.port)
-        if certificate_chain_ends_on_non_trusted_dutch_root_ca(certificates):
-            # Trust to the moment of expiration
-            add_bot_explanation(scan, "state_trusted_root_ca", datetime(2028, 11, 14) - timezone.now())
+    tasks = [
+        get_cert_chain.si(url=scan.endpoint.url.url, port=scan.endpoint.port)
+        | certificate_chain_ends_on_non_trusted_dutch_root_ca.s()
+        | store_bot_explaination_if_needed.s(scan)
+        for scan in scans
+    ]
+
+    tasks = group(tasks)
+    tasks.apply_async()
 
 
-def get_cert_chain(url, port) -> List[Any]:
+@app.task(queue="internet")
+def get_cert_chain(url, port) -> List[OpenSSL.crypto.X509]:
     # https://stackoverflow.com/questions/19145097/getting-certificate-chain-with-python-3-3-ssl-module
     # Relatively new Dutch governmental sites relying on anything less < TLS 1.2 is insane.
+    # 14932 domains, takes too long...
     log.debug(f"Retrieving certificate chain from {url}:{port}.")
+
     try:
-        conn = SSL.Connection(
-            context=SSL.Context(SSL.TLSv1_2_METHOD), socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        )
+        # todo: this is currently ipv4 only.
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        conn = SSL.Connection(context=SSL.Context(SSL.TLSv1_2_METHOD), socket=s)
         conn.connect((url, port))
         conn.do_handshake()
         chain = conn.get_peer_cert_chain()
-        return chain if chain else []
+        return serialize_cert_chain(chain) if chain else []
     except Exception:  # noqa
-        # Any connection error, cert error, verification error, whatever.
         return []
 
 
-def certificate_chain_ends_on_non_trusted_dutch_root_ca(certificates: List[OpenSSL.crypto.X509]):
+def serialize_cert_chain(certificates: List[OpenSSL.crypto.X509]) -> List[str]:
+    # kombu.exceptions.EncodeError: cannot pickle '_cffi_backend.__CDataGCP' object
+    return [b64encode(dump_certificate(FILETYPE_PEM, certificate)).decode("UTF-8") for certificate in certificates]
+
+
+def deserialize_cert_chain(certificates: List[str]) -> List[OpenSSL.crypto.X509]:
+    return [load_certificate(FILETYPE_PEM, b64decode(certificate)) for certificate in certificates]
+
+
+@app.task(queue="storage")
+def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates: List[str]) -> bool:
     # Example: https://secure-t.sittard-geleen.nl
     # https://www.pyopenssl.org/en/stable/api/crypto.html
-    if not certificates:
+    if not serialized_certificates:
+        log.debug("No certificates received.")
         return False
+
+    certificates = deserialize_cert_chain(serialized_certificates)
 
     last_cert: OpenSSL.crypto.X509 = certificates[-1]
 
     if not isinstance(last_cert, OpenSSL.crypto.X509):
+        log.debug(f"Not an x509 instance but a {type(last_cert)}.")
         return False
 
     expected_digest = b"C6:C1:BB:C7:1D:4F:30:C7:6D:4D:B3:AF:B5:D0:66:DE:49:9E:9A:2D"
@@ -122,27 +144,39 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(certificates: List[OpenS
     expected_notafter = b"20281113230000Z"  # Date in UTC, not in dutch time :)
 
     if last_cert.get_notAfter() != expected_notafter:
+        log.debug("No cert match on expected expiration date.")
         return False
 
     if last_cert.digest("sha1") != expected_digest:
+        log.debug("No cert match on digest.")
         return False
 
     if last_cert.get_serial_number() != expected_serial:
+        log.debug("No cert match on serial.")
         return False
 
     issuer = "".join(
         "/{0:s}={1:s}".format(name.decode(), value.decode()) for name, value in last_cert.get_issuer().get_components()
     )
     if issuer != expected_issuer:
+        log.debug("No cert match on issuer.")
         return False
 
     subject = "".join(
         "/{0:s}={1:s}".format(name.decode(), value.decode()) for name, value in last_cert.get_subject().get_components()
     )
     if subject != expected_subject:
+        log.debug("No cert match on subject.")
         return False
 
+    log.debug("Certificate match!")
     return True
+
+
+@app.task(queue="storage")
+def store_bot_explaination_if_needed(needed: bool, scan: EndpointGenericScan):
+    if needed:
+        add_bot_explanation(scan, "state_trusted_root_ca", datetime(2028, 11, 14, tzinfo=pytz.utc) - timezone.now())
 
 
 def autoexplain_no_https_microsoft():
