@@ -129,6 +129,10 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates:
         log.debug("No certificates received.")
         return False
 
+    if not isinstance(serialized_certificates, List):
+        log.debug("No certificates received (not even a list of items).")
+        return False
+
     certificates = deserialize_cert_chain(serialized_certificates)
 
     last_cert: OpenSSL.crypto.X509 = certificates[-1]
