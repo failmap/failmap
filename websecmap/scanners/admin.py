@@ -172,7 +172,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def explain(self, object):
         return format_html("<a href='./{}/change/#/tab/module_1/'>Explain</a>", object.pk)
 
-    readonly_fields = ["last_scan_moment", "rating_determined_on"]
+    readonly_fields = ["last_scan_moment"]
 
 
 @admin.register(models.UrlGenericScan)
