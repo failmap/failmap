@@ -459,11 +459,20 @@ def certificate_matches_microsoft_exception_policy(
         log.debug(f"Certificate for {scan.endpoint.url.url} has expired  {certificate.not_valid_after}. Not trusted.")
         return False
 
+    # Likely subdomain:
+    # lyncdiscover.site.example.com
+    # lyncdiscover.example.com
+    if "." in scan.endpoint.url.computed_subdomain:
+        fragments = scan.endpoint.url.computed_subdomain.split(".")
+        microsoft_service = fragments[0]
+    else:
+        microsoft_service = scan.endpoint.url.computed_subdomain
+
     # check if the issuer matches
     # <Name(C=US,ST=Washington,L=Redmond,O=Microsoft Corporation,OU=Microsoft IT,CN=Microsoft IT TLS CA 5)>
     _names = certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
     names = [name.value for name in _names]
-    if names[0] not in applicable_subdomains[scan.endpoint.url.computed_subdomain]:
+    if names[0] not in applicable_subdomains[microsoft_service]:
         log.debug(f"Certificate for {scan.endpoint.url.url} not in accepted names, value: {names}. Not trusted.")
         return False
 
