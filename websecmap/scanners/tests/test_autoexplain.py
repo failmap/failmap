@@ -8,8 +8,6 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
-from base64 import b64decode
-from OpenSSL.crypto import load_certificate, FILETYPE_PEM
 
 import websecmap
 from websecmap.organizations.models import Url
@@ -35,14 +33,12 @@ def test_certificate_chain_ends_on_non_trusted_dutch_root_ca(current_path):
     # Validate a complete chain that ends in the desired root certificate
     with open(f"{current_path}/websecmap/scanners/tests/autoexplain/valid_chain.json") as f:
         certificate_data = json.load(f)
-    real_certs = [load_certificate(FILETYPE_PEM, b64decode(certificate)) for certificate in certificate_data]
-    assert certificate_chain_ends_on_non_trusted_dutch_root_ca(real_certs) is True
+    assert certificate_chain_ends_on_non_trusted_dutch_root_ca(certificate_data) is True
 
     # Fail to validate something that does not end in the root certificate
     with open(f"{current_path}/websecmap/scanners/tests/autoexplain/missing_root.json") as f:
         certificate_data = json.load(f)
-    real_certs = [load_certificate(FILETYPE_PEM, b64decode(certificate)) for certificate in certificate_data]
-    assert certificate_chain_ends_on_non_trusted_dutch_root_ca(real_certs) is False
+    assert certificate_chain_ends_on_non_trusted_dutch_root_ca(certificate_data) is False
 
     # Supplying garbage causes no problems / crashes:
     assert certificate_chain_ends_on_non_trusted_dutch_root_ca([]) is False
