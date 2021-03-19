@@ -1,9 +1,10 @@
 # Gitlabs new early alpha security features, see https://gitlab.com/help/user/application_security/index.md
-include:
-  - template: License-Scanning.gitlab-ci.yml
-  - template: Dependency-Scanning.gitlab-ci.yml
-  - template: Container-Scanning.gitlab-ci.yml
-  - template: SAST.gitlab-ci.yml
+# Disabled to reduce build times.
+# include:
+  # - template: License-Scanning.gitlab-ci.yml
+  # - template: Dependency-Scanning.gitlab-ci.yml
+  # - template: Container-Scanning.gitlab-ci.yml
+  # - template: SAST.gitlab-ci.yml
 
 stages:
   - test
