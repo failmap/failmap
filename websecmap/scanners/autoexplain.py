@@ -93,22 +93,29 @@ def autoexplain_dutch_untrusted_cert():
     tasks.apply_async()
 
 
-@app.task(queue="internet")
+@app.task(queue="internet", autoretry_for=(socket.gaierror,), retry_kwargs={"max_retries": 5, "countdown": 2})
 def get_cert_chain(url, port) -> List[OpenSSL.crypto.X509]:
     # https://stackoverflow.com/questions/19145097/getting-certificate-chain-with-python-3-3-ssl-module
     # Relatively new Dutch governmental sites relying on anything less < TLS 1.2 is insane.
     # 14932 domains, takes too long...
     log.debug(f"Retrieving certificate chain from {url}:{port}.")
-
     try:
         # todo: this is currently ipv4 only.
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        conn = SSL.Connection(context=SSL.Context(SSL.TLSv1_2_METHOD), socket=s)
-        conn.connect((url, port))
-        conn.do_handshake()
-        chain = conn.get_peer_cert_chain()
-        return serialize_cert_chain(chain) if chain else []
-    except Exception:  # noqa
+        # Use with statements so sockets/connections close automatically
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            conn = SSL.Connection(context=SSL.Context(SSL.TLSv1_2_METHOD), socket=s)
+            conn.connect((url, port))
+            conn.do_handshake()
+            chain = conn.get_peer_cert_chain()
+            conn.close()
+            return serialize_cert_chain(chain) if chain else []
+
+    # get address info error (DNS issues) can be retried a few times.
+    except socket.gaierror:
+        raise
+    except Exception as e:  # noqa
+        # Log these exceptions to see what happens.
+        log.exception(e)
         return []
 
 
