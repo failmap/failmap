@@ -23,10 +23,9 @@ from websecmap.scanners.scanner.http import (
     resolves_on_v4,
     resolves_on_v6,
 )
+from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 
 log = logging.getLogger(__package__)
-
-CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
 
 # These messages are translated and expected lateron. Don't edit them unless you're also editing them in the reporting
 # etc etc.

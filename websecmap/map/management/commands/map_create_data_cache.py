@@ -1,4 +1,4 @@
-from websecmap.map.management.commands.calculate_high_level_statistics import CalculateCommand
+from websecmap.map.management.commands.custom_commands import CalculateCommand
 from websecmap.map.report import calculate_map_data
 
 

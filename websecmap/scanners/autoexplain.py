@@ -34,6 +34,8 @@ from websecmap.organizations.models import Url
 from websecmap.scanners.models import EndpointGenericScan
 import dns
 
+from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
+
 log = logging.getLogger(__package__)
 
 
@@ -87,26 +89,30 @@ def autoexplain_dutch_untrusted_cert():
     log.info(f"Going to check {len(scans)} to see if it contains a Dutch governmental certificates.")
 
     tasks = [
-        get_cert_chain.si(url=scan.endpoint.url.url, port=scan.endpoint.port)
+        get_cert_chain.si(url=scan.endpoint.url.url, port=scan.endpoint.port, ip_version=scan.endpoint.ip_version).set(
+            queue=CELERY_IP_VERSION_QUEUE_NAMES[scan.endpoint.ip_version]
+        )
         | certificate_chain_ends_on_non_trusted_dutch_root_ca.s()
         | store_bot_explaination_if_needed.s(scan)
         for scan in scans
     ]
 
+    # todo: this should be a taskcommand.
     tasks = group(tasks)
     tasks.apply_async()
 
 
-@app.task(queue="internet", autoretry_for=(socket.gaierror,), retry_kwargs={"max_retries": 5, "countdown": 2})
-def get_cert_chain(url, port) -> List[OpenSSL.crypto.X509]:
+@app.task(autoretry_for=(socket.gaierror,), retry_kwargs={"max_retries": 10, "countdown": 2})
+def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
     # https://stackoverflow.com/questions/19145097/getting-certificate-chain-with-python-3-3-ssl-module
     # Relatively new Dutch governmental sites relying on anything less < TLS 1.2 is insane.
-    # 14932 domains, takes too long...
     log.debug(f"Retrieving certificate chain from {url}:{port}.")
     try:
-        # todo: this is currently ipv4 only.
+        # Todo: does still go to the ipv4 version if told to user AF-INET6. The workers should restrict it.
+        # Decide which IP-version to use
+        socket_ip_version = socket.AF_INET if ip_version == 4 else socket.AF_INET6
         # Use with statements so sockets/connections close automatically
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        with socket.socket(socket_ip_version, socket.SOCK_STREAM) as s:
             conn = SSL.Connection(context=SSL.Context(SSL.TLSv1_2_METHOD), socket=s)
             conn.connect((url, port))
             conn.do_handshake()
