@@ -24,6 +24,8 @@ babel==2.9.0
     #   sphinx
 backcall==0.2.0
     # via ipython
+bandit==1.7.0
+    # via -r requirements-dev.in
 black==20.8b1
     # via -r requirements-dev.in
 certifi==2020.12.5
@@ -68,6 +70,10 @@ docutils==0.16
     #   sphinx
 freezegun==1.1.0
     # via -r requirements-dev.in
+gitdb==4.0.5
+    # via gitpython
+gitpython==3.1.14
+    # via bandit
 httmock==1.4.0
     # via -r requirements-dev.in
 idna==2.10
@@ -102,6 +108,8 @@ parso==0.8.1
     # via jedi
 pathspec==0.8.1
     # via black
+pbr==5.5.1
+    # via stevedore
 pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
@@ -163,6 +171,10 @@ pytz==2021.1
     #   -c requirements.txt
     #   babel
     #   django
+pyyaml==5.4.1
+    # via
+    #   -c requirements.txt
+    #   bandit
 recommonmark==0.7.1
     # via -r requirements-dev.in
 regex==2020.11.13
@@ -181,10 +193,13 @@ responses==0.12.1
 six==1.15.0
     # via
     #   -c requirements.txt
+    #   bandit
     #   livereload
     #   python-dateutil
     #   requests-mock
     #   responses
+smmap==3.0.5
+    # via gitdb
 snowballstemmer==2.1.0
     # via
     #   pydocstyle
@@ -216,6 +231,8 @@ sqlparse==0.4.1
     #   -c requirements.txt
     #   django
     #   django-debug-toolbar
+stevedore==3.3.0
+    # via bandit
 toml==0.10.2
     # via
     #   black

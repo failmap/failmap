@@ -52,7 +52,11 @@ def start_borker(uuid):
     @retry(tries=10, delay=1)
     def get_container_port():
         command = "docker port %s 6379/tcp" % name
-        return subprocess.check_output(command, shell=True, universal_newlines=True).split(":")[-1]
+        return subprocess.check_output(
+            command,
+            shell=True,  # nosec predefined input in name mitigates risk of exploitation (unless uuid.int overridden).
+            universal_newlines=True,
+        ).split(":")[-1]
 
     time.sleep(1)  # small delay to prevent first warning
     port = int(get_container_port())

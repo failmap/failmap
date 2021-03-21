@@ -29,16 +29,9 @@ from websecmap.scanners.scanner.__init__ import (
     url_filters,
 )
 from websecmap.scanners.scanner.http import connect_result
+from websecmap.scanners.scanner.utils import get_nameservers
 
 log = logging.getLogger(__name__)
-
-
-# cloudflare, google, quad9, cisco.
-NAMESERVERS = ["1.1.1.1", "8.8.8.8", "9.9.9.9", "208.67.222.222"]
-
-# since you'll be asking a lot of DNS questions, use a set of (public) resolvers:
-resolver = Resolver()
-resolver.nameservers = NAMESERVERS
 
 
 def filter_discover(
@@ -348,6 +341,9 @@ def has_a_or_aaaa(url: str) -> bool:
     before=before_log(log, logging.DEBUG),
 )
 def get_dns_records(url: str, record_type):
+    resolver = Resolver()
+    resolver.nameservers = get_nameservers()
+
     try:
         # a little delay to be friendly towards the server
         # this doesn't really help with parallel requests from the same server. Well, a little bit.
@@ -374,6 +370,9 @@ def get_dns_records(url: str, record_type):
     before=before_log(log, logging.DEBUG),
 )
 def get_dns_records_accepting_no_answer(url: str, record_type):
+    resolver = Resolver()
+    resolver.nameservers = get_nameservers()
+
     try:
         # a little delay to be friendly towards the server
         # this doesn't really help with parallel requests from the same server. Well, a little bit.

@@ -108,6 +108,9 @@ run: ${app}  ## run complete application stack (frontend, worker, broker)
 	# start server (this can take a while)
 	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} devserver
 
+audit:
+	${python} -m bandit -c bandit.yaml -r websecmap
+
 run_no_backend: ${app}  ## run application stack without broker/worker
 	# start server (this can take a while)
 	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} devserver --no-backend
@@ -202,6 +205,10 @@ requirements: ${requirements}
 # perform 'pip freeze' on first class requirements in .in files.
 ${requirements}: %.txt: %.in | ${pip-compile}
 	${env} ${pip-compile} ${pip_compile_args} --output-file $@ $<
+
+pip-sync:
+	# synchronizes the .venv with the state of requirements.txt
+	python3 -m piptools sync requirements.txt requirements-dev.txt
 
 update_requirements: pip_compile_args=--upgrade
 update_requirements: _mark_outdated requirements.txt requirements-dev.txt requirements-deploy.txt _commit_update

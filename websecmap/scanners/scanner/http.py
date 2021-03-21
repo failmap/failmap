@@ -432,7 +432,7 @@ def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bo
             uri,
             timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
             allow_redirects=False,  # redirect = connection
-            verify=False,  # any tls = connection
+            verify=False,  # nosec any tls = connection
             headers={"Host": url.url, "User-Agent": get_random_user_agent()},
         )
         if r.status_code:

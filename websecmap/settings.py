@@ -647,6 +647,11 @@ CONSTANCE_ADDITIONAL_FIELDS = {
         "django.forms.fields.ChoiceField",
         {"widget": "django.forms.Select", "choices": ((None, "-----"), ("1", "Yes"), ("0", "No"))},
     ],
+    # Todo: no validation options, that is offloaded to the widget?
+    "json": [
+        "django.forms.fields.CharField",
+        {"widget": "django.forms.Textarea"},
+    ],
 }
 
 
@@ -888,6 +893,13 @@ CONSTANCE_CONFIG = {
         'You can do so, <a href="https://gitter.im" target="_blank">here</a>.',
         str,
     ),
+    "SCANNER_NAMESERVERS": (
+        '["1.1.1.1", "8.8.8.8", "9.9.9.9", "208.67.222.222", "8.26.56.26"]',
+        "Nameservers used during scans (dns endpoints and subdomains). This string is loaded as JSON, but not validated"
+        "due to limitations of this settings library. Be careful when editing(!). This information is cached and loaded"
+        "only once every 10 minutes.",
+        "json",
+    ),
     "ENABLE_PRO": (False, "Todo: implement.", bool),
     "PRO_REPLY_TO_MAIL_ADDRESS": ("", "Reply mail address used when sending PRO mails.", str),
     # django mail settings, but managed dynamically
@@ -973,6 +985,10 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_SCAN_SCHEDULE",
                 "SHOW_DONATION",
             ),
+        ),
+        (
+            "Scanning preferences",
+            ("SCANNER_NAMESERVERS",),
         ),
     ]
 )
