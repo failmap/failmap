@@ -4,6 +4,10 @@ from typing import List
 
 from websecmap.app.constance import constance_cached_value
 
+
+CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
+
+
 # Cloudflare: 1.0.0.1, 1.1.1.1
 # Google: 8.8.4.4, 8.8.8.8
 # Quad9: 9.9.9.9

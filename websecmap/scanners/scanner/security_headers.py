@@ -18,10 +18,10 @@ from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
 from websecmap.scanners.scanner.http import get_random_user_agent
+from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 
 log = logging.getLogger(__name__)
 
-CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
 
 SECURITY_HEADER_SCAN_TYPES = [
     "http_security_header_strict_transport_security",

@@ -52,13 +52,12 @@ from websecmap.scanners.scanner.__init__ import (
     q_configurations_to_scan,
     unique_and_random,
 )
+from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 from websecmap.scanners.timeout import timeout
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 log = logging.getLogger(__package__)
-
-CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
 
 # don't contact http/443 and https/80. You can, but that is 99.99 waste data.
 STANDARD_HTTP_PORTS = [80, 8008, 8080]

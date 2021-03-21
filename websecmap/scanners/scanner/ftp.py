@@ -26,6 +26,7 @@ from websecmap.scanners.scanner.__init__ import (
     unique_and_random,
     url_filters,
 )
+from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +37,6 @@ RETRY_DELAY = 10
 # after which time (seconds) a pending task should no longer be accepted by a worker
 # can also be a datetime.
 EXPIRES = 3600  # one hour is more then enough
-CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
 
 
 def filter_scan(

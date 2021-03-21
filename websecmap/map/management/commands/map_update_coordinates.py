@@ -10,6 +10,8 @@ log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
+    # Example usage: To update all coordinates on the 1st day of the year:
+    # map_update_coordinates --date=2021-01-01 --country=NL --region=municipality
     help = "Connects to OSM and gets a set of coordinates."
 
     def add_arguments(self, parser):
