@@ -461,7 +461,11 @@ def get_headers_request(uri_url):
     # ignore wrong certificates, those are handled in a different scan.
     # 10 seconds for network delay, 10 seconds for the site to respond.
     response = requests.get(
-        uri_url, timeout=(10, 10), allow_redirects=True, verify=False, headers={"User-Agent": get_random_user_agent()}
+        uri_url,
+        timeout=(10, 10),
+        allow_redirects=True,
+        verify=False,  # nosec TLS does not have to be valid in this test, only headers do.
+        headers={"User-Agent": get_random_user_agent()},
     )
 
     # redirects are followed, this gives an indication on how many redirects are followed, and what url the

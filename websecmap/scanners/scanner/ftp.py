@@ -8,7 +8,7 @@ Scans for missing AUTH TLS / AUTH SSL options in FTP servers.
 """
 
 import logging
-from ftplib import FTP, error_perm, error_proto, error_reply, error_temp
+from ftplib import FTP, error_perm, error_proto, error_reply, error_temp  # nosec scanning for insecure ftp is the point
 
 from celery import Task, group
 from django.utils import timezone
@@ -305,7 +305,7 @@ def scan(self, address: str, port: int):
     }
 
     # todo: this only connects to encrypted servers?
-    ftp = FTP()
+    ftp = FTP()  # nosec scanning for insecure ftp is the point
 
     try:
         ftp.connect(host=address, port=port, timeout=30)
@@ -425,7 +425,7 @@ def discover(url: str, port: int):
     # https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
 
     connected = False
-    ftp = FTP()
+    ftp = FTP()  # nosec scanning for insecure ftp is the point
     try:
         ftp.connect(url, port, 30)
         connected = True

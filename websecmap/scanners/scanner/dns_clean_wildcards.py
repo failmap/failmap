@@ -95,7 +95,7 @@ def site_content(url) -> Dict[str, Any]:
         response = requests.get(
             f"https://{url}/",
             allow_redirects=True,
-            verify=False,  # certificate validity is checked elsewhere, having some https > none
+            verify=False,  # nosec: certificate validity is checked elsewhere, having some https > none
             headers={"User-Agent": get_random_user_agent()},
             timeout=(3, 3),
         )

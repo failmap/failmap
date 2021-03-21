@@ -293,7 +293,7 @@ class InternetNLV2ScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def online(obj):
         from constance import config
 
-        return mark_safe(
+        return mark_safe(  # nosec not the best way to render html in the admin, but one that's in full admin control
             f"<a href='{config.INTERNET_NL_API_USERNAME}:{config.INTERNET_NL_API_PASSWORD}"
             f"@{config.INTERNET_NL_API_URL}/requests/{obj.scan_id}' target='_blank'>online</a>"
         )

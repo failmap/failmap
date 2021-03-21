@@ -70,6 +70,10 @@ def autoexplain_dutch_untrusted_cert():
     # It can be ANY untrusted (sub)domain, which is frustrating. There is no standard where the cert can be used.
     # This may cause a lot of overhead.
     scans = EndpointGenericScan.objects.all().filter(
+        # Dont include all dead endpoints and urls, as it slows things down and are not used in reports anyway:
+        endpoint__is_dead=False,
+        endpoint__url__not_resolvable=False,
+        endpoint__url__is_dead=False,
         # Assuming this is for the dutch market only. Strictly speaking it could be anything, yet highly unusual.
         endpoint__url__computed_suffix="nl",
         type="tls_qualys_certificate_trusted",
@@ -204,7 +208,8 @@ def autoexplain_no_https_microsoft():
     """
 
     scan_type = "plain_https"
-    possible_urls = Url.objects.all().filter(computed_subdomain="autodiscover")
+    # Dont include all dead endpoints and urls, as it slows things down and are not used in reports anyway:
+    possible_urls = Url.objects.all().filter(computed_subdomain="autodiscover", not_resolvable=False, is_dead=False)
 
     log.debug(f"Found {len(possible_urls)} possible autodiscover urls.")
 
@@ -214,6 +219,7 @@ def autoexplain_no_https_microsoft():
         type=scan_type,
         is_the_latest_scan=True,
         comply_or_explain_is_explained=False,
+        endpoint__is_dead=False,
         endpoint__protocol="http",
         endpoint__port=80,
         # it DOES redirect to a secure site.
@@ -327,6 +333,7 @@ def get_relevant_microsoft_domains_from_database() -> List[Url]:
         possible_urls += list(
             Url.objects.all()
             .filter(Q(computed_subdomain__startswith=f"{subdomain}.") | Q(computed_subdomain=f"{subdomain}"))
+            .filter(is_dead=False, not_resolvable=False)
             .only("id")
         )
 
@@ -351,6 +358,7 @@ def autoexplain_trust_microsoft():
         is_the_latest_scan=True,
         comply_or_explain_is_explained=False,
         endpoint__protocol="https",
+        endpoint__is_dead=False,
         rating="not trusted",
     )
 
@@ -383,6 +391,7 @@ def explain_headers_for_explained_microsoft_trusted_tls_certificates():
         comply_or_explain_is_explained=True,
         is_the_latest_scan=True,
         endpoint__protocol="https",
+        endpoint__is_dead=False,
         rating="not trusted",
     )
     for scan in list(set(scans)):

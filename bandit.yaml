@@ -1,0 +1,1 @@
+exclude_dirs: ['./.venv/**', './venv/**', '**/test**', './.pytest_cache/**', './mittens/config.py', './mittens/config_dist.py', './mittens/config_dev.py']

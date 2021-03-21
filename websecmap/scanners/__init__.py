@@ -367,8 +367,6 @@ SCANNERS = [
     },
 ]
 
-BETA_SCANNERS = ["tls_osaft"]
-
 # todo: should we move the scanner definitions to different scanners and harvest them here?
 
 # todo: we're missing a separate nsec scanner it seems, should be separated from DNS scans.

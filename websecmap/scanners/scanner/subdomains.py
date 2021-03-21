@@ -23,6 +23,8 @@ from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, unique
 from websecmap.scanners.scanner.http import get_ips
 
 # Include DNSRecon code from an external dependency. This is cloned recursively and placed outside the django app.
+from websecmap.scanners.scanner.utils import get_random_nameserver
+
 sys.path.append(settings.VENDOR_DIR + "/dnsrecon/")
 
 log = logging.getLogger(__package__)
@@ -236,7 +238,7 @@ def discover_wildcard(url: str):
 
     wildcard = False
 
-    resolver = DnsHelper(url, get_random_dns_resolver_ip(), 3)
+    resolver = DnsHelper(url, get_random_nameserver(), 3)
 
     # Do this test twice, there are dns servers that say NO the first time, but say yes the second (i mean wtf)
     ips_1 = resolver.get_a("%s.%s" % ("".join(random.choice(string.ascii_lowercase) for i in range(16)), url))
@@ -342,7 +344,7 @@ def wordlist_scan(urls: List[Url], wordlist: List[str]):
         for url in urls_without_wildcards:
             log.info("Wordlist scan on: %s" % url.url)
 
-            resolver_ip = get_random_dns_resolver_ip()
+            resolver_ip = get_random_nameserver()
             log.debug("Using the DNS service from %s" % resolver_ip)
             resolver = DnsHelper(url.url, resolver_ip, 3)
             # Using the filter option, only adds the addresses that don't go to the wildcard record.
@@ -432,22 +434,6 @@ def remove_wildcards(urls: List[Url]):
             urls_without_wildcards.append(url)
 
     return urls_without_wildcards
-
-
-def get_random_dns_resolver_ip():
-    """
-    Using one of the public and popular DNS services.
-
-    :return:
-    """
-
-    # 1.0.0.1 == 1.1.1.1 (cloudflare)
-    # 8.8.4.4 == 8.8.8.8 (google)
-    # 199.85.127.10 == 199.85.126.10 (norton), no norton for us, because norton.
-    # 8.26.56.26 == 8.20.247.20 (comodo)
-    # 149.112.112.112 == 9.9.9.9 (quad9)
-
-    return random.choice(["1.1.1.1", "9.9.9.9", "8.8.8.8", "8.26.56.26"])
 
 
 # don't overload the crt.sh service, rate limit
