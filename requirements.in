@@ -61,7 +61,7 @@ dnspython
 netaddr
 
 # screenshots
-Pillow
+Pillow>=8.1.1
 python-resize-image
 
 # url parsing in the database, and several other locations
