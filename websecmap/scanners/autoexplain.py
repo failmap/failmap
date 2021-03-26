@@ -31,7 +31,7 @@ from OpenSSL import SSL
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import EndpointGenericScan
+from websecmap.scanners.models import EndpointGenericScan, Endpoint
 import dns
 
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
@@ -405,21 +405,38 @@ def explain_headers_for_explained_microsoft_trusted_tls_certificates():
 
 
 def autoexplain_trust_microsoft_and_include_their_webserver_headers(scan):
-    intended_for_devices = "service_intended_for_devices_not_browsers"
+    # Find a neighboring http endpoint, also there the headers are not relevant as the same security
+    # protocol is used. DNS can only switch on addresses and ip-versions. But not protocol and port.
+    http_endpoint = Endpoint.objects.all().filter(
+        # We don't care about what port is applied here.
+        protocol="http",
+        ip_version=scan.endpoint.ip_version,
+        url=scan.endpoint.url,
+        is_dead=False,
+        url__is_dead=False,
+        url__not_resolvable=False,
+    )
+    relevant_endpoints = list(set(http_endpoint))
 
-    # Also retrieve all http security headers, they are never correct. The only thing that is actually
-    # tested is the encryption quality here.
-    header_scans = [
-        "http_security_header_strict_transport_security",
-        "http_security_header_x_content_type_options",
-        "http_security_header_x_frame_options",
-        "http_security_header_x_xss_protection",
-    ]
-    for header_scan in header_scans:
-        latest_scan = get_latest_endpoint_scan(endpoint=scan.endpoint, scan_type=header_scan)
-        if not latest_scan:
-            continue
-        add_bot_explanation(latest_scan, intended_for_devices, timedelta(days=365 * 10))
+    for endpoint in relevant_endpoints + [scan.endpoint]:
+
+        intended_for_devices = "service_intended_for_devices_not_browsers"
+
+        # Also retrieve all http security headers, they are never correct. The only thing that is actually
+        # tested is the encryption quality here.
+        header_scans = [
+            "http_security_header_strict_transport_security",
+            "http_security_header_x_content_type_options",
+            "http_security_header_x_frame_options",
+            "http_security_header_x_xss_protection",
+        ]
+        for header_scan in header_scans:
+            latest_scan = get_latest_endpoint_scan(endpoint=endpoint, scan_type=header_scan)
+            if not latest_scan:
+                continue
+
+            if not latest_scan.comply_or_explain_explanation == intended_for_devices:
+                add_bot_explanation(latest_scan, intended_for_devices, timedelta(days=365 * 10))
 
 
 def get_latest_endpoint_scan(endpoint, scan_type):
