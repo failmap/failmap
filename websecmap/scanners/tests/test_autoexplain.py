@@ -224,6 +224,27 @@ def test_autoexplain_including_headers(db, monkeypatch):
         type="http_security_header_x_content_type_options",
     )
 
+    # Also add some http scans on a neighboring endpoint:
+    endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol="http", port="80", ip_version=4)
+    header_scan_http, created = EndpointGenericScan.objects.all().get_or_create(
+        endpoint=endpoint,
+        rating="not trusted",
+        rating_determined_on=datetime.datetime.now(pytz.utc),
+        is_the_latest_scan=True,
+        type="http_security_header_x_content_type_options",
+    )
+
+    # make sure that no unrealted url is updated
+    unrela_url, created = Url.objects.all().get_or_create(url="lyncdiscover2.arnhem.nl")
+    endpoint, created = Endpoint.objects.all().get_or_create(url=unrela_url, protocol="https", port="443", ip_version=4)
+    unrelated_header_scan_http, created = EndpointGenericScan.objects.all().get_or_create(
+        endpoint=endpoint,
+        rating="not trusted",
+        rating_determined_on=datetime.datetime.now(pytz.utc),
+        is_the_latest_scan=True,
+        type="http_security_header_x_content_type_options",
+    )
+
     assert endpointscan.comply_or_explain_is_explained is False
     assert header_scan_new.comply_or_explain_is_explained is False
     assert header_scan_old.comply_or_explain_is_explained is False
@@ -238,6 +259,10 @@ def test_autoexplain_including_headers(db, monkeypatch):
     updated_endpoint = EndpointGenericScan.objects.get(id=header_scan_new.id)
     assert updated_endpoint.comply_or_explain_is_explained is True
     updated_endpoint = EndpointGenericScan.objects.get(id=header_scan_old.id)
+    assert updated_endpoint.comply_or_explain_is_explained is False
+    updated_endpoint = EndpointGenericScan.objects.get(id=header_scan_http.id)
+    assert updated_endpoint.comply_or_explain_is_explained is True
+    updated_endpoint = EndpointGenericScan.objects.get(id=unrelated_header_scan_http.id)
     assert updated_endpoint.comply_or_explain_is_explained is False
 
     # Verify that headers are explained even when the TLS certificate has been explained
