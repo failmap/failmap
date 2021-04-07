@@ -41,6 +41,8 @@ SCANNERS = [
         "needs results from": ["ftp"],
         "creates endpoint scan types": ["ftp"],
         "creates url scan types": [],
+        # Shorthand of "can discover, verify etc"
+        "plannable_activities": ["discover", "verify", "scan"],
     },
     {
         "name": "plain_http",
@@ -55,6 +57,7 @@ SCANNERS = [
         "needs results from": ["http"],
         "creates endpoint scan types": ["plain_https"],
         "creates url scan types": [],
+        "plannable_activities": ["scan"],
     },
     {
         "name": "dnssec",
@@ -69,6 +72,7 @@ SCANNERS = [
         "needs results from": [],
         "creates endpoint scan types": ["subdomains"],
         "creates url scan types": ["DNSSEC"],
+        "plannable_activities": ["scan"],
     },
     {
         "name": "security_headers",
@@ -89,6 +93,7 @@ SCANNERS = [
             "http_security_header_x_xss_protection",
         ],
         "creates url scan types": [],
+        "plannable_activities": ["scan"],
     },
     {
         "name": "tls_qualys",
@@ -104,6 +109,7 @@ SCANNERS = [
         "needs results from": ["http"],
         "creates endpoint scan types": ["tls_qualys_certificate_trusted", "tls_qualys_encryption_quality"],
         "creates url scan types": [],
+        "plannable_activities": ["scan"],
     },
     {
         "name": "subdomains",
@@ -129,6 +135,7 @@ SCANNERS = [
         "needs results from": [],
         "creates endpoint scan types": [],
         "creates url scan types": [],
+        "plannable_activities": ["verify", "discover"],
     },
     {
         "name": "dns_known_subdomains",
@@ -143,6 +150,7 @@ SCANNERS = [
         "needs results from": [],
         "creates endpoint scan types": [],
         "creates url scan types": [],
+        "plannable_activities": ["discover"],
     },
     {
         "name": "dns_clean_wildcards",
@@ -157,6 +165,7 @@ SCANNERS = [
         "needs results from": [],
         "creates endpoint scan types": [],
         "creates url scan types": [],
+        "plannable_activities": ["scan"],
     },
     {
         "name": "http",
@@ -171,6 +180,7 @@ SCANNERS = [
         "needs results from": [],
         "creates endpoint scan types": [],
         "creates url scan types": [],
+        "plannable_activities": ["discover", "verify"],
     },
     {
         "name": "verify_unresolvable",
@@ -185,6 +195,7 @@ SCANNERS = [
         "needs results from": ["http"],
         "creates endpoint scan types": [],
         "creates url scan types": [],
+        "plannable_activities": ["verify"],
     },
     {
         "name": "onboard",
@@ -201,6 +212,7 @@ SCANNERS = [
         # to reduce complexity, this scanner creates no scan types specifically.
         "creates endpoint scan types": [],
         "creates url scan types": [],
+        "plannable_activities": [],
     },
     {
         "name": "dns_endpoints",
@@ -216,6 +228,7 @@ SCANNERS = [
         "needs results from": [],
         "creates endpoint scan types": [],
         "creates url scan types": [],
+        "plannable_activities": ["verify", "discover"],
     },
     {
         "name": "internet_nl_mail",
@@ -296,6 +309,7 @@ SCANNERS = [
             "internet_nl_mail_legacy_category_ipv6",
         ],
         "creates url scan types": [],
+        "plannable_activities": ["scan"],
     },
     {
         "name": "internet_nl_web",
@@ -364,6 +378,7 @@ SCANNERS = [
             "internet_nl_web_legacy_category_ipv6",
         ],
         "creates url scan types": [],
+        "plannable_activities": ["scan"],
     },
 ]
 
