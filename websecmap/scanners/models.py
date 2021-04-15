@@ -389,6 +389,54 @@ class PlannedScanStatistic(models.Model):
     data = JSONField()
 
 
+class Activity(models.IntegerChoices):
+    unknown = (
+        0,
+        "unknown",
+    )
+    discover = (
+        1,
+        "discover",
+    )
+    verify = (
+        2,
+        "verify",
+    )
+    scan = 3, "scan"
+
+
+class Scanner(models.IntegerChoices):
+    # Map the scanners in __init__.py
+    unknown = 0, "unknown"
+    tls_qualys = 1, "tls_qualys"
+    dnssec = 2, "dnssec"
+    security_headers = 3, "security_headers"
+    plain_http = 4, "plain_http"
+    internet_nl_mail = 5, "internet_nl_mail"
+    ftp = 6, "ftp"
+    dns_endpoints = 7, "dns_endpoints"
+    internet_nl_web = 8, "internet_nl_web"
+    subdomains = 9, "subdomains"
+    dns_known_subdomains = 10, "dns_known_subdomains"
+    dns_clean_wildcards = 11, "dns_clean_wildcards"
+    http = 12, "http"
+    verify_unresolvable = 13, "verify_unresolvable"
+    onboard = 14, "onboard"
+    ipv6 = 15, "ipv6"
+    dns_wildcard = 16, "dns_wildcard"
+    dummy = 17, "dummy"
+    screenshot = 18, "screenshot"
+
+
+class State(models.IntegerChoices):
+    unknown = 0, "unknown"
+    requested = 1, "requested"
+    picked_up = 2, "picked_up"
+    finished = 3, "finished"
+    error = 4, "error"
+    timeout = 5, "timeout"
+
+
 class PlannedScan(models.Model):
     """
     A planned scan is always performed per url, even if the scan itself is about endpoints. The endpoints can be
@@ -396,27 +444,20 @@ class PlannedScan(models.Model):
     """
 
     url = models.ForeignKey(Url, on_delete=models.CASCADE)
-
-    activity = models.CharField(
-        max_length=10,
-        default="",
-        db_index=True,
-        help_text="discover, verify or scan"
-        # could be an enum, which saves some data
+    activity = models.PositiveSmallIntegerField(
+        choices=Activity.choices, default=Activity.unknown, db_index=True, help_text="discover, verify or scan"
     )
 
-    scanner = models.CharField(
-        # perhaps this should be an int and scanners should be a number. This works also though...
-        # more data = more better
-        max_length=30,  # internet_nl_v2_mail, known_subdomains, http_security_headers, verify_unresolvable
-        default="",
+    scanner = models.PositiveSmallIntegerField(
+        choices=Scanner.choices,
+        default=Scanner.unknown,
         db_index=True,
-        help_text="tlsq, dnssec, http_security_headers, plain_http, internet_nl_mail, dnssec, ftp, dns_endpoints"
-        # could be an enum, which saves some data
     )
 
-    state = models.CharField(
-        max_length=10, default="", db_index=True, help_text="requested, picked_up, finished, error, timeout"
+    state = models.PositiveSmallIntegerField(
+        choices=State.choices,
+        default=State.unknown,
+        db_index=True,
     )
 
     """

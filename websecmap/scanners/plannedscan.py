@@ -12,7 +12,7 @@ from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.report import PUBLISHED_SCAN_TYPES
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import SCAN_TYPES_TO_SCANNER, SCANNERS_BY_NAME
-from websecmap.scanners.models import Endpoint, PlannedScan, PlannedScanStatistic
+from websecmap.scanners.models import Endpoint, PlannedScan, PlannedScanStatistic, Activity, Scanner, State
 
 log = logging.getLogger(__name__)
 
@@ -96,10 +96,12 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     amount: the amount of plannedscans to pick up
     """
 
-    scans = PlannedScan.objects.all().filter(activity=activity, scanner=scanner, state="requested")[0:amount]
+    scans = PlannedScan.objects.all().filter(
+        activity=Activity[activity].value, scanner=Scanner[scanner].value, state=State["requested"].value
+    )[0:amount]
     for scan in scans:
         # todo: should there be a state log? Probably.
-        scan.state = "picked_up"
+        scan.state = State["picked_up"].value
         scan.last_state_change_at = datetime.now(pytz.utc)
         scan.save()
 
@@ -121,13 +123,17 @@ def request(activity: str, scanner: str, urls: List[Url]):
         now = datetime.now(pytz.utc)
 
         ps = PlannedScan()
-        ps.activity = activity
-        ps.scanner = scanner
+        ps.activity = Activity[activity].value
+        ps.scanner = Scanner[scanner].value
         ps.url = url
-        ps.state = "requested"
+        ps.state = State["requested"].value
         ps.last_state_change_at = now
-        ps.requested_at_when = now
-        ps.requested_at_when_date = now.date()
+        # To use the index on requested_at_when times are reduced to whole hours.
+        # This is sane enough to allow tons of scans per day still, but the creation
+        # of status reports is much faster. Still gives an idea of how many scans are made.
+        # The minutes are rounded to every 10 minutes. So there is still a sense of progress and use the index
+        discard = timedelta(minutes=now.minute % 10, seconds=now.second, microseconds=now.microsecond)
+        ps.requested_at_when = now - discard
         ps.save()
 
     log.debug(f"Requested {activity} with {scanner} on {len(urls)} urls.")
@@ -136,7 +142,12 @@ def request(activity: str, scanner: str, urls: List[Url]):
 def already_requested(activity: str, scanner: str, url: Url):
     return (
         PlannedScan.objects.all()
-        .filter(activity=activity, scanner=scanner, url=url, state__in=["requested", "picked_up"])
+        .filter(
+            activity=Activity[activity].value,
+            scanner=Scanner[scanner].value,
+            url=url,
+            state__in=[State["requested"].value, State["picked_up"].value],
+        )
         .exists()
     )
 
@@ -148,10 +159,14 @@ def finish(activity: str, scanner: str, url: Url):
 
 def set_scan_state(activity: str, scanner: str, url: Url, state="finished"):
     oldest_scan = (
-        PlannedScan.objects.all().filter(activity=activity, scanner=scanner, url=url, state="picked_up").first()
+        PlannedScan.objects.all()
+        .filter(
+            activity=Activity[activity].value, scanner=Scanner[scanner].value, url=url, state=State["picked_up"].value
+        )
+        .first()
     )
     if oldest_scan:
-        oldest_scan.state = state
+        oldest_scan.state = State[state].value
         oldest_scan.last_state_change_at = datetime.now(pytz.utc)
         oldest_scan.finished_at_when = datetime.now(pytz.utc)
         oldest_scan.save()
@@ -227,9 +242,9 @@ def list_outdated(published_scan_types):
             scanner = SCAN_TYPES_TO_SCANNER[outdated_result["scan_type"]]
             plan.append(
                 {
-                    "scanner": scanner["name"],
+                    "scanner": Scanner[scanner["name"]].value,
                     "url": outdated_result["url"],
-                    "activity": "scan",
+                    "activity": Activity["scan"].value,
                     "last_scan": outdated_result["last_scan"],
                     "scan": outdated_result["scan"],
                 }

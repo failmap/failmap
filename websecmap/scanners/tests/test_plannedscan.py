@@ -5,7 +5,15 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, PlannedScan, PlannedScanStatistic
+from websecmap.scanners.models import (
+    Endpoint,
+    EndpointGenericScan,
+    PlannedScan,
+    PlannedScanStatistic,
+    Scanner,
+    State,
+    Activity,
+)
 from websecmap.scanners.plannedscan import (
     calculate_progress,
     finish_multiple,
@@ -78,18 +86,39 @@ def test_plannedscan(db):
 
     request(scanner="tls_qualys", activity="scan", urls=[u1, u2])
     assert PlannedScan.objects.all().count() == 2
-    assert PlannedScan.objects.all().filter(state="requested").count() == 2
-    assert calculate_progress() == [{"scanner": "tls_qualys", "activity": "scan", "state": "requested", "amount": 2}]
+    assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 2
+    assert calculate_progress() == [
+        {
+            "scanner": Scanner["tls_qualys"].value,
+            "activity": Activity["scan"].value,
+            "state": State["requested"].value,
+            "amount": 2,
+        }
+    ]
 
     urls = pickup(scanner="tls_qualys", activity="scan", amount=10)
     assert len(urls) == 2
-    assert PlannedScan.objects.all().filter(state="picked_up").count() == 2
-    assert calculate_progress() == [{"scanner": "tls_qualys", "activity": "scan", "state": "picked_up", "amount": 2}]
+    assert PlannedScan.objects.all().filter(state=State["picked_up"]).count() == 2
+    assert calculate_progress() == [
+        {
+            "scanner": Scanner["tls_qualys"].value,
+            "activity": Activity["scan"].value,
+            "state": State["picked_up"].value,
+            "amount": 2,
+        }
+    ]
 
     finish_multiple(scanner="tls_qualys", activity="scan", urls=urls)
-    assert PlannedScan.objects.all().filter(state="finished").count() == 2
+    assert PlannedScan.objects.all().filter(state=State["finished"]).count() == 2
 
-    assert calculate_progress() == [{"scanner": "tls_qualys", "activity": "scan", "state": "finished", "amount": 2}]
+    assert calculate_progress() == [
+        {
+            "scanner": Scanner["tls_qualys"].value,
+            "activity": Activity["scan"].value,
+            "state": State["finished"].value,
+            "amount": 2,
+        }
+    ]
 
     # test storage:
     store_progress()
@@ -124,13 +153,23 @@ def test_plan_scans(db):
         # plan scans on endpoints that have never been scanned.
         plan_scan()
         assert calculate_progress() == [
-            {"scanner": "tls_qualys", "activity": "scan", "state": "requested", "amount": 2}
+            {
+                "scanner": Scanner["tls_qualys"].value,
+                "activity": Activity["scan"].value,
+                "state": State["requested"].value,
+                "amount": 2,
+            }
         ]
 
         # if there are already planned, no new scans will be created
         plan_scan()
         assert calculate_progress() == [
-            {"scanner": "tls_qualys", "activity": "scan", "state": "requested", "amount": 2}
+            {
+                "scanner": Scanner["tls_qualys"].value,
+                "activity": Activity["scan"].value,
+                "state": State["requested"].value,
+                "amount": 2,
+            }
         ]
 
         # to test what happens on endpoints that already have scans:
@@ -160,9 +199,14 @@ def test_plan_scans(db):
         assert egs.is_the_latest_scan is True
 
         plan_scan()
-        assert PlannedScan.objects.all().filter(state="requested").count() == 1
+        assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 1
         assert calculate_progress() == [
-            {"scanner": "tls_qualys", "activity": "scan", "state": "requested", "amount": 1}
+            {
+                "scanner": Scanner["tls_qualys"].value,
+                "activity": Activity["scan"].value,
+                "state": State["requested"].value,
+                "amount": 1,
+            }
         ]
 
         EndpointGenericScan.objects.all().delete()
@@ -172,7 +216,12 @@ def test_plan_scans(db):
         create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", timezone.now() - timedelta(days=6))
         create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", timezone.now() - timedelta(days=100))
         plan_scan()
-        assert PlannedScan.objects.all().filter(state="requested").count() == 2
+        assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 2
         assert calculate_progress() == [
-            {"scanner": "tls_qualys", "activity": "scan", "state": "requested", "amount": 2}
+            {
+                "scanner": Scanner["tls_qualys"].value,
+                "activity": Activity["scan"].value,
+                "state": State["requested"].value,
+                "amount": 2,
+            }
         ]

@@ -29,7 +29,7 @@ def filter_discover(
 
 @app.task(queue="storage")
 def compose_planned_discover_task(**kwargs):
-    urls = plannedscan.pickup(activity="discover", scanner="known_subdomains", amount=kwargs.get("amount", 25))
+    urls = plannedscan.pickup(activity="discover", scanner="dns_known_subdomains", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
 
 
@@ -42,7 +42,7 @@ def plan_discover(
         return group()
 
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    plannedscan.request(activity="discover", scanner="known_subdomains", urls=urls)
+    plannedscan.request(activity="discover", scanner="dns_known_subdomains", urls=urls)
 
 
 def compose_discover_task(urls):
@@ -57,7 +57,8 @@ def compose_discover_task(urls):
 
     # The worker has no way to write / save things. A wordlist can be 10's of thousands of words.
     task = group(
-        wordlist_scan.si([url], wordlist) | plannedscan.finish.si("discover", "known_subdomains", url) for url in urls
+        wordlist_scan.si([url], wordlist) | plannedscan.finish.si("discover", "dns_known_subdomains", url)
+        for url in urls
     )
     return task
 
