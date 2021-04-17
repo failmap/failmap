@@ -337,8 +337,8 @@ class ExplainMixin(models.Model):
         blank=True,
     )
 
-    comply_or_explain_explanation = models.TextField(
-        max_length=2048,
+    comply_or_explain_explanation = models.CharField(
+        max_length=1000,
         help_text="Text that helps explain why this result is not counted in the report. For example: "
         "a broken scanner or another edge-case that is mainly on the side of the scanning party.",
         verbose_name="explanation",
@@ -370,8 +370,8 @@ class ExplainMixin(models.Model):
         blank=True,
     )
 
-    comply_or_explain_case_additional_notes = models.TextField(
-        max_length=9000,
+    comply_or_explain_case_additional_notes = models.CharField(
+        max_length=1000,
         help_text="Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info."
         "Will not be exported, but are not secret.",
         verbose_name="additional case notes",
@@ -506,7 +506,7 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
     explanation = models.CharField(
         max_length=255, default=0, help_text="Short explanation from the scanner on how the rating came to be."
     )
-    evidence = models.TextField(
+    evidence = models.CharField(
         max_length=9001,
         default=0,
         help_text="Content that might help understanding the result.",
