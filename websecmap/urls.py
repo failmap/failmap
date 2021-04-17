@@ -50,8 +50,6 @@ frontend_urls = [
     re_path(r"", include("websecmap.map.urls")),
     re_path(r"^api/", include("websecmap.api.urls")),
     re_path(r"^game/", include("websecmap.game.urls")),
-    re_path(r"^pro/", include("websecmap.pro.urls")),
-    path("pro/", include("django.contrib.auth.urls")),
 ]
 interactive_urls = [
     path("authentication/", include("django.contrib.auth.urls")),

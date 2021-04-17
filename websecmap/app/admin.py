@@ -18,7 +18,6 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 from websecmap.app.models import GameUser, Job, Volunteer
-from websecmap.pro.models import ProUser
 
 
 class JobAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -171,12 +170,6 @@ class GameUserInline(admin.StackedInline):
     model = GameUser
     can_delete = False
     verbose_name_plural = "Game Users"
-
-
-class ProUserInline(admin.StackedInline):
-    model = ProUser
-    can_delete = False
-    verbose_name_plural = "Pro Users"
 
 
 # Thank you:
@@ -558,7 +551,7 @@ def generate_game_user():
 
 class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
     resource_class = UserResource
-    inlines = (VolunteerInline, GameUserInline, ProUserInline)
+    inlines = (VolunteerInline, GameUserInline)
 
     list_display = (
         "username",
