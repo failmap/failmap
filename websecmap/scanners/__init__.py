@@ -43,6 +43,7 @@ SCANNERS = [
         "creates url scan types": [],
         # Shorthand of "can discover, verify etc"
         "plannable_activities": ["discover", "verify", "scan"],
+        "python_module": "ftp",
     },
     {
         "name": "plain_http",
@@ -58,6 +59,7 @@ SCANNERS = [
         "creates endpoint scan types": ["plain_https"],
         "creates url scan types": [],
         "plannable_activities": ["scan"],
+        "python_module": "plain_http",
     },
     {
         "name": "dnssec",
@@ -73,6 +75,7 @@ SCANNERS = [
         "creates endpoint scan types": ["subdomains"],
         "creates url scan types": ["DNSSEC"],
         "plannable_activities": ["scan"],
+        "python_module": "dnssec",
     },
     {
         "name": "security_headers",
@@ -94,6 +97,7 @@ SCANNERS = [
         ],
         "creates url scan types": [],
         "plannable_activities": ["scan"],
+        "python_module": "security_headers",
     },
     {
         "name": "tls_qualys",
@@ -110,6 +114,7 @@ SCANNERS = [
         "creates endpoint scan types": ["tls_qualys_certificate_trusted", "tls_qualys_encryption_quality"],
         "creates url scan types": [],
         "plannable_activities": ["scan"],
+        "python_module": "tls_qualys",
     },
     {
         "name": "subdomains",
@@ -136,6 +141,7 @@ SCANNERS = [
         "creates endpoint scan types": [],
         "creates url scan types": [],
         "plannable_activities": ["verify", "discover"],
+        "python_module": "subdomains",
     },
     {
         "name": "dns_known_subdomains",
@@ -151,6 +157,7 @@ SCANNERS = [
         "creates endpoint scan types": [],
         "creates url scan types": [],
         "plannable_activities": ["discover"],
+        "python_module": "dns_known_subdomains",
     },
     {
         "name": "dns_clean_wildcards",
@@ -166,6 +173,7 @@ SCANNERS = [
         "creates endpoint scan types": [],
         "creates url scan types": [],
         "plannable_activities": ["scan"],
+        "python_module": "dns_clean_wildcards",
     },
     {
         "name": "http",
@@ -181,6 +189,7 @@ SCANNERS = [
         "creates endpoint scan types": [],
         "creates url scan types": [],
         "plannable_activities": ["discover", "verify"],
+        "python_module": "http",
     },
     {
         "name": "verify_unresolvable",
@@ -196,6 +205,7 @@ SCANNERS = [
         "creates endpoint scan types": [],
         "creates url scan types": [],
         "plannable_activities": ["verify"],
+        "python_module": "verify_unresolvable",
     },
     {
         "name": "onboard",
@@ -213,6 +223,7 @@ SCANNERS = [
         "creates endpoint scan types": [],
         "creates url scan types": [],
         "plannable_activities": [],
+        "python_module": "onboard",
     },
     {
         "name": "dns_endpoints",
@@ -229,6 +240,7 @@ SCANNERS = [
         "creates endpoint scan types": [],
         "creates url scan types": [],
         "plannable_activities": ["verify", "discover"],
+        "python_module": "dns_endpoints",
     },
     {
         "name": "internet_nl_mail",
@@ -310,6 +322,7 @@ SCANNERS = [
         ],
         "creates url scan types": [],
         "plannable_activities": ["scan"],
+        "python_module": "internet_nl_v2_mail",
     },
     {
         "name": "internet_nl_web",
@@ -379,6 +392,7 @@ SCANNERS = [
         ],
         "creates url scan types": [],
         "plannable_activities": ["scan"],
+        "python_module": "internet_nl_v2_web",
     },
 ]
 

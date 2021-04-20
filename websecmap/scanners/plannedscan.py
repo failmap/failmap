@@ -96,9 +96,12 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     amount: the amount of plannedscans to pick up
     """
 
-    scans = PlannedScan.objects.all().filter(
-        activity=Activity[activity].value, scanner=Scanner[scanner].value, state=State["requested"].value
-    )[0:amount]
+    # oldest first, so ascending dates.
+    scans = (
+        PlannedScan.objects.all()
+        .filter(activity=Activity[activity].value, scanner=Scanner[scanner].value, state=State["requested"].value)
+        .order_by("requested_at_when")[0:amount]
+    )
     for scan in scans:
         # todo: should there be a state log? Probably.
         scan.state = State["picked_up"].value
