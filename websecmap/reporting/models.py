@@ -303,6 +303,12 @@ class UrlReport(
         "scans are spread out over days."
     )
 
+    is_the_newest = models.BooleanField(
+        default=False,
+        help_text="The newest url report allows for quick retrieval of the current state, it prevents complex queries.",
+        blank=True,
+    )
+
     class Meta:
         managed = True
         verbose_name = _("Url Report")

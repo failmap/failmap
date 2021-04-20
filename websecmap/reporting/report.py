@@ -379,7 +379,10 @@ def create_url_report(timeline, url: Url):
     dead_endpoints = set()
 
     # work on a sorted timeline as otherwise this code is non-deterministic!
-    for moment in sorted(timeline):
+    for index, moment in enumerate(sorted(timeline)):
+        # optimization to reduce the number of queries, to designate the newest report
+        is_the_newest = index + 1 == len(timeline)
+
         given_ratings = {}
 
         if ("url_not_resolvable" in timeline[moment] or "url_is_dead" in timeline[moment]) and url_was_once_rated:
@@ -394,7 +397,7 @@ def create_url_report(timeline, url: Url):
                 "endpoints": [],
             }
 
-            save_url_report(url, moment, default_calculation)
+            save_url_report(url, moment, default_calculation, is_the_newest=is_the_newest)
             return
 
         # reverse the relation: so we know all ratings per endpoint.
@@ -571,7 +574,7 @@ def create_url_report(timeline, url: Url):
 
         log.debug("On %s %s has %s endpoints." % (moment, url, len(endpoint_calculations)))
 
-        save_url_report(url, moment, calculation)
+        save_url_report(url, moment, calculation, is_the_newest=is_the_newest)
 
 
 def create_endpoint_calculation(endpoint, calculations):
@@ -740,7 +743,7 @@ def statistics_over_url_calculation(calculation):
     return calculation, amount_of_issues
 
 
-def save_url_report(url: Url, date: datetime, calculation):
+def save_url_report(url: Url, date: datetime, calculation, is_the_newest=False):
 
     # This also injects the statistics into the json, for use in representations / views in the right places.
     calculation, amount_of_issues = statistics_over_url_calculation(calculation)
@@ -831,7 +834,16 @@ def save_url_report(url: Url, date: datetime, calculation):
     calculation = add_statistics_to_calculation(calculation, amount_of_issues)
     u.calculation = calculation
 
+    # Make sure the new urlreport is seen as the latest, so retrieval of the last report is a direct lookup
+    u.is_the_newest = is_the_newest
     u.save()
+
+    # Make sure the new urlreport is seen as the latest, so retrieval of the last report is a direct lookup
+    # This of course makes the adding process much slower.
+    # This is not used because it's much faster to reduce queries by precalculating if this is the newest report.
+    # UrlReport.objects.all().filter(url=u.url).exclude(pk=u.pk).update(
+    #     is_the_newest=False
+    # )
 
 
 def add_statistics_to_calculation(calculation, amount_of_issues):

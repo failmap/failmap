@@ -117,6 +117,13 @@ def test_url_report(db):
     assert report.calculation["high"] == 0
     assert report.high == 0
     assert report.ok == 0
+    # the newest url report is designated as such
+    assert report.is_the_newest is True
+
+    # All the other reports for this
+    reports = UrlReport.objects.all().order_by("pk").exclude(pk=report.pk)
+    for report in reports:
+        assert report.is_the_newest is False
 
 
 def test_aggegrate_error_in_report(db):
