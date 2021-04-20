@@ -21,11 +21,12 @@ class Websecmap(AppConfig):
         subcommand = sys.argv[1] if len(sys.argv) > 1 else None
         if not inner_run and subcommand and subcommand != "help":
             # log database settings during init for operational debug purposes
-            log.info(
-                "Database settings: {ENGINE}, {NAME}, {USER}, {HOST}".format_map(
-                    defaultdict(str, **settings.DATABASES["default"])
+            for db in settings.DATABASES:
+                log.info(
+                    "Database settings ({db}): {ENGINE}, {NAME}, {USER}, {HOST}".format_map(
+                        defaultdict(str, **settings.DATABASES[db])
+                    )
                 )
-            )
 
 
 default_app_config = "websecmap.app.Websecmap"
