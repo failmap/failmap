@@ -367,7 +367,7 @@ LOGGING = {
         },
         "celery.worker.strategy": {
             "level": "INFO" if DEBUG else "ERROR",
-        }
+        },
     },
 }
 
