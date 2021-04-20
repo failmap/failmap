@@ -13,7 +13,6 @@ XDG_CACHE_HOME ?= ~/.cache
 CACHEDIR ?= ${XDG_CACHE_HOME}
 endif
 VIRTUAL_ENV ?= ${CACHEDIR}/virtualenvs/$(notdir ${PWD})
-$(info Virtualenv path: ${VIRTUAL_ENV})
 
 # variables for environment
 bin = ${VIRTUAL_ENV}/bin
@@ -32,14 +31,19 @@ pip-sync = ${bin}/pip-sync
 # application binary
 app = ${bin}/${app_name}
 
+ifeq (${MAKECMDGOALS},)
+$(info Virtualenv path: ${VIRTUAL_ENV})
 $(info Run App: ${env} ${app})
 $(info )
 $(info Run `make help` for available commands or use tab-completion.)
 $(info )
+$(info Running complete setup and test of development environment now.)
+$(info )
+endif
 
 pysrcdirs = ${app_name}/ tests/
-pysrc = $(shell find ${pysrcdirs} -name *.py)
-shsrc = $(shell find * ! -path vendor\* -name *.sh)
+pysrc = $(shell find ${pysrcdirs} -name \*.py)
+shsrc = $(shell find * ! -path vendor\* -name \*.sh)
 
 .PHONY: test check setup run fix autofix clean mrproper test_integration
 
@@ -61,7 +65,7 @@ setup: ${app}	## setup development environment and application
 ${app}: ${VIRTUAL_ENV}/.requirements.installed | ${pip}
 	# install project and its dependencies
 	${python} setup.py develop --no-deps
-	@test -f $@ && touch $@
+	@test -f $@ && touch $@  # update timestamp, do not create empty file
 
 test: .make.test	## run test suite
 .make.test: ${pysrc} ${app}
@@ -78,6 +82,7 @@ test: .make.test	## run test suite
 	${env} coverage html
 	# ensure no model updates are commited without migrations
 	${env} ${app} makemigrations --check
+	@touch $@  # update timestamp
 
 check: .make.check.py .make.check.sh  ## code quality checks
 .make.check.py: ${pysrc} ${app}
@@ -85,10 +90,12 @@ check: .make.check.py .make.check.sh  ## code quality checks
 	${env} pylama ${pysrcdirs} --skip "**/migrations/*"
 	# check formatting
 	${env} black --line-length 120 --check ${pysrcdirs}
+	@touch $@  # update timestamp
 
 .make.check.sh: ${shsrc}
 	# shell script checks (if installed)
 	if command -v shellcheck &>/dev/null;then ${env} shellcheck --version; ${env} shellcheck ${shsrc}; fi
+	@touch $@  # update timestamp
 
 autofix fix: .make.fix  ## automatic fix of trivial code quality issues
 .make.fix: ${pysrc} ${app}
@@ -103,6 +110,7 @@ autofix fix: .make.fix  ## automatic fix of trivial code quality issues
 	# replaced by black: ${env} isort -rc ${pysrcdirs}
 	# do a check after autofixing to show remaining problems
 	${MAKE} check
+	@touch $@  # update timestamp
 
 run: ${app}  ## run complete application stack (frontend, worker, broker)
 	# start server (this can take a while)
@@ -197,7 +205,7 @@ mrproper: clean clean_virtualenv ## thorough cleanup, also removes virtualenv
 
 ${VIRTUAL_ENV}/.requirements.installed: requirements.txt requirements-dev.txt| ${pip-sync}
 	${env} ${pip-sync} $^
-	@touch $@
+	@touch $@  # update timestamp
 
 requirements = requirements.txt requirements-dev.txt requirements-deploy.txt
 requirements: ${requirements}
