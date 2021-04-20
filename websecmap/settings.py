@@ -348,17 +348,6 @@ LOGGING = {
         },
     },
     "loggers": {
-        # Used when there is no log defined or loaded. Disabled given we always use __package__ to log.
-        # Would you enable it, all logging messages will be logged twice.
-        # '': {
-        #     'handlers': ['console'],
-        #     'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
-        # },
-        # get debug log output when running direct celery scans.
-        "celery.app.trace": {
-            "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
-        },
         # Default Django logging, we expect django to work, and therefore only show INFO messages.
         # It can be smart to sometimes want to see what's going on here, but not all the time.
         # https://docs.djangoproject.com/en/2.1/topics/logging/#django-s-logging-extensions
@@ -371,6 +360,14 @@ LOGGING = {
             "handlers": ["console"],
             "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
         },
+        # disable verbose task logging (ie: "received task...", "...succeeded in...")
+        "celery.app.trace": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG") if DEBUG else "ERROR",
+        },
+        "celery.worker.strategy": {
+            "level": "INFO" if DEBUG else "ERROR",
+        }
     },
 }
 
