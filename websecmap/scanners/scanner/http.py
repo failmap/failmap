@@ -551,8 +551,6 @@ def pretty_print_request(req):
 
 @app.task(queue="storage")
 def connect_result(result, protocol: str, url: Url, port: int, ip_version: int):
-    log.info("%s %s/%s IPv%s: %s" % (url, protocol, port, ip_version, result))
-
     if result:
         save_endpoint(protocol, url, port, ip_version)
     else:
