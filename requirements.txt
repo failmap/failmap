@@ -12,9 +12,12 @@ babel==2.9.0
     # via -r requirements.in
 billiard==3.6.3.0
     # via celery
+celery-statsd==1.0.0
+    # via -r requirements.in
 celery[gevent,redis]==4.4.7
     # via
     #   -r requirements.in
+    #   celery-statsd
     #   django-celery-beat
     #   flower
 certifi==2020.12.5
@@ -238,6 +241,7 @@ simplejson==3.17.2
     # via -r requirements.in
 six==1.15.0
     # via
+    #   celery-statsd
     #   django-3-jet
     #   django-autocomplete-light
     #   django-compressor
@@ -253,7 +257,9 @@ spectra==0.0.11
 sqlparse==0.4.1
     # via django
 statsd==3.3.0
-    # via django-statsd-mozilla
+    # via
+    #   celery-statsd
+    #   django-statsd-mozilla
 tablib[html,ods,xls,xlsx,yaml]==3.0.0
     # via django-import-export
 tabulate==0.8.7

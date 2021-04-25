@@ -12,9 +12,13 @@ from django.conf import settings
 
 from websecmap.celery.worker import QUEUES_MATCHING_ROLES
 
+import celery_statsd
+
 log = logging.getLogger(__package__)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "websecmap.settings")
+
+celery_statsd  # reference object at least once to prevent deletion by isort
 
 app = Celery(__name__)
 app.config_from_object("django.conf:settings", namespace="CELERY")
@@ -54,6 +58,9 @@ IP_VERSION_QUEUE = {
     4: "scanners.ipv4",
     6: "scanners.ipv6",
 }
+
+app.conf.STATSD_HOST = "localhost"
+app.conf.STATSD_PORT = 8125
 
 
 class DefaultTask(Task):
