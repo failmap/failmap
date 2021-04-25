@@ -48,6 +48,7 @@ django-celery-beat
 # limit to version 4 as 5 has conflicting requirements with available flower atm.
 celery[redis,gevent]<5
 flower
+celery-statsd
 
 # Feature usage statistics
 # https://github.com/pi-bjl/celery-statsd/commit/5d61d7756f115dbf05a7eeb8314495b53ee1955e
