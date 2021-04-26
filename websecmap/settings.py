@@ -554,6 +554,7 @@ CELERY_BROKER_POOL_LIMIT = 30
 # Settings for statsd metrics collection. Statsd defaults over UDP port 8125.
 # https://django-statsd.readthedocs.io/en/latest/#celery-signals-integration
 STATSD_HOST = os.environ.get("STATSD_HOST", "127.0.0.1")
+STATSD_PORT = os.environ.get("STATSD_PORT", "8125")
 STATSD_PREFIX = "websecmap"
 # register hooks for selery tasks
 STATSD_CELERY_SIGNALS = True
