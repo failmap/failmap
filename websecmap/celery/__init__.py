@@ -59,8 +59,9 @@ IP_VERSION_QUEUE = {
     6: "scanners.ipv6",
 }
 
-app.conf.STATSD_HOST = "localhost"
-app.conf.STATSD_PORT = 8125
+app.conf.STATSD_HOST = settings.STATSD_HOST
+app.conf.STATSD_PORT = settings.STATSD_PORT
+app.conf.CELERY_STATSD_PREFIX = settings.STATSD_PREFIX
 
 
 class DefaultTask(Task):
