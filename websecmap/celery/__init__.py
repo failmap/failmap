@@ -61,7 +61,7 @@ IP_VERSION_QUEUE = {
 
 app.conf.STATSD_HOST = settings.STATSD_HOST
 app.conf.STATSD_PORT = settings.STATSD_PORT
-app.conf.CELERY_STATSD_PREFIX = settings.STATSD_PREFIX
+app.conf.CELERY_STATSD_PREFIX = "celery_"
 
 
 class DefaultTask(Task):
