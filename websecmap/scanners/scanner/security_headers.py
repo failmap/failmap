@@ -93,7 +93,7 @@ def compose_scan_task(urls):
     endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
 
     endpoints = unique_and_random(endpoints)
-    log.info(f"Scanning security headers on {len(endpoints)} endpoints, {len(urls)} urls")
+    log.debug(f"Scanning security headers on {len(endpoints)} endpoints, {len(urls)} urls")
 
     tasks = []
     for endpoint in endpoints:

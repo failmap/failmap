@@ -306,7 +306,7 @@ def store_check_result(
     proxy.save()
 
 
-@retry(wait=wait_fixed(30), stop=stop_after_attempt(3), before=before_log(log, logging.INFO))
+@retry(wait=wait_fixed(30), stop=stop_after_attempt(3), before=before_log(log, logging.DEBUG))
 def service_provider_status(proxy):
     # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
 

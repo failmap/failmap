@@ -439,7 +439,7 @@ def remove_wildcards(urls: List[Url]):
 # don't overload the crt.sh service, rate limit
 # todo: create a generic: go to $page with $parameter and scrape all urls.
 @app.task(ignore_result=True, queue="internet", rate_limit="2/m")
-@retry(wait=wait_fixed(30), before=before_log(log, logging.INFO))
+@retry(wait=wait_fixed(30), before=before_log(log, logging.DEBUG))
 def certificate_transparency_scan(urls: List[Url]):
     """
     Checks the certificate transparency database for subdomains. Using a regex the subdomains
