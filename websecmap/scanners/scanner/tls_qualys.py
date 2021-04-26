@@ -455,7 +455,7 @@ def report_to_console(domain, data):
 
 # Qualys is a service that is constantly attacked / ddossed and very unreliable. So try a couple of times before
 # giving up. It can even be down for half a day. Waiting a little between retries.
-@retry(wait=wait_fixed(30), before=before_log(log, logging.INFO))
+@retry(wait=wait_fixed(30), before=before_log(log, logging.DEBUG))
 def service_provider_scan_via_api_with_limits(proxy, domain):
     # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
     payload = {
