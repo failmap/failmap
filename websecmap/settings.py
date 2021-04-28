@@ -489,8 +489,11 @@ COMPRESS_OFFLINE = not DEBUG
 # even serialize dicts.
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html
 CELERY_ACCEPT_CONTENT = ["pickle"]
+CELERY_SERIALIZER = "pickle"
 CELERY_TASK_SERIALIZER = "pickle"
 CELERY_RESULT_SERIALIZER = "pickle"
+CELERY_EVENT_SERIALIZER = "pickle"
+
 
 CELERY_BROKER_URL = os.environ.get("BROKER", "redis://localhost:6379/0")
 CELERY_ENABLE_UTC = True
