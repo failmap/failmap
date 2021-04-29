@@ -23,7 +23,7 @@ class TaskCommand(BaseCommand):
     Direct execution will run the task as if it was a direct function call.
 
     Sync execution will use the Celery framework to execute the task on
-    a (remote) worker destined to execute tasks of this type. It will wait for
+    a worker destined to execute tasks of this type. It will wait for
     execution to complete and return the task result/logging.
 
     Async is like Synchronous execution but it will not wait for it to complete.
@@ -53,7 +53,7 @@ class TaskCommand(BaseCommand):
             "--method",
             default="direct",
             choices=["direct", "sync", "async"],
-            help="Execute the task directly or on remote workers.",
+            help="Execute the task directly or on workers.",
         )
 
         parser.add_argument(

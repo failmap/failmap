@@ -87,7 +87,7 @@ urllib3
 # needed for mapping reasons.
 simplejson
 
-# Remote worker TLS
+# autoexplain
 pyopenssl
 
 # static file collection/generation

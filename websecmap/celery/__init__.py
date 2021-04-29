@@ -131,7 +131,7 @@ def status():
     if "redis://" in app.conf.broker_url:
         queue_names = [q.name for q in QUEUES_MATCHING_ROLES["queuemonitor"]]
 
-        # on localhost and remote workers there is no event loop. This causes an exception.
+        # on localhost there is no event loop. This causes an exception.
         # Inspired on https://github.com/tornadoweb/tornado/issues/2352 and
         # https://github.com/tornadoweb/tornado/issues/2308
         # this attempt seems to create an event loop without any further issues. This will allow the code to complete.

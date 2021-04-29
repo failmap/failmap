@@ -22,11 +22,6 @@ RUN apk --no-cache add \
   libxslt-dev \
   python3-dev \
   git
-  # build cffi module, requires compile because no wheel is available.
-  # cffi is needed in certificate tests and in remote workers.
-  # libressl-dev \
-  # musl-dev \
-  # libffi-dev
 
 # install dnscheck
 COPY vendor/dnscheck /vendor/dnscheck
@@ -37,7 +32,7 @@ RUN tools/docker-install-dnscheck.sh
 RUN npm install --global osmtogeojson
 
 # this warning most often just leads to false positives
-ENV PIP_DISABLE_PIP_VERSION_CHECK 1  
+ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 RUN python3 -mvenv /pyenv
 ENV VIRTUAL_ENV /pyenv
 ENV PATH $VIRTUAL_ENV/bin:$PATH
