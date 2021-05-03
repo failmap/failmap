@@ -55,7 +55,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SECRET_KEY = os.environ.get("SECRET_KEY", "ditisgeengeheimvriendachtjedatditeenwachtwoordwas")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", False)
+DEBUG = bool(os.environ.get("DEBUG", False))
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,::1").split(",")
 
@@ -488,7 +488,7 @@ COMPRESS_OFFLINE = not DEBUG
 # It's preferable not to use pickle, yet it's overly convenient as the normal serializer can not
 # even serialize dicts.
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html
-CELERY_ACCEPT_CONTENT = ["pickle"]
+CELERY_ACCEPT_CONTENT = ["pickle", "json"]
 CELERY_SERIALIZER = "pickle"
 CELERY_TASK_SERIALIZER = "pickle"
 CELERY_RESULT_SERIALIZER = "pickle"

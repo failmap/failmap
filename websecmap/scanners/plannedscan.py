@@ -120,7 +120,7 @@ def request(activity: str, scanner: str, urls: List[Url]):
 
     for url in urls:
         if already_requested(activity, scanner, url):
-            log.warning(f"Already registered: {activity} on {scanner} for {url}.")
+            log.debug(f"Already registered: {activity} on {scanner} for {url}.")
             continue
 
         now = datetime.now(pytz.utc)
