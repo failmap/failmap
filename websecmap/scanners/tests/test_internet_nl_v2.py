@@ -26,24 +26,24 @@ def test_reuse_last_fields_and_set_them_to_error(db):
     endpoint, created = Endpoint.objects.all().get_or_create(port=443, protocol="http", ip_version=4, url=url)
 
     # nothing happens, no crash etc.
-    reuse_last_fields_and_set_them_to_error(endpoint)
+    reuse_last_fields_and_set_them_to_error(endpoint.pk)
 
-    store_endpoint_scan_result(scan_type="test1", endpoint=endpoint, rating="some_value", message="")
-    store_endpoint_scan_result(scan_type="test2", endpoint=endpoint, rating="some_value", message="")
-    store_endpoint_scan_result(scan_type="test3", endpoint=endpoint, rating="some_value", message="")
-    store_endpoint_scan_result(scan_type="test4", endpoint=endpoint, rating="some_value", message="")
-    store_endpoint_scan_result(scan_type="test5", endpoint=endpoint, rating="some_value", message="")
-    store_endpoint_scan_result(scan_type="test1", endpoint=endpoint, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test1", endpoint_id=endpoint.pk, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test2", endpoint_id=endpoint.pk, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test3", endpoint_id=endpoint.pk, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test4", endpoint_id=endpoint.pk, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test5", endpoint_id=endpoint.pk, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test1", endpoint_id=endpoint.pk, rating="some_value", message="")
 
     # add some values that should not be changed:
     safe_ep, created = Endpoint.objects.all().get_or_create(port=443, protocol="http", ip_version=6, url=url)
-    store_endpoint_scan_result(scan_type="test1", endpoint=safe_ep, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test1", endpoint_id=safe_ep.pk, rating="some_value", message="")
 
     # more values that should not be changed:
     safe_ep, created = Endpoint.objects.all().get_or_create(port=0, protocol="dns", ip_version=6, url=url)
-    store_endpoint_scan_result(scan_type="test1", endpoint=safe_ep, rating="some_value", message="")
+    store_endpoint_scan_result(scan_type="test1", endpoint_id=safe_ep.pk, rating="some_value", message="")
 
-    reuse_last_fields_and_set_them_to_error(endpoint)
+    reuse_last_fields_and_set_them_to_error(endpoint.pk)
 
     # 7 from above (note 1 is overwritten), and 5 overwritten with error.
     assert EndpointGenericScan.objects.all().count() == 7 + 5
@@ -57,8 +57,8 @@ def test_internet_nl_logging(db):
     last = InternetNLV2StateLog.objects.all().last()
     assert last.state == "requested"
 
-    update_state(scan, "testing", "just a test")
-    update_state(scan, "error", "an irrecoverable error occurred")
+    update_state(scan.pk, "testing", "just a test")
+    update_state(scan.pk, "error", "an irrecoverable error occurred")
 
     last = InternetNLV2StateLog.objects.all().last()
     assert last.state == "error"
@@ -67,12 +67,12 @@ def test_internet_nl_logging(db):
     assert InternetNLV2StateLog.objects.all().count() == 3
 
     # a progressed scan will not do anything, as there is no recoverable state.
-    progress_running_scan(scan)
+    progress_running_scan(scan.pk)
     assert InternetNLV2StateLog.objects.all().count() == 3
 
     # a recoverable error will make sure the last known correct state is set, which is requested...
     update_state(
-        scan,
+        scan.pk,
         "configuration_error",
         "This is a recoverable error, and when progressing, the first valid state" "will be requested",
     )
@@ -82,7 +82,7 @@ def test_internet_nl_logging(db):
 
     # make sure you have the last information in the database
     scan = InternetNLV2Scan.objects.all().first()
-    progress_running_scan(scan)
+    progress_running_scan(scan.pk)
     last = InternetNLV2StateLog.objects.all().last()
     assert last.state == "requested"
 
@@ -91,26 +91,27 @@ def test_internet_nl_logging(db):
 
     # registering has a timeout of a few days, so let's time it out and check for it.
     # The timeout will be fixed next progression.
-    update_state(scan, "registering", "This will take too long and time out.")
+    update_state(scan.pk, "registering", "This will take too long and time out.")
+    scan = InternetNLV2Scan.objects.all().first()
     scan.last_state_change = datetime.now() - timedelta(days=100)
     scan.save()
-    progress_running_scan(scan)
+    progress_running_scan(scan.pk)
     last = InternetNLV2StateLog.objects.all().last()
     assert last.state == "timeout"
 
     # The timeout if fixed and a retry performed. The state is registering again.
     scan = InternetNLV2Scan.objects.all().first()
-    progress_running_scan(scan)
+    progress_running_scan(scan.pk)
     scan = InternetNLV2Scan.objects.all().first()
     last = InternetNLV2StateLog.objects.all().last()
     assert last.state == "requested" == scan.state
 
     # now create another error situation whereby a different recoverable error is used than requested.
     update_state(
-        scan, "running scan", "When an error occurs, a progress will move to running scan, and not to " "requested"
+        scan.pk, "running scan", "When an error occurs, a progress will move to running scan, and not to " "requested"
     )
-    update_state(scan, "configuration_error", "oh no!")
-    progress_running_scan(scan)
+    update_state(scan.pk, "configuration_error", "oh no!")
+    progress_running_scan(scan.pk)
 
     # recoverable state, error and retry of recoverable state
     assert InternetNLV2StateLog.objects.all().count() == 11
@@ -469,7 +470,7 @@ def test_internet_nl_store_testresults(db):
     endpoint2.ip_version = 4
     endpoint2.save()
 
-    process_scan_results(scan)
+    process_scan_results(scan.pk)
 
     create_url_report(create_timeline(url1), url1)
     create_url_report(create_timeline(url2), url2)
@@ -789,7 +790,7 @@ def test_internet_nl_store_testresults(db):
     endpoint1.ip_version = 4
     endpoint1.save()
 
-    process_scan_results(scan)
+    process_scan_results(scan.pk)
 
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_starttls_dane_rollover").count() == 1
 

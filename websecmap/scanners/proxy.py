@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from http.client import BadStatusLine
 from multiprocessing.pool import ThreadPool
 from time import sleep
+from typing import Any, Dict
 
 import pytz
 import requests
@@ -22,7 +23,7 @@ log = logging.getLogger(__name__)
 
 
 @app.task(queue="claim_proxy")
-def claim_proxy(tracing_label=""):
+def claim_proxy(tracing_label="") -> Dict[str, Any]:
     """A proxy should first be claimed and then checked. If not, several scans might use the same proxy and thus
     crash.
 
@@ -71,7 +72,7 @@ def claim_proxy(tracing_label=""):
                     # instead run the proxy checking worker every hour or so to make sure the list stays fresh.
                     # if check_proxy(proxy):
                     #    log.debug('Using proxy %s for scan.' % proxy)
-                    return proxy
+                    return {"id": proxy.pk, "address": proxy.address, "protocol": proxy.protocol}
                     # else:
                     #     log.debug('Proxy %s was not suitable for scanning. Trying another one in 60 seconds.' % proxy)
 
@@ -97,11 +98,16 @@ def claim_proxy(tracing_label=""):
 
 
 @app.task(queue="storage")
-def release_proxy(proxy: ScanProxy, tracing_label=""):
+def release_proxy(proxy: Dict[str, Any], tracing_label=""):
     """As the claim proxy queue is ALWAYS filled, you cannot insert release proxy commands there..."""
-    log.debug(f"Releasing proxy {proxy.id} claimed for {tracing_label} et al...")
-    proxy.currently_used_in_tls_qualys_scan = False
-    proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
+    log.debug(f"Releasing proxy {proxy['id']} claimed for {tracing_label} et al...")
+
+    db_proxy = ScanProxy.objects.all().filter(pk=proxy["id"]).first()
+    if not db_proxy:
+        return
+
+    db_proxy.currently_used_in_tls_qualys_scan = False
+    db_proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
 
 
 @app.task(queue="storage")
@@ -110,9 +116,11 @@ def check_all_proxies():
 
     pool = ThreadPool(100)
 
+    timeout_claims()
+
     proxies = ScanProxy.objects.all()
     for proxy in proxies:
-        pool.apply_async(check_proxy, [proxy])
+        pool.apply_async(check_proxy, [proxy.as_dict()])
 
     pool.close()
     pool.join()
@@ -120,30 +128,36 @@ def check_all_proxies():
 
 def timeout_claims():
     for proxy in ScanProxy.objects.all():
-        release_claim_after_timeout(proxy)
+        release_claim_after_timeout(proxy.as_dict())
 
 
-def release_claim_after_timeout(proxy: ScanProxy):
+def release_claim_after_timeout(proxy: Dict[str, Any]):
     # Release all proxies that have been claimed a few hours before. As a scan of 25 addresss takes about 45 minutes.
     # And in bad cases only double that. So let's quadruple that time and then just release the proxy automatically
     # because of a timeout. Last claim at can be empty.
-    if proxy.last_claim_at:
+
+    db_proxy = ScanProxy.objects.all().filter(pk=proxy["id"]).first()
+    if not db_proxy:
+        return
+
+    if db_proxy.last_claim_at:
         if all(
-            [proxy.last_claim_at < datetime.now(pytz.utc) - timedelta(hours=3), proxy.currently_used_in_tls_qualys_scan]
+            [
+                db_proxy.last_claim_at < datetime.now(pytz.utc) - timedelta(hours=3),
+                db_proxy.currently_used_in_tls_qualys_scan,
+            ]
         ):
-            log.warning(f"Force released proxy {proxy} because of a claim timeout period of 3 hours.")
-            proxy.currently_used_in_tls_qualys_scan = False
-            proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
+            log.warning(f"Force released proxy {db_proxy.pk} because of a claim timeout period of 3 hours.")
+            db_proxy.currently_used_in_tls_qualys_scan = False
+            db_proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
 
 
 @app.task(queue="internet")
-def check_proxy(proxy: ScanProxy):
+def check_proxy(proxy: Dict[str, Any]):
     # todo: service_provider_status should stop after a certain amount of requests.
     # Note that you MUST USE HTTPS proxies for HTTPS traffic! Otherwise your normal IP is used.
 
-    release_claim_after_timeout(proxy)
-
-    log.debug(f"Testing proxy {proxy.id}")
+    log.debug(f"Testing proxy {proxy['id']}")
 
     if not config.SCAN_PROXY_TESTING_URL:
         proxy_testing_url = "https://google.com/"
@@ -157,10 +171,10 @@ def check_proxy(proxy: ScanProxy):
     try:
         requests.get(
             proxy_testing_url,
-            proxies={proxy.protocol: proxy.address},
+            proxies={proxy["protocol"]: proxy["address"]},
             timeout=(PROXY_NETWORK_TIMEOUT, PROXY_SERVER_TIMEOUT),
             headers={
-                "User-Agent": f"Request through proxy {proxy.id}",
+                "User-Agent": f"Request through proxy {proxy['id']}",
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "Accept-Language": "en-US,en;q=0.5",
                 "DNT": "1",
@@ -230,7 +244,7 @@ def check_proxy(proxy: ScanProxy):
         try:
             speed = requests.get(
                 "https://apple.com",
-                proxies={proxy.protocol: proxy.address},
+                proxies={proxy["protocol"]: proxy["address"]},
                 timeout=(PROXY_NETWORK_TIMEOUT, PROXY_SERVER_TIMEOUT),
             ).elapsed.total_seconds()
             log.debug("Website retrieved.")
@@ -267,7 +281,7 @@ def check_proxy(proxy: ScanProxy):
         # requests. Proxies wont work if they are not "elite", aka: not revealing the internet user behind them.
         # otherwise the data will be coupled to a single client.
 
-        log.debug(f"Proxy accessible. Capacity available. {proxy.id}.")
+        log.debug(f"Proxy accessible. Capacity available. {proxy['id']}.")
         store_check_result.apply_async(
             [
                 proxy,
@@ -285,7 +299,7 @@ def check_proxy(proxy: ScanProxy):
 
 @app.task(queue="storage")
 def store_check_result(
-    proxy: ScanProxy,
+    proxy: Dict[str, Any],
     check_result,
     is_dead: bool,
     check_result_date,
@@ -296,18 +310,22 @@ def store_check_result(
 ):
     """Separates this to storage, so that capacity scans can be performed on another worker."""
 
-    proxy.is_dead = is_dead
-    proxy.check_result = check_result
-    proxy.check_result_date = check_result_date
-    proxy.qualys_capacity_max = qualys_capacity_max
-    proxy.qualys_capacity_current = qualys_capacity_current
-    proxy.qualys_capacity_this_client = qualys_capacity_this_client
-    proxy.request_speed_in_ms = request_speed_in_ms
-    proxy.save()
+    db_proxy = ScanProxy.objects.all().filter(pk=proxy["id"]).first()
+    if not proxy:
+        return
+
+    db_proxy.is_dead = is_dead
+    db_proxy.check_result = check_result
+    db_proxy.check_result_date = check_result_date
+    db_proxy.qualys_capacity_max = qualys_capacity_max
+    db_proxy.qualys_capacity_current = qualys_capacity_current
+    db_proxy.qualys_capacity_this_client = qualys_capacity_this_client
+    db_proxy.request_speed_in_ms = request_speed_in_ms
+    db_proxy.save()
 
 
 @retry(wait=wait_fixed(30), stop=stop_after_attempt(3), before=before_log(log, logging.DEBUG))
-def service_provider_status(proxy):
+def service_provider_status(proxy: Dict[str, Any]):
     # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
 
     response = requests.get(
@@ -322,7 +340,7 @@ def service_provider_status(proxy):
             "Accept-Language": "en-US,en;q=0.5",
             "DNT": "1",
         },
-        proxies={proxy.protocol: proxy.address},
+        proxies={proxy["protocol"]: proxy["address"]},
         cookies={},
     )
 

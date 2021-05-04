@@ -72,4 +72,4 @@ def rebuild_reports(organizations: List[str]):
         type__name="municipality",
     )
 
-    recreate_organization_reports(db_organizations)
+    recreate_organization_reports([o.pk for o in db_organizations])

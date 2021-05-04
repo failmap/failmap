@@ -186,7 +186,7 @@ class Command(BaseCommand):
             type__name="municipality",
         )
 
-        recreate_organization_reports(organizations)
+        recreate_organization_reports([o.pk for o in organizations])
 
         # Add the urls for the new organizations, will be onboarded automatically.
         add_url_to_new_organization("NL", "municipality", "Noardeast-Fryslân", "noardeast-fryslan.nl", merge_date)

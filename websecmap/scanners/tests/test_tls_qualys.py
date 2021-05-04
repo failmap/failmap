@@ -54,7 +54,7 @@ def test_qualys_save_data(db):
 
     u = create_url("werkplek.alkmaar.nl")
 
-    save_scan(u, data)
+    save_scan(u.url, data)
 
     # force created two endpoints
     assert Endpoint.objects.all().count() == 2

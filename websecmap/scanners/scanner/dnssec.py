@@ -120,18 +120,19 @@ def compose_scan_task(urls) -> Task:
     # Sending entire objects is possible. How signatures (.s and .si) work is documented:
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     task = group(
-        scan_dnssec.si(url.url) | store_dnssec.s(url) | plannedscan.finish.si("scan", "dnssec", url) for url in urls
+        scan_dnssec.si(url.url) | store_dnssec.s(url.pk) | plannedscan.finish.si("scan", "dnssec", url.pk)
+        for url in urls
     )
 
     return task
 
 
 @app.task(queue="storage")
-def store_dnssec(result: List[str], url: Url):
+def store_dnssec(result: List[str], url_id: int):
     """
-
     :param result:
     """
+
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
         return ParentFailed("skipping result parsing because scan failed.", cause=result)
@@ -150,11 +151,11 @@ def store_dnssec(result: List[str], url: Url):
         "INFO": "DNSSEC seems to be implemented sufficiently.",
     }
 
-    log.debug("Storing result: %s, for url: %s.", result, url)
+    log.debug("Storing result: %s, for url: %s.", result, url_id)
     # You can save any (string) value and any (string) message.
     # The EndpointScanManager deduplicates the data for you automatically.
     if result:
-        store_url_scan_result("DNSSEC", url, level, messages[level], evidence=",\n".join(result))
+        store_url_scan_result("DNSSEC", url_id, level, messages[level], evidence=",\n".join(result))
 
     # return something informative
     return {"status": "success", "result": level}

@@ -9,11 +9,11 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan, Url, UrlGen
 log = logging.getLogger(__package__)
 
 
-def store_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rating: str, message: str, evidence: str = ""):
+def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, message: str, evidence: str = ""):
 
     # Check if the latest scan has the same rating or not:
     try:
-        gs = EndpointGenericScan.objects.all().filter(type=scan_type, endpoint=endpoint).latest("last_scan_moment")
+        gs = EndpointGenericScan.objects.all().filter(type=scan_type, endpoint=endpoint_id).latest("last_scan_moment")
         exists = True
     except ObjectDoesNotExist:
         exists = False
@@ -36,7 +36,7 @@ def store_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rating: str, 
     gs = EndpointGenericScan()
     gs.explanation = message
     gs.rating = rating
-    gs.endpoint = endpoint
+    gs.endpoint = Endpoint.objects.all().filter(id=endpoint_id).first()
     gs.type = scan_type
     gs.evidence = evidence
     gs.last_scan_moment = datetime.now(pytz.utc)
@@ -50,7 +50,7 @@ def store_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rating: str, 
     )
 
 
-def store_url_scan_result(scan_type: str, url: Url, rating: str, message: str, evidence: str = ""):
+def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str, evidence: str = ""):
 
     # Check if the latest scan has the same rating or not:
     try:
@@ -58,7 +58,7 @@ def store_url_scan_result(scan_type: str, url: Url, rating: str, message: str, e
             UrlGenericScan.objects.all()
             .filter(
                 type=scan_type,
-                url=url,
+                url=url_id,
             )
             .latest("last_scan_moment")
         )
@@ -81,7 +81,7 @@ def store_url_scan_result(scan_type: str, url: Url, rating: str, message: str, e
         gs = UrlGenericScan()
         gs.explanation = message
         gs.rating = rating
-        gs.url = url
+        gs.url = Url.objects.all().filter(id=url_id).first()
         gs.evidence = evidence
         gs.type = scan_type
         gs.last_scan_moment = datetime.now(pytz.utc)
@@ -92,75 +92,12 @@ def store_url_scan_result(scan_type: str, url: Url, rating: str, message: str, e
         UrlGenericScan.objects.all().filter(url=gs.url, type=gs.type).exclude(pk=gs.pk).update(is_the_latest_scan=False)
 
 
-def store_historic_endpoint_scan_result(
-    scan_type: str,
-    endpoint: Endpoint,
-    rating: str,
-    message: str,
-    evidence: str,
-    rating_determined_on,
-    last_scan_moment,
-    is_latest,
-):
-    """
-    Warning: the ID of the endpointscans is relevant. So when using this, make sure that the oldest values are
-    imported first(!).
-
-    :param scan_type:
-    :param endpoint:
-    :param rating:
-    :param message:
-    :param evidence:
-    :param rating_determined_on:
-    :param last_scan_moment:
-    :param is_latest:
-    :return:
-    """
-    # Check if the latest scan has the same rating or not:
-    try:
-        gs = (
-            EndpointGenericScan.objects.all()
-            .filter(type=scan_type, endpoint=endpoint, rating_determined_on__lte=rating_determined_on)
-            .latest("last_scan_moment")
-        )
-    except ObjectDoesNotExist:
-        gs = EndpointGenericScan()
-
-    # last scan had exactly the same result, so don't create a new scan and just update the
-    # last scan date.
-    if gs.explanation == message and gs.rating == rating:
-        # log.debug("Scan had the same rating and message, updating last_scan_moment only.")
-        gs.last_scan_moment = last_scan_moment
-        gs.save()
-    else:
-        # message and rating changed for this scan_type, so it's worth while to save the scan.
-        # log.debug("Message or rating changed: making a new generic scan.")
-        gs = EndpointGenericScan()
-        gs.explanation = message
-        gs.rating = rating
-        gs.endpoint = endpoint
-        gs.type = scan_type
-        gs.evidence = evidence
-        gs.last_scan_moment = last_scan_moment
-        gs.rating_determined_on = rating_determined_on
-        gs.is_the_latest_scan = is_latest
-        gs.save()
-
-        # override auto now add..
-        gs.last_scan_moment = last_scan_moment
-        gs.save()
-
-        EndpointGenericScan.objects.all().filter(endpoint=gs.endpoint, type=gs.type).exclude(pk=gs.pk).update(
-            is_the_latest_scan=False
-        )
-
-
-def endpoint_has_scans(scan_type: str, endpoint: Endpoint):
+def endpoint_has_scans(scan_type: str, endpoint_id: int):
     """
     Used for data deduplication. Don't save a scan that had zero points, but you can upgrade
     to zero (or another rating)
     :param scan_type:
-    :param endpoint:
+    :param endpoint_id:
     :return:
     """
 
@@ -169,7 +106,7 @@ def endpoint_has_scans(scan_type: str, endpoint: Endpoint):
             EndpointGenericScan.objects.all()
             .filter(
                 type=scan_type,
-                endpoint=endpoint,
+                endpoint=endpoint_id,
             )
             .latest("last_scan_moment")
         )

@@ -148,8 +148,8 @@ def compose_scan_task(urls):
     for endpoint in endpoints:
         tasks.append(
             scan.si(endpoint.url.url, endpoint.port).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
-            | store.s(endpoint)
-            | plannedscan.finish.si("scan", "ftp", endpoint.url)
+            | store.s(endpoint.id)
+            | plannedscan.finish.si("scan", "ftp", endpoint.url.pk)
         )
 
     return group(tasks)
@@ -180,8 +180,8 @@ def compose_discover_task(urls):
             for url in urls:
                 tasks.append(
                     discover.si(url.url, port).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version])
-                    | store_when_new_or_kill_if_gone.s(url, port, "ftp", ip_version)
-                    | plannedscan.finish.si("discover", "ftp", url)
+                    | store_when_new_or_kill_if_gone.s(url.pk, port, "ftp", ip_version)
+                    | plannedscan.finish.si("discover", "ftp", url.pk)
                 )
 
     return group(tasks)
@@ -212,15 +212,15 @@ def compose_verify_task(urls):
     for endpoint in endpoints:
         tasks.append(
             discover.si(endpoint.url.url, endpoint.port).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
-            | store_when_new_or_kill_if_gone.s(endpoint.url, endpoint.port, "ftp", endpoint.ip_version)
-            | plannedscan.finish.si("verify", "ftp", endpoint.url)
+            | store_when_new_or_kill_if_gone.s(endpoint.url.pk, endpoint.port, "ftp", endpoint.ip_version)
+            | plannedscan.finish.si("verify", "ftp", endpoint.url.pk)
         )
 
     return group(tasks)
 
 
 @app.task(queue="storage")
-def store(result: dict, endpoint: Endpoint):
+def store(result: dict, endpoint_id: int):
     """
 
     :param result: param endpoint:
@@ -251,10 +251,10 @@ def store(result: dict, endpoint: Endpoint):
         level = "unknown"
         message = "An FTP connection could not be established properly. Not possible to verify encryption."
 
-    log.debug("Storing result: %s, for url: %s.", level, endpoint)
+    log.debug("Storing result: %s, for url: %s.", level, endpoint_id)
 
     if result:
-        store_endpoint_scan_result("ftp", endpoint, level, message, str(result))
+        store_endpoint_scan_result("ftp", endpoint_id, level, message, str(result))
 
     # return something informative
     return {"status": "success", "result": level}

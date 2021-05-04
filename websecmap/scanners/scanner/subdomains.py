@@ -6,7 +6,7 @@ import string
 import sys
 import tempfile
 from datetime import datetime
-from typing import List
+from typing import List, Any, Dict
 
 import pytz
 from celery import Task, group
@@ -71,9 +71,10 @@ def compose_manual_discover_task(organizations_filter: dict = dict(), urls_filte
 
 def compose_discover_task(urls) -> Task:
     task = group(
-        certificate_transparency_scan.si([url])
-        | nsec_scan.si([url])
-        | plannedscan.finish.si("discover", "subdomains", url)
+        # todo: add clear separation between scanning and storage.
+        certificate_transparency_scan.si([url.as_dict()])
+        | nsec_scan.si([url.as_dict()])
+        | plannedscan.finish.si("discover", "subdomains", url.pk)
         for url in urls
     )
     return task
@@ -122,7 +123,7 @@ def compose_manual_verify_task(
 
 def compose_verify_task(urls):
     task = group(
-        url_resolves.si(url.url) | handle_resolves.s(url) | plannedscan.finish.si("verify", "subdomains", url)
+        url_resolves.si(url.url) | handle_resolves.s(url.pk) | plannedscan.finish.si("verify", "subdomains", url.pk)
         for url in urls
     )
     return task
@@ -156,7 +157,11 @@ def url_resolves(url: str):
 
 
 @app.task(queue="storage")
-def handle_resolves(resolves, url):
+def handle_resolves(resolves: bool, url_id: int) -> None:
+
+    url = Url.objects.all().filter(pk=url_id).first()
+    if not url:
+        return
 
     if not resolves and url.not_resolvable is False:
         url.not_resolvable = True
@@ -183,12 +188,12 @@ def toplevel_urls_without_wildcards(organizations: List):
     return Url.objects.all().filter(organization__in=organizations, computed_subdomain="", uses_dns_wildcard=False)
 
 
-def remove_and_save_wildcards(urls: List[Url]):
+def remove_and_save_wildcards(urls: List[Dict[str, Any]]):
     without_wildcards, with_wildcards = has_wildcards(urls)
     return without_wildcards
 
 
-def has_wildcards(urls: List[Url]):
+def has_wildcards(urls: List[Dict[str, Any]]):
     """Run this when adding a new url.
 
     So you can be sure that there are no wildcards if you don't want them.
@@ -200,14 +205,19 @@ def has_wildcards(urls: List[Url]):
     urls_without_wildcards = []
 
     for url in urls:
-        if url_discover_wildcard(url):
-            log.info("Domain %s uses wildcards, DNS brute force not possible" % url.url)
-            url.uses_dns_wildcard = True
-            url.save()
+
+        db_url = Url.objects.all().filter(pk=url["id"]).first()
+        if not db_url:
+            continue
+
+        if url_discover_wildcard(url["url"]):
+            log.info("Domain %s uses wildcards, DNS brute force not possible" % url["url"])
+            db_url.uses_dns_wildcard = True
+            db_url.save()
             urls_with_wildcards.append(url)
         else:
-            url.uses_dns_wildcard = False
-            url.save()
+            db_url.uses_dns_wildcard = False
+            db_url.save()
             urls_without_wildcards.append(url)
 
     log.debug(
@@ -257,12 +267,12 @@ def import_dnsrecon_report(url: Url, path: str):
 
     with open(path) as data_file:
         data = json.load(data_file)
-        addedlist = dnsrecon_parse_report_contents(url, data)
+        addedlist = dnsrecon_parse_report_contents(url.as_dict(), data)
     return addedlist
 
 
 @app.task(queue="storage")
-def dnsrecon_parse_report_contents(url: Url, contents: List):
+def dnsrecon_parse_report_contents(url: Dict[str, Any], contents: List):
     addedlist = []
     for record in contents:
         # brutally ignore all kinds of info from other structures.
@@ -281,14 +291,18 @@ def dnsrecon_parse_report_contents(url: Url, contents: List):
         if record["address"] == "no_ip":
             continue
 
-        if record["name"].endswith(url.url) and record["name"].lower() != url.url.lower():
-            subdomain = record["name"][0 : -len(url.url) - 1]
+        if record["name"].endswith(url["url"]) and record["name"].lower() != url["url"].lower():
+            subdomain = record["name"][0 : -len(url["url"]) - 1]
             # remove wildcards: "name": "*.woonsubsidie.amsterdam.nl",
             if subdomain[0:2] == "*.":
                 subdomain = subdomain[2 : len(subdomain)]
 
             # will check for resolve and if this is a wildcard.
-            added = url.add_subdomain(subdomain.lower())
+            db_url = Url.objects.all().filter(pk=url["id"]).first()
+            if not db_url:
+                continue
+
+            added = db_url.add_subdomain(subdomain.lower())
             if added:
                 addedlist.append(added)
 
@@ -297,7 +311,7 @@ def dnsrecon_parse_report_contents(url: Url, contents: List):
 
 # place it on the IPv4 queue, so it can scale using cloud workers :)
 @app.task(ignore_result=True, queue="ipv4", rate_limit="6/h")
-def wordlist_scan(urls: List[Url], wordlist: List[str]):
+def wordlist_scan(urls: List[Dict[str, Any]], wordlist: List[str]):
     """
 
     :param urls:
@@ -342,22 +356,22 @@ def wordlist_scan(urls: List[Url], wordlist: List[str]):
 
         imported_urls = []
         for url in urls_without_wildcards:
-            log.info("Wordlist scan on: %s" % url.url)
+            log.info("Wordlist scan on: %s" % url["url"])
 
             resolver_ip = get_random_nameserver()
             log.debug("Using the DNS service from %s" % resolver_ip)
-            resolver = DnsHelper(url.url, resolver_ip, 3)
+            resolver = DnsHelper(url["url"], resolver_ip, 3)
             # Using the filter option, only adds the addresses that don't go to the wildcard record.
             # In the logfile all dns responses are shown, but in the list of really resolving urls only the ones
             # that deviate from the wildcard IP are stored.
             found_hosts = brute_domain(
-                resolver, tmp_wordlist.name, url.url, filter=True, verbose=False, ignore_wildcard=True
+                resolver, tmp_wordlist.name, url["url"], filter=True, verbose=False, ignore_wildcard=True
             )
 
             # some hosts rotate a set of IP's when providing wildcards. This is an annoying practice.
             # We can filter those out with some statistics. We cut off everything that resolve to the top IP's.
             log.debug("Found %s hosts" % len(found_hosts))
-            found_hosts = remove_wildcards_using_statistics(found_hosts, url)
+            found_hosts = remove_wildcards_using_statistics(found_hosts, url["url"])
 
             # You cant' know how many where added, since you don't have access to storage.
             dnsrecon_parse_report_contents.apply_async([url, found_hosts], queue="storage")
@@ -367,13 +381,13 @@ def wordlist_scan(urls: List[Url], wordlist: List[str]):
     return imported_urls
 
 
-def remove_wildcards_using_statistics(found_hosts, url):
+def remove_wildcards_using_statistics(found_hosts, url: str):
     # some hosts rotate a set of IP's when providing wildcards. This is an annoying practice.
     # We can filter those out with some statistics. We cut off everything that resolve to the top IP's.
     ip_stats = {}
 
     # if no wildcards are used, then well... just return everything as being fine
-    if not discover_wildcard(url.url):
+    if not discover_wildcard(url):
         return found_hosts
 
     # Create a list of how many IP's are used
@@ -440,7 +454,7 @@ def remove_wildcards(urls: List[Url]):
 # todo: create a generic: go to $page with $parameter and scrape all urls.
 @app.task(ignore_result=True, queue="internet", rate_limit="2/m")
 @retry(wait=wait_fixed(30), before=before_log(log, logging.DEBUG))
-def certificate_transparency_scan(urls: List[Url]):
+def certificate_transparency_scan(urls: List[Dict[str, Any]]):
     """
     Checks the certificate transparency database for subdomains. Using a regex the subdomains
     are extracted. This method is extremely fast and reliable: these certificates all exist.
@@ -458,8 +472,8 @@ def certificate_transparency_scan(urls: List[Url]):
     for url in urls:
 
         # https://crt.sh/?q=%25.zutphen.nl
-        crt_sh_url = "https://crt.sh/?q=%25." + str(url.url)
-        pattern = r"[^\s%>]*\." + str(url.url.replace(".", r"\."))  # harder string formatting :)
+        crt_sh_url = "https://crt.sh/?q=%25." + str(url["url"])
+        pattern = r"[^\s%>]*\." + str(url["url"].replace(".", r"\."))  # harder string formatting :)
 
         response = requests.get(crt_sh_url, timeout=(10, 10), allow_redirects=False)
         matches = re.findall(pattern, response.text)
@@ -472,8 +486,8 @@ def certificate_transparency_scan(urls: List[Url]):
             # - no we don't as that can change and this information can be outdated. We will check on that using any
             # brute force dns scan and some other places. Adding the logic here will increase complexity.
             match = match.replace("*.", "")
-            if match != url.url:
-                subdomains.append(match[0 : len(match) - len(url.url) - 1])  # wraps around
+            if match != url["url"]:
+                subdomains.append(match[0 : len(match) - len(url["url"]) - 1])  # wraps around
 
         subdomains = [x.lower() for x in subdomains]  # do lowercase normalization elsewhere
         subdomains = set(subdomains)
@@ -487,16 +501,21 @@ def certificate_transparency_scan(urls: List[Url]):
 
         log.debug("Found subdomains: %s" % subdomains)
 
-        for subdomain in subdomains:
-            added = url.add_subdomain(subdomain)
-            if added:
-                addedlist.append(added)
+        if subdomains:
+            db_url = Url.objects.all().filter(id=url["id"]).first()
+            if not db_url:
+                continue
+
+            for subdomain in subdomains:
+                added = db_url.add_subdomain(subdomain)
+                if added:
+                    addedlist.append(added)
     return addedlist
 
 
 # this is a fairly safe scanner, and can be run pretty quiclkly (no clue if parralelisation works)
 @app.task(ignore_result=True, queue="internet", rate_limit="4/m")
-def nsec_scan(urls: List[Url]):
+def nsec_scan(urls: List[Dict[str, Any]]):
     """
     Tries to use nsec (dnssec) walking. Does not use nsec3 (hashes).
 
@@ -516,8 +535,8 @@ def nsec_scan(urls: List[Url]):
     from lib.dnshelper import DnsHelper
 
     for url in urls:
-        resolver = DnsHelper(url.url, "8.8.8.8", 30)
-        records = ds_zone_walk(resolver, url.url)
+        resolver = DnsHelper(url["url"], "8.8.8.8", 30)
+        records = ds_zone_walk(resolver, url["url"])
         log.info(records)
         dnsrecon_parse_report_contents.apply_async([url, records])
         # return

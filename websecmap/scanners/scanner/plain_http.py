@@ -93,13 +93,15 @@ def compose_scan_task(urls):
         complete_endpoints, incomplete_endpoints = get_endpoints_with_missing_encryption(url)
 
         for complete_endpoint in complete_endpoints:
-            tasks.append(well_done.si(complete_endpoint) | plannedscan.finish.si("scan", "plain_http", url))
+            tasks.append(well_done.si(complete_endpoint.pk) | plannedscan.finish.si("scan", "plain_http", url.pk))
 
         for incomplete_endpoint in incomplete_endpoints:
             tasks.append(
-                scan.si(incomplete_endpoint).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[incomplete_endpoint.ip_version])
-                | store.s(incomplete_endpoint)
-                | plannedscan.finish.si("scan", "plain_http", url)
+                scan.si(incomplete_endpoint.ip_version, incomplete_endpoint.url.url).set(
+                    queue=CELERY_IP_VERSION_QUEUE_NAMES[incomplete_endpoint.ip_version]
+                )
+                | store.s(incomplete_endpoint.pk)
+                | plannedscan.finish.si("scan", "plain_http", url.pk)
             )
 
     if not tasks:
@@ -159,14 +161,15 @@ def get_endpoints_with_missing_encryption(url):
 
 
 @app.task(queue="storage")
-def well_done(endpoint):
-    if endpoint_has_scans("plain_https", endpoint):
-        store_endpoint_scan_result("plain_https", endpoint, "0", cleaned_up)
+def well_done(endpoint_id):
+
+    if endpoint_has_scans("plain_https", endpoint_id):
+        store_endpoint_scan_result("plain_https", endpoint_id, "0", cleaned_up)
 
 
 # Task is written to work both on v4 and v6, but the network conf of the machine differs.
 @app.task()
-def scan(endpoint):
+def scan(ip_version: int, url: str):
     """
     Using an incomplete endpoint
 
@@ -195,28 +198,31 @@ def scan(endpoint):
 
     # if the address doesn't resolve, why bother scanning at all?
     resolves = False
-    if endpoint.ip_version == 4:
-        resolves = resolves_on_v4(endpoint.url.url)
-    if endpoint.ip_version == 6:
-        resolves = resolves_on_v6(endpoint.url.url)
+    if ip_version == 4:
+        resolves = resolves_on_v4(url)
+    if ip_version == 6:
+        resolves = resolves_on_v6(url)
 
     if not resolves:
         # no need to further check, can't even get the IP address...
         return False, False, False
 
     # retry harder!
-    can_connect_result = can_connect(protocol="https", url=endpoint.url, port=443, ip_version=endpoint.ip_version)
+    can_connect_result = can_connect(protocol="https", url=url, port=443, ip_version=ip_version)
     redirects_to_safety_result = None
 
     # if you cannot connect to a secure endpoint, we're going to find out of there is redirect.
     if not can_connect_result:
-        redirects_to_safety_result = redirects_to_safety(endpoint)
+        # The worker (should) only resolve domain names only over ipv4 or ipv6. (A / AAAA).
+        # Currenlty docker does not support that. Which means a lot of network rewriting for dealing with
+        # all edge cases of HTTP.
+        redirects_to_safety_result = redirects_to_safety(f"http://{url}:80")
 
     return resolves, can_connect_result, redirects_to_safety_result
 
 
 @app.task(queue="storage")
-def store(results, endpoint):
+def store(results, endpoint_id):
 
     resolves, can_connect_result, redirects_to_safety_result = results
 
@@ -226,23 +232,29 @@ def store(results, endpoint):
         # there will be mismatches between this (or previous results) and reality.
         log.debug(
             "Endpoint on %s doesn't resolve anymore. "
-            "Run the DNS verify scanner to prevent scanning non resolving endpoints." % endpoint
+            "Run the DNS verify scanner to prevent scanning non resolving endpoints." % endpoint_id
         )
         return
 
-    connect_result(can_connect_result, protocol="https", url=endpoint.url, port=443, ip_version=endpoint.ip_version)
+    endpoint = Endpoint.objects.all().filter(id=endpoint_id).only("ip_version", "url__id").first()
+    if not endpoint:
+        return
+
+    connect_result(
+        can_connect_result, protocol="https", url_id=endpoint.url.pk, port=443, ip_version=endpoint.ip_version
+    )
 
     # issue resolved.
     if can_connect_result:
-        if endpoint_has_scans("plain_https", endpoint):
-            store_endpoint_scan_result("plain_https", endpoint, "0", cleaned_up)
+        if endpoint_has_scans("plain_https", endpoint_id):
+            store_endpoint_scan_result("plain_https", endpoint_id, "0", cleaned_up)
 
     # Really no security at all
     if not can_connect_result and redirects_to_safety_result is False:
         log.info("%s does not have a https site. Saving/updating scan." % endpoint.url)
-        store_endpoint_scan_result("plain_https", endpoint, "1000", no_https_at_all)
+        store_endpoint_scan_result("plain_https", endpoint_id, "1000", no_https_at_all)
 
     # some redirections that might have flaws etc.
     if not can_connect_result and redirects_to_safety_result is True:
         log.info("%s redirects to safety, saved by the bell." % endpoint.url)
-        store_endpoint_scan_result("plain_https", endpoint, "25", saved_by_the_bell)
+        store_endpoint_scan_result("plain_https", endpoint_id, "25", saved_by_the_bell)

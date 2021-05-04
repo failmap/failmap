@@ -30,6 +30,7 @@ import random
 import socket
 from datetime import datetime
 from ipaddress import AddressValueError
+from typing import List
 
 import pytz
 import requests
@@ -39,7 +40,7 @@ import urllib3
 from celery import Task, group
 from django.conf import settings
 from requests import ConnectTimeout, HTTPError, ReadTimeout, Request, Session, Timeout
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, SSLError
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
@@ -143,18 +144,18 @@ def compose_manual_discover_task(organizations_filter: dict = dict(), urls_filte
     return compose_discover_task(urls)
 
 
-def compose_discover_task(urls):
+def compose_discover_task(urls: List[Url]):
     tasks = []
 
     for ip_version in [4, 6]:
         for port in PREFERRED_PORT_ORDER:
             for url in urls:
                 tasks.append(
-                    can_connect.si(protocol=PORT_TO_PROTOCOL[port], url=url, port=port, ip_version=ip_version).set(
-                        queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version]
-                    )
-                    | connect_result.s(protocol=PORT_TO_PROTOCOL[port], url=url, port=port, ip_version=ip_version)
-                    | plannedscan.finish.si("discover", "http", url)
+                    can_connect.si(
+                        protocol=PORT_TO_PROTOCOL[port], url_id=url.url, port=port, ip_version=ip_version
+                    ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version])
+                    | connect_result.s(protocol=PORT_TO_PROTOCOL[port], url_id=url.pk, port=port, ip_version=ip_version)
+                    | plannedscan.finish.si("discover", "http", url.pk)
                 )
 
     return group(tasks)
@@ -216,45 +217,18 @@ def compose_verify_task(urls):
 
     tasks = group(
         can_connect.si(
-            protocol=endpoint.protocol, url=endpoint.url, port=endpoint.port, ip_version=endpoint.ip_version
+            protocol=endpoint.protocol, url=endpoint.url.url, port=endpoint.port, ip_version=endpoint.ip_version
         ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
         | connect_result.s(
-            protocol=endpoint.protocol, url=endpoint.url, port=endpoint.port, ip_version=endpoint.ip_version
+            protocol=endpoint.protocol, url_id=endpoint.url.pk, port=endpoint.port, ip_version=endpoint.ip_version
         )
-        | plannedscan.finish.si("verify", "http", endpoint.url)
+        | plannedscan.finish.si("verify", "http", endpoint.url.pk)
         for endpoint in endpoints
     )
 
     log.info(f"Verifying {len(endpoints)} http/https endpoints.")
 
     return tasks
-
-
-@app.task(queue="storage")
-def url_lives(ips, url):
-    """
-    This results in problems in celery, so we're doing it the old sequential way.
-    And given this is all storage stuff anyway...
-    chain(
-        get_ips.si(url.url),
-        group(store_url_ips_task.s(url),
-              kill_url_task.s(url),
-              revive_url_task.s(url),
-              ),
-    ),
-    """
-
-    store_url_ips(url, ips)
-
-    if not any(ips) and not url.not_resolvable:
-        kill_url_task(ips, url)
-    else:
-        # revive url
-        if url.not_resolvable:
-            url.not_resolvable = False
-            url.not_resolvable_since = datetime.now(pytz.utc)
-            url.not_resolvable_reason = "Made resolvable again since ip address was found."
-            url.save()
 
 
 @app.task(queue="4and6")
@@ -356,7 +330,7 @@ def get_ipv6(url: str):
 
 
 @app.task(queue="4and6", rate_limit="120/s", bind=True)
-def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bool:
+def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> bool:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
 
@@ -391,16 +365,16 @@ def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bo
     uri = ""
     ip = ""
     if ip_version == 4:
-        ip = get_ipv4(url.url)
+        ip = get_ipv4(url)
         uri = "%s://%s:%s" % (protocol, ip, port)
     else:
-        ip = get_ipv6(url.url)
+        ip = get_ipv6(url)
         uri = "%s://[%s]:%s" % (protocol, ip, port)
 
     if not ip:
         return False
 
-    log.debug("Attempting connect on: %s: host: %s IP: %s" % (uri, url.url, ip))
+    log.debug("Attempting connect on: %s: host: %s IP: %s" % (uri, url, ip))
 
     try:
         """
@@ -432,10 +406,10 @@ def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bo
             timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
             allow_redirects=False,  # redirect = connection
             verify=False,  # nosec any tls = connection
-            headers={"Host": url.url, "User-Agent": get_random_user_agent()},
+            headers={"Host": url, "User-Agent": get_random_user_agent()},
         )
         if r.status_code:
-            log.debug("%s: Host: %s Status: %s" % (uri, url.url, r.status_code))
+            log.debug("%s: Host: %s Status: %s" % (uri, url, r.status_code))
             return True
         else:
             log.debug("No status code? Now what?! %s" % url)
@@ -444,7 +418,7 @@ def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bo
     except (ConnectTimeout, Timeout, ReadTimeout) as Ex:
         log.debug("%s: Timeout! - %s" % (url, Ex))
         return False
-    except (ConnectionRefusedError, ConnectionError, HTTPError) as Ex:
+    except (ConnectionRefusedError, ConnectionError, HTTPError, SSLError) as Ex:
         """
         Some errors really mean there is no site. Example is the ConnectionRefusedError: [Errno 61]
         which means the endpoint can be killed.
@@ -467,6 +441,9 @@ def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bo
                 "CertificateError" in strerror,
                 "certificate verify failed" in strerror,
                 "bad handshake" in strerror,
+                # Handshake failure: so there is an option to create a handshake, but perhaps the server wont respond.
+                # Still a valid endpoint.
+                "SSLV3_ALERT_HANDSHAKE_FAILURE" in strerror,
             ]
         ):
             log.debug(
@@ -490,9 +467,9 @@ def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bo
 
                 s = Session()
 
-                uri = "%s://%s:%s" % (protocol, url.url, port)
+                uri = "%s://%s:%s" % (protocol, url, port)
 
-                req = Request("GET", uri, headers={"Host": url.url, "User-Agent": get_random_user_agent()})
+                req = Request("GET", uri, headers={"Host": url, "User-Agent": get_random_user_agent()})
                 prepped = s.prepare_request(req)
 
                 # pretty_print_request(prepped)
@@ -550,11 +527,11 @@ def pretty_print_request(req):
 
 
 @app.task(queue="storage")
-def connect_result(result, protocol: str, url: Url, port: int, ip_version: int):
+def connect_result(result, protocol: str, url_id: int, port: int, ip_version: int):
     if result:
-        save_endpoint(protocol, url, port, ip_version)
+        save_endpoint(protocol, url_id, port, ip_version)
     else:
-        kill_endpoint(protocol, url, port, ip_version)
+        kill_endpoint(protocol, url_id, port, ip_version)
     return True
 
 
@@ -595,13 +572,12 @@ def has_internet_connection(host: str = "8.8.8.8", port: int = 53, connection_ti
         return False
 
 
-def save_endpoint(protocol: str, url: Url, port: int, ip_version: int):
+def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int):
 
     # prevent duplication
-    if not endpoint_exists(url, port, protocol, ip_version):
+    if not endpoint_exists(url_id, port, protocol, ip_version):
         endpoint = Endpoint()
-        endpoint.url = url
-        endpoint.domain = url.url
+        endpoint.url = Url.objects.all().filter(id=url_id).first()
 
         endpoint.port = port
         endpoint.protocol = protocol
@@ -645,7 +621,7 @@ def kill_url_task(ips, url: Url):
 
 
 @app.task(queue="storage")
-def store_url_ips(url: Url, ips):
+def store_url_ips(url: int, ips):
     """
     Todo: method should be stored in manager
 
@@ -698,16 +674,16 @@ def get_rdns_name(ip):
     return reverse_name
 
 
-def endpoint_exists(url, port, protocol, ip_version):
+def endpoint_exists(url_id: int, port: int, protocol: str, ip_version: int) -> int:
     return (
         Endpoint.objects.all()
-        .filter(url=url, port=port, ip_version=ip_version, protocol=protocol, is_dead=False)
+        .filter(url=url_id, port=port, ip_version=ip_version, protocol=protocol, is_dead=False)
         .count()
     )
 
 
-def kill_endpoint(protocol: str, url: Url, port: int, ip_version: int):
-    eps = Endpoint.objects.all().filter(url=url, port=port, ip_version=ip_version, protocol=protocol, is_dead=False)
+def kill_endpoint(protocol: str, url_id: int, port: int, ip_version: int):
+    eps = Endpoint.objects.all().filter(url=url_id, port=port, ip_version=ip_version, protocol=protocol, is_dead=False)
 
     for ep in eps:
         ep.is_dead = True
@@ -730,11 +706,8 @@ def check_network(code_location=""):
     log.info("IPv4 is enabled via configuration: %s" % settings.NETWORK_SUPPORTS_IPV4)
     log.info("IPv6 is enabled via configuration: %s" % settings.NETWORK_SUPPORTS_IPV6)
 
-    url = Url()
-    url.url = "faalkaart.nl"
-
-    can_ipv4 = can_connect("https", url, 443, 4)
-    can_ipv6 = can_connect("https", url, 443, 6)
+    can_ipv4 = can_connect("https", "faalkaart.nl", 443, 4)
+    can_ipv6 = can_connect("https", "faalkaart.nl", 443, 6)
 
     if not can_ipv4 and not can_ipv6:
         raise ConnectionError(
@@ -760,7 +733,7 @@ def check_network(code_location=""):
         log.info("IPv6 could be reached via %s" % code_location)
 
 
-def redirects_to_safety(endpoint: Endpoint):
+def redirects_to_safety(url: str):
     """
     Also includes the ip-version of the endpoint. Implies that the endpoint resolves.
     Any safety over any network is accepted now, both A and AAAA records.
@@ -773,18 +746,13 @@ def redirects_to_safety(endpoint: Endpoint):
     import requests
     from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
-    # The worker (should) only resolve domain names only over ipv4 or ipv6. (A / AAAA).
-    # Currenlty docker does not support that. Which means a lot of network rewriting for dealing with
-    # all edge cases of HTTP.
-    uri = endpoint.uri_url()
-
     # A feature of requests is to send any headers you've sent when there are redirects.
     # This becomes problematic when you set the Host header. This prevents
 
     try:
         session = requests.Session()
         response = session.get(
-            uri,
+            url,
             timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),  # allow for insane network lag
             allow_redirects=True,  # point is: redirects to safety
             verify=False,  # certificate validity is checked elsewhere, having some https > none

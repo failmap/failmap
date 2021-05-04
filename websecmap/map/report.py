@@ -102,11 +102,11 @@ def compose_task(
         if not urls:
             # can still add an empty organization rating even though there is nothing to show. Will create an
             # empty gray region.
-            tasks.append(default_organization_rating.si([organization]))
+            tasks.append(default_organization_rating.si([organization.pk]))
             continue
 
         # make sure default organization rating is in place
-        tasks.append(recreate_url_reports.si(urls) | create_organization_reports_now.si([organization]))
+        tasks.append(recreate_url_reports.si(urls) | create_organization_reports_now.si([organization.pk]))
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")
@@ -822,7 +822,7 @@ def relevant_urls_at_timepoint_organization(organization: Organization, when: da
 
 
 @app.task(queue="reporting")
-def default_organization_rating(organizations: List[Organization]):
+def default_organization_rating(organizations: List[int]):
     """
     Generate default ratings so all organizations are on the map (as being grey). This prevents
     empty spots / holes.
@@ -830,9 +830,14 @@ def default_organization_rating(organizations: List[Organization]):
     """
 
     if not organizations:
-        organizations = Organization.objects.all()
+        organizations = list(Organization.objects.all().values_list("id", flat=True))
 
-    for organization in organizations:
+    for organization_id in organizations:
+
+        organization = Organization.objects.all().filter(id=organization_id).first()
+        if not organization:
+            continue
+
         log.info("Giving organization a default rating: %s" % organization)
 
         when = organization.created_on if organization.created_on else START_DATE
@@ -890,20 +895,28 @@ def default_organization_rating(organizations: List[Organization]):
 
 
 @app.task(queue="reporting")
-def create_organization_reports_now(organizations: List[Organization]):
+def create_organization_reports_now(organizations: List[int]):
 
-    for organization in organizations:
+    for organization_id in organizations:
+        organization = Organization.objects.all().filter(id=organization_id).first()
+        if not organization:
+            continue
+
         now = datetime.now(pytz.utc)
         create_organization_report_on_moment(organization, now)
 
 
 @app.task(queue="reporting")
-def recreate_organization_reports(organizations: List):
+def recreate_organization_reports(organizations: List[int]):
     """Remove organization rating and rebuild a new."""
 
     # todo: only for allowed organizations...
 
-    for organization in organizations:
+    for organization_id in organizations:
+        organization = Organization.objects.all().filter(id=organization_id).first()
+        if not organization:
+            continue
+
         log.info("Adding rating for organization %s", organization)
 
         # Given this is a rebuild, delete all previous reports;
@@ -924,7 +937,7 @@ def recreate_organization_reports(organizations: List):
         # empty which does not make sense. Therefore we only add a default rating if there is really nothing else.
         if not moments:
             # Make sure the organization has the default rating
-            default_organization_rating(organizations=[organization])
+            default_organization_rating(organizations=[organization.pk])
 
 
 def reduce_to_save_data(moments: List[datetime]) -> List[datetime]:
@@ -1017,7 +1030,7 @@ def set_dates_to_last_possible_moment(moments: List[datetime]) -> List[datetime]
 
 
 @app.task(queue="reporting")
-def update_report_tasks(url_chunk: List[Url]):
+def update_report_tasks(url_chunk: List[int]):
     """
     A small update function that only rebuilds a single url and the organization report for a single day. Using this
     during onboarding, it's possible to show changes much faster than a complete rebuild.
@@ -1027,9 +1040,12 @@ def update_report_tasks(url_chunk: List[Url]):
     """
     tasks = []
 
-    for url in url_chunk:
+    for url_id in url_chunk:
+        url = Url.objects.all().filter(id=url_id).first()
+        if not url:
+            continue
 
-        organizations = list(url.organization.all())
+        organizations = [o.pk for o in list(url.organization.all())]
 
         # Note that you cannot determine the moment to be "now" as the urls have to be re-reated.
         # the moment to rerate organizations is when the url_ratings has finished.

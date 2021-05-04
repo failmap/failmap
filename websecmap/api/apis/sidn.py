@@ -4,6 +4,7 @@ from io import StringIO
 
 import pytz
 import tldextract
+from django.contrib.auth.models import User
 from django.db.models import Q
 
 import logging
@@ -67,7 +68,7 @@ def remove_last_dot(my_text):
 
 
 @app.task(queue="storage")
-def sidn_domain_upload(user, csv_data):
+def sidn_domain_upload(user_id: int, csv_data: str):
     """
     Moved to reporting due to more room for delays on that queue.
 
@@ -94,7 +95,7 @@ def sidn_domain_upload(user, csv_data):
     upload = SIDNUpload()
     upload.at_when = datetime.now(pytz.utc)
     upload.state = "new"
-    upload.by_user = user
+    upload.by_user = User.objects.all().filter(pk=user_id).first()
     upload.posted_data = csv_data
     upload.save()
 

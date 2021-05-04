@@ -10,7 +10,7 @@ to log network errors. These errors can be retried.
 """
 
 import logging
-from typing import List
+from typing import List, Any, Dict
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -37,17 +37,15 @@ def return_safe_response(answer):
 
 
 @app.task(queue="storage")
-def register(
-    domains: List[str], scan_type: str, tracking_information: str, settings: InternetNLApiSettings
-) -> (str, str):
+def register(domains: List[str], scan_type: str, tracking_information: str, settings: Dict[str, Any]) -> (str, str):
 
     data = {"type": scan_type, "name": tracking_information, "domains": domains}
 
     try:
         response = requests.post(
-            f"{settings.url}/requests",
+            f"{settings['url']}/requests",
             json=data,
-            auth=HTTPBasicAuth(settings.username, settings.password),
+            auth=HTTPBasicAuth(settings["username"], settings["password"]),
             timeout=(300, 300),
         )
     except requests.RequestException as e:
@@ -58,33 +56,35 @@ def register(
 
 
 @app.task(queue="storage")
-def metadata(settings: InternetNLApiSettings):
-    return generic_internet_nl_api_request("get", f"{settings.url}/metadata/report", settings)
+def metadata(settings: Dict[str, Any]):
+    return generic_internet_nl_api_request("get", f"{settings['url']}/metadata/report", settings)
 
 
 @app.task(queue="storage")
-def status(scan_id: int, settings: InternetNLApiSettings):
-    return generic_internet_nl_api_request("get", f"{settings.url}/requests/{scan_id}", settings)
+def status(scan_id: int, settings: Dict[str, Any]):
+    return generic_internet_nl_api_request("get", f"{settings['url']}/requests/{scan_id}", settings)
 
 
 @app.task(queue="storage")
-def cancel(scan_id: int, settings: InternetNLApiSettings):
-    return generic_internet_nl_api_request("patch", f"{settings.url}/requests/{scan_id}", settings)
+def cancel(scan_id: int, settings: Dict[str, Any]):
+    return generic_internet_nl_api_request("patch", f"{settings['url']}/requests/{scan_id}", settings)
 
 
 @app.task(queue="storage")
-def result(scan_id: int, settings: InternetNLApiSettings):
-    return generic_internet_nl_api_request("get", f"{settings.url}/requests/{scan_id}/results", settings)
+def result(scan_id: int, settings: Dict[str, Any]):
+    return generic_internet_nl_api_request("get", f"{settings['url']}/requests/{scan_id}/results", settings)
 
 
-def generic_internet_nl_api_request(operation, url, settings):
+def generic_internet_nl_api_request(operation, url: str, settings: Dict[str, Any]):
     # We're dealing with all kinds of network issues by returning a network issue as a status code.
     # Network issues can be recovered and the next step can be retried. Network issues can take a long time and
     # should not break the process of gathering results.
 
     try:
         requests_function = getattr(requests, operation)
-        response = requests_function(url, auth=HTTPBasicAuth(settings.username, settings.password), timeout=(300, 300))
+        response = requests_function(
+            url, auth=HTTPBasicAuth(settings["username"], settings["password"]), timeout=(300, 300)
+        )
     except requests.RequestException as e:
         return 599, {"network_error": e.strerror}
 

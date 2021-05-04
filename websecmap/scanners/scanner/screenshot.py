@@ -103,12 +103,12 @@ def compose_scan_task(urls):
     log.info(f"Screenshots will be stored at: {settings.MEDIA_ROOT}screenshots/")
     log.info(f"IPv4 screenshot service: {v4_service}, IPv6 screenshot service: {v6_service}")
     tasks = [
-        make_screenshot.si(v4_service, endpoint.uri_url()) | save_screenshot.s(endpoint)
+        make_screenshot.si(v4_service, endpoint.uri_url()) | save_screenshot.s(endpoint.id)
         for endpoint in endpoints
         if endpoint.ip_version == 4
     ]
     tasks += [
-        make_screenshot.si(v6_service, endpoint.uri_url()) | save_screenshot.s(endpoint)
+        make_screenshot.si(v6_service, endpoint.uri_url()) | save_screenshot.s(endpoint.id)
         for endpoint in endpoints
         if endpoint.ip_version == 6
     ]
@@ -118,9 +118,9 @@ def compose_scan_task(urls):
 
 # We expect the screenshot tool to hang at non responsive urls.
 @app.task(queue="internet", rate_limit="60/m")
-def make_screenshot(service, endpoint):
+def make_screenshot(service: str, endpoint_url: str):
     try:
-        return make_screenshot_with_u2p(service, endpoint)
+        return make_screenshot_with_u2p(service, endpoint_url)
     except (ConnectionError, TimeoutError) as e:
         return e
     except Exception as e:
@@ -128,7 +128,7 @@ def make_screenshot(service, endpoint):
 
 
 @timeout(20, "Took too long to make screenshot.")
-def make_screenshot_with_u2p(screenshot_service, url):
+def make_screenshot_with_u2p(screenshot_service: str, url: str):
     get_parameters = {
         "output": "screenshot",
         "url": url,
@@ -145,7 +145,7 @@ def make_screenshot_with_u2p(screenshot_service, url):
 
 
 @app.task(queue="storage")
-def save_screenshot(response, endpoint):
+def save_screenshot(response, endpoint_id):
 
     # it might receive an exception, or "False" when there is no image data due to errors.
     if isinstance(response, TimeoutError):
@@ -165,7 +165,7 @@ def save_screenshot(response, endpoint):
     # with an invalid / non-resolvable address, a 500 error is given by the image service.
     if response.status_code == 500:
         log.debug(
-            f"Received 500 at the API from {endpoint.uri_url()}, url probably does not resolve. "
+            f"Received 500 at the API from {endpoint_id}, url probably does not resolve. "
             f"This is business as usual. Not saving."
         )
         return False
@@ -174,13 +174,13 @@ def save_screenshot(response, endpoint):
         i = Image.open(BytesIO(response.content))
         size = 320, 240
         i.thumbnail(size, Image.ANTIALIAS)
-        filename = f"{settings.MEDIA_ROOT}screenshots/{endpoint.id}_latest.png"
+        filename = f"{settings.MEDIA_ROOT}screenshots/{endpoint_id}_latest.png"
         i.save(filename, "PNG")
         log.debug(f"Image saved as: {filename}.")
 
         scr = Screenshot()
         scr.created_on = datetime.now(pytz.utc).date()
-        scr.endpoint = endpoint
+        scr.endpoint = endpoint_id
         scr.image = File(open(filename, "rb"))
         scr.filename = filename
         scr.save()
