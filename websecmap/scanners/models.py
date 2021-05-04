@@ -90,10 +90,10 @@ class Endpoint(models.Model):
         return self.ip_version == 6
 
     @staticmethod
-    def force_get(url, ip_version, protocol, port):
+    def force_get(url_id: int, ip_version, protocol, port):
         endpoints = (
             Endpoint.objects.all()
-            .filter(protocol=protocol, url=url, port=port, ip_version=ip_version, is_dead=False)
+            .filter(protocol=protocol, url=url_id, port=port, ip_version=ip_version, is_dead=False)
             .order_by("-discovered_on")
         )
 
@@ -106,7 +106,7 @@ class Endpoint(models.Model):
         if count == 0:
             ep = Endpoint()
             try:
-                ep.url = Url.objects.filter(url=url).first()
+                ep.url = Url.objects.filter(url=url_id).first()
             except ObjectDoesNotExist:
                 ep.url = ""
             ep.port = port
@@ -207,6 +207,13 @@ class ScanProxy(models.Model):
         help_text="Every time the proxy has not enough resources, this number will increase with one. A too high "
         "number makes it easy not to use this proxy anymore.",
     )
+
+    def as_dict(self):
+        return {
+            "id": self.pk,
+            "protocol": self.protocol,
+            "address": self.address,
+        }
 
     @staticmethod
     def add_address(address):

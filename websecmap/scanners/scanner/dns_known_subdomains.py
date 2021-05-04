@@ -57,7 +57,7 @@ def compose_discover_task(urls):
 
     # The worker has no way to write / save things. A wordlist can be 10's of thousands of words.
     task = group(
-        wordlist_scan.si([url], wordlist) | plannedscan.finish.si("discover", "dns_known_subdomains", url)
+        wordlist_scan.si([url.as_dict()], wordlist) | plannedscan.finish.si("discover", "dns_known_subdomains", url.pk)
         for url in urls
     )
     return task

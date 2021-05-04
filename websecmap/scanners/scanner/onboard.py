@@ -72,7 +72,7 @@ def compose_task(
     urls = list(set(urls))
 
     endpoint_discovery_urls = []
-    scans_running_urls = []
+    scans_running_urls: List[int] = []
     crawling_urls = []
 
     tasks = []
@@ -88,7 +88,7 @@ def compose_task(
         elif url.onboarding_stage in ["endpoint_finished"]:  # dev: , "scans_running"
             log.info("Scanning on: %s", url)
             update_stage([url], "scans_running")
-            scans_running_urls.append(url)
+            scans_running_urls.append(url.pk)
 
         elif url.onboarding_stage == "scans_finished":
             log.info("Crawling on: %s", url)

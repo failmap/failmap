@@ -113,7 +113,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     return urls
 
 
-def request(activity: str, scanner: str, urls: List[Url]):
+def request(activity: str, scanner: str, urls: List[int]):
     # should it be deduplicated? i mean: if there already is a specific planned scan, it doesn't
     # need to be created again: that would just be more work. Think so, otherwise the finish and start will
     # mix for different scans. So we can't do bulk inserts, but we can do better state logging
@@ -142,13 +142,13 @@ def request(activity: str, scanner: str, urls: List[Url]):
     log.debug(f"Requested {activity} with {scanner} on {len(urls)} urls.")
 
 
-def already_requested(activity: str, scanner: str, url: Url):
+def already_requested(activity: str, scanner: str, url_id: int):
     return (
         PlannedScan.objects.all()
         .filter(
             activity=Activity[activity].value,
             scanner=Scanner[scanner].value,
-            url=url,
+            url=url_id,
             state__in=[State["requested"].value, State["picked_up"].value],
         )
         .exists()
@@ -156,15 +156,18 @@ def already_requested(activity: str, scanner: str, url: Url):
 
 
 @app.task(queue="storage")
-def finish(activity: str, scanner: str, url: Url):
-    set_scan_state(activity, scanner, url, "finished")
+def finish(activity: str, scanner: str, url_id: int):
+    set_scan_state(activity, scanner, url_id, "finished")
 
 
-def set_scan_state(activity: str, scanner: str, url: Url, state="finished"):
+def set_scan_state(activity: str, scanner: str, url_id: int, state="finished"):
     oldest_scan = (
         PlannedScan.objects.all()
         .filter(
-            activity=Activity[activity].value, scanner=Scanner[scanner].value, url=url, state=State["picked_up"].value
+            activity=Activity[activity].value,
+            scanner=Scanner[scanner].value,
+            url=url_id,
+            state=State["picked_up"].value,
         )
         .first()
     )
@@ -174,19 +177,19 @@ def set_scan_state(activity: str, scanner: str, url: Url, state="finished"):
         oldest_scan.finished_at_when = datetime.now(pytz.utc)
         oldest_scan.save()
 
-        log.debug(f"Altered planned scan state for {url}. Changing it to {activity} with {scanner}.")
+        log.debug(f"Altered planned scan state for {url_id}. Changing it to {activity} with {scanner}.")
     else:
-        log.debug(f"No planned scan found for {url}. Ignored.")
+        log.debug(f"No planned scan found for {url_id}. Ignored.")
 
 
 @app.task(queue="storage")
-def finish_multiple(activity: str, scanner: str, urls: List[Url]):
+def finish_multiple(activity: str, scanner: str, urls: List[int]):
     for url in urls:
         finish(activity, scanner, url)
 
 
 def retrieve_endpoints_from_urls(
-    urls: List[Url],
+    urls: List[int],
     protocols: List[str] = None,
     ports: List[int] = None,
     ip_versions: List[int] = None,

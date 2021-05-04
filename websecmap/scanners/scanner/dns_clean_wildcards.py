@@ -68,16 +68,16 @@ def compose_scan_task(urls):
 
     for url in urls:
         tasks.append(
-            get_identical_sites_on_wildcard_url.si(url)
+            get_identical_sites_on_wildcard_url.si(url.url)
             | store.s()
-            | plannedscan.finish.si("scan", "dns_clean_wildcards", url)
+            | plannedscan.finish.si("scan", "dns_clean_wildcards", url.pk)
         )
 
     return group(tasks)
 
 
-def subdomains_under_wildcard(url: Url) -> List[Url]:
-    result = tldextract.extract(url.url)
+def subdomains_under_wildcard(url: str) -> List[Url]:
+    result = tldextract.extract(url)
     # In this case do care about dead/not resolvable.
     # Dead will not change the state (we don't revive them)...
     # not resolvable will mean slower testing.
@@ -119,14 +119,14 @@ def site_content(url) -> Dict[str, Any]:
 
 
 @app.task(queue="all_internet")
-def get_identical_sites_on_wildcard_url(wildcard_url: Url) -> List[Url]:
+def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
     identical = []
 
-    if not discover_wildcard(wildcard_url.url):
+    if not discover_wildcard(wildcard_url):
         return identical
 
     wildcard_subdomain = "".join(random.choice(string.ascii_lowercase) for i in range(16))
-    wildcard_content = site_content(f"{wildcard_subdomain}.{wildcard_url.url}")
+    wildcard_content = site_content(f"{wildcard_subdomain}.{wildcard_url}")
 
     if wildcard_content == {
         "headers": None,
@@ -139,9 +139,9 @@ def get_identical_sites_on_wildcard_url(wildcard_url: Url) -> List[Url]:
 
     # could be that the wildcard renders a different page every time, in that case do not continue.
     # this happens for deventer and hollandskroon
-    wildcard_content2 = site_content(f"{wildcard_subdomain}.{wildcard_url.url}")
-    wildcard_content3 = site_content(f"{wildcard_subdomain}.{wildcard_url.url}")
-    wildcard_content4 = site_content(f"{wildcard_subdomain}.{wildcard_url.url}")
+    wildcard_content2 = site_content(f"{wildcard_subdomain}.{wildcard_url}")
+    wildcard_content3 = site_content(f"{wildcard_subdomain}.{wildcard_url}")
+    wildcard_content4 = site_content(f"{wildcard_subdomain}.{wildcard_url}")
 
     if not all(element == wildcard_content for element in [wildcard_content2, wildcard_content3, wildcard_content4]):
         log.debug(
@@ -149,12 +149,13 @@ def get_identical_sites_on_wildcard_url(wildcard_url: Url) -> List[Url]:
         )
         return identical
 
+    # todo: this needs access to storage.
     subdomain_urls = subdomains_under_wildcard(wildcard_url)
     log.debug(f"{wildcard_url} has {len(subdomain_urls)} subdomains.")
     for subdomain_url in subdomain_urls:
 
         # couldn't get the filtering correct in the subdomains_under_wildcard method.
-        if subdomain_url == wildcard_url:
+        if subdomain_url.url == wildcard_url:
             continue
 
         # Not needed: in this case the www. is the same as the (steady) wildcard. And thus is also not useful.
@@ -167,7 +168,7 @@ def get_identical_sites_on_wildcard_url(wildcard_url: Url) -> List[Url]:
         subdomain_content = site_content(subdomain_url.url)
         if wildcard_content == subdomain_content:
             log.debug(f"WILDCARD: Content of {subdomain_url} is the same as {wildcard_subdomain}.")
-            identical.append(subdomain_url)
+            identical.append(subdomain_url.pk)
         else:
             log.debug(f"        : Content of {subdomain_url} differs from {wildcard_subdomain}.")
 
@@ -175,10 +176,13 @@ def get_identical_sites_on_wildcard_url(wildcard_url: Url) -> List[Url]:
 
 
 @app.task(queue="storage")
-def store(urls: List[Url]):
-    log.debug(f"Received {len(urls)} that have been found to be having the same data as a wildcard.")
+def store(url_ids: List[int]):
+    log.debug(f"Received {len(url_ids)} that have been found to be having the same data as a wildcard.")
 
-    for url in urls:
+    for url_id in url_ids:
+        url = Url.objects.all().filter(pk=url_id).first()
+        if not url:
+            continue
         url.is_dead = True
         url.is_dead_reason = "Same content as wildcard. So no additional value to scan."
         url.is_dead_since = datetime.now(pytz.utc)

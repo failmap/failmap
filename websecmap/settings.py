@@ -488,11 +488,13 @@ COMPRESS_OFFLINE = not DEBUG
 # It's preferable not to use pickle, yet it's overly convenient as the normal serializer can not
 # even serialize dicts.
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html
-CELERY_ACCEPT_CONTENT = ["pickle", "json"]
-CELERY_SERIALIZER = "pickle"
-CELERY_TASK_SERIALIZER = "pickle"
-CELERY_RESULT_SERIALIZER = "pickle"
-CELERY_EVENT_SERIALIZER = "pickle"
+
+# Using json instead of pickle to reduce memory overhead and reduce attack surface
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_SERIALIZER = "json"
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_EVENT_SERIALIZER = "json"
 
 
 CELERY_BROKER_URL = os.environ.get("BROKER", "redis://localhost:6379/0")

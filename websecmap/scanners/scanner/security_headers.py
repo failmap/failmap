@@ -3,14 +3,14 @@ Check if the https site uses HSTS to tell the browser the site should only be re
 (useful until browsers do https by default, instead of by choice)
 """
 import logging
-from typing import Dict
+from typing import Dict, Any, Union
 
 import requests
 import urllib3
 from celery import Task, group
-from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
+from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout, Response
 
-from websecmap.celery import ParentFailed, app
+from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
@@ -99,8 +99,8 @@ def compose_scan_task(urls):
     for endpoint in endpoints:
         tasks.append(
             get_headers.si(endpoint.uri_url()).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
-            | analyze_headers.s(endpoint)
-            | plannedscan.finish.si("scan", "security_headers", endpoint.url)
+            | analyze_headers.s(endpoint.pk)
+            | plannedscan.finish.si("scan", "security_headers", endpoint.url.pk)
         )
 
     return group(tasks)
@@ -161,12 +161,13 @@ def discover_service_type(headers: Dict = None):
 
 
 @app.task(queue="storage")
-def analyze_headers(result: requests.Response, endpoint):
+def analyze_headers(headers: Dict[str, str], endpoint_id):
     # todo: remove code paths, and make a more clear case per header type. That's easier to understand edge cases.
     # todo: Content-Security-Policy, Referrer-Policy
 
     # if scan task failed, ignore the result (exception) and report failed status
-    if isinstance(result, Exception):
+    # Exceptions do not serialize.
+    if isinstance(headers, bool):
         """
         There could be many reason the parent failed. Some issues however are created by mandated certificate use.
         In this case a "ConnectionError", "('Connection aborted.', OSError(\"(104, 'ECONNRESET')\",)) is received.
@@ -181,12 +182,14 @@ def analyze_headers(result: requests.Response, endpoint):
         """
 
         existing_header_scans = EndpointGenericScan.objects.all().filter(
-            endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True
+            endpoint=endpoint_id, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True
         )
 
         # Do not store 'corrections' when there are no scans already.
         if not existing_header_scans:
-            return ParentFailed("Skipping http header result parsing because scan failed.", cause=result)
+            # kombu.exceptions.EncodeError: Object of type ParentFailed is not JSON serializable
+            # return ParentFailed("Skipping http header result parsing because scan failed.", cause=headers)
+            return {"status": "success"}
 
         # There used to be stringent filtering here: for oserror and ECONNRESET in the exception, but the fact is
         # that there are so many possible network errors, that it's always a struggle to keep up to date.
@@ -194,28 +197,30 @@ def analyze_headers(result: requests.Response, endpoint):
         # and that the evidence shows what went wrong for later debugging reasons.
 
         for scan in existing_header_scans:
-            store_endpoint_scan_result(scan.type, endpoint, "Unreachable", "Address became unreachable.", str(result))
+            store_endpoint_scan_result(
+                scan.type, endpoint_id, "Unreachable", "Address became unreachable.", str(headers)
+            )
 
         return {"status": "success"}
 
-    response = result
-
     # determine what kind of service we're dealing with.
-    service_type = discover_service_type(response.headers)
+    service_type = discover_service_type(headers)
+
+    endpoint = Endpoint.objects.all().filter(pk=endpoint_id).only("pk", "url__id", "protocol").first()
+    if not endpoint:
+        return {"status": "success"}
 
     if service_type == "HTTP":
-        return analyze_website_headers(endpoint, response)
+        return analyze_website_headers(endpoint_id, endpoint.url.id, endpoint.protocol, headers)
     if service_type == "SOAP":
-        return analyze_soap_headers(endpoint, response)
+        return analyze_soap_headers(endpoint_id)
     if service_type == "UNKNOWN":
-        return clean_up_existing_headers(endpoint, response, service_type=service_type, reason="unknown_content_type")
+        return clean_up_existing_headers(endpoint_id, service_type=service_type, reason="unknown_content_type")
     if service_type == "RESTRICTED":
-        return clean_up_existing_headers(
-            endpoint, response, service_type=service_type, reason="authentication_required"
-        )
+        return clean_up_existing_headers(endpoint_id, service_type=service_type, reason="authentication_required")
 
 
-def analyze_soap_headers(endpoint, response):
+def analyze_soap_headers(endpoint_id):
     """
     We currently have no implementation for SOAP headers, but we do know that previously discovered non-soap headers
     can be overwritten as being SOAP headers and not being relevant anymore.
@@ -225,30 +230,28 @@ def analyze_soap_headers(endpoint, response):
 
     A next iteration of websecmap could/should contain this validation that certain headers are mandated for SOAP.
 
-    :param endpoint:
-    :param response:
+    :param endpoint_id:
     :return:
     """
 
     # clean up existing web headers and set them to being not relevant for soap:
     existing_header_scans = EndpointGenericScan.objects.all().filter(
-        endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True
+        endpoint=endpoint_id, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True
     )
 
     for scan in existing_header_scans:
-        store_endpoint_scan_result(scan.type, endpoint, "SOAP", "Header not relevant for SOAP service.")
+        store_endpoint_scan_result(scan.type, endpoint_id, "SOAP", "Header not relevant for SOAP service.")
 
     return {"status": "success"}
 
 
-def clean_up_existing_headers(endpoint, response, service_type: str, reason: str):
+def clean_up_existing_headers(endpoint_id: int, service_type: str, reason: str):
     """
     Unknown headers for a content type we can't handle.
 
     We do NOT create new headers, meaning that if no relevant data was found, no records are added to the database.
 
-    :param endpoint:
-    :param response:
+    :param endpoint_id:
     :param service_type: What type of service has been discovered that prevents further processing: RESTRICTED, UNKNOWN
     :param reason: More verbose explanation of the service type.
     :return:
@@ -256,16 +259,16 @@ def clean_up_existing_headers(endpoint, response, service_type: str, reason: str
 
     # clean up existing web headers and set them to being not relevant for soap:
     existing_header_scans = EndpointGenericScan.objects.all().filter(
-        endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True
+        endpoint=endpoint_id, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True
     )
 
     for scan in existing_header_scans:
-        store_endpoint_scan_result(scan.type, endpoint, service_type, reason)
+        store_endpoint_scan_result(scan.type, endpoint_id, service_type, reason)
 
     return {"status": "success"}
 
 
-def analyze_website_headers(endpoint, response):
+def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: Dict[str, str]):
     """
     #125: CSP can replace X-XSS-Protection and X-Frame-Options. Thus if a (more modern) CSP header is present, assume
     that decisions have been made about what's in it and ignore the previously mentioned headers.
@@ -284,9 +287,9 @@ def analyze_website_headers(endpoint, response):
     # We've removed conditional scans in scannerss, as more scan data is better.
     # you can cohose not to display or report it. Below used to be conditional scans.
 
-    generic_check_using_csp_fallback(endpoint, response.headers, "X-XSS-Protection")
-    generic_check_using_csp_fallback(endpoint, response.headers, "X-Frame-Options")
-    generic_check(endpoint, response.headers, "X-Content-Type-Options")
+    generic_check_using_csp_fallback(endpoint_id, headers, "X-XSS-Protection")
+    generic_check_using_csp_fallback(endpoint_id, headers, "X-Frame-Options")
+    generic_check(endpoint_id, headers, "X-Content-Type-Options")
 
     """
     https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
@@ -312,26 +315,26 @@ def analyze_website_headers(endpoint, response):
 
     If you think it works differently, just file an issue or make a pull request. We want to get it right.
     """
-    if endpoint.protocol == "https":
+    if protocol == "https":
 
         # runs any unsecured http service? (on ANY port).
-        unsecure_services = Endpoint.objects.all().filter(url=endpoint.url, protocol="http", is_dead=False).exists()
+        unsecure_services = Endpoint.objects.all().filter(url=url, protocol="http", is_dead=False).exists()
         if unsecure_services:
-            generic_check(endpoint, response.headers, "Strict-Transport-Security")
+            generic_check(endpoint_id, headers, "Strict-Transport-Security")
         else:
-            if "Strict-Transport-Security" in response.headers:
+            if "Strict-Transport-Security" in headers:
                 log.debug("Has Strict-Transport-Security")
                 store_endpoint_scan_result(
                     "http_security_header_strict_transport_security",
-                    endpoint,
+                    endpoint_id,
                     "True",
-                    response.headers["Strict-Transport-Security"],
+                    headers["Strict-Transport-Security"],
                 )
             else:
                 log.debug("Has no Strict-Transport-Security, yet offers no insecure http service.")
                 store_endpoint_scan_result(
                     "http_security_header_strict_transport_security",
-                    endpoint,
+                    endpoint_id,
                     "False",
                     "Security Header not present: Strict-Transport-Security, " "yet offers no insecure http service.",
                 )
@@ -339,33 +342,33 @@ def analyze_website_headers(endpoint, response):
     return {"status": "success"}
 
 
-def generic_check(endpoint: Endpoint, headers, header):
+def generic_check(endpoint_id: int, headers, header):
     # this is case insensitive
 
     scan_type = "http_security_header_%s" % header.lower().replace("-", "_")
 
     if header in headers.keys():
         log.debug("Has %s" % header)
-        store_endpoint_scan_result(scan_type, endpoint, "True", headers[header])
+        store_endpoint_scan_result(scan_type, endpoint_id, "True", headers[header])
     else:
         log.debug("Has no %s" % header)
-        store_endpoint_scan_result(scan_type, endpoint, "False", "Security Header not present: %s" % header)
+        store_endpoint_scan_result(scan_type, endpoint_id, "False", "Security Header not present: %s" % header)
 
 
-def generic_check_using_csp_fallback(endpoint: Endpoint, headers, header):
+def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
     scan_type = "http_security_header_%s" % header.lower().replace("-", "_")
 
     # this is case insensitive
     if header in headers.keys():
         log.debug("Has %s" % header)
-        store_endpoint_scan_result(scan_type, endpoint, "True", headers[header])
+        store_endpoint_scan_result(scan_type, endpoint_id, "True", headers[header])
     else:
         # CSP fallback:
         log.debug("CSP fallback used for %s" % header)
         if "Content-Security-Policy" in headers.keys():
             store_endpoint_scan_result(
                 scan_type=scan_type,
-                endpoint=endpoint,
+                endpoint_id=endpoint_id,
                 rating="Using CSP",
                 message="Content-Security-Policy header found, which can handle the security from %s."
                 "Value (possibly truncated): %s..." % (header, headers["Content-Security-Policy"][0:80]),
@@ -376,7 +379,7 @@ def generic_check_using_csp_fallback(endpoint: Endpoint, headers, header):
             log.debug("Has no %s" % header)
             store_endpoint_scan_result(
                 scan_type=scan_type,
-                endpoint=endpoint,
+                endpoint_id=endpoint_id,
                 rating="False",
                 message="Security Header not present: %s, alternative header Content-Security-Policy not present."
                 % header,
@@ -384,9 +387,11 @@ def generic_check_using_csp_fallback(endpoint: Endpoint, headers, header):
 
 
 @app.task(bind=True, default_retry_delay=1, retry_kwargs={"max_retries": 3})
-def get_headers(self, uri_uri):
+def get_headers(self, uri_uri: str) -> Union[Dict[str, Any], bool]:
     try:
-        return get_headers_request(uri_uri)
+        response = get_headers_request(uri_uri)
+        # Object of type CaseInsensitiveDict is not JSON serializable.
+        return dict(response.headers)
 
     # The amount of possible return states is overwhelming :)
 
@@ -422,10 +427,11 @@ def get_headers(self, uri_uri):
         except BaseException:
             # If this task still fails after maximum retries the last
             # error will be passed as result to the next task.
-            return e
+            # Exceptions do not serialize.
+            return False
 
 
-def get_headers_request(uri_url):
+def get_headers_request(uri_url: str) -> Response:
     """
     Issue #94:
     TL;DR: The fix is to follow all redirects.

@@ -48,7 +48,7 @@ def compose_task(
 
         # Do NOT update the statistics also. This can take long and might not have a desired effect.
         # those updates have to be called explicitly.
-        tasks.append(recreate_url_reports.si(urls) | recreate_organization_reports.si([organization]))
+        tasks.append(recreate_url_reports.si(urls) | recreate_organization_reports.si([organization.pk]))
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")

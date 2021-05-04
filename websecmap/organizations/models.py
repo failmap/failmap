@@ -326,6 +326,12 @@ class Url(models.Model):
         managed = True
         db_table = "url"
 
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "url": self.url,
+        }
+
     def __str__(self):
         if self.is_dead:
             return "✝ %s" % self.url

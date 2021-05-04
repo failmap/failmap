@@ -302,7 +302,7 @@ class InternetNLV2ScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     def attempt_rollback(self, request, queryset):
         for scan in queryset:
-            recover_and_retry.apply_async([scan])
+            recover_and_retry.apply_async([scan.pk])
         self.message_user(request, "Rolling back asynchronously. May take a while.")
 
     attempt_rollback.short_description = "Attempt rollback (async)"
@@ -310,7 +310,7 @@ class InternetNLV2ScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     def progress_scan(self, request, queryset):
         for scan in queryset:
-            tasks = progress_running_scan(scan)
+            tasks = progress_running_scan(scan.pk)
             tasks.apply_async()
         self.message_user(request, "Attempting to progress scans (async).")
 
@@ -373,7 +373,7 @@ class ScanProxyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     def check_qualys_proxy(self, request, queryset):
         for proxy in queryset:
-            check_proxy.apply_async([proxy])
+            check_proxy.apply_async([proxy.as_dict()])
         self.message_user(request, "Proxing checked asynchronously. May take some time before results come in.")
 
     check_qualys_proxy.short_description = "Check proxy"

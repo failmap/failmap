@@ -70,7 +70,7 @@ def sidn_domain_upload_(request):
     data = request.POST.get("data", "")
     if not data:
         return JsonResponse({"result": "no data supplied, not going to process request"})
-    sidn_domain_upload.apply_async([request.user, data])
+    sidn_domain_upload.apply_async([request.user.id, data])
     return JsonResponse({"result": "processing"})
 
 

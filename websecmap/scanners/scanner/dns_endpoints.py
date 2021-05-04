@@ -11,6 +11,7 @@ the same. So to save a lot of pain and trouble, we'll just fill the port and ip_
 
 import logging
 from time import sleep
+from typing import List
 
 from celery import Task, group
 from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, Resolver, Timeout
@@ -61,7 +62,7 @@ def filter_verify(
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-def compose_new_discover_task(urls):
+def compose_new_discover_task(urls: List[Url]):
     tasks = []
 
     # Endpoint life cycle helps with keeping track of scan results over time. For internet.nl scans we create a few
@@ -71,12 +72,12 @@ def compose_new_discover_task(urls):
     for url in urls:
         tasks.append(
             has_mx_without_cname.si(url.url)
-            | connect_result.s(protocol="dns_mx_no_cname", url=url, port=0, ip_version=0)
+            | connect_result.s(protocol="dns_mx_no_cname", url_id=url.pk, port=0, ip_version=0)
             | has_soa.si(url.url)
-            | connect_result.s(protocol="dns_soa", url=url, port=0, ip_version=0)
+            | connect_result.s(protocol="dns_soa", url_id=url.pk, port=0, ip_version=0)
             | has_a_or_aaaa.si(url.url)
-            | connect_result.s(protocol="dns_a_aaaa", url=url, port=0, ip_version=0)
-            | plannedscan.finish.si("discover", "dns_endpoints", url)
+            | connect_result.s(protocol="dns_a_aaaa", url_id=url.pk, port=0, ip_version=0)
+            | plannedscan.finish.si("discover", "dns_endpoints", url.pk)
         )
 
     return group(tasks)
@@ -89,12 +90,12 @@ def compose_new_verify_task(urls):
     for endpoint in endpoints:
         tasks.append(
             has_mx_without_cname.si(endpoint.url.url)
-            | connect_result.s(protocol="dns_mx_no_cname", url=endpoint.url, port=0, ip_version=0)
+            | connect_result.s(protocol="dns_mx_no_cname", url_id=endpoint.url.pk, port=0, ip_version=0)
             | has_soa.si(endpoint.url.url)
-            | connect_result.s(protocol="dns_soa", url=endpoint.url, port=0, ip_version=0)
+            | connect_result.s(protocol="dns_soa", url_id=endpoint.url.pk, port=0, ip_version=0)
             | has_a_or_aaaa.si(endpoint.url.url)
-            | connect_result.s(protocol="dns_a_aaaa", url=endpoint.url, port=0, ip_version=0)
-            | plannedscan.finish.si("verify", "dns_endpoints", endpoint.url)
+            | connect_result.s(protocol="dns_a_aaaa", url_id=endpoint.url.pk, port=0, ip_version=0)
+            | plannedscan.finish.si("verify", "dns_endpoints", endpoint.url.pk)
         )
     return group(tasks)
 

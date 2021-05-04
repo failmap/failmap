@@ -1,6 +1,7 @@
 import logging
 from copy import deepcopy
 from datetime import datetime
+from typing import Dict, Any
 
 import pytz
 from adminsortable2.admin import SortableAdminMixin
@@ -53,16 +54,16 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         tasks = []
 
         for region in queryset:
-            organization_filter = {"country": region.country, "type": region.organization_type}
+            organization_filter = {"country": region.country, "type": region.organization_type.pk}
 
             # you can't add tasks for reporting, as the data is not in the database to create the tasks yet.
             tasks.append(
-                start_import.si(region)
+                start_import.si(region.pk)
                 | import_from_scratch.si([str(region.country)], [region.organization_type.name])
-                | add_configuration.si(region.country, region.organization_type)
-                | set_imported.si(region)
+                | add_configuration.si(str(region.country), region.organization_type.pk)
+                | set_imported.si(region.pk)
                 | report_country.si(organization_filter)
-                | prepare_map.si(region.country, region.organization_type)
+                | prepare_map.si(str(region.country), region.organization_type.pk)
             )
 
         task_name = "%s (%s) " % ("Import region", ",".join(map(str, list(queryset))))
@@ -81,13 +82,13 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         tasks = []
 
         for region in queryset:
-            organization_filter = {"country": region.country, "type": region.organization_type}
+            organization_filter = {"country": region.country, "type": region.organization_type.pk}
             tasks.append(
-                start_import.si(region)
+                start_import.si(region.pk)
                 | update_coordinates.si([str(region.country)], [region.organization_type.name])
-                | set_imported.si(region)
+                | set_imported.si(region.pk)
                 | report_country.si(organization_filter)
-                | prepare_map.si(region.country, region.organization_type)
+                | prepare_map.si(str(region.country), region.organization_type.pk)
             )
 
         task_name = "%s (%s) " % ("Update region", ",".join(map(str, list(queryset))))
@@ -102,32 +103,39 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 @app.task(queue="storage")
-def start_import(region: models.AdministrativeRegion):
+def start_import(region_id: int):
+    region = models.AdministrativeRegion.objects.all().filter(pk=region_id).first()
+    if not region:
+        return
+
     region.import_start_date = datetime.now(pytz.utc)
     region.save(update_fields=["import_start_date"])
 
 
 @app.task(queue="storage")
-def set_imported(region: models.AdministrativeRegion):
+def set_imported(region_id: int):
+    region = models.AdministrativeRegion.objects.all().filter(pk=region_id).first()
+    if not region:
+        return
     region.imported = True
     region.save(update_fields=["imported"])
 
 
 @app.task(queue="storage")
-def prepare_map(country, organization_type):
+def prepare_map(country: str, organization_type: int):
     # when the reports are created, we still probably have some map cache, as the admin probably looked
     # at that page before...
     MapDataCache.objects.all().filter(organization_type__name=organization_type, country=country).delete()
 
 
 @app.task(queue="storage")
-def report_country(organization_filter):
+def report_country(organization_filter: Dict[str, Any]):
     tasks = compose_task(organizations_filter=organization_filter)
     tasks.apply_async()
 
 
 @app.task(queue="storage")
-def add_configuration(country, organization_type):
+def add_configuration(country: str, organization_type: int):
 
     if models.Configuration.objects.all().filter(country=country, organization_type=organization_type).exists():
         log.debug("This configuration already exists, skipping.")

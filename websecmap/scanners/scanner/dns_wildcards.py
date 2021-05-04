@@ -36,7 +36,7 @@ def compose_discover_task(urls):
     task = group(
         discover_wildcard.si(url.url)
         | store_wildcard.s(url.id)
-        | plannedscan.finish.si("discover", "dns_wildcard", url)
+        | plannedscan.finish.si("discover", "dns_wildcard", url.pk)
         for url in urls
     )
     return task

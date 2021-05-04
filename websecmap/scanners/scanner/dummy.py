@@ -94,7 +94,7 @@ def compose_scan_task(urls):
         # thread. The object with alias 'default' was created in thread id 4561566752 and this is thread id 4858017888.
         # ")
         # referencing the PK directly is enough for the query. It doesn't crash and it will probably do nothing.
-        scan.si(endpoint.uri_url()) | store.s(endpoint) | plannedscan.finish.si("scan", "dummy", endpoint.url.pk)
+        scan.si(endpoint.uri_url()) | store.s(endpoint.pk) | plannedscan.finish.si("scan", "dummy", endpoint.url.pk)
         for endpoint in endpoints
     )
     return task
@@ -129,7 +129,7 @@ def compose_manual_scan_task(
 
 
 @app.task(queue="storage")
-def store(result, endpoint):
+def store(result, endpoint_id):
     """
 
     :param result: param endpoint:
@@ -148,14 +148,14 @@ def store(result, endpoint):
     message_result_ok = "Because the result was True"
     message_result_false = "Because the result was False"
 
-    log.debug(f"Storing result: {result}, for endpoint: {endpoint}.")
+    log.debug(f"Storing result: {result}, for endpoint: {endpoint_id}.")
 
     # You can save any (string) value and any (string) message.
     # The EndpointScanManager deduplicates the data for you automatically.
     if result:
-        store_endpoint_scan_result("Dummy", endpoint, "True", message_result_ok)
+        store_endpoint_scan_result("Dummy", endpoint_id, "True", message_result_ok)
     else:
-        store_endpoint_scan_result("Dummy", endpoint, "False", message_result_false)
+        store_endpoint_scan_result("Dummy", endpoint_id, "False", message_result_false)
 
     # return something informative
     return {"status": "success", "result": result}

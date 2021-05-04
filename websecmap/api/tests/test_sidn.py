@@ -88,7 +88,7 @@ def test_domain_upload(db, requests_mock, current_path):
     user = User()
     user.first_name = ""
     user.save()
-    sidn_domain_upload(user, csv_data)
+    sidn_domain_upload(user.pk, csv_data)
     assert SIDNUpload.objects.all().count() == 1
 
     # Create a domain upload for arnhem:
