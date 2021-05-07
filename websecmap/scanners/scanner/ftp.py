@@ -34,6 +34,8 @@ log = logging.getLogger(__name__)
 MAX_RETRIES = 3
 RETRY_DELAY = 10
 
+FTP_SERVER_TIMEOUT = 3
+
 # after which time (seconds) a pending task should no longer be accepted by a worker
 # can also be a datetime.
 EXPIRES = 3600  # one hour is more then enough
@@ -308,7 +310,7 @@ def scan(self, address: str, port: int):
     ftp = FTP()  # nosec scanning for insecure ftp is the point
 
     try:
-        ftp.connect(host=address, port=port, timeout=30)
+        ftp.connect(host=address, port=port, timeout=FTP_SERVER_TIMEOUT)
         results["status"] += "Connected"
         log.debug("Connecting to %s " % address)
     except OSError as Ex:
@@ -427,7 +429,7 @@ def discover(url: str, port: int):
     connected = False
     ftp = FTP()  # nosec scanning for insecure ftp is the point
     try:
-        ftp.connect(url, port, 30)
+        ftp.connect(url, port, FTP_SERVER_TIMEOUT)
         connected = True
         ftp.close()
     except Exception:
@@ -471,14 +473,18 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
     if doesnotexist:
         if not connected:
             # Not logging all urls over and over again.
-            # log.debug(f"No FTP server is running on {url.url}.")
+            # log.debug(f"No FTP server is running on {url}.")
             return
 
         # new endpoint! Store this endpoint as existing. Hooray, we found something new to scan.
         # We will not set old endpoints to alive.
         if connected:
-            log.debug(f"New FTP server discovered on {url.url}.")
-            ep = Endpoint(url=url, port=port, protocol=protocol, ip_version=ip_version, discovered_on=timezone.now())
+            db_url = Url.objects.all().filter(id=url).first()
+            if not db_url:
+                return
+
+            log.debug(f"New FTP server discovered on {url}.")
+            ep = Endpoint(url=db_url, port=port, protocol=protocol, ip_version=ip_version, discovered_on=timezone.now())
             ep.save()
             return
 
@@ -488,7 +494,7 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
 
     # endpoint died. Kill it.
     if endpoint.is_dead is False and not connected:
-        log.debug(f"Existing FTP server could not be found anymore on {url.url}, removing.")
+        log.debug(f"Existing FTP server could not be found anymore on {url}, removing.")
         endpoint.is_dead = True
         endpoint.is_dead_reason = "Could not connect"
         endpoint.is_dead_since = timezone.now()
