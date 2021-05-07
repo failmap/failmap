@@ -423,7 +423,7 @@ def process_qualys_result(data, url: str):
         return
 
 
-def report_to_console(domain, data):
+def report_to_console(domain: str, data: Dict[str, Any]):
     """
     Gives some impression of what is currently going on in the scan.
 
