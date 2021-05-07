@@ -16,6 +16,7 @@ import socket
 from constance import config
 from kombu import Queue
 from retry import retry
+from collections import defaultdict
 
 log = logging.getLogger(__name__)
 
@@ -48,95 +49,102 @@ ROLES_REQUIRING_NO_NETWORK = [
 ROLES_REQUIRING_GUI_AND_NETWORK = ["desktop"]
 
 # define roles for workers
-QUEUES_MATCHING_ROLES = {
-    # Select between roles.
-    # universal worker that has access to database and internet on both v4 and v6
-    # will work in one-worker configuration - and slowly -  it's untested and it likely will not be a great experience
-    "default": [
-        # doesn't care about network family, any network is fine
-        Queue("internet"),
-        # only ipv4 tasks
-        Queue("ipv4"),
-        # only ipv4 tasks
-        Queue("ipv6"),
-        # needs both network families to be present
-        Queue("4and6"),
-        # for tasks that require a database connection
-        Queue("storage"),
-        # tasks that require no network, no database. Such as calculations, parsing of datasets etc.
-        Queue("isolated"),
-        # run qualys scans
-        Queue("qualys"),
-        Queue("claim_proxy"),
-    ],
-    # queuemonitor shows the currently running queues on the dashboard. It will not do anything else. It subscribes
-    # to all queues. This does not have a worker (and doesn't need one).
-    "queuemonitor": [
-        Queue("storage"),
-        Queue("4and6"),
-        Queue("ipv4"),
-        Queue("ipv6"),
-        Queue("internet"),
-        Queue("qualys"),
-        Queue("isolated"),
-        Queue("claim_proxy"),
-    ],
-    "default_ipv4": [
-        Queue("internet"),
-        Queue("ipv4"),
-        Queue("storage"),
-        Queue("isolated"),
-    ],
-    "default_ipv6": [
-        Queue("internet"),
-        Queue("ipv6"),
-        Queue("storage"),
-        Queue("isolated"),
-    ],
-    "v4_internet": [
-        Queue("internet"),
-        Queue("ipv4"),
-        Queue("isolated"),
-    ],
-    "v6_internet": [
-        Queue("internet"),
-        Queue("ipv6"),
-        Queue("isolated"),
-    ],
-    "storage": [
-        Queue("storage"),
-        # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might block the worker.
-        # Given there is only one storage worker, blocking it doesn't help it's work.
-    ],
-    "reporting": [
-        Queue("reporting"),
-    ],
-    "claim_proxy": [
-        Queue("claim_proxy"),
-        # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might block the worker.
-        # Given there is only one storage worker, blocking it doesn't help it's work.
-    ],
-    "calculator": [Queue("isolated")],
-    "desktop": [Queue("desktop")],
-    # universal scanner worker that has internet access for either IPv4 and IPv6 or both (you don't know)
-    "any_internet": [
-        Queue("internet"),  # tasks that requires ANY network
-        Queue("isolated"),  # no network, no database
-    ],
-    # all internet access, with ipv4 and 6 configured
-    "all_internet": [
-        Queue("internet"),
-        Queue("ipv4"),
-        Queue("ipv6"),
-        Queue("4and6"),
-        Queue("isolated"),
-    ],
-    # special scanner worker for qualys rate limited tasks to not block queue for other tasks
-    # and it needs a dedicated IP address, which is coded in hyper workers.
-    "qualys": [
-        Queue("qualys"),
-    ],
-}
+QUEUES_MATCHING_ROLES = defaultdict(
+    # if no role specified for queue, default to single queue with the worker role name
+    lambda x: Queue(x),
+    {
+        # Select between roles.
+        # universal worker that has access to database and internet on both v4 and v6
+        # will work in one-worker configuration - and slowly -  it's untested and it likely
+        # will not be a great experience
+        "default": [
+            # doesn't care about network family, any network is fine
+            Queue("internet"),
+            # only ipv4 tasks
+            Queue("ipv4"),
+            # only ipv4 tasks
+            Queue("ipv6"),
+            # needs both network families to be present
+            Queue("4and6"),
+            # for tasks that require a database connection
+            Queue("storage"),
+            # tasks that require no network, no database. Such as calculations, parsing of datasets etc.
+            Queue("isolated"),
+            # run qualys scans
+            Queue("qualys"),
+            Queue("claim_proxy"),
+        ],
+        # queuemonitor shows the currently running queues on the dashboard. It will not do anything else. It subscribes
+        # to all queues. This does not have a worker (and doesn't need one).
+        "queuemonitor": [
+            Queue("storage"),
+            Queue("4and6"),
+            Queue("ipv4"),
+            Queue("ipv6"),
+            Queue("internet"),
+            Queue("qualys"),
+            Queue("isolated"),
+            Queue("claim_proxy"),
+        ],
+        "default_ipv4": [
+            Queue("internet"),
+            Queue("ipv4"),
+            Queue("storage"),
+            Queue("isolated"),
+        ],
+        "default_ipv6": [
+            Queue("internet"),
+            Queue("ipv6"),
+            Queue("storage"),
+            Queue("isolated"),
+        ],
+        "v4_internet": [
+            Queue("internet"),
+            Queue("ipv4"),
+            Queue("isolated"),
+        ],
+        "v6_internet": [
+            Queue("internet"),
+            Queue("ipv6"),
+            Queue("isolated"),
+        ],
+        "storage": [
+            Queue("storage"),
+            # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might block the worker.
+            # Given there is only one storage worker, blocking it doesn't help it's work.
+        ],
+        "reporting": [
+            Queue("reporting"),
+        ],
+        "claim_proxy": [
+            Queue("claim_proxy"),
+            # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might
+            # block the worker.
+            # Given there is only one storage worker, blocking it doesn't help it's work.
+        ],
+        "calculator": [Queue("isolated")],
+        "desktop": [Queue("desktop")],
+        # universal scanner worker that has internet access for either IPv4 and IPv6 or
+        # both (you don't know)
+        "any_internet": [
+            Queue("internet"),  # tasks that requires ANY network
+            Queue("isolated"),  # no network, no database
+        ],
+        # all internet access, with ipv4 and 6 configured
+        "all_internet": [
+            Queue("internet"),
+            Queue("ipv4"),
+            Queue("ipv6"),
+            Queue("4and6"),
+            Queue("isolated"),
+        ],
+        # special scanner worker for qualys rate limited tasks to not block queue for other tasks
+        # and it needs a dedicated IP address, which is coded in hyper workers.
+        "qualys": [
+            Queue("qualys"),
+        ],
+    },
+)
 
 
 def worker_configuration():
