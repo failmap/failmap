@@ -99,7 +99,8 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
         # Because the endpoint, to display, needs url data, it will try to retrieve that for every
         # record. Here we already include those results, so the page loads 10x faster (at okay speeds now)
-        qs = qs.prefetch_related("endpoint", "endpoint__url")
+        qs = qs.prefetch_related("endpoint", "endpoint__url", "endpoint__url__organization",
+                                 "endpoint__url__organization__type")
 
         return qs
 
@@ -122,7 +123,6 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         ("endpoint", RelatedFieldAjaxListFilter),
         "type",
         "rating",
-        "explanation",
         "last_scan_moment",
         "rating_determined_on",
         "endpoint__protocol",
@@ -131,9 +131,6 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "endpoint__discovered_on",
         "endpoint__is_dead",
         "comply_or_explain_is_explained",
-        "comply_or_explain_explained_on",
-        "comply_or_explain_case_handled_by",
-        "comply_or_explain_explanation_valid_until",
         "is_the_latest_scan",
     ][::-1]
 
@@ -177,6 +174,11 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.UrlGenericScan)
 class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    def get_queryset(self, request):
+        qs = super(UrlGenericScanAdmin, self).get_queryset(request)
+        qs = qs.prefetch_related("url__organization", "url__organization__type")
+        return qs
+
     list_display = (
         "url",
         "type",
@@ -195,13 +197,9 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "url__organization__type__name",
         "type",
         "rating",
-        "explanation",
         "last_scan_moment",
         "rating_determined_on",
         "comply_or_explain_is_explained",
-        "comply_or_explain_explained_on",
-        "comply_or_explain_case_handled_by",
-        "comply_or_explain_explanation_valid_until",
         "is_the_latest_scan",
     ][::-1]
 
