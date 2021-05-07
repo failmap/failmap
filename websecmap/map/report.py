@@ -98,6 +98,7 @@ def compose_task(
             )
             .annotate(n_endpoints=Count("endpoint"))
             .filter(n_endpoints__gt=0)
+            .only("id")
         )
         if not urls:
             # can still add an empty organization rating even though there is nothing to show. Will create an
@@ -105,8 +106,9 @@ def compose_task(
             tasks.append(default_organization_rating.si([organization.pk]))
             continue
 
+        url_ids = [u.id for u in urls]
         # make sure default organization rating is in place
-        tasks.append(recreate_url_reports.si(urls) | create_organization_reports_now.si([organization.pk]))
+        tasks.append(recreate_url_reports.si(url_ids) | create_organization_reports_now.si([organization.pk]))
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")
@@ -121,23 +123,25 @@ def compose_task(
     # finally, rebuild the graphs (which can mis-matchi a bit if the last reports aren't in yet. Will have to do for now
     # mainly as we're trying to get away from canvas and it's buggyness.
 
+    subtasks = []
     if organizations_filter.get("country__in", None):
-        tasks.append(calculate_vulnerability_statistics.si(1, organizations_filter["country__in"]))
-        tasks.append(calculate_map_data.si(1, organizations_filter["country__in"]))
-        tasks.append(calculate_high_level_stats.si(1, organizations_filter["country__in"]))
-        tasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1, organizations_filter["country__in"]))
+        subtasks.append(calculate_vulnerability_statistics.si(1, organizations_filter["country__in"]))
+        subtasks.append(calculate_map_data.si(1, organizations_filter["country__in"]))
+        subtasks.append(calculate_high_level_stats.si(1, organizations_filter["country__in"]))
+        subtasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1, organizations_filter["country__in"]))
     elif organizations_filter.get("country", None):
-        tasks.append(calculate_vulnerability_statistics.si(1, [organizations_filter["country"]]))
-        tasks.append(calculate_map_data.si(1, [organizations_filter["country"]]))
-        tasks.append(calculate_high_level_stats.si(1, [organizations_filter["country"]]))
-        tasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1, [organizations_filter["country"]]))
+        subtasks.append(calculate_vulnerability_statistics.si(1, [organizations_filter["country"]]))
+        subtasks.append(calculate_map_data.si(1, [organizations_filter["country"]]))
+        subtasks.append(calculate_high_level_stats.si(1, [organizations_filter["country"]]))
+        subtasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1, [organizations_filter["country"]]))
     else:
-        tasks.append(calculate_vulnerability_statistics.si(1))
-        tasks.append(calculate_map_data.si(1))
-        tasks.append(calculate_high_level_stats.si(1))
-        tasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1))
+        subtasks.append(calculate_vulnerability_statistics.si(1))
+        subtasks.append(calculate_map_data.si(1))
+        subtasks.append(calculate_high_level_stats.si(1))
+        subtasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1))
 
-    task = group(tasks)
+    # Make sure all other reporting tasks are done
+    task = group(tasks) | group(subtasks)
 
     return task
 
