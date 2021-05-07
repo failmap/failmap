@@ -32,7 +32,7 @@ from constance import config
 from django.conf import settings
 
 from websecmap.app.progressbar import print_progress_bar
-from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
+from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url, Dataset
 from websecmap.scanners.scanner.http import resolves
 
 log = logging.getLogger(__package__)
@@ -59,8 +59,13 @@ def get_data(dataset, download_function):
 
     # support file uploads
     if dataset["file"]:
-        log.debug("Filename with data: %s" % dataset["file"].name)
-        return settings.MEDIA_ROOT + dataset["file"].name
+
+        db_dataset = Dataset.objects.all().filter(id=dataset['file']).first()
+        if not db_dataset:
+            return
+
+        log.debug("Filename with data: %s" % db_dataset.file_source.name)
+        return settings.MEDIA_ROOT + db_dataset.file_source.name
 
 
 def generic_dataset_import(dataset, parser_function, download_function):
