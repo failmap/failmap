@@ -153,9 +153,9 @@ def compose_discover_task(urls: List[Url]):
         for port in PREFERRED_PORT_ORDER:
             for url in urls:
                 tasks.append(
-                    can_connect.si(
-                        protocol=PORT_TO_PROTOCOL[port], url=url.url, port=port, ip_version=ip_version
-                    ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version])
+                    can_connect.si(protocol=PORT_TO_PROTOCOL[port], url=url.url, port=port, ip_version=ip_version).set(
+                        queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version]
+                    )
                     | connect_result.s(protocol=PORT_TO_PROTOCOL[port], url_id=url.pk, port=port, ip_version=ip_version)
                     | plannedscan.finish.si("discover", "http", url.pk)
                 )

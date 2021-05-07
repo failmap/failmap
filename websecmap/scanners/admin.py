@@ -99,8 +99,9 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
         # Because the endpoint, to display, needs url data, it will try to retrieve that for every
         # record. Here we already include those results, so the page loads 10x faster (at okay speeds now)
-        qs = qs.prefetch_related("endpoint", "endpoint__url", "endpoint__url__organization",
-                                 "endpoint__url__organization__type")
+        qs = qs.prefetch_related(
+            "endpoint", "endpoint__url", "endpoint__url__organization", "endpoint__url__organization__type"
+        )
 
         return qs
 

@@ -789,8 +789,7 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 raise ValueError("Datasource parser for %s is not available." % dataset.type)
 
             (
-                importers[dataset.type].import_datasets.si(**kwargs)
-                | dataset_import_finished.si(dataset.id)
+                importers[dataset.type].import_datasets.si(**kwargs) | dataset_import_finished.si(dataset.id)
             ).apply_async()
         self.message_user(request, "Import started, will run in parallel.")
 
