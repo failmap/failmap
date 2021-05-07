@@ -68,6 +68,10 @@ QUEUES_MATCHING_ROLES = {
         # run qualys scans
         Queue("qualys"),
         Queue("claim_proxy"),
+        Queue("reporting"),
+        Queue("discover_subdomains"),
+        Queue("known_subdomains"),
+        Queue("screenshot"),
     ],
     # queuemonitor shows the currently running queues on the dashboard. It will not do anything else. It subscribes
     # to all queues. This does not have a worker (and doesn't need one).

@@ -13,6 +13,7 @@ def test_get_subdomains(db):
     # Matched per country
     subdomains = ["test", "example", "first", "second"]
     for subdomain in subdomains:
+        # todo: use example.com
         u, created = Url.objects.all().get_or_create(url=f"{subdomain}.ex.com")
         u.organization.add(o)
         u.save()
@@ -36,6 +37,9 @@ def test_get_subdomains(db):
     tasks = compose_discover_task(list(Url.objects.all()))
     assert tasks is not group()
     assert len(tasks) == 8
+    # todo: tasks.tasks
+    # assert "websecmap.scanners.scanner.subdomains.wordlist_scan([<Url: test.ex.com>],
+    # ['example', 'first', 'second', 'test'])" in str(tasks)
 
     # It is intentional that the scans you request, you get. Normally you'd not plan subdomain scans on other
     # subdomains as that would in 99.999% of all cases not make sense.

@@ -44,10 +44,15 @@ def get_allowed_to_report():
 
 
 @app.task(queue="reporting")
-def recreate_url_reports(urls: List):
+def recreate_url_reports(urls: List[int]):
     """Remove the rating of one url and rebuild anew."""
 
-    for url in urls:
+    for url_id in urls:
+
+        url = Url.objects.all().filter(id=url_id).only("id").first()
+        if not url:
+            continue
+
         # Delete the ratings for this url, they are going to be rebuilt
         UrlReport.objects.all().filter(url=url).delete()
 
