@@ -79,14 +79,16 @@ to slightly larger than a multiple of 3, which is the default TCP packet retrans
 
 1 second is surely too short, it results in a lot of false positives, especially when scanning a lot of sites.
 """
-CONNECT_TIMEOUT = 10
+CONNECT_TIMEOUT = 7
 
 """
 Once your client has connected to the server and sent the HTTP request, the read timeout is the number of seconds the
 client will wait for the server to send a response. (Specifically, it’s the number of seconds that the client will wait
 between bytes sent from the server. In 99.9% of cases, this is the time before the server sends the first byte).
 """
-READ_TIMEOUT = 10
+READ_TIMEOUT = 7
+
+RDNS_TIMEOUT = 7
 
 
 def filter_discover(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs):
@@ -152,7 +154,7 @@ def compose_discover_task(urls: List[Url]):
             for url in urls:
                 tasks.append(
                     can_connect.si(
-                        protocol=PORT_TO_PROTOCOL[port], url_id=url.url, port=port, ip_version=ip_version
+                        protocol=PORT_TO_PROTOCOL[port], url=url.url, port=port, ip_version=ip_version
                     ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version])
                     | connect_result.s(protocol=PORT_TO_PROTOCOL[port], url_id=url.pk, port=port, ip_version=ip_version)
                     | plannedscan.finish.si("discover", "http", url.pk)
@@ -659,7 +661,7 @@ def store_url_ips(url: int, ips):
     )
 
 
-@timeout(10)
+@timeout(RDNS_TIMEOUT)
 def get_rdns_name(ip):
     reverse_name = ""
     try:

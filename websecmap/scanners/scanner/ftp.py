@@ -268,7 +268,6 @@ def store(result: dict, endpoint_id: int):
     default_retry_delay=RETRY_DELAY,
     retry_kwargs={"max_retries": MAX_RETRIES},
     expires=EXPIRES,
-    rate_limit="6/m",
 )
 def scan(self, address: str, port: int):
     """
