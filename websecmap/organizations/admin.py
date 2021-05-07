@@ -777,7 +777,7 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             return
 
         for dataset in queryset:
-            kwargs = {"url": dataset.url_source, "file": dataset.file_source}
+            kwargs = {"url": dataset.url_source, "file": dataset.id}
 
             extra_kwargs = loads(dataset.kwargs)
             kwargs = {**kwargs, **extra_kwargs}
@@ -788,7 +788,10 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             if not importers.get(dataset.type, None):
                 raise ValueError("Datasource parser for %s is not available." % dataset.type)
 
-            (importers[dataset.type].import_datasets.si(**kwargs) | dataset_import_finished.si(dataset)).apply_async()
+            (
+                importers[dataset.type].import_datasets.si(**kwargs)
+                | dataset_import_finished.si(dataset.id)
+            ).apply_async()
         self.message_user(request, "Import started, will run in parallel.")
 
     import_.short_description = "+ Import"
@@ -801,7 +804,12 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 @app.task(queue="storage")
-def dataset_import_finished(dataset):
+def dataset_import_finished(dataset_id):
+
+    dataset = Dataset.objects.all().filter(id=dataset_id).first()
+    if not dataset:
+        return
+
     dataset.is_imported = True
     dataset.imported_on = datetime.now(pytz.utc)
     dataset.save()

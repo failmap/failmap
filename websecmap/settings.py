@@ -1118,7 +1118,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         "label": _("💽 Import New Data"),
         "items": [
             {"name": "map.administrativeregion", "label": _("Open Street Map & Wikidata")},
-            {"name": "dataset", "label": "Spreadsheet Import"},
+            {"name": "organizations.dataset", "label": "Spreadsheet Import"},
         ],
     },
     {
