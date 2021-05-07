@@ -117,7 +117,7 @@ def compose_scan_task(urls):
 
 
 # We expect the screenshot tool to hang at non responsive urls.
-@app.task(queue="internet", rate_limit="60/m")
+@app.task(queue="screenshot", rate_limit="60/m")
 def make_screenshot(service: str, endpoint_url: str):
     try:
         return make_screenshot_with_u2p(service, endpoint_url)

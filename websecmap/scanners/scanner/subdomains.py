@@ -310,9 +310,11 @@ def dnsrecon_parse_report_contents(url: Dict[str, Any], contents: List):
 
 
 # place it on the IPv4 queue, so it can scale using cloud workers :)
-@app.task(ignore_result=True, queue="ipv4", rate_limit="6/h")
+# It seems that a rate limited task blocks an entire worker for any other tasks.
+@app.task(ignore_result=True, queue="known_subdomains", rate_limit="60/h")
 def wordlist_scan(urls: List[Dict[str, Any]], wordlist: List[str]):
     """
+    60/h = 10.000 scans / week.
 
     :param urls:
     :param wordlist:
@@ -452,7 +454,7 @@ def remove_wildcards(urls: List[Url]):
 
 # don't overload the crt.sh service, rate limit
 # todo: create a generic: go to $page with $parameter and scrape all urls.
-@app.task(ignore_result=True, queue="internet", rate_limit="2/m")
+@app.task(ignore_result=True, queue="discover_subdomains", rate_limit="2/m")
 @retry(wait=wait_fixed(30), before=before_log(log, logging.DEBUG))
 def certificate_transparency_scan(urls: List[Dict[str, Any]]):
     """
@@ -514,7 +516,7 @@ def certificate_transparency_scan(urls: List[Dict[str, Any]]):
 
 
 # this is a fairly safe scanner, and can be run pretty quiclkly (no clue if parralelisation works)
-@app.task(ignore_result=True, queue="internet", rate_limit="4/m")
+@app.task(ignore_result=True, queue="discover_subdomains", rate_limit="4/m")
 def nsec_scan(urls: List[Dict[str, Any]]):
     """
     Tries to use nsec (dnssec) walking. Does not use nsec3 (hashes).
