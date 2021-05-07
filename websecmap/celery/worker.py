@@ -136,6 +136,15 @@ QUEUES_MATCHING_ROLES = {
     "qualys": [
         Queue("qualys"),
     ],
+    "discover_subdomains": [
+        Queue("discover_subdomains"),
+    ],
+    "known_subdomains": [
+        Queue("known_subdomains"),
+    ],
+    "screenshot": [
+        Queue("screenshot"),
+    ],
 }
 
 
