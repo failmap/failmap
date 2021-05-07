@@ -60,7 +60,7 @@ def get_data(dataset, download_function):
     # support file uploads
     if dataset["file"]:
 
-        db_dataset = Dataset.objects.all().filter(id=dataset['file']).first()
+        db_dataset = Dataset.objects.all().filter(id=dataset["file"]).first()
         if not db_dataset:
             return
 
