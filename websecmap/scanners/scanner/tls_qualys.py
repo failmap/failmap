@@ -64,8 +64,56 @@ New architecture:
 """
 
 
+def filter_scan(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
+
+    if organizations_filter:
+        organizations = Organization.objects.filter(**organizations_filter).only("id")
+        urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
+    else:
+        urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter)
+
+    # We only perform an IN query, and need nothing of these urls except the ID:
+    urls = urls.only("id")
+
+    # select endpoints to scan based on filters
+    endpoints = Endpoint.objects.filter(
+        # apply filter to endpoints (or if no filter, all endpoints)
+        url__in=urls,
+        url__is_dead=False,
+        url__not_resolvable=False,
+        is_dead=False,
+        port=443,
+        protocol="https",
+        **endpoints_filter,
+    ).only("id", "port", "protocol", "ip_version", "url__id", "url__url")
+
+    # unique endpoints only
+    endpoints = unique_and_random(endpoints)
+    return unique_and_random([endpoint.url for endpoint in endpoints])
+
+
+@app.task(queue="storage")
+def plan_scan_new(
+    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+):
+    if not allowed_to_scan("tls_qualys"):
+        return group()
+
+    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    plannedscan.request(activity="scan", scanner="tls_qualys", urls=urls)
+
+
 @app.task(queue="storage")
 def plan_scan(urls_filter: dict = dict(), **kwargs):
+    """
+    There are all kinds of optimizations in this task due to scanning as few urls as possible.
+    - Scanning once every 7 days if everything was OK and scanning once every 3 days in case of errors.
+    - This increases complexity and causes confusion for requesting re-scans.
+
+    Use plan_scan_new to bypass all of those.
+    """
 
     if not allowed_to_scan("tls_qualys"):
         return None
