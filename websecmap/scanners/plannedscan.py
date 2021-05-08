@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 import dateutil.parser
 import pytz
 from django.db import connection
+from django_statsd.clients import statsd
 
 from websecmap.celery import app
 from websecmap.map.logic.map_health import get_outdated_ratings
@@ -110,6 +111,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
 
     urls = [scan.url for scan in scans]
     log.debug(f"Picked up {len(urls)} to {activity} with {scanner}.")
+    statsd.incr(f"scan.planned.pickup.{scanner}.{activity}", count=amount)
     return urls
 
 
@@ -138,6 +140,7 @@ def request(activity: str, scanner: str, urls: List[int]):
         discard = timedelta(minutes=now.minute % 10, seconds=now.second, microseconds=now.microsecond)
         ps.requested_at_when = now - discard
         ps.save()
+        statsd.incr(f"scan.planned.request.{scanner}.{activity}", count=1)
 
     log.debug(f"Requested {activity} with {scanner} on {len(urls)} urls.")
 
@@ -158,6 +161,7 @@ def already_requested(activity: str, scanner: str, url_id: int):
 @app.task(queue="storage")
 def finish(activity: str, scanner: str, url_id: int):
     set_scan_state(activity, scanner, url_id, "finished")
+    statsd.incr(f"scan.planned.finish.{scanner}.{activity}", count=1)
 
 
 def set_scan_state(activity: str, scanner: str, url_id: int, state="finished"):
