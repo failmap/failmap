@@ -115,7 +115,7 @@ class Job(models.Model):
 
 
 @app.task(queue="storage")
-def create_function_job(function: str, **kwargs):
+def create_function_job(function: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
     function: complete path to a function inside a module. This will be executed.
@@ -135,43 +135,48 @@ def create_function_job(function: str, **kwargs):
 
     task = call(**kwargs)
 
-    return Job.create(task, function, None)
+    job = Job.create(task, function, None)
+    return job.id
 
 
 @app.task(queue="storage")
-def create_job(task_module: str, **kwargs):
+def create_job(task_module: str, **kwargs) -> int:
     # will be deleted after all scanners have migrated to the manual / planned approach
     module = importlib.import_module(task_module)
     task = module.compose_task(**kwargs)
-    return Job.create(task, task_module, None)
+    job = Job.create(task, task_module, None)
+    return job.id
 
 
 @app.task(queue="storage")
-def create_discover_job(task_module: str, **kwargs):
+def create_discover_job(task_module: str, **kwargs) -> int:
     # will be deleted after all scanners have migrated to the manual / planned approach
     module = importlib.import_module(task_module)
     task = module.compose_discover_task(**kwargs)
-    return Job.create(task, task_module, None)
+    job = Job.create(task, task_module, None)
+    return job.id
 
 
 @app.task(queue="storage")
-def create_verify_job(task_module: str, **kwargs):
+def create_verify_job(task_module: str, **kwargs) -> int:
     # will be deleted after all scanners have migrated to the manual / planned approach
     module = importlib.import_module(task_module)
     task = module.compose_verify_task(**kwargs)
-    return Job.create(task, task_module, None)
+    job = Job.create(task, task_module, None)
+    return job.id
 
 
 @app.task(queue="storage")
-def create_scan_job(task_module: str, **kwargs):
+def create_scan_job(task_module: str, **kwargs) -> int:
     # will be deleted after all scanners have migrated to the manual / planned approach
     module = importlib.import_module(task_module)
     task = module.compose_scan_task(**kwargs)
-    return Job.create(task, task_module, None)
+    job = Job.create(task, task_module, None)
+    return job.id
 
 
 @app.task(queue="storage")
-def create_planned_scan_job(task_module: str, **kwargs):
+def create_planned_scan_job(task_module: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
     task_module: module from which to call `compose_discover_task` which results in the task to be executed
@@ -180,11 +185,12 @@ def create_planned_scan_job(task_module: str, **kwargs):
     module = importlib.import_module(task_module)
     task = module.compose_planned_scan_task(**kwargs)
 
-    return Job.create(task, task_module, None)
+    job = Job.create(task, task_module, None)
+    return job.id
 
 
 @app.task(queue="storage")
-def create_planned_discover_job(task_module: str, **kwargs):
+def create_planned_discover_job(task_module: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
     task_module: module from which to call `compose_discover_task` which results in the task to be executed
@@ -193,11 +199,12 @@ def create_planned_discover_job(task_module: str, **kwargs):
     module = importlib.import_module(task_module)
     task = module.compose_planned_discover_task(**kwargs)
 
-    return Job.create(task, task_module, None)
+    job = Job.create(task, task_module, None)
+    return job.id
 
 
 @app.task(queue="storage")
-def create_planned_verify_job(task_module: str, **kwargs):
+def create_planned_verify_job(task_module: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
     task_module: module from which to call `compose_discover_task` which results in the task to be executed
@@ -206,11 +213,12 @@ def create_planned_verify_job(task_module: str, **kwargs):
     module = importlib.import_module(task_module)
     task = module.compose_planned_verify_task(**kwargs)
 
-    return Job.create(task, task_module, None)
+    job = Job.create(task, task_module, None)
+    return job.id
 
 
 @app.task(queue="storage")
-def create_manual_scan_job(task_module: str, **kwargs):
+def create_manual_scan_job(task_module: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
     task_module: module from which to call `compose_discover_task` which results in the task to be executed
@@ -219,11 +227,12 @@ def create_manual_scan_job(task_module: str, **kwargs):
     module = importlib.import_module(task_module)
     task = module.compose_manual_scan_task(**kwargs)
 
-    return Job.create(task, task_module, None)
+    job = Job.create(task, task_module, None)
+    return job.id
 
 
 @app.task(queue="storage")
-def create_manual_discover_job(task_module: str, **kwargs):
+def create_manual_discover_job(task_module: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
     task_module: module from which to call `compose_discover_task` which results in the task to be executed
@@ -232,11 +241,12 @@ def create_manual_discover_job(task_module: str, **kwargs):
     module = importlib.import_module(task_module)
     task = module.compose_manual_discover_task(**kwargs)
 
-    return Job.create(task, task_module, None)
+    job = Job.create(task, task_module, None)
+    return job.id
 
 
 @app.task(queue="storage")
-def create_manual_verify_job(task_module: str, **kwargs):
+def create_manual_verify_job(task_module: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
     task_module: module from which to call `compose_discover_task` which results in the task to be executed
@@ -245,7 +255,8 @@ def create_manual_verify_job(task_module: str, **kwargs):
     module = importlib.import_module(task_module)
     task = module.compose_manual_verify_task(**kwargs)
 
-    return Job.create(task, task_module, None)
+    job = Job.create(task, task_module, None)
+    return job.id
 
 
 class Volunteer(models.Model):
