@@ -4,7 +4,7 @@ import pytz
 
 from websecmap.organizations.models import Url
 from websecmap.reporting.models import UrlReport
-from websecmap.reporting.report import create_timeline, create_url_reports, recreate_url_reports, recreate_url_report
+from websecmap.reporting.report import create_timeline, create_url_reports, recreate_url_report
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 
