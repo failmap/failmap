@@ -20,7 +20,18 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def inspect_url(self, obj):
         return format_html('<a href="../../organizations/url/{id}/change">inspect</a>', id=format(obj.url_id))
 
-    list_display = ("url", "high", "medium", "low", "ok", "total_endpoints", "ok_endpoints", "at_when", "inspect_url")
+    list_display = (
+        "url",
+        "high",
+        "medium",
+        "low",
+        "ok",
+        "total_endpoints",
+        "ok_endpoints",
+        "at_when",
+        "is_the_newest",
+        "inspect_url",
+    )
     search_fields = ["url__organization__name", "url__url", "at_when"]
     list_filter = ["url", "at_when", "url__organization__type", "url__organization__country"][::-1]
     fields = (

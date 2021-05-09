@@ -337,7 +337,7 @@ LOGGING = {
             "()": "colorlog.ColoredFormatter",
             # to get the name of the logger a message came from, add %(name)s.
             "format": "%(log_color)s%(asctime)s\t%(levelname)-8s - " "%(message)s",
-            "datefmt": "%Y-%m-%d %H:%M",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
             "log_colors": {
                 "DEBUG": "green",
                 "INFO": "white",

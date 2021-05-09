@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 
 from websecmap.reporting.models import UrlReport
-from websecmap.reporting.report import create_timeline, create_url_report
+from websecmap.reporting.report import create_timeline, create_url_reports
 from websecmap.scanners.models import EndpointGenericScan
 from websecmap.scanners.tests.test_plannedscan import create_endpoint, create_url
 
@@ -135,8 +135,7 @@ def test_data_from_dead_endpoint_stays_gone(db):
     }
 
     # now create the report based on the above data.
-    create_url_report(create_timeline(u), u)
-
+    [u.save() for u in create_url_reports(create_timeline(u), u)]
     # reports from the various days things happened:
     assert UrlReport.objects.all().count() == 6
 

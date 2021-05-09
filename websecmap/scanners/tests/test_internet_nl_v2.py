@@ -3,7 +3,7 @@ from copy import copy
 from datetime import datetime, timedelta
 
 from websecmap.organizations.models import Url
-from websecmap.reporting.report import create_timeline, create_url_report
+from websecmap.reporting.report import create_timeline, create_url_reports
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, InternetNLV2Scan, InternetNLV2StateLog
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import (
@@ -472,8 +472,8 @@ def test_internet_nl_store_testresults(db):
 
     process_scan_results(scan.pk)
 
-    create_url_report(create_timeline(url1), url1)
-    create_url_report(create_timeline(url2), url2)
+    create_url_reports(create_timeline(url1), url1)
+    create_url_reports(create_timeline(url2), url2)
 
     # is there a series of imports?
     assert EndpointGenericScan.objects.all().count() == 94
@@ -805,7 +805,7 @@ def test_internet_nl_store_testresults(db):
     # +1 due to adding mail_sending_domain
     assert EndpointGenericScan.objects.all().count() == 94 + 53 + 1
 
-    create_url_report(create_timeline(url1), url1)
+    create_url_reports(create_timeline(url1), url1)
 
 
 def test_legacy_calculations():
