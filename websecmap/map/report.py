@@ -108,7 +108,7 @@ def compose_task(
 
         url_ids = [u.id for u in urls]
         # make sure default organization rating is in place
-        tasks.append(recreate_url_reports.si(url_ids) | create_organization_reports_now.si([organization.pk]))
+        tasks.append(group(recreate_url_reports(url_ids)) | create_organization_reports_now.si([organization.pk]))
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")
@@ -124,21 +124,28 @@ def compose_task(
     # mainly as we're trying to get away from canvas and it's buggyness.
 
     subtasks = []
+    # These are database heavy tasks, and executed sequentially to spread load on the database.
     if organizations_filter.get("country__in", None):
-        subtasks.append(calculate_vulnerability_statistics.si(1, organizations_filter["country__in"]))
-        subtasks.append(calculate_map_data.si(1, organizations_filter["country__in"]))
-        subtasks.append(calculate_high_level_stats.si(1, organizations_filter["country__in"]))
-        subtasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1, organizations_filter["country__in"]))
+        subtasks.append(
+            calculate_vulnerability_statistics.si(1, organizations_filter["country__in"])
+            | calculate_map_data.si(1, organizations_filter["country__in"])
+            | calculate_high_level_stats.si(1, organizations_filter["country__in"])
+            | update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1, organizations_filter["country__in"])
+        )
     elif organizations_filter.get("country", None):
-        subtasks.append(calculate_vulnerability_statistics.si(1, [organizations_filter["country"]]))
-        subtasks.append(calculate_map_data.si(1, [organizations_filter["country"]]))
-        subtasks.append(calculate_high_level_stats.si(1, [organizations_filter["country"]]))
-        subtasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1, [organizations_filter["country"]]))
+        subtasks.append(
+            calculate_vulnerability_statistics.si(1, [organizations_filter["country"]])
+            | calculate_map_data.si(1, [organizations_filter["country"]])
+            | calculate_high_level_stats.si(1, [organizations_filter["country"]])
+            | update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1, [organizations_filter["country"]])
+        )
     else:
-        subtasks.append(calculate_vulnerability_statistics.si(1))
-        subtasks.append(calculate_map_data.si(1))
-        subtasks.append(calculate_high_level_stats.si(1))
-        subtasks.append(update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1))
+        subtasks.append(
+            calculate_vulnerability_statistics.si(1)
+            | calculate_map_data.si(1)
+            | calculate_high_level_stats.si(1)
+            | update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1)
+        )
 
     # Make sure all other reporting tasks are done
     task = group(tasks) | group(subtasks)
@@ -900,7 +907,6 @@ def default_organization_rating(organizations: List[int]):
 
 @app.task(queue="reporting")
 def create_organization_reports_now(organizations: List[int]):
-
     for organization_id in organizations:
         organization = Organization.objects.all().filter(id=organization_id).first()
         if not organization:
@@ -945,7 +951,6 @@ def recreate_organization_reports(organizations: List[int]):
 
 
 def reduce_to_save_data(moments: List[datetime]) -> List[datetime]:
-
     # reduce to only the dates, easier to work with.
     moments = reduce_to_days(moments)
 
@@ -1054,7 +1059,7 @@ def update_report_tasks(url_chunk: List[int]):
         # Note that you cannot determine the moment to be "now" as the urls have to be re-reated.
         # the moment to rerate organizations is when the url_ratings has finished.
 
-        tasks.append(recreate_url_reports.si([url]) | create_organization_reports_now.si(organizations))
+        tasks.append(group(recreate_url_reports([url])) | create_organization_reports_now.si(organizations))
 
         # Calculating statistics is _extremely slow_ so we're not doing that in this method to keep the pace.
         # Otherwise you'd have a 1000 statistic rebuilds pending, all doing a marginal job.

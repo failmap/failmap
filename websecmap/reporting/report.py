@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from copy import copy, deepcopy
 from datetime import datetime
-from typing import List
+from typing import List, Union
 
 import pytz
 from django.db.models import Q
@@ -14,6 +14,8 @@ from websecmap.reporting.models import UrlReport
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
+
+from websecmap.celery import Task
 
 log = logging.getLogger(__package__)
 
@@ -44,21 +46,74 @@ def get_allowed_to_report():
 
 
 @app.task(queue="reporting")
-def recreate_url_reports(urls: List[int]):
-    """Remove the rating of one url and rebuild anew."""
+def recreate_url_reports(urls: List[int]) -> List[Task]:
+    """Remove the rating of one url and rebuild anew (not anymore)."""
+    # to save many hours of computing and tons of IO, try a smarter approach on creating and saving reports.
+    return [(recreate_url_report.si(url_id)) for url_id in urls]
 
-    for url_id in urls:
 
-        url = Url.objects.all().filter(id=url_id).only("id").first()
-        if not url:
-            continue
+@app.task(queue="reporting")
+def recreate_url_report(url_id):
+    """
+    This used to rebuild all reports every night. This works fine until there are a lot of urls and a lot of
+    scan moments to address. It would rebuild 816088 rows on production each night while there are only
+    60.000 urls. Only adding the latest report, if anything changed at all, will reduce 90% of the workload.
+    """
+    url = Url.objects.all().filter(id=url_id).only("id", "url").first()
+    if not url:
+        return
 
-        # Delete the ratings for this url, they are going to be rebuilt
-        UrlReport.objects.all().filter(url=url).delete()
+    # Creating a timeline and rating it is much faster than doing an individual calculation.
+    # Mainly because it gets all data in just a few queries and then builds upon that.
+    # Returns chronologically ordered url reports:
+    url_reports: List[Union[UrlReport, None]] = create_url_reports(create_timeline(url), url)
 
-        # Creating a timeline and rating it is much faster than doing an individual calculation.
-        # Mainly because it gets all data in just a few queries and then builds upon that.
-        create_url_report(create_timeline(url), url)
+    # in cases where there is nothing to report at all.
+    if not url_reports:
+        log.debug(f"Found no url reports for {url.url}. Skipping.")
+        return
+
+    # log.debug(url_reports)
+
+    # No new reports: the amount of items in the timeline(+rules) is the same as the existing reports.
+    amount_of_existing_reports = UrlReport.objects.all().filter(url=url_id).count()
+    if amount_of_existing_reports == len(url_reports):
+        log.debug(f"There are no new reports for {url.url}. Updating the latest one to contain latest scan info.")
+        # latest and last() are equivalent because of the sequential nature of adding reports to the database.
+        # Comparison on an integer is faster, so we're using last().
+        latest_report = UrlReport.objects.all().filter(url=url_id).last()
+        if not latest_report.is_the_newest:
+            # A bug introduced before made dead / not_resolvable ursl not the latest:
+            if not url.is_dead and not url.not_resolvable:
+                raise SystemError(
+                    f"Attempting to delete not the latest report on {url.url}, " f"report: {latest_report.id}."
+                )
+        latest_report.delete()
+        # [1, 2, 3][-1:].pop()
+        new_latest_report = url_reports[-1:].pop()
+        new_latest_report.save()
+    else:
+        # There are new reports, at least one. See how many are new and add them.
+        # As there can be many scans a day, there will probably be many reports created that day.
+        amount_of_new_reports = len(url_reports) - amount_of_existing_reports
+        log.debug(f"Adding {amount_of_new_reports} to {url.url}.")
+
+        # The current latest report isn't the latest anymore:
+        latest_report = UrlReport.objects.all().filter(url=url_id).last()
+        if latest_report:
+            latest_report.is_the_newest = False
+            latest_report.save()
+
+        # the last N new_reports are probably actually new and should be added to the database. All prior reports
+        # are kept as is. Should only save the few new scans of today.
+        new_reports = url_reports[-amount_of_new_reports:]
+        for new_report in new_reports:
+            new_report.save()
+
+    # Old logic of just deleting everything and saving it (not even in bulk)
+    # UrlReport.objects.all().filter(url=url).delete()
+    # for url_report in url_reports:
+    #   url_report.save()
 
 
 def significant_moments(urls: List[Url] = None, reported_scan_types: List[str] = None):
@@ -358,7 +413,10 @@ def latest_moment_of_datetime(datetime_: datetime):
     return datetime_.replace(second=59, microsecond=999999, tzinfo=pytz.utc)
 
 
-def create_url_report(timeline, url: Url):
+def create_url_reports(timeline, url: Url) -> List[UrlReport]:
+
+    url_reports: List[Union[UrlReport, None]] = []
+
     """
     This creates:
     {
@@ -402,8 +460,9 @@ def create_url_report(timeline, url: Url):
                 "endpoints": [],
             }
 
-            save_url_report(url, moment, default_calculation, is_the_newest=is_the_newest)
-            return
+            # this is always the last url report, because the series ends here.
+            url_reports.append(save_url_report(url, moment, default_calculation, is_the_newest=True))
+            return url_reports
 
         # reverse the relation: so we know all ratings per endpoint.
         # It is not really relevant what endpoints _really_ exist.
@@ -579,7 +638,9 @@ def create_url_report(timeline, url: Url):
 
         log.debug("On %s %s has %s endpoints." % (moment, url, len(endpoint_calculations)))
 
-        save_url_report(url, moment, calculation, is_the_newest=is_the_newest)
+        url_reports.append(save_url_report(url, moment, calculation, is_the_newest=is_the_newest))
+
+    return url_reports
 
 
 def create_endpoint_calculation(endpoint, calculations):
@@ -841,7 +902,8 @@ def save_url_report(url: Url, date: datetime, calculation, is_the_newest=False):
 
     # Make sure the new urlreport is seen as the latest, so retrieval of the last report is a direct lookup
     u.is_the_newest = is_the_newest
-    u.save()
+    # u.save()
+    return u
 
     # Make sure the new urlreport is seen as the latest, so retrieval of the last report is a direct lookup
     # This of course makes the adding process much slower.
