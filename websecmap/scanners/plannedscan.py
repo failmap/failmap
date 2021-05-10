@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 import dateutil.parser
 import pytz
 from django.db import connection
-from django_statsd.clients import statsd
+from statshog.defaults.django import statsd
 
 from websecmap.celery import app
 from websecmap.map.logic.map_health import get_outdated_ratings
@@ -111,7 +111,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
 
     urls = [scan.url for scan in scans]
     log.debug(f"Picked up {len(urls)} to {activity} with {scanner}.")
-    statsd.incr(f"scan.planned.pickup.{scanner}.{activity}", count=amount)
+    statsd.incr("scan_planned_pickup", amount, tags={"scanner": scanner, "activity": activity})
     return urls
 
 
