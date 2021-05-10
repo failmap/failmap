@@ -446,6 +446,11 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> bo
                 # Handshake failure: so there is an option to create a handshake, but perhaps the server wont respond.
                 # Still a valid endpoint.
                 "SSLV3_ALERT_HANDSHAKE_FAILURE" in strerror,
+                # When connecting based on ip address and separate host header, the error returned
+                # might not be an SSLV3_ALERT_HANDSHAKE_FAILURE but an TLSV1_ALERT_INTERNAL_ERROR.
+                # In that case there is still a connection, although there is something going wrong with TLS.
+                # in general all SSLErrors mean there is a connection.
+                "TLSV1_ALERT_INTERNAL_ERROR" in strerror,
             ]
         ):
             log.debug(
