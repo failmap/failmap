@@ -18,7 +18,7 @@
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Management<span class="caret"></span></a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown1" style="z-index: 100000">
                             <a class="dropdown-item" :href="admin_url">{{ $t("menu.admin") }}</a>
-                            <a class="dropdown-item" href="/grafana/">{{ $t("menu.grafana") }}</a>
+                            <a class="dropdown-item" href="https://monitoring.basisbeveiliging.nl">{{ $t("menu.grafana") }}</a>
                             <a class="dropdown-item" href="/flower/">{{ $t("menu.flower") }}</a>
                         </div>
                     </li>
