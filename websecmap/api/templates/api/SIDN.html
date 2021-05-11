@@ -6,21 +6,14 @@
 </head>
 <body>
     <div class="container">
-        <i>If you can see this page, you're logged in. <a href="/api/logout/">Log out here</a></i>
-
         <h1>Adding subdomains with the SIDN API</h1>
         <p>
             This guide was written while keeping in mind that adding subdomains can be done manually, but also can be
             automated using the Python Requests library (for example).
         </p>
         <h2>Step 0: Authentication</h2>
-        <p>Before you can use the API, you need to authenticate yourself as a valid SIDN user. The authentication screen
-        is located here. Afterwards, you can continue with the following steps.</p>
-        <pre>/api/login/</pre> (<a href="/api/login?next=/api/SIDN/">direct link</a>)
-        <p>The post parameters for this request are:</p>
-        <pre>csrfmiddlewaretoken=[token]&username=[username]&password=[password]</pre>
-        <p><i>It might be possible that sending the csrftoken as a cookie is enough: cookie collection and usage is what the python
-        requests library automates.</i></p>
+
+        <p>Authentication is done via HTTP Basic Auth. To prepare a logged in session object to be used in further calls use following code.</p>
 
         <h4>Code example</h4>
         <code>
@@ -30,14 +23,9 @@
             your_password = "faalkaart"<br>
             your_api_endpoint = "http://127.0.0.1:8000"<br>
             <br>
-            login_url = your_api_endpoint + "/api/login/"<br>
             client = requests.session()<br>
+            client.auth = (your_username, your_password)
             <br>
-            # retrieve csrf:<br>
-            client.get(login_url)<br>
-            <br>
-            r = client.post(login_url, data={'username': your_username, 'password': your_password, 'csrfmiddlewaretoken': client.cookies['csrftoken']})<br>
-            print(r.ok)<br>
         </code>
 
         <h2>Step 1: retrieving layers</h2>
@@ -77,8 +65,6 @@
         <h2>Step 3: Adding subdomains</h2>
         <p>To add subdomains, make a post call with CSV data to the following location:</p>
         <pre>/api/SIDN/upload/</pre>(<a href="./upload/">direct link</a>)
-        <p>The data needs to be in the "data" parameter, additionally your request needs to use the CSRF token given by for example the form below.
-        This token changes every session, or even more often.</p>
         <p>The data submitted needs to have a very specific format, which is:</p>
         <pre>,2ndlevel,qname,distinct_asns
 123,arnhem.nl.,*.arnhem.nl.,1
@@ -92,7 +78,6 @@
         <p>It can take a short while before an answer is given. If the service times out, try smaller batches as each
             domain needs to be contacted to verify its resolvability.</p>
         <p>An example requets looks like this, note the urlencoding of the data, which requests can do for you(!)</p>
-        <pre>csrfmiddlewaretoken=[token]&data=%2C2ndlevel%2Cqname%2Cdistinct_asns%0D%0A123%2Carn...</pre>
 
         <h4>Code example</h4>
         <code>
@@ -102,8 +87,7 @@
 124,arnhem.nl.,01.arnhem.nl.,1<br>
 163,arnhem.nl.,sdfg.arnhem.nl.,1<br>
 125,arnhem.nl.,03.arnhem.nl.,1"""<br>
-            post_data = {"csrfmiddlewaretoken": client.cookies['csrftoken'], "data": csv_information}<br>
-            r = client.post(f"{your_api_endpoint}/api/SIDN/upload/", data=post_data)<br>
+            r = client.post(f"{your_api_endpoint}/api/SIDN/upload/", data={"data": csv_information})<br>
             print(r.json())<br>
 
         </code>
@@ -112,7 +96,6 @@
         <p>The form below can be used to easily create this post request. Sample data is already provided:</p>
 
             <form method="POST" action="/api/SIDN/upload/">
-                {% csrf_token %}
                 <textarea name="data" style="width: 100%; height: 300px; font-family:courier">,2ndlevel,qname,distinct_asns
 123,arnhem.nl.,*.arnhem.nl.,1
 124,arnhem.nl.,01.arnhem.nl.,1
