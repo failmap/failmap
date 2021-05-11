@@ -111,7 +111,8 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
 
     urls = [scan.url for scan in scans]
     log.debug(f"Picked up {len(urls)} to {activity} with {scanner}.")
-    statsd.incr("scan_planned_pickup", amount, tags={"scanner": scanner, "activity": activity})
+    if urls:
+        statsd.incr("scan_planned_pickup", len(urls), tags={"scanner": scanner, "activity": activity})
     return urls
 
 
@@ -140,7 +141,7 @@ def request(activity: str, scanner: str, urls: List[int]):
         discard = timedelta(minutes=now.minute % 10, seconds=now.second, microseconds=now.microsecond)
         ps.requested_at_when = now - discard
         ps.save()
-        statsd.incr(f"scan.planned.request.{scanner}.{activity}", count=1)
+        statsd.incr("scan_planned_request", 1, tags={"scanner": scanner, "activity": activity})
 
     log.debug(f"Requested {activity} with {scanner} on {len(urls)} urls.")
 
@@ -161,7 +162,7 @@ def already_requested(activity: str, scanner: str, url_id: int):
 @app.task(queue="storage")
 def finish(activity: str, scanner: str, url_id: int):
     set_scan_state(activity, scanner, url_id, "finished")
-    statsd.incr(f"scan.planned.finish.{scanner}.{activity}", count=1)
+    statsd.incr("scan_planned_finish", 1, tags={"scanner": scanner, "activity": activity})
 
 
 def set_scan_state(activity: str, scanner: str, url_id: int, state="finished"):
