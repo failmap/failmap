@@ -197,6 +197,7 @@ def request(activity: str, scanner: str, urls: List[int]):
 
     for url in urls:
         if already_requested(activity, scanner, url):
+            statsd.incr("scan_planned", tags={"state": "duplicate_request", "scanner": scanner, "activity": activity})
             log.debug(f"Already registered: {activity} on {scanner} for {url}.")
             continue
 
