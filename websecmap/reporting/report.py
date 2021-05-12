@@ -85,8 +85,12 @@ def recreate_url_report(url_id):
         if not latest_report.is_the_newest:
             # A bug introduced before made dead / not_resolvable ursl not the latest:
             if not url.is_dead and not url.not_resolvable:
-                raise SystemError(
-                    f"Attempting to delete not the latest report on {url.url}, " f"report: {latest_report.id}."
+                # Do not create exception in this case. But note it in the logs that something is wrong.
+                # This needs to be adressed manually probably for each case till a bug is found.
+                log.error(
+                    f"Attempting to delete not the latest report on {url.url}, "
+                    f"report: {latest_report.id}."
+                    f"This situation should not occur. Please investigate manually!"
                 )
         latest_report.delete()
         # [1, 2, 3][-1:].pop()
