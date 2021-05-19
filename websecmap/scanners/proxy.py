@@ -393,7 +393,7 @@ def service_provider_status(proxy: Dict[str, Any]):
         response.headers.get("X-Max-Assessments", 25),
         response.headers.get("X-Current-Assessments", 0),
         response.headers.get("X-ClientMaxAssessments", 25),
-        proxy['id'],
+        proxy["id"],
     )
 
     return {
