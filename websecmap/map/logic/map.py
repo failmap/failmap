@@ -73,6 +73,11 @@ def get_map_data(
     country: str = "NL", organization_type: str = "municipality", days_back: int = 0, displayed_issue: str = None
 ):
 
+    # A bug in the live version (possibly due to |safe) gives a Country(code='NL')} instead of
+    # the country code of the country. Here this is worked around, but something is wrong and should be fixed.
+    if hasattr(country, "code"):
+        country = Country.code
+
     when = datetime.now(pytz.utc) - relativedelta(days=int(days_back))
 
     desired_url_scans = []
