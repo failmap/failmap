@@ -56,6 +56,7 @@ class Command(BaseCommand):
 
         if answer.lower() not in ["y", "yes", "yaas"]:
             print("Copy cancelled. Better luck next time.")
+            return
 
         source_urls = Url.objects.all().filter(organization=source_organization)
         for url in source_urls:
