@@ -243,6 +243,7 @@ def index(request, map_configuration=None):
             "SHOW_FTP",
             "SHOW_PLAIN_HTTPS",
             "SHOW_DNSSEC",
+            "PLUS_SHOW_INFO",
             "SHOW_HTTP_SECURITY_HEADER_STRICT_TRANSPORT_SECURITY",
             "SHOW_HTTP_SECURITY_HEADER_X_CONTENT_TYPE_OPTIONS",
             "SHOW_HTTP_SECURITY_HEADER_X_FRAME_OPTIONS",

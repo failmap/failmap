@@ -53,6 +53,8 @@
                 </div>
             </div>
 
+            <plus_info></plus_info>
+
             <template v-if="charts_loading">
                 <div class="row" v-if="name" style="page-break-before: always;">
                     <div class="col-md-12">
@@ -168,6 +170,8 @@
                     <h4>{{ $t("report_content.report.title") }}</h4>
                 </div>
             </div>
+
+            <plus_info></plus_info>
 
             <div v-if="!urls.length" class="perurl" :class="colorizebg(0, 0, 0, 0)">
                 {{ $t("report_content.report.no_data") }}

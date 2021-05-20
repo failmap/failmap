@@ -1001,7 +1001,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         (
             "Plus",
             ("PLUS_SHOW_INFO",),
-        )
+        ),
     ]
 )
 
