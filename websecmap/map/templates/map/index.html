@@ -306,6 +306,8 @@
                 // organizations, a list of all organizations on the map including some metatadata.
                 // this is useful for select boxes and such. The charts might also be populated from this data...
                 organizations: [],
+
+                config: null,
             },
 
             mutations: {
@@ -316,7 +318,7 @@
                 },
                 organization (state, payload) {
                   state = Object.assign(state, payload)
-                },
+                }
             },
         });
 
@@ -389,6 +391,7 @@
                             changes: {{ configuration.SHOW_STATS_CHANGES | lower }},
                             ticker: {{ configuration.SHOW_TICKER | lower }},
                             services: {{ configuration.SHOW_SERVICES | lower }},
+                            plus_info: {{ configuration.PLUS_SHOW_INFO | lower }},
                             issues: {
                                 ftp: {{ configuration.SHOW_FTP | lower }},
                                 plain_https: {{ configuration.SHOW_PLAIN_HTTPS | lower }},
@@ -875,6 +878,7 @@
                 },
 
                 mounted: function(){
+                    store.commit('change', {config: this.config});
                     console.log("App loaded...");
                 },
             });
@@ -1081,6 +1085,7 @@
 
     <!-- Instead of @import... -->
     {% include "map/static/js/components/loading.vue" %}
+    {% include "map/static/js/components/plus_info.vue" %}
 
     {% include "map/static/js/components/menu_country_area.vue" %}
     {% include "map/static/js/components/menu_content.vue" %}
