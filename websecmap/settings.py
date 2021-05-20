@@ -926,6 +926,7 @@ CONSTANCE_CONFIG = {
     "ZORGKAART_USERNAME": ("", "Username to connect to the zorgkaart service.", str),
     "ZORGKAART_PASSWORD": ("", "Password to connect to the zorgkaart service.", str),
     "ZORGKAART_FILTER": ("{}", "Filter options, stored as string.", str),
+    "PLUS_SHOW_INFO": (False, "Show information about optional services.", bool),
 }
 
 CONSTANCE_CONFIG = add_scanner_fields(CONSTANCE_CONFIG)
@@ -997,6 +998,10 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             "Scanning preferences",
             ("SCANNER_NAMESERVERS",),
         ),
+        (
+            "Plus",
+            ("PLUS_SHOW_INFO",),
+        )
     ]
 )
 

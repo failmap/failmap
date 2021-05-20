@@ -5,6 +5,13 @@
     cursor: wait !important;
 }
 
+.leaflet-layer {
+  /* filter: hue-rotate(180deg); */
+    filter: grayscale(0.8);
+    /* filter: sepia(0.4); */
+}
+
+
 .websecmap a:hover, .websecmap a:active, .websecmap a:visited {
     text-decoration: none;
     color: black;
@@ -38,11 +45,11 @@
                 '-',
                 {
                     text: 'Zoom in',
-                    icon: 'static/images/zoom-in.png',
+                    icon: '/static/images/zoom-in.png',
                     callback: this.zoomIn
                 }, {
                     text: 'Zoom out',
-                    icon: 'static/images/zoom-out.png',
+                    icon: '/static/images/zoom-out.png',
                     callback: this.zoomOut
                 }, {
                     text: 'Show everything',
