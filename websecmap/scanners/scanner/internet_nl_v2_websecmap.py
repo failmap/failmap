@@ -647,9 +647,8 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
 
     if scan_data["status"] == "error":
         log.error(
-            f"Domain {domain} received an error from internet.nl. "
-            f"There is probably a bug in the internet.nl scanner. All previous scan results from this"
-            f"endpoint are set to error."
+            "Domain received an error from internet.nl. Bug in the scanner? Previous results are now set to error.",
+            extra={"domain": domain},
         )
         reuse_last_fields_and_set_them_to_error(endpoint.pk)
         return
