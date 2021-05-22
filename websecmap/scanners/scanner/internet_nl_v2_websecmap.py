@@ -576,7 +576,7 @@ def process_scan_results(scan_id: int):
     update_state(scan.pk, "finished", "")
 
 
-def reuse_last_fields_and_set_them_to_error(endpoint_id):
+def reuse_last_fields_and_set_them_to_error(endpoint_id: int):
 
     if not endpoint_id:
         return
@@ -651,7 +651,7 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
             f"There is probably a bug in the internet.nl scanner. All previous scan results from this"
             f"endpoint are set to error."
         )
-        reuse_last_fields_and_set_them_to_error(endpoint)
+        reuse_last_fields_and_set_them_to_error(endpoint.pk)
         return
 
     # link changes every time, so can't save that as message. -> _wrong_
