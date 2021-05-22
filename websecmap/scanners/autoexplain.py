@@ -93,7 +93,7 @@ def autoexplain_dutch_untrusted_cert():
             queue=CELERY_IP_VERSION_QUEUE_NAMES[scan.endpoint.ip_version]
         )
         | certificate_chain_ends_on_non_trusted_dutch_root_ca.s()
-        | store_bot_explaination_if_needed.s(scan)
+        | store_bot_explaination_if_needed.s(scan.pk)
         for scan in scans
     ]
 
@@ -195,7 +195,12 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates:
 
 
 @app.task(queue="storage")
-def store_bot_explaination_if_needed(needed: bool, scan: EndpointGenericScan):
+def store_bot_explaination_if_needed(needed: bool, scan_id: int):
+
+    scan = EndpointGenericScan.objects.all().filter(pk=scan_id).first()
+    if not scan:
+        return
+
     if needed:
         add_bot_explanation(scan, "state_trusted_root_ca", datetime(2028, 11, 14, tzinfo=pytz.utc) - timezone.now())
 
