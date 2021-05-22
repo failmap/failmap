@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List
+from typing import Dict, List
 
 import dateutil.parser
 import pytz
@@ -23,10 +23,19 @@ def store_progress():
     """
     Runs every N minutes (periodic task) and stores the latest calculated progress in the db.
     """
+    progress = calculate_progress(7)
     pss = PlannedScanStatistic()
     pss.at_when = datetime.now(pytz.utc)
-    pss.data = calculate_progress(7)
+    pss.data = progress
     pss.save()
+
+    # Also send it to statsd for nicer metrics:
+    for row in progress:
+        activity = Activity(row["activity"]).label
+        scanner = Scanner(row["scanner"]).label
+        state = State(row["state"]).label
+
+        statsd.gauge("scan_progress", row["amount"], tags={"state": state, "scanner": scanner, "activity": activity})
 
 
 def get_latest_progress():
@@ -34,7 +43,7 @@ def get_latest_progress():
     return {} if not pss else pss.data
 
 
-def calculate_progress(days=7) -> List[Dict[str, Any]]:
+def calculate_progress(days=7) -> List[Dict[str, int]]:
     """
     Retrieves the progress of all scans in the past 7 days. Will show how many are requested and how many
     are at what state.
