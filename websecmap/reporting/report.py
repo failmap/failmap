@@ -19,7 +19,6 @@ from websecmap.celery import Task
 
 log = logging.getLogger(__package__)
 
-
 START_DATE = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
 
 """
@@ -88,9 +87,8 @@ def recreate_url_report(url_id):
                 # Do not create exception in this case. But note it in the logs that something is wrong.
                 # This needs to be adressed manually probably for each case till a bug is found.
                 log.error(
-                    f"Attempting to delete not the latest report on {url.url}, "
-                    f"report: {latest_report.id}."
-                    f"This situation should not occur. Please investigate manually!"
+                    "Attempting to delete not the latest report, this should not occur!",
+                    extra={"url": url.url, "report_id": latest_report.id},
                 )
         latest_report.delete()
         # [1, 2, 3][-1:].pop()
@@ -314,7 +312,6 @@ def in_hash_table(hash_table, hash):
 
 
 def hash_scan_per_day_and_type(scan):
-
     # hopefully it doesn't run extra queries?
     if scan.type in URL_SCAN_TYPES:
         pk = scan.url.pk
@@ -418,7 +415,6 @@ def latest_moment_of_datetime(datetime_: datetime):
 
 
 def create_url_reports(timeline, url: Url) -> List[UrlReport]:
-
     url_reports: List[Union[UrlReport, None]] = []
 
     """
@@ -718,7 +714,6 @@ def judge(amount_of_issues, clean_issues_for_judgement, key, reports: List):
 
 
 def statistics_over_url_calculation(calculation):
-
     empty_with_some_extras = {
         "high": 0,
         "medium": 0,
@@ -814,7 +809,6 @@ def statistics_over_url_calculation(calculation):
 
 
 def save_url_report(url: Url, date: datetime, calculation, is_the_newest=False):
-
     # This also injects the statistics into the json, for use in representations / views in the right places.
     calculation, amount_of_issues = statistics_over_url_calculation(calculation)
 
@@ -918,7 +912,6 @@ def save_url_report(url: Url, date: datetime, calculation, is_the_newest=False):
 
 
 def add_statistics_to_calculation(calculation, amount_of_issues):
-
     # inject all kinds of statistics inside the json for easier(?) representation.
     calculation["total_issues"] = amount_of_issues["overall"]["any"]
     calculation["high"] = amount_of_issues["overall"]["high"]
@@ -1151,7 +1144,6 @@ def aggegrate_url_rating_scores(url_ratings: List, only_include_issues: List[str
 
 
 def remove_issues_from_calculation(calculation, issues):
-
     # todo: also recalculate here?
     new_url_ratings = []
     for url_rating in calculation["ratings"]:
