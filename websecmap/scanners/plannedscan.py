@@ -23,7 +23,7 @@ def store_progress():
     """
     Runs every N minutes (periodic task) and stores the latest calculated progress in the db.
     """
-    progress = calculate_progress(7)
+    progress = calculate_progress()
     pss = PlannedScanStatistic()
     pss.at_when = datetime.now(pytz.utc)
     pss.data = progress
@@ -43,7 +43,7 @@ def get_latest_progress():
     return {} if not pss else pss.data
 
 
-def calculate_progress(days=7) -> List[Dict[str, int]]:
+def calculate_progress() -> List[Dict[str, int]]:
     """
     Retrieves the progress of all scans in the past 7 days. Will show how many are requested and how many
     are at what state.
@@ -51,21 +51,15 @@ def calculate_progress(days=7) -> List[Dict[str, int]]:
     This routine is as simple and fast as it gets. The consumer will have to iterated and aggregate where needed.
     """
 
-    when = datetime.utcnow() - timedelta(days=days)
-
     # i'm _DONE_ with the obscuring of group_by and counts using terrible abstractions.
     # so here is a raw query that just works on all databases and is trivially simple to understand.
     sql = """SELECT
-                scanner, activity, state, count(*) as amount
+                scanner, activity, state, count(id) as amount
             FROM
                 scanners_plannedscan
-            WHERE
-                requested_at_when >= '%(when)s'
             GROUP BY
                 scanner, activity, state
-            """ % {
-        "when": when.date()
-    }
+            """
 
     cursor = connection.cursor()
     cursor.execute(sql)
