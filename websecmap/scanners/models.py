@@ -434,6 +434,11 @@ class Scanner(models.IntegerChoices):
     dummy = 17, "dummy"
     screenshot = 18, "screenshot"
 
+    autoexplain_dutch_untrusted_cert = 100, "autoexplain_dutch_untrusted_cert"
+    autoexplain_trust_microsoft = 101, "autoexplain_trust_microsoft"
+    autoexplain_no_https_microsoft = 102, "autoexplain_no_https_microsoft"
+    autoexplain_microsoft_neighboring_services = 103, "autoexplain_microsoft_neighboring_services"
+
 
 class State(models.IntegerChoices):
     unknown = 0, "unknown"
