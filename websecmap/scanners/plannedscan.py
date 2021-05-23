@@ -86,8 +86,8 @@ def retry():
 
     """
     PlannedScan.objects.all().filter(
-        state=State["picked_up"].value, last_state_change_at__lte=datetime.now(pytz.utc) - timedelta(days=1)
-    ).update(state="requested")
+        state=State["picked_up"].value, last_state_change_at__lte=datetime.now(pytz.utc) - timedelta(hours=6)
+    ).update(state=State["requested"].value)
 
 
 def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
