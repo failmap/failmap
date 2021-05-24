@@ -451,6 +451,14 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> bo
                 # In that case there is still a connection, although there is something going wrong with TLS.
                 # in general all SSLErrors mean there is a connection.
                 "TLSV1_ALERT_INTERNAL_ERROR" in strerror,
+                # Done: what to do with a connection reset. It denotes that there is a service running
+                #  because otherwise there would not be a RST from the TCP handshake. It frequently happens
+                #  that a http site redirects to https and the https gives a connection reset.
+                #  In this case we follow what nmap does; it means the port is open. So perhaps this method
+                #  should be called 'has open port' or 'runs a service'. While we can't connect there is
+                #  definitely a service running there, which means scans should take place.
+                #  -> this will move 'missing https' endpoint warnings to 'could not test' errors.
+                "Connection aborted" in strerror,
             ]
         ):
             log.debug(

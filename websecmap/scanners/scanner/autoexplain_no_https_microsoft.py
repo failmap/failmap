@@ -65,6 +65,7 @@ def scan(scan_id):
     # todo: break scan into smaller pieces to not interrupt the storage queue
 
     """
+
     Microsoft Office365/Exchange need the autodiscover subdomain. This is configured as a CNAME. The CNAME
     cannot be further configured. Microsoft does not expose an HTTPS service over this subdomain, only http.
     This is true for the "online" configuration, not for the "on premise" configuration.
@@ -76,7 +77,7 @@ def scan(scan_id):
     issue will always be the same.
     """
 
-    endpoint_generic_scan = EndpointGenericScan.objects.all().filter(id=scan_id)
+    endpoint_generic_scan = EndpointGenericScan.objects.all().filter(id=scan_id).first()
     if not endpoint_generic_scan:
         return
 

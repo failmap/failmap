@@ -12,7 +12,7 @@ from django.db.models import Q
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
-from websecmap.scanners.autoexplain import add_bot_explanation, get_latest_endpoint_scan
+from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan, Endpoint
 from websecmap.scanners.scanner import unique_and_random
 
@@ -100,16 +100,20 @@ applicable_subdomains = {
 }
 
 
+query = EndpointGenericScan.objects.all().filter(
+    type="tls_qualys_certificate_trusted",
+    is_the_latest_scan=True,
+    comply_or_explain_is_explained=False,
+    endpoint__protocol="https",
+    endpoint__is_dead=False,
+    rating="not trusted",
+)
+
+
 @app.task(queue="storage")
 def plan_scan():
-    scans = EndpointGenericScan.objects.all().filter(
+    scans = query.filter(
         endpoint__url__in=get_relevant_microsoft_domains_from_database(),
-        type="tls_qualys_certificate_trusted",
-        is_the_latest_scan=True,
-        comply_or_explain_is_explained=False,
-        endpoint__protocol="https",
-        endpoint__is_dead=False,
-        rating="not trusted",
     )
 
     urls = [scan.endpoint.url.pk for scan in scans]
@@ -134,23 +138,12 @@ def compose_scan_task(urls):
     """
 
     # Only check this on the latest scans, do not alter existing explanations
-    scans = (
-        EndpointGenericScan.objects.all()
-        .filter(
-            endpoint__url__in=urls,
-            type="tls_qualys_certificate_trusted",
-            is_the_latest_scan=True,
-            comply_or_explain_is_explained=False,
-            endpoint__protocol="https",
-            endpoint__is_dead=False,
-            rating="not trusted",
-        )
-        .only("id")
-    )
+    scans = query.filter(endpoint__url__in=urls).only("id")
 
     tasks = [
-        scan.si(scan_id=scan) | plannedscan.finish.si("scan", SCANNER, scan.endpoint.url.pk)
-        for scan in list(set(scans))
+        scan.si(scan_id=endpoint_generic_scan.pk)
+        | plannedscan.finish.si("scan", SCANNER, endpoint_generic_scan.endpoint.url.pk)
+        for endpoint_generic_scan in list(set(scans))
     ]
 
     return group(tasks)
@@ -160,23 +153,23 @@ def compose_scan_task(urls):
 @app.task(queue="storage")
 def scan(scan_id):
 
-    scan = EndpointGenericScan.objects.all().filter(id=scan_id)
-    if not scan:
+    epgs = EndpointGenericScan.objects.all().filter(id=scan_id).first()
+    if not epgs:
         return
 
-    certificate = retrieve_certificate(url=scan.endpoint.url.url, port=scan.endpoint.port)
+    certificate = retrieve_certificate(url=epgs.endpoint.url.url, port=epgs.endpoint.port)
 
     matches_exception_policy = certificate_matches_microsoft_exception_policy(
-        certificate, scan, applicable_subdomains, trusted_organization="Microsoft Corporation"
+        certificate, epgs, applicable_subdomains, trusted_organization="Microsoft Corporation"
     )
 
     if not matches_exception_policy:
         return
 
     # when all checks pass, and indeed the SSL_ERROR_BAD_CERT_DOMAIN was found, the finding is explained
-    log.debug(f"Scan {scan} fits all criteria to be auto explained for incorrect cert usage.")
-    add_bot_explanation(scan, "trusted_on_local_device_with_custom_trust_policy", timedelta(days=365 * 10))
-    autoexplain_trust_microsoft_and_include_their_webserver_headers(scan)
+    log.debug(f"Scan {epgs} fits all criteria to be auto explained for incorrect cert usage.")
+    add_bot_explanation(epgs, "trusted_on_local_device_with_custom_trust_policy", timedelta(days=365 * 10))
+    autoexplain_trust_microsoft_and_include_their_webserver_headers(epgs)
 
 
 def get_relevant_microsoft_domains_from_database() -> List[Url]:
@@ -300,3 +293,11 @@ def autoexplain_trust_microsoft_and_include_their_webserver_headers(scan):
 
             if not latest_scan.comply_or_explain_explanation == intended_for_devices:
                 add_bot_explanation(latest_scan, intended_for_devices, timedelta(days=365 * 10))
+
+
+def get_latest_endpoint_scan(endpoint, scan_type):
+    return (
+        EndpointGenericScan.objects.all()
+        .filter(endpoint=endpoint, is_the_latest_scan=True, type=scan_type, comply_or_explain_is_explained=False)
+        .first()
+    )

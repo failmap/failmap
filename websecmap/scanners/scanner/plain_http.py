@@ -46,13 +46,21 @@ def filter_scan(
             organization__in=organizations,
             is_dead=False,
             not_resolvable=False,
+            endpoint__protocol="http",
+            endpoint__port=80,
             **urls_filter,
         ).only("id", "url")
         log.info(f"Creating scan task {len(urls)} urls for {len(organizations)} organizations.")
     else:
-        urls = Url.objects.filter(q_configurations_to_scan(), is_dead=False, not_resolvable=False, **urls_filter).only(
-            "id", "url"
-        )
+        urls = Url.objects.filter(
+            q_configurations_to_scan(),
+            is_dead=False,
+            not_resolvable=False,
+            # Has to have at least an http endpoint, otherwise scanning doesn't make sense.
+            endpoint__protocol="http",
+            endpoint__port=80,
+            **urls_filter,
+        ).only("id", "url")
         log.info(f"Creating scan plain http task {len(urls)} urls.")
 
     return unique_and_random(urls)
@@ -91,6 +99,11 @@ def compose_scan_task(urls):
     tasks = []
     for url in urls:
         complete_endpoints, incomplete_endpoints = get_endpoints_with_missing_encryption(url)
+
+        # In case all http/https endpoints have been removed from this url, the scan still has to finish.
+        # This could have happened between the request of this scan and running this scan.
+        if not any([complete_endpoints, incomplete_endpoints]):
+            tasks.append(plannedscan.finish.si("scan", "plain_http", url.pk))
 
         for complete_endpoint in complete_endpoints:
             tasks.append(well_done.si(complete_endpoint.pk) | plannedscan.finish.si("scan", "plain_http", url.pk))
@@ -145,17 +158,17 @@ def get_endpoints_with_missing_encryption(url):
         if endpoint.protocol == "https" and endpoint.port == 443 and endpoint.ip_version == 6:
             has_https_v6 = True
 
-    if has_http_v4 and not has_https_v4:
-        incomplete_endpoints.append(http_v4_endpoint)
+    if has_http_v4:
+        if not has_https_v4:
+            incomplete_endpoints.append(http_v4_endpoint)
+        else:
+            complete_endpoints.append(http_v4_endpoint)
 
-    if has_http_v4 and has_https_v4:
-        complete_endpoints.append(http_v4_endpoint)
-
-    if has_http_v6 and not has_https_v6:
-        incomplete_endpoints.append(http_v6_endpoint)
-
-    if has_http_v6 and has_https_v6:
-        complete_endpoints.append(http_v6_endpoint)
+    if has_http_v6:
+        if not has_https_v6:
+            incomplete_endpoints.append(http_v6_endpoint)
+        else:
+            complete_endpoints.append(http_v6_endpoint)
 
     return complete_endpoints, incomplete_endpoints
 
