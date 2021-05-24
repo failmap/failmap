@@ -3,6 +3,7 @@ import logging
 from celery import group, Task
 
 from websecmap.celery import app
+from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan
@@ -26,25 +27,26 @@ from OpenSSL import SSL
 log = logging.getLogger(__package__)
 
 SCANNER = "autoexplain_dutch_untrusted_cert"
+EXPLANATION = "state_trusted_root_ca"
+
+query = EndpointGenericScan.objects.all().filter(
+    # Dont include all dead endpoints and urls, as it slows things down and are not used in reports anyway:
+    endpoint__is_dead=False,
+    endpoint__url__not_resolvable=False,
+    endpoint__url__is_dead=False,
+    # Assuming this is for the dutch market only. Strictly speaking it could be anything, yet highly unusual.
+    endpoint__url__computed_suffix="nl",
+    type="tls_qualys_certificate_trusted",
+    is_the_latest_scan=True,
+    comply_or_explain_is_explained=False,
+    endpoint__protocol="https",
+    rating="not trusted",
+)
 
 
 @app.task(queue="storage")
 def plan_scan():
-    scans = EndpointGenericScan.objects.all().filter(
-        # Dont include all dead endpoints and urls, as it slows things down and are not used in reports anyway:
-        endpoint__is_dead=False,
-        endpoint__url__not_resolvable=False,
-        endpoint__url__is_dead=False,
-        # Assuming this is for the dutch market only. Strictly speaking it could be anything, yet highly unusual.
-        endpoint__url__computed_suffix="nl",
-        type="tls_qualys_certificate_trusted",
-        is_the_latest_scan=True,
-        comply_or_explain_is_explained=False,
-        endpoint__protocol="https",
-        rating="not trusted",
-    )
-
-    urls = [scan.endpoint.url.pk for scan in scans]
+    urls = [scan.endpoint.url.pk for scan in query]
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
 
 
@@ -54,22 +56,9 @@ def compose_planned_scan_task(**kwargs):
     return compose_scan_task(urls)
 
 
-def compose_scan_task(urls) -> Task:
+def compose_scan_task(urls: List[Url]) -> Task:
 
-    scans = EndpointGenericScan.objects.all().filter(
-        # Dont include all dead endpoints and urls, as it slows things down and are not used in reports anyway:
-        endpoint__is_dead=False,
-        endpoint__url__not_resolvable=False,
-        endpoint__url__is_dead=False,
-        # Assuming this is for the dutch market only. Strictly speaking it could be anything, yet highly unusual.
-        endpoint__url__computed_suffix="nl",
-        type="tls_qualys_certificate_trusted",
-        is_the_latest_scan=True,
-        comply_or_explain_is_explained=False,
-        endpoint__protocol="https",
-        rating="not trusted",
-        endpoint__url__in=[urls],
-    )
+    scans = list(set(query.filter(endpoint__url__in=urls)))
 
     tasks = [
         get_cert_chain.si(url=scan.endpoint.url.url, port=scan.endpoint.port, ip_version=scan.endpoint.ip_version).set(
@@ -81,7 +70,6 @@ def compose_scan_task(urls) -> Task:
         for scan in scans
     ]
 
-    # todo: this should be a taskcommand.
     return group(tasks)
 
 
@@ -123,6 +111,7 @@ def deserialize_cert_chain(certificates: List[str]) -> List[OpenSSL.crypto.X509]
 
 @app.task(queue="storage")
 def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates: List[str]) -> bool:
+    # todo: there are more untrusted certificates from the dutch state.
     # Example: https://secure-t.sittard-geleen.nl
     # https://www.pyopenssl.org/en/stable/api/crypto.html
     if not serialized_certificates:
@@ -185,4 +174,4 @@ def store_bot_explaination_if_needed(needed: bool, scan_id: int):
         return
 
     if needed:
-        add_bot_explanation(scan, "state_trusted_root_ca", datetime(2028, 11, 14, tzinfo=pytz.utc) - timezone.now())
+        add_bot_explanation(scan, EXPLANATION, datetime(2028, 11, 14, tzinfo=pytz.utc) - timezone.now())

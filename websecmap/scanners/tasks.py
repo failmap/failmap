@@ -4,7 +4,7 @@ import logging
 from celery import group
 
 from websecmap.map.views import screenshot
-from websecmap.scanners import autoexplain, plannedscan, proxy
+from websecmap.scanners import plannedscan, proxy
 from websecmap.scanners.scanner import (
     dns_endpoints,
     dns_known_subdomains,
@@ -20,10 +20,13 @@ from websecmap.scanners.scanner import (
     subdomains,
     tls_qualys,
     verify_unresolvable,
+    autoexplain_trust_microsoft,
+    autoexplain_no_https_microsoft,
+    autoexplain_microsoft_neighboring_services,
+    autoexplain_dutch_untrusted_cert,
 )
 
 log = logging.getLogger(__name__)
-
 
 # explicitly declare the imported modules as this modules 'content', prevents pyflakes issues
 __scanners__ = [
@@ -42,9 +45,13 @@ __scanners__ = [
     subdomains,
     tls_qualys,
     verify_unresolvable,
+    autoexplain_dutch_untrusted_cert,
+    autoexplain_microsoft_neighboring_services,
+    autoexplain_no_https_microsoft,
+    autoexplain_trust_microsoft,
 ]
 
-__others__ = [proxy, autoexplain, plannedscan]
+__others__ = [proxy, plannedscan]
 
 # This is the single source of truth regarding scanner configuration.
 # Lists to be used elsewhere when tasks need to be composed, these lists contain compose functions.
@@ -88,7 +95,6 @@ def crawl_tasks(url):
 
 
 def scan_tasks(url_chunk):
-
     tasks = []
 
     for scanner in DEFAULT_SCANNERS:

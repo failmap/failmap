@@ -11,13 +11,11 @@ from cryptography.x509.oid import NameOID
 
 import websecmap
 from websecmap.organizations.models import Url
-from websecmap.scanners.autoexplain import (
-    autoexplain_trust_microsoft,
-    certificate_matches_microsoft_exception_policy,
-    autoexplain_no_https_microsoft,
-    certificate_chain_ends_on_non_trusted_dutch_root_ca,
-    explain_headers_for_explained_microsoft_trusted_tls_certificates,
-)
+from websecmap.scanners.scanner import autoexplain_dutch_untrusted_cert
+from websecmap.scanners.scanner import autoexplain_trust_microsoft
+from websecmap.scanners.scanner import autoexplain_microsoft_neighboring_services
+from websecmap.scanners.scanner import autoexplain_no_https_microsoft
+
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 log = logging.getLogger("websecmap")
@@ -33,16 +31,20 @@ def test_certificate_chain_ends_on_non_trusted_dutch_root_ca(current_path):
     # Validate a complete chain that ends in the desired root certificate
     with open(f"{current_path}/websecmap/scanners/tests/autoexplain/valid_chain.json") as f:
         certificate_data = json.load(f)
-    assert certificate_chain_ends_on_non_trusted_dutch_root_ca(certificate_data) is True
+    assert (
+        autoexplain_dutch_untrusted_cert.certificate_chain_ends_on_non_trusted_dutch_root_ca(certificate_data) is True
+    )
 
     # Fail to validate something that does not end in the root certificate
     with open(f"{current_path}/websecmap/scanners/tests/autoexplain/missing_root.json") as f:
         certificate_data = json.load(f)
-    assert certificate_chain_ends_on_non_trusted_dutch_root_ca(certificate_data) is False
+    assert (
+        autoexplain_dutch_untrusted_cert.certificate_chain_ends_on_non_trusted_dutch_root_ca(certificate_data) is False
+    )
 
     # Supplying garbage causes no problems / crashes:
-    assert certificate_chain_ends_on_non_trusted_dutch_root_ca([]) is False
-    assert certificate_chain_ends_on_non_trusted_dutch_root_ca("asdasd") is False
+    assert autoexplain_dutch_untrusted_cert.certificate_chain_ends_on_non_trusted_dutch_root_ca([]) is False
+    assert autoexplain_dutch_untrusted_cert.certificate_chain_ends_on_non_trusted_dutch_root_ca("asdasd") is False
 
 
 def test_autoexplain_no_https_microsoft(db, mocker):
@@ -76,19 +78,19 @@ def test_autoexplain_no_https_microsoft(db, mocker):
     # mock dns.resolver.query(scan.endpoint.url.url, 'CNAME') in several ways:
     log.debug("mydomain.com is not a valid cname record in this case.")
     mocker.patch("dns.resolver.query", return_value=[Answer("mydomain.com")])
-    autoexplain_no_https_microsoft()
+    autoexplain_no_https_microsoft.scan(endpointscan.id)
     my_epgs = EndpointGenericScan.objects.all().first()
     assert my_epgs.comply_or_explain_is_explained is False
 
     log.debug("The cname must match exactly to the desired cname.")
     mocker.patch("dns.resolver.query", return_value=[Answer("autodiscover.outlook.com.mydomain.com")])
-    autoexplain_no_https_microsoft()
+    autoexplain_no_https_microsoft.scan(endpointscan.id)
     my_epgs = EndpointGenericScan.objects.all().first()
     assert my_epgs.comply_or_explain_is_explained is False
 
     log.debug("It should be an exact match to this value.")
     mocker.patch("dns.resolver.query", return_value=[Answer("autodiscover.outlook.com.")])
-    autoexplain_no_https_microsoft()
+    autoexplain_no_https_microsoft.scan(endpointscan.id)
     my_epgs = EndpointGenericScan.objects.all().first()
     assert my_epgs.comply_or_explain_is_explained is True
 
@@ -110,26 +112,26 @@ def test_autoexplain_certificate(db):
     trusted_organization = "Nonsense Corporation"
 
     # wrong subject
-    assert False is certificate_matches_microsoft_exception_policy(
+    assert False is autoexplain_trust_microsoft.certificate_matches_microsoft_exception_policy(
         generate_certificate("subject"), endpointscan, applicable_subdomains, trusted_organization
     )
 
     # wrong issuer
-    assert False is certificate_matches_microsoft_exception_policy(
+    assert False is autoexplain_trust_microsoft.certificate_matches_microsoft_exception_policy(
         generate_certificate("issuer"), endpointscan, applicable_subdomains, trusted_organization
     )
 
     # valid in the future
-    assert False is certificate_matches_microsoft_exception_policy(
+    assert False is autoexplain_trust_microsoft.certificate_matches_microsoft_exception_policy(
         generate_certificate("future"), endpointscan, applicable_subdomains, trusted_organization
     )
 
     # expired
-    assert False is certificate_matches_microsoft_exception_policy(
+    assert False is autoexplain_trust_microsoft.certificate_matches_microsoft_exception_policy(
         generate_certificate("expired"), endpointscan, applicable_subdomains, trusted_organization
     )
 
-    assert True is certificate_matches_microsoft_exception_policy(
+    assert True is autoexplain_trust_microsoft.certificate_matches_microsoft_exception_policy(
         generate_certificate(), endpointscan, applicable_subdomains, trusted_organization
     )
 
@@ -250,9 +252,11 @@ def test_autoexplain_including_headers(db, monkeypatch):
     assert header_scan_old.comply_or_explain_is_explained is False
 
     log.debug("explaining...")
-    monkeypatch.setattr(websecmap.scanners.autoexplain, "retrieve_certificate", fake_retrieve_certificate)
+    monkeypatch.setattr(
+        websecmap.scanners.scanner.autoexplain_trust_microsoft, "retrieve_certificate", fake_retrieve_certificate
+    )
 
-    autoexplain_trust_microsoft()
+    autoexplain_trust_microsoft.scan(endpointscan.id)
 
     updated_endpoint = EndpointGenericScan.objects.get(id=endpointscan.id)
     assert updated_endpoint.comply_or_explain_is_explained is True
@@ -270,6 +274,6 @@ def test_autoexplain_including_headers(db, monkeypatch):
     egs.comply_or_explain_is_explained = False
     egs.save()
 
-    explain_headers_for_explained_microsoft_trusted_tls_certificates()
+    autoexplain_microsoft_neighboring_services.scan(egs.id)
     egs = EndpointGenericScan.objects.get(id=header_scan_new.id)
     egs.comply_or_explain_is_explained = True

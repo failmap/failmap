@@ -2,7 +2,7 @@ from celery import group
 
 from websecmap.celery import app
 from websecmap.scanners import plannedscan
-from websecmap.scanners.autoexplain import get_relevant_microsoft_domains_from_database
+from websecmap.scanners.scanner.autoexplain_trust_microsoft import get_relevant_microsoft_domains_from_database
 from websecmap.scanners.models import EndpointGenericScan
 from websecmap.scanners.scanner import unique_and_random
 from websecmap.scanners.scanner.autoexplain_trust_microsoft import (
@@ -48,11 +48,13 @@ def compose_scan_task(urls):
 @app.task(queue="storage")
 def scan(scan_id: int):
     """
+    explain_headers_for_explained_microsoft_trusted_tls_certificates
+
     Some domains in the database have an automatic explanation, but are missing the header explanations.
     Add those automatically. For example when the headers are found _after_ the tls scan is performed.
     """
 
-    scan = EndpointGenericScan.objects.all().filter(id=scan_id)
+    scan = EndpointGenericScan.objects.all().filter(id=scan_id).first()
     if not scan:
         return
 
