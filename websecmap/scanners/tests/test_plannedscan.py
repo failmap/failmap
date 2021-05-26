@@ -77,7 +77,6 @@ def create_endpoint_scan(endpoint, type, rating, at_when):
 
 
 def test_plannedscan(db):
-
     o = create_organization("Test")
     u1 = create_url("example.com")
     link_url_to_organization(u1, o)
@@ -111,13 +110,26 @@ def test_plannedscan(db):
     finish_multiple(scanner="tls_qualys", activity="scan", urls=urls)
     assert PlannedScan.objects.all().filter(state=State["finished"]).count() == 2
 
+    # Finished means that the previous steps will be added to the list if they are not present yet.
     assert calculate_progress() == [
+        {
+            "activity": Activity["scan"].value,
+            "amount": 0,
+            "scanner": Scanner["tls_qualys"].value,
+            "state": State["requested"].value,
+        },
+        {
+            "activity": Activity["scan"].value,
+            "amount": 0,
+            "scanner": Scanner["tls_qualys"].value,
+            "state": State["picked_up"].value,
+        },
         {
             "scanner": Scanner["tls_qualys"].value,
             "activity": Activity["scan"].value,
             "state": State["finished"].value,
             "amount": 2,
-        }
+        },
     ]
 
     # test storage:
@@ -139,9 +151,7 @@ def test_plannedscan(db):
 
 
 def test_plan_scans(db):
-
     with freeze_time("2020-01-01"):
-
         o = create_organization("Test")
         u1 = create_url("example.com")
         e1 = create_endpoint(u1, 4, "https", 443)

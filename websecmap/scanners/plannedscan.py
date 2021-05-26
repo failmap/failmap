@@ -65,11 +65,49 @@ def calculate_progress() -> List[Dict[str, int]]:
     cursor.execute(sql)
     rows = cursor.fetchall()
 
+    # when there are 0 records, there is of course no row created. But there might have been in the past.
     overview = []
     for row in rows:
         overview.append({"scanner": row[0], "activity": row[1], "state": row[2], "amount": row[3]})
 
+    for scanner_id, scanner_name in Scanner.choices:
+        # unknown is not used because it is not used
+        if scanner_id == 0:
+            continue
+
+        if scanner_has_finished_tasks(scanner_id, overview):
+            # scan, discover and verify, not all scanners will perform all three.
+            for activity in activities_from_finished_tasks(scanner_id, overview):
+                # unknown error and timeout are ignored because they are not used
+                for state in [State["requested"].value, State["picked_up"].value, State["finished"].value]:
+
+                    # it's not in the overview when we're here, so add it:
+                    if not already_in_overview(overview, scanner_id, activity, state):
+                        overview.append({"scanner": scanner_id, "activity": activity, "state": state, "amount": 0})
+
+    # Sort by scanner for easier human comprehension.
+    overview = sorted(overview, key=lambda o: (o["scanner"], o["activity"], o["state"]))
+
     return overview
+
+
+def already_in_overview(overview, scanner, activity, state):
+    return sum(
+        [
+            True if row["scanner"] == scanner and row["activity"] == activity and row["state"] == state else False
+            for row in overview
+        ]
+    )
+
+
+def scanner_has_finished_tasks(scanner_id, overview):
+    return activities_from_finished_tasks(scanner_id, overview)
+
+
+def activities_from_finished_tasks(scanner_id, overview):
+    return [
+        row["activity"] for row in overview if row["scanner"] == scanner_id and row["state"] == State["finished"].value
+    ]
 
 
 def reset():
