@@ -36,17 +36,17 @@ from time import sleep
 from typing import List, Dict, Any
 
 import googlemaps
+import requests
 import tldextract
 import logging
 
-import urllib3
-
-# websecmap modules
 from constance import config
 from django.db import transaction
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from iso3166 import countries_by_alpha2
+from requests.auth import HTTPBasicAuth
 
+from websecmap.celery import app
 from websecmap.organizations.models import Organization, OrganizationType, Coordinate, Url
 
 log = logging.getLogger(__package__)
@@ -156,19 +156,14 @@ TaskName = "zorgkaart import (hidden)"
 # raise it for all security
 sys.setrecursionlimit(10000)
 
-# logging
-log = logging.getLogger(__package__)
-
-# debug error info
-
 
 def create_task():
     """Adds scraping task to celery jobs"""
-    if not PeriodicTask.objects.get(name=TaskName):
+    if not PeriodicTask.objects.filter(name=TaskName).first():
         p = PeriodicTask(
             **{
                 "name": TaskName,
-                "task": "vendor.tilanus.zorgkaart.scrape",
+                "task": "websecmap.api.apis.zorgkaart.scrape",
                 "crontab": CrontabSchedule.objects.get(id=7),
             }
         )
@@ -185,15 +180,12 @@ def do_request(url, params={}, previous_items=[]):
     if "page" not in params.keys():
         params["page"] = 1
     log.debug(f"Zorgkaart scraper request with parameters: {params}")
-    # setup for API call use Debian ca-certificats
-    http = urllib3.PoolManager(cert_reqs="CERT_REQUIRED", ca_certs="/etc/ssl/certs/ca-certificates.crt")
-    headers = urllib3.util.make_headers(basic_auth=config.ZORGKAART_USERNAME + ":" + config.ZORGKAART_PASSWORD)
-    # do request
-    r = http.request("GET", url, headers=headers, fields=params)
-    if not r.status == 200:
-        raise Exception(f"Zorgkaart scraper got an non 200 status from zorgkaart: {r.status}")
-    # load in python stuctures
-    result = json.loads(r.data.decode("utf8"))
+
+    response = requests.get(
+        url, auth=HTTPBasicAuth(config.ZORGKAART_USERNAME, config.ZORGKAART_PASSWORD), params=params
+    )
+    response.raise_for_status()
+    result = response.json()
     # merge with results from reursions above
     items = previous_items + result["items"]
     # do we have everything
@@ -249,12 +241,17 @@ def translate(orglist):
     Returns:
         a list of dicts containing data that can be imported into WebSecMap.
     """
+
     outlist = []
     for org in orglist:
+
+        if not OrganizationType.objects.all().filter(name=org["type"]).first():
+            OrganizationType.objects.create(name=org["type"])
+
         outlist.append(
             {
                 "name": org["name"] + " (" + org["type"] + ")",
-                "layer": "Zorg",
+                "layer": OrganizationType.objects.all().filter(name=org["type"]).first(),
                 "country": "NL",
                 "coordinate_type": "Point",
                 "coordinate_area": [org["location"]["longitude"], org["location"]["latitude"]],
@@ -272,6 +269,7 @@ def translate(orglist):
     return outlist
 
 
+@app.task(queue="storage")
 def scrape():
     """
     Retrieves list of organisations (applying the filter in
@@ -357,7 +355,7 @@ def retrieve_geocode(string):
     return [0, 0]
 
 
-def update_flat_organization(flat_organization: Dict, existing_organizations=List[Organization]) -> None:
+def update_flat_organization(flat_organization: Dict, existing_organizations: List[Organization]) -> None:
     # name, address, coordinate_type, coordinate can be updated.
 
     for existing_organization in existing_organizations:
@@ -393,10 +391,13 @@ def add_urls_to_organizations(organizations: List[Organization], urls: List[str]
             # make the API easier to use:
             # will parse extensive urls: https://www.apple.com:80/yolo/swag
             extract = tldextract.extract(url)
+
             if extract.subdomain:
                 url = f"{extract.subdomain}.{extract.domain}.{extract.suffix}"
-            else:
-                url = f"{extract.domain}.{extract.suffix}"
+                new_url = Url.add(url)
+                new_url.organization.add(organization)
 
-            new_url = Url.add(url)
-            new_url.organization.add(organization)
+            if extract.domain:
+                url = f"{extract.domain}.{extract.suffix}"
+                new_url = Url.add(url)
+                new_url.organization.add(organization)

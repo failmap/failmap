@@ -485,11 +485,11 @@ def test_add_flat_organizations(db, monkeypatch):
     organization_and_url_import(example_data)
 
     assert Organization.objects.all().count() == 46
-    assert Url.objects.all().count() == 44
+    assert Url.objects.all().count() == 88
     assert Coordinate.objects.all().count() == 44
 
     # add this dataset again, and nothing new should be added
     organization_and_url_import(example_data)
     assert Organization.objects.all().count() == 46
-    assert Url.objects.all().count() == 44
+    assert Url.objects.all().count() == 88
     assert Coordinate.objects.all().count() == 44
