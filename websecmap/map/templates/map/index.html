@@ -885,7 +885,7 @@
 
             lazyload(); // allow for lazy loading of images
 
-            current_language = get_cookie('preferred_language') ? get_cookie('preferred_language') : window.navigator.language;
+            current_language = get_cookie('preferred_language') ? get_cookie('preferred_language') : window.navigator.language.substr(0, 2);
 
             // date and time to the current locale, whatever it may be:
             moment.locale(current_language);
