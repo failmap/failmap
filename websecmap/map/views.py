@@ -168,7 +168,7 @@ def inject_default_language_cookie(request, response) -> HttpResponse:
     if "preferred_language" not in request.COOKIES:
         # Get the accept language,
         # Add the cookie to render.
-        accept_language = request.LANGUAGE_CODE
+        accept_language = request.LANGUAGE_CODE[0:2]  # only support 'en' not 'en-gb'
         response.set_cookie(key="preferred_language", value=accept_language)
 
     return response
@@ -292,7 +292,7 @@ def index(request, map_configuration=None):
                 "sentry_token": settings.SENTRY_TOKEN,
                 "country": config["PROJECT_COUNTRY"],
                 "debug": True if settings.DEBUG else False,
-                "language": request.LANGUAGE_CODE,
+                "language": request.LANGUAGE_CODE[0:2],  # only support 'en' not 'en-gb',
                 "timestamp": datetime.now(pytz.UTC).isoformat(),
                 "initial_map_data_url": "",
                 "initial_countries": initial_countries,
