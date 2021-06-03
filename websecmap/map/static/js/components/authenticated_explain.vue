@@ -155,7 +155,7 @@ Vue.component('explain', {
             };
 
             this.asynchronous_json_post(
-                `/data/explain/explain/`, data, (server_response) => {
+                `data/explain/explain/`, data, (server_response) => {
                     this.explain_server_response = server_response;
                 });
 

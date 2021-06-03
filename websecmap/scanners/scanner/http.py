@@ -156,7 +156,10 @@ def compose_discover_task(urls: List[Url]):
                     can_connect.si(protocol=PORT_TO_PROTOCOL[port], url=url.url, port=port, ip_version=ip_version).set(
                         queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version]
                     )
-                    | connect_result.s(protocol=PORT_TO_PROTOCOL[port], url_id=url.pk, port=port, ip_version=ip_version)
+                    | connect_result.s(
+                        protocol=PORT_TO_PROTOCOL[port], url_id=url.pk, port=port, ip_version=ip_version,
+                        origin='http_discover'
+                    )
                     | plannedscan.finish.si("discover", "http", url.pk)
                 )
 
@@ -222,7 +225,8 @@ def compose_verify_task(urls):
             protocol=endpoint.protocol, url=endpoint.url.url, port=endpoint.port, ip_version=endpoint.ip_version
         ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
         | connect_result.s(
-            protocol=endpoint.protocol, url_id=endpoint.url.pk, port=endpoint.port, ip_version=endpoint.ip_version
+            protocol=endpoint.protocol, url_id=endpoint.url.pk, port=endpoint.port, ip_version=endpoint.ip_version,
+            origin='http_verify'
         )
         | plannedscan.finish.si("verify", "http", endpoint.url.pk)
         for endpoint in endpoints
@@ -542,11 +546,11 @@ def pretty_print_request(req):
 
 
 @app.task(queue="storage")
-def connect_result(result, protocol: str, url_id: int, port: int, ip_version: int):
+def connect_result(result, protocol: str, url_id: int, port: int, ip_version: int, origin: str = ''):
     if result:
-        save_endpoint(protocol, url_id, port, ip_version)
+        save_endpoint(protocol, url_id, port, ip_version, origin)
     else:
-        kill_endpoint(protocol, url_id, port, ip_version)
+        kill_endpoint(protocol, url_id, port, ip_version, origin)
     return True
 
 
@@ -587,7 +591,7 @@ def has_internet_connection(host: str = "8.8.8.8", port: int = 53, connection_ti
         return False
 
 
-def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int):
+def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = ''):
 
     # prevent duplication
     if not endpoint_exists(url_id, port, protocol, ip_version):
@@ -697,13 +701,13 @@ def endpoint_exists(url_id: int, port: int, protocol: str, ip_version: int) -> i
     )
 
 
-def kill_endpoint(protocol: str, url_id: int, port: int, ip_version: int):
+def kill_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = ''):
     eps = Endpoint.objects.all().filter(url=url_id, port=port, ip_version=ip_version, protocol=protocol, is_dead=False)
 
     for ep in eps:
         ep.is_dead = True
         ep.is_dead_since = datetime.now(pytz.utc)
-        ep.is_dead_reason = "Not found in HTTP Scanner anymore."
+        ep.is_dead_reason = f"Not found in HTTP Scanner anymore ({origin})."
         ep.save()
 
 
