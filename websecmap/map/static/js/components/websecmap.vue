@@ -765,7 +765,7 @@ const WebSecMap = Vue.component('websecmap', {
             };
 
             this.asynchronous_json_post(
-                `/data/admin/urls/add/`, data, (server_response) => {
+                `data/admin/urls/add/`, data, (server_response) => {
                     this.add_domains_server_response = server_response;
 
                     if (server_response.data) {

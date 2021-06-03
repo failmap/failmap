@@ -632,7 +632,7 @@ Vue.component('debugmenu', {
             };
 
             this.asynchronous_json_post(
-                `/data/admin/organization/add/`, data, (server_response) => {
+                `data/admin/organization/add/`, data, (server_response) => {
                 this.add_organization_server_response = server_response;
 
                 if (server_response.data){
@@ -650,7 +650,7 @@ Vue.component('debugmenu', {
             };
 
             this.asynchronous_json_post(
-                `/data/admin/proxy/add/`, data, (server_response) => {
+                `data/admin/proxy/add/`, data, (server_response) => {
                 this.add_proxies_server_response = server_response;
 
                 if (server_response.data){
