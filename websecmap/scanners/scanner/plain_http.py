@@ -254,8 +254,12 @@ def store(results, endpoint_id):
         return
 
     connect_result(
-        can_connect_result, protocol="https", url_id=endpoint.url.pk, port=443, ip_version=endpoint.ip_version,
-        origin='plain_http'
+        can_connect_result,
+        protocol="https",
+        url_id=endpoint.url.pk,
+        port=443,
+        ip_version=endpoint.ip_version,
+        origin="plain_http",
     )
 
     # issue resolved.
