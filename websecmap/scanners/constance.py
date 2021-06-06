@@ -10,6 +10,15 @@ def add_scanner_fields(constance_config):
     :param constance_config:
     :return:
     """
+    # Add rate limiting per scanner and activity:
+    for scanner in SCANNERS:
+        for plannable_activity in scanner["plannable_activities"]:
+            variable_name = f"RATE_LIMIT_{scanner['name'].upper()}_{plannable_activity.upper()}"
+            constance_config[variable_name] = (
+                500,
+                f"Simultaneous {plannable_activity.upper()} tasks for {scanner['name'].upper()}.",
+                int,
+            )
 
     # Generate Scanner Settings:
     for scanner in SCANNERS:
@@ -99,5 +108,18 @@ def add_scanner_fieldsets(constance_config_fieldsets):
     )
 
     constance_config_fieldsets.update(scanner_config_set)
+
+    # Add rate limiting per scanner and activity:
+    rate_limit = ()
+    for scanner in SCANNERS:
+        for plannable_activity in scanner["plannable_activities"]:
+            variable_name = f"RATE_LIMIT_{scanner['name'].upper()}_{plannable_activity.upper()}"
+            rate_limit += (variable_name,)
+
+    constance_config_fieldsets.update(
+        [
+            ("Rate limit simultaneous activities per scanner", rate_limit),
+        ]
+    )
 
     return constance_config_fieldsets

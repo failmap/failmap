@@ -7,6 +7,7 @@ import pytz
 from django.db import connection
 from statshog.defaults.django import statsd
 
+from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.map.logic.map_health import get_outdated_ratings
 from websecmap.map.map_configs import filter_map_configs
@@ -138,14 +139,34 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     amount: the amount of plannedscans to pick up
     """
 
+    # Do not pickup more if there are already 500 items picked up. Having more than 500 items picked up means
+    # a throughput error. If you want to go faster you can always increase the frequency of things being picked up
+    # as long as they are handled faster.
+    already_picked_up = (
+        PlannedScan.objects.all()
+        .filter(activity=Activity[activity].value, scanner=Scanner[scanner].value, state=State["picked_up"].value)
+        .count()
+    )
+
+    rate_limit_setting = f"RATE_LIMIT_{scanner.upper()}_{activity.upper()}"
+    max_picked_up_simultaneously = constance_cached_value(rate_limit_setting)
+
+    if already_picked_up >= max_picked_up_simultaneously:
+        return []
+
+    # Limit the total amount of picked up to being maximum of MAX_PICKED_UP_SIMULTANEOUSLY.
+    headroom = max_picked_up_simultaneously - already_picked_up
+    amount = amount if amount <= headroom else headroom
+    log.debug(f"Picking up maximum {amount} of total {headroom} free slots.")
+
     # oldest first, so ascending dates.
     scans = (
         PlannedScan.objects.all()
         .filter(activity=Activity[activity].value, scanner=Scanner[scanner].value, state=State["requested"].value)
         .order_by("requested_at_when")[0:amount]
     )
+    # cannot update once a slice has been taken
     for scan in scans:
-        # todo: should there be a state log? Probably.
         scan.state = State["picked_up"].value
         scan.last_state_change_at = datetime.now(pytz.utc)
         scan.save()
