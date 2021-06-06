@@ -107,7 +107,11 @@ def test_plannedscan(db):
         }
     ]
 
-    finish_multiple(scanner="tls_qualys", activity="scan", urls=urls)
+    # Verify that you cannot pickup more than the usual 500, in this max 498:
+    # todo: get this from caplog: Picking up maximum 498 of total 498 free slots.
+    pickup(scanner="tls_qualys", activity="scan", amount=1000)
+
+    finish_multiple(scanner="tls_qualys", activity="scan", urls=[url.pk for url in urls])
     assert PlannedScan.objects.all().filter(state=State["finished"]).count() == 2
 
     # Finished means that the previous steps will be added to the list if they are not present yet.
