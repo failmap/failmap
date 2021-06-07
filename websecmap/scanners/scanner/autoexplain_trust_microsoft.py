@@ -116,7 +116,7 @@ def plan_scan():
         endpoint__url__in=get_relevant_microsoft_domains_from_database(),
     )
 
-    urls = [scan.endpoint.url.pk for scan in scans]
+    urls = [_scan.endpoint.url for _scan in scans]
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
 
 
@@ -260,21 +260,21 @@ def certificate_matches_microsoft_exception_policy(
     return True
 
 
-def autoexplain_trust_microsoft_and_include_their_webserver_headers(scan):
+def autoexplain_trust_microsoft_and_include_their_webserver_headers(a_scan):
     # Find a neighboring http endpoint, also there the headers are not relevant as the same security
     # protocol is used. DNS can only switch on addresses and ip-versions. But not protocol and port.
     http_endpoint = Endpoint.objects.all().filter(
         # We don't care about what port is applied here.
         protocol="http",
-        ip_version=scan.endpoint.ip_version,
-        url=scan.endpoint.url,
+        ip_version=a_scan.endpoint.ip_version,
+        url=a_scan.endpoint.url,
         is_dead=False,
         url__is_dead=False,
         url__not_resolvable=False,
     )
     relevant_endpoints = list(set(http_endpoint))
 
-    for endpoint in relevant_endpoints + [scan.endpoint]:
+    for endpoint in relevant_endpoints + [a_scan.endpoint]:
 
         intended_for_devices = "service_intended_for_devices_not_browsers"
 
