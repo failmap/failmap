@@ -38,7 +38,7 @@ def plan_scan():
         )
     )
 
-    urls = [endpoint_generic_scan.endpoint.url.pk for endpoint_generic_scan in scans]
+    urls = [endpoint_generic_scan.endpoint.url for endpoint_generic_scan in scans]
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
 
 
@@ -82,7 +82,7 @@ def scan(scan_id):
         return
 
     try:
-        result = dns.resolver.query(endpoint_generic_scan.endpoint.url.url, "CNAME")
+        result = dns.resolver.resolve(endpoint_generic_scan.endpoint.url.url, "CNAME")
         for cnameval in result:
             # don't accept trickery such as autodiscover.outlook.com.mydomain.com.
             log.debug(f"Retrieved cname value: {cnameval}.")

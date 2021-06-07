@@ -46,7 +46,7 @@ query = EndpointGenericScan.objects.all().filter(
 
 @app.task(queue="storage")
 def plan_scan():
-    urls = [scan.endpoint.url.pk for scan in query]
+    urls = [scan.endpoint.url for scan in query]
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
 
 

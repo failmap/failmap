@@ -25,7 +25,7 @@ query = EndpointGenericScan.objects.all().filter(
 @app.task(queue="storage")
 def plan_scan():
     scans = query.filter(endpoint__url__in=get_relevant_microsoft_domains_from_database())
-    urls = [endpoint_generic_scan.endpoint.url.pk for endpoint_generic_scan in scans]
+    urls = [endpoint_generic_scan.endpoint.url for endpoint_generic_scan in scans]
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
 
 
@@ -54,9 +54,9 @@ def scan(scan_id: int):
     Add those automatically. For example when the headers are found _after_ the tls scan is performed.
     """
 
-    scan = EndpointGenericScan.objects.all().filter(id=scan_id).first()
-    if not scan:
+    a_scan = EndpointGenericScan.objects.all().filter(id=scan_id).first()
+    if not a_scan:
         return
 
     # assuming the explanation is unique, which it probably isn't
-    autoexplain_trust_microsoft_and_include_their_webserver_headers(scan)
+    autoexplain_trust_microsoft_and_include_their_webserver_headers(a_scan)

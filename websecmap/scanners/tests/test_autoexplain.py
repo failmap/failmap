@@ -77,19 +77,19 @@ def test_autoexplain_no_https_microsoft(db, mocker):
 
     # mock dns.resolver.query(scan.endpoint.url.url, 'CNAME') in several ways:
     log.debug("mydomain.com is not a valid cname record in this case.")
-    mocker.patch("dns.resolver.query", return_value=[Answer("mydomain.com")])
+    mocker.patch("dns.resolver.resolve", return_value=[Answer("mydomain.com")])
     autoexplain_no_https_microsoft.scan(endpointscan.id)
     my_epgs = EndpointGenericScan.objects.all().first()
     assert my_epgs.comply_or_explain_is_explained is False
 
     log.debug("The cname must match exactly to the desired cname.")
-    mocker.patch("dns.resolver.query", return_value=[Answer("autodiscover.outlook.com.mydomain.com")])
+    mocker.patch("dns.resolver.resolve", return_value=[Answer("autodiscover.outlook.com.mydomain.com")])
     autoexplain_no_https_microsoft.scan(endpointscan.id)
     my_epgs = EndpointGenericScan.objects.all().first()
     assert my_epgs.comply_or_explain_is_explained is False
 
     log.debug("It should be an exact match to this value.")
-    mocker.patch("dns.resolver.query", return_value=[Answer("autodiscover.outlook.com.")])
+    mocker.patch("dns.resolver.resolve", return_value=[Answer("autodiscover.outlook.com.")])
     autoexplain_no_https_microsoft.scan(endpointscan.id)
     my_epgs = EndpointGenericScan.objects.all().first()
     assert my_epgs.comply_or_explain_is_explained is True
