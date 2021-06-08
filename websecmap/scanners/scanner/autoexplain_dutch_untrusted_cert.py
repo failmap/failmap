@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 
 from celery import group, Task
 
@@ -86,7 +87,20 @@ def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
         with socket.socket(socket_ip_version, socket.SOCK_STREAM) as s:
             conn = SSL.Connection(context=SSL.Context(SSL.TLSv1_2_METHOD), socket=s)
             conn.connect((url, port))
-            conn.do_handshake()
+
+            # Deal with WantReadError errors
+            attempts = 300
+            attempt = 0
+            while attempt <= attempts:
+                try:
+                    attempt += 1
+                    conn.do_handshake()
+                except SSL.WantReadError:
+                    sleep(0.01)
+                    conn.bio_read(4096)
+                else:
+                    break
+
             chain = conn.get_peer_cert_chain()
             conn.close()
             return serialize_cert_chain(chain) if chain else []
