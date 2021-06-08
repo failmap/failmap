@@ -188,7 +188,7 @@ SCANNERS = [
         "needs results from": [],
         "creates endpoint scan types": [],
         "creates url scan types": [],
-        "plannable_activities": ["scan"],
+        "plannable_activities": ["discover"],
         "python_module": "dns_wildcards",
     },
     {
