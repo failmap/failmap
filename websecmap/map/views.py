@@ -309,6 +309,7 @@ def config(request):
                 "internet_nl_mail_auth_dmarc_exist": configuration["SHOW_INTERNET_NL_MAIL_AUTH_DMARC_EXIST"],
             },
         },
+        "announcement": configuration["ANNOUNCEMENT"],
         "responsible_organization": {
             "name": configuration["RESPONSIBLE_ORGANIZATION_NAME"],
             "promo_text": configuration["RESPONSIBLE_ORGANIZATION_PROMO_TEXT"],
