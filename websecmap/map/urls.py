@@ -22,6 +22,7 @@ register_converter(converters.JsonConverter, "json")
 
 static_urlpatterns = [
     path("", views.index),
+    path("data/config/", views.config),
     path("empty", views.emptypage),
     path("security.txt", views.security_txt),
     path("robots.txt", views.robots_txt),
