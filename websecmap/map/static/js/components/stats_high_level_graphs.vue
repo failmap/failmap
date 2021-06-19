@@ -19,7 +19,7 @@
                         :color_scheme="color_scheme"
                         :data="organization_stats"
                         :axis="['high', 'medium', 'good']"
-                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.organization_graph"
+                        :translation="$i18n.t('statistics.progress_bars.organization_graph')"
                     ></vulnerability-chart>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                         :axis="['high']"
                         :display_title="false"
                         :display_legend="false"
-                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.organization_graph"
+                        :translation="$i18n.t('statistics.progress_bars.organization_graph')"
                     ></vulnerability-chart>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                         :axis="['medium']"
                         :display_title="false"
                         :display_legend="false"
-                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.organization_graph"
+                        :translation="$i18n.t('statistics.progress_bars.organization_graph')"
                     ></vulnerability-chart>
                 </div>
             </div>
@@ -59,7 +59,7 @@
                         :axis="['good']"
                         :display_title="false"
                         :display_legend="false"
-                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.organization_graph"
+                        :translation="$i18n.t('statistics.progress_bars.organization_graph')"
                     ></vulnerability-chart>
                 </div>
             </div>
@@ -75,7 +75,7 @@
                         :color_scheme="color_scheme"
                         :data="url_stats"
                         :axis="['high', 'medium', 'good']"
-                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.internet_graph"
+                        :translation="$i18n.t('statistics.progress_bars.internet_graph')"
                     ></vulnerability-chart>
                 </div>
             </div>
@@ -92,7 +92,7 @@
                         :axis="['high']"
                         :display_title="false"
                         :display_legend="false"
-                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.internet_graph"
+                        :translation="$i18n.t('statistics.progress_bars.internet_graph')"
                     ></vulnerability-chart>
                 </div>
             </div>
@@ -105,7 +105,7 @@
                         :axis="['medium']"
                         :display_title="false"
                         :display_legend="false"
-                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.internet_graph"
+                        :translation="$i18n.t('statistics.progress_bars.internet_graph')"
                     ></vulnerability-chart>
                 </div>
             </div>
@@ -118,7 +118,7 @@
                         :axis="['good']"
                         :display_title="false"
                         :display_legend="false"
-                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.internet_graph"
+                        :translation="$i18n.t('statistics.progress_bars.internet_graph')"
                     ></vulnerability-chart>
                 </div>
             </div>

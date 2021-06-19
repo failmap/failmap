@@ -16,7 +16,7 @@
                             :color_scheme="color_scheme"
                             :data="data.total"
                             :axis="['high', 'medium', 'low']"
-                            :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                            :translation="$i18n.t('graphs.vulnerability_graph')"
                         ></vulnerability-chart>
                     </div>
                 </div>
@@ -32,7 +32,7 @@
                             :axis="['high']"
                             :display_title="false"
                             :display_legend="false"
-                            :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                            :translation="$i18n.t('graphs.vulnerability_graph')"
                         ></vulnerability-chart>
                     </div>
                 </div>
@@ -45,7 +45,7 @@
                             :axis="['medium']"
                             :display_title="false"
                             :display_legend="false"
-                            :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                            :translation="$i18n.t('graphs.vulnerability_graph')"
                         ></vulnerability-chart>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                             :axis="['low']"
                             :display_title="false"
                             :display_legend="false"
-                            :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                            :translation="$i18n.t('graphs.vulnerability_graph')"
                         ></vulnerability-chart>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                                 :color_scheme="color_scheme"
                                 :data="data[issue['name']]"
                                 :axis="issue['relevant impacts']"
-                                :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_donut"
+                                :translation="$i18n.t('graphs.vulnerability_donut')"
                             ></vulnerability-donut>
                         </div>
                     </div>
@@ -90,7 +90,7 @@
                                 :color_scheme="color_scheme"
                                 :data="data[issue['name']]"
                                 :axis="issue['relevant impacts']"
-                                :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                                :translation="$i18n.t('graphs.vulnerability_graph')"
                             ></vulnerability-chart>
                         </div>
                     </div>
