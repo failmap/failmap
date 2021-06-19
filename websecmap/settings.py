@@ -12,6 +12,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 import os
+from corsheaders.defaults import default_headers
 
 # required until fixed: https://github.com/jazzband/django-constance/issues/263
 from collections import OrderedDict
@@ -78,6 +79,8 @@ INSTALLED_APPS = [
     "constance.backends.database",
     "websecmap.app",
     "adminsortable2",
+    # Allow a client to access the data:
+    "corsheaders",
     # Jet admin dashboard
     "jet.dashboard",
     "jet",
@@ -155,6 +158,7 @@ MIDDLEWARE = [
     # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/#how-django-discovers-language-preference
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -1285,3 +1289,21 @@ Django project settings.py file:
 Todo: Only needed for /admin urls, not for other urls: it's fine when people embed the map, desired even!
 """
 X_FRAME_OPTIONS = "SAMEORIGIN"
+
+
+# https://github.com/adamchainz/django-cors-headers
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = ["http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:8081"]
+else:
+    CORS_ALLOWED_ORIGINS = ["https://" + h for h in ALLOWED_HOSTS]
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "cache-control",
+    "X-CSRFToken",
+    "csrfmiddlewaretoken",
+]
+
+# allow cookies to be sent as well, we have to, because there are logins and such.
+CORS_ALLOW_CREDENTIALS = True
+
+VENDOR_DIR = os.environ.get("VENDOR_DIR", os.path.abspath(os.path.dirname(__file__) + "/../vendor/") + "/")

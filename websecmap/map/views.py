@@ -72,7 +72,6 @@ def empty_response():
 
 
 def generic_download(filename, data, file_type):
-
     supported_types = {
         "xlsx": {"content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
         "ods": {"content_type": "application/vnd.oasis.opendocument.spreadsheet"},
@@ -178,41 +177,172 @@ def emptypage(request):
     return render(request, "map/empty.html")
 
 
+def countries_and_layers():
+    confs = Configuration.objects.all().filter(is_displayed=True).order_by("display_order")
+
+    # returns this, translated according to the preferred locale, this should be JS in the future:
+    countries = {
+        "EN": {
+            "name": "",
+            "flag": "",
+            "code": "EN",
+            "layers": [],
+        },
+    }
+
+    # use django countries to augment this infromation based on the current prefered language,
+    # which unfortunately doesn't change when switching language, but ok... for now it's fine.
+    countries = {}
+    for conf in confs:
+        if conf.country.code not in countries:
+            countries = {
+                **countries,
+                **{
+                    conf.country.code: {
+                        "code": conf.country.code,
+                        "name": conf.country.name,
+                        "flag": conf.country.flag,
+                        "layers": [conf.organization_type.name],
+                    }
+                },
+            }
+        else:
+            countries[conf.country]["layers"].append(conf.organization_type.name)
+
+    return countries
+
+
+@cache_page(one_hour)
+def config(request):
+    configuration = get_bulk_values(
+        [
+            "PROJECT_COUNTRY",
+            "PROJECT_NAME",
+            "PROJECT_TAGLINE",
+            "SHOW_INTRO",
+            "SHOW_CHARTS",
+            "SHOW_COMPLY_OR_EXPLAIN",
+            "SHOW_SCAN_SCHEDULE",
+            "SHOW_DATASETS",
+            "SHOW_ANNOUNCEMENT",
+            "SHOW_EXTENSIVE_STATISTICS",
+            "SHOW_STATS_NUMBERS",
+            "SHOW_STATS_IMPROVEMENTS",
+            "SHOW_STATS_GRAPHS",
+            "SHOW_STATS_CHANGES",
+            "SHOW_TICKER",
+            "SHOW_SERVICES",
+            "SHOW_FTP",
+            "SHOW_PLAIN_HTTPS",
+            "SHOW_DNSSEC",
+            "PLUS_SHOW_INFO",
+            "SHOW_HTTP_SECURITY_HEADER_STRICT_TRANSPORT_SECURITY",
+            "SHOW_HTTP_SECURITY_HEADER_X_CONTENT_TYPE_OPTIONS",
+            "SHOW_HTTP_SECURITY_HEADER_X_FRAME_OPTIONS",
+            "SHOW_HTTP_SECURITY_HEADER_X_XSS_PROTECTION",
+            "SHOW_TLS_QUALYS_CERTIFICATE_TRUSTED",
+            "SHOW_TLS_QUALYS_ENCRYPTION_QUALITY",
+            "SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_AVAILABLE",
+            "SHOW_INTERNET_NL_MAIL_AUTH_SPF_EXIST",
+            "SHOW_INTERNET_NL_MAIL_AUTH_DKIM_EXIST",
+            "SHOW_INTERNET_NL_MAIL_AUTH_DMARC_EXIST",
+            "RESPONSIBLE_ORGANIZATION_NAME",
+            "RESPONSIBLE_ORGANIZATION_PROMO_TEXT",
+            "RESPONSIBLE_ORGANIZATION_WEBSITE",
+            "RESPONSIBLE_ORGANIZATION_MAIL",
+            "RESPONSIBLE_ORGANIZATION_TWITTER",
+            "RESPONSIBLE_ORGANIZATION_FACEBOOK",
+            "RESPONSIBLE_ORGANIZATION_LINKEDIN",
+            "RESPONSIBLE_ORGANIZATION_WHATSAPP",
+            "RESPONSIBLE_ORGANIZATION_PHONE",
+            "PROJECT_NAME",
+            "PROJECT_TAGLINE",
+            "PROJECT_COUNTRY",
+            "PROJECT_MAIL",
+            "PROJECT_ISSUE_MAIL",
+            "PROJECT_TWITTER",
+            "PROJECT_FACEBOOK",
+            "COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK",
+            "COMPLY_OR_EXPLAIN_EMAIL_ADDRESS",
+            "MAPBOX_ACCESS_TOKEN",
+            "GITTER_CHAT_ENABLE",
+            "GITTER_CHAT_CHANNEL",
+            "ANNOUNCEMENT",
+        ]
+    )
+
+    config_object = {
+        "show": {
+            "intro": configuration["SHOW_INTRO"],
+            "charts": configuration["SHOW_CHARTS"],
+            "comply_or_explain": configuration["SHOW_COMPLY_OR_EXPLAIN"],
+            "scan_schedule": configuration["SHOW_SCAN_SCHEDULE"],
+            "datasets": configuration["SHOW_DATASETS"],
+            "announcement": configuration["SHOW_ANNOUNCEMENT"],
+            "statistics": configuration["SHOW_EXTENSIVE_STATISTICS"],
+            "numbers": configuration["SHOW_STATS_NUMBERS"],
+            "improvements": configuration["SHOW_STATS_IMPROVEMENTS"],
+            "graphs": configuration["SHOW_STATS_GRAPHS"],
+            "changes": configuration["SHOW_STATS_CHANGES"],
+            "ticker": configuration["SHOW_TICKER"],
+            "services": configuration["SHOW_SERVICES"],
+            "plus_info": configuration["PLUS_SHOW_INFO"],
+            "issues": {
+                "ftp": configuration["SHOW_FTP"],
+                "plain_https": configuration["SHOW_PLAIN_HTTPS"],
+                "dnssec": configuration["SHOW_DNSSEC"],
+                "http_security_header_strict_transport_security": configuration[
+                    "SHOW_HTTP_SECURITY_HEADER_STRICT_TRANSPORT_SECURITY"
+                ],
+                "http_security_header_x_content_type_options": configuration[
+                    "SHOW_HTTP_SECURITY_HEADER_X_CONTENT_TYPE_OPTIONS"
+                ],
+                "http_security_header_x_frame_options": configuration["SHOW_HTTP_SECURITY_HEADER_X_FRAME_OPTIONS"],
+                "http_security_header_x_xss_protection": configuration["SHOW_HTTP_SECURITY_HEADER_X_XSS_PROTECTION"],
+                "tls_qualys_certificate_trusted": configuration["SHOW_TLS_QUALYS_CERTIFICATE_TRUSTED"],
+                "tls_qualys_encryption_quality": configuration["SHOW_TLS_QUALYS_ENCRYPTION_QUALITY"],
+                "internet_nl_mail_starttls_tls_available": configuration[
+                    "SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_AVAILABLE"
+                ],
+                "internet_nl_mail_auth_spf_exist": configuration["SHOW_INTERNET_NL_MAIL_AUTH_SPF_EXIST"],
+                "internet_nl_mail_auth_dkim_exist": configuration["SHOW_INTERNET_NL_MAIL_AUTH_DKIM_EXIST"],
+                "internet_nl_mail_auth_dmarc_exist": configuration["SHOW_INTERNET_NL_MAIL_AUTH_DMARC_EXIST"],
+            },
+        },
+        "responsible_organization": {
+            "name": configuration["RESPONSIBLE_ORGANIZATION_NAME"],
+            "promo_text": configuration["RESPONSIBLE_ORGANIZATION_PROMO_TEXT"],
+            "website": configuration["RESPONSIBLE_ORGANIZATION_WEBSITE"],
+            "mail": configuration["RESPONSIBLE_ORGANIZATION_MAIL"],
+            "twitter": configuration["RESPONSIBLE_ORGANIZATION_TWITTER"],
+            "facebook": configuration["RESPONSIBLE_ORGANIZATION_FACEBOOK"],
+            "linkedin": configuration["RESPONSIBLE_ORGANIZATION_LINKEDIN"],
+            "whatsapp": configuration["RESPONSIBLE_ORGANIZATION_WHATSAPP"],
+            "phone": configuration["RESPONSIBLE_ORGANIZATION_PHONE"],
+        },
+        "project": {
+            "name": configuration["PROJECT_NAME"],
+            "tagline": configuration["PROJECT_TAGLINE"],
+            "country": configuration["PROJECT_COUNTRY"],
+            "mail": configuration["PROJECT_MAIL"],
+            "issue_mail": configuration["PROJECT_ISSUE_MAIL"],
+            "twitter": configuration["PROJECT_TWITTER"],
+            "facebook": configuration["PROJECT_FACEBOOK"],
+        },
+        "comply_or_explain": {
+            "forum_link": configuration["COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK"],
+            "email_address": configuration["COMPLY_OR_EXPLAIN_EMAIL_ADDRESS"],
+        },
+        "debug": True if settings.DEBUG else False,
+        "admin": settings.ADMIN,
+        "country_and_layers": countries_and_layers(),
+    }
+
+    return JsonResponse(config_object, encoder=JSEncoder)
+
+
 @cache_page(one_hour)
 def index(request, map_configuration=None):
-    def countries_and_layers():
-        confs = Configuration.objects.all().filter(is_displayed=True).order_by("display_order")
-
-        # returns this, translated according to the preferred locale, this should be JS in the future:
-        countries = {
-            "EN": {
-                "name": "",
-                "flag": "",
-                "code": "EN",
-                "layers": [],
-            },
-        }
-
-        # use django countries to augment this infromation based on the current prefered language,
-        # which unfortunately doesn't change when switching language, but ok... for now it's fine.
-        countries = {}
-        for conf in confs:
-            if conf.country.code not in countries:
-                countries = {
-                    **countries,
-                    **{
-                        conf.country.code: {
-                            "code": conf.country.code,
-                            "name": conf.country.name,
-                            "flag": conf.country.flag,
-                            "layers": [conf.organization_type.name],
-                        }
-                    },
-                }
-            else:
-                countries[conf.country]["layers"].append(conf.organization_type.name)
-
-        return countries
 
     initial_countries = get_initial_countries()
 
@@ -434,7 +564,6 @@ def improvements(
     weeks_back: int = 0,
     weeks_duration: int = 0,
 ):
-
     changes = get_improvements(country, organization_type, weeks_back, weeks_duration)
     return JsonResponse(changes, encoder=JSEncoder)
 
@@ -447,14 +576,12 @@ def ticker(
     weeks_back: int = 0,
     weeks_duration: int = 0,
 ):
-
     data = get_ticker_data(country, organization_type, weeks_back, weeks_duration)
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @cache_page(four_hours)
 def map_default(request, days_back: int = 0, displayed_issue: str = "all"):
-
     defaults = (
         Configuration.objects.all()
         .filter(is_displayed=True, is_the_default_option=True)
@@ -495,7 +622,6 @@ def map_data(
     days_back: int = 0,
     displayed_issue: str = "all",
 ):
-
     data = get_map_data(country, organization_type, days_back, displayed_issue)
 
     return JsonResponse(data, encoder=JSEncoder)
@@ -557,7 +683,6 @@ def screenshot(request, endpoint_id=0):
 
 
 def get_json_body(request):
-
     try:
         user_input = json.loads(request.body)
     except json.JSONDecodeError:
