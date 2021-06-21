@@ -44,7 +44,7 @@ def get_all_latest_scans(country, organization_type):
             )
             .filter(n_urls__gte=1)
             .order_by("-rating_determined_on")
-            [0:10]
+            [0:6]
         )
 
         print(scans.query)
