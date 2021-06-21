@@ -1,8 +1,8 @@
 import datetime
-import json
+import simplejson
 
 
-class ResultEncoder(json.JSONEncoder):
+class ResultEncoder(simplejson.JSONEncoder):
     """JSON encoder that serializes results from celery tasks."""
 
     def default(self, value):
@@ -15,7 +15,7 @@ class ResultEncoder(json.JSONEncoder):
             return super(ResultEncoder, self).default(value)
 
 
-class JSEncoder(json.JSONEncoder):
+class JSEncoder(simplejson.JSONEncoder):
     """JSON encoder to serialize results to be consumed by Javascript web apps."""
 
     def default(self, obj):
