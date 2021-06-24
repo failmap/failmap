@@ -90,10 +90,14 @@ def compose_manual_scan_task(
 
 
 def compose_scan_task(urls):
-    endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
-
+    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
     endpoints = unique_and_random(endpoints)
     log.debug(f"Scanning security headers on {len(endpoints)} endpoints, {len(urls)} urls")
+
+    # remove urls that don't have the relevant endpoints anymore
+    for url_id in urls_without_endpoints:
+        log.debug(f"Finishing scan on {url_id} because there are no valid endpoints anymore.")
+        plannedscan.finish("scan", "security_headers", url_id)
 
     tasks = []
     for endpoint in endpoints:

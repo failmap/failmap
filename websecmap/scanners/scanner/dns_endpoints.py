@@ -84,7 +84,13 @@ def compose_new_discover_task(urls: List[Url]):
 
 
 def compose_new_verify_task(urls):
-    endpoints = retrieve_endpoints_from_urls(urls, protocols=["dns_mx_no_cname", "dns_soa", "dns_a_aaaa"])
+    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(
+        urls, protocols=["dns_mx_no_cname", "dns_soa", "dns_a_aaaa"]
+    )
+
+    # remove urls that don't have the relevant endpoints anymore
+    for url_id in urls_without_endpoints:
+        plannedscan.finish("verify", "dns_endpoints", url_id)
 
     tasks = []
     for endpoint in endpoints:

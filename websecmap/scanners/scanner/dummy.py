@@ -77,9 +77,13 @@ def compose_scan_task(urls):
     Everything is managed on url basis, because the underlaying impelentations may differ and because it's
     more efficient than a generic model. It's also easier to understand.
     """
-    endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
+    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
     endpoints = unique_and_random(endpoints)
     log.info(f"Creating dummy scan task for {len(endpoints)} endpoints ")
+
+    # remove urls that don't have the relevant endpoints anymore
+    for url_id in urls_without_endpoints:
+        plannedscan.finish("scan", "dummy", url_id)
 
     # Make the first task immutable, so it doesn't get any arguments of other scanners in a chain.
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature

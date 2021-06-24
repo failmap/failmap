@@ -217,11 +217,12 @@ def compose_manual_verify_task(
 
 
 def compose_verify_task(urls):
-    endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
+    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
     endpoints = unique_and_random(endpoints)
 
-    # query takes 4 seconds in production on 41857 endpoints (htttp = 20000, https = 22465).
-    endpoints = unique_and_random(endpoints)
+    # remove urls that don't have the relevant endpoints anymore
+    for url_id in urls_without_endpoints:
+        plannedscan.finish("verify", "http", url_id)
 
     tasks = group(
         can_connect.si(

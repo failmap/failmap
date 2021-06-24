@@ -140,9 +140,12 @@ def compose_manual_scan_task(
 
 
 def compose_scan_task(urls):
-    endpoints = retrieve_endpoints_from_urls(urls, protocols=["ftp"])
-
+    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["ftp"])
     endpoints = unique_and_random(endpoints)
+
+    # remove urls that don't have the relevant endpoints anymore
+    for url_id in urls_without_endpoints:
+        plannedscan.finish("scan", "ftp", url_id)
 
     log.info("Scanning FTP servers on %s endpoints.", len(endpoints))
     tasks = []
@@ -204,10 +207,14 @@ def compose_manual_verify_task(
 
 
 def compose_verify_task(urls):
-    endpoints = retrieve_endpoints_from_urls(urls, protocols=["ftp"])
+    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["ftp"])
     endpoints = unique_and_random(endpoints)
 
     log.info(f"Verifying FTP servers on {len(endpoints)} endpoints.")
+
+    # remove urls that don't have the relevant endpoints anymore
+    for url_id in urls_without_endpoints:
+        plannedscan.finish("verify", "ftp", url_id)
 
     tasks = []
 

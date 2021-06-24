@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import dateutil.parser
 import pytz
@@ -260,7 +260,7 @@ def retrieve_endpoints_from_urls(
     ports: List[int] = None,
     ip_versions: List[int] = None,
     is_dead: bool = False,
-) -> List[Endpoint]:
+) -> Tuple[List[Endpoint], List[int]]:
     """
     Given this approach reduces all scans to urls, and some scans require endpoints.
 
@@ -283,7 +283,12 @@ def retrieve_endpoints_from_urls(
     ep_querysets = ep_querysets.only("id", "port", "protocol", "ip_version", "url", "url__id", "url__url")
     endpoints += list(ep_querysets)
 
-    return endpoints
+    # endpoints could be deleted, removed, dead, whatever, in that case the planned scan has to be
+    # deleted as well. We have to know what urls are not in the set we requested, so those urls can
+    # be removed from the planned scans.
+    urls_without_endpoints = list(set(urls) - set([ep.url.id for ep in endpoints]))
+
+    return endpoints, urls_without_endpoints
 
 
 @app.task(queue="storage")
