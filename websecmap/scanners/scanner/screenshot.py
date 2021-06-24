@@ -76,7 +76,7 @@ def plan_scan(
 
 @app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="ftp", amount=kwargs.get("amount", 25))
+    urls = plannedscan.pickup(activity="scan", scanner="screenshot", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
 
 
@@ -89,11 +89,15 @@ def compose_manual_scan_task(
 
 
 def compose_scan_task(urls):
-    endpoints = retrieve_endpoints_from_urls(
+    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(
         urls, protocols=["ftp", "http", "https"], ports=[80, 443, 8443, 8080, 8888, 21]
     )
 
     endpoints = unique_and_random(endpoints)
+
+    # remove urls that don't have the relevant endpoints anymore
+    for url_id in urls_without_endpoints:
+        plannedscan.finish("scan", "screenshot", url_id)
 
     # prevent constance from looking up the value constantly:
     v4_service = config.SCREENSHOT_API_URL_V4
