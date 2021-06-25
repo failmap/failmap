@@ -171,7 +171,16 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
         scan.last_state_change_at = datetime.now(pytz.utc)
         scan.save()
 
-    urls = [scan.url for scan in scans]
+    urls = []
+    for scan in scans:
+        # It's possible the urls for which a planned scan is requested has been removed/deleted but the planned
+        # scan still exists (weirdly enough). Even if there is an on delete cascade. We see that in issue 2424378050.
+        # This makes picking up scans much slower so the integrity has to be validated. How can it go wrong?
+        if not Url.objects.all().filter(id=scan.url.id).first():
+            finish(activity, scanner, scan.url.id)
+        else:
+            urls.append(scan.url)
+
     log.debug(f"Picked up {len(urls)} to {activity} with {scanner}.")
     statsd.incr("scan_planned", len(urls), tags={"state": "pickup", "scanner": scanner, "activity": activity})
     return urls
