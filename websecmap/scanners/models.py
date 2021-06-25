@@ -397,18 +397,9 @@ class PlannedScanStatistic(models.Model):
 
 
 class Activity(models.IntegerChoices):
-    unknown = (
-        0,
-        "unknown",
-    )
-    discover = (
-        1,
-        "discover",
-    )
-    verify = (
-        2,
-        "verify",
-    )
+    unknown = 0, "unknown"
+    discover = 1, "discover"
+    verify = 2, "verify"
     scan = 3, "scan"
 
 

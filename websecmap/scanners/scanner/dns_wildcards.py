@@ -20,7 +20,7 @@ def filter_discover(
 
 @app.task(queue="storage")
 def compose_planned_discover_task(**kwargs):
-    urls = plannedscan.pickup(activity="discover", scanner="dns_wildcard", amount=kwargs.get("amount", 200))
+    urls = plannedscan.pickup(activity="discover", scanner="dns_wildcards", amount=kwargs.get("amount", 200))
     return compose_discover_task(urls)
 
 
@@ -29,14 +29,14 @@ def plan_discover(
     organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ):
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    plannedscan.request(activity="discover", scanner="dns_wildcard", urls=urls)
+    plannedscan.request(activity="discover", scanner="dns_wildcards", urls=urls)
 
 
 def compose_discover_task(urls):
     task = group(
         discover_wildcard.si(url.url)
         | store_wildcard.s(url.id)
-        | plannedscan.finish.si("discover", "dns_wildcard", url.pk)
+        | plannedscan.finish.si("discover", "dns_wildcards", url.pk)
         for url in urls
     )
     return task
