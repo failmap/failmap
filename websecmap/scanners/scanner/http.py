@@ -35,12 +35,11 @@ from typing import List
 import pytz
 import requests
 
-# suppress InsecureRequestWarning, we do those request on purpose.
 import urllib3
 from celery import Task, group
 from django.conf import settings
-from requests import ConnectTimeout, HTTPError, ReadTimeout, Request, Session, Timeout
-from requests.exceptions import ConnectionError, SSLError, ChunkedEncodingError, ContentDecodingError
+from requests import HTTPError, ReadTimeout, Request, Session, Timeout
+from requests.exceptions import ConnectionError, SSLError, ChunkedEncodingError, ContentDecodingError, ConnectTimeout
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
@@ -56,6 +55,7 @@ from websecmap.scanners.scanner.__init__ import (
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 from websecmap.scanners.timeout import timeout
 
+# suppress InsecureRequestWarning, we do those request on purpose.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 log = logging.getLogger(__package__)
