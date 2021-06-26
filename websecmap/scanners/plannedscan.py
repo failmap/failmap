@@ -173,14 +173,17 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
 
     urls = []
     for scan in scans:
-        # There are plannedscans on http without an url reference.
-        # It's possible the urls for which a planned scan is requested has been removed/deleted but the planned
+        # There are plannedscans on http without an url reference. The url show up blank in the admin, even when
+        # there is cascading deletion. So there might be a database error somewhere.
         # scan still exists (weirdly enough). Even if there is an on delete cascade. We see that in issue 2424378050.
-        # This makes picking up scans much slower so the integrity has to be validated. How can it go wrong?
-        if not Url.objects.all().filter(id=scan.url.id).first():
-            finish(activity, scanner, scan.url.id)
-        else:
+        try:
+            # Use this debug message to retrieve the Url.DoesNotExist as django has to query the ID.
+            log.debug(f"Picking up scan {scan.id} with url id: {scan.url.id}.")
             urls.append(scan.url)
+        except Url.DoesNotExist:
+            # Delete this scan as the url id cannot be found, so it cannot be finished.
+            log.error("Deleting a scan without an url. The scan will be deleted.", extra={"scan_id": scan.id})
+            scan.delete()
 
     log.debug(f"Picked up {len(urls)} to {activity} with {scanner}.")
     statsd.incr("scan_planned", len(urls), tags={"state": "pickup", "scanner": scanner, "activity": activity})
