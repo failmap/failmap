@@ -40,7 +40,7 @@ import urllib3
 from celery import Task, group
 from django.conf import settings
 from requests import ConnectTimeout, HTTPError, ReadTimeout, Request, Session, Timeout
-from requests.exceptions import ConnectionError, SSLError
+from requests.exceptions import ConnectionError, SSLError, ChunkedEncodingError, ContentDecodingError
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
@@ -431,6 +431,10 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> bo
     except (ConnectTimeout, Timeout, ReadTimeout) as Ex:
         log.debug("%s: Timeout! - %s" % (url, Ex))
         return False
+    except (ChunkedEncodingError, ContentDecodingError):
+        # There is a connection and you can get something back. But it doesn't decode properly.
+        # For example InvalidChunkLength(got length b'<!DOCTYPE html>\\n', 0 bytes read)",
+        return True
     except (ConnectionRefusedError, ConnectionError, HTTPError, SSLError) as Ex:
         """
         Some errors really mean there is no site. Example is the ConnectionRefusedError: [Errno 61]
