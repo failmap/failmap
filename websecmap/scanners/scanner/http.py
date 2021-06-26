@@ -736,8 +736,8 @@ def check_network(code_location=""):
     log.info("IPv4 is enabled via configuration: %s" % settings.NETWORK_SUPPORTS_IPV4)
     log.info("IPv6 is enabled via configuration: %s" % settings.NETWORK_SUPPORTS_IPV6)
 
-    can_ipv4 = can_connect("https", "faalkaart.nl", 443, 4)
-    can_ipv6 = can_connect("https", "faalkaart.nl", 443, 6)
+    can_ipv4 = can_connect("https", "websecuritymap.org", 443, 4)
+    can_ipv6 = can_connect("https", "websecuritymap.org", 443, 6)
 
     if not can_ipv4 and not can_ipv6:
         raise ConnectionError(

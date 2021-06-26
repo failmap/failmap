@@ -138,7 +138,7 @@ After certificate installation you can visit the Web Security Map admin interfac
 
 https://admin.Web Security Map-website/admin/
 
-For the Netherlands this is: https://admin.faalkaart.nl/admin/
+For the Netherlands this is: https://basisbeveiliging.nl/admin/
 
 Here you'll be greeted with a login screen. Enter the username and password you've received after signing up.
 
@@ -193,9 +193,9 @@ For Example:
 If you're looking for everything related to the url "veere.nl", you can enter "veere.nl" in the search box. Or 
 use the following urls to directly navigate to the relevant scans:
 
-https://admin.faalkaart.nl/admin/scanners/tlsqualysscan/?q=veere.nl
-https://admin.faalkaart.nl/admin/scanners/urlgenericscan/?q=veere.nl
-https://admin.faalkaart.nl/admin/scanners/endpointgenericscan/?q=veere.nl
+https://basisbeveiliging.nl/admin/scanners/tlsqualysscan/?q=veere.nl
+https://basisbeveiliging.nl/admin/scanners/urlgenericscan/?q=veere.nl
+https://basisbeveiliging.nl/admin/scanners/endpointgenericscan/?q=veere.nl
 
 
 ### Historical data

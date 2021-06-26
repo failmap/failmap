@@ -22,7 +22,7 @@ def compose_task(
 
     **Task processing system**
 
-    At the core of Failmap is the Task processing system which ensures 'work' can be done as efficient as possible.
+    At the core of WSM is the Task processing system which ensures 'work' can be done as efficient as possible.
 
     For example:
 

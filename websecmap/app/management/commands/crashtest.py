@@ -153,9 +153,9 @@ def test_organization_commands(organization):
     call_debug_command("reset_autocomputed_fields_in_urls")
     call_debug_command("update_datamodel_documentation")
 
-    call_debug_command("create_test_dataset", "--output", "failmap_test_dataset_test")
-    call_debug_command("create_debug_dataset", "--output", "failmap_debug_dataset_test")
-    call_debug_command("create_dataset", "--output", "failmap_dataset_test")
+    call_debug_command("create_test_dataset", "--output", "wsm_test_dataset_test")
+    call_debug_command("create_debug_dataset", "--output", "wsm_debug_dataset_test")
+    call_debug_command("create_dataset", "--output", "wsm_dataset_test")
 
     # will not test clear_database, because of disasterous consequences. Could be done in test-database.
     # todo: move to real test environment. Do we have network there? How do we get packages? So yes?

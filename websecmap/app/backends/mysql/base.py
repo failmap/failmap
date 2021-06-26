@@ -1,7 +1,7 @@
 """Wraps Django MySQL backend in connection retry logic.
 
 Because of the asynchronous nature of environments we might deploy in (docker-composer) the
-database connection might not always be available when the failmap app is started. We take some
+database connection might not always be available when the WSM app is started. We take some
 effort to retry connecting to the database before giving up.
 """
 

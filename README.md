@@ -253,9 +253,7 @@ Documentation is provided at [ReadTheDocs](http://websecmap.readthedocs.io/).
 
 Internet Cleanup Foundation is open organisation run by volunteers.
 
-- Talk to us via [gitter.im/internet-cleanup-foundation](https://gitter.im/internet-cleanup-foundation/Lobby#).
-- Or using IRC: #internet-cleanup-foundation/Lobby @ irc.gitter.im (see https://irc.gitter.im for information)
-- E-mail us at: [info@faalkaart.nl](mailto:info@faalkaart.nl),
+- E-mail us at: [info@basisbeveiliging.nl](mailto:info@basisbeveiliging.nl),
 - Or simply start hacking on the code, open an [Gitlab Issue](https://gitlab.com/internet-cleanup-foundation/websecmap/issues/new) or send a [Gitlab Merge Request](https://gitlab.com/internet-cleanup-foundation/websecmap.org/merge_requests/new).
 
 ## Thanks to

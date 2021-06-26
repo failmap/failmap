@@ -96,21 +96,16 @@ class CustomIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
 
         self.children.append(
             modules.LinkList(
-                _("Failmap resources"),
+                _("Web Security Map resources"),
                 children=[
                     {
                         "title": _("Gitlab Repository"),
-                        "url": "https://gitlab.com/failmap/",
+                        "url": "https://gitlab.com/internet-cleanup-foundation/web-security-map/",
                         "external": True,
                     },
                     {
-                        "title": _("Admin repository"),
-                        "url": "https://gitlab.com/failmap/failmap",
-                        "external": True,
-                    },
-                    {
-                        "title": _("Failmap Website"),
-                        "url": "https://faalkaart.nl",
+                        "title": _("Web Security Map Website"),
+                        "url": "https://websecuritymap.org",
                         "external": True,
                     },
                 ],

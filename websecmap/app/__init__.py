@@ -14,7 +14,7 @@ class Websecmap(AppConfig):
     verbose_name = "Web Security Map"
 
     def ready(self):
-        """Run when Failmap app has fully loaded."""
+        """Run when WSM app has fully loaded."""
 
         # detect if we run inside the autoreloader's second thread
         inner_run = os.environ.get("RUN_MAIN")

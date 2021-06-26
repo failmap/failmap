@@ -882,7 +882,7 @@ CONSTANCE_CONFIG = {
     "INTERNET_NL_MAXIMUM_URLS": (1000, "The maximum amount of domains per scan.", int),
     # scanning pre-requisites
     "CONNECTIVITY_TEST_DOMAIN": (
-        "faalkaart.nl",
+        "websecuritymap.org",
         "A server that is reachable over IPv4. This is used by a worker to determine what kind of scans it can do. "
         "Enter an address that you own or manage.",
         str,
