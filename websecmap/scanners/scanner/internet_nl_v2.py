@@ -50,7 +50,7 @@ def register(domains: List[str], scan_type: str, tracking_information: str, sett
         )
     except requests.RequestException as e:
         # This is returned as a catch all for network errors. A network error can be retried.
-        return 599, {"network_error": e.strerror}
+        return 599, {"network_error": f"{e.strerror} {repr(e)}"}
 
     return return_safe_response(response)
 
@@ -86,6 +86,6 @@ def generic_internet_nl_api_request(operation, url: str, settings: Dict[str, Any
             url, auth=HTTPBasicAuth(settings["username"], settings["password"]), timeout=(300, 300)
         )
     except requests.RequestException as e:
-        return 599, {"network_error": e.strerror}
+        return 599, {"network_error": f"{e.strerror} {repr(e)}"}
 
     return return_safe_response(response)

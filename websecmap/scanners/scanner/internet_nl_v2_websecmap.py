@@ -371,7 +371,7 @@ def api_has_usable_response(response, scan_id):
 
     if status_code == 599:
         # using the log the previous actionable state can be retrieved as a recovery strategy.
-        update_state(scan_id, "network_error", response_content["error"]["label"])
+        update_state(scan_id, "network_error", json.dumps(response_content))
         return False
 
     if status_code == 500:
