@@ -421,7 +421,7 @@ class Scanner(models.IntegerChoices):
     verify_unresolvable = 13, "verify_unresolvable"
     onboard = 14, "onboard"
     ipv6 = 15, "ipv6"
-    dns_wildcard = 16, "dns_wildcard"
+    dns_wildcards = 16, "dns_wildcards"
     dummy = 17, "dummy"
     screenshot = 18, "screenshot"
 

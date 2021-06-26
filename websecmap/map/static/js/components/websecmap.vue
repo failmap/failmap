@@ -568,7 +568,7 @@ const WebSecMap = Vue.component('websecmap', {
                 13: "verify_unresolvable",
                 14: "onboard",
                 15: "ipv6",
-                16: "dns_wildcard",
+                16: "dns_wildcards",
                 17: "dummy",
                 18: "screenshot",
             },

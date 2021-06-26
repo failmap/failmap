@@ -46,7 +46,7 @@ const messages = {
         "dns_a_aaaa": "Website (http and https)",
 
         "dns_endpoints": "Endpoints for internet.nl",
-        "dns_wildcard": "Wildcard domains",
+        "dns_wildcards": "Wildcard domains",
         "known_subdomains": "New subdomains (known)",
         "subdomains": "New subdomains (OSINT)",
 

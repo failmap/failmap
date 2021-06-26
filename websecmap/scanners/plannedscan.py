@@ -173,6 +173,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
 
     urls = []
     for scan in scans:
+        # There are plannedscans on http without an url reference.
         # It's possible the urls for which a planned scan is requested has been removed/deleted but the planned
         # scan still exists (weirdly enough). Even if there is an on delete cascade. We see that in issue 2424378050.
         # This makes picking up scans much slower so the integrity has to be validated. How can it go wrong?
