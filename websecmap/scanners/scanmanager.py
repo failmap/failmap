@@ -34,11 +34,13 @@ def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, me
         log.debug("Message or rating changed compared to previous scan. Saving the new scan result.")
 
     gs = EndpointGenericScan()
-    gs.explanation = message
+    # very long csp headers for example
+    gs.explanation = message[0:255]
     gs.rating = rating
     gs.endpoint = Endpoint.objects.all().filter(id=endpoint_id).first()
     gs.type = scan_type
-    gs.evidence = evidence
+    # Very long CSP headers for example take a lot of space.
+    gs.evidence = evidence[0:9000]
     gs.last_scan_moment = datetime.now(pytz.utc)
     gs.rating_determined_on = datetime.now(pytz.utc)
     gs.is_the_latest_scan = True
