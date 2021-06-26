@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from import_export.admin import ImportExportModelAdmin
-from jet.admin import CompactInline
+# from jet.admin import CompactInline
 
 from websecmap import types
 from websecmap.app.models import Job
@@ -35,21 +35,21 @@ log = logging.getLogger(__name__)
 # 2: cannot auto-complete these with django-jet it seems, so an enormous amount of data
 # it might be solved using an explicit relation?
 # perhaps ask the django jet forum
-class UrlAdminInline(CompactInline):
+class UrlAdminInline(admin.TabularInline):
     model = Url.organization.through
     extra = 0
-    show_change_link = False
-    can_delete = False
+    show_change_link = True
+    can_delete = True
     # 'is_dead',
     # For now not trying to fix the "through" relationship errors for getting fields from the URL object.
     # <class 'failmap.organizations.admin.UrlAdminInline'>: (admin.E035) The value of 'readonly_fields[1]' is not
     # a callable, an attribute of 'UrlAdminInline', or an attribute of 'organizations.Url_organization'.
-    readonly_fields = ("url",)
+    # readonly_fields = ("url",)
 
     exclude = []
 
 
-class OrganizationAdminInline(CompactInline):
+class OrganizationAdminInline(admin.TabularInline):
     model = Organization
     extra = 0
     show_change_link = False
@@ -117,7 +117,7 @@ class EndpointAdminInline(nested_admin.NestedStackedInline):
     inlines = [EndpointGenericScanInline]
 
 
-class UrlGenericScanAdminInline(CompactInline):
+class UrlGenericScanAdminInline(admin.TabularInline):
     model = UrlGenericScan
     extra = 0
     show_change_link = True
@@ -145,12 +145,12 @@ class UrlGenericScanAdminInline(CompactInline):
     )
 
 
-class CoordinateAdminInline(CompactInline):
+class CoordinateAdminInline(admin.StackedInline):
     model = Coordinate
     extra = 0
 
 
-class OrganizationRatingAdminInline(CompactInline):
+class OrganizationRatingAdminInline(admin.StackedInline):
     model = OrganizationReport
     extra = 0
     readonly_fields = ("organization", "high", "medium", "low", "at_when", "calculation")
@@ -158,7 +158,7 @@ class OrganizationRatingAdminInline(CompactInline):
     ordering = ["-at_when"]
 
 
-class UrlRatingAdminInline(CompactInline):
+class UrlRatingAdminInline(admin.TabularInline):
     model = UrlReport
     extra = 0
     readonly_fields = ("url", "high", "medium", "low", "at_when", "calculation")
@@ -166,7 +166,7 @@ class UrlRatingAdminInline(CompactInline):
     ordering = ["-at_when"]
 
 
-class UrlIpInline(CompactInline):
+class UrlIpInline(admin.TabularInline):
     model = UrlIp
     extra = 0
     readonly_fields = ("url", "ip", "rdns_name", "discovered_on", "is_unused", "is_unused_since", "is_unused_reason")

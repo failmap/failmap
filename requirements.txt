@@ -48,8 +48,6 @@ defusedxml==0.6.0
     # via odfpy
 diff-match-patch==20200713
     # via django-import-export
-git+https://github.com/Barukimang/django-jet#egg=django-3-jet
-    # via -r requirements.in
 django-admin-sortable2==0.7.8
     # via -r requirements.in
 django-appconf==1.0.4
@@ -74,6 +72,8 @@ django-crispy-forms==1.11.0
     # via -r requirements.in
 django-excel==0.0.10
     # via -r requirements.in
+django-grappelli==2.15.1
+    # via -r requirements.in
 django-import-export==2.5.0
     # via -r requirements.in
 django-leaflet==0.27.1
@@ -93,7 +93,6 @@ django-timezone-field==4.1.1
 django==3.1.6
     # via
     #   -r requirements.in
-    #   django-3-jet
     #   django-admin-sortable2
     #   django-appconf
     #   django-celery-beat
@@ -245,7 +244,6 @@ simplejson==3.17.2
 six==1.15.0
     # via
     #   celery-statsd
-    #   django-3-jet
     #   django-autocomplete-light
     #   django-compressor
     #   django-nested-admin

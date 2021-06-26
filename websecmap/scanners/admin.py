@@ -2,15 +2,15 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from import_export.admin import ImportExportModelAdmin
-from jet.admin import CompactInline
-from jet.filters import RelatedFieldAjaxListFilter
+# from jet.admin import CompactInline
+# from jet.filters import RelatedFieldAjaxListFilter
 
 from websecmap.scanners import models
 from websecmap.scanners.proxy import check_proxy
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import progress_running_scan, recover_and_retry
 
 
-class EndpointGenericScanInline(CompactInline):
+class EndpointGenericScanInline(admin.TabularInline):
     model = models.EndpointGenericScan
     extra = 0
     show_change_link = True
@@ -121,7 +121,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "endpoint__url__organization__country",
         "endpoint__url__organization__type__name",
         "endpoint__url__is_dead",
-        ("endpoint", RelatedFieldAjaxListFilter),
+        # ("endpoint", RelatedFieldAjaxListFilter),
         "type",
         "rating",
         "last_scan_moment",

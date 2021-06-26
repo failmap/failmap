@@ -82,8 +82,9 @@ INSTALLED_APPS = [
     # Allow a client to access the data:
     "corsheaders",
     # Jet admin dashboard
-    "jet.dashboard",
-    "jet",
+    # "jet.dashboard",
+    # "jet",
+    'grappelli',
     "nested_admin",
     "django.contrib.admin",
     "django.contrib.auth",

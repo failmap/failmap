@@ -30,7 +30,8 @@ django
 # Jet admin interface with several Django 3 fixes. Breaks the tab container + select2 lists. But it's better than
 # nothing. Jet has not been maintained, even though it's been great, and alternatives are like 20 euro a month.
 # This means we'll probably move to the (simpler) grapelli interface.
-git+https://github.com/Barukimang/django-jet#egg=django-3-jet
+# git+https://github.com/Barukimang/django-jet#egg=django-3-jet
+django-grappelli
 django-countries
 django-leaflet
 jsonfield

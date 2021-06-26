@@ -40,8 +40,9 @@ def trigger_error(request):
 
 admin_urls = [
     path("sentry-debug/", trigger_error),
-    path("jet/", include("jet.urls", "jet")),  # Django JET URLS
-    path("jet/dashboard/", include("jet.dashboard.urls", "jet-dashboard")),  # Django JET dashboard URLS
+    # path("jet/", include("jet.urls", "jet")),  # Django JET URLS
+    # path("jet/dashboard/", include("jet.dashboard.urls", "jet-dashboard")),  # Django JET dashboard URLS
+    path('grappelli/', include('grappelli.urls')),  # grappelli URLS
     re_path(r"^admin/", admin.site.urls),
     re_path(r"^admin/doc/", include("django.contrib.admindocs.urls")),
     re_path(r"^nested_admin/", include("nested_admin.urls")),

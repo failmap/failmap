@@ -12,7 +12,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from import_export.admin import ImportExportModelAdmin
-from jet.admin import CompactInline
+# from jet.admin import CompactInline
 
 from websecmap.app.admin import generate_game_user
 from websecmap.app.models import GameUser
@@ -23,14 +23,14 @@ from websecmap.scanners.scanner.http import resolves
 log = logging.getLogger(__package__)
 
 
-class TeamInline(CompactInline):
+class TeamInline(admin.TabularInline):
     model = Team
     extra = 0
     can_delete = False
     ordering = ["name"]
 
 
-class OrganizationSubmissionInline(CompactInline):
+class OrganizationSubmissionInline(admin.TabularInline):
     model = OrganizationSubmission
     extra = 0
     can_delete = False
@@ -52,7 +52,7 @@ class OrganizationSubmissionInline(CompactInline):
     ]
 
 
-class UrlSubmissionInline(CompactInline):
+class UrlSubmissionInline(admin.TabularInline):
     model = UrlSubmission
     extra = 0
     can_delete = False
