@@ -147,6 +147,6 @@ mysqlclient
 psycopg2-binary # binary package installs wheel, avoiding compiling
 
 # Apple Silicon compat
-numpy>=1.20
+numpy>=1.21.0
 
 django-cors-headers
