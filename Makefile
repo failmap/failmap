@@ -16,11 +16,7 @@ VIRTUAL_ENV ?= ${CACHEDIR}/virtualenvs/$(notdir ${PWD})
 
 # variables for environment
 bin = ${VIRTUAL_ENV}/bin
-ifeq ($(shell uname -m),arm64)
-env = env PATH=${bin}:$$PATH /usr/bin/arch -x86_64
-else
 env = env PATH=${bin}:$$PATH
-endif
 
 # shortcuts for common used binaries
 python = ${bin}/python
