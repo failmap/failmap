@@ -148,7 +148,7 @@ netaddr==0.8.0
     # via -r requirements.in
 networkx==2.5
     # via colormath
-numpy==1.20.1
+numpy==1.21.0
     # via
     #   -r requirements.in
     #   colormath
