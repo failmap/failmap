@@ -33,7 +33,7 @@ scanners = {
 
 
 class Command(ScannerTaskCommand):
-    """ Can perform a host of scans. Run like: failmap scan [scanner_name] and then options."""
+    """Can perform a host of scans. Run like: failmap scan [scanner_name] and then options."""
 
     help = __doc__
 
