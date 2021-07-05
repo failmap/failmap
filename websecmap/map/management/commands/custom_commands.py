@@ -19,7 +19,7 @@ class CalculateCommand(BaseCommand):
         parser.add_argument("--organization_type", type=str, help="name of the organization type", required=False)
 
     def handle(self, *args, **options):
-        """ Short hand for the first time running this """
+        """Short hand for the first time running this"""
 
         if options["days"]:
             days = options["days"]
