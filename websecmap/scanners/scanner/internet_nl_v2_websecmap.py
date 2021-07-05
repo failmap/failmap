@@ -265,7 +265,7 @@ def registering_scan_at_internet_nl(scan_id):
 
     return (
         get_relevant_urls.si(scan.pk)
-        | register.s(scan_types[scan.type], json.dumps(scan_name), create_api_settings(scan))
+        | register.s(scan_types[scan.type], json.dumps(scan_name), create_api_settings(scan.pk))
         | registration_administration.s(scan.pk)
     )
 
