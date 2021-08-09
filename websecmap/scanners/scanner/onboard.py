@@ -10,18 +10,10 @@ from websecmap.celery import Task, app
 from websecmap.map.report import update_report_tasks
 from websecmap.organizations.models import Url
 from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, url_filters
+from websecmap.scanners.scanner.utils import in_chunks
 from websecmap.scanners.tasks import crawl_tasks, explore_tasks, scan_tasks
 
 log = logging.getLogger(__package__)
-
-
-def in_chunks(my_list, n):
-    # Example: chunks = list(chunks(urls, 25))
-    # creates list of lists containing N items.
-    # For item i in a range that is a length of l,
-    for i in range(0, len(my_list), n):
-        # Create an index range for l of n items:
-        yield my_list[i : i + n]
 
 
 def compose_task(

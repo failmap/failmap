@@ -24,3 +24,12 @@ def get_nameservers() -> List[str]:
 
 def get_random_nameserver() -> str:
     return choice(get_nameservers())
+
+
+def in_chunks(my_list, n):
+    # Example: chunks = list(chunks(urls, 25))
+    # creates list of lists containing N items.
+    # For item i in a range that is a length of l,
+    for i in range(0, len(my_list), n):
+        # Create an index range for l of n items:
+        yield my_list[i : i + n]
