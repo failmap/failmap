@@ -21,7 +21,7 @@ def in_chunks(my_list, n):
     # For item i in a range that is a length of l,
     for i in range(0, len(my_list), n):
         # Create an index range for l of n items:
-        yield my_list[i: i + n]
+        yield my_list[i : i + n]
 
 
 def compose_task(

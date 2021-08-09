@@ -4,7 +4,7 @@ import pytz
 
 from websecmap.organizations.models import Url
 from websecmap.reporting.models import UrlReport
-from websecmap.reporting.report import create_timeline, create_url_reports, recreate_url_report
+from websecmap.reporting.report import create_url_reports, recreate_url_report
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 
@@ -41,7 +41,7 @@ def test_url_report(db):
     )
 
     UrlReport.objects.all().delete()
-    [u.save() for u in create_url_reports(create_timeline(url), url)]
+    [u.save() for u in create_url_reports(url)]
 
     # We've created a report for 1 day.
     count = UrlReport.objects.all().count()
@@ -82,7 +82,7 @@ def test_url_report(db):
 
     # We always rebuild the entire set of reports, as it's crazy fast.
     UrlReport.objects.all().delete()
-    [u.save() for u in create_url_reports(create_timeline(url), url)]
+    [u.save() for u in create_url_reports(url)]
 
     count = UrlReport.objects.all().count()
     assert count == 2
@@ -104,7 +104,7 @@ def test_url_report(db):
     url.save()
 
     UrlReport.objects.all().delete()
-    [u.save() for u in create_url_reports(create_timeline(url), url)]
+    [u.save() for u in create_url_reports(url)]
 
     count = UrlReport.objects.all().count()
     assert count == 3
@@ -159,7 +159,7 @@ def test_aggegrate_error_in_report(db):
         is_the_latest_scan=True,
     )
 
-    [u.save() for u in create_url_reports(create_timeline(url), url)]
+    [u.save() for u in create_url_reports(url)]
     report = UrlReport.objects.all().order_by("pk").last()
 
     assert report.endpoint_error_in_test == 1

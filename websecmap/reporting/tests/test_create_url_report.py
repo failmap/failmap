@@ -135,7 +135,7 @@ def test_data_from_dead_endpoint_stays_gone(db):
     }
 
     # now create the report based on the above data.
-    [u.save() for u in create_url_reports(create_timeline(u), u)]
+    [u.save() for u in create_url_reports(u)]
     # reports from the various days things happened:
     assert UrlReport.objects.all().count() == 6
 

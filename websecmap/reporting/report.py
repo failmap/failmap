@@ -66,7 +66,7 @@ def recreate_url_report(url_id):
     # Creating a timeline and rating it is much faster than doing an individual calculation.
     # Mainly because it gets all data in just a few queries and then builds upon that.
     # Returns chronologically ordered url reports:
-    url_reports: List[Union[UrlReport, None]] = create_url_reports(create_timeline(url), url)
+    url_reports: List[Union[UrlReport, None]] = create_url_reports(url)
 
     # in cases where there is nothing to report at all.
     if not url_reports:
@@ -415,7 +415,8 @@ def latest_moment_of_datetime(datetime_: datetime):
     return datetime_.replace(second=59, microsecond=999999, tzinfo=pytz.utc)
 
 
-def create_url_reports(timeline, url: Url) -> List[UrlReport]:
+def create_url_reports(url: Url) -> List[UrlReport]:
+    timeline = create_timeline(url)
     url_reports: List[Union[UrlReport, None]] = []
 
     """
