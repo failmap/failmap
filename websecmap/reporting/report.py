@@ -16,6 +16,7 @@ from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYP
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 
 from websecmap.celery import Task
+from websecmap.scanners.scanner.onboard import in_chunks
 
 log = logging.getLogger(__package__)
 
@@ -1175,32 +1176,38 @@ def get_latest_urlratings_fast(urls: List[Url], when):
     if not urls:
         return []
 
-    # get all columns, instead of naming each of the 20 columns separately, and having the chance that you missed one
-    # and then django performs a separate lookup query for that value (a few times).
-    sql = (
-        """SELECT *
-                FROM reporting_urlreport
-                INNER JOIN
-                  (SELECT MAX(id) as id2 FROM reporting_urlreport or2
-                  WHERE at_when <= '%s' AND url_id IN ("""
-        % (when,)
-        + ",".join(map(str, urls))
-        + """)
-                  GROUP BY url_id) as x
-                  ON x.id2 = reporting_urlreport.id
-                ORDER BY high DESC, medium DESC, low DESC, url_id ASC
-                """
-    )
-    # print(sql)
-    # Doing this causes some delay. Would we add the calculation without the json conversion (which is 100% anyway)
-    # it would take 8 seconds to handle the first few.
-    # Would we add json loading via the standard json library it's 16 seconds.
-    # Doing it via the faster simplejson, it's 12 seconds.
-    # Via Urlrating.objects.raw it's 13 seconds.
-    # It's a bit waste to re-load a json string. Without it would be 25% to 50% faster.
-    # https://github.com/derek-schaefer/django-json-field
-    # https://docs.python.org/3/library/json.html#json.JSONEncoder
-    return UrlReport.objects.raw(sql)
+    # Split this query per 100 items to not overload the database with a single huge IN query that fetches
+    # a lot of text fields
+    chunks = in_chunks(urls, 100)
+    results = []
+    for chunk in chunks:
+        # get all columns, instead of naming each of the 20 columns separately, and having the chance that you missed
+        # one and then django performs a separate lookup query for that value (a few times).
+        sql = (
+            """SELECT *
+                    FROM reporting_urlreport
+                    INNER JOIN
+                      (SELECT MAX(id) as id2 FROM reporting_urlreport or2
+                      WHERE at_when <= '%s' AND url_id IN ("""
+            % (when,)
+            + ",".join(map(str, chunk))
+            + """)
+                      GROUP BY url_id) as x
+                      ON x.id2 = reporting_urlreport.id
+                    ORDER BY high DESC, medium DESC, low DESC, url_id ASC
+                    """
+        )
+        # print(sql)
+        # Doing this causes some delay. Would we add the calculation without the json conversion (which is 100% anyway)
+        # it would take 8 seconds to handle the first few.
+        # Would we add json loading via the standard json library it's 16 seconds.
+        # Doing it via the faster simplejson, it's 12 seconds.
+        # Via Urlrating.objects.raw it's 13 seconds.
+        # It's a bit waste to re-load a json string. Without it would be 25% to 50% faster.
+        # https://github.com/derek-schaefer/django-json-field
+        # https://docs.python.org/3/library/json.html#json.JSONEncoder
+        results += list(UrlReport.objects.raw(sql))
+    return results
 
 
 def relevant_urls_at_timepoint(queryset, when: datetime):

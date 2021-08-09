@@ -15,6 +15,15 @@ from websecmap.scanners.tasks import crawl_tasks, explore_tasks, scan_tasks
 log = logging.getLogger(__package__)
 
 
+def in_chunks(my_list, n):
+    # Example: chunks = list(chunks(urls, 25))
+    # creates list of lists containing N items.
+    # For item i in a range that is a length of l,
+    for i in range(0, len(my_list), n):
+        # Create an index range for l of n items:
+        yield my_list[i: i + n]
+
+
 def compose_task(
     organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ) -> Task:
@@ -40,14 +49,6 @@ def compose_task(
     Todo: date the last step was set. So we can find processes that failed and retry.
     Todo: run this every minute.
     """
-
-    def chunks(my_list, n):
-        # Example: chunks = list(chunks(urls, 25))
-        # creates list of lists containing N items.
-        # For item i in a range that is a length of l,
-        for i in range(0, len(my_list), n):
-            # Create an index range for l of n items:
-            yield my_list[i : i + n]
 
     # Resetting the outdated onboarding has a risk: if the queue takes longer than the onboarding tasks to finish the
     # tasks will be performed multiple time. This can grow fast and large. Therefore a very large time has been taken
@@ -102,7 +103,7 @@ def compose_task(
     for url in endpoint_discovery_urls:
         tasks.append(explore_tasks(url) | update_stage.si([url], "endpoint_finished"))
 
-    chunks = chunks(scans_running_urls, 25)
+    chunks = in_chunks(scans_running_urls, 25)
     for chunk in chunks:
         tasks.append(scan_tasks(chunk) | update_report_tasks(chunk) | update_stage.si(chunk, "scans_finished"))
 
