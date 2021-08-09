@@ -16,7 +16,7 @@ from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYP
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 
 from websecmap.celery import Task
-from websecmap.scanners.scanner.onboard import in_chunks
+from websecmap.scanners.scanner.utils import in_chunks
 
 log = logging.getLogger(__package__)
 

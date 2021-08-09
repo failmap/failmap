@@ -141,7 +141,7 @@ run-broker:  ## only run broker
 testcase: ${app}
 	# run specific testcase
 	# example: make testcase case=test_openstreetmaps
-	DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 ${env} pytest -vv --log-cli-level=10 -k ${case}
+	DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 ${env} pytest -vvv --log-cli-level=10 -k ${case}
 
 test_integration: ${app}
 	# run integration tests
