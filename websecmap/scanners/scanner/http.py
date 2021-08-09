@@ -78,17 +78,20 @@ remote machine (corresponding to the connect()) call on the socket. It’s a goo
 to slightly larger than a multiple of 3, which is the default TCP packet retransmission window.
 
 1 second is surely too short, it results in a lot of false positives, especially when scanning a lot of sites.
+Make it very long, like 20 seconds, to make sure not too much stuff gets rediscovered
 """
-CONNECT_TIMEOUT = 7
+CONNECT_TIMEOUT = 30
 
 """
 Once your client has connected to the server and sent the HTTP request, the read timeout is the number of seconds the
 client will wait for the server to send a response. (Specifically, it’s the number of seconds that the client will wait
 between bytes sent from the server. In 99.9% of cases, this is the time before the server sends the first byte).
+7 seconds is way too short, make it 30 so the server has all the time in the world to respond. Otherwise too much
+of the same stuff is re-discovered.
 """
-READ_TIMEOUT = 7
+READ_TIMEOUT = 30
 
-RDNS_TIMEOUT = 7
+RDNS_TIMEOUT = 30
 
 
 def filter_discover(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs):

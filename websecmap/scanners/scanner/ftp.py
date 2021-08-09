@@ -34,7 +34,7 @@ log = logging.getLogger(__name__)
 MAX_RETRIES = 3
 RETRY_DELAY = 10
 
-FTP_SERVER_TIMEOUT = 3
+FTP_SERVER_TIMEOUT = 30
 
 # after which time (seconds) a pending task should no longer be accepted by a worker
 # can also be a datetime.
