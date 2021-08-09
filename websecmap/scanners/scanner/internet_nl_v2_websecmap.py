@@ -480,7 +480,7 @@ def status_administration(response: Tuple[int, dict], scan_id: int):
         log.debug(f"Could not retrieve scan {scan_id}.")
         return []
 
-    if not api_has_usable_response(response, scan):
+    if not api_has_usable_response(response, scan_id):
         return
 
     status_code, response_content = response
@@ -533,7 +533,7 @@ def result_administration(response: Tuple[int, dict], scan_id: int):
         log.debug(f"Could not retrieve scan {scan_id}.")
         return []
 
-    if not api_has_usable_response(response, scan):
+    if not api_has_usable_response(response, scan_id):
         return
 
     status_code, response_content = response
