@@ -48,8 +48,8 @@ from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_conf
 
 # There is a balance between network timeout and qualys result cache.
 # This is relevant, since the results are not kept in cache for hours. More like 15 minutes.
-API_NETWORK_TIMEOUT = 20
-API_SERVER_TIMEOUT = 20
+API_NETWORK_TIMEOUT = 30
+API_SERVER_TIMEOUT = 30
 
 log = logging.getLogger(__name__)
 

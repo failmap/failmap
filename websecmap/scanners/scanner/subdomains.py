@@ -477,7 +477,7 @@ def certificate_transparency_scan(urls: List[Dict[str, Any]]):
         crt_sh_url = "https://crt.sh/?q=%25." + str(url["url"])
         pattern = r"[^\s%>]*\." + str(url["url"].replace(".", r"\."))  # harder string formatting :)
 
-        response = requests.get(crt_sh_url, timeout=(10, 10), allow_redirects=False)
+        response = requests.get(crt_sh_url, timeout=(30, 30), allow_redirects=False)
         matches = re.findall(pattern, response.text)
 
         subdomains = []

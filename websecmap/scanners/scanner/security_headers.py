@@ -472,7 +472,7 @@ def get_headers_request(uri_url: str) -> Response:
     # 10 seconds for network delay, 10 seconds for the site to respond.
     response = requests.get(
         uri_url,
-        timeout=(10, 10),
+        timeout=(30, 30),
         allow_redirects=True,
         verify=False,  # nosec TLS does not have to be valid in this test, only headers do.
         headers={"User-Agent": get_random_user_agent()},
