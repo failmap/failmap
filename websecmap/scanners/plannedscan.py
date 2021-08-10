@@ -159,12 +159,13 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     amount = amount if amount <= headroom else headroom
     log.debug(f"Picking up maximum {amount} of total {headroom} free slots.")
 
-    # oldest first, so ascending dates.
-    scans = (
-        PlannedScan.objects.all()
-        .filter(activity=Activity[activity].value, scanner=Scanner[scanner].value, state=State["requested"].value)
-        .order_by("requested_at_when")[0:amount]
-    )
+    # oldest first, so ascending dates.-> removed because that makes picking up very slow and complex.
+    # whatever is requested should just be handled asap and the things that are requestes should just be empy
+    # at the end of the day. So no .order_by("requested_at_when")
+    scans = PlannedScan.objects.all().filter(
+        activity=Activity[activity].value, scanner=Scanner[scanner].value, state=State["requested"].value
+    )[0:amount]
+
     # cannot update once a slice has been taken
     for scan in scans:
         scan.state = State["picked_up"].value
