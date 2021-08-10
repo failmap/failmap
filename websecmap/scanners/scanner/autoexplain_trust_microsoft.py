@@ -112,6 +112,7 @@ query = EndpointGenericScan.objects.all().filter(
 
 @app.task(queue="storage")
 def plan_scan():
+    # todo: no url.is_dead = False?
     scans = query.filter(
         endpoint__url__in=get_relevant_microsoft_domains_from_database(),
     )

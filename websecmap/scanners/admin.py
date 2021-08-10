@@ -6,6 +6,7 @@ from jet.admin import CompactInline
 from jet.filters import RelatedFieldAjaxListFilter
 
 from websecmap.scanners import models
+from websecmap.scanners.models import State
 from websecmap.scanners.proxy import check_proxy
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import progress_running_scan, recover_and_retry
 
@@ -438,6 +439,26 @@ class PlannedScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         ::-1
     ]
     fields = ("url", "activity", "scanner", "state", "last_state_change_at", "requested_at_when", "finished_at_when")
+
+    actions = []
+
+    def set_state_requested(self, request, queryset):
+        for plannedscan in queryset:
+            plannedscan.state = State.requested.value
+            plannedscan.save()
+        self.message_user(request, "Set to requested.")
+
+    set_state_requested.short_description = "Set to Requested"
+    actions.append("set_state_requested")
+
+    def set_state_finished(self, request, queryset):
+        for plannedscan in queryset:
+            plannedscan.state = State.finished.value
+            plannedscan.save()
+        self.message_user(request, "Set to finished.")
+
+    set_state_finished.short_description = "Set to Finished"
+    actions.append("set_state_finished")
 
 
 @admin.register(models.PlannedScanStatistic)
