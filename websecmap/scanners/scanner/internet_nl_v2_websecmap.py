@@ -594,6 +594,8 @@ def reuse_last_fields_and_set_them_to_error(endpoint_id: int):
         )
 
 
+# todo: store this on another queue: there are so many results that it blocks the entire storage worker...
+# should be a scan management queue that just does planned scans?
 @app.task(queue="storage")
 def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endpoint_protocol: str):
     """

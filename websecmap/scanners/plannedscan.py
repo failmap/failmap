@@ -123,10 +123,29 @@ def retry():
     This might result in a bunch of the same things being attempted over and over because they are never
     finished. Those things are nice investigation subjects. All scans should finish (or error).
 
+    internet_nl_mail and internet_nl_web have their own retry methods, they should NOT be retried after four hours
+    but after days!
     """
-    PlannedScan.objects.all().filter(
-        state=State["picked_up"].value, last_state_change_at__lte=datetime.now(pytz.utc) - timedelta(hours=4)
-    ).update(state=State["requested"].value)
+
+    # todo: configure this in the future.
+    # all times are in hours
+    default_timeout = 4
+    retry_policy = [{"scanners": [Scanner.internet_nl_web.value, Scanner.internet_nl_mail.value], "hours": 48}]
+
+    # add a policy for all unmentioned scanners:
+    mentioned_scanners = [policy["scanners"] for policy in retry_policy]
+    # https://stackoverflow.com/questions/11264684/flatten-list-of-lists
+    mentioned_scanners = [val for sublist in mentioned_scanners for val in sublist]
+    unmentioned_scanners = list(set(Scanner.values) - set(mentioned_scanners))
+    retry_policy.append({"scanners": unmentioned_scanners, "hours": default_timeout})
+
+    # apply the policy:
+    for policy in retry_policy:
+        PlannedScan.objects.all().filter(
+            state=State["picked_up"].value,
+            last_state_change_at__lte=datetime.now(pytz.utc) - timedelta(hours=policy["hours"]),
+            scanner__in=policy["scanners"],
+        ).update(state=State["requested"].value)
 
 
 def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
