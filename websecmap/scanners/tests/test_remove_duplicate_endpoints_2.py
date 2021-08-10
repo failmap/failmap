@@ -2,6 +2,7 @@ from datetime import date, datetime
 
 import pytz
 from django.utils import timezone
+from deepdiff import DeepDiff
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.duplicates import deduplicate_all_endpoints_sequentially
@@ -74,7 +75,8 @@ def test_deduplicate_all_endpoints_sequentially(db):
     log.info(epsdict)
     # Here you'll see that the state of the newest endpoint is transfered to the olderst one.
     # Id's are disabled, todo: have to reset sequence in test, but not too important right now.
-    assert epsdict == [
+
+    expected = [
         {
             # "id": 1,
             "discovered_on": datetime(2021, 7, 1, 0, 0, tzinfo=pytz.utc),
@@ -139,6 +141,7 @@ def test_deduplicate_all_endpoints_sequentially(db):
             "url": "basisbeveiliging.nl",
         },
     ]
+    DeepDiff(epsdict, expected, ignore_order=True)
 
     # The scans should also still be here
     assert EndpointGenericScan.objects.filter(endpoint=target_ep).count() == 2
