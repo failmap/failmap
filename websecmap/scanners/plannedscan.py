@@ -116,6 +116,12 @@ def reset():
 
 
 @app.task(queue="storage")
+def force_retry():
+    # just retry everything that is picked up now:
+    PlannedScan.objects.all().filter(state=State["picked_up"].value).update(state=State["requested"].value)
+
+
+@app.task(queue="storage")
 def retry():
     """
     When something is picked up, but not finished in a day, just retry. Something went wrong.
