@@ -349,7 +349,7 @@ def update_state(scan_id: int, new_state: str, new_state_message: str):
 
     old_state = copy(scan.state)
     scan.state = new_state
-    scan.state_message = new_state_message
+    scan.state_message = new_state_message[0:200]
     scan.last_state_check = datetime.now(pytz.utc)
     scan.last_state_change = datetime.now(pytz.utc)
     scan.save()
