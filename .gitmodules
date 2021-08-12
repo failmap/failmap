@@ -1,9 +1,3 @@
-[submodule "vendor/dnsrecon"]
-	path = vendor/dnsrecon
-	url = https://github.com/darkoperator/dnsrecon.git
-[submodule "vendor/theHarvester"]
-	path = vendor/theHarvester
-	url = https://github.com/laramies/theHarvester.git
 [submodule "vendor/dnscheck"]
 	path = vendor/dnscheck
 	url = https://github.com/stitch/dnscheck.git
