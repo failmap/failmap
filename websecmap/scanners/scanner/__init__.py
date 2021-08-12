@@ -8,7 +8,8 @@ from django.db.models import Q
 
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.models import Endpoint
+from websecmap.scanners import plannedscan
+from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 log = logging.getLogger(__name__)
 
@@ -246,3 +247,21 @@ def unique_and_random(items: List):
     items = list(set(items))
     random.shuffle(items)
     return items
+
+
+def finish_those_that_wont_be_scanned(scanner: str, scans: List[EndpointGenericScan], urls: List[Url]):
+    """
+    Some urls might be requested for a scan but are not eligible anymore because, for example, the
+    endpoint already has been explained. Once a scan on a url is requested, it will be retried until the
+    end of time. With this routine stuff that will not be scanned (missing in going_to_be_scanned) will
+    be set to finished.
+    Uses in autoexplain methods, where sometimes explanations are not needed or the query
+    """
+    all_url_ids = [url.id for url in urls]
+    log.debug(f"All url ids: {all_url_ids}.")
+    scanned_url_ids = [epgs.endpoint.url.id for epgs in scans]
+    log.debug(f"Will not be scanned: {all_url_ids}.")
+    will_not_be_scanned = list(set(all_url_ids) - set(scanned_url_ids))
+    for not_scanned_id in will_not_be_scanned:
+        log.debug(f"Not going to scan {not_scanned_id}, as there is nothing to scan for this url anymore.")
+        plannedscan.finish("scan", scanner, not_scanned_id)

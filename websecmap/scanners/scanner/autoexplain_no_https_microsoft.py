@@ -10,7 +10,7 @@ from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan
 import dns
 
-from websecmap.scanners.scanner import unique_and_random
+from websecmap.scanners.scanner import unique_and_random, finish_those_that_wont_be_scanned
 
 log = logging.getLogger(__package__)
 
@@ -50,6 +50,7 @@ def compose_planned_scan_task(**kwargs):
 
 def compose_scan_task(urls):
     scans = query.filter(endpoint__url__in=urls)
+    finish_those_that_wont_be_scanned(SCANNER, scans, urls)
 
     tasks = [
         scan.si(scan_id=endpoint_generic_scan.pk)
