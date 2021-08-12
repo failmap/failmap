@@ -9,6 +9,13 @@ from django.utils import timezone
 from websecmap.map.logic.map_defaults import get_country, get_default_country, get_default_layer, get_organization_type
 from websecmap.map.models import Configuration, HighLevelStatistic, OrganizationReport, VulnerabilityStatistic
 from websecmap.organizations.models import Organization
+from websecmap.reporting.severity import get_severity
+from websecmap.scanners import POLICY, URL_SCAN_TYPES
+from websecmap.scanners.impact import get_impact
+from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
+import logging
+
+log = logging.getLogger(__package__)
 
 
 def get_vulnerability_graph(country, organization_type, weeks_back):
@@ -208,6 +215,74 @@ def get_stats(country, organization_type, weeks_back):
         reports["endpoints_now"] = r["endpoints"]
 
     return reports
+
+
+def what_to_improve(country: str, organization_type: str, issue_type: str):
+    # todo: check if the layer is published.
+
+    policy = POLICY.get(issue_type, None)
+    if not policy:
+        log.debug(f"No policy found for {issue_type}")
+        return []
+
+    country = get_country(country)
+    organization_type = get_organization_type(organization_type)
+
+    if issue_type in URL_SCAN_TYPES:
+        return what_to_improve_ugs(country, organization_type, issue_type, policy)
+    else:
+        return what_to_improve_epgs(country, organization_type, issue_type, policy)
+
+
+def what_to_improve_ugs(country: str, organization_type: str, issue_type: str, policy):
+    scans = UrlGenericScan.objects.all().filter(
+        type=issue_type,
+        is_the_latest_scan=True,
+        comply_or_explain_is_explained=False,
+        rating__in=policy["high"] + policy["medium"],
+        url__is_dead=False,
+        url__not_resolvable=False,
+        url__organization__country=country,
+        url__organization__type=organization_type,
+    )[0:1000]
+
+    return [
+        {
+            "organization_name": scan.url.organization.name,
+            "url_url": scan.url.url,
+            "severity": get_impact(get_severity(scan)),
+            "last_scan_moment": scan.last_scan_moment,
+            "rating_determined_on": scan.rating_determined_on,
+        }
+        for scan in scans
+        if get_impact(get_severity(scan)) in ["high", "medium"]
+    ]
+
+
+def what_to_improve_epgs(country: str, organization_type: str, issue_type: str, policy):
+    scans = EndpointGenericScan.objects.all().filter(
+        type=issue_type,
+        is_the_latest_scan=True,
+        comply_or_explain_is_explained=False,
+        rating__in=policy["high"] + policy["medium"],
+        endpoint__is_dead=False,
+        endpoint__url__is_dead=False,
+        endpoint__url__not_resolvable=False,
+        endpoint__url__organization__country=country,
+        endpoint__url__organization__type=organization_type,
+    )[0:1000]
+
+    return [
+        {
+            "organization_name": scan.endpoint.url.organization.name,
+            "url_url": scan.endpoint.url.url,
+            "severity": get_impact(get_severity(scan)),
+            "last_scan_moment": scan.last_scan_moment,
+            "rating_determined_on": scan.rating_determined_on,
+        }
+        for scan in scans
+        if get_impact(get_severity(scan)) in ["high", "medium"]
+    ]
 
 
 def get_short_and_simple_stats(weeks_back: int = 0) -> Dict:

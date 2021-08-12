@@ -47,6 +47,7 @@ from websecmap.map.logic.stats_and_graphs import (
     get_short_and_simple_stats,
     get_stats,
     get_vulnerability_graph,
+    what_to_improve,
 )
 from websecmap.map.logic.ticker import get_ticker_data
 from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
@@ -529,6 +530,12 @@ def top_win(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_L
 def stats(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
     reports = get_stats(country, organization_type, weeks_back)
     return JsonResponse(reports, encoder=JSEncoder)
+
+
+@cache_page(one_hour)
+def _what_to_improve(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, issue_type=""):
+    reports = what_to_improve(country, organization_type, issue_type)
+    return JsonResponse(reports, encoder=JSEncoder, safe=False)
 
 
 @cache_page(one_hour)

@@ -36,6 +36,7 @@ static_urlpatterns = [
     path("data/map_default/<d:days_back>/<slug:displayed_issue>/", views.map_default),
     path("data/map_default/<d:days_back>//", views.map_default),
     path("data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>", views.stats),
+    path("data/stats/what_to_improve/<c:country>/<slug:organization_type>/<str:issue_type>/", views._what_to_improve),
     path("data/short_and_simple_stats/<w:weeks_back>/", views.get_short_and_simple_stats_),
     # defaults
     path("data/defaults/", views.defaults),
