@@ -14,7 +14,7 @@ from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan, Endpoint
-from websecmap.scanners.scanner import unique_and_random
+from websecmap.scanners.scanner import unique_and_random, finish_those_that_wont_be_scanned
 
 log = logging.getLogger(__package__)
 
@@ -138,8 +138,9 @@ def compose_scan_task(urls):
     This infra is used a lot by the dutch government, so instead of managing hundreds of exceptions by hand.
     """
 
-    # Only check this on the latest scans, do not alter existing explanations
-    scans = query.filter(endpoint__url__in=urls).only("id")
+    # Only check this on the latest scans, do not alter existing explanations.
+    scans = query.filter(endpoint__url__in=urls).only("id", "endpoint__url__id")
+    finish_those_that_wont_be_scanned(SCANNER, scans, urls)
 
     tasks = [
         scan.si(scan_id=endpoint_generic_scan.pk)
