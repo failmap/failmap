@@ -42,13 +42,10 @@ POLICY = {
         "irrelevant": [],
     },
     "plain_https": {
-        "high": [
-            "Site does not redirect to secure url, and has no secure alternative on a standard port.",
-            "Site does not redirect to secure url, and has nosecure alternative on a standard port.",
-        ],
-        "medium": ["Redirects to a secure site, while a secure counterpart on the standard port is missing."],
+        "high": ["1000"],
+        "medium": ["25"],
         "low": [],
-        "ok": [],
+        "ok": ["0"],
         "error": [],
         "irrelevant": [],
     },
