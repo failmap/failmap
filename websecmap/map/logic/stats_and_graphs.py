@@ -248,7 +248,8 @@ def what_to_improve_ugs(country: str, organization_type: str, issue_type: str, p
 
     return [
         {
-            "organization_name": scan.url.organization.name,
+            # "organization_id": scan.url.organization.pk,
+            # "organization_name": scan.url.organization.name,
             "url_url": scan.url.url,
             "severity": get_impact(get_severity(scan)),
             "last_scan_moment": scan.last_scan_moment,
@@ -270,11 +271,12 @@ def what_to_improve_epgs(country: str, organization_type: str, issue_type: str, 
         endpoint__url__not_resolvable=False,
         endpoint__url__organization__country=country,
         endpoint__url__organization__type=organization_type,
-    )[0:1000]
+    )[0:500]
 
     return [
         {
-            "organization_name": scan.endpoint.url.organization.name,
+            # "organization_id": scan.endpoint.url.organization.pk,
+            # "organization_name": scan.endpoint.url.organization.name,
             "url_url": scan.endpoint.url.url,
             "severity": get_impact(get_severity(scan)),
             "last_scan_moment": scan.last_scan_moment,
