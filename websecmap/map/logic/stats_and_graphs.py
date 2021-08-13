@@ -235,6 +235,7 @@ def what_to_improve(country: str, organization_type: str, issue_type: str):
 
 
 def what_to_improve_ugs(country: str, organization_type: str, issue_type: str, policy):
+    # todo: how to outer join on organization type and country?
     scans = UrlGenericScan.objects.all().filter(
         type=issue_type,
         is_the_latest_scan=True,
@@ -244,9 +245,9 @@ def what_to_improve_ugs(country: str, organization_type: str, issue_type: str, p
         url__not_resolvable=False,
         url__organization__country=country,
         url__organization__type=organization_type,
-    )[0:1000]
+    )[0:500]
 
-    return [
+    dicts = [
         {
             # "organization_id": scan.url.organization.pk,
             # "organization_name": scan.url.organization.name,
@@ -258,6 +259,9 @@ def what_to_improve_ugs(country: str, organization_type: str, issue_type: str, p
         for scan in scans
         if get_impact(get_severity(scan)) in ["high", "medium"]
     ]
+
+    # crude deduplication as i can't easily find out how to left outer join stuff.
+    return [dict(t) for t in {tuple(d.items()) for d in dicts}]
 
 
 def what_to_improve_epgs(country: str, organization_type: str, issue_type: str, policy):
@@ -273,7 +277,7 @@ def what_to_improve_epgs(country: str, organization_type: str, issue_type: str, 
         endpoint__url__organization__type=organization_type,
     )[0:500]
 
-    return [
+    dicts = [
         {
             # "organization_id": scan.endpoint.url.organization.pk,
             # "organization_name": scan.endpoint.url.organization.name,
@@ -285,6 +289,9 @@ def what_to_improve_epgs(country: str, organization_type: str, issue_type: str, 
         for scan in scans
         if get_impact(get_severity(scan)) in ["high", "medium"]
     ]
+
+    # crude deduplication as i can't easily find out how to left outer join stuff.
+    return [dict(t) for t in {tuple(d.items()) for d in dicts}]
 
 
 def get_short_and_simple_stats(weeks_back: int = 0) -> Dict:
