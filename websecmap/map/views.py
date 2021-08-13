@@ -345,7 +345,6 @@ def config(request):
 
 @cache_page(one_hour)
 def index(request, map_configuration=None):
-
     initial_countries = get_initial_countries()
 
     if map_configuration:
@@ -527,8 +526,8 @@ def top_win(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_L
 
 
 @cache_page(one_hour)
-def stats(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
-    reports = get_stats(country, organization_type, weeks_back)
+def stats(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0, days: int = 365):
+    reports = get_stats(country, organization_type, weeks_back, days)
     return JsonResponse(reports, encoder=JSEncoder)
 
 
@@ -545,22 +544,24 @@ def get_short_and_simple_stats_(request, weeks_back=0):
 
 
 @cache_page(one_hour)
-def organization_vulnerability_timeline(request, organization_id: int, organization_type: str = "", country: str = ""):
-    stats = get_organization_vulnerability_timeline(organization_id)
+def organization_vulnerability_timeline(request, organization_id: int, days: int = 365):
+    stats = get_organization_vulnerability_timeline(organization_id, days=days)
     return JsonResponse(stats, encoder=JSEncoder, safe=False)
 
 
 @cache_page(one_hour)
 def organization_vulnerability_timeline_via_name(
-    request, organization_name: str, organization_type: str = "", country: str = ""
+    request, organization_name: str, organization_type: str = "", country: str = "", days: int = 365
 ):
-    stats = get_organization_vulnerability_timeline_via_name(organization_name, organization_type, country)
+    stats = get_organization_vulnerability_timeline_via_name(organization_name, organization_type, country, days)
     return JsonResponse(stats, encoder=JSEncoder, safe=False)
 
 
 @cache_page(one_hour)
-def vulnerability_graphs(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
-    stats = get_vulnerability_graph(country, organization_type, weeks_back)
+def vulnerability_graphs(
+    request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0, days: int = 365
+):
+    stats = get_vulnerability_graph(country, organization_type, weeks_back, days)
     return JsonResponse(stats, encoder=JSEncoder)
 
 

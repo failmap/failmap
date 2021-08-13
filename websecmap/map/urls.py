@@ -35,13 +35,16 @@ static_urlpatterns = [
     path("data/organizations/list/<c:country>/<slug:organization_type>/", views.organization_list),
     path("data/map_default/<d:days_back>/<slug:displayed_issue>/", views.map_default),
     path("data/map_default/<d:days_back>//", views.map_default),
-    path("data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>", views.stats),
+    path("data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>/<int:days>/", views.stats),
     path("data/stats/what_to_improve/<c:country>/<slug:organization_type>/<str:issue_type>/", views._what_to_improve),
     path("data/short_and_simple_stats/<w:weeks_back>/", views.get_short_and_simple_stats_),
     # defaults
     path("data/defaults/", views.defaults),
     path("data/layers/<c:country>/", views.layers),
-    path("data/vulnerability_graphs/<c:country>/<slug:organization_type>/<w:weeks_back>", views.vulnerability_graphs),
+    path(
+        "data/vulnerability_graphs/<c:country>/<slug:organization_type>/<w:weeks_back>/<int:days>/",
+        views.vulnerability_graphs,
+    ),
     path("data/topfail/<c:country>/<slug:organization_type>/<w:weeks_back>", views.top_fail),
     path("data/topwin/<c:country>/<slug:organization_type>/<w:weeks_back>", views.top_win),
     path("data/all_latest_scans/<c:country>/<slug:organization_type>/", views.all_latest_scans),
@@ -52,17 +55,21 @@ static_urlpatterns = [
     path("data/ticker/<c:country>/<slug:organization_type>/<w:weeks_back>/<w:weeks_duration>", views.ticker),
     path("data/explained/<c:country>/<slug:organization_type>/", views.explain_list),
     # be compatible with optional parameters and types.
-    path("data/organization_vulnerability_timeline/<oid:organization_id>", views.organization_vulnerability_timeline),
     path(
-        "data/organization_vulnerability_timeline/<oid:organization_id>/<slug:organization_type>/<c:country>",
+        "data/organization_vulnerability_timeline/<oid:organization_id>/<int:days>/",
         views.organization_vulnerability_timeline,
     ),
     path(
-        "data/organization_vulnerability_timeline/<str:organization_name>/<slug:organization_type>/<c:country>",
+        "data/organization_vulnerability_timeline/<oid:organization_id>/<int:days>/",
+        views.organization_vulnerability_timeline,
+    ),
+    path(
+        "data/organization_vulnerability_timeline/"
+        "<str:organization_name>/<slug:organization_type>/<c:country>/<int:days>/",
         views.organization_vulnerability_timeline_via_name,
     ),
     path(
-        "data/organization_vulnerability_timeline/<str:organization_name>/",
+        "data/organization_vulnerability_timeline/<str:organization_name>/<int:days>/",
         views.organization_vulnerability_timeline_via_name,
     ),
     path(

@@ -18,13 +18,13 @@ import logging
 log = logging.getLogger(__package__)
 
 
-def get_vulnerability_graph(country, organization_type, weeks_back):
+def get_vulnerability_graph(country, organization_type, weeks_back, days: int = 365):
 
     organization_type_id = get_organization_type(organization_type)
     country = get_country(country)
     when = timezone.now() - relativedelta(weeks=int(weeks_back))
 
-    one_year_ago = when - timedelta(days=365)
+    one_year_ago = when - timedelta(days=days)
 
     data = (
         VulnerabilityStatistic.objects.all()
@@ -71,8 +71,8 @@ def get_vulnerability_graph(country, organization_type, weeks_back):
     return stats
 
 
-def get_organization_vulnerability_timeline(organization_id: int):
-    one_year_ago = timezone.now() - timedelta(days=365)
+def get_organization_vulnerability_timeline(organization_id: int, days: int = 365):
+    one_year_ago = timezone.now() - timedelta(days=days)
 
     ratings = (
         OrganizationReport.objects.all()
@@ -98,7 +98,7 @@ def get_organization_vulnerability_timeline(organization_id: int):
 
 
 def get_organization_vulnerability_timeline_via_name(
-    organization_name: str, organization_type: str = "", country: str = ""
+    organization_name: str, organization_type: str = "", country: str = "", days: int = 365
 ):
 
     layer = get_organization_type(organization_type) if organization_type else get_default_layer()
@@ -109,9 +109,9 @@ def get_organization_vulnerability_timeline_via_name(
     )
 
     if not organization:
-        return {}
+        return []
 
-    return get_organization_vulnerability_timeline(organization.id)
+    return get_organization_vulnerability_timeline(organization.id, days)
 
 
 def stats_determine_when(stat, weeks_back=0):
@@ -172,13 +172,10 @@ def get_stats_outdated(country, organization_type, weeks_back):
     return reports
 
 
-def get_stats(country, organization_type, weeks_back):
+def get_stats(country, organization_type, weeks_back, days: int = 365):
     """
     Stats are calculated using websecmap calculate_high_level_statistics
 
-    :param country:
-    :param organization_type:
-    :param weeks_back:
     :return:
     """
 
@@ -188,7 +185,7 @@ def get_stats(country, organization_type, weeks_back):
     stats = (
         HighLevelStatistic.objects.all()
         .filter(country=country, organization_type=get_organization_type(organization_type), at_when__lte=when)
-        .order_by("-at_when")[0:366]
+        .order_by("-at_when")[0:days]
     )
 
     reports = {"organizations": [], "urls": [], "explained": {}, "endpoints_now": 0, "endpoint": []}
