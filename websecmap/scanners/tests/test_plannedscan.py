@@ -75,6 +75,7 @@ def create_endpoint_scan(endpoint, type, rating, at_when):
     # overwrite the auto_now_add behavior (todo: remove this implicit behavior)
     egs.last_scan_moment = at_when
     egs.save()
+    return egs
 
 
 def test_plannedscan(db):

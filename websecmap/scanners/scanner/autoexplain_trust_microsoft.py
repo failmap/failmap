@@ -33,6 +33,31 @@ applicable_subdomains = {
         "a.manage.microsoft.com",
     ],
     "enterpriseregistration": ["*.enterpriseregistration.windows.net", "enterpriseregistration.windows.net"],
+    "webmail": [
+        "*.internal.outlook.com",
+        "*.outlook.com",
+        "outlook.com",
+        "office365.com",
+        "*.office365.com",
+        "*.outlook.office365.com",
+        "*.office.com",
+        "outlook.office.com",
+        "substrate.office.com",
+        "attachment.outlook.live.net",
+        "attachment.outlook.office.net",
+        "attachment.outlook.officeppe.net",
+        "attachments.office.net",
+        "*.clo.footprintdns.com",
+        "*.nrb.footprintdns.com",
+        "ccs.login.microsoftonline.com",
+        "ccs-sdf.login.microsoftonline.com",
+        "substrate-sdf.office.com",
+        "attachments-sdf.office.net",
+        "*.live.com",
+        "mail.services.live.com",
+        "hotmail.com",
+        "*.hotmail.com",
+    ],
     "msoid": [
         "*.accesscontrol.windows.net",
         "*.accesscontrol.windows-ppe.net",
@@ -99,7 +124,6 @@ applicable_subdomains = {
     ],
 }
 
-
 query = EndpointGenericScan.objects.all().filter(
     type="tls_qualys_certificate_trusted",
     is_the_latest_scan=True,
@@ -154,7 +178,6 @@ def compose_scan_task(urls):
 # todo: this needs to be split out onto several workers, now it can hinder the storage queue.
 @app.task(queue="storage")
 def scan(scan_id):
-
     epgs = EndpointGenericScan.objects.all().filter(id=scan_id).first()
     if not epgs:
         return
@@ -162,7 +185,11 @@ def scan(scan_id):
     certificate = retrieve_certificate(url=epgs.endpoint.url.url, port=epgs.endpoint.port)
 
     matches_exception_policy = certificate_matches_microsoft_exception_policy(
-        certificate, epgs, applicable_subdomains, trusted_organization="Microsoft Corporation"
+        certificate,
+        epgs.endpoint.url.url,
+        epgs.endpoint.url.computed_subdomain,
+        applicable_subdomains,
+        trusted_organization="Microsoft Corporation",
     )
 
     if not matches_exception_policy:
@@ -203,7 +230,7 @@ def retrieve_certificate(url: str, port: int = 443) -> [x509.Certificate, None]:
 
 
 def certificate_matches_microsoft_exception_policy(
-    certificate: x509.Certificate, scan, applicable_subdomains, trusted_organization
+    certificate: x509.Certificate, url: str, subdomain: str, applicable_subdomains, trusted_organization
 ) -> bool:
     """
     It's possible to fake all checks with a self signed certificate. The reason we _still_ do it like this, is that
@@ -218,45 +245,43 @@ def certificate_matches_microsoft_exception_policy(
     :return:
     """
     if not certificate:
-        log.debug(f"Could not retrieve certificate for {scan.endpoint.url.url}.")
+        log.debug(f"Could not retrieve certificate for {url}.")
         return False
 
     if certificate.not_valid_before > datetime.now():
-        log.debug(
-            f"Certificate for {scan.endpoint.url.url} is not valid before {certificate.not_valid_before}. "
-            f"Not trusted."
-        )
+        log.debug(f"Certificate for {url} is not valid before {certificate.not_valid_before}. " f"Not trusted.")
         return False
 
     if datetime.now() > certificate.not_valid_after:
-        log.debug(f"Certificate for {scan.endpoint.url.url} has expired  {certificate.not_valid_after}. Not trusted.")
+        log.debug(f"Certificate for {url} has expired  {certificate.not_valid_after}. Not trusted.")
         return False
 
     # Likely subdomain:
     # lyncdiscover.site.example.com
     # lyncdiscover.example.com
-    if "." in scan.endpoint.url.computed_subdomain:
-        fragments = scan.endpoint.url.computed_subdomain.split(".")
+    if "." in subdomain:
+        fragments = subdomain.split(".")
         microsoft_service = fragments[0]
     else:
-        microsoft_service = scan.endpoint.url.computed_subdomain
+        microsoft_service = subdomain
 
     # check if the issuer matches
     # <Name(C=US,ST=Washington,L=Redmond,O=Microsoft Corporation,OU=Microsoft IT,CN=Microsoft IT TLS CA 5)>
     _names = certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
     names = [name.value for name in _names]
     if names[0] not in applicable_subdomains[microsoft_service]:
-        log.debug(f"Certificate for {scan.endpoint.url.url} not in accepted names, value: {names}. Not trusted.")
+        log.debug(
+            f"Certificate for {url} not in accepted names, value: {names}. "
+            f"{names[0]} not in {applicable_subdomains[microsoft_service]}."
+            f"Not trusted."
+        )
         return False
 
     # check if the common name or alt name of the certificate matches the subdomain
     _names = certificate.issuer.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)
     names = [name.value for name in _names]
     if trusted_organization not in names:
-        log.debug(
-            f"Certificate for {scan.endpoint.url.url} not handed out by {trusted_organization} but by "
-            f"{names}. Not trusted."
-        )
+        log.debug(f"Certificate for {url} not handed out by {trusted_organization} but by " f"{names}. Not trusted.")
         return False
 
     return True

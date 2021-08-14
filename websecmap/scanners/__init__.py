@@ -588,6 +588,22 @@ SCANNERS = [
         "plannable_activities": ["scan"],
         "python_module": "autoexplain_no_https_microsoft",
     },
+    {
+        "name": "autoexplain_no_https_possible",
+        "verbose name": "Removes https requirement from subdomains that don't have https requirements.",
+        "description": "",
+        "can discover endpoints": False,
+        "can verify endpoints": False,
+        "can discover urls": False,
+        "can verify urls": False,
+        "can scan endpoints": False,
+        "can scan urls": False,
+        "needs results from": [],
+        "creates endpoint scan types": [],
+        "creates url scan types": [],
+        "plannable_activities": ["scan"],
+        "python_module": "autoexplain_no_https_possible",
+    },
 ]
 
 # todo: should we move the scanner definitions to different scanners and harvest them here?

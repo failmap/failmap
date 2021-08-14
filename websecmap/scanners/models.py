@@ -429,6 +429,7 @@ class Scanner(models.IntegerChoices):
     autoexplain_trust_microsoft = 101, "autoexplain_trust_microsoft"
     autoexplain_no_https_microsoft = 102, "autoexplain_no_https_microsoft"
     autoexplain_microsoft_neighboring_services = 103, "autoexplain_microsoft_neighboring_services"
+    autoexplain_no_https_possible = 104, "autoexplain_no_https_possible"
 
 
 class State(models.IntegerChoices):
