@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Optional
 
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, Screenshot
 import logging
@@ -67,7 +68,7 @@ def transfer_endpoint_state(fromm: Endpoint, to: Endpoint):
     to.save()
 
 
-def get_older_duplicate_endpoint(endpoint, within_days: int = 60):
+def get_older_duplicate_endpoint(endpoint: Endpoint, within_days: int = 60):
     # Determine if there is an older duplicate endpoint. If that exists, then return it.
 
     # No discovery date, doesn't make sense, can't deal with that.
@@ -91,3 +92,98 @@ def get_older_duplicate_endpoint(endpoint, within_days: int = 60):
         .order_by("-discovered_on")
         .first()
     )
+
+
+def deduplicate_all_scans_sequentially():
+    """
+    Go over each scan, if there is an older scan with the same attributes, merge the newer one into the older,
+    basically by changing the 'latest scan' and date information. In both cases: if there is an explanation
+    keep it. If both have an explanation just use the old one.
+
+    Many explanations get lost because of a new endpoint and thus a new scan. This causes a storm of e-mails
+    when there is a DNS outage or something like that.
+
+    The newest stuff is always being deleted, that's why this works without too much hassle.
+    UrlGenericScan is not used now, as there have NEVER been explains about DNSSEC. There might be in the future.
+    """
+
+    for epgs in EndpointGenericScan.objects.all().order_by("-rating_determined_on"):
+        log.info(f"Attempting to deduplicate: {epgs}")
+        # Always fetch the latest endpoint state, because it might have been changed by an update.
+        fresh_epgs = EndpointGenericScan.objects.all().filter(id=epgs.id).first()
+        if not fresh_epgs:
+            continue
+        reduce_if_duplicate_scan(fresh_epgs)
+    log.info("done")
+
+
+def reduce_if_duplicate_scan(scan: EndpointGenericScan):
+    older_scan = get_older_duplicate_scan(scan)
+    if not older_scan:
+        log.info(f"No older endpoint exists for {scan}.")
+        return
+
+    log.info(f"Going to transfer data from {scan} to {older_scan}.")
+    # when both scans where stored at the same time, one is the latest scan. Merge those too.
+    if not older_scan.is_the_latest_scan:
+        log.info("Transferred latest scan information")
+        older_scan.is_the_latest_scan = scan.is_the_latest_scan
+        if scan.is_the_latest_scan:
+            log.info("Newest scan is the latest scan and has been transferred.")
+    else:
+        log.info("Older scan already is the latest scan, not changing it.")
+
+    # Only if there was no explanation, migrate the comply or explain data from the newer scan.
+    if not older_scan.comply_or_explain_is_explained:
+        log.info("Transferred comply or explain information")
+        older_scan.comply_or_explain_is_explained = scan.comply_or_explain_is_explained
+        older_scan.comply_or_explain_case_additional_notes = scan.comply_or_explain_case_additional_notes
+        older_scan.comply_or_explain_case_handled_by = scan.comply_or_explain_case_handled_by
+        older_scan.comply_or_explain_explained_by = scan.comply_or_explain_explained_by
+        older_scan.comply_or_explain_explained_on = scan.comply_or_explain_explained_on
+        older_scan.comply_or_explain_explanation = scan.comply_or_explain_explanation
+        older_scan.comply_or_explain_explanation_valid_until = scan.comply_or_explain_explanation_valid_until
+    else:
+        log.info("Older scan was already explained, not copying newer data.")
+
+    # Migrate the last scan moment
+    log.debug(
+        f"Migrating the last scan moment, setting it to the newer scan. "
+        f"From {older_scan.last_scan_moment} to {scan.last_scan_moment}"
+    )
+    older_scan.last_scan_moment = scan.last_scan_moment
+    older_scan.save()
+
+    log.info("Scan migrated to older scan, removing the newer scan as it has no additional value.")
+    scan.delete()
+
+
+def get_older_duplicate_scan(scan: EndpointGenericScan) -> Optional[EndpointGenericScan]:
+    # This has to ONLY check for the most recent scan before this one, and THEN see if that one is the same.
+    # It should not dig in the entire past.
+    possible_duplicate = (
+        EndpointGenericScan.objects.all()
+        .filter(endpoint=scan.endpoint, type=scan.type, last_scan_moment__lte=scan.last_scan_moment)
+        .exclude(pk=scan.pk)
+        .order_by("-last_scan_moment")
+        .first()
+    )
+
+    if not possible_duplicate:
+        log.info("No previous scan found for this endpoint.")
+        return None
+
+    # The metrics have to be exactly the same, the rest of the state such as explanation and latest scan field
+    # can deviate.
+    if not all(
+        [
+            possible_duplicate.rating == scan.rating,
+            possible_duplicate.explanation == scan.explanation,
+            possible_duplicate.evidence == scan.evidence,
+        ]
+    ):
+        log.info("Previous scan had different characteristics, cannot deduplicate.")
+        return None
+
+    log.info(f"Found a previous scan for {scan}, which is {possible_duplicate}.")
+    return possible_duplicate
