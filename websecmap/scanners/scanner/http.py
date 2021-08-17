@@ -30,7 +30,7 @@ import random
 import socket
 from datetime import datetime
 from ipaddress import AddressValueError
-from typing import List
+from typing import List, Optional, Dict, Union
 
 import pytz
 import requests
@@ -68,7 +68,6 @@ STANDARD_HTTPS_PORTS = [443, 8443]
 PORT_TO_PROTOCOL = {80: "http", 8008: "http", 8080: "http", 443: "https", 8443: "https"}
 
 PREFERRED_PORT_ORDER = [443, 80, 8443, 8080, 8008]
-
 
 """
 http://2.python-requests.org/en/master/user/advanced/?highlight=timeout%3D#timeouts
@@ -118,7 +117,6 @@ def filter_discover(organizations_filter: dict = dict(), urls_filter: dict = dic
 
 @app.task(queue="storage")
 def plan_discover(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs):
-
     if not allowed_to_discover_endpoints("http"):
         return group()
 
@@ -345,8 +343,52 @@ def get_ipv6(url: str):
 """
 
 
+def connection_answer(
+    connection_result: bool = False, exception: Optional[Union[Exception, str]] = None
+) -> Dict[str, str]:
+    data = {"result": connection_result, "error": ""}
+
+    if not exception:
+        return data
+
+    # There can still be an error even when a connection was possible. For example a TLS error, but that indicates
+    # there was a connection possible still.
+    if isinstance(exception, Exception):
+        data["error"] = type(exception).__name__
+    else:
+        data["error"] = exception
+
+    return data
+
+
+# These errors indicate there _IS_ a connection, but there is some kind of misconfiguration.
+# These are snippets from the received errors
+ACCEPTABLE_CONNECTION_ERRORS = [
+    "BadStatusLine",
+    "CertificateError",
+    "certificate verify failed",
+    "bad handshake",
+    # Handshake failure: so there is an option to create a handshake, but perhaps the server wont respond.
+    # Still a valid endpoint.
+    "SSLV3_ALERT_HANDSHAKE_FAILURE",
+    # When connecting based on ip address and separate host header, the error returned
+    # might not be an SSLV3_ALERT_HANDSHAKE_FAILURE but an TLSV1_ALERT_INTERNAL_ERROR.
+    # In that case there is still a connection, although there is something going wrong with TLS.
+    # in general all SSLErrors mean there is a connection.
+    "TLSV1_ALERT_INTERNAL_ERROR",
+    # Done: what to do with a connection reset. It denotes that there is a service running
+    #  because otherwise there would not be a RST from the TCP handshake. It frequently happens
+    #  that a http site redirects to https and the https gives a connection reset.
+    #  In this case we follow what nmap does; it means the port is open. So perhaps this method
+    #  should be called 'has open port' or 'runs a service'. While we can't connect there is
+    #  definitely a service running there, which means scans should take place.
+    #  -> this will move 'missing https' endpoint warnings to 'could not test' errors.
+    "Connection aborted",
+]
+
+
 @app.task(queue="4and6", rate_limit="120/s", bind=True)
-def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> bool:
+def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> Dict[str, str]:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
 
@@ -371,15 +413,11 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> bo
     this leads to some false positives or to some other wrong data.
     The big question is: would some https sites only respond IF the right protocol (SSL 1) or
     something like that is spoken to them? Do we need a "special" TLS implementation on our server?
-
-    Todo: futher look if DIG can be of value to us. Until now it seems not so.
     """
 
     # You can see what queue / routing info is used. So options(queue works and overrides the default 4and6 queue)
     # log.info(self.request['delivery_info']['routing_key'])
 
-    uri = ""
-    ip = ""
     if ip_version == 4:
         ip = get_ipv4(url)
         uri = "%s://%s:%s" % (protocol, ip, port)
@@ -388,7 +426,9 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> bo
         uri = "%s://[%s]:%s" % (protocol, ip, port)
 
     if not ip:
-        return False
+        # todo: possibly add more information, what resolver and such. Above methods should use specified resolvers
+        #  not system resolvers.
+        return connection_answer(False, f"ipv{ip_version}_resolve_error")
 
     log.debug("Attempting connect on: %s: host: %s IP: %s" % (uri, url, ip))
 
@@ -426,117 +466,61 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> bo
         )
         if r.status_code:
             log.debug("%s: Host: %s Status: %s" % (uri, url, r.status_code))
-            return True
+            return connection_answer(True, None)
         else:
-            log.debug("No status code? Now what?! %s" % url)
+            log.debug("No status code." % url)
             # probably never reached, exception thrown when no status code is present
-            return True
+            return connection_answer(True, "no_http_status_code")
     except (ConnectTimeout, Timeout, ReadTimeout) as Ex:
-        log.debug("%s: Timeout! - %s" % (url, Ex))
-        return False
-    except (ChunkedEncodingError, ContentDecodingError):
+        return connection_answer(False, Ex)
+    except (ChunkedEncodingError, ContentDecodingError) as Ex:
         # There is a connection and you can get something back. But it doesn't decode properly.
         # For example InvalidChunkLength(got length b'<!DOCTYPE html>\\n', 0 bytes read)",
-        return True
+        return connection_answer(True, Ex)
     except (ConnectionRefusedError, ConnectionError, HTTPError, SSLError) as Ex:
-        """
-        Some errors really mean there is no site. Example is the ConnectionRefusedError: [Errno 61]
-        which means the endpoint can be killed.
+        strerror = str(Ex.args)  # Cast whatever we get back to a string. Instead of trace.
+        has_acceptable_error = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
+        if has_acceptable_error:
+            log.debug(f"There is a server, but could not communicate directly: {strerror}")
+            return connection_answer(True, Ex)
 
-        There are exceptions that still can be translated into an existing site.
-        Until now we've found in responses:
-        - BadStatusLine
-        - CertificateError
-        - certificate verify failed
-
-        Perhaps: (todo)
-        - EOF occurred in violation of protocol
-        """
-        log.debug("%s: Exception returned: %s" % (url, Ex))
-        strerror = Ex.args  # this can be multiple.  # zit in nested exception?
-        strerror = str(strerror)  # Cast whatever we get back to a string. Instead of trace.
-        if any(
-            [
-                "BadStatusLine" in strerror,
-                "CertificateError" in strerror,
-                "certificate verify failed" in strerror,
-                "bad handshake" in strerror,
-                # Handshake failure: so there is an option to create a handshake, but perhaps the server wont respond.
-                # Still a valid endpoint.
-                "SSLV3_ALERT_HANDSHAKE_FAILURE" in strerror,
-                # When connecting based on ip address and separate host header, the error returned
-                # might not be an SSLV3_ALERT_HANDSHAKE_FAILURE but an TLSV1_ALERT_INTERNAL_ERROR.
-                # In that case there is still a connection, although there is something going wrong with TLS.
-                # in general all SSLErrors mean there is a connection.
-                "TLSV1_ALERT_INTERNAL_ERROR" in strerror,
-                # Done: what to do with a connection reset. It denotes that there is a service running
-                #  because otherwise there would not be a RST from the TCP handshake. It frequently happens
-                #  that a http site redirects to https and the https gives a connection reset.
-                #  In this case we follow what nmap does; it means the port is open. So perhaps this method
-                #  should be called 'has open port' or 'runs a service'. While we can't connect there is
-                #  definitely a service running there, which means scans should take place.
-                #  -> this will move 'missing https' endpoint warnings to 'could not test' errors.
-                "Connection aborted" in strerror,
-            ]
-        ):
-            log.debug(
-                "Exception indicates that there is a server, but we're not able to "
-                "communicate with it correctly. Error: %s" % strerror
+        # No acceptable answer? Try a normal connection:
+        # This might be due to the fact that a firewall is blocking direct requests to the IP with a different
+        # host. Seen this in edienstenburgerzaken.purmerend.nl, which is annoying. So we're going to try
+        # to connect again, but then with the normal host, without IP. Note that this requires that the
+        # correct queue is used to connect to the network. This might not work on your development machine
+        # as it might connect over the wrong network
+        # Basically perform the same checks on the url directly, with a more extensive request that can be debugged
+        try:
+            log.debug("Trying again with a matching url and host header -> No connection to IP with a host header.")
+            uri = "%s://%s:%s" % (protocol, url, port)
+            req = Request("GET", uri, headers={"Host": url, "User-Agent": get_random_user_agent()})
+            s = Session()
+            prepped = s.prepare_request(req)
+            s.send(
+                prepped,
+                verify=False,
+                timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
+                allow_redirects=False,
             )
-            return True
-        else:
-            log.debug("Exception indicates we could not connect to server. Error: %s" % strerror)
+            return connection_answer(True, "found_with_hostname")
+        except (ConnectionRefusedError, ConnectionError, HTTPError) as sub_ex:
+            # Same handling as above.
+            strerror = str(sub_ex.args)
+            has_acceptable_error = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
+            if has_acceptable_error:
+                log.debug(f"There is a server, but could not communicate directly: {strerror}")
+                return connection_answer(True, sub_ex)
+            else:
+                return connection_answer(False, sub_ex)
+        except (ConnectTimeout, Timeout, ReadTimeout) as sub_ex:
+            return connection_answer(False, sub_ex)
+        except Exception as sub_ex:
+            return connection_answer(False, sub_ex)
 
-            # This might be due to the fact that a firewall is blocking direct requests to the IP with a different
-            # host. Seen this in edienstenburgerzaken.purmerend.nl, which is annoying. So we're going to try
-            # to connect again, but then with the normal host, without IP. Note that this requires that the
-            # correct queue is used to connect to the network. This might not work on your development machine
-            # as it might connect over the wrong network
-
-            # Basically perform the same checks on the url directly, with a more extensive request that can be debugged
-
-            try:
-                log.debug("Trying again with a matching url and host header -> No connection to IP with a host header.")
-
-                s = Session()
-
-                uri = "%s://%s:%s" % (protocol, url, port)
-
-                req = Request("GET", uri, headers={"Host": url, "User-Agent": get_random_user_agent()})
-                prepped = s.prepare_request(req)
-
-                # pretty_print_request(prepped)
-
-                s.send(
-                    prepped,
-                    verify=False,
-                    timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
-                    allow_redirects=False,
-                )
-
-                return True
-            except (ConnectionRefusedError, ConnectionError, HTTPError) as Ex:
-                # Same handling as above.
-                strerror = Ex.args
-                strerror = str(strerror)
-
-                if any(
-                    [
-                        error in strerror
-                        for error in ["BadStatusLine", "CertificateError", "certificate verify failed", "bad handshake"]
-                    ]
-                ):
-                    log.debug(
-                        "Exception indicates that there is a server, but we're not able to "
-                        "communicate with it correctly. Error: %s" % strerror
-                    )
-                    return True
-            except (ConnectTimeout, Timeout, ReadTimeout):
-                return False
-
-            # At this point we might have received a different exception. Let's see which ones...
-            log.debug("Did also not connect using the hostname as url. Giving up.")
-            return False
+    # The rest :)
+    except Exception as Ex:
+        return connection_answer(False, Ex)
 
 
 # thank you https://stackoverflow.com/questions/20658572/python-requests-print-entire-http-request-raw
@@ -561,10 +545,10 @@ def pretty_print_request(req):
 
 @app.task(queue="storage")
 def connect_result(result, protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
-    if result:
-        save_endpoint(protocol, url_id, port, ip_version, origin)
+    if result["result"]:
+        save_endpoint(protocol, url_id, port, ip_version, f"ok/{origin}/{result['error']}")
     else:
-        kill_endpoint(protocol, url_id, port, ip_version, origin)
+        kill_endpoint(protocol, url_id, port, ip_version, f"error/{origin}/{result['error']}")
     return True
 
 
@@ -606,7 +590,6 @@ def has_internet_connection(host: str = "8.8.8.8", port: int = 53, connection_ti
 
 
 def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
-
     # prevent duplication
     if not endpoint_exists(url_id, port, protocol, ip_version):
         endpoint = Endpoint()
@@ -619,6 +602,8 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
         endpoint.is_dead = False
         endpoint.discovered_on = datetime.now(pytz.utc)
         # endpoint.dossier = "Found using the http scanner."  #
+        # no other place to put it:
+        endpoint.is_dead_reason = origin
         endpoint.save()
         log.info("Added endpoint added to database: %s" % endpoint)
     else:
@@ -628,7 +613,6 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
 
 @app.task(queue="storage")
 def kill_url_task(ips, url: Url):
-
     # only kill if there are no ips.
     if any(ips):
         return
@@ -734,36 +718,25 @@ def check_network(code_location=""):
     :return:
     """
 
-    log.info("Testing network connection via %s." % code_location)
+    log.info(f"Testing network connection via {code_location}.")
 
-    log.info("IPv4 is enabled via configuration: %s" % settings.NETWORK_SUPPORTS_IPV4)
-    log.info("IPv6 is enabled via configuration: %s" % settings.NETWORK_SUPPORTS_IPV6)
+    log.info(f"IPv4 is enabled via configuration: {settings.NETWORK_SUPPORTS_IPV4}")
+    log.info(f"IPv6 is enabled via configuration: {settings.NETWORK_SUPPORTS_IPV6}")
 
     can_ipv4 = can_connect("https", "faalkaart.nl", 443, 4)
     can_ipv6 = can_connect("https", "faalkaart.nl", 443, 6)
 
-    if not can_ipv4 and not can_ipv6:
+    if not can_ipv4["result"] or not can_ipv6["result"]:
         raise ConnectionError(
-            "Both ipv6 and ipv4 networks could not be reached via %s."
-            "IPv4 enabled in config: %s, IPv6 enabled in config: %s"
-            % (code_location, settings.NETWORK_SUPPORTS_IPV4, settings.NETWORK_SUPPORTS_IPV6)
+            f"IPv4 enabled in config: {settings.NETWORK_SUPPORTS_IPV4}, "
+            f"IPv4 Connection: {can_ipv4['result']}"
+            f"IPv4 Error: {can_ipv4['error']}"
+            f"IPv6 enabled in config: {settings.NETWORK_SUPPORTS_IPV6}"
+            f"IPv6 Connection: 6:{can_ipv6['result']}"
+            f"IPv6 Error: {can_ipv6['error']}"
         )
 
-    if not can_ipv4:
-        raise ConnectionError(
-            "Could not reach IPv4 Network via %s. IPv4 enabled in config: %s"
-            % (code_location, settings.NETWORK_SUPPORTS_IPV4)
-        )
-    else:
-        log.info("IPv4 could be reached via %s" % code_location)
-
-    if not can_ipv6:
-        raise ConnectionError(
-            "Could not reach IPv6 Network via %s. IPv6 enabled in config: %s"
-            % (code_location, settings.NETWORK_SUPPORTS_IPV6)
-        )
-    else:
-        log.info("IPv6 could be reached via %s" % code_location)
+    log.info(f"Network could be reached could be reached via {code_location}")
 
 
 def redirects_to_safety(url: str):
