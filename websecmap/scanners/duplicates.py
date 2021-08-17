@@ -21,10 +21,10 @@ def deduplicate_all_endpoints_sequentially(days: int = 60):
     """
 
     # Iterate over all endpoints from new to old. So all endpoints exist. id descending, newest first.
-    for endpoint in Endpoint.objects.all().order_by("-discovered_on"):
-        log.info(f"Attempting to deduplicate: {endpoint}")
+    for endpoint_id in Endpoint.objects.all().order_by("-discovered_on").only("id").values_list("id", flat=True):
+        log.info(f"Attempting to deduplicate: {endpoint_id}")
         # Always fetch the latest endpoint state, because it might have been changed by an update.
-        fresh_endpoint = Endpoint.objects.all().filter(id=endpoint.id).first()
+        fresh_endpoint = Endpoint.objects.all().filter(id=endpoint_id).first()
         if not fresh_endpoint:
             continue
         reduce_if_duplicate_endpoint(fresh_endpoint, days)
@@ -107,10 +107,12 @@ def deduplicate_all_scans_sequentially():
     UrlGenericScan is not used now, as there have NEVER been explains about DNSSEC. There might be in the future.
     """
 
-    for epgs in EndpointGenericScan.objects.all().order_by("-rating_determined_on"):
-        log.info(f"Attempting to deduplicate: {epgs}")
+    for epgs_id in (
+        EndpointGenericScan.objects.all().order_by("-rating_determined_on").only("id").values_list("id", flat=True)
+    ):
+        log.info(f"Attempting to deduplicate: {epgs_id}")
         # Always fetch the latest endpoint state, because it might have been changed by an update.
-        fresh_epgs = EndpointGenericScan.objects.all().filter(id=epgs.id).first()
+        fresh_epgs = EndpointGenericScan.objects.all().filter(id=epgs_id).first()
         if not fresh_epgs:
             continue
         reduce_if_duplicate_scan(fresh_epgs)
