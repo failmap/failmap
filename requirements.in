@@ -61,6 +61,7 @@ statshog
 requests
 
 # dnsrecon / DNS scanning dependencies
+dnsrecon
 dnspython
 netaddr
 

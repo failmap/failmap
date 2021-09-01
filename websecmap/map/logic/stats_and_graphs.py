@@ -9,15 +9,22 @@ from django.utils import timezone
 from websecmap.map.logic.map_defaults import get_country, get_default_country, get_default_layer, get_organization_type
 from websecmap.map.models import Configuration, HighLevelStatistic, OrganizationReport, VulnerabilityStatistic
 from websecmap.organizations.models import Organization
+from websecmap.reporting.severity import get_severity
+from websecmap.scanners import POLICY, URL_SCAN_TYPES
+from websecmap.scanners.impact import get_impact
+from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
+import logging
+
+log = logging.getLogger(__package__)
 
 
-def get_vulnerability_graph(country, organization_type, weeks_back):
+def get_vulnerability_graph(country, organization_type, weeks_back, days: int = 365):
 
     organization_type_id = get_organization_type(organization_type)
     country = get_country(country)
     when = timezone.now() - relativedelta(weeks=int(weeks_back))
 
-    one_year_ago = when - timedelta(days=365)
+    one_year_ago = when - timedelta(days=days)
 
     data = (
         VulnerabilityStatistic.objects.all()
@@ -64,8 +71,8 @@ def get_vulnerability_graph(country, organization_type, weeks_back):
     return stats
 
 
-def get_organization_vulnerability_timeline(organization_id: int):
-    one_year_ago = timezone.now() - timedelta(days=365)
+def get_organization_vulnerability_timeline(organization_id: int, days: int = 365):
+    one_year_ago = timezone.now() - timedelta(days=days)
 
     ratings = (
         OrganizationReport.objects.all()
@@ -91,7 +98,7 @@ def get_organization_vulnerability_timeline(organization_id: int):
 
 
 def get_organization_vulnerability_timeline_via_name(
-    organization_name: str, organization_type: str = "", country: str = ""
+    organization_name: str, organization_type: str = "", country: str = "", days: int = 365
 ):
 
     layer = get_organization_type(organization_type) if organization_type else get_default_layer()
@@ -102,9 +109,9 @@ def get_organization_vulnerability_timeline_via_name(
     )
 
     if not organization:
-        return {}
+        return []
 
-    return get_organization_vulnerability_timeline(organization.id)
+    return get_organization_vulnerability_timeline(organization.id, days)
 
 
 def stats_determine_when(stat, weeks_back=0):
@@ -165,13 +172,10 @@ def get_stats_outdated(country, organization_type, weeks_back):
     return reports
 
 
-def get_stats(country, organization_type, weeks_back):
+def get_stats(country, organization_type, weeks_back, days: int = 365):
     """
     Stats are calculated using websecmap calculate_high_level_statistics
 
-    :param country:
-    :param organization_type:
-    :param weeks_back:
     :return:
     """
 
@@ -181,7 +185,7 @@ def get_stats(country, organization_type, weeks_back):
     stats = (
         HighLevelStatistic.objects.all()
         .filter(country=country, organization_type=get_organization_type(organization_type), at_when__lte=when)
-        .order_by("-at_when")[0:366]
+        .order_by("-at_when")[0:days]
     )
 
     reports = {"organizations": [], "urls": [], "explained": {}, "endpoints_now": 0, "endpoint": []}
@@ -208,6 +212,87 @@ def get_stats(country, organization_type, weeks_back):
         reports["endpoints_now"] = r["endpoints"]
 
     return reports
+
+
+def what_to_improve(country: str, organization_type: str, issue_type: str):
+    # todo: check if the layer is published.
+
+    policy = POLICY.get(issue_type, None)
+    if not policy:
+        log.debug(f"No policy found for {issue_type}")
+        return []
+
+    country = get_country(country)
+    organization_type = get_organization_type(organization_type)
+
+    if issue_type in URL_SCAN_TYPES:
+        return what_to_improve_ugs(country, organization_type, issue_type, policy)
+    else:
+        return what_to_improve_epgs(country, organization_type, issue_type, policy)
+
+
+def what_to_improve_ugs(country: str, organization_type: str, issue_type: str, policy):
+    # todo: how to outer join on organization type and country?
+    scans = UrlGenericScan.objects.all().filter(
+        type=issue_type,
+        is_the_latest_scan=True,
+        comply_or_explain_is_explained=False,
+        rating__in=policy["high"] + policy["medium"],
+        url__is_dead=False,
+        url__not_resolvable=False,
+        url__organization__country=country,
+        url__organization__type=organization_type,
+    )[0:500]
+
+    dicts = [
+        {
+            # "organization_id": scan.url.organization.pk,
+            # "organization_name": scan.url.organization.name,
+            "url_url": scan.url.url,
+            "subdomain": scan.url.computed_subdomain,
+            "domain": f"{scan.url.computed_domain}.{scan.url.computed_suffix}",
+            "severity": get_impact(get_severity(scan)),
+            "last_scan_moment": scan.last_scan_moment,
+            "rating_determined_on": scan.rating_determined_on,
+        }
+        for scan in scans
+        if get_impact(get_severity(scan)) in ["high", "medium"]
+    ]
+
+    # crude deduplication as i can't easily find out how to left outer join stuff.
+    return [dict(t) for t in {tuple(d.items()) for d in dicts}]
+
+
+def what_to_improve_epgs(country: str, organization_type: str, issue_type: str, policy):
+    scans = EndpointGenericScan.objects.all().filter(
+        type=issue_type,
+        is_the_latest_scan=True,
+        comply_or_explain_is_explained=False,
+        rating__in=policy["high"] + policy["medium"],
+        endpoint__is_dead=False,
+        endpoint__url__is_dead=False,
+        endpoint__url__not_resolvable=False,
+        endpoint__url__organization__country=country,
+        endpoint__url__organization__type=organization_type,
+    )[0:500]
+
+    dicts = [
+        {
+            # "organization_id": scan.endpoint.url.organization.pk,
+            # "organization_name": scan.endpoint.url.organization.name,
+            "url_url": scan.endpoint.url.url,
+            "subdomain": scan.endpoint.url.computed_subdomain,
+            "domain": f"{scan.endpoint.url.computed_domain}.{scan.endpoint.url.computed_suffix}",
+            "severity": get_impact(get_severity(scan)),
+            "last_scan_moment": scan.last_scan_moment,
+            "rating_determined_on": scan.rating_determined_on,
+        }
+        for scan in scans
+        if get_impact(get_severity(scan)) in ["high", "medium"]
+    ]
+
+    # crude deduplication as i can't easily find out how to left outer join stuff.
+    return [dict(t) for t in {tuple(d.items()) for d in dicts}]
 
 
 def get_short_and_simple_stats(weeks_back: int = 0) -> Dict:

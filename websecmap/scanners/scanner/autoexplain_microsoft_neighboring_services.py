@@ -4,7 +4,7 @@ from websecmap.celery import app
 from websecmap.scanners import plannedscan
 from websecmap.scanners.scanner.autoexplain_trust_microsoft import get_relevant_microsoft_domains_from_database
 from websecmap.scanners.models import EndpointGenericScan
-from websecmap.scanners.scanner import unique_and_random
+from websecmap.scanners.scanner import unique_and_random, finish_those_that_wont_be_scanned
 from websecmap.scanners.scanner.autoexplain_trust_microsoft import (
     autoexplain_trust_microsoft_and_include_their_webserver_headers,
 )
@@ -36,11 +36,14 @@ def compose_planned_scan_task(**kwargs):
 
 
 def compose_scan_task(urls):
+    scans = query.filter(endpoint__url__in=urls).only("id", "endpoint__url__id")
+    finish_those_that_wont_be_scanned(SCANNER, scans, urls)
+
     return group(
         [
             scan.si(scan_id=endpoint_generic_scan.pk)
             | plannedscan.finish.si("scan", SCANNER, endpoint_generic_scan.endpoint.url.pk)
-            for endpoint_generic_scan in list(set(query.filter(endpoint__url__in=urls)))
+            for endpoint_generic_scan in list(set(scans))
         ]
     )
 

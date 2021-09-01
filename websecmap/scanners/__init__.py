@@ -26,6 +26,120 @@ DETAILS = {
 
 """
 
+# A policy is applied per endpoint/url scan type These will be configurable in the future.
+# Currently it's hardcoded in severity.py. This perhaps should be defined in scanners? Perhaps not given
+# it will be configurable and scanners are a fact.
+# todo: fill in the rest, currently only have the bad stuff for the 'what's bad' statistics queries
+# error: a test error, something went wrong during scanning. Will not punish the result.
+# irrelevant: previous scores are not relevant anymore because something happened that made it so. All is set to 0.
+POLICY = {
+    "ftp": {
+        "high": ["outdated", "insecure"],
+        "medium": [],
+        "low": [],
+        "ok": [],
+        "error": [],
+        "irrelevant": [],
+    },
+    "plain_https": {
+        "high": ["1000"],
+        "medium": ["25"],
+        "low": [],
+        "ok": ["0"],
+        "error": [],
+        "irrelevant": [],
+    },
+    "DNSSEC": {
+        "high": ["ERROR"],
+        "medium": [],
+        "low": [],
+        "ok": [],
+        "error": [],
+        "irrelevant": [],
+    },
+    # Todo: needs nuance in headers for the 'yet offers no insecure http service'. Should not be True or False(!)
+    # Until that is done, no list here...
+    "http_security_header_strict_transport_security": {
+        "high": [],
+        "medium": ["False"],
+        "low": [],
+        "ok": ["True"],
+        "error": [],
+        "irrelevant": ["Unreachable", "RESTRICTED", "UNKNOWN", "SOAP"],
+    },
+    "http_security_header_x_content_type_options": {
+        "high": [],
+        "medium": [],
+        "low": ["False"],
+        "ok": ["True"],
+        "error": [],
+        "irrelevant": [],
+    },
+    "http_security_header_x_frame_options": {
+        "high": [],
+        "medium": [],
+        "low": ["False"],
+        "ok": ["True"],
+        "error": [],
+        "irrelevant": [],
+    },
+    "http_security_header_x_xss_protection": {
+        "high": [],
+        "medium": [],
+        "low": ["False"],
+        "ok": ["True"],
+        "error": [],
+        "irrelevant": [],
+    },
+    "tls_qualys_certificate_trusted": {
+        "high": ["not trusted"],
+        "medium": [],
+        "low": [],
+        "ok": ["trusted"],
+        "error": ["scan_error"],
+        "irrelevant": [],
+    },
+    "tls_qualys_encryption_quality": {
+        "high": ["F"],
+        "medium": [],
+        "low": ["B", "C"],
+        "ok": ["A+", "A-", "A"],
+        "error": ["scan_error"],
+        "irrelevant": [],
+    },
+    "internet_nl_mail_starttls_tls_available": {
+        "high": ["failed"],
+        "medium": ["warning"],
+        "low": ["info"],
+        "ok": ["passed", "good_not_tested"],
+        "error": ["error", "unreachable", "not_testable", "untestable"],
+        "irrelevant": ["not_tested", "not_applicable", "no_mx"],
+    },
+    "internet_nl_mail_auth_spf_exist": {
+        "high": ["failed"],
+        "medium": ["warning"],
+        "low": ["info"],
+        "ok": ["passed", "good_not_tested"],
+        "error": ["error", "unreachable", "not_testable", "untestable"],
+        "irrelevant": ["not_tested", "not_applicable", "no_mx"],
+    },
+    "internet_nl_mail_auth_dkim_exist": {
+        "high": ["failed"],
+        "medium": ["warning"],
+        "low": ["info"],
+        "ok": ["passed", "good_not_tested"],
+        "error": ["error", "unreachable", "not_testable", "untestable"],
+        "irrelevant": ["not_tested", "not_applicable", "no_mx"],
+    },
+    "internet_nl_mail_auth_dmarc_exist": {
+        "high": ["failed"],
+        "medium": ["warning"],
+        "low": ["info"],
+        "ok": ["passed", "good_not_tested"],
+        "error": ["error", "unreachable", "not_testable", "untestable"],
+        "irrelevant": ["not_tested", "not_applicable", "no_mx"],
+    },
+}
 
 SCANNERS = [
     {
@@ -473,6 +587,22 @@ SCANNERS = [
         "creates url scan types": [],
         "plannable_activities": ["scan"],
         "python_module": "autoexplain_no_https_microsoft",
+    },
+    {
+        "name": "autoexplain_no_https_possible",
+        "verbose name": "Removes https requirement from subdomains that don't have https requirements.",
+        "description": "",
+        "can discover endpoints": False,
+        "can verify endpoints": False,
+        "can discover urls": False,
+        "can verify urls": False,
+        "can scan endpoints": False,
+        "can scan urls": False,
+        "needs results from": [],
+        "creates endpoint scan types": [],
+        "creates url scan types": [],
+        "plannable_activities": ["scan"],
+        "python_module": "autoexplain_no_https_possible",
     },
 ]
 

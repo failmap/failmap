@@ -8,7 +8,7 @@ from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan
-from websecmap.scanners.scanner import unique_and_random
+from websecmap.scanners.scanner import unique_and_random, finish_those_that_wont_be_scanned
 
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 
@@ -58,8 +58,8 @@ def compose_planned_scan_task(**kwargs):
 
 
 def compose_scan_task(urls: List[Url]) -> Task:
-
     scans = list(set(query.filter(endpoint__url__in=urls)))
+    finish_those_that_wont_be_scanned(SCANNER, scans, urls)
 
     tasks = [
         get_cert_chain.si(url=scan.endpoint.url.url, port=scan.endpoint.port, ip_version=scan.endpoint.ip_version).set(

@@ -111,28 +111,31 @@ def test_autoexplain_certificate(db):
     }
     trusted_organization = "Nonsense Corporation"
 
+    url = endpointscan.endpoint.url.url
+    subdomain = endpointscan.endpoint.url.computed_subdomain
+
     # wrong subject
     assert False is autoexplain_trust_microsoft.certificate_matches_microsoft_exception_policy(
-        generate_certificate("subject"), endpointscan, applicable_subdomains, trusted_organization
+        generate_certificate("subject"), url, subdomain, applicable_subdomains, trusted_organization
     )
 
     # wrong issuer
     assert False is autoexplain_trust_microsoft.certificate_matches_microsoft_exception_policy(
-        generate_certificate("issuer"), endpointscan, applicable_subdomains, trusted_organization
+        generate_certificate("issuer"), url, subdomain, applicable_subdomains, trusted_organization
     )
 
     # valid in the future
     assert False is autoexplain_trust_microsoft.certificate_matches_microsoft_exception_policy(
-        generate_certificate("future"), endpointscan, applicable_subdomains, trusted_organization
+        generate_certificate("future"), url, subdomain, applicable_subdomains, trusted_organization
     )
 
     # expired
     assert False is autoexplain_trust_microsoft.certificate_matches_microsoft_exception_policy(
-        generate_certificate("expired"), endpointscan, applicable_subdomains, trusted_organization
+        generate_certificate("expired"), url, subdomain, applicable_subdomains, trusted_organization
     )
 
     assert True is autoexplain_trust_microsoft.certificate_matches_microsoft_exception_policy(
-        generate_certificate(), endpointscan, applicable_subdomains, trusted_organization
+        generate_certificate(), url, subdomain, applicable_subdomains, trusted_organization
     )
 
 

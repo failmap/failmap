@@ -24,6 +24,7 @@ from websecmap.scanners.scanner import (
     autoexplain_no_https_microsoft,
     autoexplain_microsoft_neighboring_services,
     autoexplain_dutch_untrusted_cert,
+    autoexplain_no_https_possible,
 )
 
 log = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ __scanners__ = [
     autoexplain_microsoft_neighboring_services,
     autoexplain_no_https_microsoft,
     autoexplain_trust_microsoft,
+    autoexplain_no_https_possible,
 ]
 
 __others__ = [proxy, plannedscan]

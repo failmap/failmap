@@ -92,5 +92,5 @@ def revive(object_type, date, preview: bool = True):
         log.info("Reviving: %s" % dead_object)
         dead_object.is_dead = False
         dead_object.is_dead_since = None
-        dead_object.is_dead_reason = "Revived on %s" % datetime.now(pytz.utc)
+        dead_object.is_dead_reason = "Revived on %s" % datetime.now(pytz.utc).date()
         dead_object.save(update_fields=["is_dead", "is_dead_since", "is_dead_reason"])

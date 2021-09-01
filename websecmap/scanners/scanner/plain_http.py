@@ -225,7 +225,7 @@ def scan(ip_version: int, url: str):
     redirects_to_safety_result = None
 
     # if you cannot connect to a secure endpoint, we're going to find out of there is redirect.
-    if not can_connect_result:
+    if not can_connect_result["result"]:
         # The worker (should) only resolve domain names only over ipv4 or ipv6. (A / AAAA).
         # Currenlty docker does not support that. Which means a lot of network rewriting for dealing with
         # all edge cases of HTTP.
@@ -263,16 +263,16 @@ def store(results, endpoint_id):
     )
 
     # issue resolved.
-    if can_connect_result:
+    if can_connect_result["result"]:
         if endpoint_has_scans("plain_https", endpoint_id):
             store_endpoint_scan_result("plain_https", endpoint_id, "0", cleaned_up)
 
     # Really no security at all
-    if not can_connect_result and redirects_to_safety_result is False:
+    if not can_connect_result["result"] and redirects_to_safety_result is False:
         log.info("%s does not have a https site. Saving/updating scan." % endpoint.url)
         store_endpoint_scan_result("plain_https", endpoint_id, "1000", no_https_at_all)
 
     # some redirections that might have flaws etc.
-    if not can_connect_result and redirects_to_safety_result is True:
+    if not can_connect_result["result"] and redirects_to_safety_result is True:
         log.info("%s redirects to safety, saved by the bell." % endpoint.url)
         store_endpoint_scan_result("plain_https", endpoint_id, "25", saved_by_the_bell)

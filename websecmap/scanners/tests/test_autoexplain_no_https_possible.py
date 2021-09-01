@@ -1,0 +1,47 @@
+from datetime import datetime
+
+from websecmap.scanners.models import PlannedScan, EndpointGenericScan
+from websecmap.scanners.scanner.autoexplain_no_https_possible import plan_scan, scan
+from websecmap.scanners.tests.test_plannedscan import (
+    create_organization,
+    link_url_to_organization,
+    create_url,
+    create_endpoint,
+    create_endpoint_scan,
+)
+
+
+def test_autoexplain_no_https_possible(db):
+
+    # Three different endpoints, one will be explained because it has the pki subdomain and a 1000 score.
+    o = create_organization("Test")
+    u1 = create_url("pki.example.com")
+    link_url_to_organization(u1, o)
+    e1 = create_endpoint(u1, 4, "https", 443)
+    e2 = create_endpoint(u1, 6, "https", 443)
+    es1 = create_endpoint_scan(e1, "plain_https", "1000", datetime(2020, 1, 1))
+    es2 = create_endpoint_scan(e2, "plain_https", "0", datetime(2020, 1, 1))
+
+    u2 = create_url("sip.example2.com")
+    link_url_to_organization(u2, o)
+    e3 = create_endpoint(u2, 4, "https", 443)
+    es3 = create_endpoint_scan(e3, "plain_https", "1000", datetime(2020, 1, 1))
+
+    plan_scan()
+
+    assert PlannedScan.objects.all().count() == 1
+    first_planned_scan = PlannedScan.objects.all().first()
+    assert first_planned_scan.url == u1
+
+    scan(es1.id)
+    scan(es2.id)
+    scan(es3.id)
+
+    egs = EndpointGenericScan.objects.all().filter(pk=es1.pk).first()
+    assert egs.comply_or_explain_is_explained is True
+
+    egs = EndpointGenericScan.objects.all().filter(pk=es2.pk).first()
+    assert egs.comply_or_explain_is_explained is False
+
+    egs = EndpointGenericScan.objects.all().filter(pk=es3.pk).first()
+    assert egs.comply_or_explain_is_explained is False

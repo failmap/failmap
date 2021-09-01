@@ -18,12 +18,11 @@ class Command(BaseCommand):
     """
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            "--days", nargs=1, help="How big the gap between endpoints can be, default=60", type=int, default=60
-        )
+        parser.add_argument("--days", help="How big the gap between endpoints can be, default=60", type=int, default=60)
         super().add_arguments(parser)
 
     help = __doc__
 
     def handle(self, *args, **options):
+        print(options["days"])
         deduplicate_all_endpoints_sequentially(days=options["days"])

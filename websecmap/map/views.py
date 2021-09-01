@@ -47,11 +47,12 @@ from websecmap.map.logic.stats_and_graphs import (
     get_short_and_simple_stats,
     get_stats,
     get_vulnerability_graph,
+    what_to_improve,
 )
 from websecmap.map.logic.ticker import get_ticker_data
 from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
 from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
-from websecmap.map.models import Configuration
+from websecmap.map.models import Configuration, OrganizationReport
 from websecmap.organizations.models import Organization
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Screenshot
@@ -344,7 +345,6 @@ def config(request):
 
 @cache_page(one_hour)
 def index(request, map_configuration=None):
-
     initial_countries = get_initial_countries()
 
     if map_configuration:
@@ -526,9 +526,15 @@ def top_win(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_L
 
 
 @cache_page(one_hour)
-def stats(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
-    reports = get_stats(country, organization_type, weeks_back)
+def stats(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0, days: int = 365):
+    reports = get_stats(country, organization_type, weeks_back, days)
     return JsonResponse(reports, encoder=JSEncoder)
+
+
+@cache_page(one_hour)
+def _what_to_improve(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, issue_type=""):
+    reports = what_to_improve(country, organization_type, issue_type)
+    return JsonResponse(reports, encoder=JSEncoder, safe=False)
 
 
 @cache_page(one_hour)
@@ -538,22 +544,24 @@ def get_short_and_simple_stats_(request, weeks_back=0):
 
 
 @cache_page(one_hour)
-def organization_vulnerability_timeline(request, organization_id: int, organization_type: str = "", country: str = ""):
-    stats = get_organization_vulnerability_timeline(organization_id)
+def organization_vulnerability_timeline(request, organization_id: int, days: int = 365):
+    stats = get_organization_vulnerability_timeline(organization_id, days=days)
     return JsonResponse(stats, encoder=JSEncoder, safe=False)
 
 
 @cache_page(one_hour)
 def organization_vulnerability_timeline_via_name(
-    request, organization_name: str, organization_type: str = "", country: str = ""
+    request, organization_name: str, organization_type: str = "", country: str = "", days: int = 365
 ):
-    stats = get_organization_vulnerability_timeline_via_name(organization_name, organization_type, country)
+    stats = get_organization_vulnerability_timeline_via_name(organization_name, organization_type, country, days)
     return JsonResponse(stats, encoder=JSEncoder, safe=False)
 
 
 @cache_page(one_hour)
-def vulnerability_graphs(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
-    stats = get_vulnerability_graph(country, organization_type, weeks_back)
+def vulnerability_graphs(
+    request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0, days: int = 365
+):
+    stats = get_vulnerability_graph(country, organization_type, weeks_back, days)
     return JsonResponse(stats, encoder=JSEncoder)
 
 
@@ -603,14 +611,50 @@ def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type
     query = (
         Organization.objects.all()
         .filter(country=get_country(country), type=get_organization_type(organization_type), is_dead=False)
-        .values_list(
-            "id",
-            "name",
-            "computed_name_slug",
-        )
+        .only("id", "name", "computed_name_slug")
     )
 
-    data = [{"id": elem[0], "name": elem[1], "slug": elem[2]} for elem in query]
+    data = []
+    for record in query:
+        # Get the latest organization report, if any, so to have some impression what the result will be when selecting
+        # the organization:
+
+        report = (
+            OrganizationReport.objects.all()
+            .filter(organization=record.id)
+            .only("total_urls", "total_endpoints", "high", "medium", "low", "at_when")
+            .last()
+        )
+        if report:
+            data.append(
+                {
+                    "id": record.id,
+                    "name": record.name,
+                    "slug": record.computed_name_slug,
+                    "report_available": True,
+                    "urls": report.total_urls,
+                    "endpoints": report.total_endpoints,
+                    "high": report.high,
+                    "medium": report.medium,
+                    "low": report.low,
+                    "at_when": report.at_when,
+                }
+            )
+        else:
+            data.append(
+                {
+                    "id": record.id,
+                    "name": record.name,
+                    "slug": record.computed_name_slug,
+                    "report_available": False,
+                    "urls": 0,
+                    "endpoints": 0,
+                    "high": 0,
+                    "medium": 0,
+                    "low": 0,
+                    "at_when": None,
+                }
+            )
 
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 

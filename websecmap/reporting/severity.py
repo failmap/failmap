@@ -7,7 +7,7 @@ This file contains (or should) verbose explantion of why points are given.
 import json
 import logging
 from datetime import datetime
-from typing import Union
+from typing import Union, Any, Dict
 
 import pytz
 from django.conf import settings
@@ -667,7 +667,8 @@ calculation_methods = {
 }
 
 
-def get_severity(scan: Union[EndpointGenericScan, UrlGenericScan]):
+# @lru_cache(maxsize=128)
+def get_severity(scan: Union[EndpointGenericScan, UrlGenericScan]) -> Dict[str, Any]:
     # Can be probably more efficient by adding some methods to scan.
     if not calculation_methods.get(scan.type, None):
         raise ValueError("No calculation available for this scan type: %s" % scan.type)
