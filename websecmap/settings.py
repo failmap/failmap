@@ -1307,3 +1307,9 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 CORS_ALLOW_CREDENTIALS = True
 
 VENDOR_DIR = os.environ.get("VENDOR_DIR", os.path.abspath(os.path.dirname(__file__) + "/../vendor/") + "/")
+
+"""
+Reports are JSON blobs. They are not stored in the database because it requires a lot of (hard to clean) diskspace and
+they cannot be easily compressed or handled.
+"""
+REPORT_STORAGE_DIR = os.environ.get("REPORT_STORAGE_DIR", os.path.abspath(os.path.dirname(__file__)) + "/reports/")
