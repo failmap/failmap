@@ -29,7 +29,7 @@ from websecmap.scanners.scanner.__init__ import (
     unique_and_random,
     url_filters,
 )
-from websecmap.scanners.scanner.http import connect_result
+from websecmap.scanners.scanner.http import connect_result_simple
 from websecmap.scanners.scanner.utils import get_nameservers
 
 log = logging.getLogger(__name__)
@@ -72,11 +72,11 @@ def compose_new_discover_task(urls: List[Url]):
     for url in urls:
         tasks.append(
             has_mx_without_cname.si(url.url)
-            | connect_result.s(protocol="dns_mx_no_cname", url_id=url.pk, port=0, ip_version=0)
+            | connect_result_simple.s(protocol="dns_mx_no_cname", url_id=url.pk, port=0, ip_version=0)
             | has_soa.si(url.url)
-            | connect_result.s(protocol="dns_soa", url_id=url.pk, port=0, ip_version=0)
+            | connect_result_simple.s(protocol="dns_soa", url_id=url.pk, port=0, ip_version=0)
             | has_a_or_aaaa.si(url.url)
-            | connect_result.s(protocol="dns_a_aaaa", url_id=url.pk, port=0, ip_version=0)
+            | connect_result_simple.s(protocol="dns_a_aaaa", url_id=url.pk, port=0, ip_version=0)
             | plannedscan.finish.si("discover", "dns_endpoints", url.pk)
         )
 
@@ -96,11 +96,11 @@ def compose_new_verify_task(urls):
     for endpoint in endpoints:
         tasks.append(
             has_mx_without_cname.si(endpoint.url.url)
-            | connect_result.s(protocol="dns_mx_no_cname", url_id=endpoint.url.pk, port=0, ip_version=0)
+            | connect_result_simple.s(protocol="dns_mx_no_cname", url_id=endpoint.url.pk, port=0, ip_version=0)
             | has_soa.si(endpoint.url.url)
-            | connect_result.s(protocol="dns_soa", url_id=endpoint.url.pk, port=0, ip_version=0)
+            | connect_result_simple.s(protocol="dns_soa", url_id=endpoint.url.pk, port=0, ip_version=0)
             | has_a_or_aaaa.si(endpoint.url.url)
-            | connect_result.s(protocol="dns_a_aaaa", url_id=endpoint.url.pk, port=0, ip_version=0)
+            | connect_result_simple.s(protocol="dns_a_aaaa", url_id=endpoint.url.pk, port=0, ip_version=0)
             | plannedscan.finish.si("verify", "dns_endpoints", endpoint.url.pk)
         )
     return group(tasks)
