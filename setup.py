@@ -48,11 +48,11 @@ def requirements(extra=None):
     """Return list of required package names from requirements.txt."""
     # strip trailing comments, and extract package name from git urls.
     if extra:
-        filename = 'requirements-' + extra + '.txt'
+        filename = 'requirements-' + extra + '.in'
     else:
-        filename = 'requirements.txt'
+        filename = 'requirements.in'
     requirements = [r.strip().split(' ', 1)[0].split('egg=', 1)[-1]
-                    for r in open(filename) if not r.startswith('#')]
+                    for r in open(filename) if not (r.startswith('#') or r.startswith('-')) ]
     return requirements
 
 
