@@ -66,7 +66,8 @@ dnspython
 netaddr
 
 # screenshots
-Pillow>=8.1.1
+# minimal version due to CVE-2021-23437
+Pillow>=8.3.2
 python-resize-image
 
 # url parsing in the database, and several other locations
