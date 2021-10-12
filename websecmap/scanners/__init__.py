@@ -444,11 +444,13 @@ SCANNERS = [
             "internet_nl_mail_starttls_tls_0rtt",
             # extra fields with api 2.0
             "internet_nl_mail_legacy_mail_non_sending_domain",
+            "internet_nl_mail_legacy_mail_sending_domain",
             "internet_nl_mail_legacy_mail_server_testable",
             "internet_nl_mail_legacy_mail_server_reachable",
             "internet_nl_mail_legacy_domain_has_mx",
             "internet_nl_mail_legacy_tls_1_3",
             "internet_nl_mail_legacy_category_ipv6",
+            "internet_nl_mail_legacy_category"
         ],
         "creates url scan types": [],
         "plannable_activities": ["scan"],
@@ -519,6 +521,7 @@ SCANNERS = [
             # extra fields added with api 2.0
             "internet_nl_web_legacy_tls_1_3",
             "internet_nl_web_legacy_category_ipv6",
+            "internet_nl_web_legacy_category"
         ],
         "creates url scan types": [],
         "plannable_activities": ["scan"],

@@ -271,7 +271,6 @@ def registering_scan_at_internet_nl(scan_id):
 
 
 def running_scan(scan_id: int):
-
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
         log.debug(f"Could not retrieve scan {scan_id}.")
@@ -286,7 +285,6 @@ def running_scan(scan_id: int):
 
 
 def continue_running_scan(scan_id: int):
-
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
         log.debug(f"Could not retrieve scan {scan_id}.")
@@ -299,7 +297,6 @@ def continue_running_scan(scan_id: int):
 
 
 def storing_scan_results(scan_id: int):
-
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
         log.debug(f"Could not retrieve scan {scan_id}.")
@@ -325,7 +322,6 @@ def processing_scan_results(scan_id: int):
 
 
 def update_state(scan_id: int, new_state: str, new_state_message: str):
-
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
         log.debug(f"Could not retrieve scan {scan_id}.")
@@ -366,7 +362,6 @@ def update_state(scan_id: int, new_state: str, new_state_message: str):
 
 
 def api_has_usable_response(response, scan_id):
-
     status_code, response_content = response
 
     if status_code == 599:
@@ -399,7 +394,6 @@ def api_has_usable_response(response, scan_id):
 
 @app.task(queue="storage")
 def get_relevant_urls(scan_id: int) -> List[str]:
-
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
         log.debug(f"Could not retrieve scan {scan_id}.")
@@ -564,7 +558,6 @@ def process_scan_results(scan_id: int):
     domains = scan.retrieved_scan_report.keys()
 
     for domain in domains:
-
         store_domain_scan_results(
             domain=domain,
             scan_data=scan.retrieved_scan_report[domain],
@@ -577,7 +570,6 @@ def process_scan_results(scan_id: int):
 
 
 def reuse_last_fields_and_set_them_to_error(endpoint_id: int):
-
     if not endpoint_id:
         return
 
@@ -696,7 +688,6 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
     # categories (ie, derived from the test results)
     # no technical details here:
     for category in scan_data["results"]["categories"].keys():
-
         # to keep APIv2 field names in line with APIv1, so we don't have to rename fields and all reports stay valid.
         scan_type_field = f"internet_nl_{scan_type}_{api_v2_categories_to_v1_categories[scan_type][category]}"
 
@@ -763,7 +754,6 @@ def add_calculation(scan_data, new_key: str, required_values: List[str]):
 
 
 def add_instant_calculation(scan_data, key, value):
-
     scan_data["results"]["calculated_results"][key] = {
         "status": value,
         "verdict": value,
@@ -775,7 +765,6 @@ def add_instant_calculation(scan_data, key, value):
 # value for this field. What will not testable not
 # not_testable < failed < warning < info < good_not_testable < good
 def lowest_value_in_results(scan_data, test_names: List[str]) -> str:
-
     if not scan_data:
         raise ValueError("No views provided. Something went wrong in the API response?")
 
@@ -903,6 +892,15 @@ def calculate_forum_standaardisatie_views_web(scan_data):
     # add custom field for the ipv6 test, so this can be labelled individually
     add_instant_calculation(
         scan_data, "web_legacy_category_ipv6", scan_data["results"]["categories"]["web_ipv6"]["status"]
+    )
+
+    # 236, add category conclusion for forum standaardisatie
+    add_calculation(
+        scan_data=scan_data,
+        new_key="web_legacy_category",
+        required_values=["web_legacy_dnssec", "web_legacy_tls_available", "web_legacy_tls_ncsc_web",
+                         "web_legacy_https_enforced", "web_legacy_hsts", "web_legacy_category_ipv6",
+                         "web_legacy_ipv6_nameserver", "web_legacy_ipv6_webserver", "tls_1_3_support"],
     )
 
     return scan_data
@@ -1113,5 +1111,17 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
         add_instant_calculation(
             scan_data, "mail_legacy_category_ipv6", scan_data["results"]["categories"]["mail_ipv6"]["status"]
         )
+
+    # 236, add category conclusion for forum standaardisatie
+    add_calculation(
+        scan_data=scan_data,
+        new_key="mail_legacy_category",
+        required_values=["mail_legacy_category_ipv6", "mail_legacy_mail_sending_domain",
+                         "mail_legacy_mail_server_testable", "mail_legacy_mail_server_reachable",
+                         "mail_legacy_domain_has_mx", "mail_legacy_tls_1_3", "mail_legacy_ipv6_mailserver",
+                         "mail_legacy_ipv6_nameserver", "mail_legacy_dane", "mail_legacy_dnssec_mx",
+                         "mail_legacy_start_tls_ncsc", "mail_legacy_start_tls", "mail_legacy_spf_policy",
+                         "mail_legacy_dmarc_policy", "mail_legacy_spf", "mail_legacy_dkim", "mail_legacy_dmarc"],
+    )
 
     return scan_data
