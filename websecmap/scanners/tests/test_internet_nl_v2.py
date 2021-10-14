@@ -476,7 +476,7 @@ def test_internet_nl_store_testresults(db):
     create_url_reports(url2)
 
     # is there a series of imports?
-    assert EndpointGenericScan.objects.all().count() == 94
+    assert EndpointGenericScan.objects.all().count() == 96
 
     # are the web scans imported
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_appsecpriv_x_xss_protection").count() == 2
@@ -800,10 +800,12 @@ def test_internet_nl_store_testresults(db):
 
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_legacy_category_ipv6").count() == 1
 
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_legacy_category").count() == 1
+
     assert EndpointGenericScan.objects.all().filter(type="nonsense").count() == 0
 
     # +1 due to adding mail_sending_domain
-    assert EndpointGenericScan.objects.all().count() == 94 + 53 + 1
+    assert EndpointGenericScan.objects.all().count() == 96 + 53 + 2
 
     create_url_reports(url1)
 

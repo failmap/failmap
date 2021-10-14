@@ -743,8 +743,8 @@ def store_test_results(endpoint_id, test_results):
         )
 
 
-def add_calculation(scan_data, new_key: str, required_values: List[str]):
-    lowest_value = lowest_value_in_results(scan_data, required_values)
+def add_calculation(scan_data, new_key: str, required_values: List[str], where: str = 'tests'):
+    lowest_value = lowest_value_in_results(scan_data, required_values, where)
 
     scan_data["results"]["calculated_results"][new_key] = {
         "status": lowest_value,
@@ -761,35 +761,36 @@ def add_instant_calculation(scan_data, key, value):
     }
 
 
+severity_order = {
+    # Failed is always the worst possible output. It overrules not tested etc.
+    # as per: https://github.com/internetstandards/Internet.nl-dashboard/issues/184
+    "failed": -10,
+    "error_in_test": -8,
+    # error counts as error in test: error_in_test is never returned from the API.
+    "error": -8,
+    "warning": 2,
+    "info": 3,
+    "good_not_tested": 4,
+    "not_applicable": 8,
+    "not_tested": 9,
+    "passed": 10,
+}
+
+
 # Todo: this will be: lowest denominator. So: failed, to good (see comparison elsewhere). The lowest is the
 # value for this field. What will not testable not
 # not_testable < failed < warning < info < good_not_testable < good
-def lowest_value_in_results(scan_data, test_names: List[str]) -> str:
+def lowest_value_in_results(scan_data, test_names: List[str], where='tests') -> str:
     if not scan_data:
         raise ValueError("No views provided. Something went wrong in the API response?")
 
     if not test_names:
         raise ValueError("No values provided. Would always result in True, which could be risky.")
 
-    severity_order = {
-        # Failed is always the worst possible output. It overrules not tested etc.
-        # as per: https://github.com/internetstandards/Internet.nl-dashboard/issues/184
-        "failed": -10,
-        "error_in_test": -8,
-        # error counts as error in test: error_in_test is never returned from the API.
-        "error": -8,
-        "warning": 2,
-        "info": 3,
-        "good_not_tested": 4,
-        "not_applicable": 8,
-        "not_tested": 9,
-        "passed": 10,
-    }
-
     lowest_test_outcome = 10
     lowest_test_status = "passed"
     for test_name in test_names:
-        current_status = scan_data["results"]["tests"][test_name]["status"]
+        current_status = scan_data["results"][where][test_name]["status"]
         # Never up the status with an unknown status. Those are ignored with the random high value of 9000.
         if severity_order.get(current_status, 9000) < lowest_test_outcome:
             lowest_test_outcome = severity_order[current_status]
@@ -900,7 +901,8 @@ def calculate_forum_standaardisatie_views_web(scan_data):
         new_key="web_legacy_category",
         required_values=["web_legacy_dnssec", "web_legacy_tls_available", "web_legacy_tls_ncsc_web",
                          "web_legacy_https_enforced", "web_legacy_hsts", "web_legacy_category_ipv6",
-                         "web_legacy_ipv6_nameserver", "web_legacy_ipv6_webserver", "tls_1_3_support"],
+                         "web_legacy_ipv6_nameserver", "web_legacy_ipv6_webserver", "web_legacy_tls_1_3"],
+        where='calculated_results'
     )
 
     return scan_data
@@ -1122,6 +1124,7 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
                          "mail_legacy_ipv6_nameserver", "mail_legacy_dane", "mail_legacy_dnssec_mx",
                          "mail_legacy_start_tls_ncsc", "mail_legacy_start_tls", "mail_legacy_spf_policy",
                          "mail_legacy_dmarc_policy", "mail_legacy_spf", "mail_legacy_dkim", "mail_legacy_dmarc"],
+        where='calculated_results'
     )
 
     return scan_data
