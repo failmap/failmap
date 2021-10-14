@@ -450,7 +450,7 @@ SCANNERS = [
             "internet_nl_mail_legacy_domain_has_mx",
             "internet_nl_mail_legacy_tls_1_3",
             "internet_nl_mail_legacy_category_ipv6",
-            "internet_nl_mail_legacy_category"
+            "internet_nl_mail_legacy_category",
         ],
         "creates url scan types": [],
         "plannable_activities": ["scan"],
@@ -521,7 +521,7 @@ SCANNERS = [
             # extra fields added with api 2.0
             "internet_nl_web_legacy_tls_1_3",
             "internet_nl_web_legacy_category_ipv6",
-            "internet_nl_web_legacy_category"
+            "internet_nl_web_legacy_category",
         ],
         "creates url scan types": [],
         "plannable_activities": ["scan"],

@@ -743,7 +743,7 @@ def store_test_results(endpoint_id, test_results):
         )
 
 
-def add_calculation(scan_data, new_key: str, required_values: List[str], where: str = 'tests'):
+def add_calculation(scan_data, new_key: str, required_values: List[str], where: str = "tests"):
     lowest_value = lowest_value_in_results(scan_data, required_values, where)
 
     scan_data["results"]["calculated_results"][new_key] = {
@@ -780,7 +780,7 @@ severity_order = {
 # Todo: this will be: lowest denominator. So: failed, to good (see comparison elsewhere). The lowest is the
 # value for this field. What will not testable not
 # not_testable < failed < warning < info < good_not_testable < good
-def lowest_value_in_results(scan_data, test_names: List[str], where='tests') -> str:
+def lowest_value_in_results(scan_data, test_names: List[str], where="tests") -> str:
     if not scan_data:
         raise ValueError("No views provided. Something went wrong in the API response?")
 
@@ -899,10 +899,18 @@ def calculate_forum_standaardisatie_views_web(scan_data):
     add_calculation(
         scan_data=scan_data,
         new_key="web_legacy_category",
-        required_values=["web_legacy_dnssec", "web_legacy_tls_available", "web_legacy_tls_ncsc_web",
-                         "web_legacy_https_enforced", "web_legacy_hsts", "web_legacy_category_ipv6",
-                         "web_legacy_ipv6_nameserver", "web_legacy_ipv6_webserver", "web_legacy_tls_1_3"],
-        where='calculated_results'
+        required_values=[
+            "web_legacy_dnssec",
+            "web_legacy_tls_available",
+            "web_legacy_tls_ncsc_web",
+            "web_legacy_https_enforced",
+            "web_legacy_hsts",
+            "web_legacy_category_ipv6",
+            "web_legacy_ipv6_nameserver",
+            "web_legacy_ipv6_webserver",
+            "web_legacy_tls_1_3",
+        ],
+        where="calculated_results",
     )
 
     return scan_data
@@ -1118,13 +1126,26 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     add_calculation(
         scan_data=scan_data,
         new_key="mail_legacy_category",
-        required_values=["mail_legacy_category_ipv6", "mail_legacy_mail_sending_domain",
-                         "mail_legacy_mail_server_testable", "mail_legacy_mail_server_reachable",
-                         "mail_legacy_domain_has_mx", "mail_legacy_tls_1_3", "mail_legacy_ipv6_mailserver",
-                         "mail_legacy_ipv6_nameserver", "mail_legacy_dane", "mail_legacy_dnssec_mx",
-                         "mail_legacy_start_tls_ncsc", "mail_legacy_start_tls", "mail_legacy_spf_policy",
-                         "mail_legacy_dmarc_policy", "mail_legacy_spf", "mail_legacy_dkim", "mail_legacy_dmarc"],
-        where='calculated_results'
+        required_values=[
+            "mail_legacy_category_ipv6",
+            "mail_legacy_mail_sending_domain",
+            "mail_legacy_mail_server_testable",
+            "mail_legacy_mail_server_reachable",
+            "mail_legacy_domain_has_mx",
+            "mail_legacy_tls_1_3",
+            "mail_legacy_ipv6_mailserver",
+            "mail_legacy_ipv6_nameserver",
+            "mail_legacy_dane",
+            "mail_legacy_dnssec_mx",
+            "mail_legacy_start_tls_ncsc",
+            "mail_legacy_start_tls",
+            "mail_legacy_spf_policy",
+            "mail_legacy_dmarc_policy",
+            "mail_legacy_spf",
+            "mail_legacy_dkim",
+            "mail_legacy_dmarc",
+        ],
+        where="calculated_results",
     )
 
     return scan_data
