@@ -354,7 +354,7 @@ def update_state(scan_id: int, new_state: str, new_state_message: str):
     statelog.scan = scan
     statelog.at_when = datetime.now(pytz.utc)
     statelog.state = new_state
-    statelog.state_message = new_state_message
+    statelog.state_message = new_state_message[0:200]
     statelog.last_state_check = datetime.now(pytz.utc)
     statelog.save()
 

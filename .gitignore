@@ -45,3 +45,6 @@ venv
 /dataset_*.json
 /websecmap_test_dataset*
 /websecmap_dataset*
+
+unbound
+websecmap/checks
