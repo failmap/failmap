@@ -251,41 +251,43 @@ def get_map_data(
         # but it will also mean an enormous increase of data sent to the client.)
         # It's actually reasonably fast.
         high, medium, low, ok = 0, 0, 0, 0
+        severity = "unknown"
 
         calculation = json.loads(reports[i[6]])
 
-        for url in calculation["organization"]["urls"]:
-            for url_rating in url["ratings"]:
-                if (
-                    url_rating["type"] in desired_url_scans
-                    and url_rating.get("comply_or_explain_valid_at_time_of_report", False) is False
-                ):
-                    high += url_rating["high"]
-                    medium += url_rating["medium"]
-                    low += url_rating["low"]
-                    ok += url_rating["ok"]
-
-            # it's possible the url doesn't have ratings.
-            for endpoint in url["endpoints"]:
-                for endpoint_rating in endpoint["ratings"]:
+        if calculation:
+            for url in calculation["organization"]["urls"]:
+                for url_rating in url["ratings"]:
                     if (
-                        endpoint_rating["type"] in desired_endpoint_scans
-                        and endpoint_rating.get("comply_or_explain_valid_at_time_of_report", False) is False
+                        url_rating["type"] in desired_url_scans
+                        and url_rating.get("comply_or_explain_valid_at_time_of_report", False) is False
                     ):
-                        high += endpoint_rating["high"]
-                        medium += endpoint_rating["medium"]
-                        low += endpoint_rating["low"]
-                        ok += endpoint_rating["ok"]
+                        high += url_rating["high"]
+                        medium += url_rating["medium"]
+                        low += url_rating["low"]
+                        ok += url_rating["ok"]
 
-        # figure out if red, orange or green:
-        # #162, only make things red if there is a critical issue.
-        # removed json parsing of the calculation. This saves time.
-        # no contents, no endpoint ever mentioned in any url (which is a standard attribute)
-        if "total_urls" not in calculation["organization"] or not calculation["organization"]["total_urls"]:
-            severity = "unknown"
-        else:
-            # things have to be OK in order to be colored. If it's all empty... then it's not OK.
-            severity = "high" if high else "medium" if medium else "low" if low else "good" if ok else "unknown"
+                # it's possible the url doesn't have ratings.
+                for endpoint in url["endpoints"]:
+                    for endpoint_rating in endpoint["ratings"]:
+                        if (
+                            endpoint_rating["type"] in desired_endpoint_scans
+                            and endpoint_rating.get("comply_or_explain_valid_at_time_of_report", False) is False
+                        ):
+                            high += endpoint_rating["high"]
+                            medium += endpoint_rating["medium"]
+                            low += endpoint_rating["low"]
+                            ok += endpoint_rating["ok"]
+
+            # figure out if red, orange or green:
+            # #162, only make things red if there is a critical issue.
+            # removed json parsing of the calculation. This saves time.
+            # no contents, no endpoint ever mentioned in any url (which is a standard attribute)
+            if "total_urls" not in calculation["organization"] or not calculation["organization"]["total_urls"]:
+                severity = "unknown"
+            else:
+                # things have to be OK in order to be colored. If it's all empty... then it's not OK.
+                severity = "high" if high else "medium" if medium else "low" if low else "good" if ok else "unknown"
 
         dataset = {
             "type": "Feature",
@@ -371,6 +373,9 @@ def extract_domains(calculation):
     will become a set of words, like this:
     data websecmap example mysite testsite lan anothersite
     """
+
+    if not calculation:
+        return ""
 
     words = []
 
