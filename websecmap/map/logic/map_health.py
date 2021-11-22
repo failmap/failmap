@@ -113,6 +113,10 @@ def split_ratings_between_good_and_bad(
     a_while_ago = now - timedelta(hours=hours)
     infractions = []
     good = []
+
+    if not report.calculation:
+        return [], []
+
     for url in report.calculation["organization"]["urls"]:
         # endpoint ratings
         for endpoint in url["endpoints"]:

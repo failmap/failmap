@@ -790,6 +790,11 @@ def lowest_value_in_results(scan_data, test_names: List[str], where="tests") -> 
     lowest_test_outcome = 10
     lowest_test_status = "passed"
     for test_name in test_names:
+
+        # Might be the case that not all tests are in the results, as for the ipv6 version of internet.nl
+        if test_name not in scan_data["results"][where]:
+            continue
+
         current_status = scan_data["results"][where][test_name]["status"]
         # Never up the status with an unknown status. Those are ignored with the random high value of 9000.
         if severity_order.get(current_status, 9000) < lowest_test_outcome:
@@ -817,49 +822,52 @@ def calculate_forum_standaardisatie_views_web(scan_data):
     # TLS_NCSC
     # v2: web_https_tls_* 10 and web_https_cert_* 4, not including: web_https_http_available
     # #205 -> if starttls_failed failed, then dane test is not performed.
-    if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
-        add_instant_calculation(scan_data, "web_legacy_tls_ncsc_web", "failed")
-    elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
-        add_instant_calculation(scan_data, "web_legacy_tls_ncsc_web", "error")
-    else:
-        add_calculation(
-            scan_data=scan_data,
-            new_key="web_legacy_tls_ncsc_web",
-            required_values=[
-                "web_https_tls_keyexchange",
-                "web_https_tls_compress",
-                "web_https_tls_secreneg",
-                "web_https_tls_ciphers",
-                "web_https_tls_clientreneg",
-                "web_https_tls_version",
-                "web_https_tls_cipherorder",
-                "web_https_tls_0rtt",
-                "web_https_tls_ocsp",
-                "web_https_tls_keyexchangehash",
-                "web_https_cert_sig",
-                "web_https_cert_pubkey",
-                "web_https_cert_chain",
-                "web_https_cert_domain",
-            ],
-        )
+    if "web_https_http_available" in scan_data["results"]["tests"]:
+        if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
+            add_instant_calculation(scan_data, "web_legacy_tls_ncsc_web", "failed")
+        elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
+            add_instant_calculation(scan_data, "web_legacy_tls_ncsc_web", "error")
+        else:
+            add_calculation(
+                scan_data=scan_data,
+                new_key="web_legacy_tls_ncsc_web",
+                required_values=[
+                    "web_https_tls_keyexchange",
+                    "web_https_tls_compress",
+                    "web_https_tls_secreneg",
+                    "web_https_tls_ciphers",
+                    "web_https_tls_clientreneg",
+                    "web_https_tls_version",
+                    "web_https_tls_cipherorder",
+                    "web_https_tls_0rtt",
+                    "web_https_tls_ocsp",
+                    "web_https_tls_keyexchangehash",
+                    "web_https_cert_sig",
+                    "web_https_cert_pubkey",
+                    "web_https_cert_chain",
+                    "web_https_cert_domain",
+                ],
+            )
 
     # HTTPS Redirect
-    if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
-        add_instant_calculation(scan_data, "web_legacy_https_enforced", "failed")
-    elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
-        add_instant_calculation(scan_data, "web_legacy_https_enforced", "error")
-    else:
-        add_calculation(
-            scan_data=scan_data, new_key="web_legacy_https_enforced", required_values=["web_https_http_redirect"]
-        )
+    if "web_https_http_available" in scan_data["results"]["tests"]:
+        if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
+            add_instant_calculation(scan_data, "web_legacy_https_enforced", "failed")
+        elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
+            add_instant_calculation(scan_data, "web_legacy_https_enforced", "error")
+        else:
+            add_calculation(
+                scan_data=scan_data, new_key="web_legacy_https_enforced", required_values=["web_https_http_redirect"]
+            )
 
     # HSTS
-    if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
-        add_instant_calculation(scan_data, "web_legacy_hsts", "failed")
-    elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
-        add_instant_calculation(scan_data, "web_legacy_hsts", "error")
-    else:
-        add_calculation(scan_data=scan_data, new_key="web_legacy_hsts", required_values=["web_https_http_hsts"])
+    if "web_https_http_available" in scan_data["results"]["tests"]:
+        if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
+            add_instant_calculation(scan_data, "web_legacy_hsts", "failed")
+        elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
+            add_instant_calculation(scan_data, "web_legacy_hsts", "error")
+        else:
+            add_calculation(scan_data=scan_data, new_key="web_legacy_hsts", required_values=["web_https_http_hsts"])
 
     # Not in forum standaardisatie magazine, but used internally
     add_calculation(
