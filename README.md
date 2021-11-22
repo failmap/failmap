@@ -217,6 +217,12 @@ set LDFLAGS -L/usr/local/opt/openssl/lib
 ```
 
 
+FIsh shell, mac, archx86 ld: library not found for -lzstd, you need the x86 brew:
+```bash
+arch -x86_64 /usr/local/bin/brew reinstall zstd
+set -x LDFLAGS -L/usr/local/Homebrew/Cellar/zstd/
+```
+
 If you get issues like these:
 OSError: dlopen(/usr/local/lib/libgdal.dylib, 6): Library not loaded: /usr/local/opt/openssl/lib/libssl.1.0.0.dylib
   Referenced from: /usr/local/opt/libpq/lib/libpq.5.dylib
