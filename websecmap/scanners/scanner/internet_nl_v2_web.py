@@ -62,7 +62,9 @@ def compose_scan_task(urls):
     if not urls:
         return group()
 
-    return group([initialize_scan.si("web", urls) | plannedscan.finish_multiple.si("scan", "internet_nl_web", urls)])
+    url_ids = [url.id for url in urls]
+
+    return group([initialize_scan.si("web", url_ids) | plannedscan.finish_multiple.si("scan", "internet_nl_web", url_ids)])
 
 
 def compose_manual_scan_task(
