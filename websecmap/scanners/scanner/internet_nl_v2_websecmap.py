@@ -708,8 +708,10 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
     scan_data["results"]["calculated_results"] = {}
     if scan_type == "web":
         scan_data = calculate_forum_standaardisatie_views_web(scan_data)
+        calculate_ipv6_views_web(scan_data)
     elif scan_type == "mail_dashboard":
         scan_data = calculate_forum_standaardisatie_views_mail(scan_data)
+        calculate_ipv6_views_mail(scan_data)
 
     store_test_results(endpoint.pk, scan_data["results"]["calculated_results"])
 
@@ -922,6 +924,129 @@ def calculate_forum_standaardisatie_views_web(scan_data):
     )
 
     return scan_data
+
+
+def calculate_ipv6_views_web(scan_data):
+    """
+    Amalgamation of ipv6 siphoned into several metrics:
+
+    Input are the following internet.nl metrics:
+    1: IPv6 address for name servers: "internet_nl_web_ipv6_ns_address",
+    2: IPv6 reachability of name servers: "internet_nl_web_ipv6_ns_reach",
+    3: IPv6 address for web server: "internet_nl_web_ipv6_ws_address",
+    4: IPv6 reachability of web server: "internet_nl_web_ipv6_ws_reach",
+    5: Same website on IPv6 and IPv4: "internet_nl_web_ipv6_ws_similar",
+
+    Green = IPv6 Ready = 1, 2, 3, 4, 5
+    Orange = IPv6 Proof = 3, 4, 5
+    Red = IPv6 Incompatible = Any other combo
+
+    When something is IPv6 ready, it cannot be IPv6 proof: there is only one grade possible.
+    """
+
+    # output
+    web_ipv6: str = "incompatible"  # ready, proof, incompatible
+    web_ipv6_ready: bool = False  # boolean metric for green, so the map can only show green
+    web_ipv6_proof: bool = False  # boolean metric for orange, so the map can only show orange
+    web_ipv6_incompatible: bool = False  # boolean metric for red, so the map can only show red
+
+    # simplify the calculation here, so you don't have to test out the entire scan_data object:
+    ns_address = scan_data["results"]["tests"]["web_ipv6_ns_address"]["status"]
+    ns_reach = scan_data["results"]["tests"]["web_ipv6_ns_reach"]["status"]
+    ws_address = scan_data["results"]["tests"]["web_ipv6_ws_address"]["status"]
+    ws_reach = scan_data["results"]["tests"]["web_ipv6_ws_reach"]["status"]
+    ws_similar = scan_data["results"]["tests"]["web_ipv6_ws_similar"]["status"]
+
+    # Calculations:
+
+    # Ready means 5x passed verdict
+    if 5 == [ns_address, ns_reach, ws_address, ws_reach, ws_similar].count("passed"):
+        web_ipv6 = "ready"
+        web_ipv6_ready = True
+        attach_web_scores(scan_data, "web", web_ipv6, web_ipv6_ready, web_ipv6_proof, web_ipv6_incompatible)
+        return
+
+    # Proof means only 3x passed verdict on 3 to 5
+    if 3 == [ws_address, ws_reach, ws_similar].count("passed"):
+        web_ipv6 = "proof"
+        web_ipv6_proof = True
+        attach_web_scores(scan_data, "web", web_ipv6, web_ipv6_ready, web_ipv6_proof, web_ipv6_incompatible)
+        return
+
+    # Any other scenario means being incompatible:
+    web_ipv6 = "incompatible"
+    web_ipv6_incompatible = True
+    attach_web_scores(scan_data, "web", web_ipv6, web_ipv6_ready, web_ipv6_proof, web_ipv6_incompatible)
+
+
+def attach_web_scores(
+    scan_data,
+    web_or_mail: str = "web",
+    web_ipv6: str = "incompatible",
+    web_ipv6_ready: bool = False,
+    web_ipv6_proof: bool = False,
+    web_ipv6_incompatible: bool = False,
+):
+
+    if "calculated_results" not in scan_data["results"]:
+        scan_data["results"] = {"calculated_results": {}}
+
+    cal = scan_data["results"]["calculated_results"]
+
+    inc = web_ipv6_incompatible
+    cal[f"v6_{web_or_mail}_ipv6"] = {"status": web_ipv6, "verdict": web_ipv6, "technical_details": []}
+    cal[f"v6_{web_or_mail}_ipv6_ready"] = {"status": web_ipv6_ready, "verdict": web_ipv6_ready, "technical_details": []}
+    cal[f"v6_{web_or_mail}_ipv6_proof"] = {"status": web_ipv6_proof, "verdict": web_ipv6_proof, "technical_details": []}
+    cal[f"v6_{web_or_mail}_ipv6_incompatible"] = {"status": inc, "verdict": inc, "technical_details": []}
+
+
+def calculate_ipv6_views_mail(scan_data):
+    """
+    Amalgamation of ipv6 siphoned into several metrics:
+
+    Input are the following internet.nl metrics:
+    1: IPv6 address for name servers: "internet_nl_mail_ipv6_ns_address",
+    2: IPv6 reachability of name servers: "internet_nl_mail_ipv6_ns_reach",
+    3: IPv6 address for mail server: "internet_nl_mail_ipv6_ws_address",
+    4: IPv6 reachability of mail server: "internet_nl_mail_ipv6_ws_reach",
+
+    Green = IPv6 Ready = 1, 2, 3, 4
+    Orange = IPv6 Proof = 3, 4
+    Red = IPv6 Incompatible = Any other combo
+
+    When something is IPv6 ready, it cannot be IPv6 proof: there is only one grade possible.
+    """
+    # output
+    mail_ipv6: str = "incompatible"  # ready, proof, incompatible
+    mail_ipv6_ready: bool = False  # boolean metric for green, so the map can only show green
+    mail_ipv6_proof: bool = False  # boolean metric for orange, so the map can only show orange
+    mail_ipv6_incompatible: bool = False  # boolean metric for red, so the map can only show red
+
+    # simplify the calculation here, so you don't have to test out the entire scan_data object:
+    ns_address = scan_data["results"]["tests"]["mail_ipv6_ns_address"]["status"]
+    ns_reach = scan_data["results"]["tests"]["mail_ipv6_ns_reach"]["status"]
+    mx_address = scan_data["results"]["tests"]["mail_ipv6_mx_address"]["status"]
+    mx_reach = scan_data["results"]["tests"]["mail_ipv6_mx_reach"]["status"]
+
+    # Calculations:
+    # Ready means 4x passed verdict
+    if 4 == [ns_address, ns_reach, mx_address, mx_reach].count("passed"):
+        mail_ipv6 = "ready"
+        mail_ipv6_ready = True
+        attach_web_scores(scan_data, "mail", mail_ipv6, mail_ipv6_ready, mail_ipv6_proof, mail_ipv6_incompatible)
+        return
+
+    # Proof means only 2 passed verdict on 3 and 4
+    if 2 == [mx_address, mx_reach].count("passed"):
+        mail_ipv6 = "proof"
+        mail_ipv6_proof = True
+        attach_web_scores(scan_data, "mail", mail_ipv6, mail_ipv6_ready, mail_ipv6_proof, mail_ipv6_incompatible)
+        return
+
+    # Any other scenario means being incompatible:
+    mail_ipv6 = "incompatible"
+    mail_ipv6_incompatible = True
+    attach_web_scores(scan_data, "mail", mail_ipv6, mail_ipv6_ready, mail_ipv6_proof, mail_ipv6_incompatible)
 
 
 def calculate_forum_standaardisatie_views_mail(scan_data):

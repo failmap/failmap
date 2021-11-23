@@ -305,6 +305,46 @@ def internet_nl_generic_boolean_value(scan: Union[EndpointGenericScan, UrlGeneri
     return internet_nl_requirement_tilde_value_format(scan)
 
 
+def true_means_high(scan: EndpointGenericScan):
+    high, medium, low = 0, 0, 0
+    if scan.rating == "True":
+        high = 1
+    return standard_calculation(scan, "", high, medium, low)
+
+
+def true_means_medium(scan: EndpointGenericScan):
+    high, medium, low = 0, 0, 0
+    if scan.rating == "True":
+        medium = 1
+    return standard_calculation(scan, "", high, medium, low)
+
+
+def true_means_low(scan: EndpointGenericScan):
+    high, medium, low = 0, 0, 0
+    if scan.rating == "True":
+        low = 1
+    return standard_calculation(scan, "", high, medium, low)
+
+
+def true_means_good(scan: EndpointGenericScan):
+    high, medium, low = 0, 0, 0
+    return standard_calculation(scan, "", high, medium, low)
+
+
+def ipv6_grading(scan: EndpointGenericScan):
+    high, medium, low = 0, 0, 0
+
+    # "ready" is good :)
+
+    if scan.rating == "proof":
+        medium = 1
+
+    if scan.rating == "incompatible":
+        high = 1
+
+    return standard_calculation(scan, "", high, medium, low)
+
+
 def change_internet_nl_severity_to_websecmap_severity(
     scan: Union[EndpointGenericScan, UrlGenericScan], original_requirement_level
 ):
@@ -668,6 +708,15 @@ calculation_methods = {
     # 236
     "internet_nl_mail_legacy_category": internet_nl_requirement_tilde_value_format,
     "internet_nl_web_legacy_category": internet_nl_requirement_tilde_value_format,
+    # v6 ratings
+    "internet_nl_v6_web_ipv6": ipv6_grading,
+    "internet_nl_v6_web_ipv6_ready": true_means_good,
+    "internet_nl_v6_web_ipv6_proof": true_means_medium,
+    "internet_nl_v6_web_ipv6_incompatible": true_means_high,
+    "internet_nl_v6_mail_ipv6": ipv6_grading,
+    "internet_nl_v6_mail_ipv6_ready": true_means_good,
+    "internet_nl_v6_mail_ipv6_proof": true_means_medium,
+    "internet_nl_v6_mail_ipv6_incompatible": true_means_high,
 }
 
 

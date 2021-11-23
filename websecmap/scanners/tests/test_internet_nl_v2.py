@@ -51,7 +51,6 @@ def test_reuse_last_fields_and_set_them_to_error(db):
 
 
 def test_internet_nl_logging(db):
-
     # todo: make sure that never an empty list is added in normal situations?
     scan = initialize_scan("web", [])
     last = InternetNLV2StateLog.objects.all().last()
@@ -476,7 +475,7 @@ def test_internet_nl_store_testresults(db):
     create_url_reports(url2)
 
     # is there a series of imports?
-    assert EndpointGenericScan.objects.all().count() == 96
+    assert EndpointGenericScan.objects.all().count() == 104
 
     # are the web scans imported
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_appsecpriv_x_xss_protection").count() == 2
@@ -494,6 +493,11 @@ def test_internet_nl_store_testresults(db):
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_keyexchangehash").count() == 2
 
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_legacy_tls_1_3").count() == 2
+
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_v6_web_ipv6").count() == 2
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_v6_web_ipv6_ready").count() == 2
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_v6_web_ipv6_proof").count() == 2
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_v6_web_ipv6_incompatible").count() == 2
 
     scan_data = test_results["lyncdiscover.vng.nl"]
 
@@ -792,20 +796,28 @@ def test_internet_nl_store_testresults(db):
 
     process_scan_results(scan.pk)
 
-    assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_starttls_dane_rollover").count() == 1
-
-    assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_legacy_tls_1_3").count() == 1
-
-    assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_legacy_start_tls_ncsc").count() == 1
-
-    assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_legacy_category_ipv6").count() == 1
-
-    assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_legacy_category").count() == 1
-
     assert EndpointGenericScan.objects.all().filter(type="nonsense").count() == 0
 
+    should_be_present = [
+        "internet_nl_mail_starttls_dane_rollover",
+        "internet_nl_mail_legacy_tls_1_3",
+        "internet_nl_mail_legacy_start_tls_ncsc",
+        "internet_nl_mail_legacy_category_ipv6",
+        "internet_nl_mail_legacy_category",
+        "internet_nl_v6_mail_ipv6",
+        "internet_nl_v6_mail_ipv6_ready",
+        "internet_nl_v6_mail_ipv6_proof",
+        "internet_nl_v6_mail_ipv6_incompatible",
+    ]
+
+    for field in should_be_present:
+        log.debug(f"Checking for presence of {field}.")
+        assert EndpointGenericScan.objects.all().filter(type=field).count() == 1
+
     # +1 due to adding mail_sending_domain
-    assert EndpointGenericScan.objects.all().count() == 96 + 53 + 2
+    # + 8 for 2x ipv6 web results
+    # + 4 for 1x ipv6 mail results
+    assert EndpointGenericScan.objects.all().count() == 96 + 53 + 2 + 8 + 4
 
     create_url_reports(url1)
 
