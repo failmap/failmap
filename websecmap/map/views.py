@@ -269,6 +269,14 @@ def config(request):
             "GITTER_CHAT_ENABLE",
             "GITTER_CHAT_CHANNEL",
             "ANNOUNCEMENT",
+            "SHOW_INTERNET_NL_V6_WEB_IPV6",
+            "SHOW_INTERNET_NL_V6_WEB_IPV6_READY",
+            "SHOW_INTERNET_NL_V6_WEB_IPV6_PROOF",
+            "SHOW_INTERNET_NL_V6_WEB_IPV6_INCOMPATIBLE",
+            "SHOW_INTERNET_NL_V6_MAIL_IPV6",
+            "SHOW_INTERNET_NL_V6_MAIL_IPV6_READY",
+            "SHOW_INTERNET_NL_V6_MAIL_IPV6_PROOF",
+            "SHOW_INTERNET_NL_V6_MAIL_IPV6_INCOMPATIBLE",
         ]
     )
 
@@ -308,6 +316,15 @@ def config(request):
                 "internet_nl_mail_auth_spf_exist": configuration["SHOW_INTERNET_NL_MAIL_AUTH_SPF_EXIST"],
                 "internet_nl_mail_auth_dkim_exist": configuration["SHOW_INTERNET_NL_MAIL_AUTH_DKIM_EXIST"],
                 "internet_nl_mail_auth_dmarc_exist": configuration["SHOW_INTERNET_NL_MAIL_AUTH_DMARC_EXIST"],
+
+                "internet_nl_v6_web_ipv6": configuration["SHOW_INTERNET_NL_V6_WEB_IPV6"],
+                "internet_nl_v6_web_ipv6_ready": configuration["SHOW_INTERNET_NL_V6_WEB_IPV6_READY"],
+                "internet_nl_v6_web_ipv6_proof": configuration["SHOW_INTERNET_NL_V6_WEB_IPV6_PROOF"],
+                "internet_nl_v6_web_ipv6_incompatible": configuration["SHOW_INTERNET_NL_V6_WEB_IPV6_INCOMPATIBLE"],
+                "internet_nl_v6_mail_ipv6": configuration["SHOW_INTERNET_NL_V6_MAIL_IPV6"],
+                "internet_nl_v6_mail_ipv6_ready": configuration["SHOW_INTERNET_NL_V6_MAIL_IPV6_READY"],
+                "internet_nl_v6_mail_ipv6_proof": configuration["SHOW_INTERNET_NL_V6_MAIL_IPV6_PROOF"],
+                "internet_nl_v6_mail_ipv6_incompatible": configuration["SHOW_INTERNET_NL_V6_MAIL_IPV6_INCOMPATIBLE"],
             },
         },
         "announcement": configuration["ANNOUNCEMENT"],
