@@ -96,7 +96,7 @@ def create_api_settings(scan: int) -> Dict[str, Any]:
 
 
 @app.task(queue="storage")
-def initialize_scan(scan_type: str, domains: List[int]):
+def initialize_scan(scan_type: str, domains: List[int]) -> int:
     scan = InternetNLV2Scan()
     scan.type = scan_type
     scan.save()
@@ -109,14 +109,14 @@ def initialize_scan(scan_type: str, domains: List[int]):
             f"Too many domains: {len(domains)} is more than {max_urls}. Not registering. Try "
             f"again with fewer domains or change the maximum accordingly.",
         )
-        return scan
+        return scan.id
 
     # many to many requires an object to exist.
     scan.subject_urls.set(Url.objects.all().filter(id__in=domains))
 
     update_state(scan.pk, "requested", "requested a scan to be performed on internet.nl api")
 
-    return scan
+    return scan.id
 
 
 @app.task(queue="storage")
