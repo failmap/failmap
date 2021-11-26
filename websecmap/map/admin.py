@@ -54,7 +54,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         tasks = []
 
         for region in queryset:
-            organization_filter = {"country": region.country, "type": region.organization_type.pk}
+            organization_filter = {"country": str(region.country), "type": region.organization_type.pk}
 
             # you can't add tasks for reporting, as the data is not in the database to create the tasks yet.
             tasks.append(
@@ -82,7 +82,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         tasks = []
 
         for region in queryset:
-            organization_filter = {"country": region.country, "type": region.organization_type.pk}
+            organization_filter = {"country": str(region.country), "type": region.organization_type.pk}
             tasks.append(
                 start_import.si(region.pk)
                 | update_coordinates.si([str(region.country)], [region.organization_type.name])

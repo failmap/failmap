@@ -343,7 +343,10 @@ def create_timeline(url: Url):
 
     :return:
     """
-    moments, happenings = significant_moments(urls=[url], reported_scan_types=get_allowed_to_report())
+    scan_types = get_allowed_to_report()
+    log.debug("Report includes the following scan types: %s" % scan_types)
+
+    moments, happenings = significant_moments(urls=[url], reported_scan_types=scan_types)
 
     timeline = {}
 

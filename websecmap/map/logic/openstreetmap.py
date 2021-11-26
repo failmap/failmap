@@ -39,6 +39,51 @@ Todo: Possibility to remove water:
 https://stackoverflow.com/questions/25297811/how-can-i-remove-water-from-openstreetmap-ways
 https://gis.stackexchange.com/questions/157842/how-to-get-landmass-polygons-for-bounding-box-in-overpass-api/157943
 https://stackoverflow.com/questions/41723087/get-administrative-borders-with-overpass-ql
+
+
+A feature from:
+http://www.overpass-api.de/api/interpreter
+
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+      [
+        [
+          [
+            7.091445304,
+            53.256632044
+          ],
+          [
+            7.091445304,
+            53.256632044
+          ]
+        ]
+      ]
+    ]
+  },
+  "properties": {
+    "osm_id": -12118634,
+    "boundary": "administrative",
+    "admin_level": 8,
+    "parents": "-47826,-47796,-2323309",
+    "name": "Eemsdelta",
+    "local_name": "Eemsdelta",
+    "name_en": null,
+    "all_tags": {
+      "name": "Eemsdelta",
+      "boundary": "administrative",
+      "way_area": "0.0490848",
+      "wikidata": "Q97055892",
+      "wikipedia": "nl:Eemsdelta",
+      "admin_level": "8",
+      "authoritative": "yes",
+      "ref:gemeentecode": "1979"
+    }
+  }
+}
+
 """
 
 
@@ -240,19 +285,6 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
     """
     Handles the storing / administration of coordinates in failmap using the stacking pattern.
 
-    "properties": {
-                "@id": "relation/47394",
-                "admin_level": "8",
-                "authoritative": "yes",
-                "boundary": "administrative",
-                "name": "Heemstede",
-                "ref:gemeentecode": "397",
-                "source": "dataportal",
-                "type": "boundary",
-                "wikidata": "Q9928",
-                "wikipedia": "nl:Heemstede (Noord-Holland)"
-              },
-
     Coordinates: [[[x,y], [a,b]]]
     """
 
@@ -271,12 +303,21 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
 
     # A check on country code is performed to make sure no 'outside of country' websites are loaded and connected
     # to an organization.
-    if "wikidata" in properties:
-        iso3316_2_country_code = get_property_from_code(properties["wikidata"], ISO3316_2_COUNTRY_CODE)
+    wikidata_code = ""
+    wikipedia_code = ""
+
+    if "wikipedia" in properties.get("all_tags", []):
+        wikipedia_code = properties["all_tags"]["wikipedia"]
+
+    if "wikidata" in properties.get("all_tags", []):
+        wikidata_code = properties["all_tags"]["wikidata"]
+
+    if wikidata_code:
+        iso3316_2_country_code = get_property_from_code(wikidata_code, ISO3316_2_COUNTRY_CODE)
 
         # some regions are marked by their subdivision code. This is LU-... The first two letters are the country code.
         if not iso3316_2_country_code:
-            iso3316_2_country_code = get_property_from_code(properties["wikidata"], ISO3316_2_COUNTY_SUBDIVISION_CODE)
+            iso3316_2_country_code = get_property_from_code(wikidata_code, ISO3316_2_COUNTY_SUBDIVISION_CODE)
             if iso3316_2_country_code:
                 iso3316_2_country_code = iso3316_2_country_code[0:2]
 
@@ -299,8 +340,8 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
         type=OrganizationType.objects.all().filter(name=organization_type).first(),
         country=country,
         created_on=when if when else datetime.now(pytz.utc),
-        wikidata=properties["wikidata"] if "wikidata" in properties else "",
-        wikipedia=properties["wikipedia"] if "wikipedia" in properties else "",
+        wikidata=wikidata_code,
+        wikipedia=wikipedia_code,
     )
     new_organization.save()  # has to be done in a separate call. can't append .save() to the organization object.
     log.info(f"Saved new organization: {new_organization}")
@@ -316,8 +357,8 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
     log.info(f"Saved new coordinate: {new_coordinate}")
 
     # try to find official urls for this organization, as it's empty now. All those will then be onboarded and scanned.
-    if "wikidata" in properties:
-        add_official_websites(new_organization, properties["wikidata"])
+    if wikidata_code:
+        add_official_websites(new_organization, wikidata_code)
 
 
 def store_updates(feature: Dict, country: str = "NL", organization_type: str = "municipality", when=None):
@@ -326,20 +367,6 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
 
     """
     Handles the storing / administration of coordinates in failmap using the stacking pattern.
-
-    "properties": {
-                "@id": "relation/47394",
-                "admin_level": "8",
-                "authoritative": "yes",
-                "boundary": "administrative",
-                "name": "Heemstede",
-                "ref:gemeentecode": "397",
-                "source": "dataportal",
-                "type": "boundary",
-                "wikidata": "Q9928",
-                "wikipedia": "nl:Heemstede (Noord-Holland)"
-              },
-
     Coordinates: [[[x,y], [a,b]]]
     """
     # check if organization is part of the database
@@ -349,8 +376,17 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
     if not matching_organization:
         return
 
-    if "wikidata" in properties:
-        add_official_websites(matching_organization, properties["wikidata"])
+    wikidata_code = ""
+    wikipedia_code = ""
+
+    if "wikipedia" in properties.get("all_tags", []):
+        wikipedia_code = properties["all_tags"]["wikipedia"]
+
+    if "wikidata" in properties.get("all_tags", []):
+        wikidata_code = properties["all_tags"]["wikidata"]
+
+    if wikidata_code:
+        add_official_websites(matching_organization, wikidata_code)
 
     if not when:
         old_coordinate = Coordinate.objects.filter(organization=matching_organization, is_dead=False)
@@ -383,9 +419,9 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
         old_coord.save()
 
     # Update the wikipedia references, given we have them now.
-    if "wikidata" in coordinates or "wikipedia" in coordinates:
-        matching_organization.wikidata = (properties["wikidata"] if "wikidata" in properties else "",)
-        matching_organization.wikipedia = (properties["wikipedia"] if "wikipedia" in properties else "",)
+    if wikidata_code or wikipedia_code:
+        matching_organization.wikidata = wikidata_code
+        matching_organization.wikipedia = wikipedia_code
         matching_organization.save()
 
     Coordinate(
@@ -514,7 +550,7 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
 
     # todo: probably db changes over time.
     url = (
-        f"https://osm-boundaries.com/Download/Submit"
+        f"http://osm-boundaries.com/Download/Submit"
         f"?apiKey={config.WAMBACHERS_OSM_CLIKEY}"
         f"&db=osm20210104&"
         f"&osmIds={country_to_osm_number(country)}"
@@ -528,7 +564,7 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
     )
 
     # get's a zip file and extract the content. The contents is the result.
-    response = requests.get(url, stream=True, timeout=(1200, 1200))
+    response = requests.get(url, stream=True, timeout=(1200, 1200), verify=False)
     response.raise_for_status()
 
     # show a nice progress bar when downloading
@@ -830,6 +866,7 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
         data={"data": query, "submit": "Query"},
         stream=True,
         timeout=(1200, 1200),
+        verify=False,
     )
 
     response.raise_for_status()

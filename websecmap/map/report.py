@@ -11,6 +11,7 @@ from celery import group
 from deepdiff import DeepDiff
 from django.db.models import Count
 
+from websecmap.app.constance import get_bulk_values_starting_with
 from websecmap.celery import Task, app
 from websecmap.map.logic.map import get_map_data, get_reports_by_ids
 from websecmap.map.logic.map_health import update_map_health_reports
@@ -31,30 +32,21 @@ from websecmap.scanners.scanner.__init__ import q_configurations_to_report
 
 log = logging.getLogger(__package__)
 
-# websecmap.scanners.ALL_SCAN_TYPES is too much, as some providers give dozens of results.
-# What we want to show is a lot less,
-# and therefore this is used. The published scan_types are listed at index.html, in javascript.
-# This should be made into python and then exported to JS (nearly the same syntax).
-# Look at index.html...
 
-PUBLISHED_ENDPOINT_SCAN_TYPES = [
-    "ftp",
-    "plain_https",
-    "http_security_header_strict_transport_security",
-    "http_security_header_x_content_type_options",
-    "http_security_header_x_frame_options",
-    "http_security_header_x_xss_protection",
-    "tls_qualys_certificate_trusted",
-    "tls_qualys_encryption_quality",
-    "internet_nl_mail_starttls_tls_available",
-    "internet_nl_mail_auth_spf_exist",
-    "internet_nl_mail_auth_dkim_exist",
-    "internet_nl_mail_auth_dmarc_exist",
-]
+def get_published_scan_types():
+    report_metrics = get_bulk_values_starting_with("REPORT_INCLUDE_")
+    # Only where the settings is true:
+    return [
+        report_metric_k.replace("REPORT_INCLUDE_", "").lower()
+        for report_metric_k in report_metrics.keys()
+        if report_metrics[report_metric_k]
+    ]
 
-PUBLISHED_URL_SCAN_TYPES = ["DNSSEC"]
 
-PUBLISHED_SCAN_TYPES = PUBLISHED_ENDPOINT_SCAN_TYPES + PUBLISHED_URL_SCAN_TYPES
+PUBLISHED_SCAN_TYPES = get_published_scan_types()
+
+PUBLISHED_URL_SCAN_TYPES = [scan_type for scan_type in PUBLISHED_SCAN_TYPES if scan_type in URL_SCAN_TYPES]
+PUBLISHED_ENDPOINT_SCAN_TYPES = [scan_type for scan_type in PUBLISHED_SCAN_TYPES if scan_type in ENDPOINT_SCAN_TYPES]
 
 
 def compose_task(

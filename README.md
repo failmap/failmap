@@ -211,17 +211,30 @@ Dealing with compiling mysql and other software that uses SSL.
 You can look at the detailed issue here, mostly compilation fails because of a missing environment variable.
 
 The LDFLAGS need to point to your openssl installation, for example:
- 
+"ld: library not found for -lssl" ->
 ```bash
-set LDFLAGS -L/usr/local/opt/openssl/lib
+set -gx LDFLAGS "-L/usr/local/opt/openssl@3/lib"
+set -gx CPPFLAGS "-I/usr/local/opt/openssl@3/include"
 ```
+Note: for this you need the X86 (not the arm64!) openssl, because life is pain. So running your "brew install openssl"
+does not work, as that installs to: "/opt/homebrew/opt/openssl/lib/".
+
+On m1 macs you can do:
+`arch -x86_64 /bin/bash`  # start an x86 shell, which means homebrew will install in /usr/local/Homebrew
+`rm -rf /usr/local/Homebrew/`  # to start a new homebrew, without 'missing taps' and other possible weirdness.
+`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` taken from https://brew.sh/
+`/usr/local/Homebrew/bin/brew install openssl`  # There you go, now retry.
 
 
-FIsh shell, mac, archx86 ld: library not found for -lzstd, you need the x86 brew:
+
+
+Fish shell, mac, archx86 ld: library not found for -lzstd, you need the x86 brew:
 ```bash
 arch -x86_64 /usr/local/bin/brew reinstall zstd
 set -x LDFLAGS -L/usr/local/Homebrew/Cellar/zstd/
 ```
+
+
 
 If you get issues like these:
 OSError: dlopen(/usr/local/lib/libgdal.dylib, 6): Library not loaded: /usr/local/opt/openssl/lib/libssl.1.0.0.dylib

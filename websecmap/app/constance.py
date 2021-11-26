@@ -24,6 +24,16 @@ def get_bulk_values(keys: List[str]):
     return {k: values[k] for k in keys if k in values}
 
 
+def get_bulk_values_starting_with(starts_with: str):
+    from constance import admin
+
+    # retrieves everything, pretty quickly
+    values = admin.get_values()
+
+    # and now extract the keys we want to have
+    return {key: values[key] for key in values.keys() if key.startswith(starts_with)}
+
+
 def constance_cached_value(key):
     """
     Tries to minimize access to the database for constance. Every time you want a value, you'll get the latest value.
