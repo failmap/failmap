@@ -711,6 +711,7 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
         calculate_ipv6_views_web(scan_data)
     elif scan_type == "mail_dashboard":
         scan_data = calculate_forum_standaardisatie_views_mail(scan_data)
+    elif scan_type == "mail":
         calculate_ipv6_views_mail(scan_data)
 
     store_test_results(endpoint.pk, scan_data["results"]["calculated_results"])
