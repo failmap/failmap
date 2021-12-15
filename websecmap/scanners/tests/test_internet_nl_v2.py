@@ -56,8 +56,8 @@ def test_internet_nl_logging(db):
     last = InternetNLV2StateLog.objects.all().last()
     assert last.state == "requested"
 
-    update_state(scan.pk, "testing", "just a test")
-    update_state(scan.pk, "error", "an irrecoverable error occurred")
+    update_state(scan, "testing", "just a test")
+    update_state(scan, "error", "an irrecoverable error occurred")
 
     last = InternetNLV2StateLog.objects.all().last()
     assert last.state == "error"
@@ -66,12 +66,12 @@ def test_internet_nl_logging(db):
     assert InternetNLV2StateLog.objects.all().count() == 3
 
     # a progressed scan will not do anything, as there is no recoverable state.
-    progress_running_scan(scan.pk)
+    progress_running_scan(scan)
     assert InternetNLV2StateLog.objects.all().count() == 3
 
     # a recoverable error will make sure the last known correct state is set, which is requested...
     update_state(
-        scan.pk,
+        scan,
         "configuration_error",
         "This is a recoverable error, and when progressing, the first valid state" "will be requested",
     )
