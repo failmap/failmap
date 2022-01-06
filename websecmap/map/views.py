@@ -277,6 +277,7 @@ def config(request):
             "SHOW_INTERNET_NL_V6_MAIL_IPV6_READY",
             "SHOW_INTERNET_NL_V6_MAIL_IPV6_PROOF",
             "SHOW_INTERNET_NL_V6_MAIL_IPV6_INCOMPATIBLE",
+            "GOOGLE_MAPS_API_KEY"
         ]
     )
 
@@ -354,6 +355,7 @@ def config(request):
         "debug": True if settings.DEBUG else False,
         "admin": settings.ADMIN,
         "country_and_layers": countries_and_layers(),
+        "google_maps_api_key": configuration["GOOGLE_MAPS_API_KEY"],
     }
 
     return JsonResponse(config_object, encoder=JSEncoder)
