@@ -58,11 +58,13 @@ django==3.1.13
     #   django-colorful
     #   django-cors-headers
     #   django-excel
+    #   django-filter
     #   django-import-export
     #   django-leaflet
     #   django-picklefield
     #   django-select2
     #   django-timezone-field
+    #   djangorestframework
     #   jsonfield
 django-4-jet @ git+https://github.com/Barukimang/django-jet
     # via -r requirements.in
@@ -90,6 +92,8 @@ django-crispy-forms==1.11.0
     # via -r requirements.in
 django-excel==0.0.10
     # via -r requirements.in
+django-filter==21.1
+    # via -r requirements.in
 django-import-export==2.5.0
     # via -r requirements.in
 django-leaflet==0.27.1
@@ -106,6 +110,8 @@ django-statsd-mozilla==0.4.0
     # via -r requirements.in
 django-timezone-field==4.1.1
     # via django-celery-beat
+djangorestframework==3.13.1
+    # via -r requirements.in
 dnspython==2.1.0
     # via
     #   -r requirements.in
@@ -221,6 +227,7 @@ pytz==2021.1
     #   celery
     #   django
     #   django-timezone-field
+    #   djangorestframework
     #   flower
 pyyaml==5.4.1
     # via

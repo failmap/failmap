@@ -152,3 +152,7 @@ psycopg2-binary # binary package installs wheel, avoiding compiling
 numpy>=1.21.0
 
 django-cors-headers
+
+# map management
+djangorestframework
+django-filter
