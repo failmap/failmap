@@ -14,6 +14,8 @@ from websecmap.celery.worker import QUEUES_MATCHING_ROLES
 
 import celery_statsd
 
+EXPIRES_IN_ONE_DAY = 86400
+
 log = logging.getLogger(__package__)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "websecmap.settings")

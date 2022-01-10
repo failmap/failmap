@@ -13,7 +13,7 @@ from requests.exceptions import ConnectTimeout, ProxyError, SSLError
 from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fixed
 from urllib3.exceptions import ProtocolError
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.scanners.models import ScanProxy
 
 PROXY_NETWORK_TIMEOUT = 30
@@ -22,7 +22,7 @@ PROXY_SERVER_TIMEOUT = 30
 log = logging.getLogger(__name__)
 
 
-@app.task(queue="claim_proxy")
+@app.task(queue="claim_proxy", expires=EXPIRES_IN_ONE_DAY)
 def claim_proxy(tracing_label="") -> Dict[str, Any]:
     """A proxy should first be claimed and then checked. If not, several scans might use the same proxy and thus
     crash.
@@ -97,7 +97,7 @@ def claim_proxy(tracing_label="") -> Dict[str, Any]:
         sleep(60)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def release_proxy(proxy: Dict[str, Any], tracing_label=""):
     """As the claim proxy queue is ALWAYS filled, you cannot insert release proxy commands there..."""
     log.debug(f"Releasing proxy {proxy['id']} claimed for {tracing_label} et al...")
@@ -110,7 +110,7 @@ def release_proxy(proxy: Dict[str, Any], tracing_label=""):
     db_proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def check_all_proxies():
     # celery doesn't work with asyncio. But it does work with threadpools.
 
@@ -152,7 +152,7 @@ def release_claim_after_timeout(proxy: Dict[str, Any]):
             db_proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
 
 
-@app.task(queue="internet")
+@app.task(queue="internet", expires=EXPIRES_IN_ONE_DAY)
 def check_proxy(proxy: Dict[str, Any]):
     # todo: service_provider_status should stop after a certain amount of requests.
     # Note that you MUST USE HTTPS proxies for HTTPS traffic! Otherwise your normal IP is used.
@@ -297,7 +297,7 @@ def check_proxy(proxy: Dict[str, Any]):
         return True
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store_check_result(
     proxy: Dict[str, Any],
     check_result,

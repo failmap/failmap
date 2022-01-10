@@ -8,7 +8,7 @@ from django.db import connection
 from statshog.defaults.django import statsd
 
 from websecmap.app.constance import constance_cached_value
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.map.logic.map_health import get_outdated_ratings
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.report import PUBLISHED_SCAN_TYPES
@@ -19,7 +19,7 @@ from websecmap.scanners.models import Endpoint, PlannedScan, PlannedScanStatisti
 log = logging.getLogger(__name__)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store_progress():
     """
     Runs every N minutes (periodic task) and stores the latest calculated progress in the db.
@@ -115,13 +115,13 @@ def reset():
     PlannedScan.objects.all().delete()
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def force_retry():
     # just retry everything that is picked up now:
     PlannedScan.objects.all().filter(state=State["picked_up"].value).update(state=State["requested"].value)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def retry():
     """
     When something is picked up, but not finished in a day, just retry. Something went wrong.
@@ -260,7 +260,7 @@ def already_requested(activity: str, scanner: str, url_id: int):
     )
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def finish(activity: str, scanner: str, url_id: int):
     set_scan_state(activity, scanner, url_id, "finished")
     statsd.incr("scan_planned", tags={"state": "finished", "scanner": scanner, "activity": activity})
@@ -288,7 +288,7 @@ def set_scan_state(activity: str, scanner: str, url_id: int, state="finished"):
         log.debug(f"No planned scan found for {url_id}. Ignored.")
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def finish_multiple(activity: str, scanner: str, urls: List[int]):
     for url in urls:
         finish(activity, scanner, url)
@@ -331,19 +331,19 @@ def retrieve_endpoints_from_urls(
     return endpoints, urls_without_endpoints
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def websecmap_plan_outdated_scans():
     # one without parameters
     return plan_outdated_scans(PUBLISHED_SCAN_TYPES)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def websecmap_list_outdated():
     # one without parameters
     return list_outdated(PUBLISHED_SCAN_TYPES)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def list_outdated(published_scan_types):
     for map_configuration in filter_map_configs():
         print(f"Outdated items for {map_configuration['country']}/{map_configuration['organization_type__name']}:")
@@ -399,7 +399,7 @@ def deduplicate_plan(planned_items):
     return clean_plan
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_outdated_scans(published_scan_types):
     for map_configuration in filter_map_configs():
         log.debug(f"Retrieving outdated scans from config: {map_configuration}.")

@@ -32,7 +32,7 @@ from celery import Task, group
 from django.utils import timezone
 from tenacity import RetryError, before_log, retry, wait_fixed
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
@@ -94,7 +94,7 @@ def filter_scan(
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_scan_new(
     organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ):
@@ -105,7 +105,7 @@ def plan_scan_new(
     plannedscan.request(activity="scan", scanner="tls_qualys", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_scan(urls_filter: dict = dict(), **kwargs):
     """
     There are all kinds of optimizations in this task due to scanning as few urls as possible.
@@ -236,7 +236,7 @@ def compose_manual_scan_task(organizations_filter: dict = dict(), urls_filter: d
     return compose_scan_task(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_scan_task(**kwargs) -> Task:
     # If you run this every 10 minutes, there will be little problems with 'toctou' problems, claiming
     # a proxy is free, while it has been claimed by other results of this method (in the call before).
@@ -312,7 +312,7 @@ def compose_scan_task(urls: List[Url]) -> Task:
 # 12 / hour = 1 every 5 minutes. In 30 minutes 6 scans will run at the same time. We used to have 10.
 # 20 / hour = 1 every 3 minutes. In 30 minutes 10 scans will run at the same time.
 # 30 / hours = 1 every 2 minutes. In 30 minutes 15 scans will run at the same time.
-@app.task(queue="qualys", acks_late=True)
+@app.task(queue="qualys", acks_late=True, expires=EXPIRES_IN_ONE_DAY)
 def qualys_scan_bulk(proxy: Dict[str, Any], urls: List[str]):
 
     log.debug("Initiating bulk scan")
@@ -444,7 +444,7 @@ def qualys_scan_thread(proxy: Dict[str, Any], url: str):
         sleep(error_waiting_time)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def process_qualys_result(data, url: str):
     """Receive the JSON response from Qualys API, processes this result and stores it in database."""
 
@@ -641,7 +641,7 @@ def save_scan(url: str, data: Any):
     return
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def scratch(domain, data):
     log.debug("Scratching data for %s", domain)
     scratchpad = TlsQualysScratchpad()

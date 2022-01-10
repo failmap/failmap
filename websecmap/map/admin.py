@@ -13,7 +13,7 @@ from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
 from websecmap.app.models import Job
-from websecmap.celery import PRIO_HIGH, app
+from websecmap.celery import PRIO_HIGH, app, EXPIRES_IN_ONE_DAY
 from websecmap.map import models
 from websecmap.map.logic.openstreetmap import import_from_scratch, update_coordinates
 from websecmap.map.models import HighLevelStatistic, MapDataCache, VulnerabilityStatistic
@@ -102,7 +102,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append(update_coordinates)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def start_import(region_id: int):
     region = models.AdministrativeRegion.objects.all().filter(pk=region_id).first()
     if not region:
@@ -112,7 +112,7 @@ def start_import(region_id: int):
     region.save(update_fields=["import_start_date"])
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def set_imported(region_id: int):
     region = models.AdministrativeRegion.objects.all().filter(pk=region_id).first()
     if not region:
@@ -121,20 +121,20 @@ def set_imported(region_id: int):
     region.save(update_fields=["imported"])
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def prepare_map(country: str, organization_type: int):
     # when the reports are created, we still probably have some map cache, as the admin probably looked
     # at that page before...
     MapDataCache.objects.all().filter(organization_type__name=organization_type, country=country).delete()
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def report_country(organization_filter: Dict[str, Any]):
     tasks = compose_task(organizations_filter=organization_filter)
     tasks.apply_async()
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def add_configuration(country: str, organization_type: int):
 
     if models.Configuration.objects.all().filter(country=country, organization_type=organization_type).exists():

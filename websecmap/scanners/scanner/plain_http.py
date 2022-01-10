@@ -10,7 +10,7 @@ import logging
 
 from celery import Task, group
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
@@ -66,7 +66,7 @@ def filter_scan(
     return unique_and_random(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_scan(
     organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ):
@@ -77,7 +77,7 @@ def plan_scan(
     plannedscan.request(activity="scan", scanner="plain_http", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="plain_http", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -123,7 +123,7 @@ def compose_scan_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def get_endpoints_with_missing_encryption(url):
     """
     Finds a list of endpoints that are missing an encrypted counterpart. Takes in account ip_version.
@@ -173,7 +173,7 @@ def get_endpoints_with_missing_encryption(url):
     return complete_endpoints, incomplete_endpoints
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def well_done(endpoint_id):
 
     if endpoint_has_scans("plain_https", endpoint_id):
@@ -181,7 +181,7 @@ def well_done(endpoint_id):
 
 
 # Task is written to work both on v4 and v6, but the network conf of the machine differs.
-@app.task()
+@app.task(expires=EXPIRES_IN_ONE_DAY)
 def scan(ip_version: int, url: str):
     """
     Using an incomplete endpoint
@@ -234,7 +234,7 @@ def scan(ip_version: int, url: str):
     return resolves, can_connect_result, redirects_to_safety_result
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store(results, endpoint_id):
 
     resolves, can_connect_result, redirects_to_safety_result = results

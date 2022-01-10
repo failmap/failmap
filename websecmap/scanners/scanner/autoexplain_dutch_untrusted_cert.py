@@ -3,7 +3,7 @@ from time import sleep
 
 from celery import group, Task
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
@@ -45,13 +45,13 @@ query = EndpointGenericScan.objects.all().filter(
 )
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_scan():
     urls = [scan.endpoint.url for scan in query]
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner=SCANNER, amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -74,7 +74,9 @@ def compose_scan_task(urls: List[Url]) -> Task:
     return group(tasks)
 
 
-@app.task(autoretry_for=(socket.gaierror,), retry_kwargs={"max_retries": 10, "countdown": 2})
+@app.task(
+    autoretry_for=(socket.gaierror,), retry_kwargs={"max_retries": 10, "countdown": 2}, expires=EXPIRES_IN_ONE_DAY
+)
 def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
     # https://stackoverflow.com/questions/19145097/getting-certificate-chain-with-python-3-3-ssl-module
     # Relatively new Dutch governmental sites relying on anything less < TLS 1.2 is insane.
@@ -122,7 +124,7 @@ def deserialize_cert_chain(certificates: List[str]) -> List[OpenSSL.crypto.X509]
     return [load_certificate(FILETYPE_PEM, b64decode(certificate)) for certificate in certificates]
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates: List[str]) -> bool:
     # todo: there are more untrusted certificates from the dutch state.
     # Example: https://secure-t.sittard-geleen.nl
@@ -179,7 +181,7 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates:
     return True
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store_bot_explaination_if_needed(needed: bool, scan_id: int):
 
     scan = EndpointGenericScan.objects.all().filter(pk=scan_id).first()

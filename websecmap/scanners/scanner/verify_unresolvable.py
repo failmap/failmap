@@ -2,14 +2,14 @@ import logging
 
 from celery import Task, group
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.scanners import plannedscan
 from websecmap.scanners.scanner import subdomains
 
 log = logging.getLogger(__package__)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_verify(
     organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ):
@@ -17,7 +17,7 @@ def plan_verify(
     plannedscan.request(activity="verify", scanner="verify_unresolvable", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_verify_task(**kwargs):
     urls = plannedscan.pickup(activity="verify", scanner="verify_unresolvable", amount=kwargs.get("amount", 25))
     return compose_verify_task(urls)

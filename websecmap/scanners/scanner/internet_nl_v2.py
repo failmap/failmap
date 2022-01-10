@@ -15,7 +15,7 @@ from typing import List, Any, Dict
 import requests
 from requests.auth import HTTPBasicAuth
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def return_safe_response(answer):
     return answer.status_code, {}
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def register(domains: List[str], scan_type: str, tracking_information: str, settings: Dict[str, Any]) -> (str, str):
 
     data = {"type": scan_type, "name": tracking_information, "domains": domains}
@@ -55,22 +55,22 @@ def register(domains: List[str], scan_type: str, tracking_information: str, sett
     return return_safe_response(response)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def metadata(settings: Dict[str, Any]):
     return generic_internet_nl_api_request("get", f"{settings['url']}/metadata/report", settings)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def status(scan_id: int, settings: Dict[str, Any]):
     return generic_internet_nl_api_request("get", f"{settings['url']}/requests/{scan_id}", settings)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def cancel(scan_id: int, settings: Dict[str, Any]):
     return generic_internet_nl_api_request("patch", f"{settings['url']}/requests/{scan_id}", settings)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def result(scan_id: int, settings: Dict[str, Any]):
     return generic_internet_nl_api_request("get", f"{settings['url']}/requests/{scan_id}/results", settings)
 

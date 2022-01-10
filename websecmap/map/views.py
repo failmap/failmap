@@ -277,7 +277,7 @@ def config(request):
             "SHOW_INTERNET_NL_V6_MAIL_IPV6_READY",
             "SHOW_INTERNET_NL_V6_MAIL_IPV6_PROOF",
             "SHOW_INTERNET_NL_V6_MAIL_IPV6_INCOMPATIBLE",
-            "GOOGLE_MAPS_API_KEY"
+            "GOOGLE_MAPS_API_KEY",
         ]
     )
 

@@ -16,7 +16,7 @@ import requests
 import tldextract
 from celery import Task, group
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.scanner import q_configurations_to_scan, unique_and_random, url_filters
@@ -41,7 +41,7 @@ def filter_scan(
     return urls
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_scan(
     organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ):
@@ -50,7 +50,7 @@ def plan_scan(
     plannedscan.request(activity="scan", scanner="dns_clean_wildcards", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="dns_clean_wildcards", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -118,7 +118,7 @@ def site_content(url) -> Dict[str, Any]:
         }
 
 
-@app.task(queue="all_internet")
+@app.task(queue="all_internet", expires=EXPIRES_IN_ONE_DAY)
 def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
     identical = []
 
@@ -175,7 +175,7 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
     return identical
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store(url_ids: List[int]):
     log.debug(f"Received {len(url_ids)} that have been found to be having the same data as a wildcard.")
 

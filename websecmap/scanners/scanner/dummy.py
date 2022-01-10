@@ -11,7 +11,7 @@ import time
 from celery import Task, group
 from django.conf import settings
 
-from websecmap.celery import ParentFailed, app
+from websecmap.celery import ParentFailed, app, EXPIRES_IN_ONE_DAY
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
@@ -58,7 +58,7 @@ def filter_scan(
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_scan(
     organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ):
@@ -104,7 +104,7 @@ def compose_scan_task(urls):
     return task
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_scan_task(**kwargs):
     if not allowed_to_scan("dummy"):
         log.warning("Dummy scanner is not allowed to scan.")
@@ -132,7 +132,7 @@ def compose_manual_scan_task(
     return compose_scan_task(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store(result, endpoint_id):
     """
 

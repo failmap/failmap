@@ -6,7 +6,7 @@ import pytz
 from celery import group
 from django.utils import timezone
 
-from websecmap.celery import Task, app
+from websecmap.celery import Task, app, EXPIRES_IN_ONE_DAY
 from websecmap.map.report import update_report_tasks
 from websecmap.organizations.models import Url
 from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, url_filters
@@ -159,7 +159,7 @@ def forward_onboarding_status(url):
     url.save()
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def finish_onboarding(url):
     log.info("Finishing onboarding of %s", url)
     url.onboarded = True
@@ -170,7 +170,7 @@ def finish_onboarding(url):
     return True
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def update_stage(urls: List[Url], stage=""):
 
     for url in urls:

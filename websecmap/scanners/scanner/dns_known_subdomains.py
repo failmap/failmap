@@ -11,7 +11,7 @@ import logging
 
 from celery import Task, group
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.scanners import plannedscan
 from websecmap.scanners.scanner.__init__ import allowed_to_discover_urls, unique_and_random
 from websecmap.scanners.scanner.subdomains import (
@@ -32,13 +32,13 @@ def filter_discover(
     return unique_and_random(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="dns_known_subdomains", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_discover(
     organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ):

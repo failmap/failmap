@@ -9,7 +9,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID
 from django.db.models import Q
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
@@ -134,7 +134,7 @@ query = EndpointGenericScan.objects.all().filter(
 )
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_scan():
     # todo: no url.is_dead = False?
     scans = query.filter(
@@ -145,7 +145,7 @@ def plan_scan():
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner=SCANNER, amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -176,7 +176,7 @@ def compose_scan_task(urls):
 
 
 # todo: this needs to be split out onto several workers, now it can hinder the storage queue.
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def scan(scan_id):
     epgs = EndpointGenericScan.objects.all().filter(id=scan_id).first()
     if not epgs:

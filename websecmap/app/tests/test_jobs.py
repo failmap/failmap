@@ -2,7 +2,7 @@ import pytest
 from django.contrib.auth.models import User
 
 from websecmap.app.models import Job
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 
 
 @pytest.fixture
@@ -12,7 +12,7 @@ def celery(settings):
     settings.CELERY_TASK_ALWAYS_EAGER = True
 
 
-@app.task(queue="default")
+@app.task(queue="default", expires=EXPIRES_IN_ONE_DAY)
 def dummy(result=True):
     """Dummy celery task for testing."""
     if result:

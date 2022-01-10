@@ -46,7 +46,7 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from iso3166 import countries_by_alpha2
 from requests.auth import HTTPBasicAuth
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Organization, OrganizationType, Coordinate, Url
 
 log = logging.getLogger(__package__)
@@ -269,7 +269,7 @@ def translate(orglist):
     return outlist
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def scrape():
     """
     Retrieves list of organisations (applying the filter in

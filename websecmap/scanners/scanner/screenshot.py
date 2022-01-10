@@ -32,7 +32,7 @@ from django.core.files import File
 from django.db.models import Q
 from PIL import Image
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, Screenshot
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
@@ -66,7 +66,7 @@ def filter_scan(
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_scan(
     organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ):
@@ -74,7 +74,7 @@ def plan_scan(
     plannedscan.request(activity="scan", scanner="screenshot", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="screenshot", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -121,7 +121,7 @@ def compose_scan_task(urls):
 
 
 # We expect the screenshot tool to hang at non responsive urls.
-@app.task(queue="screenshot", rate_limit="60/m")
+@app.task(queue="screenshot", rate_limit="60/m", expires=EXPIRES_IN_ONE_DAY)
 def make_screenshot(service: str, endpoint_url: str):
     try:
         return make_screenshot_with_u2p(service, endpoint_url)
@@ -148,7 +148,7 @@ def make_screenshot_with_u2p(screenshot_service: str, url: str):
     return requests.get(api_call)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def save_screenshot(response, endpoint_id):
 
     # it might receive an exception, or "False" when there is no image data due to errors.

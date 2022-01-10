@@ -18,7 +18,7 @@ from jet.admin import CompactInline
 
 from websecmap import types
 from websecmap.app.models import Job
-from websecmap.celery import PRIO_HIGH, app
+from websecmap.celery import PRIO_HIGH, app, EXPIRES_IN_ONE_DAY
 from websecmap.map.models import OrganizationReport
 from websecmap.organizations import datasources
 from websecmap.organizations.datasources import dutch_government, excel
@@ -802,7 +802,7 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     preserve_filters = True
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def dataset_import_finished(dataset_id):
 
     dataset = Dataset.objects.all().filter(id=dataset_id).first()

@@ -2,7 +2,7 @@ import logging
 
 from celery import Task, group
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.scanner import unique_and_random
@@ -18,13 +18,13 @@ def filter_discover(
     return unique_and_random(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="dns_wildcards", amount=kwargs.get("amount", 200))
     return compose_discover_task(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_discover(
     organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ):
@@ -57,7 +57,7 @@ def compose_manual_discover_task(
     return compose_discover_task(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store_wildcard(result: bool, url_id: int):
     try:
         url = Url.objects.all().get(id=url_id)

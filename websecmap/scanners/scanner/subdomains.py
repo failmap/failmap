@@ -12,7 +12,7 @@ from django.db import connection
 from django.db.models import Q
 from tenacity import before_log, retry, wait_fixed
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.map.logic.map_defaults import get_country
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
@@ -49,7 +49,7 @@ def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict
     return urls
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_discover(
     organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
 ):
@@ -57,7 +57,7 @@ def plan_discover(
     plannedscan.request(activity="discover", scanner="subdomains", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="subdomains", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)

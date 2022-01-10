@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from celery import group
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan
@@ -26,7 +26,7 @@ query = EndpointGenericScan.objects.all().filter(
 excepted_subdomains = ["pki", "crl"]
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_scan():
     scans = query.filter(
         endpoint__url__computed_subdomain__in=excepted_subdomains, comply_or_explain_is_explained=False
@@ -35,7 +35,7 @@ def plan_scan():
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner=SCANNER, amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -54,7 +54,7 @@ def compose_scan_task(urls):
     )
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def scan(scan_id: int):
 
     a_scan = EndpointGenericScan.objects.all().filter(id=scan_id).first()

@@ -22,6 +22,7 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.template.response import TemplateResponse
 from django.urls import path
+from rest_framework import routers, serializers, viewsets
 
 # register Jet Dashboard views
 import websecmap.app.dashboard_module_views  # noqa
@@ -60,21 +61,17 @@ interactive_urls = [
 
 urlpatterns = frontend_urls.copy()
 
-# Django Rest Framework:
-# Serializers define the API representation.
-from rest_framework import routers, serializers, viewsets
-
 
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ['id', 'name']
+        fields = ["id", "name"]
 
 
 class CoordinateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coordinate
-        fields = ['organization', 'geojsontype', 'area']
+        fields = ["organization", "geojsontype", "area"]
 
 
 # ViewSets define the view behavior.
@@ -90,16 +87,20 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-router.register(r'coordinate', CoordinateViewSet)
-router.register(r'organization', OrganizationViewSet)
-urlpatterns += [
-    path('data/api/', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-]
+router.register(r"coordinate", CoordinateViewSet)
+router.register(r"organization", OrganizationViewSet)
+
 
 # enable admin url's if this is an administrative (more secured/read-write) instance
 if settings.ADMIN:
     urlpatterns += admin_urls
+
+    # While rest framework is already secured with "IsAdminUser", not exposing anything
+    # to normal users is better security, as it increases the attack surface (hugely).
+    urlpatterns += [
+        path("data/api/", include(router.urls)),
+        path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
+    ]
 
 # enable urls with interactive components that require database write access (login, url/org submit)
 if settings.ADMIN or settings.INTERACTIVE:
@@ -112,8 +113,8 @@ if settings.DEBUG:
         import debug_toolbar
 
         urlpatterns = [
-                          re_path(r"^__debug__/", include(debug_toolbar.urls)),
-                      ] + urlpatterns
+            re_path(r"^__debug__/", include(debug_toolbar.urls)),
+        ] + urlpatterns
     except ImportError:
         pass
 
@@ -151,6 +152,6 @@ def handler500(request):
 
 if settings.DEBUG:
     urlpatterns = [
-                      # test urls for error pages (cause normally we don't have them, ahum)
-                      re_path(r"^500/$", handler500),
-                  ] + urlpatterns
+        # test urls for error pages (cause normally we don't have them, ahum)
+        re_path(r"^500/$", handler500),
+    ] + urlpatterns
