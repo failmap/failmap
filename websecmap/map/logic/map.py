@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Any, Dict
 
 import pytz
 import simplejson as json
@@ -9,23 +9,15 @@ from django.utils.text import slugify
 
 from websecmap.map.logic.map_defaults import get_country, get_organization_type, remark
 from websecmap.map.models import MapDataCache
+from websecmap.reporting.diskreport import retrieve_report
 from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
 
-def get_reports_by_ids(ids):
-    if not ids:
-        return {}
-
+def get_reports_by_ids(ids: List[str]) -> Dict[str, Dict[Any, Any]]:
     reports = {}
-    cursor = connection.cursor()
 
-    # noinspection SqlNoDataSourceInspection
-    # The number of values in the IN() list is only limited by the max_allowed_packet value.
-    report_sql = f"SELECT id, calculation FROM map_organizationreport WHERE id IN ({','.join(ids)})"
-    cursor.execute(report_sql)
-    report_rows = cursor.fetchall()
-    for row in report_rows:
-        reports[row[0]] = row[1]
+    for report_id in ids:
+        reports[report_id] = retrieve_report(report_id, "OrganizationReport")
 
     return reports
 
@@ -253,7 +245,7 @@ def get_map_data(
         high, medium, low, ok = 0, 0, 0, 0
         severity = "unknown"
 
-        calculation = json.loads(reports[i[6]])
+        calculation = reports[str(i[6])]
 
         if calculation:
             for url in calculation["organization"]["urls"]:

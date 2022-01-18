@@ -6,7 +6,6 @@ from datetime import date, datetime, timedelta
 from typing import List, Tuple
 
 import pytz
-import simplejson as json
 from celery import group
 from deepdiff import DeepDiff
 from django.db.models import Count
@@ -18,6 +17,7 @@ from websecmap.map.logic.map_health import update_map_health_reports
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.models import HighLevelStatistic, MapDataCache, OrganizationReport, VulnerabilityStatistic
 from websecmap.organizations.models import Organization, OrganizationType, Url
+from websecmap.reporting.diskreport import store_report, retrieve_report
 from websecmap.reporting.report import (
     START_DATE,
     aggegrate_url_rating_scores,
@@ -208,28 +208,28 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
 
             # gets all url-ratings, even on urls that are dead / not relevant at a certain time period.
             # this doesn't really work out it seems... as you dont know what url ratings are relevant when
-            sql = """SELECT reporting_urlreport.id as id, reporting_urlreport.id as my_id,
-                            reporting_urlreport.total_endpoints,
-                            reporting_urlreport2.calculation as calculation, url.id as url_id2
-                   FROM reporting_urlreport
-                   INNER JOIN
-                   (SELECT MAX(id) as id2 FROM reporting_urlreport or2
-                   WHERE at_when <= '%(when)s' GROUP BY url_id) as x
-                   ON x.id2 = reporting_urlreport.id
-                   INNER JOIN url ON reporting_urlreport.url_id = url.id
-                   INNER JOIN url_organization on url.id = url_organization.url_id
-                   INNER JOIN organization ON url_organization.organization_id = organization.id
-                   INNER JOIN reporting_urlreport as reporting_urlreport2
-                        ON reporting_urlreport2.id = reporting_urlreport.id
-                    WHERE organization.type_id = '%(OrganizationTypeId)s'
-                    AND organization.country = '%(country)s'
-                    AND reporting_urlreport.total_endpoints > 0
-                    ORDER BY reporting_urlreport.url_id
-                """ % {
-                "when": when,
-                "OrganizationTypeId": organization_type_id,
-                "country": country,
-            }
+            # sql = """SELECT reporting_urlreport.id as id, reporting_urlreport.id as my_id,
+            #                 reporting_urlreport.total_endpoints,
+            #                 reporting_urlreport2.calculation as calculation, url.id as url_id2
+            #        FROM reporting_urlreport
+            #        INNER JOIN
+            #        (SELECT MAX(id) as id2 FROM reporting_urlreport or2
+            #        WHERE at_when <= '%(when)s' GROUP BY url_id) as x
+            #        ON x.id2 = reporting_urlreport.id
+            #        INNER JOIN url ON reporting_urlreport.url_id = url.id
+            #        INNER JOIN url_organization on url.id = url_organization.url_id
+            #        INNER JOIN organization ON url_organization.organization_id = organization.id
+            #        INNER JOIN reporting_urlreport as reporting_urlreport2
+            #             ON reporting_urlreport2.id = reporting_urlreport.id
+            #         WHERE organization.type_id = '%(OrganizationTypeId)s'
+            #         AND organization.country = '%(country)s'
+            #         AND reporting_urlreport.total_endpoints > 0
+            #         ORDER BY reporting_urlreport.url_id
+            #     """ % {
+            #     "when": when,
+            #     "OrganizationTypeId": organization_type_id,
+            #     "country": country,
+            # }
 
             # There is a cartesian product on organization, for the simple reason that organizations sometimes
             # use the same url. The filter on organization cannot be changed to left outer join, because it might
@@ -328,7 +328,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
 
             direct_reports = []
             for report in reports:
-                direct_reports.append(json.loads(reports[report]))
+                direct_reports.append(reports[report])
 
             number_of_endpoints = 0
             number_of_urls = 0
@@ -624,7 +624,7 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                 # it will double the urls that are shared between organizations.
                 # that is not really bad, it distorts a little.
                 # we're forced to load each item separately anyway, so why not read it?
-                calculation = json.loads(reports[rating.id])
+                calculation = reports[str(rating.id)]
                 measurement["total_urls"] += len(calculation["organization"]["urls"])
 
                 measurement["good_urls"] += sum(
@@ -784,7 +784,11 @@ def create_organization_report_on_moment(organization: Organization, when: datet
 
     # Still do deepdiff to prevent double reports.
     try:
-        last = OrganizationReport.objects.filter(organization=organization, at_when__lte=when).latest("at_when")
+        last = (
+            OrganizationReport.objects.filter(organization=organization, at_when__lte=when)
+            .defer("calculation")
+            .latest("at_when")
+        )
     except OrganizationReport.DoesNotExist:
         log.debug("Could not find the last organization rating, creating a dummy one.")
         last = OrganizationReport()  # create an empty one
@@ -793,7 +797,8 @@ def create_organization_report_on_moment(organization: Organization, when: datet
     calculation = {"organization": scores}
 
     # this is 10% faster without deepdiff, the major pain is elsewhere.
-    if DeepDiff(last.calculation, calculation, ignore_order=True, report_repetition=True):
+    last_report_data = retrieve_report(last.id, "OrganizationReport")
+    if DeepDiff(last_report_data, calculation, ignore_order=True, report_repetition=True):
         log.info("The calculation for %s on %s has changed, so we're saving this rating." % (organization, when))
 
         # remove urls and name from scores object, so it can be used as initialization parameters (saves lines)
@@ -805,9 +810,11 @@ def create_organization_report_on_moment(organization: Organization, when: datet
         organizationrating = OrganizationReport(**init_scores)
         organizationrating.organization = organization
         organizationrating.at_when = when
-        organizationrating.calculation = calculation
-
+        organizationrating.calculation = None
         organizationrating.save()
+
+        store_report(organizationrating.pk, "OrganizationReport", calculation)
+
         log.info("Saved report for %s on %s." % (organization, when))
     else:
         # This happens because some urls are dead etc: our filtering already removes this from the relevant information
@@ -848,7 +855,10 @@ def default_organization_rating(organizations: List[int]):
         r = OrganizationReport()
         r.at_when = when
         r.organization = organization
-        r.calculation = {
+        r.calculation = None
+        r.save()
+
+        default_calculation = {
             "organization": {
                 "name": organization.name,
                 "high": 0,
@@ -894,7 +904,7 @@ def default_organization_rating(organizations: List[int]):
                 "total_issues": 0,
             }
         }
-        r.save()
+        store_report(r.id, "OrganizationReport", default_calculation)
 
 
 @app.task(queue="reporting")

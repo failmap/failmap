@@ -10,6 +10,7 @@ from websecmap.map.logic.map_defaults import (
     get_when,
 )
 from websecmap.organizations.models import Organization
+from websecmap.reporting.diskreport import retrieve_report
 
 log = logging.getLogger(__package__)
 
@@ -46,17 +47,19 @@ def get_organization_report_by_id(organization_id: int, weeks_back: int = 0):
     ratings = organization.filter(organizationreport__at_when__lte=when)
     try:
         values = ratings.values(
-            "organizationreport__calculation",
             "organizationreport__at_when",
             "name",
             "pk",
             "twitter_handle",
+            "organizationreport__id",
             "organizationreport__high",
             "organizationreport__medium",
             "organizationreport__low",
         ).latest("organizationreport__at_when")
     except Organization.DoesNotExist:
         return {}
+
+    report_data = retrieve_report(values["organizationreport__id"], "OrganizationReport")
 
     report = {
         "name": values["name"],
@@ -66,7 +69,7 @@ def get_organization_report_by_id(organization_id: int, weeks_back: int = 0):
         "when": values["organizationreport__at_when"].isoformat(),
         # fixing json being presented and escaped as a string, this makes it a lot slowr
         # had to do this cause we use jsonfield, not django_jsonfield, due to rendering map widgets in admin
-        "calculation": values["organizationreport__calculation"],
+        "calculation": report_data,
         "promise": "",
         "high": values["organizationreport__high"],
         "medium": values["organizationreport__medium"],

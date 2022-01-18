@@ -4,6 +4,7 @@ import pytz
 
 from websecmap.map.models import Configuration, OrganizationReport
 from websecmap.organizations.models import OrganizationType
+from websecmap.reporting.diskreport import store_report, retrieve_report
 from websecmap.scanners.models import PlannedScan
 from websecmap.scanners.plannedscan import plan_outdated_scans
 from websecmap.scanners.tests.test_plannedscan import create_organization, create_url, link_url_to_organization
@@ -75,12 +76,16 @@ def test_plan_outdated_scans(db):
         }
     }
     r = OrganizationReport()
-    r.calculation = example_report
+    r.calculation = None
     r.organization = o
     r.at_when = datetime.now(pytz.utc) - timedelta(days=100)
     r.save()
 
-    assert len(r.calculation["organization"]) == 1
+    # save and retrieve reports.
+    store_report(r.id, "OrganizationReport", example_report)
+    calc = retrieve_report(r.id, "OrganizationReport")
+
+    assert len(calc["organization"]) == 1
 
     assert PlannedScan.objects.all().count() == 0
 

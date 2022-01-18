@@ -5,8 +5,9 @@ from django.utils import timezone
 from websecmap.map.models import OrganizationReport
 from websecmap.reporting.diskreport import (
     sync_reports_from_db_to_disk,
-    get_original_storage_location,
-    read_json_from_gzip,
+    _read_json_from_gzip,
+    location_on_disk,
+    retrieve_report,
 )
 from websecmap.scanners.tests.test_plannedscan import create_organization
 
@@ -27,7 +28,8 @@ def test_report_syncing(db):
     sync_reports_from_db_to_disk()
 
     # the file was created, the report is retrievable
-    first_report = OrganizationReport.objects.first()
+    first_report = OrganizationReport.objects.get(id=organizationreport.id)
     assert first_report.calculation is None
-    assert os.path.isfile(f"{get_original_storage_location()}{first_report.id}.gson")
-    assert read_json_from_gzip(f"{get_original_storage_location()}{first_report.id}.gson") == stored_data
+    assert os.path.isfile(location_on_disk(first_report.id, "OrganizationReport"))
+    assert retrieve_report(first_report.id, "OrganizationReport") == stored_data
+    assert _read_json_from_gzip(location_on_disk(first_report.id, "OrganizationReport")) == stored_data

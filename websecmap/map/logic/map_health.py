@@ -11,6 +11,7 @@ from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.map.map_configs import filter_map_configs, retrieve
 from websecmap.map.models import Configuration, MapHealthReport, OrganizationReport
 from websecmap.organizations.models import Organization
+from websecmap.reporting.diskreport import retrieve_report
 
 OUTDATED_HOURS = 24 * 7
 
@@ -102,6 +103,7 @@ def get_latest_report_of_organization(organization, at_when):
         OrganizationReport.objects.all()
         .filter(organization=organization, at_when__lte=at_when)
         .order_by("-at_when")
+        .defer("calculation")
         .first()
     )
 
@@ -114,10 +116,12 @@ def split_ratings_between_good_and_bad(
     infractions = []
     good = []
 
-    if not report.calculation:
+    report_calculation = retrieve_report(report.id, "OrganizationReport")
+
+    if not report_calculation:
         return [], []
 
-    for url in report.calculation["organization"]["urls"]:
+    for url in report_calculation["organization"]["urls"]:
         # endpoint ratings
         for endpoint in url["endpoints"]:
             for rating in endpoint["ratings"]:
