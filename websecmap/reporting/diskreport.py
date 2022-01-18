@@ -32,7 +32,18 @@ def location_on_disk(report_id: Union[int, str], model: Union[str, Type["Model"]
     # prevent some path traversal and directory issues, but not all:
     report_id = str(report_id).replace(".", "").replace("/", "").replace("\\", "")
 
-    return f"{storage_location_of_model(model)}/{report_id}.gson"
+    # because of the 500.000 reports on basisbeveiliging, which take 100 gigabyte, we should use some sort of mapping
+    # that create subdirectories per 1000 files or so. Otherwise administration with linux tools is too slow.
+    if len(report_id) <= 3:
+        return f"{storage_location_of_model(model)}/{report_id}.gson"
+
+    # Any report ids larger than 999 (or fff) will get their own subdirectory based on their first 3 characters:
+    subdirectory = report_id[0:3]
+    subdir_storage_directory = f"{storage_location_of_model(model)}/{subdirectory}/"
+    if not os.path.isdir(subdir_storage_directory):
+        os.makedirs(subdir_storage_directory, exist_ok=True)
+
+    return f"{storage_location_of_model(model)}/{subdirectory}/{report_id}.gson"
 
 
 def storage_location_of_model(model: Union[str, Type["Model"]] = "OrganizationReport"):
