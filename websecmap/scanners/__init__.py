@@ -49,7 +49,7 @@ POLICY = {
         "error": [],
         "irrelevant": [],
     },
-    "DNSSEC": {
+    "dnssec": {
         "high": ["ERROR"],
         "medium": [],
         "low": [],
@@ -187,7 +187,7 @@ SCANNERS = [
         "can scan urls": True,
         "needs results from": [],
         "creates endpoint scan types": ["subdomains"],
-        "creates url scan types": ["DNSSEC"],
+        "creates url scan types": ["dnssec"],
         "plannable_activities": ["scan"],
         "python_module": "dnssec",
     },

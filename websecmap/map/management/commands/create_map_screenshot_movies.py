@@ -34,7 +34,7 @@ class Command(BaseCommand):
         filters = [
             "all",
             "ftp",
-            "DNSSEC",
+            "dnssec",
             "http_security_header_x_xss_protection",
             "http_security_header_x_content_type_options",
             "http_security_header_x_frame_options",

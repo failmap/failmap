@@ -155,7 +155,7 @@ def store_dnssec(result: List[str], url_id: int):
     # You can save any (string) value and any (string) message.
     # The EndpointScanManager deduplicates the data for you automatically.
     if result:
-        store_url_scan_result("DNSSEC", url_id, level, messages[level], evidence=",\n".join(result))
+        store_url_scan_result("dnssec", url_id, level, messages[level], evidence=",\n".join(result))
 
     # return something informative
     return {"status": "success", "result": level}

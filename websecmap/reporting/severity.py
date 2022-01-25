@@ -181,7 +181,7 @@ def ftp(scan: Union[EndpointGenericScan, UrlGenericScan]):
     return standard_calculation(scan, scan.explanation, high, medium, low, error_in_test=scan.rating == "unknown")
 
 
-def DNSSEC(scan: Union[EndpointGenericScan, UrlGenericScan]):
+def dnssec(scan: Union[EndpointGenericScan, UrlGenericScan]):
     """
     See: https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions
 
@@ -582,7 +582,7 @@ calculation_methods = {
     "http_security_header_x_frame_options": get_security_header_calculation,
     "http_security_header_x_xss_protection": get_security_header_calculation,
     "plain_https": plain_https,
-    "DNSSEC": DNSSEC,
+    "dnssec": dnssec,
     "ftp": ftp,
     "tls_qualys_certificate_trusted": tls_qualys_certificate_trusted,
     "tls_qualys_encryption_quality": tls_qualys_encryption_quality,

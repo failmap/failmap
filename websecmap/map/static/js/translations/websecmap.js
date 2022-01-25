@@ -67,6 +67,8 @@ const messages = {
         "DNSSEC": "Domain name security (DNSSEC)",
         "DNSSEC is incorrectly or not configured (errors found).": "DNSSEC is incorrectly or not configured (errors found).",
         "DNSSEC seems to be implemented sufficiently.": "DNSSEC seems to be implemented sufficiently.",
+        "dnssec is incorrectly or not configured (errors found).": "DNSSEC is incorrectly or not configured (errors found).",
+        "dnssec seems to be implemented sufficiently.": "DNSSEC seems to be implemented sufficiently.",
 
 
         // FTP
