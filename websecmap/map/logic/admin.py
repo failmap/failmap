@@ -24,6 +24,38 @@ def operation_response(error: bool = False, success: bool = False, message: str 
     }
 
 
+def move_coordinate(data):
+    # data contains: {coordinate_id: this.coordinate_id, latitude: this.latitude, longitude: this.longitude}
+    ...
+
+    if not data.get("coordinate_id", 0):
+        return operation_response(error=True, message="No coordinate selected.")
+
+    if not data.get("latitude", 0):
+        return operation_response(error=True, message="Missing latitude.")
+
+    if not data.get("longitude", 0):
+        return operation_response(error=True, message="Missing longitude.")
+
+    existing_coordinate = (
+        Coordinate.objects.all().filter(id=data.get("coordinate_id"), geojsontype="Point", is_dead=False).first()
+    )
+    if not existing_coordinate:
+        return operation_response(error=True, message="Coordinate does not exist.")
+
+    try:
+        existing_coordinate.area = [data.get("longitude", 0), data.get("latitude", 0)]
+        existing_coordinate.edit_area = {
+            "type": "Point",
+            "coordinates": [data.get("longitude", 0), data.get("latitude", 0)],
+        }
+        existing_coordinate.save()
+        return operation_response(success=True, message="Coordinate saved.")
+
+    except ValueError:
+        return operation_response(error=True, message="Coordinates do not appear to have the right format.")
+
+
 def add_organization(data):
 
     if not data.get("layer", 0):
@@ -107,6 +139,8 @@ def add_urls(organization_id, urls: str):
 
     # urls is basically garbage input on multiple lines with spaces and comma's and all kinds of unicode.
     # here we try to break up this garbage into small pieces text, some are a url, some are garbage...
+    urls = urls.replace("https://", " ")
+    urls = urls.replace("http://", " ")
     urls = urls.replace(",", " ")
     urls = urls.replace("\n", " ")
     urls = urls.split(" ")

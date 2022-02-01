@@ -23,6 +23,7 @@ from websecmap.map.logic.admin import (
     add_urls,
     switch_lattitude_and_longitude,
     user_is_staff_member,
+    move_coordinate,
 )
 from websecmap.map.logic.datasets import create_filename
 from websecmap.map.logic.explain import explain, get_all_explains, get_recent_explains, remove_explanation
@@ -801,6 +802,12 @@ def _switch_lattitude_and_longitude(request, organization_id=0):
 def _add_organization(request):
     request = get_json_body(request)
     return JsonResponse(add_organization(request), encoder=JSEncoder, safe=False)
+
+
+@user_passes_test(user_is_staff_member)
+def _move_coordinate(request):
+    request = get_json_body(request)
+    return JsonResponse(move_coordinate(request), encoder=JSEncoder, safe=False)
 
 
 def planned_scan_progress(request):

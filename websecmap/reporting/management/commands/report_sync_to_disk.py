@@ -20,7 +20,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--limit",
             type=int,
-            help="Number of reports to sync to disk (large batches will crash)",
+            help="Number of reports to sync to disk (large bat ches will crash)",
             required=False,
             default=100,
         )
