@@ -27,16 +27,21 @@ static_urlpatterns = [
     path("security.txt", views.security_txt),
     path("robots.txt", views.robots_txt),
     path("manifest.json", views.manifest_json),
-    path(
-        "autocomplete/<c:country>/<slug:organization_type>/organization/<str:parameter>", views.organization_autcomplete
-    ),
+    # Unused:
+    # path(
+    #     "autocomplete/<c:country>/<slug:organization_type>
+    #     /organization/<str:parameter>", views.organization_autcomplete
+    # ),
     path("data/map/<c:country>/<slug:organization_type>/<d:days_back>/<slug:displayed_issue>/", views.map_data),
     path("data/map/<c:country>/<slug:organization_type>/<d:days_back>//", views.map_data),
+    path("data/map/<c:country>/<slug:organization_type>/<d:days_back>/", views.map_data),
+    path("data/map/<c:country>/<slug:organization_type>/<d:days_back>", views.map_data),
     path("data/organizations/list/<c:country>/<slug:organization_type>/", views.organization_list),
     path("data/map_default/<d:days_back>/<slug:displayed_issue>/", views.map_default),
     path("data/map_default/<d:days_back>//", views.map_default),
     path("data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>", views.stats),
     path("data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>/<int:days>/", views.stats),
+    path("data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>/<int:days>", views.stats),
     path("data/stats/what_to_improve/<c:country>/<slug:organization_type>/<str:issue_type>/", views._what_to_improve),
     path("data/short_and_simple_stats/<w:weeks_back>/", views.get_short_and_simple_stats_),
     # defaults
