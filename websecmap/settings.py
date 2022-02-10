@@ -290,7 +290,6 @@ USE_TZ = True
 # locale name notation. E.g. de, pt_BR, es_AR, etc.
 LOCALE_PATHS = ["locale"]
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
@@ -502,7 +501,6 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_EVENT_SERIALIZER = "json"
 
-
 CELERY_BROKER_URL = os.environ.get("BROKER", "redis://localhost:6379/0")
 CELERY_ENABLE_UTC = True
 
@@ -606,7 +604,6 @@ if DEBUG:
     # send statsd metrics to debug_toolbar
     STATSD_CLIENT = "django_statsd.clients.toolbar"
 
-
 # if sentry DSN is provided register raven to emit events on exceptions
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
 if SENTRY_DSN:
@@ -654,7 +651,6 @@ IMPORT_EXPORT_USE_TRANSACTIONS = True
 # https://django-constance.readthedocs.io/en/latest/
 CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 
-
 CONSTANCE_ADDITIONAL_FIELDS = {
     "yes_no_null_select": [
         "django.forms.fields.ChoiceField",
@@ -666,7 +662,6 @@ CONSTANCE_ADDITIONAL_FIELDS = {
         {"widget": "django.forms.Textarea"},
     ],
 }
-
 
 CONSTANCE_CONFIG = {
     "COMMENTS": (
@@ -687,6 +682,18 @@ CONSTANCE_CONFIG = {
         "",
         "The text that you want to announce. You can make use of HTML, Javascript and CSS to include anything you "
         "want. For example a link to a meeting, a new feature or a news message.",
+        str,
+    ),
+    "SHOW_DISCLAIMER": (
+        False,
+        "Shows an announcement bar at the top of the website. This allows you to communicate about new features or "
+        "upcoming fairs / meetings and etcetera.",
+        bool,
+    ),
+    "DISCLAIMER_HTML": (
+        "",
+        "The text that you want to disclaim. You can make use of HTML, Javascript and CSS to include anything you "
+        "want. For example a disclaimer about the quality of the imported data and how to reach you for corrections.",
         str,
     ),
     "PROJECT_WEBSITE": (
@@ -820,6 +827,26 @@ CONSTANCE_CONFIG = {
         "Shows changes in extended statistics. " "Extended statistics needs to be enabled for this to have effect.",
         bool,
     ),
+    "SHOW_REPORT_NUMBERS": (
+        True,
+        "Shows the high/medium/low numbers at the top of a report.",
+        bool,
+    ),
+    "SHOW_REPORT_CHARTS": (
+        True,
+        "Shows charts inside reports",
+        bool,
+    ),
+    "SHOW_REPORT_RISK_SUMMARY": (
+        True,
+        "Shows risk summary table inside reports",
+        bool,
+    ),
+    "SHOW_REPORT_CONTENT": (
+        True,
+        "Shows the actual metrics inside reports",
+        bool,
+    ),
     "SHOW_DATASETS": (
         True,
         "Shows dataset downloads. Note: dataset downloads are always available, even if they "
@@ -939,7 +966,10 @@ CONSTANCE_CONFIG = add_scanner_fields(CONSTANCE_CONFIG)
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
     [
-        ("General", ("COMMENTS", "PROJECT_WEBSITE", "SHOW_ANNOUNCEMENT", "ANNOUNCEMENT")),
+        (
+            "General",
+            ("COMMENTS", "PROJECT_WEBSITE", "SHOW_ANNOUNCEMENT", "ANNOUNCEMENT", "SHOW_DISCLAIMER", "DISCLAIMER_HTML"),
+        ),
         (
             "Keys to External Services",
             (
@@ -1001,6 +1031,15 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             ),
         ),
         (
+            "What to show on the reporting page",
+            (
+                "SHOW_REPORT_NUMBERS",
+                "SHOW_REPORT_CHARTS",
+                "SHOW_REPORT_RISK_SUMMARY",
+                "SHOW_REPORT_CONTENT",
+            ),
+        ),
+        (
             "Scanning preferences",
             ("SCANNER_NAMESERVERS",),
         ),
@@ -1010,7 +1049,6 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         ),
     ]
 )
-
 
 CONSTANCE_CONFIG_FIELDSETS = add_scanner_fieldsets(CONSTANCE_CONFIG_FIELDSETS)
 
@@ -1272,7 +1310,6 @@ else:
     # Mail settings are managed in constance for easier mainteneance.
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-
 # Allow file uploads in datasets:
 MEDIA_ROOT = os.environ.get("MEDIA_ROOT", os.path.abspath(os.path.dirname(__file__)) + "/uploads/")
 
@@ -1291,7 +1328,6 @@ Django project settings.py file:
 Todo: Only needed for /admin urls, not for other urls: it's fine when people embed the map, desired even!
 """
 X_FRAME_OPTIONS = "SAMEORIGIN"
-
 
 # https://github.com/adamchainz/django-cors-headers
 if DEBUG:
@@ -1315,7 +1351,6 @@ Reports are JSON blobs. They are not stored in the database because it requires 
 they cannot be easily compressed or handled.
 """
 REPORT_STORAGE_DIR = os.environ.get("REPORT_STORAGE_DIR", MEDIA_ROOT + "diskreports/")
-
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,

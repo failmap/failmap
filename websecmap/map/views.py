@@ -232,6 +232,10 @@ def config(request):
             "SHOW_STATS_IMPROVEMENTS",
             "SHOW_STATS_GRAPHS",
             "SHOW_STATS_CHANGES",
+            "SHOW_REPORT_NUMBERS",
+            "SHOW_REPORT_CHARTS",
+            "SHOW_REPORT_RISK_SUMMARY",
+            "SHOW_REPORT_CONTENT",
             "SHOW_TICKER",
             "SHOW_SERVICES",
             "SHOW_FTP",
@@ -279,6 +283,8 @@ def config(request):
             "SHOW_INTERNET_NL_V6_MAIL_IPV6_PROOF",
             "SHOW_INTERNET_NL_V6_MAIL_IPV6_INCOMPATIBLE",
             "GOOGLE_MAPS_API_KEY",
+            "SHOW_DISCLAIMER",
+            "DISCLAIMER_HTML",
         ]
     )
 
@@ -298,6 +304,11 @@ def config(request):
             "ticker": configuration["SHOW_TICKER"],
             "services": configuration["SHOW_SERVICES"],
             "plus_info": configuration["PLUS_SHOW_INFO"],
+            "report_numbers": configuration["SHOW_REPORT_NUMBERS"],
+            "report_charts": configuration["SHOW_REPORT_CHARTS"],
+            "report_risk_summary": configuration["SHOW_REPORT_RISK_SUMMARY"],
+            "report_content": configuration["SHOW_REPORT_CONTENT"],
+            "disclaimer": configuration["SHOW_DISCLAIMER"],
             "issues": {
                 "ftp": configuration["SHOW_FTP"],
                 "plain_https": configuration["SHOW_PLAIN_HTTPS"],
@@ -329,6 +340,7 @@ def config(request):
             },
         },
         "announcement": configuration["ANNOUNCEMENT"],
+        "disclaimer": configuration["DISCLAIMER_HTML"],
         "responsible_organization": {
             "name": configuration["RESPONSIBLE_ORGANIZATION_NAME"],
             "promo_text": configuration["RESPONSIBLE_ORGANIZATION_PROMO_TEXT"],
