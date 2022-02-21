@@ -56,6 +56,24 @@ def move_coordinate(data):
         return operation_response(error=True, message="Coordinates do not appear to have the right format.")
 
 
+def delete_coordinate(data):
+    if not data.get("coordinate_id", 0):
+        return operation_response(error=True, message="no_coordinate_selected")
+
+    existing_coordinate = (
+        Coordinate.objects.all().filter(id=data.get("coordinate_id"), geojsontype="Point", is_dead=False).first()
+    )
+    if not existing_coordinate:
+        return operation_response(error=True, message="coordinate_does_not_exist")
+
+    try:
+        existing_coordinate.delete()
+        return operation_response(success=True, message="coordinate_deleted")
+
+    except ValueError:
+        return operation_response(error=True, message="coordinate_could_not_be_deleted.")
+
+
 def add_organization(data):
 
     if not data.get("layer", 0):
