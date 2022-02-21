@@ -154,7 +154,7 @@ POLICY = {
         "ok": ["internet_nl_mail_ipv6_ready"],
         "error": [""],
         "irrelevant": [],
-    }
+    },
 }
 
 SCANNERS = [
