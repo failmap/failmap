@@ -385,7 +385,7 @@ def config(request):
             "title_4": configuration["INFO_TITLE_4"],
             "content_4": configuration["INFO_CONTENT_4"],
             "title_5": configuration["INFO_TITLE_5"],
-            "content_5": configuration["INFO_CONTENT_5"]
+            "content_5": configuration["INFO_CONTENT_5"],
         },
         "comply_or_explain": {
             "forum_link": configuration["COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK"],

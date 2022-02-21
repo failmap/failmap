@@ -961,8 +961,6 @@ CONSTANCE_CONFIG = {
     "ZORGKAART_PASSWORD": ("", "Password to connect to the zorgkaart service.", str),
     "ZORGKAART_FILTER": ("{}", "Filter options, stored as string.", str),
     "PLUS_SHOW_INFO": (False, "Show information about optional services.", bool),
-
-
     "INFO_HEADING": ("", "Heading of the info page.", str),
     "INFO_TITLE_1": ("", "Title 1 of the info page.", str),
     "INFO_CONTENT_1": ("", "Content 1 of the info page.", str),
@@ -1031,7 +1029,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "INFO_TITLE_4",
                 "INFO_CONTENT_4",
                 "INFO_TITLE_5",
-                "INFO_CONTENT_5"
+                "INFO_CONTENT_5",
             ),
         ),
         ("Chat and support options (using gitter)", ("GITTER_CHAT_ENABLE", "GITTER_CHAT_CHANNEL")),
