@@ -883,6 +883,7 @@ CONSTANCE_CONFIG = {
     ),
     "SHOW_SCAN_SCHEDULE": (False, "Shows list of upcoming scans, so everyone knows what scan is due next.", bool),
     "SHOW_SERVICES": (True, "Show table with how many services are scanned. Requires SHOW_STATS_NUMBERS.", bool),
+    "SHOW_SERVICES_TABLE": (True, "Show table with how many services are scanned. Requires SHOW_STATS_NUMBERS.", bool),
     "SHOW_DONATION": (True, "Show donation buttons and links on the site.", bool),
     "COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK": (
         "",
@@ -1025,6 +1026,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_STATS_IMPROVEMENTS",
                 "SHOW_STATS_NUMBERS",
                 "SHOW_SERVICES",
+                "SHOW_SERVICES_TABLE",
                 "SHOW_STATS_CHANGES",
                 "SHOW_SCAN_SCHEDULE",
                 "SHOW_DONATION",
