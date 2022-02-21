@@ -139,6 +139,22 @@ POLICY = {
         "error": ["error", "unreachable", "not_testable", "untestable"],
         "irrelevant": ["not_tested", "not_applicable", "no_mx"],
     },
+    "internet_nl_v6_web_ipv6": {
+        "high": ["internet_nl_web_ipv6_incompatible"],
+        "medium": ["internet_nl_web_ipv6_proof"],
+        "low": [],
+        "ok": ["internet_nl_web_ipv6_ready"],
+        "error": [""],
+        "irrelevant": [],
+    },
+    "internet_nl_v6_mail_ipv6": {
+        "high": ["internet_nl_mail_ipv6_incompatible"],
+        "medium": ["internet_nl_mail_ipv6_proof"],
+        "low": [],
+        "ok": ["internet_nl_mail_ipv6_ready"],
+        "error": [""],
+        "irrelevant": [],
+    }
 }
 
 SCANNERS = [
