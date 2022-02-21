@@ -342,7 +342,7 @@ def ipv6_grading(scan: EndpointGenericScan):
     if scan.rating == "incompatible":
         high = 1
 
-    return standard_calculation(scan, "", high, medium, low)
+    return standard_calculation(scan, f"ipv6_{scan.rating}", high, medium, low)
 
 
 def change_internet_nl_severity_to_websecmap_severity(

@@ -708,7 +708,7 @@ CONSTANCE_CONFIG = {
         "",
         "The name of this mapping project, used for branding and promotion."
         "<br><br>For example: in the Netherlands the title Faalkaart is used. This has changed over time to "
-        "Basis Beveiliging. The name will be shown at the bottom of the website.",
+        "Basis Beveiliging. The name will be shown at the bottom of the website and the title bar.",
         str,
     ),
     "PROJECT_COUNTRY": (
