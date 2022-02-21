@@ -961,6 +961,19 @@ CONSTANCE_CONFIG = {
     "ZORGKAART_PASSWORD": ("", "Password to connect to the zorgkaart service.", str),
     "ZORGKAART_FILTER": ("{}", "Filter options, stored as string.", str),
     "PLUS_SHOW_INFO": (False, "Show information about optional services.", bool),
+
+
+    "INFO_HEADING": ("", "Heading of the info page.", str),
+    "INFO_TITLE_1": ("", "Title 1 of the info page.", str),
+    "INFO_CONTENT_1": ("", "Content 1 of the info page.", str),
+    "INFO_TITLE_2": ("", "Title 2 of the info page.", str),
+    "INFO_CONTENT_2": ("", "Content 2 of the info page.", str),
+    "INFO_TITLE_3": ("", "Title 3 of the info page.", str),
+    "INFO_CONTENT_3": ("", "Content 3 of the info page.", str),
+    "INFO_TITLE_4": ("", "Title 4 of the info page.", str),
+    "INFO_CONTENT_4": ("", "Content 4 of the info page.", str),
+    "INFO_TITLE_5": ("", "Title 5 of the info page.", str),
+    "INFO_CONTENT_5": ("", "Content 5 of the info page.", str),
 }
 
 CONSTANCE_CONFIG = add_scanner_fields(CONSTANCE_CONFIG)
@@ -1003,6 +1016,22 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "RESPONSIBLE_ORGANIZATION_LINKEDIN",
                 "RESPONSIBLE_ORGANIZATION_WHATSAPP",
                 "RESPONSIBLE_ORGANIZATION_PHONE",
+            ),
+        ),
+        (
+            "Info page content",
+            (
+                "INFO_HEADING",
+                "INFO_TITLE_1",
+                "INFO_CONTENT_1",
+                "INFO_TITLE_2",
+                "INFO_CONTENT_2",
+                "INFO_TITLE_3",
+                "INFO_CONTENT_3",
+                "INFO_TITLE_4",
+                "INFO_CONTENT_4",
+                "INFO_TITLE_5",
+                "INFO_CONTENT_5"
             ),
         ),
         ("Chat and support options (using gitter)", ("GITTER_CHAT_ENABLE", "GITTER_CHAT_CHANNEL")),
