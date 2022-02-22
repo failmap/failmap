@@ -972,6 +972,14 @@ CONSTANCE_CONFIG = {
     "INFO_CONTENT_4": ("", "Content 4 of the info page.", str),
     "INFO_TITLE_5": ("", "Title 5 of the info page.", str),
     "INFO_CONTENT_5": ("", "Content 5 of the info page.", str),
+    "GRADING_POLICY": (
+        "",
+        "Translation prefix for grading labels such as 'high', 'medium', 'low', 'good'. This allows "
+        "a different message to be conveyed depending on the context the site is in. "
+        "Empty = default. Supported: 'ipv6' and empty. ipv6 uses internet.nl ipv6 map features "
+        "where high means incompatible, medium means proof and good means ready.",
+        str,
+    ),
 }
 
 CONSTANCE_CONFIG = add_scanner_fields(CONSTANCE_CONFIG)
@@ -980,7 +988,15 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
     [
         (
             "General",
-            ("COMMENTS", "PROJECT_WEBSITE", "SHOW_ANNOUNCEMENT", "ANNOUNCEMENT", "SHOW_DISCLAIMER", "DISCLAIMER_HTML"),
+            (
+                "COMMENTS",
+                "PROJECT_WEBSITE",
+                "SHOW_ANNOUNCEMENT",
+                "ANNOUNCEMENT",
+                "SHOW_DISCLAIMER",
+                "DISCLAIMER_HTML",
+                "GRADING_POLICY",
+            ),
         ),
         (
             "Keys to External Services",

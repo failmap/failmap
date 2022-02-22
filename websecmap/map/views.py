@@ -298,6 +298,7 @@ def config(request):
             "GOOGLE_MAPS_API_KEY",
             "SHOW_DISCLAIMER",
             "DISCLAIMER_HTML",
+            "GRADING_POLICY",
         ]
     )
 
@@ -396,6 +397,7 @@ def config(request):
         "admin": settings.ADMIN,
         "country_and_layers": countries_and_layers(),
         "google_maps_api_key": configuration["GOOGLE_MAPS_API_KEY"],
+        "grading_policy": configuration["GRADING_POLICY"],
     }
 
     return JsonResponse(config_object, encoder=JSEncoder)
