@@ -8,7 +8,7 @@ from django.db import transaction
 
 from websecmap.map.logic.openstreetmap import update_coordinates
 from websecmap.map.report import recreate_organization_reports
-from websecmap.organizations.adminstrative_transformations import add_url_to_new_organization, merge, dissolve
+from websecmap.organizations.adminstrative_transformations import add_url_to_new_organization, merge
 from websecmap.organizations.models import Organization
 
 log = logging.getLogger(__package__)
@@ -59,7 +59,10 @@ def merge_nl_municipalities_2022():
             "De gemeenten Beemster en Purmerend: opheffing van Beemster en toevoeging van het grondgebied aan "
             "Purmerend."
         )
-        dissolve(dissolved_organization_name="Beemster", target_organization_names=["Purmerend"], **opts)
+        # Still doing a merge since the OSM source we use does not have the updated tiles.
+        # Perhaps we should do a donation.
+        # dissolve(dissolved_organization_name="Beemster", target_organization_names=["Purmerend"], **opts)
+        merge(source_organizations_names=["Beemster"], target_organization_name="Purmerend", **opts)
 
     update_coordinates(countries=["NL"], organization_types=["municipality"], when=merge_date)
 
