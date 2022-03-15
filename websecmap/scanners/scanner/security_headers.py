@@ -3,12 +3,13 @@ Check if the https site uses HSTS to tell the browser the site should only be re
 (useful until browsers do https by default, instead of by choice)
 """
 import logging
-from typing import Dict, Any, Union
+from typing import Union
 
 import requests
 import urllib3
 from celery import Task, group
-from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout, Response
+from requests import ConnectTimeout, ConnectionError, HTTPError, ReadTimeout, Timeout
+from requests.structures import CaseInsensitiveDict
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
@@ -110,7 +111,7 @@ def compose_scan_task(urls):
     return group(tasks)
 
 
-def discover_service_type(headers: Dict = None):
+def discover_service_type(headers: CaseInsensitiveDict = None):
     """
     Try to discover some meaning of the webserver headers, because some HTTP servers are used for entirely different
     purposes than hosting web pages. For example SOAP is used for XML messages and has their own security paradigm.
@@ -165,7 +166,7 @@ def discover_service_type(headers: Dict = None):
 
 
 @app.task(queue="storage")
-def analyze_headers(headers: Dict[str, str], endpoint_id):
+def analyze_headers(headers: CaseInsensitiveDict, endpoint_id):
     # todo: remove code paths, and make a more clear case per header type. That's easier to understand edge cases.
     # todo: Content-Security-Policy, Referrer-Policy
 
@@ -272,7 +273,9 @@ def clean_up_existing_headers(endpoint_id: int, service_type: str, reason: str):
     return {"status": "success"}
 
 
-def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: Dict[str, str]):
+def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: CaseInsensitiveDict):
+    # The HTTP specification RFC 7230 section 3.2 says header names are case-insensitive.
+
     """
     #125: CSP can replace X-XSS-Protection and X-Frame-Options. Thus if a (more modern) CSP header is present, assume
     that decisions have been made about what's in it and ignore the previously mentioned headers.
@@ -320,7 +323,6 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
     If you think it works differently, just file an issue or make a pull request. We want to get it right.
     """
     if protocol == "https":
-
         # runs any unsecured http service? (on ANY port).
         unsecure_services = Endpoint.objects.all().filter(url=url, protocol="http", is_dead=False).exists()
         if unsecure_services:
@@ -391,11 +393,11 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
 
 
 @app.task(bind=True, default_retry_delay=1, retry_kwargs={"max_retries": 3})
-def get_headers(self, uri_uri: str) -> Union[Dict[str, Any], bool]:
+def get_headers(self, uri_uri: str) -> Union[CaseInsensitiveDict, bool]:
     try:
         response = get_headers_request(uri_uri)
         # Object of type CaseInsensitiveDict is not JSON serializable.
-        return dict(response.headers)
+        return response
 
     # The amount of possible return states is overwhelming :)
 
@@ -435,7 +437,7 @@ def get_headers(self, uri_uri: str) -> Union[Dict[str, Any], bool]:
             return False
 
 
-def get_headers_request(uri_url: str) -> Response:
+def get_headers_request(uri_url: str) -> CaseInsensitiveDict:
     """
     Issue #94:
     TL;DR: The fix is to follow all redirects.
@@ -494,4 +496,4 @@ def get_headers_request(uri_url: str) -> Response:
 
     for header in response.headers:
         log.debug("Received header: %s" % header)
-    return response
+    return response.headers
