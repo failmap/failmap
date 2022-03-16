@@ -1061,7 +1061,7 @@ def update_report_tasks(url_chunk: List[int]):
         # Note that you cannot determine the moment to be "now" as the urls have to be re-reated.
         # the moment to rerate organizations is when the url_ratings has finished.
 
-        tasks.append(group(recreate_url_reports([url])) | create_organization_reports_now.si(organizations))
+        tasks.append(group(recreate_url_reports([url.id])) | create_organization_reports_now.si(organizations))
 
         # Calculating statistics is _extremely slow_ so we're not doing that in this method to keep the pace.
         # Otherwise you'd have a 1000 statistic rebuilds pending, all doing a marginal job.

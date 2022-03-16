@@ -42,13 +42,14 @@ def compose_task(
     tasks = []
 
     for organization in organizations:
-        urls = Url.objects.filter(q_configurations_to_report(), organization=organization, **urls_filter)
+        urls = Url.objects.filter(q_configurations_to_report(), organization=organization, **urls_filter).only("id")
         if not urls:
             continue
 
         # Do NOT update the statistics also. This can take long and might not have a desired effect.
         # those updates have to be called explicitly.
-        tasks.append(group(recreate_url_reports(urls)) | recreate_organization_reports.si([organization.pk]))
+        url_ids = [url.id for url in urls]
+        tasks.append(group(recreate_url_reports(url_ids)) | recreate_organization_reports.si([organization.pk]))
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")
