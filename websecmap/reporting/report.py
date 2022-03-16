@@ -100,6 +100,14 @@ def recreate_url_report(url_id):
         # As there can be many scans a day, there will probably be many reports created that day.
         amount_of_new_reports = len(url_reports) - amount_of_existing_reports
         log.debug(f"Adding {amount_of_new_reports} to {url.url}.")
+        # due to bugs there could be multiple on a single day... not yet clear why.
+        # in that case nothing is added.
+        if amount_of_new_reports < 0:
+            # This should never happen.
+            log.error(
+                "There are more url reports than relevant moments in time for this url.", extra={"url_id": url_id}
+            )
+            return
 
         # The current latest report isn't the latest anymore:
         latest_report = UrlReport.objects.all().filter(url=url_id).last()
