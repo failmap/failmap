@@ -1,10 +1,6 @@
 {% extends "admin/base.html" %}
 {% block extrahead %}
 {% load static %}
-    <script>
-    // Fix for gettext issues
-    django.gettext = window.gettext
-</script>
 <!-- Inject admin action dropdown conversion to button for all admin pages. -->
 <script type="text/javascript" src="{% static 'js/vendor/node_modules/vue/dist/vue.js' %}"></script>
 <!-- add some CSS to make sure the action buttons are not overlapping the list of items -->
