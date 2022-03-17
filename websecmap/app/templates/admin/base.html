@@ -1,6 +1,10 @@
 {% extends "admin/base.html" %}
 {% block extrahead %}
 {% load static %}
+    <script>
+    // Fix for gettext issues
+    django.gettext = window.gettext
+</script>
 <!-- Inject admin action dropdown conversion to button for all admin pages. -->
 <script type="text/javascript" src="{% static 'js/vendor/node_modules/vue/dist/vue.js' %}"></script>
 <!-- add some CSS to make sure the action buttons are not overlapping the list of items -->
@@ -23,4 +27,18 @@ It "works" given the page never reaches the bottom (and the scroll-to-bottom sty
   {% endfor %}
 </ul>
 {% endif %}
+{% endblock %}
+
+<!-- This fixes the select boxes -->
+<!-- https://github.com/geex-arts/django-jet/issues/464 -->
+{% load i18n static jet_tags %}
+{% block html %}{{ block.super }}
+        <script src="{% url 'jet:jsi18n' %}"></script>
+{% endblock %}
+
+{% block blockbots %}{{ block.super }}
+
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' as url %}{{ url|jet_append_version }}"
+            type="text/javascript"></script>
+    <script src="{% static 'admin/js/jquery.init.js' as url %}{{ url|jet_append_version }}"></script>
 {% endblock %}
