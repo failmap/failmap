@@ -8,7 +8,7 @@ from websecmap.scanners.models import EndpointGenericScan
 from websecmap.scanners.tests.test_plannedscan import create_endpoint, create_url
 
 
-def test_data_from_dead_endpoint_stays_gone(db):
+def test_data_from_dead_endpoint_stays_gone(db, default_policy):
     """
     Scenario:
 

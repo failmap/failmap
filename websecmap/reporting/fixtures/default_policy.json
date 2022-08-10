@@ -1,0 +1,182 @@
+[
+    {
+        "model": "reporting.scanpolicy",
+        "pk": 1,
+        "fields": {
+            "total_issues": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "ok": 0,
+            "not_applicable": 0,
+            "not_testable": 0,
+            "error_in_test": 0,
+            "scan_type": "tls_qualys_encryption_quality",
+            "conclusion": "A",
+            "explanation": "Good Transport Security, rated A.",
+            "annotation": ""
+        }
+    },
+    {
+        "model": "reporting.scanpolicy",
+        "pk": 2,
+        "fields": {
+            "total_issues": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "ok": 0,
+            "not_applicable": 0,
+            "not_testable": 0,
+            "error_in_test": 0,
+            "scan_type": "tls_qualys_encryption_quality",
+            "conclusion": "A+",
+            "explanation": "Perfect Transport Security, rated A+.",
+            "annotation": ""
+        }
+    },
+    {
+        "model": "reporting.scanpolicy",
+        "pk": 3,
+        "fields": {
+            "total_issues": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 1,
+            "ok": 0,
+            "not_applicable": 0,
+            "not_testable": 0,
+            "error_in_test": 0,
+            "scan_type": "tls_qualys_encryption_quality",
+            "conclusion": "B",
+            "explanation": "Less than optimal Transport Security, rated B.",
+            "annotation": ""
+        }
+    },
+    {
+        "model": "reporting.scanpolicy",
+        "pk": 4,
+        "fields": {
+            "total_issues": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 1,
+            "ok": 0,
+            "not_applicable": 0,
+            "not_testable": 0,
+            "error_in_test": 0,
+            "scan_type": "tls_qualys_encryption_quality",
+            "conclusion": "C",
+            "explanation": "Less than optimal Transport Security, rated C.",
+            "annotation": ""
+        }
+    },
+    {
+        "model": "reporting.scanpolicy",
+        "pk": 5,
+        "fields": {
+            "total_issues": 0,
+            "high": 1,
+            "medium": 0,
+            "low": 0,
+            "ok": 0,
+            "not_applicable": 0,
+            "not_testable": 0,
+            "error_in_test": 0,
+            "scan_type": "tls_qualys_encryption_quality",
+            "conclusion": "F",
+            "explanation": "Broken Transport Security, rated F",
+            "annotation": ""
+        }
+    },
+    {
+        "model": "reporting.scanpolicy",
+        "pk": 6,
+        "fields": {
+            "total_issues": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "ok": 0,
+            "not_applicable": 0,
+            "not_testable": 0,
+            "error_in_test": 0,
+            "scan_type": "tls_qualys_encryption_quality",
+            "conclusion": "A-",
+            "explanation": "Good Transport Security, rated A-.",
+            "annotation": ""
+        }
+    },
+    {
+        "model": "reporting.scanpolicy",
+        "pk": 7,
+        "fields": {
+            "total_issues": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "ok": 0,
+            "not_applicable": 0,
+            "not_testable": 0,
+            "error_in_test": 1,
+            "scan_type": "tls_qualys_encryption_quality",
+            "conclusion": "scan_error",
+            "explanation": "Error occured during scan. No score assigned.",
+            "annotation": ""
+        }
+    },
+    {
+        "model": "reporting.scanpolicy",
+        "pk": 8,
+        "fields": {
+            "total_issues": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "ok": 0,
+            "not_applicable": 0,
+            "not_testable": 0,
+            "error_in_test": 0,
+            "scan_type": "tls_qualys_certificate_trusted",
+            "conclusion": "trusted",
+            "explanation": "Certificate is trusted.",
+            "annotation": ""
+        }
+    },
+    {
+        "model": "reporting.scanpolicy",
+        "pk": 9,
+        "fields": {
+            "total_issues": 0,
+            "high": 1,
+            "medium": 0,
+            "low": 0,
+            "ok": 0,
+            "not_applicable": 0,
+            "not_testable": 0,
+            "error_in_test": 0,
+            "scan_type": "tls_qualys_certificate_trusted",
+            "conclusion": "not trusted",
+            "explanation": "Certificate is not trusted.",
+            "annotation": ""
+        }
+    },
+    {
+        "model": "reporting.scanpolicy",
+        "pk": 10,
+        "fields": {
+            "total_issues": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "ok": 0,
+            "not_applicable": 0,
+            "not_testable": 0,
+            "error_in_test": 1,
+            "scan_type": "tls_qualys_certificate_trusted",
+            "conclusion": "scan_error",
+            "explanation": "Error occured during scan. No score assigned.",
+            "annotation": ""
+        }
+    }
+]

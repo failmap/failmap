@@ -77,3 +77,32 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ["-at_when"]
 
     save_as = True
+
+
+@admin.register(models.ScanPolicy)
+class ScanPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    list_display = (
+        "scan_type",
+        "conclusion",
+        "high",
+        "medium",
+        "low",
+        "error_in_test",
+        "annotation"
+    )
+
+    fields = (
+        "annotation",
+        "scan_type",
+        "conclusion",
+        "explanation",
+        "total_issues",
+        "high",
+        "medium",
+        "low",
+        "ok",
+        "not_applicable",
+        "not_testable",
+        "error_in_test"
+    )

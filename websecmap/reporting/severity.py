@@ -12,6 +12,7 @@ from typing import Union, Any, Dict
 import pytz
 from django.conf import settings
 
+from websecmap.reporting.policy import conclusion_to_score
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 
 log = logging.getLogger(__package__)
@@ -195,47 +196,21 @@ def dnssec(scan: Union[EndpointGenericScan, UrlGenericScan]):
     return standard_calculation(scan, scan.explanation, high, medium, low)
 
 
-def tls_qualys_certificate_trusted(scan: Union[EndpointGenericScan, UrlGenericScan]):
-    high, medium, low = 0, 0, 0
+def get_score_from_policy(scan: Union[EndpointGenericScan, UrlGenericScan]):
+    policy = conclusion_to_score(scan.type, scan.rating)
 
-    explanations = {
-        "not trusted": "Certificate is not trusted.",
-        "trusted": "Certificate is trusted.",
-        # copy the error we got. And do not add any score to it(!)
-        "scan_error": scan.explanation,
-    }
+    # Would it be smarter to just have the values we need?
+    data = policy.__dict__
+    data.pop("_state", None)
+    data.pop("_foreign_key_cache", None)
+    data.pop("annotation", None)
+    data.pop("id", None)
+    data.pop("total_issues", None)
+    data.pop("ok", None)
+    data.pop("scan_type", None)
+    data.pop("conclusion", None)
 
-    explanation = explanations[scan.rating]
-
-    if scan.rating == "not trusted":
-        high += 1
-
-    return standard_calculation(scan, explanation, high, medium, low, error_in_test=scan.rating == "scan_error")
-
-
-def tls_qualys_encryption_quality(scan: Union[EndpointGenericScan, UrlGenericScan]):
-    high, medium, low = 0, 0, 0
-
-    explanations = {
-        "F": "Broken Transport Security, rated F",
-        "C": "Less than optimal Transport Security, rated C.",
-        "B": "Less than optimal Transport Security, rated B.",
-        "A-": "Good Transport Security, rated A-.",
-        "A": "Good Transport Security, rated A.",
-        "A+": "Perfect Transport Security, rated A+.",
-        # copy the error we got. And do not add any score to it(!)
-        "scan_error": scan.explanation,
-    }
-
-    explanation = explanations[scan.rating]
-
-    if scan.rating in ["F"]:
-        high += 1
-
-    if scan.rating in ["B", "C"]:
-        low += 1
-
-    return standard_calculation(scan, explanation, high, medium, low, error_in_test=scan.rating == "scan_error")
+    return standard_calculation(scan, **data)
 
 
 def internet_nl_mail_starttls_tls_available(scan: Union[EndpointGenericScan, UrlGenericScan]):
@@ -584,8 +559,10 @@ calculation_methods = {
     "plain_https": plain_https,
     "dnssec": dnssec,
     "ftp": ftp,
-    "tls_qualys_certificate_trusted": tls_qualys_certificate_trusted,
-    "tls_qualys_encryption_quality": tls_qualys_encryption_quality,
+
+    # Qualys scans are straight mapping of a value to a color as this is already a high level scan.
+    "tls_qualys_certificate_trusted": get_score_from_policy,
+    "tls_qualys_encryption_quality": get_score_from_policy,
     "Dummy": dummy_calculated_values,
     # todo: the new format will change the translation fields of the UI somewhat...
     "internet_nl_mail_starttls_tls_available": internet_nl_requirement_tilde_value_format,
