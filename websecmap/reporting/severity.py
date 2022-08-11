@@ -83,93 +83,67 @@ def get_security_header_calculation(scan: Union[EndpointGenericScan, UrlGenericS
         todo: we're going to need to split this up per header, there are too many code paths forming.
     """
 
-    high, medium, low = 0, 0, 0
-
-    header = {
-        "http_security_header_strict_transport_security": "Strict-Transport-Security",
-        "http_security_header_x_content_type_options": "X-Content-Type-Options",
-        "http_security_header_x_frame_options": "X-Frame-Options",
-        "http_security_header_x_xss_protection": "X-XSS-Protection",
-    }[scan.type]
-
     # We add what is done well, so it's more obvious it's checked.
     if scan.rating == "Unreachable":
-        return standard_calculation(
-            scan,
-            "Web server content became unreachable. No HTTP content present.",
-            high,
-            medium,
-            low,
-            error_in_test=True,
-        )
+        return conclusion_to_standard_calculation(scan, "unreachable")
 
     if scan.rating == "RESTRICTED":
-        return standard_calculation(
-            scan, "Web server requires authorization to access, headers are not publicly visible.", high, medium, low
-        )
+        return conclusion_to_standard_calculation(scan, "access_restricted")
 
     if scan.rating == "UNKNOWN":
-        return standard_calculation(
-            scan, "Non HTTP response found, which does not require HTTP security headers.", high, medium, low
-        )
+        return conclusion_to_standard_calculation(scan, "non_http_response")
 
     if scan.rating == "SOAP":
-        return standard_calculation(scan, "Header not relevant for SOAP service.", high, medium, low)
+        return conclusion_to_standard_calculation(scan, "soap")
 
     if scan.rating == "True":
-        explanation = header + " header present."
+        return conclusion_to_standard_calculation(scan, "present")
     elif scan.rating == "Using CSP":
-        explanation = (
-            "Content-Security-Policy header found, which covers the security aspect of the %s header." % header
-        )
+        return conclusion_to_standard_calculation(scan, "using_csp")
     else:
-        explanation = "Missing " + header + " header."
-
-        if header in ["Strict-Transport-Security"]:
+        if scan.type in ["http_security_header_strict_transport_security"]:
 
             # special case when no insecure alternatives are offered
             if (
                 scan.explanation == "Security Header not present: Strict-Transport-Security, "
                 "yet offers no insecure http service."
             ):
-                explanation = "Missing " + header + " header. Offers no insecure alternative service."
-                medium += 0
+                return conclusion_to_standard_calculation(scan, "missing_but_no_insecure_service_offered")
             else:
-                medium += 1
+                return conclusion_to_standard_calculation(scan, "missing")
 
-        if header in ["X-Content-Type-Options", "X-XSS-Protection", "X-Frame-Options"]:
-            low += 1
+        if scan.type in [
+            "http_security_header_x_content_type_options",
+            "http_security_header_x_frame_options",
+            "http_security_header_x_xss_protection",
+        ]:
+            return conclusion_to_standard_calculation(scan, "missing")
 
-    return standard_calculation(scan, explanation, high, medium, low)
+    # fallback any other conclusion that has not been handled yet, so you can set it ad-hoc
+    return conclusion_to_standard_calculation(scan, scan.rating)
 
 
 def plain_https(scan: Union[EndpointGenericScan, UrlGenericScan]):
-    high, medium, low = 0, 0, 0
-
     # changed the ratings in the database. They are not really correct.
     # When there is no https at all, it's worse than having broken https. So rate them the same.
-    if scan.explanation == "Site does not redirect to secure url, and has no secure alternative on a standard port.":
-        high += 1
 
-    # wrong spelling (history)
-    if scan.explanation == "Site does not redirect to secure url, and has nosecure alternative on a standard port.":
-        high += 1
+    if scan.explanation == "1000":
+        return conclusion_to_standard_calculation(scan, "no_https_redirect_and_no_https_on_standard_port")
 
     # And have redirects looked at: why is there no secure alternative on the standard counterpart port?
-    if scan.explanation == "Redirects to a secure site, while a secure counterpart on the standard port is missing.":
-        medium += 1
+    if scan.explanation == "25":
+        return conclusion_to_standard_calculation(scan, "https_redirect_on_insecure_port_and_no_https_on_standard_port")
 
-    return standard_calculation(scan, scan.explanation, high, medium, low)
+    if scan.explanation == "0":
+        return conclusion_to_standard_calculation(scan, "redirecting_properly")
+
+    # fallback any other conclusion that has not been handled yet, so you can set it ad-hoc
+    return conclusion_to_standard_calculation(scan, scan.rating)
 
 
 def ftp(scan: Union[EndpointGenericScan, UrlGenericScan]):
-    # outdated, insecure
-    high, medium, low = 0, 0, 0
-
     # changed the ratings in the database. They are not really correct.
     # When there is no https at all, it's worse than having broken https. So rate them the same.
-    if scan.rating == "outdated" or scan.rating == "insecure":
-        high += 1
 
     # sometimes we cannot connect, but do see there is an FTP server. As we're not sure, and cannot verify, we'll give
     # this a low rating. It might be wrong. On the other hand: FTP should be implemented properly and doing a FEAT
@@ -178,8 +152,7 @@ def ftp(scan: Union[EndpointGenericScan, UrlGenericScan]):
 
     # also here: the last scan moment increases with every scan. When you have a set of
     # relevant dates (when scans where made) ....
-
-    return standard_calculation(scan, scan.explanation, high, medium, low, error_in_test=scan.rating == "unknown")
+    return conclusion_to_standard_calculation(scan, scan.rating)
 
 
 def dnssec(scan: Union[EndpointGenericScan, UrlGenericScan]):
@@ -188,17 +161,20 @@ def dnssec(scan: Union[EndpointGenericScan, UrlGenericScan]):
 
     In short: DNSSEC quarantees that a domain name matches a certain IP address.
     """
-    high, medium, low = 0, 0, 0
+    return conclusion_to_standard_calculation(scan, scan.rating.lower())
 
-    if scan.rating == "ERROR":
-        high += 1
 
-    return standard_calculation(scan, scan.explanation, high, medium, low)
+def conclusion_to_standard_calculation(scan: Union[EndpointGenericScan, UrlGenericScan], conclusion: str):
+    policy = conclusion_to_score(scan.type, conclusion)
+    return apply_policy_to_standard_calculation(scan, policy)
 
 
 def get_score_from_policy(scan: Union[EndpointGenericScan, UrlGenericScan]):
     policy = conclusion_to_score(scan.type, scan.rating)
+    return apply_policy_to_standard_calculation(scan, policy)
 
+
+def apply_policy_to_standard_calculation(scan, policy):
     # Would it be smarter to just have the values we need?
     data = policy.__dict__
     data.pop("_state", None)
@@ -559,7 +535,6 @@ calculation_methods = {
     "plain_https": plain_https,
     "dnssec": dnssec,
     "ftp": ftp,
-
     # Qualys scans are straight mapping of a value to a color as this is already a high level scan.
     "tls_qualys_certificate_trusted": get_score_from_policy,
     "tls_qualys_encryption_quality": get_score_from_policy,

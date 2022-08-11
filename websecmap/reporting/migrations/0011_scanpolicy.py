@@ -6,29 +6,42 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reporting', '0010_urlreport_is_the_newest'),
+        ("reporting", "0010_urlreport_is_the_newest"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ScanPolicy',
+            name="ScanPolicy",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('total_issues', models.IntegerField(default=0)),
-                ('high', models.IntegerField(default=0)),
-                ('medium', models.IntegerField(default=0)),
-                ('low', models.IntegerField(default=0)),
-                ('ok', models.IntegerField(default=0)),
-                ('not_applicable', models.IntegerField(default=0)),
-                ('not_testable', models.IntegerField(default=0)),
-                ('error_in_test', models.IntegerField(default=0)),
-                ('scan_type', models.CharField(db_index=True, max_length=60)),
-                ('conclusion', models.CharField(default=0, max_length=128)),
-                ('explanation', models.CharField(default=0, help_text='Short explanation from the scanner on how the rating came to be.', max_length=255)),
-                ('annotation', models.CharField(help_text='This allows policy makers to write down something about why a conclusion results in what score...', max_length=8000)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("total_issues", models.IntegerField(default=0)),
+                ("high", models.IntegerField(default=0)),
+                ("medium", models.IntegerField(default=0)),
+                ("low", models.IntegerField(default=0)),
+                ("ok", models.IntegerField(default=0)),
+                ("not_applicable", models.IntegerField(default=0)),
+                ("not_testable", models.IntegerField(default=0)),
+                ("error_in_test", models.IntegerField(default=0)),
+                ("scan_type", models.CharField(db_index=True, max_length=60)),
+                ("conclusion", models.CharField(default=0, max_length=128)),
+                (
+                    "explanation",
+                    models.CharField(
+                        default=0,
+                        help_text="Short explanation from the scanner on how the rating came to be.",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "annotation",
+                    models.CharField(
+                        help_text="This allows policy makers to write down something about why a conclusion results in what score...",
+                        max_length=8000,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

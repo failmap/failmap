@@ -14,7 +14,7 @@ def get(key):
             return CACHE[key]["value"]
         else:
             # do not save this stuff forever
-            del(CACHE[key])
+            del CACHE[key]
 
     # A default None is of a bit tricky, as 'None' might also have been cached. Should this just raise an error?
     return None

@@ -325,6 +325,7 @@ class UrlReport(
 
 # todo: we can make a vulnerabilitystatistic per organization type or per tag. But not per country, list etc.
 
+
 class ScanPolicy(AllIssuesCombined):
     scan_type = models.CharField(
         max_length=60,
@@ -335,16 +336,13 @@ class ScanPolicy(AllIssuesCombined):
         default="",
     )
     explanation = models.CharField(
-        max_length=255, help_text="Short explanation from the scanner on how the rating came to be."
+        max_length=255, help_text="Short explanation from the scanner on how the rating came to be.", blank=True
     )
     annotation = models.TextField(
         max_length=8000,
         help_text="This allows policy makers to write down something about why a conclusion results in what score...",
-        blank=True
+        blank=True,
     )
 
     def __str__(self):
-        return "🏅 [%s %s]" % (
-            self.scan_type,
-            self.conclusion
-        )
+        return "🏅 [%s %s]" % (self.scan_type, self.conclusion)

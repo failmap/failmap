@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reporting', '0011_scanpolicy'),
+        ("reporting", "0011_scanpolicy"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='scanpolicy',
-            name='annotation',
-            field=models.CharField(blank=True, help_text='This allows policy makers to write down something about why a conclusion results in what score...', max_length=8000),
+            model_name="scanpolicy",
+            name="annotation",
+            field=models.CharField(
+                blank=True,
+                help_text="This allows policy makers to write down something about why a conclusion results in what score...",
+                max_length=8000,
+            ),
         ),
     ]

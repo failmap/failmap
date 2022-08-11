@@ -7,7 +7,7 @@ CACHE_DURATION_SECONDS = 600
 CACHE = {}
 
 
-def conclusion_to_score(scan: str = '', conclusion: str = '') -> ScanPolicy:
+def conclusion_to_score(scan: str = "", conclusion: str = "") -> ScanPolicy:
     """
     Retrieve the severity from the database in a combination of test name and the conclusion that has been found.
     How to get to that conclusion can of course be a very complex set of conditions.
@@ -38,9 +38,11 @@ def conclusion_to_score(scan: str = '', conclusion: str = '') -> ScanPolicy:
     # are tons and tons of metrics available and it's easy to miss one in a migration. Then it at least gives a
     # sense of control. Some ratings might also change over time, for example, qualys might add a 'Q' score. That
     # should not stop the software, only skew the results a bit until that score is set up properly.
-    log.warning(f"Could not find a policy, cannot convert conclusion to a score. Creating ad hoc policy. "
-                f"Please configure this policy in the admin interface.",
-                extra={'scan': scan, 'conclusion': conclusion})
+    log.warning(
+        "Could not find a policy, cannot convert conclusion to a score. Creating ad hoc policy. "
+        "Please configure this policy in the admin interface.",
+        extra={"scan": scan, "conclusion": conclusion},
+    )
 
     ad_hoc_sp = ScanPolicy()
     ad_hoc_sp.scan_type = scan
