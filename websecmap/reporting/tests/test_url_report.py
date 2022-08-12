@@ -3,12 +3,12 @@ from datetime import datetime
 import pytz
 
 from websecmap.organizations.models import Url
-from websecmap.reporting.models import UrlReport
+from websecmap.reporting.models import UrlReport, ScanPolicy
 from websecmap.reporting.report import create_url_reports, recreate_url_report
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 
-def test_url_report(db):
+def test_url_report(db, default_policy):
     # Url test.nl has been created
     day_0 = datetime(day=1, month=1, year=2000, tzinfo=pytz.utc)
     # First endpoint was created, first OK scan
@@ -91,6 +91,7 @@ def test_url_report(db):
     assert report.total_endpoints == 1
     # make sure that the endpoints are actually there.
     assert len(report.calculation["endpoints"]) == 1
+    # assert report.__dict__ == {}
     assert report.ok == 0
     assert report.high == 1
     assert report.not_testable == 1
@@ -137,7 +138,10 @@ def test_url_report(db):
         assert report.is_the_newest is False
 
 
-def test_aggegrate_error_in_report(db):
+def test_aggegrate_error_in_report(db, default_policy):
+
+    # check if the scan policies have loaded
+    assert ScanPolicy.objects.all().count() > 10
 
     some_time = datetime(day=1, month=1, year=2000, tzinfo=pytz.utc)
     some_later_time = datetime(day=2, month=1, year=2000, tzinfo=pytz.utc)
@@ -161,6 +165,8 @@ def test_aggegrate_error_in_report(db):
 
     [u.save() for u in create_url_reports(url)]
     report = UrlReport.objects.all().order_by("pk").last()
+
+    # assert report.__dict__ == {}
 
     assert report.endpoint_error_in_test == 1
     # This is 0 because this is not an endpoint level error, but an url_level_error

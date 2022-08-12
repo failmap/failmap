@@ -43,6 +43,7 @@ def conclusion_to_score(scan: str = "", conclusion: str = "") -> ScanPolicy:
         "Please configure this policy in the admin interface.",
         extra={"scan": scan, "conclusion": conclusion},
     )
+    log.debug({"scan": scan, "conclusion": conclusion})
 
     ad_hoc_sp = ScanPolicy()
     ad_hoc_sp.scan_type = scan

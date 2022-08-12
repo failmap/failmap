@@ -82,9 +82,9 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.ScanPolicy)
 class ScanPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
-    list_display = ("summary", "scan_type", "conclusion", "high", "medium", "low", "error_in_test", "annotation")
+    list_display = ("summary", "scan_type", "conclusion", "high", "medium", "low", "ok", "error_in_test", "annotation")
 
-    list_filter = ["scan_type", "high", "medium", "low", "error_in_test"]
+    list_filter = ["scan_type", "high", "medium", "low", "ok", "error_in_test", "conclusion"]
 
     def summary(self, obj):
         text = ""
@@ -100,6 +100,12 @@ class ScanPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
         if obj.error_in_test:
             text += "❌ error"
+
+        if obj.not_applicable:
+            text += "❌ N/A"
+
+        if obj.not_testable:
+            text += "❌ Not Testable"
 
         if not text:
             text = "🟢 ok"
