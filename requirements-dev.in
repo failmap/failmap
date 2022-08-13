@@ -29,6 +29,8 @@ django-debug-toolbar-request-history
 pytest-mock
 requests_mock
 bandit
+pylint
+pylint-django
 
 # docs / readthedocs.io
 sphinx

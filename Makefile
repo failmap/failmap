@@ -254,3 +254,6 @@ help:           ## Show this help.
 	done
 
 check-commit: fix test
+
+lint:  ${pysrc} ${app} ## Do basic linting
+	DJANGO_SETTINGS_MODULE=${app_name}.settings ${env} pylint ${pysrcdirs}

@@ -30,7 +30,7 @@ import requests
 log = logging.getLogger(__package__)
 
 
-def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict()) -> List:
+def url_by_filters(organizations_filter: dict = None, urls_filter: dict = None) -> List:
     # only include what is allowed to be scanned, and reduce the amount of retrieved fields to a minimum.
     urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), **urls_filter).only("id", "url")
 
@@ -51,7 +51,7 @@ def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_discover(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ):
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
     plannedscan.request(activity="discover", scanner="subdomains", urls=urls)
@@ -63,7 +63,7 @@ def compose_planned_discover_task(**kwargs):
     return compose_discover_task(urls)
 
 
-def compose_manual_discover_task(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs):
+def compose_manual_discover_task(organizations_filter: dict = None, urls_filter: dict = None, **kwargs):
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
     log.info(f"Discovering subdomains on {len(urls)} urls.")
     return compose_discover_task(urls)
@@ -82,7 +82,7 @@ def compose_discover_task(urls) -> Task:
 
 
 def filter_verify(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ):
 
     default_filter = {"not_resolvable": False}
@@ -97,7 +97,7 @@ def filter_verify(
 
 @app.task(queue="storage")
 def plan_verify(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ):
 
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
@@ -112,12 +112,12 @@ def compose_planned_verify_task(**kwargs):
 
 # it will not revive anything(!) Should that be a revive task?
 def compose_manual_verify_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
 
     # instead of only checking by domain, just accept the filters as they are handled in any other scenario...
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    log.info("Will verify subdomain resolvability via DNS on %s urls" % len(urls))
+    log.info(f"Will verify subdomain resolvability via DNS on {len(urls)} urls")
 
     return compose_verify_task(urls)
 
@@ -131,7 +131,7 @@ def compose_verify_task(urls):
 
 
 def filter_discover(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ):
 
     default_filter = {"not_resolvable": False}
@@ -149,9 +149,9 @@ def filter_discover(
 @app.task(queue="internet")
 def url_resolves(url: str):
 
-    v4, v6 = get_ips(url)
+    ipv4, ipv6 = get_ips(url)
 
-    if not v4 and not v6:
+    if not ipv4 and not ipv6:
         return False
 
     return True
@@ -190,7 +190,7 @@ def toplevel_urls_without_wildcards(organizations: List):
 
 
 def remove_and_save_wildcards(urls: List[Dict[str, Any]]):
-    without_wildcards, with_wildcards = has_wildcards(urls)
+    without_wildcards, _ = has_wildcards(urls)
     return without_wildcards
 
 
@@ -212,7 +212,7 @@ def has_wildcards(urls: List[Dict[str, Any]]):
             continue
 
         if url_discover_wildcard(url["url"]):
-            log.info("Domain %s uses wildcards, DNS brute force not possible" % url["url"])
+            log.info("Domain %s uses wildcards, DNS brute force not possible", url["url"])
             db_url.uses_dns_wildcard = True
             db_url.save()
             urls_with_wildcards.append(url)
@@ -222,8 +222,8 @@ def has_wildcards(urls: List[Dict[str, Any]]):
             urls_without_wildcards.append(url)
 
     log.debug(
-        "Of the %s urls, %s had a wildcard and %s did not."
-        % (len(urls), len(urls_with_wildcards), len(urls_without_wildcards))
+        "Of the %s urls, %s had a wildcard and %s did not.",
+        len(urls), len(urls_with_wildcards), len(urls_without_wildcards)
     )
 
     return urls_without_wildcards, urls_with_wildcards
@@ -241,18 +241,18 @@ def discover_wildcard(url: str):
 
     In some cases DNSrecon makes a wrong assumption about wildcard usage. This is hopefully a bit better.
     """
-    log.debug("Checking for DNS wildcards on domain: %s" % url)
+    log.debug("Checking for DNS wildcards on domain: %s", url)
 
     wildcard = False
 
     resolver = DnsHelper(url, [get_random_nameserver()], 3)
 
     # Do this test twice, there are dns servers that say NO the first time, but say yes the second (i mean wtf)
-    ips_1 = resolver.get_a("%s.%s" % ("".join(random.choice(string.ascii_lowercase) for i in range(16)), url))
-    ips_2 = resolver.get_a("%s.%s" % ("".join(random.choice(string.ascii_lowercase) for i in range(16)), url))
+    ips_1 = resolver.get_a(f"{''.join(random.choice(string.ascii_lowercase) for i in range(16))}.{url}")
+    ips_2 = resolver.get_a(f"{''.join(random.choice(string.ascii_lowercase) for i in range(16))}.{url}")
 
     if len(ips_1) > 0 or len(ips_2) > 0:
-        log.debug("%s has wildcards enabled." % url)
+        log.debug("%s has wildcards enabled.", url)
         return True
 
     return wildcard
@@ -270,7 +270,7 @@ def dnsrecon_parse_report_contents(contents: List, url: Dict[str, Any]):
     addedlist = []
     for record in contents:
         # brutally ignore all kinds of info from other structures.
-        log.debug("Record: %s" % record)
+        log.debug("Record: %s", record)
         # https://stackoverflow.com/questions/11328940/check-if-list-item-contains-items-fro
         # strings: dkim etc
         # target: cname
@@ -314,7 +314,7 @@ def wordlist_scan(url: str, wordlist: List[str]):
     :param wordlist:
     :return:
     """
-    log.debug("Performing wordlist scan on %s, with the wordlist of %s words" % (url, len(wordlist)))
+    log.debug("Performing wordlist scan on %s, with the wordlist of %s words", url, len(wordlist))
 
     # any organization can determine at any points that there are now wildcards in effect
     # would we not check this, all urls below the current url will be seen as valid, which
@@ -329,11 +329,11 @@ def wordlist_scan(url: str, wordlist: List[str]):
     log.debug("Creating temporary file from wordlist")
     with tempfile.NamedTemporaryFile(mode="wt") as tmp_wordlist:
         for word in wordlist:
-            tmp_wordlist.write("%s\n" % word)
+            tmp_wordlist.write(f"{word}\n")
         tmp_wordlist.flush()  # make sure it's actually written.
 
-        log.debug("The wordlist file is written as %s" % tmp_wordlist.name)
-        log.info("Wordlist scan on: %s" % url)
+        log.debug("The wordlist file is written as %s", tmp_wordlist.name)
+        log.info("Wordlist scan on: %s", url)
 
         resolver = DnsHelper(url, [get_random_nameserver()], 3)
         # Using the filter option, only adds the addresses that don't go to the wildcard record.
@@ -343,7 +343,7 @@ def wordlist_scan(url: str, wordlist: List[str]):
 
         # some hosts rotate a set of IP's when providing wildcards. This is an annoying practice.
         # We can filter those out with some statistics. We cut off everything that resolve to the top IP's.
-        log.debug("Found %s hosts" % len(found_hosts))
+        log.debug("Found %s hosts", len(found_hosts))
         found_hosts = remove_wildcards_using_statistics(found_hosts, url)
 
         # You cant' know how many where added, since you don't have access to storage.
@@ -461,7 +461,7 @@ def certificate_transparency_scan(url: str):
     if "25" in subdomains:
         subdomains.remove("25")
 
-    log.debug("Found subdomains: %s" % subdomains)
+    log.debug("Found subdomains: %s", subdomains)
     return subdomains
 
 
@@ -593,7 +593,7 @@ def get_popular_subdomains(country: str = "NL"):
     # i'm _DONE_ with the obscuring of group_by and counts using terrible abstractions.
     # so here is a raw query that just works on all databases and is trivially simple to understand.
     # The popularity of a domain per country is still an unknown.
-    sql = """SELECT
+    sql = f"""SELECT
                  computed_subdomain, count(computed_subdomain) as amount
              FROM
                  url
@@ -607,7 +607,7 @@ def get_popular_subdomains(country: str = "NL"):
                     INNER JOIN url_organization on url_organization.url_id = url.id
                     INNER JOIN organization on url_organization.organization_id = organization.id
                     WHERE organization.is_dead=false
-                    AND organization.country = '%(country)s'
+                    AND organization.country = {country}
                 )
              GROUP BY
                  computed_subdomain
@@ -616,9 +616,7 @@ def get_popular_subdomains(country: str = "NL"):
              HAVING count(computed_subdomain) > 1
              ORDER BY count(computed_subdomain) DESC
              LIMIT 500
-             """ % {
-        "country": country
-    }
+             """
 
     cursor = connection.cursor()
     cursor.execute(sql)

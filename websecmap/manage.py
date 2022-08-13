@@ -4,7 +4,7 @@ import sys
 
 
 def main():
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "failmap.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "websecmap.settings")
 
     from django.core.management import execute_from_command_line
 
