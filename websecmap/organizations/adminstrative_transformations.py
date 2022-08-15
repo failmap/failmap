@@ -83,9 +83,9 @@ def merge(
     :return:
     """
 
-    type = OrganizationType.objects.get(name=organization_type)
+    organization_type_object = OrganizationType.objects.get(name=organization_type)
     new_organization = Organization()
-    new_organization.type = type
+    new_organization.type = organization_type_object
     new_organization.country = country
     new_organization.name = target_organization_name
     new_organization.created_on = when
@@ -97,15 +97,15 @@ def merge(
     # implies that name + country + organization_type is unique.
     try:
         original_target = Organization.objects.get(
-            name=target_organization_name, country=country, type=type, is_dead=False
+            name=target_organization_name, country=country, type=organization_type_object, is_dead=False
         )
         new_organization.twitter_handle = original_target.twitter_handle
 
-        log.info("Creating a new %s, with information from the merged organization." % target_organization_name)
+        log.info("Creating a new %s, with information from the merged organization.", target_organization_name)
         original_target.is_dead = True
         original_target.is_dead_since = when
         original_target.is_dead_reason = (
-            "Merged with other organizations, reusing the same name but different data" "+ the old data."
+            "Merged with other organizations, reusing the same name but different data + the old data."
         )
         original_target.save()
 
@@ -127,19 +127,18 @@ def merge(
     new_organization.save()
 
     for source_organizations_name in source_organizations_names:
-        log.info("Trying to add %s to the merge with %s." % (source_organizations_name, new_organization))
+        log.info("Trying to add %s to the merge with %s.", source_organizations_name, new_organization)
 
         try:
             source_organization = Organization.objects.get(
-                name=source_organizations_name, country=country, type=type, is_dead=False
+                name=source_organizations_name, country=country, type=organization_type_object, is_dead=False
             )
         except Organization.DoesNotExist:
             # New organizations don't exist... so nothing to migrate.
             raise ValueError(
-                "Organization %s does not exist. Tried to merge it with %s. Are you using a different translation for "
-                "this organization (for example a local dialect)?",
-                source_organizations_name,
-                target_organization_name,
+                f"Organization {source_organizations_name} does not exist. Tried to merge it "
+                f"with {target_organization_name}. Are you using a different translation for "
+                "this organization (for example a local dialect)?"
             )
 
         # copy todays used coordinates from all to-be-merged organizations into the target
@@ -153,7 +152,7 @@ def merge(
             # Would otherwise retrieve multiple coordinates.
             coordinate.is_dead = True
             coordinate.is_dead_since = when
-            coordinate.is_dead_reason = "Merged with %s" % new_organization
+            coordinate.is_dead_reason = f"Merged with {new_organization}"
 
         # Should we make copies of all urls? And for what? Or should we state somewhere when an URL was owned
         # by an organization? Like n-n with extra information from when that is valid? That would result in
@@ -172,14 +171,14 @@ def merge(
         # A weird bug in Django Jet doesn't show the urls in the new organization.
         # WRONG: you where looking at the old relation, not the many to many field(!).
         for url in Url.objects.all().filter(organization=source_organization):
-            log.debug("Adding new organization to existing Url %s" % url)
+            log.debug("Adding new organization to existing Url %s", url)
             url.organization.add(new_organization)
             log.debug(url.organization.all())
             url.save()
 
         source_organization.is_dead = True
         source_organization.is_dead_since = when
-        source_organization.is_dead_reason = "Merged into %s on %s." % (new_organization, when)
+        source_organization.is_dead_reason = f"Merged into {new_organization} on {when}."
         source_organization.save()
 
     # raise NotImplemented
@@ -215,7 +214,7 @@ def dissolve(
     )
     dissolved_organization.is_dead = True
     dissolved_organization.is_dead_since = when
-    dissolved_organization.is_dead_reason = "Disolved into other organizations (%s)" % target_organization_names
+    dissolved_organization.is_dead_reason = f"Disolved into other organizations ({target_organization_names})"
     dissolved_organization.save()
 
     # the urls of this organization are shared to it's targets :) ENJOY! :)
@@ -233,7 +232,7 @@ def dissolve(
         target_organization.is_dead = True
         target_organization.is_dead_since = when
         target_organization.is_dead_reason = (
-            "Received heritage of dissolved organization %s" % dissolved_organization_name
+            f"Received heritage of dissolved organization {dissolved_organization_name}"
         )
         target_organization.save()
 

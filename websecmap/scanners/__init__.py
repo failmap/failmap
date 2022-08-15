@@ -664,3 +664,22 @@ for scanner in SCANNERS:
 
 # todo: add config options for each of the scans defined above, include them in constance.
 # todo: check these config options dynamically at the right moments, so to reduce maintenance.
+
+
+def init_dict(*args):
+    # To deal with the well known issues with mutable arguments in methods.
+    # Initialize to empty dicts, so they can be used as kwargs and other constructs without having to deal with None
+    # values all the time.
+
+    returned = []
+
+    for arg in args:
+        if arg is None:
+            returned.append({})
+        else:
+            returned.append(arg)
+
+    if len(returned) == 1:
+        return returned[0]
+
+    return tuple(returned)

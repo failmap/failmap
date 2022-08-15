@@ -3,16 +3,15 @@ import logging
 from celery import Task, group
 
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.scanner import subdomains
 
 log = logging.getLogger(__package__)
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_verify(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_verify(organizations_filter, urls_filter, **kwargs)
     plannedscan.request(activity="verify", scanner="verify_unresolvable", urls=urls)
 
@@ -23,9 +22,8 @@ def compose_planned_verify_task(**kwargs):
     return compose_verify_task(urls)
 
 
-def filter_verify(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     override_filter = {"not_resolvable": True}
     urls_filter = {**urls_filter, **override_filter}
 
@@ -33,8 +31,9 @@ def filter_verify(
 
 
 def compose_manual_verify_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_verify_task(urls)
 

@@ -633,7 +633,7 @@ SENTRY_TOKEN = os.environ.get("SENTRY_TOKEN", "")
 
 SENTRY_ORGANIZATION = "internet-cleanup-foundation"
 SENTRY_PROJECT = "faalkaart"
-SENTRY_PROJECT_URL = "https://sentry.io/%s/%s" % (SENTRY_ORGANIZATION, SENTRY_PROJECT)
+SENTRY_PROJECT_URL = f"https://sentry.io/{SENTRY_ORGANIZATION}/{SENTRY_PROJECT}"
 
 # Some workers or (development) environments don't support both IP networks
 # Note that not supporting either protocols can result in all endpoints being killed as they are unreachable by scanners

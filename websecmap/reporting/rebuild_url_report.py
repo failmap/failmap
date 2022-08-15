@@ -23,10 +23,10 @@ def compose_task(**kwargs) -> Task:
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")
-        log.debug("Url filter: %s" % kwargs)
+        log.debug("Url filter: %s", kwargs)
         return group()
 
-    log.debug("Number of tasks: %s" % len(tasks))
+    log.debug("Number of tasks: %s", len(tasks))
 
     task = group(tasks)
 

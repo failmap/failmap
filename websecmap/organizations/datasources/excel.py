@@ -43,7 +43,7 @@ def parse_data(dataset, filename):
     # csv, ods, xls, xlsx and xlsm files
     found_organizations = []
 
-    log.debug("Loading excel data from %s" % filename)
+    log.debug("Loading excel data from %s", filename)
     sheet = p.get_sheet(file_name=filename, name_columns_by_row=0)
     records = sheet.to_records()
 

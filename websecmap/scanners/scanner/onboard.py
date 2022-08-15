@@ -9,6 +9,7 @@ from django.utils import timezone
 from websecmap.celery import Task, app, EXPIRES_IN_ONE_DAY
 from websecmap.map.report import update_report_tasks
 from websecmap.organizations.models import Url
+from websecmap.scanners import init_dict
 from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, url_filters
 from websecmap.scanners.scanner.utils import in_chunks
 from websecmap.scanners.tasks import crawl_tasks, explore_tasks, scan_tasks
@@ -17,8 +18,9 @@ log = logging.getLogger(__package__)
 
 
 def compose_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     """Multi-stage onboarding."""
 
     """
@@ -53,7 +55,7 @@ def compose_task(
     urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), **urls_filter)
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
 
-    log.info("Found %s urls to create tasks for." % len(urls))
+    log.info("Found %s urls to create tasks for.", len(urls))
 
     # it's impossible to set the first stage "endpoint_discovery" in a task, as the task might take an hour
     # to complete (depending of how much work is in the queue. Could be days. So therefore to trigger the first
@@ -102,7 +104,7 @@ def compose_task(
     for url in crawling_urls:
         tasks.append(crawl_tasks(url) | finish_onboarding.si(url))
 
-    log.info("Created %s tasks to be performed." % len(tasks))
+    log.info("Created %s tasks to be performed.", len(tasks))
     task = group(tasks)
 
     # log.info("Task:")

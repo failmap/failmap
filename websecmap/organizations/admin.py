@@ -197,22 +197,22 @@ class ActionMixin:
         # using this function maker, scan functions can be generated.
         def scan_function_maker(scanner_name, verbose_name):
             def scan_function(self, *args, **kwargs):
-                module = importlib.import_module("websecmap.scanners.scanner.%s" % scanner_name)
-                return self.generic_action(module.compose_task, "🔬 %s" % verbose_name, *args, **kwargs)
+                module = importlib.import_module(f"websecmap.scanners.scanner.{scanner_name}")
+                return self.generic_action(module.compose_task, f"🔬 {verbose_name}", *args, **kwargs)
 
             return scan_function
 
         def discover_function_maker(scanner_name, verbose_name):
             def scan_function(self, *args, **kwargs):
-                module = importlib.import_module("websecmap.scanners.scanner.%s" % scanner_name)
-                return self.generic_action(module.compose_discover_task, "🗺 %s" % verbose_name, *args, **kwargs)
+                module = importlib.import_module(f"websecmap.scanners.scanner.{scanner_name}")
+                return self.generic_action(module.compose_discover_task, f"🗺 {verbose_name}", *args, **kwargs)
 
             return scan_function
 
         def verify_function_maker(scanner_name, verbose_name):
             def verify_function(self, *args, **kwargs):
-                module = importlib.import_module("websecmap.scanners.scanner.%s" % scanner_name)
-                return self.generic_action(module.compose_verify_task, "[X] %s" % verbose_name, *args, **kwargs)
+                module = importlib.import_module(f"websecmap.scanners.scanner.{scanner_name}")
+                return self.generic_action(module.compose_verify_task, f"[X] {verbose_name}", *args, **kwargs)
 
             return verify_function
 
@@ -223,22 +223,22 @@ class ActionMixin:
             # these discover:
             if scanner["can discover urls"] or scanner["can discover endpoints"]:
                 func = discover_function_maker(scanner["name"], scanner["verbose name"])
-                unique_name = "discover_%s" % scanner["name"]
-                actions[unique_name] = (func, unique_name, "🗺 %s" % scanner["verbose name"])
+                unique_name = f"discover_{scanner['name']}"
+                actions[unique_name] = (func, unique_name, f"🗺 {scanner['verbose name']}")
 
         for scanner in SCANNERS:
             # these verify:
             if scanner["can verify urls"] or scanner["can verify endpoints"]:
                 func = verify_function_maker(scanner["name"], scanner["verbose name"])
-                unique_name = "verify_%s" % scanner["name"]
-                actions[unique_name] = (func, unique_name, "[X] %s" % scanner["verbose name"])
+                unique_name = f"verify_{scanner['name']}"
+                actions[unique_name] = (func, unique_name, f"[X] {scanner['verbose name']}")
 
         for scanner in SCANNERS:
             # these create scans
             if scanner["creates endpoint scan types"] or scanner["creates url scan types"]:
                 func = scan_function_maker(scanner["name"], scanner["verbose name"])
-                unique_name = "scan_%s" % scanner["name"]
-                actions[unique_name] = (func, unique_name, "🔬 %s" % scanner["verbose name"])
+                unique_name = f"scan_{scanner['name']}"
+                actions[unique_name] = (func, unique_name, f"🔬 {scanner['verbose name']}")
 
         return actions
 
@@ -254,10 +254,10 @@ class ActionMixin:
             filters["endpoints_filter"] = filters.pop("x_filter")
 
         task = task_composer(**filters)
-        task_name = "%s (%s) " % (name, ",".join(map(str, list(queryset))))
+        task_name = f"{name} ({','.join(map(str, list(queryset)))}) "
         job = Job.create(task, task_name, request, priority=PRIO_HIGH)
         link = reverse("admin:app_job_change", args=(job.id,))
-        self.message_user(request, 'Job created, <a href="%s">%s</a>' % (link, task_name))
+        self.message_user(request, f'Job created, <a href="{link}">{task_name}</a>')
 
 
 # http://jet.readthedocs.io/en/latest/autocomplete.html?highlight=many
@@ -296,25 +296,23 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     @staticmethod
     def name_details(self):
         if self.is_dead:
-            return "✝ %s, %s (%s - %s)" % (
-                self.name,
-                self.country,
-                self.created_on.strftime("%b %Y") if self.created_on else "",
-                self.is_dead_since.strftime("%b %Y") if self.is_dead_since else "",
+            return (
+                f"✝ {self.name}, {self.country} ({self.created_on.strftime('%b %Y') if self.created_on else ''} "
+                f"- {self.is_dead_since.strftime('%b %Y') if self.is_dead_since else ''})"
             )
         else:
-            return "%s, %s (%s)" % (self.name, self.country, self.created_on.strftime("%b %Y"))
+            return f"{self.name}, {self.country} ({self.created_on.strftime('%b %Y')})"
 
     @staticmethod
     def wikidata_(self):
         return format_html(
-            "<a href='https://www.wikidata.org/wiki/%s' target='_blank'>🔍 %s</a>" % (self.wikidata, self.wikidata)
+            f"<a href='https://www.wikidata.org/wiki/{self.wikidata}' target='_blank'>🔍 {self.wikidata}</a>"
         )
 
     @staticmethod
     def wikipedia_(self):
         return format_html(
-            "<a href='https://www.wikipedia.org/wiki/%s' target='_blank'>🔍 %s</a>" % (self.wikipedia, self.wikipedia)
+            f"<a href='https://www.wikipedia.org/wiki/{self.wikipedia}' target='_blank'>🔍 {self.wikipedia}</a>"
         )
 
     # preserve_filters = True
@@ -322,6 +320,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
 # https://docs.djangoproject.com/en/2.0/ref/forms/validation/
 class MyUrlAdminForm(forms.ModelForm):
+    @property
     def clean_url(self):
 
         url_string = self.data.get("url")
@@ -336,9 +335,9 @@ class MyUrlAdminForm(forms.ModelForm):
         result = tldextract.extract(url_string)
 
         if result.subdomain:
-            clean_url_string = "%s.%s.%s" % (result.subdomain, result.domain, result.suffix)
+            clean_url_string = f"{result.subdomain}.{result.domain}.{result.suffix}"
         else:
-            clean_url_string = "%s.%s" % (result.domain, result.suffix)
+            clean_url_string = f"{result.domain}.{result.suffix}"
 
         # also place the cleaned data back into the form, in case of errors.
         # this does not work this way it seems.
@@ -442,7 +441,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     # It's efficient to already get all endpints. Makes 30 second load into 8 second load.
     def get_queryset(self, request):
-        queryset = super(UrlAdmin, self).get_queryset(request)
+        queryset = super().get_queryset(request)
         queryset = queryset.prefetch_related("endpoint_set")
         return queryset
 
@@ -546,17 +545,16 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
             return
 
         str = format_html(
-            "%s <a href='/admin/scanners/endpoint/?q=%s' target='_blank'>🔍</a>" % (obj.endpoint_set.count(), obj.url)
+            f"{obj.endpoint_set.count()} <a href='/admin/scanners/endpoint/?q={obj.url}' target='_blank'>🔍</a>"
         )
 
         for endpoint in obj.endpoint_set.all():
 
             if endpoint.is_dead is False:
-                str += " - <a href='%(protocol)s://%(url)s:%(port)s' target='_blank'>%(protocol)s/%(port)s</a>" % {
-                    "url": obj.url,
-                    "port": endpoint.port,
-                    "protocol": endpoint.protocol,
-                }
+                str += (
+                    f" - <a href='{endpoint.protocol}://{obj.url}:{endpoint.port}' target='_blank'>"
+                    f"{endpoint.protocol}/{endpoint.port}</a>"
+                )
         return format_html(str)
 
     @staticmethod
@@ -576,16 +574,16 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     @staticmethod
     def current_rating(obj):
-        x = UrlReport.objects.filter(url=obj).only("high", "medium", "low").latest("at_when")
+        urlreport = UrlReport.objects.filter(url=obj).only("high", "medium", "low").latest("at_when")
 
-        if not any([x.high, x.medium, x.low]):
+        if not any([urlreport.high, urlreport.medium, urlreport.low]):
             return "✅ Perfect"
 
-        label = "🔴" if x.high else "🔶" if x.medium else "🍋"
+        label = "🔴" if urlreport.high else "🔶" if urlreport.medium else "🍋"
 
         return format_html(
-            "%s <span style='color: red'>%s</span> <span style='color: orange'>%s</span> "
-            "<span style='color: yellow'>%s</span>" % (label, x.high, x.medium, x.low)
+            f"{label} <span style='color: red'>{urlreport.high}</span> <span style='color: orange'>{urlreport.medium}"
+            f"</span> <span style='color: yellow'>{urlreport.low}</span>"
         )
 
     inlines = [UrlGenericScanAdminInline, EndpointAdminInline, UrlRatingAdminInline, UrlIpInline]
@@ -696,10 +694,10 @@ class CoordinateAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             if coordinate.geojsontype != "Point":
                 continue
 
-            a = coordinate.area
-            coordinate.area = [a[1], a[0]]
+            area = coordinate.area
+            coordinate.area = [area[1], area[0]]
 
-            coordinate.edit_area = {"type": "Point", "coordinates": [a[1], a[0]]}
+            coordinate.edit_area = {"type": "Point", "coordinates": [area[1], area[0]]}
 
             coordinate.save()
         self.message_user(request, "Lng Lat switched. Order should be: Lng, Lat.")
@@ -786,7 +784,7 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             importers = {"excel": excel, "dutch_government": dutch_government, "": excel, None: excel}
 
             if not importers.get(dataset.type, None):
-                raise ValueError("Datasource parser for %s is not available." % dataset.type)
+                raise ValueError(f"Datasource parser for {dataset.type} is not available.")
 
             (
                 importers[dataset.type].import_datasets.si(**kwargs) | dataset_import_finished.si(dataset.id)

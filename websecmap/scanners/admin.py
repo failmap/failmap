@@ -68,8 +68,8 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def visit(inst):
         if not inst:
             return "- no url, how?"
-        url = "%s://%s:%s/" % (inst.protocol, inst.url.url, inst.port)
-        return format_html("<a href='%s' target='_blank'>Visit</a>" % url)
+        url = f"{inst.protocol}://{inst.url.url}:{inst.port}/"
+        return format_html(f"<a href='{url}' target='_blank'>Visit</a>")
 
     inlines = [EndpointGenericScanInline]
     save_as = True  # Save as new is nice for duplicating endpoints.
@@ -96,7 +96,7 @@ class ScreenshotAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.EndpointGenericScan)
 class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def get_queryset(self, request):
-        qs = super(EndpointGenericScanAdmin, self).get_queryset(request)
+        qs = super().get_queryset(request)
 
         # Because the endpoint, to display, needs url data, it will try to retrieve that for every
         # record. Here we already include those results, so the page loads 10x faster (at okay speeds now)
@@ -177,7 +177,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.UrlGenericScan)
 class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def get_queryset(self, request):
-        qs = super(UrlGenericScanAdmin, self).get_queryset(request)
+        qs = super().get_queryset(request)
         qs = qs.prefetch_related("url__organization", "url__organization__type")
         return qs
 

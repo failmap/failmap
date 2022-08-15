@@ -47,7 +47,7 @@ class MyPeriodicTaskForm(PeriodicTaskForm):
 
     def clean(self):
 
-        cleaned_data = super(PeriodicTaskForm, self).clean()
+        cleaned_data = super().clean()
 
         # if not self.cleaned_data['last_run_at']:
         #     self.cleaned_data['last_run_at'] = datetime.now(pytz.utc)
@@ -187,7 +187,7 @@ class GroupResource(resources.ModelResource):
 
 def generate_password():
     password = "".join(choice("ACDEFGHKLMNPRSTUVWXZ234567") for i in range(20))
-    return "%s-%s-%s-%s-%s" % (password[0:4], password[4:8], password[8:12], password[12:16], password[16:20])
+    return f"{password[0:4]}-{password[4:8]}-{password[8:12]}-{password[12:16]}-{password[16:20]}"
 
 
 def generate_username():
@@ -518,7 +518,7 @@ def generate_username():
         "zhukovsky",
     ]
 
-    return "%s %s" % (choice(traits).capitalize(), choice(names).capitalize())
+    return f"{choice(traits).capitalize()} {choice(names).capitalize()}"
 
 
 def generate_game_user():
@@ -528,7 +528,7 @@ def generate_game_user():
     password = generate_password()
 
     user = User.objects.create_user(
-        username="game_user_%s" % game_user_number,
+        username=f"game_user_{game_user_number}",
         # can log into other things
         is_active=True,
         # No access to admin interface needed
@@ -586,7 +586,7 @@ class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
         volunteer_number += 1
 
         user = User.objects.create_user(
-            username="Volunteer%s" % volunteer_number,
+            username=f"Volunteer{volunteer_number}",
             is_active=False,
             is_staff=True,
             is_superuser=False,
@@ -642,7 +642,7 @@ admin.site.register(Group, GroupAdmin)
 
 class CustomConfigForm(ConstanceForm):
     def __init__(self, *args, **kwargs):
-        super(CustomConfigForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # ... do stuff to make your settings form nice ...
 
 

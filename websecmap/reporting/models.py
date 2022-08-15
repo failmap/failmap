@@ -254,14 +254,9 @@ class SeriesOfUrlsReportMixin(
 
     def __str__(self):
         if any([self.high, self.medium, self.low]):
-            return "🔴%s 🔶%s 🍋%s | %s" % (
-                self.high,
-                self.medium,
-                self.low,
-                self.at_when.date(),
-            )
+            return f"🔴{self.high} 🔶{self.medium} 🍋{self.low} | {self.at_when.date()}"
         else:
-            return "✅ perfect | %s" % self.at_when.date()
+            return f"✅ perfect | {self.at_when.date()}"
 
     class Meta:
         abstract = True
@@ -315,12 +310,7 @@ class UrlReport(
         verbose_name_plural = _("Url Reports")
 
     def __str__(self):
-        return "%s,%s,%s  - %s" % (
-            self.high,
-            self.medium,
-            self.low,
-            self.at_when.date(),
-        )
+        return f"{self.high},{self.medium},{self.low}  - {self.at_when.date()}"
 
 
 # todo: we can make a vulnerabilitystatistic per organization type or per tag. But not per country, list etc.
@@ -345,4 +335,4 @@ class ScanPolicy(AllIssuesCombined):
     )
 
     def __str__(self):
-        return "🏅 [%s %s]" % (self.scan_type, self.conclusion)
+        return f"🏅 [{self.scan_type} {self.conclusion}]"

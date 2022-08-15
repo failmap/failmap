@@ -98,4 +98,4 @@ class Command(DumpDataCommand):
         if not app_labels:
             app_labels = self.APP_LABELS
 
-        super(Command, self).handle(*app_labels, **options)
+        super().handle(*app_labels, **options)

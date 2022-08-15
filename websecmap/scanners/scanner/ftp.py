@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Url
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
@@ -41,9 +41,8 @@ FTP_SERVER_TIMEOUT = 30
 EXPIRES = 3600  # one hour is more then enough
 
 
-def filter_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     default_filter = {"protocol": "ftp", "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level="endpoint"), **endpoints_filter)
@@ -55,9 +54,8 @@ def filter_scan(
 
 
 @app.task(queue="storage")
-def plan_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("ftp"):
         return group()
 
@@ -65,10 +63,8 @@ def plan_scan(
     plannedscan.request(activity="scan", scanner="ftp", urls=urls)
 
 
-def filter_verify(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
-
+def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     default_filter = {"protocol": "ftp", "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level="endpoint"), **endpoints_filter)
@@ -80,9 +76,8 @@ def filter_verify(
 
 
 @app.task(queue="storage")
-def plan_verify(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("ftp"):
         return group()
 
@@ -91,9 +86,9 @@ def plan_verify(
 
 
 def filter_discover(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ):
-
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), not_resolvable=False, is_dead=False)
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
     urls = urls.only("id", "url")
@@ -102,9 +97,8 @@ def filter_discover(
 
 
 @app.task(queue="storage")
-def plan_discover(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("ftp"):
         return group()
 
@@ -119,7 +113,7 @@ def compose_planned_scan_task(**kwargs):
 
 
 def compose_manual_scan_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
     """
     Todo's:
@@ -131,7 +125,7 @@ def compose_manual_scan_task(
     [X] Added graphs, stats and more
     [X] Created translations
     """
-
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("ftp"):
         return group()
 
@@ -167,8 +161,9 @@ def compose_planned_discover_task(**kwargs):
 
 
 def compose_manual_discover_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     # There are only semi-alternative ports, no real alternative ports.
     # ports = [21, 990, 2811, 5402, 6622, 20, 2121, 212121]  # All types different default ports.
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
@@ -199,9 +194,9 @@ def compose_planned_verify_task(**kwargs):
 
 
 def compose_manual_verify_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
-
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_verify_task(urls)
 
@@ -318,28 +313,28 @@ def scan(self, address: str, port: int):
     try:
         ftp.connect(host=address, port=port, timeout=FTP_SERVER_TIMEOUT)
         results["status"] += "Connected"
-        log.debug("Connecting to %s " % address)
-    except OSError as Ex:
-        log.debug("OSError: %s" % Ex)
-        results["status"] += getattr(Ex, "message", repr(Ex))
+        log.debug("Connecting to %s ", address)
+    except OSError as my_exception:
+        log.debug("OSError: %s", my_exception)
+        results["status"] += getattr(my_exception, "message", repr(my_exception))
         # [Errno 64] Host is down
         # log.debug('Could not connect to %s' % ip)
         # you'll get a lot HOST IS DOWN messages.
         return results
-    except EOFError as Ex:
-        log.debug("EOFError: %s" % Ex)
-        results["status"] += getattr(Ex, "message", repr(Ex))
+    except EOFError as my_exception:
+        log.debug("EOFError: %s", my_exception)
+        results["status"] += getattr(my_exception, "message", repr(my_exception))
         # ftp behaves unexpectedly, so there is FTP but we don't know anything about it.
         # we cannot draw any conclusion regarding it's safety?
         return results
-    except (error_perm, error_proto, error_temp, error_reply) as Ex:
-        log.debug("FTP Error: %s" % Ex)
-        results["status"] += getattr(Ex, "message", repr(Ex))
+    except (error_perm, error_proto, error_temp, error_reply) as my_exception:
+        log.debug("FTP Error: %s", my_exception)
+        results["status"] += getattr(my_exception, "message", repr(my_exception))
         # ftplib.error_perm: 502 Command not implemented. We can't assess it further.
         return results
-    except Exception as Ex:
-        log.debug("Base Exception %s" % Ex)
-        results["status"] += getattr(Ex, "message", repr(Ex))
+    except Exception as my_exception:
+        log.debug("Base Exception %s", my_exception)
+        results["status"] += getattr(my_exception, "message", repr(my_exception))
         # Or whatever exception in really rare cases.
         return results
 
@@ -368,21 +363,21 @@ def scan(self, address: str, port: int):
         results["supports_tls"] = "AUTH TLS" in results["features"]
         results["supports_ssl"] = "AUTH SSL" in results["features"]
         # log.debug(results)
-    except (error_reply, error_perm, error_temp, error_proto) as Ex:
-        results["status"] += "FEAT Command: " + getattr(Ex, "message", repr(Ex))
-    except Exception as Ex:
+    except (error_reply, error_perm, error_temp, error_proto) as my_exception:
+        results["status"] += "FEAT Command: " + getattr(my_exception, "message", repr(my_exception))
+    except Exception as my_exception:
         # and the other few million exception possibilities
-        results["status"] += "FEAT Command: " + getattr(Ex, "message", repr(Ex))
+        results["status"] += "FEAT Command: " + getattr(my_exception, "message", repr(my_exception))
 
     # Even if the feat command delivered nothing, we're doing to AUTH anyway.
     if not results["supports_tls"] and not results["supports_ssl"]:
         results["supports_tls"], result = try_tls(ftp)
-        results["status"] += "Supports tls: %s" % result
+        results["status"] += f"Supports tls: {result}"
 
         if not results["supports_tls"]:
             # the fallback, even if it's not as secure.
             results["supports_ssl"], result = try_ssl(ftp)
-            results["status"] += "Supports ssl: %s" % result
+            results["status"] += f"Supports ssl: {result}"
 
     # Don't get the welcome, it might give an exception and doesn't add that much
     # try:
@@ -406,24 +401,24 @@ def try_ssl(ftp):
     try:
         ftp.voidcmd("AUTH SSL")
         return True, ""
-    except (error_reply, error_perm, error_temp, error_proto) as Ex:
-        log.debug(str(Ex))
-        return False, getattr(Ex, "message", repr(Ex))
-    except Exception as Ex:
-        log.debug(str(Ex))
-        return False, getattr(Ex, "message", repr(Ex))
+    except (error_reply, error_perm, error_temp, error_proto) as my_exception:
+        log.debug(str(my_exception))
+        return False, getattr(my_exception, "message", repr(my_exception))
+    except Exception as my_exception:
+        log.debug(str(my_exception))
+        return False, getattr(my_exception, "message", repr(my_exception))
 
 
 def try_tls(ftp):
     try:
         ftp.voidcmd("AUTH TLS")
         return True, ""
-    except (error_reply, error_perm, error_temp, error_proto) as Ex:
-        log.debug(str(Ex))
-        return False, getattr(Ex, "message", repr(Ex))
-    except Exception as Ex:
-        log.debug(str(Ex))
-        return False, getattr(Ex, "message", repr(Ex))
+    except (error_reply, error_perm, error_temp, error_proto) as my_exception:
+        log.debug(str(my_exception))
+        return False, getattr(my_exception, "message", repr(my_exception))
+    except Exception as my_exception:
+        log.debug(str(my_exception))
+        return False, getattr(my_exception, "message", repr(my_exception))
 
 
 # tries and discover FTP servers by A) trying to open an FTP connection to a standard port.
@@ -490,8 +485,10 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
                 return
 
             log.debug(f"New FTP server discovered on {url}.")
-            ep = Endpoint(url=db_url, port=port, protocol=protocol, ip_version=ip_version, discovered_on=timezone.now())
-            ep.save()
+            endpoint = Endpoint(
+                url=db_url, port=port, protocol=protocol, ip_version=ip_version, discovered_on=timezone.now()
+            )
+            endpoint.save()
             return
 
     # endpoint was alive and still is. Nothing changed. We don't have a last seen date. So do nothing.

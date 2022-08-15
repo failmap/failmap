@@ -76,17 +76,16 @@ def claim_proxy(tracing_label="") -> Dict[str, Any]:
                     # else:
                     #     log.debug('Proxy %s was not suitable for scanning. Trying another one in 60 seconds.' % proxy)
 
-                else:
-                    # do not log an error here, when forgetting to add proxies or if there are no clean proxies anymore,
-                    # the queue might fill up with too many claim_proxy tasks. Each of them continuing in their own
-                    # thread
-                    # to get a proxy every 2 minutes (30/h). This can lead up to 30.000 issues per day.
-                    # When you have over 500 proxy requests, things are off. It's better to start with a clean
-                    # slate then.
-                    log.debug(
-                        f"No proxies available for {tracing_label} et al. "
-                        f"You can add more proxies to solve this. Will try again in 60 seconds."
-                    )
+                # do not log an error here, when forgetting to add proxies or if there are no clean proxies anymore,
+                # the queue might fill up with too many claim_proxy tasks. Each of them continuing in their own
+                # thread
+                # to get a proxy every 2 minutes (30/h). This can lead up to 30.000 issues per day.
+                # When you have over 500 proxy requests, things are off. It's better to start with a clean
+                # slate then.
+                log.debug(
+                    f"No proxies available for {tracing_label} et al. "
+                    f"You can add more proxies to solve this. Will try again in 60 seconds."
+                )
 
         except BaseException as e:
             # In some rare cases this method crashes, while it should be as reliable as can be.
@@ -226,7 +225,7 @@ def check_proxy(proxy: Dict[str, Any]):
         return False
 
     if api_results["max"] < 20 or api_results["this-client-max"] < 20 or api_results["current"] > 19:
-        log.debug("Out of capacity %s." % proxy)
+        log.debug("Out of capacity %s.", proxy)
         store_check_result.apply_async(
             [
                 proxy,
@@ -239,62 +238,62 @@ def check_proxy(proxy: Dict[str, Any]):
             ]
         )
         return False
-    else:
-        # todo: Request time via the proxy. Just getting google.com might take a lot of time...
-        try:
-            speed = requests.get(
-                "https://apple.com",
-                proxies={proxy["protocol"]: proxy["address"]},
-                timeout=(PROXY_NETWORK_TIMEOUT, PROXY_SERVER_TIMEOUT),
-            ).elapsed.total_seconds()
-            log.debug("Website retrieved.")
-        except ProxyError:
-            log.debug("Could not retrieve website.")
-            store_check_result.apply_async(
-                [
-                    proxy,
-                    "Could not retrieve website.",
-                    True,
-                    datetime.now(pytz.utc),
-                    api_results["current"],
-                    api_results["max"],
-                    api_results["this-client-max"],
-                ]
-            )
-            return False
-        except ConnectTimeout:
-            log.debug("Proxy too slow for standard site.")
-            store_check_result.apply_async(
-                [
-                    proxy,
-                    "Proxy too slow for standard site.",
-                    True,
-                    datetime.now(pytz.utc),
-                    api_results["current"],
-                    api_results["max"],
-                    api_results["this-client-max"],
-                ]
-            )
-            return False
 
-        # todo: how to check the headers the proxy sends to the client? That requires a server to receive
-        # requests. Proxies wont work if they are not "elite", aka: not revealing the internet user behind them.
-        # otherwise the data will be coupled to a single client.
-
-        log.debug(f"Proxy accessible. Capacity available. {proxy['id']}.")
+    # todo: Request time via the proxy. Just getting google.com might take a lot of time...
+    try:
+        speed = requests.get(
+            "https://apple.com",
+            proxies={proxy["protocol"]: proxy["address"]},
+            timeout=(PROXY_NETWORK_TIMEOUT, PROXY_SERVER_TIMEOUT),
+        ).elapsed.total_seconds()
+        log.debug("Website retrieved.")
+    except ProxyError:
+        log.debug("Could not retrieve website.")
         store_check_result.apply_async(
             [
                 proxy,
-                "Proxy accessible. Capacity available.",
-                False,
+                "Could not retrieve website.",
+                True,
                 datetime.now(pytz.utc),
                 api_results["current"],
                 api_results["max"],
                 api_results["this-client-max"],
-                int(speed * 1000),
             ]
         )
-        return True
+        return False
+    except ConnectTimeout:
+        log.debug("Proxy too slow for standard site.")
+        store_check_result.apply_async(
+            [
+                proxy,
+                "Proxy too slow for standard site.",
+                True,
+                datetime.now(pytz.utc),
+                api_results["current"],
+                api_results["max"],
+                api_results["this-client-max"],
+            ]
+        )
+        return False
+
+    # todo: how to check the headers the proxy sends to the client? That requires a server to receive
+    # requests. Proxies wont work if they are not "elite", aka: not revealing the internet user behind them.
+    # otherwise the data will be coupled to a single client.
+
+    log.debug(f"Proxy accessible. Capacity available. {proxy['id']}.")
+    store_check_result.apply_async(
+        [
+            proxy,
+            "Proxy accessible. Capacity available.",
+            False,
+            datetime.now(pytz.utc),
+            api_results["current"],
+            api_results["max"],
+            api_results["this-client-max"],
+            int(speed * 1000),
+        ]
+    )
+    return True
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
@@ -345,7 +344,7 @@ def service_provider_status(proxy: Dict[str, Any]):
     )
 
     # inspect to see if there are cookies or other tracking variables.
-    log.debug("Cookies: %s Proxy: %s" % (proxy, response.cookies))
+    log.debug("Cookies: %s Proxy: %s", proxy, response.cookies)
 
     """
     Always the same response. This is just used to get a correct response and the available capacity.

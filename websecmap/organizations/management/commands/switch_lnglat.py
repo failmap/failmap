@@ -13,10 +13,10 @@ class Command(BaseCommand):
         coordinates = Coordinate.objects.all().filter(geojsontype="Point")
 
         for coordinate in coordinates:
-            a = coordinate.area
-            coordinate.area = [a[1], a[0]]
+            area = coordinate.area
+            coordinate.area = [area[1], area[0]]
 
-            coordinate.edit_area = {"type": "Point", "coordinates": [a[1], a[0]]}
+            coordinate.edit_area = {"type": "Point", "coordinates": [area[1], area[0]]}
 
-            log.debug("Switched %s" % coordinate.organization)
+            log.debug("Switched %s", coordinate.organization)
             coordinate.save()

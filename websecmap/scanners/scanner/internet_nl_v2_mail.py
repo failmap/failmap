@@ -12,7 +12,7 @@ from celery import Task, group
 
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Url
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.scanner.__init__ import (
     allowed_to_scan,
     q_configurations_to_scan,
@@ -24,9 +24,8 @@ from websecmap.scanners.scanner.internet_nl_v2_websecmap import initialize_scan
 log = logging.getLogger(__name__)
 
 
-def filter_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     default_filter = {"is_dead": False, "not_resolvable": False}
     urls_filter = {**urls_filter, **default_filter}
     urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), **urls_filter)
@@ -47,10 +46,8 @@ def compose_planned_scan_task(**kwargs):
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
-
+def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("internet_nl_mail"):
         return group()
 
@@ -70,9 +67,9 @@ def compose_scan_task(urls):
 
 
 def compose_manual_scan_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
-
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("internet_nl_mail"):
         return group()
 

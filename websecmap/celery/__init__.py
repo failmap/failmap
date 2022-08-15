@@ -82,7 +82,7 @@ class ParentFailed(Exception):
         """Allow to set parent exception as cause."""
         if cause:
             self.__cause__ = cause
-        super(ParentFailed, self).__init__(message, *args)
+        super().__init__(message, *args)
 
 
 @app.task(queue="isolated", bind=True)

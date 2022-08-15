@@ -43,7 +43,7 @@ from requests.exceptions import ConnectionError, SSLError, ChunkedEncodingError,
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.models import Endpoint, UrlIp
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.__init__ import (
@@ -93,8 +93,9 @@ READ_TIMEOUT = 30
 RDNS_TIMEOUT = 30
 
 
-def filter_discover(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs):
+def filter_discover(organizations_filter: dict = None, urls_filter: dict = None, **kwargs):
     # ignore administratively dead domains by default.
+    organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
     urls_filter = {"is_dead": False} if not urls_filter else urls_filter
 
     if organizations_filter:
@@ -116,7 +117,8 @@ def filter_discover(organizations_filter: dict = dict(), urls_filter: dict = dic
 
 
 @app.task(queue="storage")
-def plan_discover(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs):
+def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
     if not allowed_to_discover_endpoints("http"):
         return group()
 
@@ -132,7 +134,8 @@ def compose_planned_discover_task(**kwargs):
     return compose_discover_task(urls)
 
 
-def compose_manual_discover_task(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs) -> Task:
+def compose_manual_discover_task(organizations_filter: dict = None, urls_filter: dict = None, **kwargs) -> Task:
+    organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
     """Discovers HTTP/HTTPS endpoints by attempting to connect to them.
 
     *This is an implementation of `compose_discover_task`.
@@ -170,9 +173,8 @@ def compose_discover_task(urls: List[Url]):
     return group(tasks)
 
 
-def filter_verify(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     # todo: do we need a generic resurrect task and also check for , 'is_dead': False here?
     # otherwise we'll be verifying things that existed ages ago and probably will never return. Which makes this
     # scan also extremely slow. - The description says we should.
@@ -187,9 +189,8 @@ def filter_verify(
 
 
 @app.task(queue="storage")
-def plan_verify(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_discover_endpoints("http"):
         return group()
 
@@ -204,8 +205,9 @@ def compose_planned_verify_task(**kwargs):
 
 
 def compose_manual_verify_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     """Verifies existing https and http endpoints. Is pretty quick, as it will not stumble upon non-existing services
     as much.
     """
@@ -266,10 +268,10 @@ def get_ipv4(url: str):
 
     try:
         ipv4 = socket.gethostbyname(url)
-        log.debug("%s has IPv4 address: %s" % (url, ipv4))
+        log.debug("%s has IPv4 address: %s", url, ipv4)
     except Exception as ex:
         # when not known: [Errno 8] nodename nor servname provided, or not known
-        log.debug("Get IPv4 error on %s: %s" % (url, ex))
+        log.debug("Get IPv4 error on %s: %s", url, ex)
 
     # the contents of the DNS record can be utter garbage, there is absolutely no guarantee that this is an IP
     # it could be an entire novel, or images
@@ -279,7 +281,7 @@ def get_ipv4(url: str):
             if not address.is_global:
                 ipv4 = ""
     except (AddressValueError, ValueError):
-        log.debug("IPv4 address was not recognized on %s: %s" % (url, ipv4))
+        log.debug("IPv4 address was not recognized on %s: %s", url, ipv4)
         ipv4 = ""
 
     return ipv4
@@ -292,23 +294,21 @@ def get_ipv6(url: str):
 
     try:
         # dig AAAA faalkaart.nl +short (might be used for debugging)
-        x = socket.getaddrinfo(url, None, socket.AF_INET6)
-        ipv6 = x[0][4][0]
+        my_socket = socket.getaddrinfo(url, None, socket.AF_INET6)
+        ipv6 = my_socket[0][4][0]
 
         # six to four addresses make no sense
         if str(ipv6).startswith("::ffff:"):
             log.debug(
-                "Six-to-Four address %s discovered on %s, "
-                "did you configure IPv6 connectivity correctly? "
-                "Removing this IPv6 address from result to prevent "
-                "database pollution." % (ipv6, url)
+                f"Six-to-Four address {ipv6} discovered on {url}, did you configure IPv6 connectivity correctly? "
+                "Removing this IPv6 address from result to prevent database pollution."
             )
             ipv6 = ""
         else:
-            log.debug("%s has IPv6 address: %s" % (url, ipv6))
+            log.debug("%s has IPv6 address: %s", url, ipv6)
     except Exception as ex:
         # when not known: [Errno 8nodename nor servname provided, or not known
-        log.debug("Get IPv6 error on %s: %s" % (url, ex))
+        log.debug("Get IPv6 error on %s: %s", url, ex)
 
     try:
         if ipv6:
@@ -316,7 +316,7 @@ def get_ipv6(url: str):
             if not address.is_global:
                 ipv6 = ""
     except (AddressValueError, ValueError):
-        log.debug("IPv6 address was not recognized on %s: %s" % (url, ipv6))
+        log.debug("IPv6 address was not recognized on %s: %s", url, ipv6)
         ipv6 = ""
 
     return ipv6
@@ -419,18 +419,18 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> Di
     # log.info(self.request['delivery_info']['routing_key'])
 
     if ip_version == 4:
-        ip = get_ipv4(url)
-        uri = "%s://%s:%s" % (protocol, ip, port)
+        ip_address = get_ipv4(url)
+        uri = f"{protocol}://{ip_address}:{port}"
     else:
-        ip = get_ipv6(url)
-        uri = "%s://[%s]:%s" % (protocol, ip, port)
+        ip_address = get_ipv6(url)
+        uri = f"{protocol}://[{ip_address}]:{port}"
 
-    if not ip:
+    if not ip_address:
         # todo: possibly add more information, what resolver and such. Above methods should use specified resolvers
         #  not system resolvers.
         return connection_answer(False, f"ipv{ip_version}_resolve_error")
 
-    log.debug("Attempting connect on: %s: host: %s IP: %s" % (uri, url, ip))
+    log.debug("Attempting connect on: %s: host: %s IP: %s", uri, url, ip_address)
 
     try:
         """
@@ -457,32 +457,32 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> Di
         # Certificate did not match expected hostname: 85.119.104.84.
         Certificate: {'subject': ((('commonName', 'webdiensten.drechtsteden.nl'),),)
         """
-        r = requests.get(
+        my_request = requests.get(
             uri,
             timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
             allow_redirects=False,  # redirect = connection
             verify=False,  # nosec any tls = connection
             headers={"Host": url, "User-Agent": get_random_user_agent()},
         )
-        if r.status_code:
-            log.debug("%s: Host: %s Status: %s" % (uri, url, r.status_code))
+        if my_request.status_code:
+            log.debug("%s: Host: %s Status: %s", uri, url, my_request.status_code)
             return connection_answer(True, None)
-        else:
-            log.debug("No status code." % url)
-            # probably never reached, exception thrown when no status code is present
-            return connection_answer(True, "no_http_status_code")
-    except (ConnectTimeout, Timeout, ReadTimeout) as Ex:
-        return connection_answer(False, Ex)
-    except (ChunkedEncodingError, ContentDecodingError) as Ex:
+
+        log.debug("No status code.", url)
+        # probably never reached, exception thrown when no status code is present
+        return connection_answer(True, "no_http_status_code")
+    except (ConnectTimeout, Timeout, ReadTimeout) as my_exception:
+        return connection_answer(False, my_exception)
+    except (ChunkedEncodingError, ContentDecodingError) as my_exception:
         # There is a connection and you can get something back. But it doesn't decode properly.
         # For example InvalidChunkLength(got length b'<!DOCTYPE html>\\n', 0 bytes read)",
-        return connection_answer(True, Ex)
-    except (ConnectionRefusedError, ConnectionError, HTTPError, SSLError) as Ex:
-        strerror = str(Ex.args)  # Cast whatever we get back to a string. Instead of trace.
+        return connection_answer(True, my_exception)
+    except (ConnectionRefusedError, ConnectionError, HTTPError, SSLError) as my_exception:
+        strerror = str(my_exception.args)  # Cast whatever we get back to a string. Instead of trace.
         has_acceptable_error = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
         if has_acceptable_error:
             log.debug(f"There is a server, but could not communicate directly: {strerror}")
-            return connection_answer(True, Ex)
+            return connection_answer(True, my_exception)
 
         # No acceptable answer? Try a normal connection:
         # This might be due to the fact that a firewall is blocking direct requests to the IP with a different
@@ -493,11 +493,11 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> Di
         # Basically perform the same checks on the url directly, with a more extensive request that can be debugged
         try:
             log.debug("Trying again with a matching url and host header -> No connection to IP with a host header.")
-            uri = "%s://%s:%s" % (protocol, url, port)
+            uri = f"{protocol}://{url}:{port}"
             req = Request("GET", uri, headers={"Host": url, "User-Agent": get_random_user_agent()})
-            s = Session()
-            prepped = s.prepare_request(req)
-            s.send(
+            my_session = Session()
+            prepped = my_session.prepare_request(req)
+            my_session.send(
                 prepped,
                 verify=False,
                 timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
@@ -511,16 +511,16 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> Di
             if has_acceptable_error:
                 log.debug(f"There is a server, but could not communicate directly: {strerror}")
                 return connection_answer(True, sub_ex)
-            else:
-                return connection_answer(False, sub_ex)
+
+            return connection_answer(False, sub_ex)
         except (ConnectTimeout, Timeout, ReadTimeout) as sub_ex:
             return connection_answer(False, sub_ex)
         except Exception as sub_ex:
             return connection_answer(False, sub_ex)
 
     # The rest :)
-    except Exception as Ex:
-        return connection_answer(False, Ex)
+    except Exception as my_exception:
+        return connection_answer(False, my_exception)
 
 
 # thank you https://stackoverflow.com/questions/20658572/python-requests-print-entire-http-request-raw
@@ -595,7 +595,7 @@ def has_internet_connection(host: str = "8.8.8.8", port: int = 53, connection_ti
         socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
         return True
     except Exception as ex:
-        log.debug("No internet connection: %s" % ex)
+        log.debug("No internet connection: %s", ex)
         return False
 
 
@@ -615,7 +615,7 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
         # no other place to put it:
         endpoint.is_dead_reason = origin
         endpoint.save()
-        log.info("Added endpoint added to database: %s" % endpoint)
+        log.info("Added endpoint added to database: %s", endpoint)
     else:
         log.debug("Endpoint based on parameters was already in database.")
     return
@@ -658,23 +658,23 @@ def store_url_ips(url: int, ips):
     method to discover all ip's this url currently has.
     """
 
-    for ip in ips:
+    for ip_address in ips:
 
         # sometimes there is no ipv4 or 6 address... or you get some other dirty dataset.
-        if not ip:
+        if not ip_address:
             continue
 
         # the same thing that exists already? don't do anything about it.
-        if UrlIp.objects.all().filter(url=url, ip=ip, is_unused=False).count():
+        if UrlIp.objects.all().filter(url=url, ip=ip_address, is_unused=False).count():
             continue
 
         epip = UrlIp()
-        epip.ip = ip
+        epip.ip = ip_address
         epip.url = url
         epip.is_unused = False
         epip.discovered_on = datetime.now(pytz.utc)
         try:
-            epip.rdns_name = get_rdns_name(ip)
+            epip.rdns_name = get_rdns_name(ip_address)
         except TimeoutError:
             # we'll have to do without.
             epip.rdns_name = ""
@@ -696,7 +696,7 @@ def get_rdns_name(ip):
         # host doesn't exist / unknown host
         pass
     except BaseException as e:
-        log.error("Unknown rdns failure %s on ip %s" % (str(e), ip))
+        log.error("Unknown rdns failure %s on ip %s", str(e), ip)
 
     return reverse_name
 
@@ -712,11 +712,11 @@ def endpoint_exists(url_id: int, port: int, protocol: str, ip_version: int) -> i
 def kill_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
     eps = Endpoint.objects.all().filter(url=url_id, port=port, ip_version=ip_version, protocol=protocol, is_dead=False)
 
-    for ep in eps:
-        ep.is_dead = True
-        ep.is_dead_since = datetime.now(pytz.utc)
-        ep.is_dead_reason = f"Not found in HTTP Scanner anymore ({origin})."
-        ep.save()
+    for endpoint in eps:
+        endpoint.is_dead = True
+        endpoint.is_dead_since = datetime.now(pytz.utc)
+        endpoint.is_dead_reason = f"Not found in HTTP Scanner anymore ({origin})."
+        endpoint.save()
 
 
 @app.task(queue="4and6")
@@ -797,9 +797,9 @@ def redirects_to_safety(url: str):
                 return True
             log.debug("Url is not redirecting to a safe url.")
             return False
-        else:
-            log.debug("Request was not redirected, so not going to a safe url.")
-            return False
+
+        log.debug("Request was not redirected, so not going to a safe url.")
+        return False
     except (
         ConnectTimeout,
         HTTPError,

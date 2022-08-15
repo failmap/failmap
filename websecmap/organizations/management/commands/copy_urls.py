@@ -16,7 +16,7 @@ class Command(BaseCommand):
         """Add arguments."""
         parser.add_argument("-s", "--source", type=str, help="Organization ID")
         parser.add_argument("-t", "--target", type=str, help="Organization ID")
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
 
     def handle(self, *args, **options):
 

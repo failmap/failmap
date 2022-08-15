@@ -12,7 +12,7 @@ from celery import Task, group
 from django.conf import settings
 
 from websecmap.celery import ParentFailed, app, EXPIRES_IN_ONE_DAY
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
@@ -35,9 +35,8 @@ RETRY_DELAY = 1
 EXPIRES = 3600 * 10  # 10 hour example
 
 
-def filter_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     """
     This creates a filter on what needs to be scanned. This filter is often reused for manual and planned scans.
     """
@@ -59,9 +58,8 @@ def filter_scan(
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     """
     Adds scans to the scan planning. These can be consumed with compose_planned_scan_task
     """

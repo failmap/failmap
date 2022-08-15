@@ -13,7 +13,7 @@ from requests.structures import CaseInsensitiveDict
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
@@ -32,9 +32,9 @@ SECURITY_HEADER_SCAN_TYPES = [
 ]
 
 
-def filter_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
+
     # apply filter to organizations (or if no filter, all organizations)
     # apply filter to urls in organizations (or if no filter, all urls)
     organizations = []
@@ -63,9 +63,8 @@ def filter_scan(
 
 
 @app.task(queue="storage")
-def plan_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("security_headers"):
         return group()
 
@@ -80,8 +79,10 @@ def compose_planned_scan_task(**kwargs):
 
 
 def compose_manual_scan_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
+
     """Compose taskset to scan specified endpoints."""
     if not allowed_to_scan("security_headers"):
         return group()
@@ -351,44 +352,44 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
 def generic_check(endpoint_id: int, headers, header):
     # this is case insensitive
 
-    scan_type = "http_security_header_%s" % header.lower().replace("-", "_")
+    scan_type = f"http_security_header_{header.lower().replace('-', '_')}"
 
     if header in headers.keys():
-        log.debug("Has %s" % header)
+        log.debug("Has %s", header)
         store_endpoint_scan_result(scan_type, endpoint_id, "True", headers[header])
     else:
-        log.debug("Has no %s" % header)
-        store_endpoint_scan_result(scan_type, endpoint_id, "False", "Security Header not present: %s" % header)
+        log.debug("Has no %s", header)
+        store_endpoint_scan_result(scan_type, endpoint_id, "False", f"Security Header not present: {header}")
 
 
 def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
-    scan_type = "http_security_header_%s" % header.lower().replace("-", "_")
+    scan_type = f"http_security_header_{header.lower().replace('-', '_')}"
 
     # this is case insensitive
     if header in headers.keys():
-        log.debug("Has %s" % header)
+        log.debug("Has %s", header)
         store_endpoint_scan_result(scan_type, endpoint_id, "True", headers[header])
     else:
         # CSP fallback:
-        log.debug("CSP fallback used for %s" % header)
+        log.debug("CSP fallback used for %s", header)
         if "Content-Security-Policy" in headers.keys():
             store_endpoint_scan_result(
                 scan_type=scan_type,
                 endpoint_id=endpoint_id,
                 rating="Using CSP",
-                message="Content-Security-Policy header found, which can handle the security from %s."
-                "Value (possibly truncated): %s..." % (header, headers["Content-Security-Policy"][0:80]),
+                message=f"Content-Security-Policy header found, which can handle the security from {header}. "
+                f"Value (possibly truncated): {headers['Content-Security-Policy'][0:80]}...",
                 evidence=headers["Content-Security-Policy"],
             )
 
         else:
-            log.debug("Has no %s" % header)
+            log.debug("Has no %s", header)
             store_endpoint_scan_result(
                 scan_type=scan_type,
                 endpoint_id=endpoint_id,
                 rating="False",
-                message="Security Header not present: %s, alternative header Content-Security-Policy not present."
-                % header,
+                message=f"Security Header not present: {header}, alternative header "
+                f"Content-Security-Policy not present.",
             )
 
 
@@ -468,7 +469,7 @@ def get_headers_request(uri_url: str) -> CaseInsensitiveDict:
     :return: requests.response
     """
 
-    log.debug("Getting headers for %s" % uri_url)
+    log.debug("Getting headers for %s", uri_url)
 
     # ignore wrong certificates, those are handled in a different scan.
     # 10 seconds for network delay, 10 seconds for the site to respond.
@@ -495,5 +496,5 @@ def get_headers_request(uri_url: str) -> CaseInsensitiveDict:
     # response.raise_for_status()
 
     for header in response.headers:
-        log.debug("Received header: %s" % header)
+        log.debug("Received header: %s", header)
     return response.headers

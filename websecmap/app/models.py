@@ -107,7 +107,7 @@ class Job(models.Model):
         try:
             job.save(update_fields=["result", "status", "finished_on"])
         except TypeError:
-            job.result = "Job returned a '%s' which could not be serialized. Job finished." % type(result)
+            job.result = f"Job returned a '{type(result)}' which could not be serialized. Job finished."
             job.save(update_fields=["result", "status", "finished_on"])
 
     def __str__(self):
@@ -131,7 +131,7 @@ def create_function_job(function: str, **kwargs) -> int:
     module = importlib.import_module(module)
     call = getattr(module, function_name, None)
     if not call:
-        raise ValueError("Function %s not found in %s." % (function_name, module))
+        raise ValueError(f"Function {function_name} not found in {module}.")
 
     task = call(**kwargs)
 

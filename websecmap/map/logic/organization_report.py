@@ -26,7 +26,7 @@ def get_organization_report_by_name(
         is_dead=False,
     ).first()
 
-    log.debug("- %s %s %s " % (organization_name, get_country(country), get_organization_type(organization_type)))
+    log.debug("- %s %s %s ", organization_name, get_country(country), get_organization_type(organization_type))
     log.debug(organization)
 
     if not organization:

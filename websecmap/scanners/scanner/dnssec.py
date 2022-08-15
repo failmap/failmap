@@ -29,7 +29,7 @@ from django.db.models import Q
 
 from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import store_url_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
@@ -45,10 +45,8 @@ RETRY_DELAY = 10
 EXPIRES = 3600  # one hour is more then enough
 
 
-def filter_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
-
+def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     # DNSSEC only works on top level urls
     urls_filter = dict(urls_filter, **{"computed_subdomain": ""})
 
@@ -82,9 +80,8 @@ def filter_scan(
 
 
 @app.task(queue="storage")
-def plan_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     log.info(f"Creating DNSSEC scan task for {len(urls)} urls.")
     plannedscan.request(activity="scan", scanner="dnssec", urls=urls)
@@ -97,9 +94,9 @@ def compose_planned_scan_task(**kwargs):
 
 
 def compose_manual_scan_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ):
-
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("dnssec"):
         return group()
 
@@ -283,10 +280,10 @@ def analyze_result(result: List[str]):
         """
 
         # first line if language files are not installed
-        if line.startswith("%s" % "INFO Did not find DNSKEY"):
+        if line.startswith("INFO Did not find DNSKEY"):
             log.info(line)
             errors.append(line)
-        if line.startswith("%s" % "INFO [DNSSEC:DNSKEY_NOT_FOUND]"):
+        if line.startswith("INFO [DNSSEC:DNSKEY_NOT_FOUND]"):
             log.info(line)
             errors.append(line)
 
@@ -308,11 +305,11 @@ def analyze_result(result: List[str]):
         #     log.info(line)
         #     errors.append(line)
 
-        if line.startswith("%s" % "INFO Authenticated denial records not found"):
+        if line.startswith("INFO Authenticated denial records not found"):
             log.info(line)
             errors.append(line)
 
-        if line.startswith("%s" % "INFO No DNSKEY(s) found at child"):
+        if line.startswith("INFO No DNSKEY(s) found at child"):
             log.info(line)
             errors.append(line)
 
@@ -329,7 +326,7 @@ def analyze_result(result: List[str]):
     highest_level = "ERROR" if errors else "WARNING" if warnings else "INFO" if infos else "NONE"
 
     if highest_level == "NONE":
-        raise ValueError("Did not correctly parse DNSSCAN result string. %s " % result)
+        raise ValueError(f"Did not correctly parse DNSSCAN result string. {result}")
 
     relevant_strings = []
 

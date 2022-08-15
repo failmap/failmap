@@ -1517,8 +1517,10 @@ class Command(BaseCommand):
                         ch for ch in line.lower() if ch.isalnum()
                     ):
                         log.debug(
-                            "Match, administrative region %s is a %s in %s"
-                            % (counter + 3, organization_type, country_code)
+                            "Match, administrative region %s is a %s in %s",
+                            counter + 3,
+                            organization_type,
+                            country_code,
                         )
                         matches.append(
                             {
@@ -1529,7 +1531,7 @@ class Command(BaseCommand):
                         )
                         continue
 
-        log.info("Found %s matches." % len(matches))
+        log.info("Found %s matches.", len(matches))
 
         import_matches(matches)
 
@@ -1548,19 +1550,17 @@ def import_matches(matches):
             administrative_region.admin_level = match["admin_level"]
             administrative_region.organization_type = otype
             administrative_region.save()
-            log.info("Saved: %s %s = %s" % (match["country"], match["organization_type"], match["admin_level"]))
+            log.info("Saved: %s %s = %s", match["country"], match["organization_type"], match["admin_level"])
 
         else:
-            log.info(
-                "Exists already: %s %s = %s" % (match["country"], match["organization_type"], match["admin_level"])
-            )
+            log.info("Exists already: %s %s = %s", match["country"], match["organization_type"], match["admin_level"])
 
 
 def figure_out_country(lines: List[str]):
     country = re.findall("lagicon\|([^}]*)", lines[1], re.MULTILINE)
     if not country:
         # probably a comment line or some sorts
-        log.debug("No country found in line %s." % lines[1])
+        log.debug("No country found in line %s.", lines[1])
         return
     log.debug(country[0])
     try:
@@ -1593,6 +1593,6 @@ def figure_out_country(lines: List[str]):
         if country[0] in alternatives:
             return alternatives[country[0]]
 
-        log.error("Country %s was not found." % country[0])
+        log.error("Country %s was not found.", country[0])
         return
     return isocode.alpha2

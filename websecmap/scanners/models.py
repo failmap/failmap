@@ -75,12 +75,12 @@ class Endpoint(models.Model):
 
     def __str__(self):
         if self.is_dead:
-            return "✝ IPv%s %s/%s | [%s] %s  " % (self.ip_version, self.protocol, self.port, self.id, self.url)
-        else:
-            return "IPv%s %s/%s | [%s] %s " % (self.ip_version, self.protocol, self.port, self.id, self.url)
+            return f"✝ IPv{self.ip_version} {self.protocol}/{self.port} | [{self.id}] {self.url} "
+
+        return f"IPv{self.ip_version} {self.protocol}/{self.port} | [{self.id}] {self.url} "
 
     def uri_url(self):
-        return "%s://%s:%s" % (self.protocol, self.url.url, self.port)
+        return f"{self.protocol}://{self.url.url}:{self.port}"
 
     # when testing for ipv4 or ipv6, an endpoint is mutually exclusive.
     def is_ipv4(self):
@@ -104,19 +104,19 @@ class Endpoint(models.Model):
             return endpoints[0]
 
         if count == 0:
-            ep = Endpoint()
+            endpoint = Endpoint()
             try:
-                ep.url = Url.objects.filter(url=url_id).first()
+                endpoint.url = Url.objects.filter(url=url_id).first()
             except ObjectDoesNotExist:
-                ep.url = ""
-            ep.port = port
-            ep.protocol = protocol
-            ep.ip_version = ip_version
-            ep.is_dead = False
-            ep.discovered_on = datetime.now(pytz.utc)
-            ep.save()
+                endpoint.url = ""
+            endpoint.port = port
+            endpoint.protocol = protocol
+            endpoint.ip_version = ip_version
+            endpoint.is_dead = False
+            endpoint.discovered_on = datetime.now(pytz.utc)
+            endpoint.save()
 
-            return ep
+            return endpoint
 
     @staticmethod
     # while being extermely slow, it sort of works... It's better than waiting for the whole list to download.
@@ -225,9 +225,9 @@ class ScanProxy(models.Model):
 
     def __str__(self):
         if self.is_dead:
-            return "✝ %s %s" % (self.pk, self.address)
-        else:
-            return "%s %s" % (self.pk, self.address)
+            return f"✝ {self.pk} {self.address}"
+
+        return f"{self.pk} {self.address}"
 
 
 class UrlIp(models.Model):
@@ -279,7 +279,7 @@ class UrlIp(models.Model):
     is_unused_reason = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return "%s %s" % (self.ip, self.discovered_on.date())
+        return f"{self.ip} {self.discovered_on.date()}"
 
     class Meta:
         verbose_name = _("urlip")
@@ -557,7 +557,7 @@ class EndpointGenericScan(GenericScanMixin):
     )
 
     def __str__(self):
-        return "%s: %s %s on %s" % (self.rating_determined_on.date(), self.type, self.rating, self.endpoint)
+        return f"{self.rating_determined_on.date()}: {self.type} {self.rating} on {self.endpoint}"
 
 
 class UrlGenericScan(GenericScanMixin):
@@ -568,7 +568,7 @@ class UrlGenericScan(GenericScanMixin):
     url = models.ForeignKey(Url, null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "%s: %s %s on %s" % (self.rating_determined_on.date(), self.type, self.rating, self.url)
+        return f"{self.rating_determined_on.date()}: {self.type} {self.rating} on {self.url}"
 
 
 class EndpointGenericScanScratchpad(models.Model):
@@ -648,7 +648,7 @@ class InternetNLV2Scan(models.Model):
     retrieved_scan_report = JSONField(default=None, blank=True, null=True)
 
     def __str__(self):
-        return "%s: %s %s" % (self.pk, self.scan_id, self.state)
+        return f"{self.pk}: {self.scan_id} {self.state}"
 
 
 class InternetNLV2StateLog(models.Model):
@@ -672,7 +672,7 @@ class InternetNLV2StateLog(models.Model):
     at_when = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return "%s.%s: %s" % (self.scan.pk, self.pk, self.state)
+        return f"{self.scan.pk}.{self.pk}: {self.state}"
 
 
 # A debugging table to help with API interactions.

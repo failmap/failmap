@@ -176,9 +176,9 @@ def worker_verify_role_capabilities(role):
         # allow IPv6 support to be faked during development
         if not os.environ.get("NETWORK_SUPPORTS_IPV6", False):
             # verify if a https connection to a IPv6 website can be made
-            s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
+            my_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
             try:
-                s.connect((config.IPV6_TEST_DOMAIN, 443))
+                my_socket.connect((config.IPV6_TEST_DOMAIN, 443))
             except socket.gaierror:
                 # docker container DNS might not be ready, retry
                 raise
@@ -189,9 +189,9 @@ def worker_verify_role_capabilities(role):
     if role in ROLES_REQUIRING_IPV4 or role in ROLES_REQUIRING_IPV4_AND_IPV6:
         # verify if a https connection to a website can be made
         # we assume non-ipv4 internet doesn't exist
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+        my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
         try:
-            s.connect((config.CONNECTIVITY_TEST_DOMAIN, 443))
+            my_socket.connect((config.CONNECTIVITY_TEST_DOMAIN, 443))
         except socket.gaierror:
             # docker container DNS might not be ready, retry
             raise
@@ -203,16 +203,16 @@ def worker_verify_role_capabilities(role):
         # one may fail.
 
         # try v4 first
-        s4 = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+        socket_4 = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
         try:
-            s4.connect((config.IPV6_TEST_DOMAIN, 443))
+            socket_4.connect((config.IPV6_TEST_DOMAIN, 443))
         except socket.gaierror:
             # docker container DNS might not be ready, retry
             raise
         except BaseException:
-            s6 = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
+            socket_6 = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
             try:
-                s6.connect((config.IPV6_TEST_DOMAIN, 443))
+                socket_6.connect((config.IPV6_TEST_DOMAIN, 443))
             except socket.gaierror:
                 # docker container DNS might not be ready, retry
                 raise

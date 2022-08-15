@@ -31,8 +31,12 @@ def count_queries(message: str = ""):
             length_long += 1
 
     log.debug(
-        "# queries: %3s L: %2s, M %2s, S:%2s(%s)"
-        % (len(connection.queries), length_long, length_medium, length_short, message)
+        "# queries: %3s L: %2s, M %2s, S:%2s(%s)",
+        len(connection.queries),
+        length_long,
+        length_medium,
+        length_short,
+        message,
     )
 
 

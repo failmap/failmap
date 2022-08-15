@@ -104,7 +104,7 @@ def test_map_views(organization_type, organization):
             continue
 
         callback = pattern.callback
-        log.debug("Testing: %s" % callback)
+        log.debug("Testing: %s", callback)
         arguments = inspect.signature(callback).parameters.keys()
 
         kwargs = {}
@@ -112,7 +112,7 @@ def test_map_views(organization_type, organization):
             kwargs[argument] = autofill[argument]
 
         output = callback(**kwargs)
-        log.debug("Received: %s" % output.content[0:80])
+        log.debug("Received: %s", output.content[0:80])
 
 
 def test_app_commands():
@@ -194,7 +194,7 @@ def test_commandline_scanners(url):
 
 
 def call_debug_command(command_name, *args):
-    log.warning("Calling command: %s %s" % (command_name, " ".join(args)))
+    log.warning("Calling command: %s %s", command_name, " ".join(args))
     call_command(command_name, *args)
 
 

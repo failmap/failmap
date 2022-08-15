@@ -23,14 +23,14 @@ def compose_task(
     if endpoints_filter:
         raise NotImplementedError("This scanner does not work on a endpoint level.")
 
-    log.info("Organization filter: %s" % organizations_filter)
-    log.info("Url filter: %s" % urls_filter)
+    log.info("Organization filter: %s", organizations_filter)
+    log.info("Url filter: %s", urls_filter)
 
     # Only displayed configurations are reported. Because why have reports on things you don't display?
     # apply filter to organizations (or if no filter, all organizations)
     organizations = Organization.objects.filter(q_configurations_to_report("organization"), **organizations_filter)
 
-    log.debug("Organizations: %s" % len(organizations))
+    log.debug("Organizations: %s", len(organizations))
 
     # Create tasks for rebuilding ratings for selected organizations and urls.
     # Wheneven a url has been (re)rated the organization for that url need to
@@ -53,13 +53,13 @@ def compose_task(
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")
-        log.debug("Organization filter: %s" % organizations_filter)
-        log.debug("Url filter: %s" % urls_filter)
-        log.debug("urls to display: %s" % q_configurations_to_report())
-        log.debug("organizatins to display: %s" % q_configurations_to_report("organization"))
+        log.debug("Organization filter: %s", organizations_filter)
+        log.debug("Url filter: %s", urls_filter)
+        log.debug("urls to display: %s", q_configurations_to_report())
+        log.debug("organizatins to display: %s", q_configurations_to_report("organization"))
         return group()
 
-    log.debug("Number of tasks: %s" % len(tasks))
+    log.debug("Number of tasks: %s", len(tasks))
 
     # Given this is a complete rebuild, also rebuild the statistics for the past year. (only a year is shown max)
     # if you want to rebuild reports, just run a "calculate map data" by hand also. Code was removed here.

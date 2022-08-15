@@ -22,7 +22,7 @@ def configure_workers(sender=None, conf=None, instance=None, **kwargs):
     else:
         hostname = platform.node()
     role = os.environ.get("WORKER_ROLE", "default")
-    instance.hostname = "%s@%s" % (role, hostname)
+    instance.hostname = f"{role}@{hostname}"
 
     if not worker_verify_role_capabilities(role):
         log.error("Host does not seem to have capabilities to run chosen role!")

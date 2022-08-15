@@ -45,11 +45,11 @@ class CalculateCommand(BaseCommand):
 def check_positive(value):
     ivalue = int(value)
     if ivalue <= 0:
-        raise ArgumentTypeError("%s is an invalid positive int value" % value)
+        raise ArgumentTypeError(f"{value} is an invalid positive int value")
     return ivalue
 
 
 def is_iso(value):
     if value not in countries_by_alpha2:
-        raise ArgumentTypeError("%s country should be a valid ISO code." % value)
+        raise ArgumentTypeError(f"{value} country should be a valid ISO code.")
     return value

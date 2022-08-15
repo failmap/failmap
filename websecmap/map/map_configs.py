@@ -8,8 +8,8 @@ log = logging.getLogger(__name__)
 
 def filter_map_configs(countries: List = None, organization_types: List = None):
     configs = Configuration.objects.all()
-    log.debug("filter for countries: %s" % countries)
-    log.debug("filter for organization_types: %s" % organization_types)
+    log.debug("filter for countries: %s", countries)
+    log.debug("filter for organization_types: %s", organization_types)
 
     configs = configs.filter(is_reported=True)
 

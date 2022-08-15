@@ -43,12 +43,12 @@ class Command(BaseCommand):
         if options["list"]:
             log.info("Currently available administrative regions:")
             log.info("Hint: add the via the admin interface.")
-            x = AdministrativeRegion.objects.all()
-            if not x:
+            adminregions = AdministrativeRegion.objects.all()
+            if not adminregions:
                 log.info("-- None found. Add them via the admin interface.")
 
-            for z in x:
-                log.info("%-3s %-72s, %-5s" % (z.country, z.organization_type, z.admin_level))
+            for region in adminregions:
+                log.info("%-3s %-72s, %-5s", region.country, region.organization_type, region.admin_level)
 
         else:
             import_from_scratch(

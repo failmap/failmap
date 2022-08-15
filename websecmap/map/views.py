@@ -86,7 +86,7 @@ def generic_download(filename, data, file_type):
 
     if file_type in supported_types:
         http_response = excel.make_response(data, file_type)
-        http_response["Content-Disposition"] = "attachment; filename=%s.%s" % (slugify(filename), file_type)
+        http_response["Content-Disposition"] = f"attachment; filename={slugify(filename)}.{file_type}"
         http_response["Content-type"] = supported_types[file_type]["content_type"]
         return http_response
 

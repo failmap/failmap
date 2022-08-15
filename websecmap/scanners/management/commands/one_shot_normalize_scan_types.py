@@ -24,7 +24,7 @@ class Command(VerifyTaskCommand):
 
         for scan in scans:
             old_type = scan.type
-            new_type = "http_security_header_%s" % str(old_type).lower().replace("-", "_")
-            log.debug("Old: %s, New: %s" % (old_type, new_type))
+            new_type = f"http_security_header_{str(old_type).lower().replace('-', '_')}"
+            log.debug("Old: %s, New: %s", old_type, new_type)
             scan.type = new_type
             scan.save(update_fields=["type"])

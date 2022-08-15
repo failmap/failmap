@@ -14,7 +14,7 @@ def create_filename(set_name, country: str = "NL", organization_type="municipali
     else:
         organization_type_name = organization_type_name.get("name")
 
-    filename = "%s_%s_%s_%s" % (country, organization_type_name, set_name, timezone.datetime.now().date())
+    filename = f"{country}_{organization_type_name}_{set_name}_{timezone.datetime.now().date()}"
     return filename
 
 

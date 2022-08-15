@@ -273,7 +273,7 @@ def scores(request):
             "team": team.name,
             "team_color": team.color,
             # transparency makes it lighter and more beautiful.
-            "team_color_soft": "%s%s" % (color_code, "33"),
+            "team_color_soft": f"{color_code}{'33'}",
             "high": final_calculation["high"],
             "high_multiplier": score_multiplier["high"],
             "high_score": final_calculation["high"] * score_multiplier["high"],
@@ -755,7 +755,7 @@ def get_bare_organization_feature(submitted_organization):
         "type": "Feature",
         "properties": {
             # can't use ID of submission, because this does not match per call.
-            "organization_id": "pending_%s" % submitted_organization.organization_type_name,
+            "organization_id": f"pending_{submitted_organization.organization_type_name}",
             "organization_type": submitted_organization.organization_type_name,
             "organization_name": submitted_organization.organization_name,
             "organization_slug": slugify(submitted_organization.organization_name),
@@ -805,7 +805,7 @@ def add_bare_url_features(features, submitted_urls):
         feature = {
             "type": "Feature",
             "properties": {
-                "organization_id": "%s" % submitted_url.for_organization.pk,
+                "organization_id": f"{submitted_url.for_organization.pk}",
                 "organization_type": submitted_url.for_organization.type.name,
                 "organization_name": submitted_url.for_organization.name,
                 "organization_slug": slugify(submitted_url.for_organization.name),

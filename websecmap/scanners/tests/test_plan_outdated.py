@@ -75,15 +75,15 @@ def test_plan_outdated_scans(db):
             ],
         }
     }
-    r = OrganizationReport()
-    r.calculation = None
-    r.organization = o
-    r.at_when = datetime.now(pytz.utc) - timedelta(days=100)
-    r.save()
+    report = OrganizationReport()
+    report.calculation = None
+    report.organization = o
+    report.at_when = datetime.now(pytz.utc) - timedelta(days=100)
+    report.save()
 
     # save and retrieve reports.
-    store_report(r.id, "OrganizationReport", example_report)
-    calc = retrieve_report(r.id, "OrganizationReport")
+    store_report(report.id, "OrganizationReport", example_report)
+    calc = retrieve_report(report.id, "OrganizationReport")
 
     assert len(calc["organization"]) == 1
 

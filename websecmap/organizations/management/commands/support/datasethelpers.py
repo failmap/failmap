@@ -22,12 +22,12 @@ def sqlite_has_correct_referential_integrity():
         )
 
     for row in rows:
-        log.info("%25s %6s %25s %6s" % (row[0], row[1], row[2], row[3]))
+        log.info("%25s %6s %25s %6s", row[0], row[1], row[2], row[3])
 
     if rows:
         log.error("Here are some extremely crude SQL statements that might help fix the problem.")
     for row in rows:
-        log.info('DELETE FROM %s WHERE id = "%s";' % (row[0], row[1]))
+        log.info('DELETE FROM %s WHERE id = "%s";', row[0], row[1])
 
     if rows:
         return False

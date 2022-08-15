@@ -26,7 +26,7 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", week
     when = get_when(weeks_back)
 
     cursor = connection.cursor()
-    sql = """
+    sql = f"""
             SELECT
               low,
               organization.name,
@@ -51,30 +51,26 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", week
               (
                 SELECT MAX(or2.id) as id2 FROM map_organizationreport or2
                 INNER JOIN organization as org2 ON org2.id = or2.organization_id
-                WHERE at_when <= '%(when)s'
-                  AND org2.country = '%(country)s'
-                  AND org2.type_id = '%(OrganizationTypeId)s'
+                WHERE at_when <= '{when}'
+                  AND org2.country = '{get_country(country)}'
+                  AND org2.type_id = '{get_organization_type(organization_type)}'
                 GROUP BY organization_id
               ) as stacked_organization_report
             ON stacked_organization_report.id2 = map_organizationreport.id
             WHERE
-              (('%(when)s' BETWEEN organization.created_on AND organization.is_dead_since
+              (('{when}' BETWEEN organization.created_on AND organization.is_dead_since
                AND organization.is_dead = 1
                ) OR (
-               organization.created_on <= '%(when)s'
+               organization.created_on <= '{when}'
                AND organization.is_dead = 0
               ))
-              AND organization.type_id = '%(OrganizationTypeId)s'
-              AND organization.country = '%(country)s'
+              AND organization.type_id = '{get_organization_type(organization_type)}'
+              AND organization.country = '{get_country(country)}'
               AND total_urls > 0
             GROUP BY organization.name
             HAVING high = 0 AND medium = 0
             ORDER BY low ASC, total_endpoints DESC, organization.name ASC
-            """ % {
-        "when": when,
-        "OrganizationTypeId": get_organization_type(organization_type),
-        "country": get_country(country),
-    }
+            """
 
     # log.debug(sql)
     cursor.execute(sql)
@@ -87,7 +83,7 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", wee
     when = get_when(weeks_back)
     cursor = connection.cursor()
 
-    sql = """
+    sql = f"""
             SELECT
                 low,
                 organization.name,
@@ -111,30 +107,26 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", wee
               (
                 SELECT MAX(or2.id) as id2 FROM map_organizationreport or2
                 INNER JOIN organization as org2 ON org2.id = or2.organization_id
-                WHERE at_when <= '%(when)s'
-                  AND org2.country = '%(country)s'
-                  AND org2.type_id = '%(OrganizationTypeId)s'
+                WHERE at_when <= '{when}'
+                  AND org2.country = '{get_country(country)}'
+                  AND org2.type_id = '{get_organization_type(organization_type)}'
                 GROUP BY organization_id
               ) as stacked_organization_report
             ON stacked_organization_report.id2 = map_organizationreport.id
             WHERE
-              (('%(when)s' BETWEEN organization.created_on AND organization.is_dead_since
+              (('{when}' BETWEEN organization.created_on AND organization.is_dead_since
                AND organization.is_dead = 1
                ) OR (
-               organization.created_on <= '%(when)s'
+               organization.created_on <= '{when}'
                AND organization.is_dead = 0
               ))
-              AND organization.type_id = '%(OrganizationTypeId)s'
-              AND organization.country = '%(country)s'
+              AND organization.type_id = '{get_organization_type(organization_type)}'
+              AND organization.country = '{get_country(country)}'
               AND total_urls > 0
             GROUP BY organization.name
             HAVING high > 0 or medium > 0
             ORDER BY high DESC, medium DESC, medium DESC, organization.name ASC
-            """ % {
-        "when": when,
-        "OrganizationTypeId": get_organization_type(organization_type),
-        "country": get_country(country),
-    }
+            """
 
     # log.debug(sql)
     cursor.execute(sql)
@@ -167,9 +159,9 @@ def rows_to_dataset(rows, when):
             "low": i[8],
             "total_urls": i[9],
             "total_endpoints": i[10],
-            "high_div_endpoints": "%s" % ceil((int(i[6]) / int(i[10])) * 100) if i[10] else 0,
-            "mid_div_endpoints": "%s" % ceil((int(i[7]) / int(i[10])) * 100) if i[10] else 0,
-            "low_div_endpoints": "%s" % ceil((int(i[8]) / int(i[10])) * 100) if i[10] else 0,
+            "high_div_endpoints": f"{ceil((int(i[6]) / int(i[10])) * 100)}" if i[10] else 0,
+            "mid_div_endpoints": f"{ceil((int(i[7]) / int(i[10])) * 100)}" if i[10] else 0,
+            "low_div_endpoints": f"{ceil((int(i[8]) / int(i[10])) * 100)}" if i[10] else 0,
             # Add all percentages, which is sort of an indication how bad / well the organization is doing overall.
             "relative": (
                 ceil((int(i[6]) / int(i[10])) * 1000)

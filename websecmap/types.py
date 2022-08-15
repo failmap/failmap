@@ -4,10 +4,14 @@ from websecmap.celery import Task
 
 
 def compose_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
+    organizations_filter: dict = None,
+    urls_filter: dict = None,
+    endpoints_filter: dict = None,
 ) -> Task:
+    # Convert dicts to empty dicts if they are None for easier work:
+    # organizations_filter, urls_filter, endpoints_filter =
+    # init_dict(organizations_filter, urls_filter, endpoints_filter)
+
     """Compose a task to perform work on specified organizations/urls/endpoints.
 
     :param organizations_filter: dict: limit organizations to these filters, see below
@@ -108,9 +112,9 @@ def compose_task(
 
 
 def compose_discover_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
+    organizations_filter: dict,
+    urls_filter: dict,
+    endpoints_filter: dict,
 ) -> Task:
     """
     See Compose Task
@@ -120,4 +124,8 @@ def compose_discover_task(
     :param endpoints_filter:
     :return:
     """
+
+    # organizations_filter, urls_filter, endpoints_filter =
+    # init_dict(organizations_filter, urls_filter, endpoints_filter)
+
     raise NotImplementedError()

@@ -66,10 +66,7 @@ class AdministrativeRegion(models.Model):
         verbose_name_plural = _("administrative_regions")
 
     def __str__(self):
-        return "%s/%s" % (
-            self.country,
-            self.organization_type,
-        )
+        return f"{self.country}/{self.organization_type}"
 
 
 class Configuration(models.Model):
@@ -112,10 +109,7 @@ class Configuration(models.Model):
         ordering = ("display_order",)
 
     def __str__(self):
-        return "%s/%s" % (
-            self.country,
-            self.organization_type,
-        )
+        return f"{self.country}/{self.organization_type}"
 
 
 class MapHealthReport(models.Model):
@@ -176,7 +170,7 @@ class MapDataCache(models.Model):
     cached_on = models.DateField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
-        return "Map Cache %s %s %s" % (self.country, self.organization_type, self.at_when)
+        return f"Map Cache {self.country} {self.organization_type} {self.at_when}"
 
 
 # It took too long to calculate these stats, resulting in non showing graphs. Therefore we're now storing

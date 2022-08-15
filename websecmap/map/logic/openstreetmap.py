@@ -162,11 +162,10 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
                 resolution = get_resampling_resolution(country, organization_type)
                 resampled = resample(feature, resolution)
                 store_new(resampled, country, organization_type, when)
-                message = "Imported %s of %s. %s%% (Currently: %s)" % (
-                    index + 1,
-                    len(data["features"]),
-                    round(((index + 1) / len(data["features"])) * 100, 2),
-                    feature["properties"]["name"],
+                message = (
+                    f"Imported {index + 1} of {len(data['features'])}. "
+                    f"{round(((index + 1) / len(data['features'])) * 100, 2)}% "
+                    f"(Currently: {feature['properties']['name']})"
                 )
                 store_import_message(country, organization_type, message)
 
@@ -258,12 +257,12 @@ def resample(feature: Dict, resampling_resolution: float = 0.001):
     log.info(f"Resampling path for {feature['properties']['name']}")
 
     if feature["geometry"]["type"] == "Polygon":
-        log.debug("Original length: %s" % len(feature["geometry"]["coordinates"][0]))
+        log.debug("Original length: %s", len(feature["geometry"]["coordinates"][0]))
         i = 0
         for coordinate in feature["geometry"]["coordinates"]:
             feature["geometry"]["coordinates"][i] = rdp(coordinate, epsilon=resampling_resolution)
             i += 1
-        log.debug("Resampled length: %s" % len(feature["geometry"]["coordinates"][0]))
+        log.debug("Resampled length: %s", len(feature["geometry"]["coordinates"][0]))
 
     if feature["geometry"]["type"] == "MultiPolygon":
         i, j = 0, 0
@@ -914,7 +913,7 @@ def osmtogeojson_available():
     except CalledProcessError as e:
         if "no such file or directory, open 'tesfile.osm'" in str(e.output):
             return True
-        else:
-            return False
+
+        return False
     except FileNotFoundError:
         return False

@@ -201,8 +201,10 @@ class GenericTaskCommand(TaskCommand):
             organizations_filter = {"country__in": options["country"]}
 
         log.debug(
-            "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s"
-            % (organizations_filter, urls_filter, endpoints_filter)
+            "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s",
+            organizations_filter,
+            urls_filter,
+            endpoints_filter,
         )
 
         # compose set of tasks to be executed
@@ -269,8 +271,10 @@ class ScannerTaskCommand(TaskCommand):
             organizations_filter = {"country__in": options["country"]}
 
         log.debug(
-            "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s"
-            % (organizations_filter, urls_filter, endpoints_filter)
+            "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s",
+            organizations_filter,
+            urls_filter,
+            endpoints_filter,
         )
 
         # compose set of tasks to be executed
@@ -334,7 +338,7 @@ class DiscoverTaskCommand(TaskCommand):
             organization_filter = {"country__in": options["country"]}
 
         log.debug(
-            "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s" % (organization_filter, urls_filter, [])
+            "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s", organization_filter, urls_filter, []
         )
 
         # compose set of tasks to be executed

@@ -12,7 +12,7 @@ class ResultEncoder(simplejson.JSONEncoder):
                 error["cause"] = self.default(value.__cause__)
             return error
         else:
-            return super(ResultEncoder, self).default(value)
+            return super().default(value)
 
 
 class JSEncoder(simplejson.JSONEncoder):
@@ -27,4 +27,4 @@ class JSEncoder(simplejson.JSONEncoder):
         elif isinstance(obj, datetime.timedelta):
             return (datetime.datetime.min + obj).time().isoformat()
         else:
-            return super(JSEncoder, self).default(obj)
+            return super().default(obj)

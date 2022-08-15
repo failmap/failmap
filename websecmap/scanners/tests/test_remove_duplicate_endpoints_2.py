@@ -63,14 +63,14 @@ def test_deduplicate_all_endpoints_sequentially(db):
     epsdict = [
         {
             # "id": e.id,
-            "discovered_on": e.discovered_on,
-            "protocol": e.protocol,
-            "port": e.port,
-            "ip_version": e.ip_version,
-            "is_dead": e.is_dead,
-            "url": e.url.url,
+            "discovered_on": endpoint.discovered_on,
+            "protocol": endpoint.protocol,
+            "port": endpoint.port,
+            "ip_version": endpoint.ip_version,
+            "is_dead": endpoint.is_dead,
+            "url": endpoint.url.url,
         }
-        for e in eps
+        for endpoint in eps
     ]
     log.info(epsdict)
     # Here you'll see that the state of the newest endpoint is transfered to the olderst one.

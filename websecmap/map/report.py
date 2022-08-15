@@ -61,14 +61,14 @@ def compose_task(
     if endpoints_filter:
         raise NotImplementedError("This scanner does not work on a endpoint level.")
 
-    log.info("Organization filter: %s" % organizations_filter)
-    log.info("Url filter: %s" % urls_filter)
+    log.info("Organization filter: %s", organizations_filter)
+    log.info("Url filter: %s", urls_filter)
 
     # Only displayed configurations are reported. Because why have reports on things you don't display?
     # apply filter to organizations (or if no filter, all organizations)
     organizations = Organization.objects.filter(q_configurations_to_report("organization"), **organizations_filter)
 
-    log.debug("Organizations: %s" % len(organizations))
+    log.debug("Organizations: %s", len(organizations))
 
     # Create tasks for rebuilding ratings for selected organizations and urls.
     # Wheneven a url has been (re)rated the organization for that url need to
@@ -104,13 +104,13 @@ def compose_task(
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")
-        log.debug("Organization filter: %s" % organizations_filter)
-        log.debug("Url filter: %s" % urls_filter)
-        log.debug("urls to display: %s" % q_configurations_to_report())
-        log.debug("organizations to display: %s" % q_configurations_to_report("organization"))
+        log.debug("Organization filter: %s", organizations_filter)
+        log.debug("Url filter: %s", urls_filter)
+        log.debug("urls to display: %s", q_configurations_to_report())
+        log.debug("organizations to display: %s", q_configurations_to_report("organization"))
         return group()
 
-    log.debug("Number of tasks: %s" % len(tasks))
+    log.debug("Number of tasks: %s", len(tasks))
 
     # finally, rebuild the graphs (which can mis-matchi a bit if the last reports aren't in yet. Will have to do for now
     # mainly as we're trying to get away from canvas and it's buggyness.
@@ -171,7 +171,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                 }
             }
             when = datetime.now(pytz.utc) - timedelta(days=days_back)
-            log.info("Days back:%s Date: %s" % (days_back, when))
+            log.info("Days back:%s Date: %s", (days_back, when))
 
             # delete this specific moment as it's going to be replaced, so it's not really noticable an update is
             # taking place.
@@ -687,10 +687,9 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                                 # therefore reduce this to have only one v4 and v6
                                 if not added_endpoint:
                                     added_endpoint = True
-                                    endpointtype = "%s/%s (%s)" % (
-                                        endpoint["protocol"],
-                                        endpoint["port"],
-                                        ("IPv4" if endpoint["ip_version"] == 4 else "IPv6"),
+                                    endpointtype = (
+                                        f"{endpoint['protocol']}/{endpoint['port']} "
+                                        f"({('IPv4' if endpoint['ip_version'] == 4 else 'IPv6')})"
                                     )
                                     if endpointtype not in measurement["endpoint"]:
                                         measurement["endpoint"][endpointtype] = {
@@ -734,12 +733,12 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                 measurement["medium url percentage"] = 0
                 measurement["good url percentage"] = 0
 
-            s = HighLevelStatistic()
-            s.country = map_configuration["country"]
-            s.organization_type = OrganizationType.objects.get(name=map_configuration["organization_type__name"])
-            s.at_when = when
-            s.report = measurement
-            s.save()
+            stat = HighLevelStatistic()
+            stat.country = map_configuration["country"]
+            stat.organization_type = OrganizationType.objects.get(name=map_configuration["organization_type__name"])
+            stat.at_when = when
+            stat.report = measurement
+            stat.save()
 
 
 def create_organization_report_on_moment(organization: Organization, when: datetime = None):
@@ -769,7 +768,7 @@ def create_organization_report_on_moment(organization: Organization, when: datet
     # using this check we can also ditch deepdiff, because ratings on the same day are always the same.
     # todo: we should be able to continue on a certain day.
     if OrganizationReport.objects.all().filter(organization=organization, at_when=when).exists():
-        log.info("Rating already exists for %s on %s. Not overwriting." % (organization, when))
+        log.info("Rating already exists for %s on %s. Not overwriting.", organization, when)
 
     # Done: closing off urls, after no relevant endpoints, but still resolvable. Done.
     # if so, we don't need to check for existing endpoints anymore at a certain time...
@@ -799,7 +798,7 @@ def create_organization_report_on_moment(organization: Organization, when: datet
     # this is 10% faster without deepdiff, the major pain is elsewhere.
     last_report_data = retrieve_report(last.id, "OrganizationReport")
     if DeepDiff(last_report_data, calculation, ignore_order=True, report_repetition=True):
-        log.info("The calculation for %s on %s has changed, so we're saving this rating." % (organization, when))
+        log.info("The calculation for %s on %s has changed, so we're saving this rating.", organization, when)
 
         # remove urls and name from scores object, so it can be used as initialization parameters (saves lines)
         # this is by reference, meaning that the calculation will be affected if we don't work on a clone.
@@ -815,11 +814,11 @@ def create_organization_report_on_moment(organization: Organization, when: datet
 
         store_report(organizationrating.pk, "OrganizationReport", calculation)
 
-        log.info("Saved report for %s on %s." % (organization, when))
+        log.info("Saved report for %s on %s.", organization, when)
     else:
         # This happens because some urls are dead etc: our filtering already removes this from the relevant information
         # at this point in time. But since it's still a significant moment, it will just show that nothing has changed.
-        log.warning("The calculation for %s on %s is the same as the previous one. Not saving." % (organization, when))
+        log.warning("The calculation for %s on %s is the same as the previous one. Not saving.", organization, when)
 
 
 def relevant_urls_at_timepoint_organization(organization: Organization, when: datetime):
@@ -848,15 +847,15 @@ def default_organization_rating(organizations: List[int]):
         if not organization:
             continue
 
-        log.info("Giving organization a default rating: %s" % organization)
+        log.info("Giving organization a default rating: %s", organization)
 
         when = organization.created_on if organization.created_on else START_DATE
 
-        r = OrganizationReport()
-        r.at_when = when
-        r.organization = organization
-        r.calculation = None
-        r.save()
+        report = OrganizationReport()
+        report.at_when = when
+        report.organization = organization
+        report.calculation = None
+        report.save()
 
         default_calculation = {
             "organization": {
@@ -904,7 +903,7 @@ def default_organization_rating(organizations: List[int]):
                 "total_issues": 0,
             }
         }
-        store_report(r.id, "OrganizationReport", default_calculation)
+        store_report(report.id, "OrganizationReport", default_calculation)
 
 
 @app.task(queue="reporting")

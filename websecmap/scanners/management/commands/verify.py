@@ -28,7 +28,7 @@ class Command(VerifyTaskCommand):
 
         try:
             if options["scanner"][0] not in scanners:
-                print("Scanner does not exist. Please specify a scanner: %s " % scanners.keys())
+                print(f"Scanner does not exist. Please specify a scanner: {scanners.keys()} ")
                 return
 
             self.scanner_module = scanners[options["scanner"][0]]

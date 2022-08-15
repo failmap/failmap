@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
         for app in apps:
             log.info("creating image for: %s", app)
-            call_command("graph_models", app, "-o", "docs/source/topics/development/data_model/%s_models.png" % app)
+            call_command("graph_models", app, "-o", f"docs/source/topics/development/data_model/{app}_models.png")
 
         # not using -a, because it's hard to see where some of the models originate from (and then to remove them
         # using -X). So making it more explicit.
@@ -38,7 +38,7 @@ class Command(BaseCommand):
         contents += "It has been generated with 'failmap docs'." + os.linesep + os.linesep
 
         for app in apps:
-            contents += "## %s" % app + os.linesep
+            contents += f"## {app}" + os.linesep
             contents += "![Data Model](data_model/%s_models.png)" % app + os.linesep
             contents += "" + os.linesep
 

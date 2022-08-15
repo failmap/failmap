@@ -51,7 +51,7 @@ def repair_corrupted_coordinate(coordinate):
     # Some coordinates are stored as strings, which cannot be parsed correctly. They should be stored as arrays.
 
     validate_point(coordinate)
-    a = coordinate.area
+    area = coordinate.area
 
     if coordinate.area is None:
         organizations = Organization.objects.all().filter(coordinate=coordinate)
@@ -67,13 +67,13 @@ def repair_corrupted_coordinate(coordinate):
 
     print(
         f"Inspecting coordinate: {coordinate}, "
-        f"type: {coordinate.geojsontype}, area: {coordinate.area}, a[0]: {a[0]}."
+        f"type: {coordinate.geojsontype}, area: {coordinate.area}, a[0]: {area[0]}."
     )
 
-    if a[0] == "[":
+    if area[0] == "[":
         # the coordinate is a string, which is not valid. It should have been stored in a different way.
         # example string input: [4.8264312999999675, 52.3454862]
-        arr = a.replace("[", "").replace("]", "").replace(",", "").split(" ")
+        arr = area.replace("[", "").replace("]", "").replace(",", "").split(" ")
         arr[0] = float(arr[0])
         arr[1] = float(arr[1])
         print(f"Repairing coordinate: {coordinate}, proposed fix: {arr}")
@@ -81,8 +81,8 @@ def repair_corrupted_coordinate(coordinate):
         coordinate.area = arr
         coordinate.save(update_fields=["area"])
 
-    a = coordinate.area
-    if a[0] == "[":
+    area = coordinate.area
+    if area[0] == "[":
         raise ValueError(f"Coordinate {coordinate} cannot be fixed.")
 
     return coordinate
@@ -100,11 +100,11 @@ def attach_coordinate(organization, latitude, longitude):
 def switch_latlng(coordinate):
     validate_point(coordinate)
 
-    a = coordinate.area
+    area = coordinate.area
 
-    coordinate.area = [a[1], a[0]]
+    coordinate.area = [area[1], area[0]]
 
-    coordinate.edit_area = {"type": "Point", "coordinates": [a[1], a[0]]}
+    coordinate.edit_area = {"type": "Point", "coordinates": [area[1], area[0]]}
 
     coordinate.save()
 

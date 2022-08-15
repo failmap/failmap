@@ -146,7 +146,7 @@ def significant_moments(urls: List[Url] = None, reported_scan_types: List[str] =
     :return:
     """
 
-    log.debug("Making a timeline for %s urls: %s" % (len(urls), urls))
+    log.debug("Making a timeline for %s urls: %s", len(urls), urls)
 
     if not urls:
         log.info("No urls, so no moments")
@@ -327,7 +327,7 @@ def hash_scan_per_day_and_type(scan):
     else:
         pk = scan.endpoint.pk
 
-    return "%s%s%s" % (pk, scan.type, scan.rating_determined_on.replace(second=59, microsecond=999999))
+    return f"{pk}{scan.type}{scan.rating_determined_on.replace(second=59, microsecond=999999)}"
 
 
 def create_timeline(url: Url):
@@ -447,7 +447,7 @@ def create_url_reports(url: Url) -> List[UrlReport]:
     :return:
     """
 
-    log.info("Rebuilding ratings for url %s on %s moments" % (url, len(timeline)))
+    log.info("Rebuilding ratings for url %s on %s moments", url, len(timeline))
     previous_endpoint_ratings = {}
     previous_url_ratings = {}
     previous_endpoints = []
@@ -649,7 +649,7 @@ def create_url_reports(url: Url) -> List[UrlReport]:
             "endpoints": endpoint_calculations,
         }
 
-        log.debug("On %s %s has %s endpoints." % (moment, url, len(endpoint_calculations)))
+        log.debug("On %s %s has %s endpoints.", moment, url, len(endpoint_calculations))
 
         url_reports.append(save_url_report(url, moment, calculation, is_the_newest=is_the_newest))
 
@@ -659,7 +659,7 @@ def create_url_reports(url: Url) -> List[UrlReport]:
 def create_endpoint_calculation(endpoint, calculations):
     return {
         "id": endpoint.pk,
-        "concat": "%s/%s IPv%s" % (endpoint.protocol, endpoint.port, endpoint.ip_version),
+        "concat": f"{endpoint.protocol}/{endpoint.port} IPv{endpoint.ip_version}",
         "ip": endpoint.ip_version,
         "ip_version": endpoint.ip_version,
         "port": endpoint.port,
@@ -975,7 +975,7 @@ def inspect_timeline(timeline, url: Url):
     for moment in timeline:
 
         message += "|" + newline
-        message += "|- %s" % moment + newline
+        message += f"|- {moment}" + newline
         # for debugging
         # message += "|- %s: Contents: %s" % (moment, timeline[moment]) + newline
 
@@ -1002,7 +1002,7 @@ def inspect_timeline(timeline, url: Url):
         if "dead" in timeline[moment]:
             message += "|  |- dead endpoints" + newline
             for endpoint in timeline[moment]["dead_endpoints"]:
-                message += "|  |  |- %s" % endpoint + newline
+                message += f"|  |  |- {endpoint}" + newline
 
         if "url_not_resolvable" in timeline[moment]:
             message += "|  |- url became not resolvable" + newline

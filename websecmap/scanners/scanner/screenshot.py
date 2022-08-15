@@ -33,7 +33,7 @@ from django.db.models import Q
 from PIL import Image
 
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.models import Endpoint, Screenshot
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.__init__ import endpoint_filters, q_configurations_to_scan, unique_and_random
@@ -42,9 +42,8 @@ from websecmap.scanners.timeout import timeout
 log = logging.getLogger(__package__)
 
 
-def filter_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     # basically updates screenshots. It will ignore whatever parameter you throw at it as creating screenshots every day
     # is a bit nonsense. It will update every month.
     one_month_ago = datetime.now(pytz.utc) - timedelta(days=31)
@@ -67,9 +66,8 @@ def filter_scan(
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="scan", scanner="screenshot", urls=urls)
 
@@ -81,9 +79,9 @@ def compose_planned_scan_task(**kwargs):
 
 
 def compose_manual_scan_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
-
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_scan_task(urls)
 

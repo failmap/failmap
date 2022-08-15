@@ -123,7 +123,10 @@ def get_map_data(
     # Sept 2019: MySQL has an issue with mediumtext fields. When joined, and the query is not optimized, the
     # result will take 2 minutes to complete. Would you not select the mediumtext field, the query finishes in a second.
     # That is why there are two queries to retrieve map data from the database.
-    sql = """
+    my_organization_type = get_organization_type(organization_type)
+    my_country = get_country(country)
+
+    sql = f"""
         SELECT
             map_organizationreport.low,
             organization.name,
@@ -148,16 +151,16 @@ def get_map_data(
           (SELECT stacked_organization.id as stacked_organization_id
           FROM organization stacked_organization
           WHERE (
-            stacked_organization.created_on <= '%(when)s'
+            stacked_organization.created_on <= '{when}'
             AND stacked_organization.is_dead = 0
-            AND stacked_organization.type_id=%(OrganizationTypeId)s
-            AND stacked_organization.country='%(country)s'
+            AND stacked_organization.type_id={my_organization_type}
+            AND stacked_organization.country='{my_country}'
             )
           OR (
-          '%(when)s' BETWEEN stacked_organization.created_on AND stacked_organization.is_dead_since
+          '{when}' BETWEEN stacked_organization.created_on AND stacked_organization.is_dead_since
             AND stacked_organization.is_dead = 1
-            AND stacked_organization.type_id=%(OrganizationTypeId)s
-            AND stacked_organization.country='%(country)s'
+            AND stacked_organization.type_id={my_organization_type}
+            AND stacked_organization.country='{my_country}'
           )) as organization_stack
           ON organization_stack.stacked_organization_id = map_organizationreport.organization_id
 
@@ -174,16 +177,16 @@ def get_map_data(
           INNER JOIN organization filter_organization
             ON (stacked_coordinate.organization_id = filter_organization.id)
           WHERE (
-            stacked_coordinate.created_on <= '%(when)s'
+            stacked_coordinate.created_on <= '{when}'
             AND stacked_coordinate.is_dead = 0
-            AND filter_organization.country='%(country)s'
-            AND filter_organization.type_id=%(OrganizationTypeId)s
+            AND filter_organization.country='{my_country}'
+            AND filter_organization.type_id={my_organization_type}
             )
           OR
-            ('%(when)s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
+            ('{when}' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
             AND stacked_coordinate.is_dead = 1
-            AND filter_organization.country='%(country)s'
-            AND filter_organization.type_id=%(OrganizationTypeId)s
+            AND filter_organization.country='{my_country}'
+            AND filter_organization.type_id={my_organization_type}
             ) GROUP BY area, organization_id
           ) as coordinate_stack
           ON coordinate_stack.organization_id = map_organizationreport.organization_id
@@ -196,22 +199,18 @@ def get_map_data(
           FROM map_organizationreport
           INNER JOIN organization filter_organization2
             ON (filter_organization2.id = map_organizationreport.organization_id)
-          WHERE at_when <= '%(when)s'
-          AND filter_organization2.country='%(country)s'
-          AND filter_organization2.type_id=%(OrganizationTypeId)s
+          WHERE at_when <= '{when}'
+          AND filter_organization2.country='{my_country}'
+          AND filter_organization2.type_id={my_organization_type}
           GROUP BY organization_id
           ) as stacked_organizationrating
           ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
 
 
-        WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
+        WHERE organization.type_id = '{my_organization_type}' AND organization.country= '{my_country}'
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY map_organizationreport.at_when ASC
-        """ % {
-        "when": when,
-        "OrganizationTypeId": get_organization_type(organization_type),
-        "country": get_country(country),
-    }
+        """
 
     cursor.execute(sql)
     rows = cursor.fetchall()

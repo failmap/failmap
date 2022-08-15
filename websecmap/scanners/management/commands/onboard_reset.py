@@ -22,7 +22,7 @@ class Command(VerifyTaskCommand):
             expired = Url.objects.all().filter(onboarding_stage__in=["endpoint_discovery", "scans_running", "crawling"])
 
             for url in expired:
-                log.debug("Resetting onboarding status of %s" % url)
+                log.debug("Resetting onboarding status of %s", url)
                 reset_onboarding_status(url)
 
         except KeyboardInterrupt:

@@ -18,7 +18,7 @@ from celery import Task, group
 
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Url
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.scanner import q_configurations_to_scan, unique_and_random, url_filters
 from websecmap.scanners.scanner.http import get_random_user_agent
 from websecmap.scanners.scanner.subdomains import discover_wildcard
@@ -26,9 +26,9 @@ from websecmap.scanners.scanner.subdomains import discover_wildcard
 log = logging.getLogger(__name__)
 
 
-def filter_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
+
     # Don't care about dead or not resolvable here: The subdomains below this might be very well alive.
     default_filter = {"uses_dns_wildcard": True}
     urls_filter = {**urls_filter, **default_filter}
@@ -42,10 +42,8 @@ def filter_scan(
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
-
+def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="scan", scanner="dns_clean_wildcards", urls=urls)
 
@@ -57,8 +55,9 @@ def compose_planned_scan_task(**kwargs):
 
 
 def compose_manual_scan_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_scan_task(urls)
 

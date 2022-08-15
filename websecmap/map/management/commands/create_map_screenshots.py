@@ -47,22 +47,23 @@ class Command(BaseCommand):
             for moment_in_time in moments_in_time:
                 for filter in filters:
                     log.debug(
-                        "%s %s %s %s"
-                        % (configuration.country, configuration.organization_type.name, filter, moment_in_time)
-                    )
-
-                    map_only_url = config.PROJECT_WEBSITE + "/map_only/%s/%s/%s/%s/" % (
-                        configuration.country,
-                        configuration.organization_type.name,
-                        moment_in_time,
-                        filter,
-                    )
-
-                    filename = settings.TOOLS["firefox"]["screenshot_output_dir"] + "%s_%s_%s_%s.png" % (
+                        "%s %s %s %s",
                         configuration.country,
                         configuration.organization_type.name,
                         filter,
                         moment_in_time,
+                    )
+
+                    map_only_url = (
+                        config.PROJECT_WEBSITE
+                        + f"/map_only/{configuration.country}/{configuration.organization_type.name}/"
+                        f"{moment_in_time}/{filter}/"
+                    )
+
+                    filename = (
+                        settings.TOOLS["firefox"]["screenshot_output_dir"]
+                        + f"{configuration.country}_{configuration.organization_type.name}_{filter}"
+                        f"_{moment_in_time}.png"
                     )
 
                     screenshot_chrome(map_only_url, filename)
@@ -82,7 +83,7 @@ def screenshot_firefox(url, filename):
         "screenshots",
         "-no-remote",
     ]
-    log.debug("Called command: %s" % " ".join(command))
+    log.debug("Called command: %s", " ".join(command))
     subprocess.call(command)
 
 
@@ -91,10 +92,10 @@ def screenshot_chrome(url, filename):
         chrome,
         "--disable-gpu",
         "--headless",
-        "--screenshot=%s" % filename,
+        f"--screenshot={filename}",
         "--window-size=1600,1200",
         "--virtual-time-budget=5000",
         url,
     ]
-    log.debug("Called command: %s" % " ".join(command))
+    log.debug("Called command: %s", " ".join(command))
     subprocess.call(command)

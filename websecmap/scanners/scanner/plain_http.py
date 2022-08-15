@@ -12,7 +12,7 @@ from celery import Task, group
 
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
@@ -35,10 +35,8 @@ saved_by_the_bell = "Redirects to a secure site, while a secure counterpart on t
 no_https_at_all = "Site does not redirect to secure url, and has no secure alternative on a standard port."
 
 
-def filter_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
-
+def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if organizations_filter:
         organizations = Organization.objects.filter(is_dead=False, **organizations_filter).only("id")
         urls = Url.objects.filter(
@@ -67,9 +65,8 @@ def filter_scan(
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("plain_http"):
         return group()
 
@@ -84,9 +81,9 @@ def compose_planned_scan_task(**kwargs):
 
 
 def compose_manual_scan_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
-
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     # We might not be allowed to scan for this at all.
     if not allowed_to_scan("plain_http"):
         return group()  # An empty group fits this callable's signature and does not impede celery.
@@ -245,7 +242,8 @@ def store(results, endpoint_id):
         # there will be mismatches between this (or previous results) and reality.
         log.debug(
             "Endpoint on %s doesn't resolve anymore. "
-            "Run the DNS verify scanner to prevent scanning non resolving endpoints." % endpoint_id
+            "Run the DNS verify scanner to prevent scanning non resolving endpoints.",
+            endpoint_id,
         )
         return
 
@@ -269,10 +267,10 @@ def store(results, endpoint_id):
 
     # Really no security at all
     if not can_connect_result["result"] and redirects_to_safety_result is False:
-        log.info("%s does not have a https site. Saving/updating scan." % endpoint.url)
+        log.info("%s does not have a https site. Saving/updating scan.", endpoint.url)
         store_endpoint_scan_result("plain_https", endpoint_id, "1000", no_https_at_all)
 
     # some redirections that might have flaws etc.
     if not can_connect_result["result"] and redirects_to_safety_result is True:
-        log.info("%s redirects to safety, saved by the bell." % endpoint.url)
+        log.info("%s redirects to safety, saved by the bell.", endpoint.url)
         store_endpoint_scan_result("plain_https", endpoint_id, "25", saved_by_the_bell)

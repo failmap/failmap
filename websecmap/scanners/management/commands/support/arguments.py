@@ -23,4 +23,4 @@ def valid_organization(name):
         o = Organization.objects.get(name__iexact=name)
         return o.name
     except ObjectDoesNotExist:
-        raise argparse.ArgumentTypeError("%s is not a valid organization or _ALL_" % name)
+        raise argparse.ArgumentTypeError(f"{name} is not a valid organization or _ALL_")

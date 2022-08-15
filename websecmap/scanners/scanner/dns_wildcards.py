@@ -4,7 +4,7 @@ from celery import Task, group
 
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Url
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.scanner import unique_and_random
 from websecmap.scanners.scanner.subdomains import discover_wildcard, url_by_filters
 
@@ -12,8 +12,9 @@ log = logging.getLogger(__package__)
 
 
 def filter_discover(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
     return unique_and_random(urls)
 
@@ -25,9 +26,8 @@ def compose_planned_discover_task(**kwargs):
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_discover(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="discover", scanner="dns_wildcards", urls=urls)
 
@@ -43,8 +43,9 @@ def compose_discover_task(urls):
 
 
 def compose_manual_discover_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
 
     # a heuristic
@@ -52,7 +53,7 @@ def compose_manual_discover_task(
         log.info("Did not get any urls to discover wildcards.")
         return group()
 
-    log.debug("Going to scan for wildcards for the following %s urls." % len(urls))
+    log.debug("Going to scan for wildcards for the following %s urls.", len(urls))
 
     return compose_discover_task(urls)
 

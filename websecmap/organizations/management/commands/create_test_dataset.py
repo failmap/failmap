@@ -29,7 +29,7 @@ class Command(DumpDataCommand):
         parser.add_argument(
             "-c", "--count", default=20, type=int, help="Maximum amount of organization to create in the dataset."
         )
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
 
     def handle(self, *app_labels, **options):
         """

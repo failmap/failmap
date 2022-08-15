@@ -25,7 +25,7 @@ class UpdatesOnOrganizationFeed(Feed):
         except ObjectDoesNotExist:
             return "Organization Updates"
 
-        return "%s Updates" % organization.name
+        return f"{organization.name} Updates"
 
     # it seems weird to do this.
     def get_object(self, request, *args, **kwargs):
@@ -56,10 +56,10 @@ class UpdatesOnOrganizationFeed(Feed):
             else "🍋"
         )
 
-        return "%s %s - %s: %s" % (badge, rating, item["url"], item["service"])
+        return f"{badge} {rating} - {item['url']}: {item['service']}"
 
     def item_description(self, item):
-        return "%s: %s" % (_(item["scan_type"]), _(item.get("explanation", "")))
+        return f"{_(item['scan_type'])}: {_(item.get('explanation', ''))}"
 
     def item_pubdate(self, item):
         return item["rating_determined_on"]
@@ -67,12 +67,9 @@ class UpdatesOnOrganizationFeed(Feed):
     # item_link is only needed if NewsItem has no get_absolute_url method.
     # unique links are required to properly display a feed.
     def item_link(self, item):
-        return "%s/#report-%s/%s/%s/%s" % (
-            config.PROJECT_WEBSITE,
-            item["organization_id"],
-            item["url"],
-            item["service"],
-            item["rating_determined_on"],
+        return (
+            f"{config.PROJECT_WEBSITE}/#report-{item['organization_id']}/{item['url']}/"
+            f"{item['service']}/{item['rating_determined_on']}"
         )
 
 
@@ -94,13 +91,13 @@ class LatestScanFeed(Feed):
 
     def title(self, scan_type: str = ""):
         if scan_type:
-            return "%s Scan Updates" % scan_type
+            return f"{scan_type} Scan Updates"
         else:
             return "Vulnerabilities Feed"
 
     def link(self, scan_type: str = ""):
         if scan_type:
-            return "/data/feed/%s" % scan_type
+            return f"/data/feed/{scan_type}"
         else:
             return "/data/feed/"
 
@@ -140,10 +137,10 @@ class LatestScanFeed(Feed):
 
         if item.type in URL_SCAN_TYPES:
             # url generic scan:
-            return "%s %s - %s" % (badge, rating, item.url.url)
+            return f"{badge} {rating} - {item.url.url}"
         else:
             # endpoint scan
-            return "%s %s - %s" % (badge, rating, item.endpoint.url.url)
+            return f"{badge} {rating} - {item.endpoint.url.url}"
 
     def item_description(self, item):
         calculation = get_severity(item)
@@ -156,10 +153,10 @@ class LatestScanFeed(Feed):
     def item_link(self, item):
         if item.type in URL_SCAN_TYPES:
             # url generic scan:
-            return "%s/#updates/%s/%s" % (config.PROJECT_WEBSITE, item.last_scan_moment, item.url.url)
+            return f"{config.PROJECT_WEBSITE}/#updates/{item.last_scan_moment}/{item.url.url}"
         else:
             # endpoint scan
-            return "%s/#updates/%s/%s" % (config.PROJECT_WEBSITE, item.last_scan_moment, item.endpoint.url.url)
+            return f"{config.PROJECT_WEBSITE}/#updates/{item.last_scan_moment}/{item.endpoint.url.url}"
 
 
 def latest_updates(organization_id):
@@ -235,7 +232,7 @@ def latest_updates(organization_id):
                     "organization": organization.name,
                     "organization_id": organization.pk,
                     "url": scan.endpoint.url.url,
-                    "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
+                    "service": f"{scan.endpoint.protocol}/{scan.endpoint.port} (IPv{scan.endpoint.ip_version})",
                     "protocol": scan.endpoint.protocol,
                     "port": scan.endpoint.port,
                     "ip_version": scan.endpoint.ip_version,

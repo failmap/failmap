@@ -105,7 +105,7 @@ class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         contest.from_moment = datetime.now(pytz.utc)
         contest.until_moment = datetime.now(pytz.utc) + timedelta(days=3)
         contest.admin_user = generate_game_user()
-        contest.name = "new_contest_%s" % datetime.now(pytz.utc).date()
+        contest.name = f"new_contest_{datetime.now(pytz.utc).date()}"
         contest.save()
 
         # create a number of team members.
@@ -154,15 +154,15 @@ def generate_team(contest):
 
 
 def create_printout(contest):
-    login_url = "%s/game/" % config.PROJECT_WEBSITE
-    game_url = "%s/game/scores/" % config.PROJECT_WEBSITE
+    login_url = f"{config.PROJECT_WEBSITE}/game/"
+    game_url = f"{config.PROJECT_WEBSITE}/game/scores/"
 
-    username = "%s" % contest.admin_user.username  # associate an account to login.
+    username = f"{contest.admin_user.username}"  # associate an account to login.
     game_user = GameUser.objects.all().filter(user=contest.admin_user).first()
     if not game_user or game_user.password is None:
         raise ValueError("Set a game user for this contest, do so in the users list. Also set the password.")
 
-    password = "%s" % game_user.password
+    password = f"{game_user.password}"
 
     # todo: margin top per page.
     content = "<style>body{font-family: verdana, sans-serif;}</style>"
@@ -184,8 +184,8 @@ def create_printout(contest):
                 display: none !important;
             }
                </style>"""
-    content += "<h1>%s</h1>" % contest.name
-    content += "<p>Starts at %s. Deadline: %s.</p>" % (contest.from_moment, contest.until_moment)
+    content += f"<h1>{contest.name}</h1>"
+    content += f"<p>Starts at {contest.from_moment}. Deadline: {contest.until_moment}.</p>"
     content += "<br />"
     content += "<h2>Teams</h2>"
     teams = Team.objects.all().filter(participating_in_contest=contest, allowed_to_submit_things=True)
@@ -196,35 +196,35 @@ def create_printout(contest):
         teamcontent += (
             "<p style='font-weight: bold; font-size: 2em; "
             "padding-top: 100px; margin-bottom: 0px; padding-bottom: 0px;'>"
-            "Hi team <span style='background-color: %s;'>%s</span>!</p>"
-            "<br><br>" % (team.color, team.name)
+            f"Hi team <span style='background-color: {team.color};'>{team.name}</span>!</p>"
+            "<br><br>"
         )
         teamcontent += "Thanks for joining this contest! These instructions try to help you get started.<br><br>"
         teamcontent += "To participate, first go to the gaming interface: <br>"
-        teamcontent += "<b>%s</b> <br>" % login_url
+        teamcontent += f"<b>{login_url}</b> <br>"
         teamcontent += "<br />"
         teamcontent += "Then <b>click login</b> at the top right corner.<br>"
         teamcontent += "<br />"
         teamcontent += "Use the following account information: <br>"
-        teamcontent += "Username: <b>%s</b><br>" % username
-        teamcontent += "Password: <b>%s</b><br />" % password
+        teamcontent += f"Username: <b>{username}</b><br>"
+        teamcontent += f"Password: <b>{password}</b><br />"
         teamcontent += "<br />"
-        teamcontent += "Then, select this contest: <b>%s</b><br />" % contest.name
+        teamcontent += f"Then, select this contest: <b>{contest.name}</b><br />"
         teamcontent += "<br />"
         teamcontent += "Then select your team and fill in it's secret:<br />"
-        teamcontent += "Team: <span style='background-color: %s; width: 60px; height: 20px;'><b>%s</b></span><br />" % (
-            team.color,
-            team.name,
+        teamcontent += (
+            f"Team: <span style='background-color: {team.color}; width: 60px; height: 20px;'>"
+            f"<b>{team.name}</b></span><br />"
         )
-        teamcontent += "Secret: <b>%s</b><br />" % team.secret
+        teamcontent += f"Secret: <b>{team.secret}</b><br />"
         teamcontent += "<br />"
         teamcontent += "If you have any questions, please ask the contest organizer!<br>"
         teamcontent += "<br />"
         teamcontent += "Have fun!<br>"
-        teamcontent += "<i>-- the %s contest organizers</s><br>" % contest.name
+        teamcontent += f"<i>-- the {contest.name} contest organizers</s><br>"
         teamcontent += "<br /><br />"
         teamcontent += "<i>P.S. It's possible to see the scorebord without logging in at:</i><br>"
-        teamcontent += "<i>%s</i><br>" % game_url
+        teamcontent += f"<i>{game_url}</i><br>"
         teamcontent += "<br />"
 
         # only the beginning of the tag, so the closing style and any properties etc don't matter.
@@ -235,8 +235,8 @@ def create_printout(contest):
         mailcontent = ""
         mailcontent += (
             "<a class='noprint' href='mailto:address"
-            "?subject=Your %s Contest Login Info"
-            "&body=%s'>E-Mail this</a>" % (contest.name, stuff)
+            f"?subject=Your {contest.name} Contest Login Info"
+            f"&body={stuff}'>E-Mail this</a>"
         )
 
         content += teamcontent
@@ -257,14 +257,14 @@ def generate_team_password():
 
     password = "".join(choices(letters, k=16))
     # to make it easier to read, add spaces per 4 characters.
-    return "%s-%s-%s-%s" % (password[0:4], password[4:8], password[8:12], password[12:16])
+    return f"{password[0:4]}-{password[4:8]}-{password[8:12]}-{password[12:16]}"
 
 
 def generate_pastel_color():
     def r():
         return randint(125, 255)
 
-    return "#%02X%02X%02X" % (r(), r(), r())
+    return f"#{r():02X}{r():02X}{r():02X}"
 
 
 def generate_team_name():
@@ -599,7 +599,7 @@ def generate_team_name_docker():
         "zhukovsky",
     ]
 
-    return "%s %s" % (choice(traits).capitalize(), choice(names).capitalize())
+    return f"{choice(traits).capitalize()} {choice(names).capitalize()}"
 
 
 # todo: submissioninline, read only... there are going to be MANY new things...
@@ -622,7 +622,7 @@ class TeamAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     @staticmethod
     def team_color(obj):
-        return mark_safe("<div style='background-color: %s; width: 60px; height: 20px;'></div>" % obj.color)
+        return mark_safe(f"<div style='background-color: {obj.color}; width: 60px; height: 20px;'></div>")
 
     actions = []
 
@@ -705,7 +705,7 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             url = Url.objects.all().filter(url=urlsubmission.url, is_dead=False).first()
 
             if not url:
-                log.debug("adding new url: %s" % urlsubmission.url)
+                log.debug(f"adding new url: {urlsubmission.url}")
                 # if it already exists, then add the url to the organization.
                 url = Url(url=urlsubmission.url)
                 url.save()
@@ -888,7 +888,7 @@ def check_valid_urls(urls):
             continue
 
         # tld extract has also removed ports, usernames, passwords and other nonsense.
-        url = "%s.%s" % (extract.domain, extract.suffix)
+        url = f"{extract.domain}.{extract.suffix}"
 
         # see if the URL resolves at all:
         if not resolves(url):

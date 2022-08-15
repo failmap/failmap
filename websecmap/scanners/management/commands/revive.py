@@ -47,7 +47,7 @@ class Command(BaseCommand):
 
         try:
             if options["subject"][0] not in self.subjects:
-                print("Subject cannot be revived, no code for that: %s " % self.subjects.keys())
+                print(f"Subject cannot be revived, no code for that: {self.subjects.keys()} ")
                 return
 
             revive(options["subject"][0], options["date"], options["preview"])
@@ -76,10 +76,10 @@ def revive(object_type, date, preview: bool = True):
         dead_objects = Endpoint.objects.all().filter(is_dead=True, is_dead_since__date=date)
 
     if preview:
-        log.info("Previewing the amount of dead %s that will be revived on %s" % (object_type, date))
+        log.info("Previewing the amount of dead %s that will be revived on %s", object_type, date)
 
-    log.info("There are %s dead %s this day that will be revived." % (len(dead_objects), object_type))
-    log.info("These %s will be revived: %s" % (object_type, dead_objects))
+    log.info("There are %s dead %s this day that will be revived.", len(dead_objects), object_type)
+    log.info("These %s will be revived: %s", object_type, dead_objects)
 
     if preview:
         log.info("No changes where made.")
@@ -89,8 +89,8 @@ def revive(object_type, date, preview: bool = True):
     sleep(10)
 
     for dead_object in dead_objects:
-        log.info("Reviving: %s" % dead_object)
+        log.info("Reviving: %s", dead_object)
         dead_object.is_dead = False
         dead_object.is_dead_since = None
-        dead_object.is_dead_reason = "Revived on %s" % datetime.now(pytz.utc).date()
+        dead_object.is_dead_reason = f"Revived on {datetime.now(pytz.utc).date()}"
         dead_object.save(update_fields=["is_dead", "is_dead_since", "is_dead_reason"])

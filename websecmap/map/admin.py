@@ -66,12 +66,12 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 | prepare_map.si(str(region.country), region.organization_type.pk)
             )
 
-        task_name = "%s (%s) " % ("Import region", ",".join(map(str, list(queryset))))
+        task_name = f"{'Import region'} ({','.join(map(str, list(queryset)))}) "
         task = group(tasks)
 
         job = Job.create(task, task_name, request, priority=PRIO_HIGH)
         link = reverse("admin:app_job_change", args=(job.id,))
-        self.message_user(request, 'Job created, <a href="%s">%s</a>' % (link, task_name))
+        self.message_user(request, f'Job created, <a href="{link}">{task_name}</a>')
 
     import_region.short_description = "🛃  Import region"
     actions.append(import_region)
@@ -91,7 +91,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 | prepare_map.si(str(region.country), region.organization_type.pk)
             )
 
-        task_name = "%s (%s) " % ("Update region", ",".join(map(str, list(queryset))))
+        task_name = f"{'Update region'} ({','.join(map(str, list(queryset)))}) "
         task = group(tasks)
 
         job = Job.create(task, task_name, request, priority=PRIO_HIGH)
@@ -159,7 +159,7 @@ def add_configuration(country: str, organization_type: int):
         else:
             new_number = 1
 
-    a = models.Configuration(
+    configuration = models.Configuration(
         country=country,
         organization_type=organization_type,
         is_the_default_option=False,
@@ -168,7 +168,7 @@ def add_configuration(country: str, organization_type: int):
         is_reported=True,
         display_order=new_number,
     )
-    a.save()
+    configuration.save()
 
 
 @admin.register(models.Configuration)
@@ -378,7 +378,7 @@ class ConfigurationAdmin(
                 log.debug("No next one")
                 continue
 
-            log.debug("Moving up: %s to %s" % (configuration.display_order, next_config.display_order))
+            log.debug("Moving up: %s to %s", configuration.display_order, next_config.display_order)
             tmp = deepcopy(next_config.display_order)
             next_config.display_order = configuration.display_order
             configuration.display_order = tmp
@@ -403,7 +403,7 @@ class ConfigurationAdmin(
                 log.debug("No previous one")
                 continue
 
-            log.debug("Moving down: %s to %s" % (configuration.display_order, previous_config.display_order))
+            log.debug("Moving down: %s to %s", configuration.display_order, previous_config.display_order)
             tmp = deepcopy(previous_config.display_order)
             previous_config.display_order = configuration.display_order
             configuration.display_order = tmp
@@ -452,7 +452,7 @@ class MapHealthReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 class MapDataCacheAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def get_queryset(self, request):
         # textfields are extremely slow in mysql. Prevent the text field.
-        qs = super(MapDataCacheAdmin, self).get_queryset(request)
+        qs = super().get_queryset(request)
         qs = qs.defer("dataset")
         return qs
 
@@ -533,7 +533,7 @@ class OrganizationReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     # do NOT load the calculation field, as that will be slow.
     # https://stackoverflow.com/questions/34774028/how-to-ignore-loading-huge-fields-in-django-admin-list-display
     def get_queryset(self, request):
-        qs = super(OrganizationReportAdmin, self).get_queryset(request)
+        qs = super().get_queryset(request)
 
         # tell Django to not retrieve mpoly field from DB
         qs = qs.defer("calculation")

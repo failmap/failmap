@@ -191,25 +191,25 @@ def get_stats(country, organization_type, weeks_back, days: int = 365):
     reports = {"organizations": [], "urls": [], "explained": {}, "endpoints_now": 0, "endpoint": []}
 
     for stat in stats:
-        r = stat.report
+        repor = stat.report
         reports["organizations"].append(
-            {"high": r["high"], "medium": r["medium"], "good": r["good"], "date": stat.at_when.isoformat()}
+            {"high": repor["high"], "medium": repor["medium"], "good": repor["good"], "date": stat.at_when.isoformat()}
         )
         reports["urls"].append(
             {
-                "high": r["high_urls"],
-                "medium": r["medium_urls"],
-                "good": r["good_urls"],
+                "high": repor["high_urls"],
+                "medium": repor["medium_urls"],
+                "good": repor["good_urls"],
                 "date": stat.at_when.isoformat(),
             }
         )
 
     first = stats.first()
     if first:
-        r = first.report
-        reports["endpoint"] = r["endpoint"]
-        reports["explained"] = r["explained"]
-        reports["endpoints_now"] = r["endpoints"]
+        repor = first.report
+        reports["endpoint"] = repor["endpoint"]
+        reports["explained"] = repor["explained"]
+        reports["endpoints_now"] = repor["endpoints"]
 
     return reports
 

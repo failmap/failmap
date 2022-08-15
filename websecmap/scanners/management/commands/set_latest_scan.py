@@ -26,11 +26,11 @@ class Command(BaseCommand):
 
 
 def reflag_urlgenericscan(type):
-    log.debug("Setting flags on UrlGenericScan type: %s" % type)
+    log.debug("Setting flags on UrlGenericScan type: %s", type)
     UrlGenericScan.objects.all().filter(type=type).update(is_the_latest_scan=False)
 
     # get the latest scans
-    sql = """
+    sql = f"""
         SELECT
             id,
             last_scan_moment,
@@ -38,23 +38,20 @@ def reflag_urlgenericscan(type):
         FROM scanners_urlgenericscan
         INNER JOIN
             (SELECT MAX(id) as id2 FROM scanners_urlgenericscan egs2
-             WHERE last_scan_moment <= '%(when)s' and type = '%(type)s' GROUP BY url_id
+             WHERE last_scan_moment <= '{datetime.now(pytz.utc)}' and type = '{type}' GROUP BY url_id
              ) as x
         ON x.id2 = scanners_urlgenericscan.id
-    """ % {
-        "when": datetime.now(pytz.utc),
-        "type": type,
-    }
+    """
 
     updatescans(UrlGenericScan.objects.raw(sql))
 
 
 def reflag_endpointgenericscan(type):
-    log.debug("Setting flags on EndpointGenericScan type: %s" % type)
+    log.debug("Setting flags on EndpointGenericScan type: %s", type)
     EndpointGenericScan.objects.all().filter(type=type).update(is_the_latest_scan=False)
 
     # get the latest endpointgenericscans
-    sql = """
+    sql = f"""
         SELECT
             id,
             last_scan_moment,
@@ -62,19 +59,16 @@ def reflag_endpointgenericscan(type):
         FROM scanners_endpointgenericscan
         INNER JOIN
             (SELECT MAX(id) as id2 FROM scanners_endpointgenericscan egs2
-             WHERE last_scan_moment <= '%(when)s' and type = '%(type)s' GROUP BY endpoint_id
+             WHERE last_scan_moment <= '{datetime.now(pytz.utc)}' and type = '{type}' GROUP BY endpoint_id
              ) as x
         ON x.id2 = scanners_endpointgenericscan.id
-    """ % {
-        "when": datetime.now(pytz.utc),
-        "type": type,
-    }
+    """
 
     updatescans(EndpointGenericScan.objects.raw(sql))
 
 
 def updatescans(scans):
-    log.debug("Updating %s scans" % len(list(scans)))
+    log.debug("Updating %s scans", len(list(scans)))
     for scan in scans:
         scan.is_the_latest_scan = True
         scan.save()

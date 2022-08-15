@@ -15,7 +15,7 @@ from tenacity import before_log, retry, wait_fixed
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.map.logic.map_defaults import get_country
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, unique_and_random, url_filters
 from websecmap.scanners.scanner.http import get_ips
 
@@ -31,6 +31,8 @@ log = logging.getLogger(__package__)
 
 
 def url_by_filters(organizations_filter: dict = None, urls_filter: dict = None) -> List:
+    organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
+
     # only include what is allowed to be scanned, and reduce the amount of retrieved fields to a minimum.
     urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), **urls_filter).only("id", "url")
 
@@ -50,9 +52,8 @@ def url_by_filters(organizations_filter: dict = None, urls_filter: dict = None) 
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_discover(
-    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
-):
+def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
     plannedscan.request(activity="discover", scanner="subdomains", urls=urls)
 
@@ -64,6 +65,7 @@ def compose_planned_discover_task(**kwargs):
 
 
 def compose_manual_discover_task(organizations_filter: dict = None, urls_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
     log.info(f"Discovering subdomains on {len(urls)} urls.")
     return compose_discover_task(urls)
@@ -81,9 +83,8 @@ def compose_discover_task(urls) -> Task:
     return task
 
 
-def filter_verify(
-    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
-):
+def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
     default_filter = {"not_resolvable": False}
     # The urls filter will overwrite the default filter in this case. Used in verify unresolvable
@@ -96,9 +97,8 @@ def filter_verify(
 
 
 @app.task(queue="storage")
-def plan_verify(
-    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
-):
+def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="verify", scanner="subdomains", urls=urls)
@@ -114,6 +114,7 @@ def compose_planned_verify_task(**kwargs):
 def compose_manual_verify_task(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
     # instead of only checking by domain, just accept the filters as they are handled in any other scenario...
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
@@ -133,6 +134,7 @@ def compose_verify_task(urls):
 def filter_discover(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
     default_filter = {"not_resolvable": False}
     # The urls filter will overwrite the default filter in this case. Used in verify unresolvable
@@ -223,7 +225,9 @@ def has_wildcards(urls: List[Dict[str, Any]]):
 
     log.debug(
         "Of the %s urls, %s had a wildcard and %s did not.",
-        len(urls), len(urls_with_wildcards), len(urls_without_wildcards)
+        len(urls),
+        len(urls_with_wildcards),
+        len(urls_without_wildcards),
     )
 
     return urls_without_wildcards, urls_with_wildcards
@@ -607,7 +611,7 @@ def get_popular_subdomains(country: str = "NL"):
                     INNER JOIN url_organization on url_organization.url_id = url.id
                     INNER JOIN organization on url_organization.organization_id = organization.id
                     WHERE organization.is_dead=false
-                    AND organization.country = {country}
+                    AND organization.country = '{country}'
                 )
              GROUP BY
                  computed_subdomain

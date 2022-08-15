@@ -8,8 +8,8 @@ from django_celery_beat.models import PeriodicTask
 
 def get_next_and_last_scans():
     def next(obj):
-        z, y = obj.schedule.is_due(last_run_at=timezone.now())
-        date = timezone.now() + timedelta(seconds=y)
+        _, my_y = obj.schedule.is_due(last_run_at=timezone.now())
+        date = timezone.now() + timedelta(seconds=my_y)
         return date
 
     periodic_tasks = (

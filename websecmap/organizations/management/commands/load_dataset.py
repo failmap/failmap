@@ -38,4 +38,4 @@ class Command(LoadDataCommand):
         # Setting USE_TZ to false during import weirdly DOES NOT suppress the yaml errors.
         settings.USE_TZ = False
 
-        super(Command, self).handle(*app_labels, **options)
+        super().handle(*app_labels, **options)

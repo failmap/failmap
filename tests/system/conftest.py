@@ -17,23 +17,17 @@ INTERVAL = timedelta(seconds=5)
 @pytest.fixture(scope="session")
 def websecmap(docker_ip, docker_services):
     class Websecmap:
-        admin_url = "http://%s:%d" % (
-            docker_ip,
-            int(docker_services("port admin 8000").split(":")[-1]),
-        )
-        frontend_url = "http://%s:%d" % (
-            docker_ip,
-            int(docker_services("port frontend 8000").split(":")[-1]),
-        )
+        admin_url = f"http://{docker_ip}:{int(docker_services('port admin 8000').split(':')[-1]):d}"
+        frontend_url = f"http://{docker_ip}:{int(docker_services('port frontend 8000').split(':')[-1]):d}"
 
         def get_admin(self, path):
             with urllib.request.urlopen(self.admin_url + path) as f:
-                return (f, f.read().decode("utf-8"))
+                return f, f.read().decode("utf-8")
 
         def get_frontend(self, path, return_errors=False):
             try:
                 with urllib.request.urlopen(self.frontend_url + path) as f:
-                    return (f, f.read().decode("utf-8"))
+                    return f, f.read().decode("utf-8")
             except urllib.error.HTTPError as e:
                 return e
 
@@ -52,7 +46,7 @@ def docker_ip():
 
     match = re.match(r"^tcp://(.+?):\d+$", docker_host)
     if not match:
-        raise ValueError('Invalid value for DOCKER_HOST: "%s".' % (docker_host,))
+        raise ValueError(f'Invalid value for DOCKER_HOST: "{docker_host}".')
     return match.group(1)
 
 
@@ -76,9 +70,9 @@ def docker_services(pytestconfig, docker_ip):
     docker_compose("up -d")
 
     # docker-compose binds port 8000 to an unique port number, extract that number here to form url
-    url = "http://%s:%d" % (docker_ip, int(docker_compose("port admin 8000").split(":")[-1]))
+    url = f"http://{docker_ip}:{int(docker_compose('port admin 8000').split(':')[-1]):d}"
 
-    print("waiting for url %s to be responsive." % url)
+    print(f"waiting for url {url} to be responsive.")
     for _ in range(int(TIMEOUT.seconds / INTERVAL.seconds)):
         try:
             # verify admin is http responsive and stop waiting
@@ -86,18 +80,18 @@ def docker_services(pytestconfig, docker_ip):
             print("admin instance is ready for testing")
             break
         except BaseException as e:
-            print("admin instance not accessible, exception: %r, retrying in %i" % (e, INTERVAL.seconds))
+            print(f"admin instance not accessible, exception: {e!r}, retrying in {INTERVAL.seconds:d}")
             time.sleep(INTERVAL.seconds)
     else:
         # provide context as to why the containered service failed to be responsive
         for service in docker_compose("config --services").splitlines():
-            docker_compose("logs -f %s" % service, background=True)
+            docker_compose(f"logs -f {service}", background=True)
         docker_compose("down -v")
-        pytest.fail("admin instance at %s not accessible after %s seconds" % (url, TIMEOUT.seconds), pytrace=False)
+        pytest.fail(f"admin instance at {url} not accessible after {TIMEOUT.seconds} seconds", pytrace=False)
 
     yield docker_compose
 
     # output logs in case the test failed, and cleanup the containers
     for service in docker_compose("config --services").splitlines():
-        docker_compose("logs -f %s" % service, background=True)
+        docker_compose(f"logs -f {service}", background=True)
     docker_compose("down -v")

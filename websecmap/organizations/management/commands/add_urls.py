@@ -22,7 +22,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         """Add arguments."""
         parser.add_argument("-u", "--urls", type=str, nargs="+", help="space separated urls")
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
 
     def handle(self, *args, **options):
 
@@ -32,7 +32,7 @@ class Command(BaseCommand):
             return
 
         log.info("Found new urls, to what organizations do you want to add these?")
-        log.info("The new urls are: %s" % " ".join(new_urls))
+        log.info("The new urls are: %s", " ".join(new_urls))
         organizations = inquire_organization()
 
         for url in new_urls:
@@ -47,7 +47,7 @@ class Command(BaseCommand):
                 new_url.organization.add(organization)
                 new_url.save()
 
-                log.info("Added %s to %s" % (url, organization))
+                log.info("Added %s to %s", url, organization)
 
 
 def get_new_urls(urls: List[str]):
@@ -59,7 +59,7 @@ def get_new_urls(urls: List[str]):
         url = url.lower()
         exists = Url.objects.all().filter(url=url).exists()
         if exists:
-            log.debug("Exists: %s" % url)
+            log.debug("Exists: %s", url)
         else:
             # check for wildcard dns...
             if discover_wildcard(url):
@@ -69,10 +69,10 @@ def get_new_urls(urls: List[str]):
                 )
             else:
                 if resolves(url):
-                    log.debug("Does not exist in the database, it resolved: %s" % url)
+                    log.debug("Does not exist in the database, it resolved: %s", url)
                     new_urls.append(url)
                 else:
-                    log.debug("Does not exist in the database, but didn't resolve, so can't be added: %s" % url)
+                    log.debug("Does not exist in the database, but didn't resolve, so can't be added: %s", url)
     if new_urls:
         log.debug("These urls do not exist:")
         log.debug(" ".join(new_urls))
@@ -89,7 +89,7 @@ def inquire_organization():
 
     while True:
         if organizations:
-            log.info("Currently adding to: %s" % organizations)
+            log.info("Currently adding to: %s", organizations)
 
         possible_organization = input("Type the name of an organization, type - to be done: ")
 

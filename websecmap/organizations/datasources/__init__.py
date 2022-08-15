@@ -46,15 +46,15 @@ def get_data(dataset, download_function):
     if dataset["url"]:
 
         filename = url_to_filename(dataset["url"])
-        log.debug("Data will be stored in: %s" % filename)
+        log.debug("Data will be stored in: %s", filename)
 
         if is_cached(filename):
-            log.debug("Getting cached file for: %s" % dataset["url"])
+            log.debug("Getting cached file for: %s", dataset["url"])
             return filename
 
         download_function(dataset["url"], filename_to_save=filename)
 
-        log.debug("Filename with data: %s" % filename)
+        log.debug("Filename with data: %s", filename)
         return filename
 
     # support file uploads
@@ -64,7 +64,7 @@ def get_data(dataset, download_function):
         if not db_dataset:
             return
 
-        log.debug("Filename with data: %s" % db_dataset.file_source.name)
+        log.debug("Filename with data: %s", db_dataset.file_source.name)
         return settings.MEDIA_ROOT + db_dataset.file_source.name
 
 
@@ -102,7 +102,7 @@ def url_to_filename(url: str):
     # keep the extension as some importers do magic with that
 
     m = hashlib.md5()
-    m.update(("%s" % url).encode("utf-8"))
+    m.update(f"{url}".encode("utf-8"))
 
     # make sure the directory for processing files exists
     makedirs(DOWNLOAD_DIRECTORY, exist_ok=True)
@@ -128,9 +128,9 @@ def check_environment():
     except googlemaps.exceptions.ApiError as e:
         raise ValueError(
             "The google API returned an error with a test geolocation query. The error received was:"
-            "%s. You can configure the google API "
+            f"{str(e)}. You can configure the google API "
             "<a target='_blank' href='https://console.cloud.google.com/google/maps-apis/"
-            "apis/geocoding-backend.googleapis.com/credentials'>here</a>." % str(e)
+            "apis/geocoding-backend.googleapis.com/credentials'>here</a>."
         )
 
 
@@ -169,7 +169,7 @@ def geolocate_organizations(organizations: List):
         # https://console.cloud.google.com/google/maps-apis/apis/geocoding-backend.googleapis.com/credentials
         # todo: country code to apply restrictions?
         try:
-            geocode_result = gmaps.geocode("%s, %s" % (organization["address"], organization["geocoding_hint"]))
+            geocode_result = gmaps.geocode(f"{organization['address']}, {organization['geocoding_hint']}")
 
             # give a little slack, so the server is not overburdened.
             sleep(0.1)
@@ -183,7 +183,7 @@ def geolocate_organizations(organizations: List):
             log.debug(e)
             sleep(10)
 
-            geocode_result = gmaps.geocode("%s, %s" % (organization["address"], organization["geocoding_hint"]))
+            geocode_result = gmaps.geocode(f"{organization['address']}, {organization['geocoding_hint']}")
 
         """
         [{'address_components': [
@@ -269,10 +269,10 @@ def save_websites(organization, websites: List[str]):
 
         # also save the address with subdomain :)
         if extract.subdomain:
-            address = "%s.%s.%s" % (extract.subdomain, extract.domain, extract.suffix)
+            address = f"{extract.subdomain}.{extract.domain}.{extract.suffix}"
             save_url(address, organization)
 
-        address = "%s.%s" % (extract.domain, extract.suffix)
+        address = f"{extract.domain}.{extract.suffix}"
         save_url(address, organization)
 
 
@@ -317,7 +317,7 @@ def save_organization(o, organization_type):
         )
     except Organization.MultipleObjectsReturned:
         created = False
-        log.debug("Organization %s is multiple times in the database." % o["name"])
+        log.debug("Organization %s is multiple times in the database.", o["name"])
         failmap_organization = (
             Organization.objects.all()
             .filter(
@@ -342,7 +342,7 @@ def save_organization_type(name):
     try:
         organization_type, created = OrganizationType.objects.all().get_or_create(name=name)
     except OrganizationType.MultipleObjectsReturned:
-        log.debug("Layer %s is multiple times in the database." % name)
+        log.debug("Layer %s is multiple times in the database.", name)
         organization_type = OrganizationType.objects.all().filter(name=name).first()
 
     return organization_type
@@ -361,7 +361,7 @@ def save_url(website, failmap_organization):
         )
     except Url.MultipleObjectsReturned:
         created = False
-        log.debug("Url %s is multiple times in the database." % website)
+        log.debug("Url %s is multiple times in the database.", website)
         url = Url.objects.all().filter(url=website, is_dead=False).first()
 
     if created:
@@ -375,6 +375,6 @@ def save_url(website, failmap_organization):
 
 
 def debug_organizations(organizations):
-    log.debug("This is the current content of all found organizations (%s): " % len(organizations))
+    log.debug("This is the current content of all found organizations (%s): ", len(organizations))
     for o in organizations:
-        log.debug("%s, %s, %s, %s, %s" % (o["name"], o["address"], o["lat"], o["lng"], o["websites"]))
+        log.debug("%s, %s, %s, %s, %s", o["name"], o["address"], o["lat"], o["lng"], o["websites"])

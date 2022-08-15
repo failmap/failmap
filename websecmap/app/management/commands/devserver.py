@@ -44,9 +44,9 @@ DEVELOPMENT_FIXTURES = "development_user,development_scandata,development_period
 
 def start_borker(uuid):
 
-    name = "websecmap-broker-%s" % str(uuid.int)
+    name = f"websecmap-broker-{str(uuid.int)}"
 
-    borker_command = "docker run --rm --name=%s -p 6379 redis" % name
+    borker_command = f"docker run --rm --name={name} -p 6379 redis"
     borker_process = subprocess.Popen(borker_command.split(), stdout=subprocess.DEVNULL, stderr=sys.stderr.buffer)
 
     @retry(tries=10, delay=1)
@@ -160,7 +160,7 @@ class Command(RunserverCommand):
             self.processes.append(start_worker(broker_port, options["verbosity"] < 2))
 
             # set celery broker url
-            settings.CELERY_BROKER_URL = "redis://localhost:%d/0" % broker_port
+            settings.CELERY_BROKER_URL = f"redis://localhost:{broker_port:d}/0"
             # set as environment variable for the inner_run
             os.environ["BROKER"] = settings.CELERY_BROKER_URL
 

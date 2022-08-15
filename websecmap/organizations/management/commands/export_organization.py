@@ -25,7 +25,7 @@ class Command(DumpDataCommand):
         # https://stackoverflow.com/questions/8203622/argparse-store-false-if-unspecified#8203679
         # https://edumaven.com/python-programming/argparse-boolean
         # --all / "all" is used by super.
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
 
     def handle(self, *app_labels, **options):
 

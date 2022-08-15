@@ -72,9 +72,9 @@ def validate_constance_configuration(CONSTANCE_CONFIG, CONSTANCE_CONFIG_FIELDSET
     variables_in_config = [x for x in CONSTANCE_CONFIG]
     missing = set(variables_in_config) - set(variables_in_fieldsets)
     if missing:
-        raise EnvironmentError("Constance config variables %s are missing in constance config fieldsets." % missing)
+        raise EnvironmentError(f"Constance config variables {missing} are missing in constance config fieldsets.")
 
     # All fieldsets fields must be defined:
     missing = set(variables_in_fieldsets) - set(variables_in_config)
     if missing:
-        raise EnvironmentError("Constance Fieldsets refer to missing fields: %s." % missing)
+        raise EnvironmentError(f"Constance Fieldsets refer to missing fields: {missing}.")

@@ -28,7 +28,9 @@ def get_ticker_data(
     # compare the first urlrating to the last urlrating
     # but do not include urls that don't exist.
 
-    sql = """
+    my_organization_type = get_organization_type(organization_type)
+    my_country = get_country(country)
+    sql = f"""
         SELECT
             map_organizationreport.id as id,
             name,
@@ -44,34 +46,32 @@ def get_ticker_data(
                 INNER JOIN organization as filter_organization
                 ON (filter_organization.id = or2.organization_id)
                 WHERE
-                    at_when <= '%(when)s'
-                    AND filter_organization.country='%(country)s'
-                    AND filter_organization.type_id=%(OrganizationTypeId)s
+                    at_when <= '{when}'
+                    AND filter_organization.country='{my_country}'
+                    AND filter_organization.type_id={my_organization_type}
                GROUP BY organization_id
             ) as stacked_organizationreport
         ON stacked_organizationreport.id2 = map_organizationreport.id
         INNER JOIN organization ON map_organizationreport.organization_id = organization.id
         WHERE
-        (('%(when)s' BETWEEN organization.created_on AND organization.is_dead_since
+        (('{when}' BETWEEN organization.created_on AND organization.is_dead_since
            AND organization.is_dead = 1
            ) OR (
-           organization.created_on <= '%(when)s'
+           organization.created_on <= '{when}'
            AND organization.is_dead = 0
         ))
-        AND organization.type_id = '%(OrganizationTypeId)s'
-        AND organization.country = '%(country)s'
+        AND organization.type_id = '{my_organization_type}'
+        AND organization.country = '{my_country}'
         AND total_urls > 0
-        """ % {
-        "when": when,
-        "OrganizationTypeId": get_organization_type(organization_type),
-        "country": get_country(country),
-    }
+        """
 
     newest_urlratings = list(OrganizationReport.objects.raw(sql))
 
     # this of course doesn't work with the first day, as then we didn't measure
     # everything (and the ratings for several issues are 0...
-    sql = """
+    my_organization_type = get_organization_type(organization_type)
+    my_country = get_country(country)
+    sql = f"""
         SELECT
             map_organizationreport.id as id,
             name,
@@ -87,28 +87,24 @@ def get_ticker_data(
                 INNER JOIN organization as filter_organization
                 ON (filter_organization.id = or2.organization_id)
                 WHERE
-                    at_when <= '%(when)s'
-                    AND filter_organization.country='%(country)s'
-                    AND filter_organization.type_id=%(OrganizationTypeId)s
+                    at_when <= '{when - timedelta(days=(weeks_duration * 7))}'
+                    AND filter_organization.country='{my_country}'
+                    AND filter_organization.type_id={my_organization_type}
                GROUP BY organization_id
             ) as stacked_organizationreport
         ON stacked_organizationreport.id2 = map_organizationreport.id
         INNER JOIN organization ON map_organizationreport.organization_id = organization.id
         WHERE
-        (('%(when)s' BETWEEN organization.created_on AND organization.is_dead_since
+        (('{when - timedelta(days=(weeks_duration * 7))}' BETWEEN organization.created_on AND organization.is_dead_since
                AND organization.is_dead = 1
                ) OR (
-               organization.created_on <= '%(when)s'
+               organization.created_on <= '{when - timedelta(days=(weeks_duration * 7))}'
                AND organization.is_dead = 0
         ))
-        AND organization.type_id = '%(OrganizationTypeId)s'
-        AND organization.country = '%(country)s'
+        AND organization.type_id = '{my_organization_type}'
+        AND organization.country = '{my_country}'
         AND total_urls > 0
-        """ % {
-        "when": when - timedelta(days=(weeks_duration * 7)),
-        "OrganizationTypeId": get_organization_type(organization_type),
-        "country": get_country(country),
-    }
+        """
 
     oldest_urlratings = list(OrganizationReport.objects.raw(sql))
 

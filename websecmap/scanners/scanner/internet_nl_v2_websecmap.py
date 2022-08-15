@@ -82,17 +82,17 @@ def valid_api_settings(scan: InternetNLV2Scan):
 
 
 def create_api_settings(scan: int) -> Dict[str, Any]:
-    s = InternetNLApiSettings()
-    s.username = config.INTERNET_NL_API_USERNAME
-    s.password = config.INTERNET_NL_API_PASSWORD
+    settings = InternetNLApiSettings()
+    settings.username = config.INTERNET_NL_API_USERNAME
+    settings.password = config.INTERNET_NL_API_PASSWORD
 
-    s.url = config.INTERNET_NL_API_URL
+    settings.url = config.INTERNET_NL_API_URL
     # for convenience, remove trailing slashes from the url, this will be entered incorrectly.
-    s.url = s.url.rstrip("/")
+    settings.url = settings.url.rstrip("/")
 
-    s.maximum_domains = config.INTERNET_NL_MAXIMUM_URLS
+    settings.maximum_domains = config.INTERNET_NL_MAXIMUM_URLS
 
-    return s.__dict__
+    return settings.__dict__
 
 
 @app.task(queue="storage")

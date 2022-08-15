@@ -100,7 +100,7 @@ def http_security_headers(scan: Union[EndpointGenericScan, UrlGenericScan]):
 
     if scan.rating == "True":
         return conclusion_to_standard_calculation(scan, "present")
-    elif scan.rating == "Using CSP":
+    if scan.rating == "Using CSP":
         return conclusion_to_standard_calculation(scan, "using_csp")
     else:
         if scan.type in ["http_security_header_strict_transport_security"]:
@@ -111,8 +111,8 @@ def http_security_headers(scan: Union[EndpointGenericScan, UrlGenericScan]):
                 "yet offers no insecure http service."
             ):
                 return conclusion_to_standard_calculation(scan, "missing_but_no_insecure_service_offered")
-            else:
-                return conclusion_to_standard_calculation(scan, "missing")
+
+            return conclusion_to_standard_calculation(scan, "missing")
 
         if scan.type in [
             "http_security_header_x_content_type_options",

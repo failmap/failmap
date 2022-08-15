@@ -5,7 +5,7 @@ class FourDigitYearConverter:
         return int(value)
 
     def to_url(self, value):
-        return "%04d" % value
+        return f"{value}"
 
 
 class OrganizationTypeConverter:
@@ -15,7 +15,7 @@ class OrganizationTypeConverter:
         return str(value)
 
     def to_url(self, value):
-        return "%s" % value
+        return f"{value}"
 
 
 class OrganizationIdConverter:
@@ -25,7 +25,7 @@ class OrganizationIdConverter:
         return int(value)
 
     def to_url(self, value):
-        return "%d" % value
+        return f"{value}"
 
 
 class OrganizationConverter:
@@ -35,7 +35,7 @@ class OrganizationConverter:
         return str(value)
 
     def to_url(self, value):
-        return "%s" % value
+        return f"{value}"
 
 
 class JsonConverter:
@@ -46,7 +46,7 @@ class JsonConverter:
         return str(value)
 
     def to_url(self, value):
-        return "%s" % value
+        return f"{value}"
 
 
 class WeeksConverter:
@@ -56,7 +56,7 @@ class WeeksConverter:
         return int(value)
 
     def to_url(self, value):
-        return "%d" % value
+        return f"{value}"
 
 
 class DaysConverter:
@@ -66,7 +66,7 @@ class DaysConverter:
         return int(value)
 
     def to_url(self, value):
-        return "%d" % value
+        return f"{value}"
 
 
 class CountryConverter:
@@ -76,4 +76,4 @@ class CountryConverter:
         return str(value)
 
     def to_url(self, value):
-        return "%s" % value
+        return f"{value}"

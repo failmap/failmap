@@ -19,7 +19,7 @@ from tenacity import before_log, retry, stop_after_attempt, wait_exponential
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.__init__ import (
@@ -36,9 +36,9 @@ log = logging.getLogger(__name__)
 
 
 def filter_discover(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ):
-
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     default_filter = {"is_dead": False, "not_resolvable": False}
     urls_filter = {**urls_filter, **default_filter}
     urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), **urls_filter).only("id", "url")
@@ -48,10 +48,8 @@ def filter_discover(
     return unique_and_random(urls)
 
 
-def filter_verify(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
-
+def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     default_filter = {"protocol__in": ["dns_mx_no_cname", "dns_soa", "dns_a_aaaa"], "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level="endpoint"), **endpoints_filter)
@@ -107,18 +105,15 @@ def compose_new_verify_task(urls):
 
 
 @app.task(queue="storage")
-def plan_discover(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="discover", scanner="dns_endpoints", urls=urls)
 
 
 @app.task(queue="storage")
-def plan_verify(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
-
+def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="verify", scanner="dns_endpoints", urls=urls)
 
@@ -136,34 +131,35 @@ def compose_planned_discover_task(**kwargs):
 
 
 def compose_manual_verify_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
-
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_new_verify_task(urls)
 
 
 def compose_manual_discover_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_new_discover_task(urls)
 
 
 def compose_discover_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
     # this method is here for backwards compatibility in the internet.nl dashboard
-
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_new_discover_task(urls)
 
 
 def compose_verify_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
     # this method is here for backwards compatibility in the internet.nl dashboard
-
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_new_verify_task(urls)
 
@@ -357,17 +353,17 @@ def get_dns_records(url: str, record_type):
         sleep(0.03)
         return resolver.query(url, record_type)
     except NoAnswer:
-        log.debug("The DNS response does not contain an answer to the question. %s %s " % (url, record_type))
+        log.debug("The DNS response does not contain an answer to the question. %s %s ", url, record_type)
         return None
     except NXDOMAIN:
-        log.debug("dns query name does not exist. %s %s" % (url, record_type))
+        log.debug("dns query name does not exist. %s %s", url, record_type)
         return None
     except NoNameservers:
         log.debug("Pausing, or add more DNS servers...")
         sleep(20)
     except Timeout:
         # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
-        log.debug(f"Timeout received for DNS query to {url}.")
+        log.debug("Timeout received for DNS query to %s.", url)
         return False
 
 
@@ -385,21 +381,21 @@ def get_dns_records_accepting_no_answer(url: str, record_type):
         # this doesn't really help with parallel requests from the same server. Well, a little bit.
         sleep(0.03)
         answer = resolver.query(url, record_type, raise_on_no_answer=False)
-        log.debug("dns query returned an answer %s %s" % (url, record_type))
+        log.debug("dns query returned an answer %s %s", url, record_type)
         return answer
     except NoAnswer:
         # this will never happen, as we explicitly say OK. This means that only domains that really
         # do not return ANY answer *where NXDOMAIN is returned* will be false.
         return None
     except NXDOMAIN:
-        log.debug("dns query name does not exist. %s %s" % (url, record_type))
+        log.debug("dns query name does not exist. %s %s", url, record_type)
         return None
     except NoNameservers:
         log.debug("Pausing, or add more DNS servers...")
         sleep(20)
     except Timeout:
         # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
-        log.debug(f"Timeout received for DNS query to {url}.")
+        log.debug("Timeout received for DNS query to %s.", url)
         return False
 
 

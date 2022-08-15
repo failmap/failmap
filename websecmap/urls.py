@@ -35,9 +35,10 @@ admin.site.site_header = "Web Security Map Admin"
 admin.site.site_title = "Web Security Map Admin"
 
 
-def trigger_error(request):
+def trigger_error():
     # See: https://docs.sentry.io/platforms/python/django/
     division_by_zero = 1 / 0  # noqa
+    print(division_by_zero)
 
 
 admin_urls = [

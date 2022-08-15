@@ -52,9 +52,9 @@ class Command(BaseCommand):
 
 
 def create_movie(filter, configuration):
-    file_filter = "%s_%s_%s" % (configuration.country, configuration.organization_type.name, filter)
+    file_filter = f"{configuration.country}_{configuration.organization_type.name}_{filter}"
 
-    log.info("Creating movie for %s" % file_filter)
+    log.info("Creating movie for %s", file_filter)
 
     log.debug("Loading filenames")
     files = [
@@ -74,6 +74,4 @@ def create_movie(filter, configuration):
     clips = [ImageClip(settings.TOOLS["firefox"]["screenshot_output_dir"] + file).set_duration(0.2) for file in files]
     log.debug("Writing file")
     concat_clip = concatenate_videoclips(clips, method="compose")
-    concat_clip.write_videofile(
-        "%svideo_%s.mp4" % (settings.TOOLS["firefox"]["screenshot_output_dir"], file_filter), fps=30
-    )
+    concat_clip.write_videofile(f"{settings.TOOLS['firefox']['screenshot_output_dir']}video_{file_filter}.mp4", fps=30)

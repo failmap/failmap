@@ -127,7 +127,7 @@ class CustomAppIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
         self.available_children.append(modules.RecentActions)
         self.children.append(
             modules.RecentActions(
-                _("Recent Actions for %s" % context["app_label"].capitalize()),
+                _(f"Recent Actions for {context['app_label'].capitalize()}"),
                 40,
                 column=1,
                 order=0,
@@ -160,5 +160,5 @@ class CustomAppIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
             )
 
         self.children.append(
-            modules.AppList(_("Applications"), models=("%s.*" % context["app_label"],), column=0, order=1)
+            modules.AppList(_("Applications"), models=(f"{context['app_label']}.*",), column=0, order=1)
         )

@@ -26,7 +26,6 @@ def operation_response(error: bool = False, success: bool = False, message: str 
 
 def move_coordinate(data):
     # data contains: {coordinate_id: this.coordinate_id, latitude: this.latitude, longitude: this.longitude}
-    ...
 
     if not data.get("coordinate_id", 0):
         return operation_response(error=True, message="No coordinate selected.")
@@ -186,8 +185,8 @@ def add_urls(organization_id, urls: str):
         return operation_response(
             success=True, message=f"{len(valid)} urls have been added.", data={"invalid_domains": not_valid}
         )
-    else:
-        return operation_response(success=True, message=f"{len(valid)} urls have been added.")
+
+    return operation_response(success=True, message=f"{len(valid)} urls have been added.")
 
 
 def add_proxies(proxies: str):
@@ -216,10 +215,10 @@ def add_proxies(proxies: str):
         return operation_response(
             success=True, message=f"{len(valid)} proxies have been added.", data={"invalid_proxies": not_valid}
         )
-    else:
-        return operation_response(
-            success=True, message=f"{len(valid)} proxies have been added. They will be validated before use."
-        )
+
+    return operation_response(
+        success=True, message=f"{len(valid)} proxies have been added. They will be validated before use."
+    )
 
 
 def is_valid_ip_address_and_port(address):

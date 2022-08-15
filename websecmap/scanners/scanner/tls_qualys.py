@@ -34,7 +34,7 @@ from tenacity import RetryError, before_log, retry, wait_fixed
 
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
 from websecmap.scanners.proxy import (
     claim_proxy,
@@ -64,10 +64,8 @@ New architecture:
 """
 
 
-def filter_scan(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
-
+def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if organizations_filter:
         organizations = Organization.objects.filter(**organizations_filter).only("id")
         urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
@@ -95,9 +93,8 @@ def filter_scan(
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_scan_new(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
-):
+def plan_scan_new(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("tls_qualys"):
         return group()
 
@@ -106,7 +103,8 @@ def plan_scan_new(
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_scan(urls_filter: dict = dict(), **kwargs):
+def plan_scan(urls_filter: dict = None, **kwargs):
+    urls_filter = init_dict(urls_filter)
     """
     There are all kinds of optimizations in this task due to scanning as few urls as possible.
     - Scanning once every 7 days if everything was OK and scanning once every 3 days in case of errors.
@@ -177,9 +175,11 @@ def plan_scan(urls_filter: dict = dict(), **kwargs):
         plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(urls))
 
 
-def compose_manual_scan_task(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs):
+def compose_manual_scan_task(organizations_filter: dict = None, urls_filter: dict = None, **kwargs):
     if not allowed_to_scan("tls_qualys"):
         return group()
+
+    organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
 
     # apply filter to organizations (or if no filter, all organizations)
     organizations = []
@@ -316,8 +316,8 @@ def compose_scan_task(urls: List[Url]) -> Task:
 def qualys_scan_bulk(proxy: Dict[str, Any], urls: List[str]):
 
     log.debug("Initiating bulk scan")
-    log.debug("Received proxy: %s" % proxy)
-    log.debug("Received urls: %s" % urls)
+    log.debug("Received proxy: %s", proxy)
+    log.debug("Received urls: %s", urls)
 
     # Using this all scans stay on the same server (so no ip-hopping between scans, which limits the available
     # capacity severely.
@@ -395,13 +395,13 @@ def qualys_scan_thread(proxy: Dict[str, Any], url: str):
                 log.debug(f"Qualys scan finished on {url}.")
                 process_qualys_result.apply_async([data, url])
                 return True
-            else:
-                log.debug(
-                    f"Scan on {url} has not yet finished. " f"Waiting {normal_waiting_time} seconds before next update."
-                )
-                sleep(normal_waiting_time)
-                # Don't break out of the loop...
-                # continue
+
+            log.debug(
+                f"Scan on {url} has not yet finished. " f"Waiting {normal_waiting_time} seconds before next update."
+            )
+            sleep(normal_waiting_time)
+            # Don't break out of the loop...
+            # continue
 
         # The API is in error state, let's see if we can be nice and recover.
         if "errors" in data:
@@ -457,7 +457,7 @@ def process_qualys_result(data, url: str):
         return
 
     # missing endpoints: url propably resolves but has no TLS?
-    elif data["status"] == "READY":
+    if data["status"] == "READY":
         scratch(url, data)
         raise ValueError("Found no endpoints in ready scan. Todo: How to handle this?")
 
@@ -489,17 +489,17 @@ def report_to_console(domain: str, data: Dict[str, Any]):
 
     if status == "READY":
         for endpoint in data["endpoints"]:
-            log.debug("%s (IP: %s) = %s" % (domain, endpoint["ipAddress"], endpoint.get("grade", "No TLS")))
+            log.debug("%s (IP: %s) = %s", domain, endpoint["ipAddress"], endpoint.get("grade", "No TLS"))
 
     if status in ["DNS", "ERROR"]:
         log.debug("%s %s: Got message: %s", domain, data["status"], data.get("statusMessage", "unknown"))
 
     if data["status"] == "IN_PROGRESS":
         for endpoint in data["endpoints"]:
-            log.debug("%s, ep: %s. status: %s" % (domain, endpoint["ipAddress"], endpoint.get("statusMessage", "0")))
+            log.debug("%s, ep: %s. status: %s", domain, endpoint["ipAddress"], endpoint.get("statusMessage", "0"))
 
     if status == "unknown":
-        log.error("Unexpected data received for domain: %s, %s" % (domain, data))
+        log.error("Unexpected data received for domain: %s, %s", domain, data)
 
 
 # Qualys is a service that is constantly attacked / ddossed and very unreliable. So try a couple of times before

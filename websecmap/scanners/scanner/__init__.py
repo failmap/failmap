@@ -40,11 +40,11 @@ def add_model_filter(queryset, **kwargs):
     # dashboard.internet_nl_dashboard.models.Account
     # This is probably one of the ugliest ways to do this :)
     model_filters = str(queryset.model).replace("'>", "").split(".")[-1].lower() + "_filters"
-    log.debug("Checking for filters: %s" % model_filters)
+    log.debug("Checking for filters: %s", model_filters)
 
     if kwargs.get(model_filters, None):
         filters = kwargs.get(model_filters)
-        log.debug("Filtering on: %s" % filters)
+        log.debug("Filtering on: %s", filters)
         queryset = queryset.filter(**filters)
 
     return queryset
@@ -66,25 +66,25 @@ def allowed_to_scan(scanner_name: str = ""):
         return True
 
     try:
-        return getattr(config, "USE_SCANNER_%s" % scanner_name.upper())
+        return getattr(config, f"USE_SCANNER_{scanner_name.upper()}")
     except AttributeError:
-        log.debug("Scanner %s is not allowed to scan due to setting." % scanner_name)
+        log.debug("Scanner %s is not allowed to scan due to setting.", scanner_name)
         return False
 
 
 def allowed_to_discover_urls(scanner_name: str = ""):
     try:
-        return getattr(config, "DISCOVER_URLS_USING_%s" % scanner_name.upper())
+        return getattr(config, f"DISCOVER_URLS_USING_{scanner_name.upper()}")
     except AttributeError:
-        log.debug("Scanner %s is not allowed to discover urls due to setting." % scanner_name)
+        log.debug("Scanner %s is not allowed to discover urls due to setting.", scanner_name)
         return False
 
 
 def allowed_to_discover_endpoints(scanner_name: str = ""):
     try:
-        return getattr(config, "DISCOVER_ENDPOINTS_USING_%s" % scanner_name.upper())
+        return getattr(config, f"DISCOVER_ENDPOINTS_USING_{scanner_name.upper()}")
     except AttributeError:
-        log.debug("Scanner %s is not allowed to discover endpoints due to setting." % scanner_name)
+        log.debug("Scanner %s is not allowed to discover endpoints due to setting.", scanner_name)
         return False
 
 

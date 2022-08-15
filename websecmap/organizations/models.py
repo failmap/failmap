@@ -122,9 +122,9 @@ class Organization(models.Model):
         type_label = self.organization_name_cache[self.type_id]
 
         if self.is_dead:
-            return "✝ %s, %s/%s (%s)" % (self.name, self.country, type_label, self.created_on.strftime("%b %Y"))
+            return f"✝ {self.name}, {self.country}/{type_label} ({self.created_on.strftime('%b %Y')})"
         else:
-            return "%s, %s/%s (%s)" % (self.name, self.country, type_label, self.created_on.strftime("%b %Y"))
+            return f"{self.name}, {self.country}/{type_label} ({self.created_on.strftime('%b %Y')})"
 
     def add_url(self, url: str):
 
@@ -139,7 +139,7 @@ class Organization(models.Model):
 
         # handle computed values
         self.computed_name_slug = slugify(self.name)
-        super(Organization, self).save(*args, **kwarg)
+        super().save(*args, **kwarg)
 
 
 GEOJSON_TYPES = (
@@ -206,7 +206,7 @@ class Coordinate(models.Model):
     def save(self, *args, **kwarg):
         # handle computed values
         self.calculated_area_hash = hashlib.md5(str(self.area).encode("utf-8")).hexdigest()
-        super(Coordinate, self).save(*args, **kwarg)
+        super().save(*args, **kwarg)
 
     class Meta:
         managed = True
@@ -334,7 +334,7 @@ class Url(models.Model):
 
     def __str__(self):
         if self.is_dead:
-            return "✝ %s" % self.url
+            return f"✝ {self.url}"
         else:
             return self.url
 
@@ -377,7 +377,7 @@ class Url(models.Model):
         self.computed_domain = result.domain
         self.computed_suffix = result.suffix
 
-        super(Url, self).save(*args, **kwarg)
+        super().save(*args, **kwarg)
 
     def is_top_level(self):
         # count the number of dots. Should be one.
@@ -398,15 +398,15 @@ class Url(models.Model):
         new_url = (subdomain + "." + self.url).lower()
 
         if not Url.is_valid_url(new_url):
-            log.debug("Subdomain not valid: %s" % new_url)
+            log.debug("Subdomain not valid: %s", new_url)
             return
 
         if Url.objects.all().filter(url=new_url, organization__in=self.organization.all()).exists():
-            log.debug("Subdomain already in the database: %s" % new_url)
+            log.debug("Subdomain already in the database: %s", new_url)
             return
 
         if not resolves(new_url):
-            log.debug("New subdomain did not resolve on either ipv4 and ipv6: %s" % new_url)
+            log.debug("New subdomain did not resolve on either ipv4 and ipv6: %s", new_url)
             return
 
         try:
@@ -431,7 +431,7 @@ class Url(models.Model):
         for organization in self.organization.all():
             u.organization.add(organization)
             u.save()
-            log.info("Added url: %s to organization: %s" % (new_url, organization))
+            log.info("Added url: %s to organization: %s", new_url, organization)
 
         return u
 

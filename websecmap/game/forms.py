@@ -55,7 +55,7 @@ class TeamForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.contest = kwargs.pop("contest", 0)
         self.user = kwargs.pop("user", None)
-        super(TeamForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["team"] = forms.ModelChoiceField(
             widget=forms.RadioSelect,
             queryset=Team.objects.all().filter(allowed_to_submit_things=True, participating_in_contest=self.contest),
@@ -111,7 +111,7 @@ class OrganisationSubmissionForm(forms.Form):
         self.contest = kwargs.pop("contest", None)
         self.team = kwargs.pop("team", None)
 
-        super(OrganisationSubmissionForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     field_order = (
         # Fields to enter manually
@@ -255,7 +255,7 @@ class OrganisationSubmissionForm(forms.Form):
             organization_type_name=organization_type_name,
             organization_wikipedia=organization_wikipedia,
             organization_wikidata_code=organization_wikidata,
-            organization_address_geocoded="[%s, %s]" % (lng, lat),
+            organization_address_geocoded=f"[{lng}, {lat}]",
             organization_country=organization_country,
             suggested_urls=organization_suggested_urls,
             added_on=timezone.now(),
@@ -282,7 +282,7 @@ class UrlSubmissionForm(forms.Form):
         self.contest = kwargs.pop("contest", None)
         self.team = kwargs.pop("team", None)
 
-        super(UrlSubmissionForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.fields["for_organization"] = forms.ModelMultipleChoiceField(
             label="Organizations",
@@ -409,7 +409,7 @@ class UrlSubmissionForm(forms.Form):
                 continue
 
             # tld extract has also removed ports, usernames, passwords and other nonsense.
-            url = "%s.%s" % (extract.domain, extract.suffix)
+            url = f"{extract.domain}.{extract.suffix}"
 
             # see if the URL resolves at all:
             if not resolves(url):
@@ -434,22 +434,21 @@ class UrlSubmissionForm(forms.Form):
             raise ValidationError(
                 "Please review your submission and try again. "
                 "Removed because of being incomplete addresses: "
-                "%s. Removed because not resolvable: %s. "
-                "" % (", ".join(incomplete), ", ".join(not_resolvable)),
+                f"{', '.join(incomplete)}. Removed because not resolvable: {', '.join(not_resolvable)}. ",
                 code="not_complete_and_not_resolvable",
             )
 
         if incomplete:
             raise ValidationError(
                 "The following websites are not complete and have been removed: "
-                "%s. Please review your submission and try again." % incomplete,
+                f"{incomplete}. Please review your submission and try again.",
                 code="not_complete",
             )
 
         if not_resolvable:
             raise ValidationError(
-                "The following sites are not resolvable and have been removed: %s. "
-                "Please review your submission and try again." % not_resolvable,
+                f"The following sites are not resolvable and have been removed: {not_resolvable}. "
+                "Please review your submission and try again.",
                 code="not_resolvable",
             )
 

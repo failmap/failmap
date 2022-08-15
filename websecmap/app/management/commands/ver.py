@@ -14,8 +14,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        print("Python version: %s" % platform.python_version())
-        print("Django version: %s" % django.get_version())
-        print("Failmap version: %s" % __version__)
+        print(f"Python version: {platform.python_version()}")
+        print(f"Django version: {django.get_version()}")
+        print(f"Failmap version: {__version__}")
         print("")
         print("Check for the latest version at: https://gitlab.com/failmap/failmap/")
