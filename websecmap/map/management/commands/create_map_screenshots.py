@@ -45,24 +45,24 @@ class Command(BaseCommand):
 
         for configuration in map_configurations:
             for moment_in_time in moments_in_time:
-                for filter in filters:
+                for my_filter in filters:
                     log.debug(
                         "%s %s %s %s",
                         configuration.country,
                         configuration.organization_type.name,
-                        filter,
+                        my_filter,
                         moment_in_time,
                     )
 
                     map_only_url = (
                         config.PROJECT_WEBSITE
                         + f"/map_only/{configuration.country}/{configuration.organization_type.name}/"
-                        f"{moment_in_time}/{filter}/"
+                        f"{moment_in_time}/{my_filter}/"
                     )
 
                     filename = (
                         settings.TOOLS["firefox"]["screenshot_output_dir"]
-                        + f"{configuration.country}_{configuration.organization_type.name}_{filter}"
+                        + f"{configuration.country}_{configuration.organization_type.name}_{my_filter}"
                         f"_{moment_in_time}.png"
                     )
 

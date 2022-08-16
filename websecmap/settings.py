@@ -770,19 +770,19 @@ CONSTANCE_CONFIG = {
     "RESPONSIBLE_ORGANIZATION_NAME": ("", "The name of the organization running this project.", str),
     "RESPONSIBLE_ORGANIZATION_PROMO_TEXT": (
         "",
-        "Some text promoting this organization and its mission. This text will" " not be translated.",
+        "Some text promoting this organization and its mission. This text will not be translated.",
         str,
     ),
     "RESPONSIBLE_ORGANIZATION_WEBSITE": ("", "The name of the organization running this project.", str),
     "RESPONSIBLE_ORGANIZATION_MAIL": ("", "The name of the organization running this project.", str),
     "RESPONSIBLE_ORGANIZATION_TWITTER": (
         "",
-        "The twitter address where people can follow this project. Include " "the @!",
+        "The twitter address where people can follow this project. Include the @!",
         str,
     ),
     "RESPONSIBLE_ORGANIZATION_FACEBOOK": (
         "",
-        "The facebook address where people can follow this project. Make sure" " this is a complete url.",
+        "The facebook address where people can follow this project. Make sure this is a complete url.",
         str,
     ),
     "RESPONSIBLE_ORGANIZATION_LINKEDIN": ("", "Linkedin page url.", str),
@@ -803,12 +803,12 @@ CONSTANCE_CONFIG = {
     ),
     "SHOW_EXTENSIVE_STATISTICS": (
         True,
-        "Shows extended statistics: these are bars of how well things are going " "now and in the past months.",
+        "Shows extended statistics: these are bars of how well things are going now and in the past months.",
         bool,
     ),
     "SHOW_STATS_GRAPHS": (
         True,
-        "Shows graphs in extended statistics. " "Extended statistics needs to be enabled for this to have effect.",
+        "Shows graphs in extended statistics. Extended statistics needs to be enabled for this to have effect.",
         bool,
     ),
     "SHOW_STATS_IMPROVEMENTS": (
@@ -819,12 +819,12 @@ CONSTANCE_CONFIG = {
     ),
     "SHOW_STATS_NUMBERS": (
         True,
-        "Shows numbers in extended statistics. " "Extended statistics needs to be enabled for this to have effect.",
+        "Shows numbers in extended statistics. Extended statistics needs to be enabled for this to have effect.",
         bool,
     ),
     "SHOW_STATS_CHANGES": (
         True,
-        "Shows changes in extended statistics. " "Extended statistics needs to be enabled for this to have effect.",
+        "Shows changes in extended statistics. Extended statistics needs to be enabled for this to have effect.",
         bool,
     ),
     "SHOW_REPORT_NUMBERS": (
@@ -878,7 +878,7 @@ CONSTANCE_CONFIG = {
     "TICKER_SLOGAN": ("WEB SECURITY MAP - MONITOR YOUR GOVERNMENT", "Text to show between every 10 changes.", str),
     "TICKER_VISIBLE_VIA_JS_COMMAND": (
         False,
-        "Adds a Show/Hide ticker link at the bottom of the page. It will start scrolling after a second" " or two.",
+        "Adds a Show/Hide ticker link at the bottom of the page. It will start scrolling after a second or two.",
         bool,
     ),
     "SHOW_SCAN_SCHEDULE": (False, "Shows list of upcoming scans, so everyone knows what scan is due next.", bool),
@@ -906,7 +906,7 @@ CONSTANCE_CONFIG = {
     "INTERNET_NL_API_PASSWORD": ("", "Password for the internet.nl API", str),
     "INTERNET_NL_API_URL": (
         "https://batch.internet.nl/api/batch/v2",
-        "The internet address for the Internet.nl API installation. Defaults to a version from " "2020.",
+        "The internet address for the Internet.nl API installation. Defaults to a version from 2020.",
         str,
     ),
     "INTERNET_NL_MAXIMUM_URLS": (1000, "The maximum amount of domains per scan.", int),
@@ -1139,8 +1139,8 @@ try:
     from websecmap.app.constance import validate_constance_configuration
 
     validate_constance_configuration(CONSTANCE_CONFIG, CONSTANCE_CONFIG_FIELDSETS)
-except EnvironmentError as e:
-    raise EnvironmentError(e)
+except EnvironmentError as my_exception:
+    raise EnvironmentError(my_exception) from my_exception
 
 # End constance settings
 ########

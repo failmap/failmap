@@ -96,7 +96,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
         job = Job.create(task, task_name, request, priority=PRIO_HIGH)
         link = reverse("admin:app_job_change", args=(job.id,))
-        self.message_user(request, 'Job created, <a href="%s">%s</a>' % (link, task_name))
+        self.message_user(request, f'Job created, <a href="{link}">{task_name}</a>')
 
     update_coordinates.short_description = "🛂  Update region"
     actions.append(update_coordinates)

@@ -6,19 +6,22 @@ from websecmap.celery import Task
 from websecmap.map.report import recreate_organization_reports
 from websecmap.organizations.models import Organization, Url
 from websecmap.reporting.report import recreate_url_reports
+from websecmap.scanners import init_dict
 from websecmap.scanners.scanner.__init__ import q_configurations_to_report
 
 log = logging.getLogger(__package__)
 
 
 def compose_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
+    organizations_filter: dict = None,
+    urls_filter: dict = None,
+    endpoints_filter: dict = None,
 ) -> Task:
     """
     Compose taskset to rebuild specified organizations/urls.
     """
+
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
     if endpoints_filter:
         raise NotImplementedError("This scanner does not work on a endpoint level.")

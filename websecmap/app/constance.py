@@ -15,7 +15,8 @@ def get_bulk_values(keys: List[str]):
     :param keys:
     :return:
     """
-    from constance import admin
+    # solves: django.core.exceptions.AppRegistryNotReady: Apps aren't loaded yet.
+    from constance import admin  # pylint: disable=import-outside-toplevel
 
     # retrieves everything, pretty quickly
     values = admin.get_values()
@@ -25,7 +26,8 @@ def get_bulk_values(keys: List[str]):
 
 
 def get_bulk_values_starting_with(starts_with: str):
-    from constance import admin
+    # solves: django.core.exceptions.AppRegistryNotReady: Apps aren't loaded yet.
+    from constance import admin  # pylint: disable=import-outside-toplevel
 
     # retrieves everything, pretty quickly
     values = admin.get_values()
@@ -62,14 +64,14 @@ def constance_cached_value(key):
     return value
 
 
-def validate_constance_configuration(CONSTANCE_CONFIG, CONSTANCE_CONFIG_FIELDSETS):
+def validate_constance_configuration(constance_config, constance_config_fieldsets):
     # Check for constance configuration issues:
     # All Fields defined above must be in the fieldsets.
     # See also: https://github.com/jazzband/django-constance/issues/293
     variables_in_fieldsets = [
-        i for sub in [CONSTANCE_CONFIG_FIELDSETS[x] for x in CONSTANCE_CONFIG_FIELDSETS] for i in sub
+        i for sub in [constance_config_fieldsets[x] for x in constance_config_fieldsets] for i in sub
     ]
-    variables_in_config = [x for x in CONSTANCE_CONFIG]
+    variables_in_config = list(constance_config)
     missing = set(variables_in_config) - set(variables_in_fieldsets)
     if missing:
         raise EnvironmentError(f"Constance config variables {missing} are missing in constance config fieldsets.")

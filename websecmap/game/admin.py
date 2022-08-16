@@ -705,7 +705,7 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             url = Url.objects.all().filter(url=urlsubmission.url, is_dead=False).first()
 
             if not url:
-                log.debug(f"adding new url: {urlsubmission.url}")
+                log.debug("adding new url: {%s}", urlsubmission.url)
                 # if it already exists, then add the url to the organization.
                 url = Url(url=urlsubmission.url)
                 url.save()

@@ -99,32 +99,30 @@ class IEPeriodicTaskAdmin(PeriodicTaskAdmin, ImportExportModelAdmin):
     def due(obj):
         if obj.last_run_at:
             return obj.schedule.remaining_estimate(last_run_at=obj.last_run_at)
-        else:
-            # y in seconds
-            z, y = obj.schedule.is_due(last_run_at=datetime.now(pytz.utc))
-            date = datetime.now(pytz.utc) + timedelta(seconds=y)
 
-            return naturaltime(date)
+        _, y_in_seconds = obj.schedule.is_due(last_run_at=datetime.now(pytz.utc))
+        date = datetime.now(pytz.utc) + timedelta(seconds=y_in_seconds)
+
+        return naturaltime(date)
 
     @staticmethod
     def precise(obj):
         if obj.last_run_at:
             return obj.schedule.remaining_estimate(last_run_at=obj.last_run_at)
-        else:
-            return obj.schedule.remaining_estimate(last_run_at=datetime.now(pytz.utc))
+
+        return obj.schedule.remaining_estimate(last_run_at=datetime.now(pytz.utc))
 
     @staticmethod
     def next(obj):
         if obj.last_run_at:
             return obj.schedule.remaining_estimate(last_run_at=obj.last_run_at)
-        else:
-            # y in seconds
-            z, y = obj.schedule.is_due(last_run_at=datetime.now(pytz.utc))
-            # somehow the cron jobs still give the correct countdown even last_run_at is not set.
 
-            date = datetime.now(pytz.utc) + timedelta(seconds=y)
+        _, y_in_seconds = obj.schedule.is_due(last_run_at=datetime.now(pytz.utc))
+        # somehow the cron jobs still give the correct countdown even last_run_at is not set.
 
-            return date
+        date = datetime.now(pytz.utc) + timedelta(seconds=y_in_seconds)
+
+        return date
 
     class Meta:
         ordering = ["-name"]
@@ -568,14 +566,14 @@ class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
 
     actions = []
 
-    def add_game_user(self, request, queryset):
+    def add_game_user(self, request, _):
         generate_game_user()
         self.message_user(request, "Game user added, rename if needed!")
 
     add_game_user.short_description = "💖 Add Game User (select a user first)"
     actions.append(add_game_user)
 
-    def add_volunteer(self, request, queryset):
+    def add_volunteer(self, request, _):
 
         # password is random and non-recoverable. It has to be set explicitly by the admin
         alphabet = string.ascii_letters + string.digits

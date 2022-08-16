@@ -171,7 +171,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                 }
             }
             when = datetime.now(pytz.utc) - timedelta(days=days_back)
-            log.info("Days back:%s Date: %s", (days_back, when))
+            log.info("Days back:%s Date: %s", days_back, when)
 
             # delete this specific moment as it's going to be replaced, so it's not really noticable an update is
             # taking place.
@@ -492,14 +492,12 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
                 ).delete()
 
                 log.debug(
-                    "Country: %s, Organization_type: %s, day: %s, date: %s, filter: %s"
-                    % (
-                        map_configuration["country"],
-                        map_configuration["organization_type__name"],
-                        days_back,
-                        when,
-                        scan_type,
-                    )
+                    "Country: %s, Organization_type: %s, day: %s, date: %s, filter: %s",
+                    map_configuration["country"],
+                    map_configuration["organization_type__name"],
+                    days_back,
+                    when,
+                    scan_type,
                 )
                 data = get_map_data(
                     map_configuration["country"], map_configuration["organization_type__name"], days_back, scan_type
@@ -527,8 +525,10 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
     for map_configuration in map_configurations:
         for days_back in list(reversed(range(0, days))):
             log.debug(
-                "For country: %s type: %s days back: %s"
-                % (map_configuration["country"], map_configuration["organization_type__name"], days_back)
+                "For country: %s type: %s days back: %s",
+                map_configuration["country"],
+                map_configuration["organization_type__name"],
+                days_back,
             )
 
             when = datetime.now(pytz.utc) - timedelta(days=days_back)
@@ -755,13 +755,7 @@ def create_organization_report_on_moment(organization: Organization, when: datet
     if not when:
         when = datetime.now(pytz.utc)
 
-    log.info(
-        "Creating report for %s on %s"
-        % (
-            organization,
-            when,
-        )
-    )
+    log.info("Creating report for %s on %s", organization, when)
 
     # if there already is an organization rating on this moment, skip it. You should have deleted it first.
     # this is probably a lot quicker than calculating the score and then deepdiffing it.
@@ -935,7 +929,7 @@ def recreate_organization_reports(organizations: List[int]):
 
         # and then rebuild the ratings per moment, which is a maximum of one per day.
         urls = Url.objects.filter(organization__in=organizations)
-        moments, happenings = significant_moments(urls=urls, reported_scan_types=get_allowed_to_report())
+        moments, _ = significant_moments(urls=urls, reported_scan_types=get_allowed_to_report())
 
         moments = reduce_to_save_data(moments)
         for moment in moments:
@@ -969,7 +963,7 @@ def reduce_to_save_data(moments: List[datetime]) -> List[datetime]:
         for moment in moments
         if
         # not simplyfying the chain expression, as i can't understand what is being said clear enough
-        moment > some_day_a_two_years_ago and moment <= some_day_a_year_ago
+        some_day_a_two_years_ago < moment <= some_day_a_year_ago
     ]
     # log.debug(f"To weeks: {to_reduce_to_weeks}")
     results += reduce_to_weeks(to_reduce_to_weeks)
@@ -988,7 +982,7 @@ def reduce_to_months(moments: List[datetime]) -> List[datetime]:
     # last moment of the month is good enough, that is at least a point there will be data.
     # https://stackoverflow.com/questions/42950/how-to-get-the-last-day-of-the-month
     for moment in moments:
-        (first_weekday, amount_of_days_in_month) = calendar.monthrange(moment.year, moment.month)
+        (_, amount_of_days_in_month) = calendar.monthrange(moment.year, moment.month)
         if datetime(moment.year, moment.month, amount_of_days_in_month, tzinfo=pytz.utc) not in reduced_datetimes:
             reduced_datetimes.append(datetime(moment.year, moment.month, amount_of_days_in_month, tzinfo=pytz.utc))
 

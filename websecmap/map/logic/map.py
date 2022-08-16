@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 from django.db import connection
 from django.utils.text import slugify
 
-from websecmap.map.logic.map_defaults import get_country, get_organization_type, remark
+from websecmap.map.logic.map_defaults import get_country, get_organization_type, REMARK
 from websecmap.map.models import MapDataCache
 from websecmap.reporting.diskreport import retrieve_report
 from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
@@ -109,7 +109,7 @@ def get_map_data(
             "type": "FeatureCollection",
             "render_date": datetime.now(pytz.utc).isoformat(),
             "data_from_time": when.isoformat(),
-            "remark": remark,
+            "remark": REMARK,
             "applied filter": displayed_issue,
             "layer": organization_type,
             "country": country,

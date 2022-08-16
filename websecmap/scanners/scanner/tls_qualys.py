@@ -100,6 +100,7 @@ def plan_scan_new(organizations_filter: dict = None, urls_filter: dict = None, e
 
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="scan", scanner="tls_qualys", urls=urls)
+    return group()
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
@@ -114,7 +115,7 @@ def plan_scan(urls_filter: dict = None, **kwargs):
     """
 
     if not allowed_to_scan("tls_qualys"):
-        return None
+        return
 
     # fuck the django orm, for making the following more complicated than it needs to be:
     # Plan scans for endpoints that never have been scanned
@@ -351,10 +352,10 @@ def qualys_scan_bulk(proxy: Dict[str, Any], urls: List[str]):
         pool.close()
         pool.join()
 
-    except Exception as e:
+    except Exception as my_exception:
         # catch _anything_ that goes wrong, log it to the sentry/logfile
         # This is done to still return the scanproxy so it can be released.
-        log.exception(f"Unexpected crash in qualys bulk scan: {e}")
+        log.exception("Unexpected crash in qualys bulk scan: {%s}", my_exception)
 
     # return the proxy so it can be closed.
     # The scan results are created as separate tasks in the scan thread.
@@ -377,7 +378,7 @@ def qualys_scan_thread(proxy: Dict[str, Any], url: str):
         except requests.RequestException:
             # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
             # ex: EOF occurred in violation of protocol (_ssl.c:749)
-            log.exception(f"(Network or Server) Error when contacting Qualys for scan on {url}.")
+            log.exception("(Network or Server) Error when contacting Qualys for scan on {%s}.", url)
             sleep(60)
             # continue
 
@@ -392,12 +393,13 @@ def qualys_scan_thread(proxy: Dict[str, Any], url: str):
             if data["status"] in ["READY", "ERROR"]:
                 # scan completed
                 # store the result on the storage queue.
-                log.debug(f"Qualys scan finished on {url}.")
+                log.debug("Qualys scan finished on {%s}.", url)
                 process_qualys_result.apply_async([data, url])
                 return True
 
             log.debug(
-                f"Scan on {url} has not yet finished. " f"Waiting {normal_waiting_time} seconds before next update."
+                "Scan on {%s} has not yet finished. Waiting {%s} seconds before next update.",
+                url, normal_waiting_time
             )
             sleep(normal_waiting_time)
             # Don't break out of the loop...
@@ -410,7 +412,7 @@ def qualys_scan_thread(proxy: Dict[str, Any], url: str):
             # Don't increase the amount of waiting time yet... try again in a minute.
             if error_message == "Running at full capacity. Please try again later.":
                 # this happens all the time, so don't raise an exception but just make a log message.
-                log.info(f"Error occurred while scanning {url}: qualys is at full capacity, trying later.")
+                log.info("Error occurred while scanning {%s}: qualys is at full capacity, trying later.", url)
                 sleep(error_waiting_time)
                 # Don't break out of the loop...
                 # continue
@@ -418,9 +420,9 @@ def qualys_scan_thread(proxy: Dict[str, Any], url: str):
             # We're going too fast with new assessments. Back off.
             if error_message.startswith("Concurrent assessment limit reached"):
                 log.error(
-                    f"Too many concurrent assessments: Are you running multiple scans from the same IP? "
-                    f"Concurrent scans slowly lower the concurrency limit of 25 concurrent scans to zero. "
-                    f"Slow down. {data['errors'][0]['message']}"
+                    "Too many concurrent assessments: Are you running multiple scans from the same IP? "
+                    "Concurrent scans slowly lower the concurrency limit of 25 concurrent scans to zero. "
+                    "Slow down. {%s}", data['errors'][0]['message']
                 )
                 if error_waiting_time < max_waiting_time:
                     error_waiting_time += 60
@@ -428,7 +430,7 @@ def qualys_scan_thread(proxy: Dict[str, Any], url: str):
                     # continue
 
             if error_message.startswith("Too many concurrent assessments"):
-                log.info(f"Error occurred while scanning {url}: Too many concurrent assessments.")
+                log.info("Error occurred while scanning {%s}: Too many concurrent assessments.", url)
                 if error_waiting_time < max_waiting_time:
                     error_waiting_time += 60
                     sleep(error_waiting_time)
@@ -440,7 +442,7 @@ def qualys_scan_thread(proxy: Dict[str, Any], url: str):
         # This is an undefined state.
         # scan started without errors. It's probably pending. Reset the waiting time to 60 seconds again as we
         # we want to get the result asap.
-        log.debug(f"Got to an undefined state on qualys scan on {url}. Scan has not finished, and we're retrying.")
+        log.debug("Got to an undefined state on qualys scan on {%s}. Scan has not finished, and we're retrying.", url)
         sleep(error_waiting_time)
 
 
@@ -565,7 +567,7 @@ def save_scan(url: str, data: Any):
     stored_ipv6 = False
     stored_ipv4 = False
 
-    log.debug(f"Found {len(data['endpoints'])} endpoints in data.")
+    log.debug("Found {%s} endpoints in data.", len(data['endpoints']))
 
     # should be unique(!)
     db_url = Url.objects.all().filter(url=url).last()
@@ -595,7 +597,7 @@ def save_scan(url: str, data: Any):
         # End prevent duplicates
 
         message = qualys_endpoint["statusMessage"]
-        log.debug(f"Message for endpoint {qualys_endpoint['ipAddress']} is {message}.")
+        log.debug("Message for endpoint {%s} is {%s}.", qualys_endpoint['ipAddress'], message)
 
         # Qualys might discover endpoints we don't have yet. In that case, be pragmatic and create the endpoint.
         failmap_endpoint = Endpoint.force_get(db_url, ip_version, "https", 443)

@@ -38,8 +38,8 @@ class TaskCommand(BaseCommand):
     task = None
     # it is a anti-pattern to instantiate empty lists/dicts as class parameters
     # but since management commands are contained in their own invocation this can fly
-    args = list()
-    kwargs = dict()
+    args = []
+    kwargs = {}
 
     def _add_arguments(self, parser):
         """Method to allow subclasses to add command specific arguments."""
@@ -177,9 +177,9 @@ class GenericTaskCommand(TaskCommand):
         """Compose set of tasks based on provided arguments."""
 
         # by default no filter means all of each.
-        organizations_filter = dict()
-        urls_filter = dict()
-        endpoints_filter = dict()  # A choice of ports, ip-version and protocol
+        organizations_filter = {}
+        urls_filter = {}
+        endpoints_filter = {}  # A choice of ports, ip-version and protocol
 
         if options["organization_names"]:
             # create a case-insensitive filter to match organizations by name
@@ -247,9 +247,9 @@ class ScannerTaskCommand(TaskCommand):
         """Compose set of tasks based on provided arguments."""
 
         # by default no filter means all of each.
-        organizations_filter = dict()
-        urls_filter = dict()
-        endpoints_filter = dict()  # A choice of ports, ip-version and protocol
+        organizations_filter = {}
+        urls_filter = {}
+        endpoints_filter = {}  # A choice of ports, ip-version and protocol
 
         if options["organization_names"]:
             # create a case-insensitive filter to match organizations by name
@@ -313,11 +313,11 @@ class DiscoverTaskCommand(TaskCommand):
     def compose(self, *args, **options):
         """Compose set of tasks based on provided arguments."""
 
-        urls_filter = dict()
+        urls_filter = {}
 
         if not options["organization_names"]:
             # by default no filter means all organizations
-            organization_filter = dict()
+            organization_filter = {}
         else:
             # create a case-insensitive filter to match organizations by name
             regex = "^(" + "|".join(options["organization_names"]) + ")$"
@@ -368,9 +368,9 @@ class VerifyTaskCommand(TaskCommand):
         """Compose set of tasks based on provided arguments."""
 
         # by default no filter means all of each.
-        organizations_filter = dict()
-        urls_filter = dict()
-        endpoints_filter = dict()  # A choice of ports, ip-version and protocol
+        organizations_filter = {}
+        urls_filter = {}
+        endpoints_filter = {}  # A choice of ports, ip-version and protocol
 
         if options["organization_names"]:
             # create a case-insensitive filter to match organizations by name
@@ -387,8 +387,10 @@ class VerifyTaskCommand(TaskCommand):
             organizations_filter = {"country__in": options["country"]}
 
         log.debug(
-            "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s"
-            % (organizations_filter, urls_filter, endpoints_filter)
+            "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s",
+            organizations_filter,
+            urls_filter,
+            endpoints_filter,
         )
 
         # compose set of tasks to be executed

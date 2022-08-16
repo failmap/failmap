@@ -1,3 +1,6 @@
+x = """
+# Needing moviepy for this obscure feature is just a waste of resources. This should be done in a differen project or it
+# needs to be done really well inside this one so it adds value.
 import logging
 import os
 import re
@@ -19,14 +22,13 @@ def tryint(s):
 
 
 def alphanum_key(s):
-    """Turn a string into a list of string and number chunks.
-    "z23a" -> ["z", 23, "a"]
-    """
+    # Turn a string into a list of string and number chunks.
+    # z23a" -> ["z", 23, "a"]
     return [tryint(c) for c in re.split("([0-9]+)", s)]
 
 
 class Command(BaseCommand):
-    help = """Uses moviepy to create a few movies based on screenshots."""
+    help = 'Uses moviepy to create a few movies based on screenshots.'
 
     def handle(self, *args, **options):
 
@@ -47,12 +49,12 @@ class Command(BaseCommand):
         map_configurations = Configuration.objects.all()
 
         for configuration in map_configurations:
-            for filter in filters:
-                create_movie(filter, configuration)
+            for a_filter in filters:
+                create_movie(a_filter, configuration)
 
 
-def create_movie(filter, configuration):
-    file_filter = f"{configuration.country}_{configuration.organization_type.name}_{filter}"
+def create_movie(a_filter, configuration):
+    file_filter = f"{configuration.country}_{configuration.organization_type.name}_{a_filter}"
 
     log.info("Creating movie for %s", file_filter)
 
@@ -75,3 +77,4 @@ def create_movie(filter, configuration):
     log.debug("Writing file")
     concat_clip = concatenate_videoclips(clips, method="compose")
     concat_clip.write_videofile(f"{settings.TOOLS['firefox']['screenshot_output_dir']}video_{file_filter}.mp4", fps=30)
+"""

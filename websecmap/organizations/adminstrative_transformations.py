@@ -133,13 +133,13 @@ def merge(
             source_organization = Organization.objects.get(
                 name=source_organizations_name, country=country, type=organization_type_object, is_dead=False
             )
-        except Organization.DoesNotExist:
+        except Organization.DoesNotExist as exc:
             # New organizations don't exist... so nothing to migrate.
             raise ValueError(
                 f"Organization {source_organizations_name} does not exist. Tried to merge it "
                 f"with {target_organization_name}. Are you using a different translation for "
                 "this organization (for example a local dialect)?"
-            )
+            ) from exc
 
         # copy todays used coordinates from all to-be-merged organizations into the target
         for coordinate in Coordinate.objects.all().filter(organization=source_organization, is_dead=False):
@@ -208,9 +208,9 @@ def dissolve(
 
     log.info("Dissolving %s into %s.", dissolved_organization_name, target_organization_names)
 
-    type = OrganizationType.objects.get(name=organization_type)
+    organization_type_data = OrganizationType.objects.get(name=organization_type)
     dissolved_organization = Organization.objects.get(
-        name=dissolved_organization_name, country=country, type=type, is_dead=False
+        name=dissolved_organization_name, country=country, type=organization_type_data, is_dead=False
     )
     dissolved_organization.is_dead = True
     dissolved_organization.is_dead_since = when
@@ -224,7 +224,7 @@ def dissolve(
 
     for target_organization_name in target_organization_names:
         target_organization = Organization.objects.get(
-            name=target_organization_name, country=country, type=type, is_dead=False
+            name=target_organization_name, country=country, type=organization_type_data, is_dead=False
         )
 
         clone_target = deepcopy(target_organization)
@@ -255,13 +255,11 @@ def dissolve(
 
         # don't take the promises, they are from another organization and management
 
-    return
-
 
 def add_url_to_new_organization(country: str, organization_type: str, target_organization_name, url, when):
-    type = OrganizationType.objects.get(name=organization_type)
+    otype = OrganizationType.objects.get(name=organization_type)
 
-    organization = Organization.objects.get(name=target_organization_name, country=country, type=type, is_dead=False)
+    organization = Organization.objects.get(name=target_organization_name, country=country, type=otype, is_dead=False)
 
     new_url = Url()
     new_url.url = url

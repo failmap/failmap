@@ -25,7 +25,7 @@ from django.urls import path
 from rest_framework import routers, serializers, viewsets
 
 # register Jet Dashboard views
-import websecmap.app.dashboard_module_views  # noqa
+import websecmap.app.dashboard_module_views  # noqa  # pylint: disable=unused-import
 
 # Django 1.10 http://stackoverflow.com/questions/38744285/
 # django-urls-error-view-must-be-a-callable-or-a-list-tuple-in-the-case-of-includ#38744286
@@ -77,12 +77,12 @@ class CoordinateSerializer(serializers.ModelSerializer):
 
 
 # ViewSets define the view behavior.
-class CoordinateViewSet(viewsets.ModelViewSet):
+class CoordinateViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
     queryset = Coordinate.objects.all().filter(geojsontype="Point", is_dead=False)
     serializer_class = CoordinateSerializer
 
 
-class OrganizationViewSet(viewsets.ModelViewSet):
+class OrganizationViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
 

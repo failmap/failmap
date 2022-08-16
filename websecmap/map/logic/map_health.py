@@ -45,7 +45,7 @@ def update_map_health_reports(
             total_good = []
             old_date = datetime.now(pytz.utc) - timedelta(days=days_back)
 
-            log.debug(f"Creating health report of {days_back} days back.")
+            log.debug("Creating health report of {%s} days back.", days_back)
             for organization in organizations_on_map:
                 # log.debug(f"Creating health report of {organization} at {old_date}.")
                 latest_report = get_latest_report_of_organization(organization, old_date)

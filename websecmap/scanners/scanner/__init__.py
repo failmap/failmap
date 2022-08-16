@@ -258,10 +258,10 @@ def finish_those_that_wont_be_scanned(scanner: str, scans: List[EndpointGenericS
     Uses in autoexplain methods, where sometimes explanations are not needed or the query
     """
     all_url_ids = [url.id for url in urls]
-    log.debug(f"All url ids: {all_url_ids}.")
+    log.debug("All url ids: {%s}.", all_url_ids)
     scanned_url_ids = [epgs.endpoint.url.id for epgs in scans]
-    log.debug(f"Will not be scanned: {all_url_ids}.")
+    log.debug("Will not be scanned: {%s}.", all_url_ids)
     will_not_be_scanned = list(set(all_url_ids) - set(scanned_url_ids))
     for not_scanned_id in will_not_be_scanned:
-        log.debug(f"Not going to scan {not_scanned_id}, as there is nothing to scan for this url anymore.")
+        log.debug("Not going to scan {%s}, as there is nothing to scan for this url anymore.", not_scanned_id)
         plannedscan.finish("scan", scanner, not_scanned_id)

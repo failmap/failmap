@@ -14,4 +14,4 @@ class Command(BaseCommand):
         for coordinate in coordinates:
             coordinate.save()
 
-        log.info(f"Done creating hashes for {len(coordinates)}.")
+        log.info("Done creating hashes for {%s}.", len(coordinates))

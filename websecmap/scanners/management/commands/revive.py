@@ -60,7 +60,7 @@ def valid_date(s):
     try:
         return datetime.strptime(s, "%Y-%m-%d")
     except ValueError:
-        msg = "Not a valid date: '{0}' - The format is YYYY-MM-DD.".format(s)
+        msg = f"Not a valid date: '{s}' - The format is YYYY-MM-DD."
         raise argparse.ArgumentTypeError(msg)
 
 

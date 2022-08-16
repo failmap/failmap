@@ -61,6 +61,7 @@ def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpo
 
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="scan", scanner="ftp", urls=urls)
+    return group()
 
 
 def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
@@ -83,6 +84,7 @@ def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, end
 
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="verify", scanner="ftp", urls=urls)
+    return group()
 
 
 def filter_discover(
@@ -104,6 +106,7 @@ def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, e
 
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="discover", scanner="ftp", urls=urls)
+    return group()
 
 
 @app.task(queue="storage")
@@ -167,7 +170,7 @@ def compose_manual_discover_task(
     # There are only semi-alternative ports, no real alternative ports.
     # ports = [21, 990, 2811, 5402, 6622, 20, 2121, 212121]  # All types different default ports.
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    log.info(f"Discovering FTP servers on {len(urls)} urls.")
+    log.info("Discovering FTP servers on %s urls.", len(urls))
     return compose_discover_task(urls)
 
 
@@ -205,7 +208,7 @@ def compose_verify_task(urls):
     endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["ftp"])
     endpoints = unique_and_random(endpoints)
 
-    log.info(f"Verifying FTP servers on {len(endpoints)} endpoints.")
+    log.info("Verifying FTP servers on %s endpoints.", len(endpoints))
 
     # remove urls that don't have the relevant endpoints anymore
     for url_id in urls_without_endpoints:
@@ -484,7 +487,7 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
             if not db_url:
                 return
 
-            log.debug(f"New FTP server discovered on {url}.")
+            log.debug("New FTP server discovered on %s.", url)
             endpoint = Endpoint(
                 url=db_url, port=port, protocol=protocol, ip_version=ip_version, discovered_on=timezone.now()
             )
@@ -497,7 +500,7 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
 
     # endpoint died. Kill it.
     if endpoint.is_dead is False and not connected:
-        log.debug(f"Existing FTP server could not be found anymore on {url}, removing.")
+        log.debug("Existing FTP server could not be found anymore on %s, removing.", url)
         endpoint.is_dead = True
         endpoint.is_dead_reason = "Could not connect"
         endpoint.is_dead_since = timezone.now()

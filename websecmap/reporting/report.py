@@ -70,7 +70,7 @@ def recreate_url_report(url_id):
 
     # in cases where there is nothing to report at all.
     if not url_reports:
-        log.debug(f"Found no url reports for {url.url}. Skipping.")
+        log.debug("Found no url reports for {%s}. Skipping.", url.url)
         return
 
     # log.debug(url_reports)
@@ -78,7 +78,7 @@ def recreate_url_report(url_id):
     # No new reports: the amount of items in the timeline(+rules) is the same as the existing reports.
     amount_of_existing_reports = UrlReport.objects.all().filter(url=url_id).count()
     if amount_of_existing_reports == len(url_reports):
-        log.debug(f"There are no new reports for {url.url}. Updating the latest one to contain latest scan info.")
+        log.debug("There are no new reports for {%s}. Updating the latest one to contain latest scan info.", url.url)
         # latest and last() are equivalent because of the sequential nature of adding reports to the database.
         # Comparison on an integer is faster, so we're using last().
         latest_report = UrlReport.objects.all().filter(url=url_id).last()
@@ -99,7 +99,7 @@ def recreate_url_report(url_id):
         # There are new reports, at least one. See how many are new and add them.
         # As there can be many scans a day, there will probably be many reports created that day.
         amount_of_new_reports = len(url_reports) - amount_of_existing_reports
-        log.debug(f"Adding {amount_of_new_reports} to {url.url}.")
+        log.debug("Adding {%s} to {%s}.", amount_of_new_reports, url.url)
         # due to bugs there could be multiple on a single day... not yet clear why.
         # in that case nothing is added.
         if amount_of_new_reports < 0:
@@ -278,43 +278,45 @@ def latest_rating_per_day_only(scans):
     for scan in scans:
         # A combination that is unique, enough to identify a scan, but that will cause a collision if we don't
         # filter out the problematic values.
-        hash = hash_scan_per_day_and_type(scan)
+        dt_hash = hash_scan_per_day_and_type(scan)
         # use a high precision here, since we want to have the absolute latest scan
         # only when a rating changes, a new scan is added, this makes it fairly easy to get the latest
-        if not in_hash_table(hash_table, hash):
-            hash_table.append({"hash": hash, "scan": scan})
+        if not in_hash_table(hash_table, dt_hash):
+            hash_table.append({"hash": dt_hash, "scan": scan})
         else:
             # here is where the magic happens: only the scan with the highest rating_determined_on can stay
             # find the one, check it and replace it.
-            existing_item = in_hash_table(hash_table, hash)
+            existing_item = in_hash_table(hash_table, dt_hash)
             if existing_item["scan"].rating_determined_on < scan.rating_determined_on:
                 # Due to the ordering of the scans, usually this message will NEVER appear and the first scan
                 # was always the latest. Perhaps per database this default ordering differs. Since we don't have
                 # testcases, i don't dare to touch the rest of this code.
                 log.debug(
-                    "Scan ID %s on %s had also another scan today that had a rating that lasted longer."
-                    % (scan.pk, scan.type)
+                    "Scan ID %s on %s had also another scan today that had a rating that lasted longer.",
+                    scan.pk,
+                    scan.type,
                 )
                 hash_table.remove(existing_item)
-                hash_table.append({"hash": hash, "scan": scan})
+                hash_table.append({"hash": dt_hash, "scan": scan})
             else:
                 log.debug(
-                    "Scan ID %s on %s had also another scan today that had a rating that lasted shorter. IGNORED"
-                    % (scan.pk, scan.type)
+                    "Scan ID %s on %s had also another scan today that had a rating that lasted shorter. IGNORED",
+                    scan.pk,
+                    scan.type,
                 )
 
     # return a list of scans:
     filtered_scans = []
-    for hash in hash_table:
-        filtered_scans.append(hash["scan"])
+    for dt_hash in hash_table:
+        filtered_scans.append(dt_hash["scan"])
 
     return filtered_scans
 
 
-def in_hash_table(hash_table, hash):
+def in_hash_table(hash_table, a_hash):
     # https://stackoverflow.com/questions/8653516/python-list-of-dictionaries-search
     try:
-        return next((item for item in hash_table if item["hash"] == hash))
+        return next((item for item in hash_table if item["hash"] == a_hash))
 
     except StopIteration:
         return False
@@ -323,11 +325,11 @@ def in_hash_table(hash_table, hash):
 def hash_scan_per_day_and_type(scan):
     # hopefully it doesn't run extra queries?
     if scan.type in URL_SCAN_TYPES:
-        pk = scan.url.pk
+        primary_key = scan.url.pk
     else:
-        pk = scan.endpoint.pk
+        primary_key = scan.endpoint.pk
 
-    return f"{pk}{scan.type}{scan.rating_determined_on.replace(second=59, microsecond=999999)}"
+    return f"{primary_key}{scan.type}{scan.rating_determined_on.replace(second=59, microsecond=999999)}"
 
 
 def create_timeline(url: Url):
@@ -796,8 +798,8 @@ def statistics_over_url_calculation(calculation):
         else:
             amount_of_issues = add_report_to_key(amount_of_issues, "url", report)
 
-    amount_of_issues, clean = judge(amount_of_issues, clean_issues_for_judgement, "url", [amount_of_issues["url"]])
-    amount_of_issues, clean = judge(
+    amount_of_issues, _ = judge(amount_of_issues, clean_issues_for_judgement, "url", [amount_of_issues["url"]])
+    amount_of_issues, _ = judge(
         amount_of_issues, clean_issues_for_judgement, "url_explained", [amount_of_issues["url_explained"]]
     )
 
@@ -825,15 +827,15 @@ def save_url_report(url: Url, date: datetime, calculation, is_the_newest=False):
     # This also injects the statistics into the json, for use in representations / views in the right places.
     calculation, amount_of_issues = statistics_over_url_calculation(calculation)
 
-    u = UrlReport()
-    u.url = url
+    url_report = UrlReport()
+    url_report.url = url
 
     # save it as NOW if it's done today, else on the last moment on the same day.
     # So the url ratings immediately are shown, even if the day is not over.
     if date == datetime.now().date():
-        u.at_when = datetime.now(pytz.utc)
+        url_report.at_when = datetime.now(pytz.utc)
     else:
-        u.at_when = datetime(
+        url_report.at_when = datetime(
             year=date.year,
             month=date.month,
             day=date.day,
@@ -844,61 +846,61 @@ def save_url_report(url: Url, date: datetime, calculation, is_the_newest=False):
             tzinfo=pytz.utc,
         )
 
-    u.total_endpoints = len(calculation["endpoints"])
+    url_report.total_endpoints = len(calculation["endpoints"])
 
-    u.high = amount_of_issues["overall"]["high"]
-    u.medium = amount_of_issues["overall"]["medium"]
-    u.low = amount_of_issues["overall"]["low"]
-    u.total_issues = amount_of_issues["overall"]["any"]
-    u.ok = amount_of_issues["overall"]["ok"]
-    u.not_testable = amount_of_issues["overall"]["not_testable"]
-    u.not_applicable = amount_of_issues["overall"]["not_applicable"]
-    u.error_in_test = amount_of_issues["overall"]["error_in_test"]
+    url_report.high = amount_of_issues["overall"]["high"]
+    url_report.medium = amount_of_issues["overall"]["medium"]
+    url_report.low = amount_of_issues["overall"]["low"]
+    url_report.total_issues = amount_of_issues["overall"]["any"]
+    url_report.ok = amount_of_issues["overall"]["ok"]
+    url_report.not_testable = amount_of_issues["overall"]["not_testable"]
+    url_report.not_applicable = amount_of_issues["overall"]["not_applicable"]
+    url_report.error_in_test = amount_of_issues["overall"]["error_in_test"]
 
-    u.high_endpoints = amount_of_issues["endpoint_judgements"]["high"]
-    u.medium_endpoints = amount_of_issues["endpoint_judgements"]["medium"]
-    u.low_endpoints = amount_of_issues["endpoint_judgements"]["low"]
-    u.ok_endpoints = amount_of_issues["endpoint_judgements"]["ok"]
+    url_report.high_endpoints = amount_of_issues["endpoint_judgements"]["high"]
+    url_report.medium_endpoints = amount_of_issues["endpoint_judgements"]["medium"]
+    url_report.low_endpoints = amount_of_issues["endpoint_judgements"]["low"]
+    url_report.ok_endpoints = amount_of_issues["endpoint_judgements"]["ok"]
 
-    u.total_url_issues = amount_of_issues["url"]["any"]
-    u.total_endpoint_issues = amount_of_issues["endpoint"]["any"]
+    url_report.total_url_issues = amount_of_issues["url"]["any"]
+    url_report.total_endpoint_issues = amount_of_issues["endpoint"]["any"]
 
-    u.url_issues_high = amount_of_issues["url"]["high"]
-    u.url_issues_medium = amount_of_issues["url"]["medium"]
-    u.url_issues_low = amount_of_issues["url"]["low"]
-    u.url_not_testable = amount_of_issues["url"]["not_testable"]
-    u.url_not_applicable = amount_of_issues["url"]["not_applicable"]
-    u.url_error_in_test = amount_of_issues["url"]["error_in_test"]
+    url_report.url_issues_high = amount_of_issues["url"]["high"]
+    url_report.url_issues_medium = amount_of_issues["url"]["medium"]
+    url_report.url_issues_low = amount_of_issues["url"]["low"]
+    url_report.url_not_testable = amount_of_issues["url"]["not_testable"]
+    url_report.url_not_applicable = amount_of_issues["url"]["not_applicable"]
+    url_report.url_error_in_test = amount_of_issues["url"]["error_in_test"]
 
     # probably the same as OK, as you can only be OK once.
-    u.url_ok = amount_of_issues["overall_judgements"]["ok"]
+    url_report.url_ok = amount_of_issues["overall_judgements"]["ok"]
 
-    u.endpoint_issues_high = amount_of_issues["endpoint"]["high"]
-    u.endpoint_issues_medium = amount_of_issues["endpoint"]["medium"]
-    u.endpoint_issues_low = amount_of_issues["endpoint"]["low"]
-    u.endpoint_ok = amount_of_issues["endpoint"]["ok"]
-    u.endpoint_not_testable = amount_of_issues["endpoint"]["not_testable"]
-    u.endpoint_not_applicable = amount_of_issues["endpoint"]["not_applicable"]
-    u.endpoint_error_in_test = amount_of_issues["endpoint"]["error_in_test"]
+    url_report.endpoint_issues_high = amount_of_issues["endpoint"]["high"]
+    url_report.endpoint_issues_medium = amount_of_issues["endpoint"]["medium"]
+    url_report.endpoint_issues_low = amount_of_issues["endpoint"]["low"]
+    url_report.endpoint_ok = amount_of_issues["endpoint"]["ok"]
+    url_report.endpoint_not_testable = amount_of_issues["endpoint"]["not_testable"]
+    url_report.endpoint_not_applicable = amount_of_issues["endpoint"]["not_applicable"]
+    url_report.endpoint_error_in_test = amount_of_issues["endpoint"]["error_in_test"]
 
-    u.explained_high = amount_of_issues["url_explained_judgements"]["high"]
-    u.explained_medium = amount_of_issues["url_explained_judgements"]["medium"]
-    u.explained_low = amount_of_issues["url_explained_judgements"]["low"]
+    url_report.explained_high = amount_of_issues["url_explained_judgements"]["high"]
+    url_report.explained_medium = amount_of_issues["url_explained_judgements"]["medium"]
+    url_report.explained_low = amount_of_issues["url_explained_judgements"]["low"]
 
-    u.explained_total_issues = amount_of_issues["overall_explained"]["any"]
+    url_report.explained_total_issues = amount_of_issues["overall_explained"]["any"]
 
-    u.explained_high_endpoints = amount_of_issues["endpoint_explained_judgements"]["high"]
-    u.explained_medium_endpoints = amount_of_issues["endpoint_explained_judgements"]["medium"]
-    u.explained_low_endpoints = amount_of_issues["endpoint_explained_judgements"]["low"]
+    url_report.explained_high_endpoints = amount_of_issues["endpoint_explained_judgements"]["high"]
+    url_report.explained_medium_endpoints = amount_of_issues["endpoint_explained_judgements"]["medium"]
+    url_report.explained_low_endpoints = amount_of_issues["endpoint_explained_judgements"]["low"]
 
-    u.explained_total_url_issues = amount_of_issues["url_explained"]["any"]
-    u.explained_total_endpoint_issues = amount_of_issues["endpoint_explained"]["any"]
-    u.explained_url_issues_high = amount_of_issues["url_explained"]["high"]
-    u.explained_url_issues_medium = amount_of_issues["url_explained"]["medium"]
-    u.explained_url_issues_low = amount_of_issues["url_explained"]["low"]
-    u.explained_endpoint_issues_high = amount_of_issues["endpoint_explained"]["high"]
-    u.explained_endpoint_issues_medium = amount_of_issues["endpoint_explained"]["medium"]
-    u.explained_endpoint_issues_low = amount_of_issues["endpoint_explained"]["low"]
+    url_report.explained_total_url_issues = amount_of_issues["url_explained"]["any"]
+    url_report.explained_total_endpoint_issues = amount_of_issues["endpoint_explained"]["any"]
+    url_report.explained_url_issues_high = amount_of_issues["url_explained"]["high"]
+    url_report.explained_url_issues_medium = amount_of_issues["url_explained"]["medium"]
+    url_report.explained_url_issues_low = amount_of_issues["url_explained"]["low"]
+    url_report.explained_endpoint_issues_high = amount_of_issues["endpoint_explained"]["high"]
+    url_report.explained_endpoint_issues_medium = amount_of_issues["endpoint_explained"]["medium"]
+    url_report.explained_endpoint_issues_low = amount_of_issues["endpoint_explained"]["low"]
 
     calculation["ratings"] = sorted(
         calculation["ratings"], key=lambda k: (k["high"], k["medium"], k["low"]), reverse=True
@@ -909,12 +911,12 @@ def save_url_report(url: Url, date: datetime, calculation, is_the_newest=False):
 
     # all statistics, except for endpoints can be added at the end of the json
     calculation = add_statistics_to_calculation(calculation, amount_of_issues)
-    u.calculation = calculation
+    url_report.calculation = calculation
 
     # Make sure the new urlreport is seen as the latest, so retrieval of the last report is a direct lookup
-    u.is_the_newest = is_the_newest
+    url_report.is_the_newest = is_the_newest
     # u.save()
-    return u
+    return url_report
 
     # Make sure the new urlreport is seen as the latest, so retrieval of the last report is a direct lookup
     # This of course makes the adding process much slower.
@@ -984,8 +986,8 @@ def inspect_timeline(timeline, url: Url):
             for item in timeline[moment]["url_scan"]["scans"]:
                 calculation = get_severity(item)
                 message += (
-                    "|  |  |-  H:%2s M:%2s L:%2s %-40s"
-                    % (calculation.get("high", "?"), calculation.get("medium", "?"), calculation.get("low", "?"), item)
+                    f"|  |  |-  H:{calculation.get('high', '?'):>2} "
+                    f"M:{calculation.get('medium', '?'):>2} L:{calculation.get('low', '?'):>2} {item:<40}"
                     + newline
                 )
 
@@ -994,8 +996,8 @@ def inspect_timeline(timeline, url: Url):
             for item in timeline[moment]["endpoint_scan"]["scans"]:
                 calculation = get_severity(item)
                 message += (
-                    "|  |  |-  H:%2s M:%2s L:%2s %-40s"
-                    % (calculation.get("high", "?"), calculation.get("medium", "?"), calculation.get("low", "?"), item)
+                    f"|  |  |-  H:{calculation.get('high', '?'):>2} "
+                    f"M:{calculation.get('medium', '?'):>2} L:{calculation.get('low', '?'):>2} {item:<40}"
                     + newline
                 )
 
@@ -1026,50 +1028,56 @@ def aggegrate_url_rating_scores(url_ratings: List, only_include_issues: List[str
     :return:
     """
 
+    score_fields = [
+        "high",
+        "high",
+        "medium",
+        "low",
+        "ok",
+        "total_urls",
+        "high_urls",
+        "medium_urls",
+        "low_urls",
+        "ok_urls",
+        "explained_high",
+        "explained_medium",
+        "explained_low",
+        "explained_high_endpoints",
+        "explained_medium_endpoints",
+        "explained_low_endpoints",
+        "explained_high_urls",
+        "explained_medium_urls",
+        "explained_low_urls",
+        "explained_total_url_issues",
+        "explained_url_issues_high",
+        "explained_url_issues_medium",
+        "explained_url_issues_low",
+        "explained_total_endpoint_issues",
+        "explained_endpoint_issues_high",
+        "explained_endpoint_issues_medium",
+        "explained_endpoint_issues_low",
+        "total_endpoints",
+        "high_endpoints",
+        "medium_endpoints",
+        "low_endpoints",
+        "ok_endpoints",
+        "total_url_issues",
+        "total_endpoint_issues",
+        "url_issues_high",
+        "url_issues_medium",
+        "url_issues_low",
+        "endpoint_issues_high",
+        "endpoint_issues_medium",
+        "endpoint_issues_low",
+    ]
+
     scores = {
-        "high": 0,
-        "medium": 0,
-        "low": 0,
-        "ok": 0,
-        "total_urls": 0,
-        "high_urls": 0,
-        "medium_urls": 0,
-        "low_urls": 0,
-        "ok_urls": 0,
-        "explained_high": 0,
-        "explained_medium": 0,
-        "explained_low": 0,
-        "explained_high_endpoints": 0,
-        "explained_medium_endpoints": 0,
-        "explained_low_endpoints": 0,
-        "explained_high_urls": 0,
-        "explained_medium_urls": 0,
-        "explained_low_urls": 0,
-        # number of issues can be higher than the number of urls or endpoints of course.
-        "explained_total_url_issues": 0,
-        "explained_url_issues_high": 0,
-        "explained_url_issues_medium": 0,
-        "explained_url_issues_low": 0,
-        "explained_total_endpoint_issues": 0,
-        "explained_endpoint_issues_high": 0,
-        "explained_endpoint_issues_medium": 0,
-        "explained_endpoint_issues_low": 0,
-        "total_endpoints": 0,
-        "high_endpoints": 0,
-        "medium_endpoints": 0,
-        "low_endpoints": 0,
-        "ok_endpoints": 0,
-        "total_url_issues": 0,
-        "total_endpoint_issues": 0,
-        "url_issues_high": 0,
-        "url_issues_medium": 0,
-        "url_issues_low": 0,
-        "endpoint_issues_high": 0,
-        "endpoint_issues_medium": 0,
-        "endpoint_issues_low": 0,
         # todo: both endpoints and urls are rated.
         "urls": [],
     }
+
+    for field in score_fields:
+        scores[field] = 0
 
     for urlrating in url_ratings:
 
@@ -1196,12 +1204,11 @@ def get_latest_urlratings_fast(urls: List[Url], when):
         # get all columns, instead of naming each of the 20 columns separately, and having the chance that you missed
         # one and then django performs a separate lookup query for that value (a few times).
         sql = (
-            """SELECT *
+            f"""SELECT *
                     FROM reporting_urlreport
                     INNER JOIN
                       (SELECT MAX(id) as id2 FROM reporting_urlreport or2
-                      WHERE at_when <= '%s' AND url_id IN ("""
-            % (when,)
+                      WHERE at_when <= '{when}' AND url_id IN ("""
             + ",".join(map(str, chunk))
             + """)
                       GROUP BY url_id) as x

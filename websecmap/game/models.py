@@ -168,8 +168,8 @@ class OrganizationSubmission(models.Model):
     def __str__(self):
         if self.has_been_accepted:
             return f"OK: {self.organization_name}"
-        else:
-            return self.organization_name
+
+        return self.organization_name
 
     class Meta:
         verbose_name = _("organisation submission")
@@ -217,8 +217,8 @@ class UrlSubmission(models.Model):
     def __str__(self):
         if self.has_been_accepted:
             return f"OK: {self.url}"
-        else:
-            return self.url
+
+        return self.url
 
     class Meta:
         verbose_name = _("url submission")

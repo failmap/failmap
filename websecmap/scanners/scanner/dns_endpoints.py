@@ -366,6 +366,8 @@ def get_dns_records(url: str, record_type):
         log.debug("Timeout received for DNS query to %s.", url)
         return False
 
+    return None
+
 
 @retry(
     wait=wait_exponential(multiplier=1, min=0, max=10),
@@ -397,6 +399,8 @@ def get_dns_records_accepting_no_answer(url: str, record_type):
         # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
         log.debug("Timeout received for DNS query to %s.", url)
         return False
+
+    return None
 
 
 """

@@ -66,7 +66,7 @@ class OrganizationAdminInline(CompactInline):
 # a bug is that three empty values are added in the list below.
 # perhaps the inline is fixable with some days of engineering, and might be worth while, but for now...
 # and for some reason that
-class EndpointGenericScanInline(nested_admin.NestedTabularInline):
+class EndpointGenericScanInline(nested_admin.NestedTabularInline):  # pylint: disable=no-member
     model = EndpointGenericScan
 
     can_delete = False
@@ -109,7 +109,7 @@ class EndpointGenericScanInline(nested_admin.NestedTabularInline):
     #     return obj.last_scan_moment
 
 
-class EndpointAdminInline(nested_admin.NestedStackedInline):
+class EndpointAdminInline(nested_admin.NestedStackedInline):  # pylint: disable=no-member
     model = Endpoint
     extra = 0
     show_change_link = True
@@ -294,25 +294,25 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     inlines = [CoordinateAdminInline, UrlAdminInline, OrganizationRatingAdminInline]  #
 
     @staticmethod
-    def name_details(self):
-        if self.is_dead:
+    def name_details(inst):
+        if inst.is_dead:
             return (
-                f"✝ {self.name}, {self.country} ({self.created_on.strftime('%b %Y') if self.created_on else ''} "
-                f"- {self.is_dead_since.strftime('%b %Y') if self.is_dead_since else ''})"
+                f"✝ {inst.name}, {inst.country} ({inst.created_on.strftime('%b %Y') if inst.created_on else ''} "
+                f"- {inst.is_dead_since.strftime('%b %Y') if inst.is_dead_since else ''})"
             )
-        else:
-            return f"{self.name}, {self.country} ({self.created_on.strftime('%b %Y')})"
+
+        return f"{inst.name}, {inst.country} ({inst.created_on.strftime('%b %Y')})"
 
     @staticmethod
-    def wikidata_(self):
+    def wikidata_(inst):
         return format_html(
-            f"<a href='https://www.wikidata.org/wiki/{self.wikidata}' target='_blank'>🔍 {self.wikidata}</a>"
+            f"<a href='https://www.wikidata.org/wiki/{inst.wikidata}' target='_blank'>🔍 {inst.wikidata}</a>"
         )
 
     @staticmethod
-    def wikipedia_(self):
+    def wikipedia_(inst):
         return format_html(
-            f"<a href='https://www.wikipedia.org/wiki/{self.wikipedia}' target='_blank'>🔍 {self.wikipedia}</a>"
+            f"<a href='https://www.wikipedia.org/wiki/{inst.wikipedia}' target='_blank'>🔍 {inst.wikipedia}</a>"
         )
 
     # preserve_filters = True
@@ -366,7 +366,6 @@ class MyUrlAdminForm(forms.ModelForm):
                 .count()
                 > 1
             ):
-
                 # format_html = XSS :)
                 raise ValidationError(
                     format_html(
@@ -385,21 +384,17 @@ class MyUrlAdminForm(forms.ModelForm):
         # this form still closes succesfully.
         # This url already exists and the selected organization(s) have been added to it.
 
-        if Url.objects.all().filter(url=self.data.get("url"), is_dead=False).count() > 1:
+        message = (
+            f"This url {self.data.get('url')} already exists and is alive. Please add the desired organization"
+            f"s to the existing url. This was not done automatically because it might be possible specific "
+            f"other data was entered in this form that cannot blindly be copied (as it might interfere with "
+            f"the existing url). Search for <a href=\"../?url={self.data.get('url')}&is_dead=Fals"
+            f"e\">🔍 {self.data.get('url')}</a>."
+        )
 
+        if Url.objects.all().filter(url=self.data.get("url"), is_dead=False).count() > 1:
             # format_html = XSS :)
-            raise ValidationError(
-                format_html(
-                    _(
-                        "This url %(url)s already exists and is alive. Please add the desired organizations to the "
-                        "existing url. This was not done automatically because it might be possible specific other "
-                        "data was entered in this form that cannot blindly be copied (as it might interfere with the "
-                        "existing url). "
-                        'Search for <a href="../?url=%(url)s&is_dead=False">🔍 %(url)s</a>.'
-                        % {"url": self.data.get("url")}
-                    )
-                )
-            )
+            raise ValidationError(format_html(_(message)))
 
 
 class HasEndpointScansListFilter(admin.SimpleListFilter):
@@ -434,10 +429,12 @@ class HasEndpointScansListFilter(admin.SimpleListFilter):
             return queryset
         if self.value() == "no":
             return queryset
+        return queryset
 
 
+# NestedModelAdmin used as in documentation.
 @admin.register(Url)
-class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmin):
+class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmin):  # pylint: disable=no-member
 
     # It's efficient to already get all endpints. Makes 30 second load into 8 second load.
     def get_queryset(self, request):
@@ -542,35 +539,35 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     def visit(self, obj: Url):
         if not obj.endpoint_set.count():
-            return
+            return ""
 
-        str = format_html(
+        string = format_html(
             f"{obj.endpoint_set.count()} <a href='/admin/scanners/endpoint/?q={obj.url}' target='_blank'>🔍</a>"
         )
 
         for endpoint in obj.endpoint_set.all():
 
             if endpoint.is_dead is False:
-                str += (
+                string += (
                     f" - <a href='{endpoint.protocol}://{obj.url}:{endpoint.port}' target='_blank'>"
                     f"{endpoint.protocol}/{endpoint.port}</a>"
                 )
-        return format_html(str)
+        return format_html(string)
 
     @staticmethod
-    def unresolvable_for(self):
-        if self.not_resolvable and self.not_resolvable_since:
-            return naturaltime(self.not_resolvable_since)
-        else:
-            return "-"
+    def unresolvable_for(instance):
+        if instance.not_resolvable and instance.not_resolvable_since:
+            return naturaltime(instance.not_resolvable_since)
+
+        return "-"
 
     # todo: further humanize this.
     @staticmethod
-    def dead_for(self):
-        if self.is_dead and self.is_dead_since:
-            return naturaltime(self.is_dead_since)
-        else:
-            return "-"
+    def dead_for(instance):
+        if instance.is_dead and instance.is_dead_since:
+            return naturaltime(instance.is_dead_since)
+
+        return "-"
 
     @staticmethod
     def current_rating(obj):
@@ -609,7 +606,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     declare_dead.short_description = "🔪  Declare dead"
     actions.append("declare_dead")
 
-    def timeline_debug(self, request, queryset):
+    def timeline_debug(self, _, queryset):
         from django.http import HttpResponse
 
         from websecmap.reporting.report import create_timeline, inspect_timeline
@@ -638,7 +635,6 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(Coordinate)
 class CoordinateAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     # show Europe as default. Will probably change over time.
     # http://django-leaflet.readthedocs.io/en/latest/advanced.html
     # If you copy this setting from a point, be sure to switch x and y when pasting in default center.
@@ -770,8 +766,8 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         # check if the environment is sane, if not, return a user message with the error
         try:
             datasources.check_environment()
-        except BaseException as e:
-            self.message_user(request, str(e), level=messages.ERROR)
+        except Exception as my_exception:
+            self.message_user(request, str(my_exception), level=messages.ERROR)
             return
 
         for dataset in queryset:
@@ -802,7 +798,6 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def dataset_import_finished(dataset_id):
-
     dataset = Dataset.objects.all().filter(id=dataset_id).first()
     if not dataset:
         return

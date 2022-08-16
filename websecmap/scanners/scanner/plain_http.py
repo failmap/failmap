@@ -48,7 +48,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
             endpoint__port=80,
             **urls_filter,
         ).only("id", "url")
-        log.info(f"Creating scan task {len(urls)} urls for {len(organizations)} organizations.")
+        log.info("Creating scan task {%s} urls for {%s} organizations.", len(urls), len(organizations))
     else:
         urls = Url.objects.filter(
             q_configurations_to_scan(),
@@ -59,7 +59,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
             endpoint__port=80,
             **urls_filter,
         ).only("id", "url")
-        log.info(f"Creating scan plain http task {len(urls)} urls.")
+        log.info("Creating scan plain http task {%s} urls.", len(urls))
 
     return unique_and_random(urls)
 

@@ -51,12 +51,12 @@ def start_borker(uuid):
 
     @retry(tries=10, delay=1)
     def get_container_port():
-        command = "docker port %s 6379/tcp" % name
+        command = f"docker port {name} 6379/tcp"
         return subprocess.check_output(
             command,
             shell=True,  # nosec predefined input in name mitigates risk of exploitation (unless uuid.int overridden).
             universal_newlines=True,
-        ).split(":")[-1]
+        ).split(":", maxsplit=1)[-1]
 
     time.sleep(1)  # small delay to prevent first warning
     port = int(get_container_port())
@@ -65,16 +65,20 @@ def start_borker(uuid):
 
 
 def start_worker(broker_port, silent=True):
+
+    if silent:
+        log.debug("Todo: silent is not yet supported.")
+
     watchdog = (
-        ("watchmedo auto-restart --directory={} --pattern=*.py" " --recursive --signal=SIGKILL -- ")
-        .format(SOURCE_DIRECTORY)
-        .split()
+        f"watchmedo auto-restart --directory={SOURCE_DIRECTORY} "
+        f"--pattern=*.py"
+        " --recursive --signal=SIGKILL -- ".split()
     )
+
     # watchdog = 'tools/autoreload.sh'
     worker_command = (
-        ("websecmap celery worker --loglevel=info --pool=gevent" " --concurrency=1 --broker redis://localhost:{}/0")
-        .format(broker_port)
-        .split()
+        f"websecmap celery worker --loglevel=info --pool=gevent --concurrency=1 "
+        f"--broker redis://localhost:{broker_port}/0".split()
     )
 
     worker_process = subprocess.Popen(watchdog + worker_command, stdout=sys.stdout.buffer, stderr=sys.stderr.buffer)
@@ -148,7 +152,7 @@ class Command(RunserverCommand):
             try:
                 # docker should be installed, daemon should be configured and running
                 subprocess.check_call("docker info", shell=True, stdout=subprocess.DEVNULL)
-            except BaseException:
+            except BaseException:  # pylint: disable=broad-except
                 print(REDIS_INFO)
                 sys.exit(1)
 

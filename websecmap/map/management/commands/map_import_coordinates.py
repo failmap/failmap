@@ -56,9 +56,9 @@ class Command(BaseCommand):
             )
 
 
-def valid_date(s):
+def valid_date(string):
     try:
-        return datetime.strptime(s, "%Y-%m-%d")
+        return datetime.strptime(string, "%Y-%m-%d")
     except ValueError:
-        msg = "Not a valid date: '{0}'.".format(s)
+        msg = f"Not a valid date: '{string}'."
         raise ArgumentTypeError(msg)

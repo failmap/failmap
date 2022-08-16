@@ -94,10 +94,7 @@ def calculate_progress() -> List[Dict[str, int]]:
 
 def already_in_overview(overview, scanner, activity, state):
     return sum(
-        [
-            True if row["scanner"] == scanner and row["activity"] == activity and row["state"] == state else False
-            for row in overview
-        ]
+        [bool(row["scanner"] == scanner and row["activity"] == activity and row["state"] == state) for row in overview]
     )
 
 
@@ -182,7 +179,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     # Limit the total amount of picked up to being maximum of MAX_PICKED_UP_SIMULTANEOUSLY.
     headroom = max_picked_up_simultaneously - already_picked_up
     amount = amount if amount <= headroom else headroom
-    log.debug(f"Picking up maximum {amount} of total {headroom} free slots.")
+    log.debug("Picking up maximum {%s} of total {%s} free slots.", amount, headroom)
 
     # oldest first, so ascending dates.-> removed because that makes picking up very slow and complex.
     # whatever is requested should just be handled asap and the things that are requestes should just be empy
@@ -204,14 +201,14 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
         # scan still exists (weirdly enough). Even if there is an on delete cascade. We see that in issue 2424378050.
         try:
             # Use this debug message to retrieve the Url.DoesNotExist as django has to query the ID.
-            log.debug(f"Picking up scan {scan.id} with url id: {scan.url.id}.")
+            log.debug("Picking up scan {%s} with url id: {%s}.", scan.id, scan.url.id)
             urls.append(scan.url)
         except Url.DoesNotExist:
             # Delete this scan as the url id cannot be found, so it cannot be finished.
             log.error("Deleting a scan without an url. The scan will be deleted.", extra={"scan_id": scan.id})
             scan.delete()
 
-    log.debug(f"Picked up {len(urls)} to {activity} with {scanner}.")
+    log.debug("Picked up {%s} to {%s} with {%s}.", len(urls), activity, scanner)
     statsd.incr("scan_planned", len(urls), tags={"state": "pickup", "scanner": scanner, "activity": activity})
     return urls
 
@@ -224,7 +221,7 @@ def request(activity: str, scanner: str, urls: List[int]):
     for url in urls:
         if already_requested(activity, scanner, url):
             statsd.incr("scan_planned", tags={"state": "duplicate_request", "scanner": scanner, "activity": activity})
-            log.debug(f"Already registered: {activity} on {scanner} for {url}.")
+            log.debug("Already registered: {%s} on {%s} for {%s}.", activity, scanner, url)
             continue
 
         now = datetime.now(pytz.utc)
@@ -244,7 +241,7 @@ def request(activity: str, scanner: str, urls: List[int]):
         ps.save()
         statsd.incr("scan_planned", tags={"state": "request", "scanner": scanner, "activity": activity})
 
-    log.debug(f"Requested {activity} with {scanner} on {len(urls)} urls.")
+    log.debug("Requested {%s} with {%s} on {%s} urls.", activity, scanner, len(urls))
 
 
 def already_requested(activity: str, scanner: str, url_id: int):
@@ -283,9 +280,9 @@ def set_scan_state(activity: str, scanner: str, url_id: int, state="finished"):
         oldest_scan.finished_at_when = datetime.now(pytz.utc)
         oldest_scan.save()
 
-        log.debug(f"Altered planned scan state for {url_id}. Changing it to {activity} with {scanner}.")
+        log.debug("Altered planned scan state for {%s}. Changing it to {%s} with {%s}.", url_id, activity, scanner)
     else:
-        log.debug(f"No planned scan found for {url_id}. Ignored.")
+        log.debug("No planned scan found for {%s}. Ignored.", url_id)
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
@@ -402,13 +399,13 @@ def deduplicate_plan(planned_items):
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_outdated_scans(published_scan_types):
     for map_configuration in filter_map_configs():
-        log.debug(f"Retrieving outdated scans from config: {map_configuration}.")
+        log.debug("Retrieving outdated scans from config: {%s}.", map_configuration)
 
         organizations_on_map = Organization.objects.all().filter(
             country=map_configuration["country"], type=map_configuration["organization_type"]
         )
 
-        log.debug(f"There are {len(organizations_on_map)} organizations on this map.")
+        log.debug("There are {%s} organizations on this map.", len(organizations_on_map))
 
         # Outdated is earlier than the map_health says something is outdated. Otherwise we're always
         # one day behind with scans, and thus is always something outdated.
@@ -462,4 +459,4 @@ def plan_outdated_scans(published_scan_types):
         for item in clean_plan_with_urls:
             request(item["activity"], item["scanner"], [item["url"]])
 
-        log.debug(f"Planned {len(clean_plan_with_urls)} scans / verify and discovery tasks.")
+        log.debug("Planned {%s} scans / verify and discovery tasks.", len(clean_plan_with_urls))

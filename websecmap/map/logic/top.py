@@ -4,7 +4,7 @@ from math import ceil
 from django.db import connection
 from django.utils import timezone
 
-from websecmap.map.logic.map_defaults import get_country, get_organization_type, get_when, remark
+from websecmap.map.logic.map_defaults import get_country, get_organization_type, get_when, REMARK
 
 log = logging.getLogger(__name__)
 
@@ -140,7 +140,7 @@ def rows_to_dataset(rows, when):
             "type": "toplist",
             "render_date": timezone.now(),
             "data_from_time": when,
-            "remark": remark,
+            "remark": REMARK,
         },
         "ranking": [],
     }

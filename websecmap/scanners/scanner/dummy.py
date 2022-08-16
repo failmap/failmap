@@ -77,7 +77,7 @@ def compose_scan_task(urls):
     """
     endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
     endpoints = unique_and_random(endpoints)
-    log.info(f"Creating dummy scan task for {len(endpoints)} endpoints ")
+    log.info("Creating dummy scan task for {%s} endpoints ", len(endpoints))
 
     # remove urls that don't have the relevant endpoints anymore
     for url_id in urls_without_endpoints:
@@ -150,7 +150,7 @@ def store(result, endpoint_id):
     message_result_ok = "Because the result was True"
     message_result_false = "Because the result was False"
 
-    log.debug(f"Storing result: {result}, for endpoint: {endpoint_id}.")
+    log.debug("Storing result: {%s}, for endpoint: {%s}.", result, endpoint_id)
 
     # You can save any (string) value and any (string) message.
     # The EndpointScanManager deduplicates the data for you automatically.
@@ -193,7 +193,7 @@ def scan(self, uri_url):
 
     """
     try:
-        log.info(f"Start scanning {uri_url}")
+        log.info("Start scanning {%s}", uri_url)
 
         # Tools and output for this scan are registered in /failmap/settings.py
         # We prefer tools written in python, limiting the amount of dependencies used in the project.
@@ -208,7 +208,7 @@ def scan(self, uri_url):
         # mytool = settings.TOOLS['youtool']['executable']
         # Below demonstrates the usage of settings.
         sample_settings_usage = len(settings.TOOLS)
-        log.debug(f"{sample_settings_usage} are registered.")
+        log.debug("{%s} are registered.", sample_settings_usage)
 
         # simulation: sometimes a task fails, for example with network errors etcetera. The task will be retried.
         if not random.randint(0, 5):
@@ -220,7 +220,7 @@ def scan(self, uri_url):
         # simulation: the result can be different
         result = bool(random.randint(0, 1))
 
-        log.info(f"Done scanning: {uri_url}, result: {result}")
+        log.info("Done scanning: {%s}, result: {%s}", uri_url, result)
         return result
     except SomeError as e:
         # If an expected error is encountered put this task back on the queue to be retried.

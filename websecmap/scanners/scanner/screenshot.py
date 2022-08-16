@@ -101,9 +101,9 @@ def compose_scan_task(urls):
     v4_service = config.SCREENSHOT_API_URL_V4
     v6_service = config.SCREENSHOT_API_URL_V6
 
-    log.info(f"Trying to make {len(endpoints)} screenshots.")
-    log.info(f"Screenshots will be stored at: {settings.MEDIA_ROOT}screenshots/")
-    log.info(f"IPv4 screenshot service: {v4_service}, IPv6 screenshot service: {v6_service}")
+    log.info("Trying to make {%s} screenshots.", len(endpoints))
+    log.info("Screenshots will be stored at: {%s}screenshots/", settings.MEDIA_ROOT)
+    log.info("IPv4 screenshot service: {%s}, IPv6 screenshot service: {%s}", v4_service, v6_service)
     tasks = [
         make_screenshot.si(v4_service, endpoint.uri_url()) | save_screenshot.s(endpoint.id)
         for endpoint in endpoints
@@ -123,10 +123,10 @@ def compose_scan_task(urls):
 def make_screenshot(service: str, endpoint_url: str):
     try:
         return make_screenshot_with_u2p(service, endpoint_url)
-    except (ConnectionError, TimeoutError) as e:
-        return e
-    except Exception as e:
-        return e
+    except (ConnectionError, TimeoutError) as my_exception:
+        return my_exception
+    except Exception as my_exception:
+        return my_exception
 
 
 @timeout(20, "Took too long to make screenshot.")
@@ -152,23 +152,23 @@ def save_screenshot(response, endpoint_id):
     # it might receive an exception, or "False" when there is no image data due to errors.
     if isinstance(response, TimeoutError):
         log.debug(
-            f"Received exception at save screenshot, not saving. Probably took too long to paint page due to"
-            f"a too complex page or a terribly slow server. This is business as usual. Details: {response}"
+            "Received exception at save screenshot, not saving. Probably took too long to paint page due to"
+            "a too complex page or a terribly slow server. This is business as usual. Details: {%s}", response
         )
         return False
 
     if isinstance(response, Exception):
         log.exception(
-            f"Received unexpected exception at save screenshot, not saving. "
-            f"Is the screenshot service available at this address? Details: {response}"
+            "Received unexpected exception at save screenshot, not saving. "
+            "Is the screenshot service available at this address? Details: {%s}", response
         )
         return False
 
     # with an invalid / non-resolvable address, a 500 error is given by the image service.
     if response.status_code == 500:
         log.debug(
-            f"Received 500 at the API from {endpoint_id}, url probably does not resolve. "
-            f"This is business as usual. Not saving."
+            "Received 500 at the API from {%s}, url probably does not resolve. "
+            "This is business as usual. Not saving.", endpoint_id
         )
         return False
 
@@ -178,7 +178,7 @@ def save_screenshot(response, endpoint_id):
         i.thumbnail(size, Image.ANTIALIAS)
         filename = f"{settings.MEDIA_ROOT}screenshots/{endpoint_id}_latest.png"
         i.save(filename, "PNG")
-        log.debug(f"Image saved as: {filename}.")
+        log.debug("Image saved as: {%s}.", filename)
 
         scr = Screenshot()
         scr.created_on = datetime.now(pytz.utc).date()
@@ -186,6 +186,6 @@ def save_screenshot(response, endpoint_id):
         scr.image = File(open(filename, "rb"))
         scr.filename = filename
         scr.save()
-        log.debug(f"Saved in databased as id:{scr.pk} filename:{scr.filename}.")
+        log.debug("Saved in databased as id:{%s} filename:{%s}.", scr.pk, scr.filename)
     except Exception as e:
         log.exception(e)

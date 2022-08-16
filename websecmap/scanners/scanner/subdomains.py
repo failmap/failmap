@@ -67,7 +67,7 @@ def compose_planned_discover_task(**kwargs):
 def compose_manual_discover_task(organizations_filter: dict = None, urls_filter: dict = None, **kwargs):
     organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
-    log.info(f"Discovering subdomains on {len(urls)} urls.")
+    log.info("Discovering subdomains on %s urls.", len(urls))
     return compose_discover_task(urls)
 
 
@@ -118,7 +118,7 @@ def compose_manual_verify_task(
 
     # instead of only checking by domain, just accept the filters as they are handled in any other scenario...
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    log.info(f"Will verify subdomain resolvability via DNS on {len(urls)} urls")
+    log.info("Will verify subdomain resolvability via DNS on %s urls", len(urls))
 
     return compose_verify_task(urls)
 

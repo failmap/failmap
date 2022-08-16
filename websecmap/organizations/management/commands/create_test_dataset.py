@@ -78,7 +78,7 @@ class Command(DumpDataCommand):
         objects += EndpointGenericScan.objects.all().filter(endpoint__in=endpoints)
         objects += UrlGenericScan.objects.all().filter(url__in=urls)
 
-        with open(filename, "w") as f:
-            f.write(serialize(self.FORMAT, objects))
+        with open(filename, "w", encoding="utf-8") as file_handle:
+            file_handle.write(serialize(self.FORMAT, objects))
 
         log.info("Wrote %s", filename)

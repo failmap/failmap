@@ -83,7 +83,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
 def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    log.info(f"Creating DNSSEC scan task for {len(urls)} urls.")
+    log.info("Creating DNSSEC scan task for {%s} urls.", len(urls))
     plannedscan.request(activity="scan", scanner="dnssec", urls=urls)
 
 
@@ -135,7 +135,7 @@ def store_dnssec(result: List[str], url_id: int):
         return ParentFailed("skipping result parsing because scan failed.", cause=result)
 
     # relevant helps to store the minimum amount of information.
-    level, relevant = analyze_result(result)
+    level, _ = analyze_result(result)
 
     # Messages are translated for display. Add the exact messages in: /failmap/map/static/js/script.js
     # Run "failmap translate" to have the messages added to:

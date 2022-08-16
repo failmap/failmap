@@ -100,7 +100,7 @@ def filter_discover(organizations_filter: dict = None, urls_filter: dict = None,
 
     if organizations_filter:
         organizations = Organization.objects.filter(**organizations_filter).only("id")
-        log.info(f"Organization filter applied with {len(organizations)} organizations.")
+        log.info("Organization filter applied with {%s} organizations.", len(organizations))
 
         urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter).only(
             "id", "url"
@@ -111,7 +111,7 @@ def filter_discover(organizations_filter: dict = None, urls_filter: dict = None,
 
     # make sure all urls are unique (some are shared between organizations, or a custom query might dupe them)
     urls = unique_and_random(urls)
-    log.info(f"Discovering HTTP endpoints for {len(urls)} urls.")
+    log.info("Discovering HTTP endpoints for {%s} urls.", len(urls))
 
     return urls
 
@@ -242,7 +242,7 @@ def compose_verify_task(urls):
         for endpoint in endpoints
     )
 
-    log.info(f"Verifying {len(endpoints)} http/https endpoints.")
+    log.info("Verifying {%s} http/https endpoints.", len(endpoints))
 
     return tasks
 
@@ -300,8 +300,8 @@ def get_ipv6(url: str):
         # six to four addresses make no sense
         if str(ipv6).startswith("::ffff:"):
             log.debug(
-                f"Six-to-Four address {ipv6} discovered on {url}, did you configure IPv6 connectivity correctly? "
-                "Removing this IPv6 address from result to prevent database pollution."
+                "Six-to-Four address {%s} discovered on {%s}, did you configure IPv6 connectivity correctly? "
+                "Removing this IPv6 address from result to prevent database pollution.", ipv6, url
             )
             ipv6 = ""
         else:
@@ -468,7 +468,7 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> Di
             log.debug("%s: Host: %s Status: %s", uri, url, my_request.status_code)
             return connection_answer(True, None)
 
-        log.debug("No status code.", url)
+        log.debug("No status code. %s ", url)
         # probably never reached, exception thrown when no status code is present
         return connection_answer(True, "no_http_status_code")
     except (ConnectTimeout, Timeout, ReadTimeout) as my_exception:
@@ -481,7 +481,7 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> Di
         strerror = str(my_exception.args)  # Cast whatever we get back to a string. Instead of trace.
         has_acceptable_error = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
         if has_acceptable_error:
-            log.debug(f"There is a server, but could not communicate directly: {strerror}")
+            log.debug("There is a server, but could not communicate directly: {%s}", strerror)
             return connection_answer(True, my_exception)
 
         # No acceptable answer? Try a normal connection:
@@ -509,7 +509,7 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> Di
             strerror = str(sub_ex.args)
             has_acceptable_error = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
             if has_acceptable_error:
-                log.debug(f"There is a server, but could not communicate directly: {strerror}")
+                log.debug("There is a server, but could not communicate directly: {%s}", strerror)
                 return connection_answer(True, sub_ex)
 
             return connection_answer(False, sub_ex)
@@ -534,13 +534,14 @@ def pretty_print_request(req):
     printed and may differ from the actual request.
     """
     print(
-        "{}\n{}\n{}\n\n{}".format(
+        "{}\n{}\n{}\n\n{}".format(  # pylint: disable=consider-using-f-string
             "-----------START-----------",
             req.method + " " + req.url,
             "\n".join("{}: {}".format(k, v) for k, v in req.headers.items()),
             req.body,
         )
     )
+    # disabled consider-using-f-string because you can't use backslash statements in f-strings
 
 
 @app.task(queue="storage")
@@ -570,14 +571,14 @@ def resolves(url: str):
 
 
 def resolves_on_v4(url: str):
-    (ip4, ip6) = get_ips(url)
+    (ip4, _) = get_ips(url)
     if ip4:
         return True
     return False
 
 
 def resolves_on_v6(url: str):
-    (ip4, ip6) = get_ips(url)
+    (_, ip6) = get_ips(url)
     if ip6:
         return True
     return False
@@ -618,7 +619,6 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
         log.info("Added endpoint added to database: %s", endpoint)
     else:
         log.debug("Endpoint based on parameters was already in database.")
-    return
 
 
 @app.task(queue="storage")
@@ -687,16 +687,16 @@ def store_url_ips(url: int, ips):
 
 
 @timeout(RDNS_TIMEOUT)
-def get_rdns_name(ip):
+def get_rdns_name(ip_address):
     reverse_name = ""
     try:
-        reverse_name = socket.gethostbyaddr(ip)
+        reverse_name = socket.gethostbyaddr(ip_address)
     except (TimeoutError, socket.herror):
         # takes too long
         # host doesn't exist / unknown host
         pass
-    except BaseException as e:
-        log.error("Unknown rdns failure %s on ip %s", str(e), ip)
+    except BaseException as my_exception:
+        log.error("Unknown rdns failure %s on ip %s", str(my_exception), ip_address)
 
     return reverse_name
 
@@ -728,13 +728,13 @@ def check_network(code_location=""):
     :return:
     """
 
-    log.info(f"Testing network connection via {code_location}.")
+    log.info("Testing network connection via {%s}.", code_location)
 
-    log.info(f"IPv4 is enabled via configuration: {settings.NETWORK_SUPPORTS_IPV4}")
-    log.info(f"IPv6 is enabled via configuration: {settings.NETWORK_SUPPORTS_IPV6}")
+    log.info("IPv4 is enabled via configuration: {%s}", settings.NETWORK_SUPPORTS_IPV4)
+    log.info("IPv6 is enabled via configuration: {%s}", settings.NETWORK_SUPPORTS_IPV6)
 
-    can_ipv4 = can_connect("https", "faalkaart.nl", 443, 4)
-    can_ipv6 = can_connect("https", "faalkaart.nl", 443, 6)
+    can_ipv4 = can_connect(None, "https", "faalkaart.nl", 443, 4)
+    can_ipv6 = can_connect(None, "https", "faalkaart.nl", 443, 6)
 
     if not can_ipv4["result"] or not can_ipv6["result"]:
         raise ConnectionError(
@@ -746,7 +746,7 @@ def check_network(code_location=""):
             f"IPv6 Error: {can_ipv6['error']}"
         )
 
-    log.info(f"Network could be reached could be reached via {code_location}")
+    log.info("Network could be reached could be reached via {%s}", code_location)
 
 
 def redirects_to_safety(url: str):
@@ -759,8 +759,6 @@ def redirects_to_safety(url: str):
     :param endpoint:
     :return:
     """
-    import requests
-    from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
     # A feature of requests is to send any headers you've sent when there are redirects.
     # This becomes problematic when you set the Host header. This prevents
@@ -788,9 +786,9 @@ def redirects_to_safety(url: str):
         if response.history:
             log.debug("Request was redirected, there is hope. Redirect path:")
             for index, resp in enumerate(response.history):
-                log.debug(f"- Redirect {index}: {resp.url}.")
+                log.debug("- Redirect {%s}: {%s}.", index, resp.url)
             log.debug("Final destination:")
-            log.debug(f"{response.status_code}: {response.url}")
+            log.debug("{%s}: {%s}", response.status_code, response.url)
 
             if response.url.startswith("https://"):
                 log.debug("Url starts with https, so it redirects to safety.")
@@ -807,9 +805,9 @@ def redirects_to_safety(url: str):
         Timeout,
         ConnectionError,
         requests.exceptions.TooManyRedirects,
-    ) as e:
+    ) as my_exception:
         log.debug("Request resulted into an error, it's not redirecting properly.")
-        log.debug(f"The error retrieved was: {e}")
+        log.debug("The error retrieved was: {%s}", my_exception)
         return False
 
 

@@ -123,8 +123,8 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
     :return:
     """
 
-    log.info(f"Countries: {countries}")
-    log.info(f"Region(s): {organization_types}")
+    log.info("Countries: {%s}", countries)
+    log.info("Region(s): {%s}", organization_types)
 
     if not countries or countries == [None]:
         countries = ["NL"]
@@ -188,7 +188,7 @@ def store_import_message(country, organization_type, message):
     # Note, that AdministrativeRegion is written to an old copy of this object in the task chain
     # after import is performed. Therefore explicitly set the update field, so not to lose other data.
 
-    log.debug(f"Update message received for ({country}/{organization_type}): {message}")
+    log.debug("Update message received for ({%s}/{%s}): {%s}", country, organization_type, message)
 
     region = AdministrativeRegion.objects.filter(country=country, organization_type__name=organization_type).first()
 
@@ -202,13 +202,13 @@ def update_coordinates(countries: List[str] = None, organization_types: List[str
 
     if not osmtogeojson_available():
         raise FileNotFoundError(
-            "osmtogeojson was not found. Please install it and make sure python can access it. " "Cannot continue."
+            "osmtogeojson was not found. Please install it and make sure python can access it. Cannot continue."
         )
 
     for country in sorted(countries):
         for organization_type in sorted(organization_types):
 
-            log.info(f"Attempting to update coordinates for: {country} {organization_type}.")
+            log.info("Attempting to update coordinates for: {%s} {%s}.", country, organization_type)
 
             # you are about to load 50 megabyte of data. Or MORE! :)
             try:
@@ -221,7 +221,7 @@ def update_coordinates(countries: List[str] = None, organization_types: List[str
                 store_import_message.apply_async([country, organization_type, ex])
                 return
 
-            log.info(f"Received coordinate data. Starting with: {json.dumps(data)[0:200]}")
+            log.info("Received coordinate data. Starting with: {%s}", json.dumps(data)[0:200])
 
             log.info("Parsing features:")
             for index, feature in enumerate(data["features"]):
@@ -237,11 +237,10 @@ def update_coordinates(countries: List[str] = None, organization_types: List[str
                 # slower, but in a task. Still atomic this way.
                 resolution = get_resampling_resolution(country, organization_type)
                 store_updates(resample(feature, resolution), country, organization_type, when)
-                message = "Updated %s of %s. %s%% (Currently: %s)" % (
-                    index + 1,
-                    len(data["features"]),
-                    round(((index + 1) / len(data["features"])) * 100, 2),
-                    feature["properties"]["name"],
+                message = (
+                    f"Updated {index + 1} of {len(data['features'])}. "
+                    f"{round(((index + 1) / len(data['features'])) * 100, 2)}% "
+                    f"(Currently: {feature['properties']['name']})"
                 )
                 store_import_message(country, organization_type, message)
 
@@ -254,7 +253,7 @@ def resample(feature: Dict, resampling_resolution: float = 0.001):
     # downsample the coordinates using the rdp algorithm, mainly to reduce 50 megabyte to a about 150 kilobytes.
     # The code is a little bit dirty, using these counters. If you can refactor, please do :)
 
-    log.info(f"Resampling path for {feature['properties']['name']}")
+    log.info("Resampling path for {%s}", feature['properties']['name'])
 
     if feature["geometry"]["type"] == "Polygon":
         log.debug("Original length: %s", len(feature["geometry"]["coordinates"][0]))
@@ -321,7 +320,8 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
                 iso3316_2_country_code = iso3316_2_country_code[0:2]
 
         if iso3316_2_country_code and country.upper() != iso3316_2_country_code.upper():
-            log.debug(f"According to wikidata the imported region is not in {country} but in {iso3316_2_country_code}.")
+            log.debug("According to wikidata the imported region is not in {%s} but in {%s}.",
+                      country, iso3316_2_country_code)
             log.debug("Going to save the region under the new country. You probably got too much data back from OSM")
             country = iso3316_2_country_code.upper()
 
@@ -331,7 +331,7 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
         .filter(name=name, country=country, type__name=organization_type, is_dead=False)
         .exists()
     ):
-        log.debug(f"Organization {name} exists in country {country} and type {organization_type}, skipping.")
+        log.debug("Organization {%s} exists in country {%s} and type {%s}, skipping.", name, country, organization_type)
         return
 
     new_organization = Organization(
@@ -353,7 +353,7 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
         area=coordinates["coordinates"],
     )
     new_coordinate.save()
-    log.info(f"Saved new coordinate: {new_coordinate}")
+    log.info("Saved new coordinate: {%s}", new_coordinate)
 
     # try to find official urls for this organization, as it's empty now. All those will then be onboarded and scanned.
     if wikidata_code:
@@ -485,12 +485,12 @@ def add_official_websites(organization, wikidata_code):
         if extract.subdomain:
             organization.add_url(f"{extract.subdomain}.{extract.domain}.{extract.suffix}")
         organization.add_url(f"{extract.domain}.{extract.suffix}")
-        log.debug(f"Added URL {website}. If it contained 'www', also without 'www'.")
+        log.debug("Added URL {%s}. If it contained 'www', also without 'www'.", website)
 
 
 def get_data_from_wambachers_zipfile(filename):
-    with gzip.open(filename, "rt") as f:
-        return json.loads(f.read())
+    with gzip.open(filename, "rt") as file_handle:
+        return json.loads(file_handle.read())
 
 
 def get_osm_data_wambachers(country: str = "NL", organization_type: str = "municipality"):
@@ -531,7 +531,7 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
     filename = create_evil_filename([country, organization_type, str(timezone.now().date())], "zip")
     filename = settings.TOOLS["openstreetmap"]["output_dir"] + filename
 
-    log.debug(f"Saving data to {filename}")
+    log.debug("Saving data to {%s}", filename)
 
     # if the file has been downloaded recently, don't do that again.
     four_hours_ago = time.time() - 14400
@@ -567,14 +567,14 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
     response.raise_for_status()
 
     # show a nice progress bar when downloading
-    with open(filename, "wb") as f:
+    with open(filename, "wb") as file_handle:
         i = 0
         for block in response.iter_content(chunk_size=1024):
             i += 1
             print_progress_bar(i, 100000, "Wambacher OSM data")
             if block:
-                f.write(block)
-                f.flush()
+                file_handle.write(block)
+                file_handle.flush()
 
     # unzip the file and return it's geojson contents.
     return get_data_from_wambachers_zipfile(filename)
@@ -834,8 +834,8 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
     four_hours_ago = time.time() - 14400
     if os.path.isfile(filename + ".polygons") and four_hours_ago < os.path.getmtime(filename):
         log.debug("Already downloaded a coordinate file in the past four hours. Using that one.")
-        log.debug(filename + ".polygons")
-        return json.load(open(filename + ".polygons"))
+        log.debug("%s.polygons", filename)
+        return json.load(open(filename + ".polygons", encoding="utf-8"))
 
     """
         The overpass query interface can be found here: https://overpass-turbo.eu/
@@ -870,7 +870,7 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
 
     response.raise_for_status()
 
-    with open(filename, "wb") as f:
+    with open(filename, "wb", encoding="utf-8") as file_handle:
         # total_length = int(response.headers.get('content-length'))
         # we don't get a content length from the api. So, "just" do something to show some progress...
         # {'Date': 'Tue, 20 Mar 2018 09:58:11 GMT', 'Server': 'Apache/2.4.18 (Ubuntu)', 'Vary': 'Accept-Encoding',
@@ -883,8 +883,8 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
             i += 1
             print_progress_bar(i, 100000, " Generic OSM data")
             if block:
-                f.write(block)
-                f.flush()
+                file_handle.write(block)
+                file_handle.flush()
 
     return osm_to_geojson(filename)
 
@@ -892,14 +892,14 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
 def osm_to_geojson(filename):
     log.info("Converting OSM file to polygons. This also can take a while...")
     try:
-        with open(filename + ".polygons", "w") as outfile:
+        with open(filename + ".polygons", "w", encoding="utf-8") as outfile:
             subprocess.call(["osmtogeojson", filename], stdout=outfile)
     except subprocess.CalledProcessError:
         log.exception("Error while converting to polygons.")
     except OSError:
         log.exception("osmtogeojson tool not found.")
 
-    return json.load(open(filename + ".polygons"))
+    return json.load(open(filename + ".polygons", encoding="utf-8"))
 
 
 def osmtogeojson_available():
@@ -910,8 +910,8 @@ def osmtogeojson_available():
             ["osmtogeojson", "tesfile.osm"],
             stderr=subprocess.STDOUT,
         )
-    except CalledProcessError as e:
-        if "no such file or directory, open 'tesfile.osm'" in str(e.output):
+    except CalledProcessError as my_exception:
+        if "no such file or directory, open 'tesfile.osm'" in str(my_exception.output):
             return True
 
         return False

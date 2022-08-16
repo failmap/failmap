@@ -79,11 +79,11 @@ def merge_endpoints_that_recently_died():
                 continue
 
             log.info(
-                f"Found identical endpoints for {dead_endpoint}. "
-                f"(created: {dead_endpoint.discovered_on}, died: {dead_endpoint.is_dead_since})"
+                "Found identical endpoints for {%s}. (created: {%s}, died: {%s})",
+                dead_endpoint, dead_endpoint.discovered_on, dead_endpoint.is_dead_since
             )
-            for ep in identical_endpoints:
-                log.info("Identical: %s (created: %s, died: %s)", ep, ep.discovered_on, ep.is_dead_since)
+            for id_ep in identical_endpoints:
+                log.info("Identical: %s (created: %s, died: %s)", id_ep, id_ep.discovered_on, id_ep.is_dead_since)
 
             for identical_endpoint in identical_endpoints:
 

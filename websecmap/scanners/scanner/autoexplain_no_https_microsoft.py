@@ -86,11 +86,11 @@ def scan(scan_id):
         result = dns.resolver.resolve(endpoint_generic_scan.endpoint.url.url, "CNAME")
         for cnameval in result:
             # don't accept trickery such as autodiscover.outlook.com.mydomain.com.
-            log.debug(f"Retrieved cname value: {cnameval}.")
+            log.debug("Retrieved cname value: {%s}.", cnameval)
             if "autodiscover.outlook.com." == str(cnameval):
                 log.debug("Perfect match, will add automatic explanation.")
                 add_bot_explanation(endpoint_generic_scan, EXPLANATION, timedelta(days=365 * 10))
     except dns.exception.DNSException as e:
-        log.debug(f"Received an expectable error from dns server: {e}.")
+        log.debug("Received an expectable error from dns server: {%s}.", e)
         # can happen of course.
         # sample: dns.resolver.NXDOMAIN, dns.exception.Timeout, dns.resolver.NoAnswer, dns.query.BadResponse

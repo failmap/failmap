@@ -39,12 +39,12 @@ class Command(BaseCommand):
 
         for app in apps:
             contents += f"## {app}" + os.linesep
-            contents += "![Data Model](data_model/%s_models.png)" % app + os.linesep
+            contents += f"![Data Model](data_model/{app}_models.png)" + os.linesep
             contents += "" + os.linesep
 
         contents += "## All in one" + os.linesep
         contents += "![Data Model](data_model/failmap_models.png)" + os.linesep
         contents += "" + os.linesep
 
-        with open("docs/source/topics/development/data_model.md", "w") as text_file:
+        with open("docs/source/topics/development/data_model.md", "w", encoding="utf-8") as text_file:
             text_file.write(contents)

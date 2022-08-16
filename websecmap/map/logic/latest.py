@@ -4,7 +4,7 @@ from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.db.models import Count, Q
 from django.utils import timezone
 
-from websecmap.map.logic.map_defaults import get_country, get_organization_type, remark
+from websecmap.map.logic.map_defaults import get_country, get_organization_type, REMARK
 from websecmap.map.report import PUBLISHED_ENDPOINT_SCAN_TYPES, PUBLISHED_URL_SCAN_TYPES
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
@@ -15,7 +15,7 @@ def get_all_latest_scans(country, organization_type):
     dataset = {
         "scans": defaultdict(list),
         "render_date": timezone.now().isoformat(),
-        "remark": remark,
+        "remark": REMARK,
     }
 
     filtered_organization_type = get_organization_type(organization_type)

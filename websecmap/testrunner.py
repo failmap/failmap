@@ -11,6 +11,7 @@ class PytestTestRunner(DiscoverRunner):
         self.failfast = failfast
         self.keepdb = keepdb
         self.pdb = pdb
+        super().__init__()
 
     @classmethod
     def add_arguments(cls, parser):

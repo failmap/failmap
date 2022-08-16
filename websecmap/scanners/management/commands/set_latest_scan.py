@@ -19,15 +19,15 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for scan_type in URL_SCAN_TYPES:
-            reflag_urlgenericscan(type=scan_type)
+            reflag_urlgenericscan(scan_type=scan_type)
 
         for scan_type in ENDPOINT_SCAN_TYPES:
-            reflag_endpointgenericscan(type=scan_type)
+            reflag_endpointgenericscan(scan_type=scan_type)
 
 
-def reflag_urlgenericscan(type):
-    log.debug("Setting flags on UrlGenericScan type: %s", type)
-    UrlGenericScan.objects.all().filter(type=type).update(is_the_latest_scan=False)
+def reflag_urlgenericscan(scan_type):
+    log.debug("Setting flags on UrlGenericScan type: %s", scan_type)
+    UrlGenericScan.objects.all().filter(type=scan_type).update(is_the_latest_scan=False)
 
     # get the latest scans
     sql = f"""
@@ -38,7 +38,7 @@ def reflag_urlgenericscan(type):
         FROM scanners_urlgenericscan
         INNER JOIN
             (SELECT MAX(id) as id2 FROM scanners_urlgenericscan egs2
-             WHERE last_scan_moment <= '{datetime.now(pytz.utc)}' and type = '{type}' GROUP BY url_id
+             WHERE last_scan_moment <= '{datetime.now(pytz.utc)}' and type = '{scan_type}' GROUP BY url_id
              ) as x
         ON x.id2 = scanners_urlgenericscan.id
     """
@@ -46,9 +46,9 @@ def reflag_urlgenericscan(type):
     updatescans(UrlGenericScan.objects.raw(sql))
 
 
-def reflag_endpointgenericscan(type):
-    log.debug("Setting flags on EndpointGenericScan type: %s", type)
-    EndpointGenericScan.objects.all().filter(type=type).update(is_the_latest_scan=False)
+def reflag_endpointgenericscan(scan_type):
+    log.debug("Setting flags on EndpointGenericScan type: %s", scan_type)
+    EndpointGenericScan.objects.all().filter(type=scan_type).update(is_the_latest_scan=False)
 
     # get the latest endpointgenericscans
     sql = f"""
@@ -59,7 +59,7 @@ def reflag_endpointgenericscan(type):
         FROM scanners_endpointgenericscan
         INNER JOIN
             (SELECT MAX(id) as id2 FROM scanners_endpointgenericscan egs2
-             WHERE last_scan_moment <= '{datetime.now(pytz.utc)}' and type = '{type}' GROUP BY endpoint_id
+             WHERE last_scan_moment <= '{datetime.now(pytz.utc)}' and type = '{scan_type}' GROUP BY endpoint_id
              ) as x
         ON x.id2 = scanners_endpointgenericscan.id
     """

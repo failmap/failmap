@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        with open("websecmap/organizations/fixtures/testdata.yaml", "r") as yaml_in, open(
+        with open("websecmap/organizations/fixtures/testdata.yaml", "r", encoding="utf-8") as yaml_in, open(
             "websecmap/organizations/fixtures/testdata.json", "w"
         ) as json_out:
 
@@ -36,7 +36,7 @@ def json_serial(obj):
         return AMSTERDAM.localize(obj).isoformat()
 
     if isinstance(obj, date):
-        dt = datetime.combine(obj, datetime.min.time())
-        return AMSTERDAM.localize(dt).date().isoformat()
+        my_dt = datetime.combine(obj, datetime.min.time())
+        return AMSTERDAM.localize(my_dt).date().isoformat()
 
     return obj

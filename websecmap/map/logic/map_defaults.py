@@ -24,7 +24,7 @@ COUNTRIES = iso3166.countries_by_alpha2
 # the data in this system is as open as possible.
 
 
-remark = "Get the code and all data from our gitlab repo: https://gitlab.com/internet-cleanup-foundation/"
+REMARK = "Get the code and all data from our gitlab repo: https://gitlab.com/internet-cleanup-foundation/"
 DEFAULT_COUNTRY = "NL"
 DEFAULT_LAYER = "municipality"
 
@@ -136,12 +136,12 @@ def get_countries():
         .values_list("country", flat=True)
     )
 
-    list = []
+    my_list = []
     for conf in confs:
-        if conf not in list:
-            list.append(conf)
+        if conf not in my_list:
+            my_list.append(conf)
 
-    return list
+    return my_list
 
 
 def get_layers(country: str = "NL"):

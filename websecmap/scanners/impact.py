@@ -82,7 +82,7 @@ def calculate_impact():
             "good": {"high": 0, "medium": 0, "low": 0, "good": 0},
         }
     # count down id's, so there is some feeling on how long it will take.
-    log.debug(f"Calculating impact for country: {config.PROJECT_COUNTRY}.")
+    log.debug("Calculating impact for country: {%s}.", config.PROJECT_COUNTRY)
     # do not take endpoints that are "switching" on and off, only alive endpoints and urls
     all_endpoints = (
         Endpoint.objects.all()
@@ -181,11 +181,11 @@ def get_impact(severity):
 
 def is_improved(first_scan, last_scan):
     if first_scan == "high":
-        return True if last_scan in ["medium", "low", "good"] else False
+        return last_scan in ["medium", "low", "good"]
     if first_scan == "medium":
-        return True if last_scan in ["low", "good"] else False
+        return last_scan in ["low", "good"]
     if first_scan == "low":
-        return True if last_scan in ["good"] else False
+        return last_scan in ["good"]
     if first_scan == "good" and last_scan != "good":
         return False
 

@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from django.core.management.base import BaseCommand
 
@@ -20,7 +21,7 @@ class Command(BaseCommand):
 
         if not options["url_addresses"]:
             print("Specify url using -u. timeline -u example.com")
-            exit()
+            sys.exit()
 
         # create a case-insensitive filter to match organizations by name
         regex = "^(" + "|".join(options["url_addresses"]) + ")$"

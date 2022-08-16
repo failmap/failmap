@@ -94,11 +94,11 @@ def compose_manual_scan_task(
 def compose_scan_task(urls):
     endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
     endpoints = unique_and_random(endpoints)
-    log.debug(f"Scanning security headers on {len(endpoints)} endpoints, {len(urls)} urls")
+    log.debug("Scanning security headers on {%s} endpoints, {%s} urls", len(endpoints), len(urls))
 
     # remove urls that don't have the relevant endpoints anymore
     for url_id in urls_without_endpoints:
-        log.debug(f"Finishing scan on {url_id} because there are no valid endpoints anymore.")
+        log.debug("Finishing scan on {%s} because there are no valid endpoints anymore.", url_id)
         plannedscan.finish("scan", "security_headers", url_id)
 
     tasks = []
@@ -484,9 +484,9 @@ def get_headers_request(uri_url: str) -> CaseInsensitiveDict:
     # redirects are followed, this gives an indication on how many redirects are followed, and what url the
     # headers are taken from:
     for index, resp in enumerate(response.history):
-        log.debug(f"- Redirect {index}: {resp.url}.")
+        log.debug("- Redirect {%s}: {%s}.", index, resp.url)
 
-    log.debug(f"- You are now at {response.url}.")
+    log.debug("- You are now at {%s}.", response.url)
 
     # Removed: only continue for valid responses (eg: 200)
     # Error pages, such as 404 are super fancy, with forms and all kinds of content.

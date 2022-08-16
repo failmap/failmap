@@ -21,8 +21,8 @@ class Command(BaseCommand):
 
         try:
             if options["id"]:
-                for id in options["id"]:
-                    proxy = ScanProxy.objects.all().filter(id=id).first()
+                for option_id in options["id"]:
+                    proxy = ScanProxy.objects.all().filter(id=option_id).first()
                     if proxy:
                         check_proxy(proxy)
             else:

@@ -63,23 +63,23 @@ def store_wildcard(result: bool, url_id: int):
     try:
         url = Url.objects.all().get(id=url_id)
     except Url.DoesNotExist:
-        log.debug(f"Url {url_id} does not exist anymore. Not doing anything")
+        log.debug("Url {%s} does not exist anymore. Not doing anything", url_id)
         return
 
     # see if we need to do anything, if not, that saves a database operation. Reading is faster than writing.
     if url.uses_dns_wildcard and result:
-        log.debug(f"No change in wildcard result on {url}. Wildcard stays enabled.")
+        log.debug("No change in wildcard result on {%s}. Wildcard stays enabled.", url)
         return
 
     if not url.uses_dns_wildcard and not result:
-        log.debug(f"No change in wildcard result on {url}. Wildcard stays disabled.")
+        log.debug("No change in wildcard result on {%s}. Wildcard stays disabled.", url)
         return
 
     if result:
-        log.debug(f"Wildcard discovered on {url}.")
+        log.debug("Wildcard discovered on {%s}.", url)
         url.uses_dns_wildcard = True
         url.save()
     else:
-        log.debug(f"Wildcard removed on {url}.")
+        log.debug("Wildcard removed on {%s}.", url)
         url.uses_dns_wildcard = False
         url.save()

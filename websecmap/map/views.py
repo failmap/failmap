@@ -61,11 +61,11 @@ from websecmap.scanners.models import Screenshot
 
 log = logging.getLogger(__package__)
 
-one_minute = 60
-one_hour = 60 * 60
-four_hours = 60 * 60 * 4
-one_day = 24 * 60 * 60
-ten_minutes = 60 * 10
+ONE_MINUTE = 60
+ONE_HOUR = 60 * 60
+FOUR_HOURS = 60 * 60 * 4
+ONE_DAY = 24 * 60 * 60
+TEN_MINUTES = 60 * 10
 
 DEFAULT_FILE_FORMAT = "json"
 
@@ -101,7 +101,7 @@ def layers(request, country):
     return JsonResponse(get_layers(country), encoder=JSEncoder, safe=False)
 
 
-@cache_page(one_day)
+@cache_page(ONE_DAY)
 def export_urls_only(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, file_format: str = DEFAULT_FILE_FORMAT
 ):
@@ -111,7 +111,7 @@ def export_urls_only(
     return generic_download(filename, data, file_format)
 
 
-@cache_page(one_day)
+@cache_page(ONE_DAY)
 def export_organizations(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, file_format: str = DEFAULT_FILE_FORMAT
 ):
@@ -120,7 +120,7 @@ def export_organizations(
     return generic_download(filename, data, file_format)
 
 
-@cache_page(one_day)
+@cache_page(ONE_DAY)
 def export_organization_types(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, file_format: str = DEFAULT_FILE_FORMAT
 ):
@@ -129,7 +129,7 @@ def export_organization_types(
     return generic_download(filename, data, file_format)
 
 
-@cache_page(one_day)
+@cache_page(ONE_DAY)
 def export_coordinates(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, file_format: str = DEFAULT_FILE_FORMAT
 ):
@@ -138,7 +138,7 @@ def export_coordinates(
     return generic_download(filename, data, file_format)
 
 
-@cache_page(one_day)
+@cache_page(ONE_DAY)
 def export_urls(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, file_format: str = DEFAULT_FILE_FORMAT
 ):
@@ -147,7 +147,7 @@ def export_urls(
     return generic_download(filename, data, file_format)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def export_explains(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, file_format: str = DEFAULT_FILE_FORMAT
 ):
@@ -160,7 +160,7 @@ def export_explains(
         safe=False,
         encoder=JSEncoder,
     )
-    response["Content-Disposition"] = 'attachment; filename="%s.json"' % filename
+    response["Content-Disposition"] = f'attachment; filename="{filename}.json"'
     return response
 
 
@@ -215,7 +215,7 @@ def countries_and_layers():
     return countries
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def config(request):
     configuration = get_bulk_values(
         [
@@ -393,7 +393,7 @@ def config(request):
             "forum_link": configuration["COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK"],
             "email_address": configuration["COMPLY_OR_EXPLAIN_EMAIL_ADDRESS"],
         },
-        "debug": True if settings.DEBUG else False,
+        "debug": bool(settings.DEBUG),
         "admin": settings.ADMIN,
         "country_and_layers": countries_and_layers(),
         "google_maps_api_key": configuration["GOOGLE_MAPS_API_KEY"],
@@ -403,7 +403,7 @@ def config(request):
     return JsonResponse(config_object, encoder=JSEncoder)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def index(request, map_configuration=None):
     initial_countries = get_initial_countries()
 
@@ -483,7 +483,7 @@ def index(request, map_configuration=None):
                 "admin": settings.ADMIN,
                 "sentry_token": settings.SENTRY_TOKEN,
                 "country": config["PROJECT_COUNTRY"],
-                "debug": True if settings.DEBUG else False,
+                "debug": bool(settings.DEBUG),
                 "language": request.LANGUAGE_CODE[0:2],  # only support 'en' not 'en-gb',
                 "timestamp": datetime.now(pytz.UTC).isoformat(),
                 "initial_map_data_url": "",
@@ -499,17 +499,17 @@ def index(request, map_configuration=None):
     )
 
 
-@cache_page(one_day)
+@cache_page(ONE_DAY)
 def robots_txt(request):
     return render(request, "map/robots.txt", content_type="text/plain")
 
 
-@cache_page(one_day)
+@cache_page(ONE_DAY)
 def security_txt(request):
     return render(request, "map/security.txt", content_type="text/plain")
 
 
-@cache_page(one_day)
+@cache_page(ONE_DAY)
 def manifest_json(request):
     # App manifest
     # https://developer.chrome.com/apps/manifest
@@ -546,7 +546,7 @@ def manifest_json(request):
     return JsonResponse(manifest, encoder=JSEncoder)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def organization_report_by_id(
     request, country: str = DEFAULT_COUNTRY, organization_type: str = DEFAULT_LAYER, organization_id=None, weeks_back=0
 ):
@@ -557,7 +557,7 @@ def organization_report_by_id(
     return JsonResponse(report, safe=False, encoder=JSEncoder)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def organization_report_by_name(
     request,
     country: str = DEFAULT_COUNTRY,
@@ -574,43 +574,43 @@ def organization_report_by_name(
     return JsonResponse(report, safe=False, encoder=JSEncoder)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def top_fail(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
     data = get_top_fail_data(country, organization_type, weeks_back)
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def top_win(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
     data = get_top_win_data(country, organization_type, weeks_back)
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def stats(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0, days: int = 365):
     reports = get_stats(country, organization_type, weeks_back, days)
     return JsonResponse(reports, encoder=JSEncoder)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def _what_to_improve(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, issue_type=""):
     reports = what_to_improve(country, organization_type, issue_type)
     return JsonResponse(reports, encoder=JSEncoder, safe=False)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def get_short_and_simple_stats_(request, weeks_back=0):
     data = get_short_and_simple_stats(weeks_back)
     return JsonResponse(data, encoder=JSEncoder)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def organization_vulnerability_timeline(request, organization_id: int, days: int = 365):
     stats = get_organization_vulnerability_timeline(organization_id, days=days)
     return JsonResponse(stats, encoder=JSEncoder, safe=False)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def organization_vulnerability_timeline_via_name(
     request, organization_name: str, organization_type: str = "", country: str = "", days: int = 365
 ):
@@ -618,7 +618,7 @@ def organization_vulnerability_timeline_via_name(
     return JsonResponse(stats, encoder=JSEncoder, safe=False)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def vulnerability_graphs(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0, days: int = 365
 ):
@@ -626,7 +626,7 @@ def vulnerability_graphs(
     return JsonResponse(stats, encoder=JSEncoder)
 
 
-@cache_page(ten_minutes)
+@cache_page(TEN_MINUTES)
 def improvements(
     request,
     country: str = DEFAULT_COUNTRY,
@@ -638,7 +638,7 @@ def improvements(
     return JsonResponse(changes, encoder=JSEncoder)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def ticker(
     request,
     country: str = DEFAULT_COUNTRY,
@@ -650,7 +650,7 @@ def ticker(
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
-@cache_page(four_hours)
+@cache_page(FOUR_HOURS)
 def map_default(request, days_back: int = 0, displayed_issue: str = "all"):
     defaults = (
         Configuration.objects.all()
@@ -667,7 +667,7 @@ def map_default(request, days_back: int = 0, displayed_issue: str = "all"):
     return map_data(request, defaults["country"], defaults["organization_type__name"], days_back, displayed_issue)
 
 
-@cache_page(one_hour)
+@cache_page(ONE_HOUR)
 def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type: str = DEFAULT_LAYER):
     query = (
         Organization.objects.all()
@@ -720,7 +720,7 @@ def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
-@cache_page(four_hours)
+@cache_page(FOUR_HOURS)
 def map_data(
     request,
     country: str = DEFAULT_COUNTRY,
@@ -733,19 +733,19 @@ def map_data(
     return JsonResponse(data, encoder=JSEncoder)
 
 
-@cache_page(ten_minutes)
+@cache_page(TEN_MINUTES)
 def all_latest_scans(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER):
     dataset = get_all_latest_scans(country, organization_type)
     return JsonResponse(dataset, encoder=JSEncoder)
 
 
-@cache_page(ten_minutes)
+@cache_page(TEN_MINUTES)
 def explain_list(request, country, organization_type):
     data = get_recent_explains(country, organization_type)
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
-@cache_page(ten_minutes)
+@cache_page(TEN_MINUTES)
 def updates_on_organization(request, organization_id):
     if not organization_id:
         return empty_response()
@@ -765,13 +765,13 @@ def organization_autcomplete(
     return JsonResponse(list(qs), encoder=JSEncoder, safe=False)
 
 
-@cache_page(ten_minutes)
+@cache_page(TEN_MINUTES)
 def upcoming_and_past_scans(request):
     data = get_next_and_last_scans()
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
-@cache_page(one_day)
+@cache_page(ONE_DAY)
 def screenshot(request, endpoint_id=0):
     # get the latest screenshot from an endpoint.
 

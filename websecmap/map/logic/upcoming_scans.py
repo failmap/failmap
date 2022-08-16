@@ -7,7 +7,7 @@ from django_celery_beat.models import PeriodicTask
 
 
 def get_next_and_last_scans():
-    def next(obj):
+    def next_periodic_task(obj):
         _, my_y = obj.schedule.is_due(last_run_at=timezone.now())
         date = timezone.now() + timedelta(seconds=my_y)
         return date
@@ -39,7 +39,7 @@ def get_next_and_last_scans():
     # do not add
     for periodic_task in periodic_tasks:
         scan = {}
-        next_date = next(periodic_task)
+        next_date = next_periodic_task(periodic_task)
         scan["name"] = mark_safe(periodic_task.name)
         scan["date"] = next_date
         scan["human_date"] = naturaltime(next_date).capitalize()

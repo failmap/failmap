@@ -37,7 +37,7 @@ def claim_proxy(tracing_label="") -> Dict[str, Any]:
     # try to get the first available, fastest, proxy
     while True:
 
-        log.debug(f"Attempting to claim a proxy to scan {tracing_label} et al...")
+        log.debug("Attempting to claim a proxy to scan {%s} et al...", tracing_label)
 
         try:
 
@@ -63,7 +63,7 @@ def claim_proxy(tracing_label="") -> Dict[str, Any]:
                 if proxy:
 
                     # first claim to prevent duplicate claims
-                    log.debug(f"Proxy {proxy.id} claimed for {tracing_label} et al...")
+                    log.debug("Proxy {%s} claimed for {%s} et al...", proxy.id, tracing_label)
                     proxy.currently_used_in_tls_qualys_scan = True
                     proxy.last_claim_at = datetime.now(pytz.utc)
                     proxy.save(update_fields=["currently_used_in_tls_qualys_scan", "last_claim_at"])
@@ -83,13 +83,13 @@ def claim_proxy(tracing_label="") -> Dict[str, Any]:
                 # When you have over 500 proxy requests, things are off. It's better to start with a clean
                 # slate then.
                 log.debug(
-                    f"No proxies available for {tracing_label} et al. "
-                    f"You can add more proxies to solve this. Will try again in 60 seconds."
+                    "No proxies available for {%s} et al. "
+                    "You can add more proxies to solve this. Will try again in 60 seconds.", tracing_label
                 )
 
         except BaseException as e:
             # In some rare cases this method crashes, while it should be as reliable as can be.
-            log.error(f"Exception occurred when requesting a proxy for {tracing_label} et al")
+            log.error("Exception occurred when requesting a proxy for {%s} et al", tracing_label)
             log.exception(e)
             raise e
 
@@ -99,7 +99,7 @@ def claim_proxy(tracing_label="") -> Dict[str, Any]:
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def release_proxy(proxy: Dict[str, Any], tracing_label=""):
     """As the claim proxy queue is ALWAYS filled, you cannot insert release proxy commands there..."""
-    log.debug(f"Releasing proxy {proxy['id']} claimed for {tracing_label} et al...")
+    log.debug("Releasing proxy {%s} claimed for {%s} et al...", proxy['id'], tracing_label)
 
     db_proxy = ScanProxy.objects.all().filter(pk=proxy["id"]).first()
     if not db_proxy:
@@ -146,7 +146,7 @@ def release_claim_after_timeout(proxy: Dict[str, Any]):
                 db_proxy.currently_used_in_tls_qualys_scan,
             ]
         ):
-            log.warning(f"Force released proxy {db_proxy.pk} because of a claim timeout period of 3 hours.")
+            log.warning("Force released proxy {%s} because of a claim timeout period of 3 hours.", db_proxy.pk)
             db_proxy.currently_used_in_tls_qualys_scan = False
             db_proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
 
@@ -156,7 +156,7 @@ def check_proxy(proxy: Dict[str, Any]):
     # todo: service_provider_status should stop after a certain amount of requests.
     # Note that you MUST USE HTTPS proxies for HTTPS traffic! Otherwise your normal IP is used.
 
-    log.debug(f"Testing proxy {proxy['id']}")
+    log.debug("Testing proxy {%s}", proxy['id'])
 
     if not config.SCAN_PROXY_TESTING_URL:
         proxy_testing_url = "https://google.com/"
@@ -164,7 +164,7 @@ def check_proxy(proxy: Dict[str, Any]):
     else:
         proxy_testing_url = config.SCAN_PROXY_TESTING_URL
 
-    log.debug(f"Attempting to connect to testing url: {proxy_testing_url}")
+    log.debug("Attempting to connect to testing url: {%s}", proxy_testing_url)
     # send requests to a known domain to inspect the headers the proxies attach. There has to be something
     # that links various scans to each other.
     try:
@@ -208,7 +208,7 @@ def check_proxy(proxy: Dict[str, Any]):
         store_check_result.apply_async([proxy, "Bad status line.", True, datetime.now(pytz.utc)])
         return False
 
-    log.debug(f"Could connect to test site {proxy_testing_url}. Proxy is functional.")
+    log.debug("Could connect to test site {%s}. Proxy is functional.", proxy_testing_url)
 
     log.debug("Attempting to connect to the Qualys API.")
     try:
@@ -280,7 +280,7 @@ def check_proxy(proxy: Dict[str, Any]):
     # requests. Proxies wont work if they are not "elite", aka: not revealing the internet user behind them.
     # otherwise the data will be coupled to a single client.
 
-    log.debug(f"Proxy accessible. Capacity available. {proxy['id']}.")
+    log.debug("Proxy accessible. Capacity available. {%s}.", proxy['id'])
     store_check_result.apply_async(
         [
             proxy,

@@ -26,8 +26,8 @@ def filter_map_configs(countries: List = None, organization_types: List = None):
 
 def retrieve(country: str, organization_type_id: int):
 
-    c = Configuration.objects.all().filter(country=country, organization_type=organization_type_id).first()
-    if not c:
+    configuration = Configuration.objects.all().filter(country=country, organization_type=organization_type_id).first()
+    if not configuration:
         raise ValueError(f"Could not find map configuration in {country} with id {organization_type_id}.")
 
-    return c
+    return configuration

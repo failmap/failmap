@@ -20,7 +20,7 @@ log = logging.getLogger(__package__)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "websecmap.settings")
 
-celery_statsd  # reference object at least once to prevent deletion by isort
+celery_statsd  # reference object at least once to prevent deletion by isort  # pylint: disable=pointless-statement
 
 app = Celery(__name__)
 app.config_from_object("django.conf:settings", namespace="CELERY")
@@ -87,7 +87,7 @@ class ParentFailed(Exception):
 
 @app.task(queue="isolated", bind=True)
 def debug_task(self):
-    print("Request: {0!r}".format(self.request))
+    print(f"Request: {self.request!r}")
 
 
 @app.task(queue="isolated")
@@ -154,9 +154,9 @@ def status():
         try:
             broker = flower.utils.broker.Broker(app.conf.broker_url, broker_options=app.conf.broker_transport_options)
             queue_stats = broker.queues(queue_names).result()
-        except RuntimeError as e:
+        except RuntimeError as my_exception:
             log.error("Could not connect to flower to retrieve queue stats.")
-            log.exception(e)
+            log.exception(my_exception)
 
         queues = [{"name": x["name"], "tasks_pending": x["messages"]} for x in queue_stats]
     else:

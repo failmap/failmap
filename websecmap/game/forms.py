@@ -26,9 +26,9 @@ class ContestForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        id = cleaned_data.get("id")
+        idnr = cleaned_data.get("id")
 
-        if not Contest.objects.all().filter(pk=id).exists():
+        if not Contest.objects.all().filter(pk=idnr).exists():
             raise ValidationError(
                 _("This contest does not exist."),
                 code="invalid",
@@ -85,11 +85,11 @@ class TeamForm(forms.Form):
                     id=team.id, secret=secret, allowed_to_submit_things=True, participating_in_contest=self.contest
                 )
 
-            except Team.DoesNotExist:
+            except Team.DoesNotExist as exc:
                 raise ValidationError(
                     _("Incorrect secret or team. Try again!"),
                     code="invalid",
-                )
+                ) from exc
 
 
 def has_permission(permission_code, user):
@@ -99,6 +99,8 @@ def has_permission(permission_code, user):
 
     if user.is_superuser and permission_code in ["skip_team_secret"]:
         return True
+
+    return False
 
 
 class OrganisationSubmissionForm(forms.Form):
@@ -311,7 +313,7 @@ class UrlSubmissionForm(forms.Form):
         valid = []
         try:
             sites = self.data.getlist("websites", [])
-            incomplete, not_resolvable, valid = self.filter_websites(sites)
+            _, _, valid = self.filter_websites(sites)
             # log.debug("incomplete: %s, not_resolvable: %s, valid: %s" % (incomplete, not_resolvable, valid))
             initial = valid
             choices = []
@@ -472,8 +474,8 @@ class UrlSubmissionForm(forms.Form):
                 pk=organization, country=self.contest.target_country, is_dead=False
             ).exists():
                 continue
-            else:
-                existing.append(organization)
+
+            existing.append(organization)
 
         if not existing:
             raise forms.ValidationError(

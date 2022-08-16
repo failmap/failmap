@@ -80,7 +80,7 @@ def compose_scan_task(urls: List[Url]) -> Task:
 def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
     # https://stackoverflow.com/questions/19145097/getting-certificate-chain-with-python-3-3-ssl-module
     # Relatively new Dutch governmental sites relying on anything less < TLS 1.2 is insane.
-    log.debug(f"Retrieving certificate chain from {url}:{port}.")
+    log.debug("Retrieving certificate chain from {%s}:{%s}.", url, port)
     try:
         # Todo: does still go to the ipv4 version if told to user AF-INET6. The workers should restrict it.
         # Decide which IP-version to use
@@ -142,7 +142,7 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates:
     last_cert: OpenSSL.crypto.X509 = certificates[-1]
 
     if not isinstance(last_cert, OpenSSL.crypto.X509):
-        log.debug(f"Not an x509 instance but a {type(last_cert)}.")
+        log.debug("Not an x509 instance but a {%s}.", type(last_cert))
         return False
 
     expected_digest = b"C6:C1:BB:C7:1D:4F:30:C7:6D:4D:B3:AF:B5:D0:66:DE:49:9E:9A:2D"
@@ -164,14 +164,14 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates:
         return False
 
     issuer = "".join(
-        "/{0:s}={1:s}".format(name.decode(), value.decode()) for name, value in last_cert.get_issuer().get_components()
+        f"/{name.decode():s}={value.decode():s}" for name, value in last_cert.get_issuer().get_components()
     )
     if issuer != expected_issuer:
         log.debug("No cert match on issuer.")
         return False
 
     subject = "".join(
-        "/{0:s}={1:s}".format(name.decode(), value.decode()) for name, value in last_cert.get_subject().get_components()
+        f"/{name.decode():s}={value.decode():s}" for name, value in last_cert.get_subject().get_components()
     )
     if subject != expected_subject:
         log.debug("No cert match on subject.")

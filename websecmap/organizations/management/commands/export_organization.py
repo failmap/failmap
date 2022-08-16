@@ -54,7 +54,7 @@ class Command(DumpDataCommand):
         objects += endpoints
         objects += EndpointGenericScan.objects.all().filter(endpoint__in=endpoints)
 
-        with open(filename, "w") as f:
-            f.write(serialize(self.FORMAT, objects))
+        with open(filename, "w", encoding="utf-8") as file_handle:
+            file_handle.write(serialize(self.FORMAT, objects))
 
         log.info("Wrote %s", filename)

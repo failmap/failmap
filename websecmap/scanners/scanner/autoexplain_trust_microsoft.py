@@ -196,7 +196,7 @@ def scan(scan_id):
         return
 
     # when all checks pass, and indeed the SSL_ERROR_BAD_CERT_DOMAIN was found, the finding is explained
-    log.debug(f"Scan {epgs} fits all criteria to be auto explained for incorrect cert usage.")
+    log.debug("Scan {%s} fits all criteria to be auto explained for incorrect cert usage.", epgs)
     add_bot_explanation(epgs, "trusted_on_local_device_with_custom_trust_policy", timedelta(days=365 * 10))
     autoexplain_trust_microsoft_and_include_their_webserver_headers(epgs)
 
@@ -245,15 +245,15 @@ def certificate_matches_microsoft_exception_policy(
     :return:
     """
     if not certificate:
-        log.debug(f"Could not retrieve certificate for {url}.")
+        log.debug("Could not retrieve certificate for {%s}.", url)
         return False
 
     if certificate.not_valid_before > datetime.now():
-        log.debug(f"Certificate for {url} is not valid before {certificate.not_valid_before}. " f"Not trusted.")
+        log.debug("Certificate for {%s} is not valid before {%s}. Not trusted.", url, certificate.not_valid_before)
         return False
 
     if datetime.now() > certificate.not_valid_after:
-        log.debug(f"Certificate for {url} has expired  {certificate.not_valid_after}. Not trusted.")
+        log.debug("Certificate for {%s} has expired  {%s}. Not trusted.", url, certificate.not_valid_after)
         return False
 
     # Likely subdomain:
@@ -271,9 +271,8 @@ def certificate_matches_microsoft_exception_policy(
     names = [name.value for name in _names]
     if names[0] not in applicable_subdomains[microsoft_service]:
         log.debug(
-            f"Certificate for {url} not in accepted names, value: {names}. "
-            f"{names[0]} not in {applicable_subdomains[microsoft_service]}."
-            f"Not trusted."
+            "Certificate for {%s} not in accepted names, value: {%s}. {%s} not in {%s}. Not trusted.",
+            url, names, names[0], applicable_subdomains[microsoft_service]
         )
         return False
 
@@ -281,7 +280,8 @@ def certificate_matches_microsoft_exception_policy(
     _names = certificate.issuer.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)
     names = [name.value for name in _names]
     if trusted_organization not in names:
-        log.debug(f"Certificate for {url} not handed out by {trusted_organization} but by " f"{names}. Not trusted.")
+        log.debug("Certificate for {%s} not handed out by {%s} but by {%s}. Not trusted.",
+                  url, trusted_organization, names)
         return False
 
     return True

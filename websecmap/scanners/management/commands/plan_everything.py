@@ -46,5 +46,5 @@ class Command(BaseCommand):
         ]:
             for planning_method in ["plan_discover", "plan_verify", "plan_scan"]:
                 method = getattr(scanner, planning_method, None)
-                if method:
+                if method is not False:
                     method()

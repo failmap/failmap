@@ -5,4 +5,4 @@ class OrganizationsConfig(AppConfig):
     name = "websecmap.organizations"
 
     def ready(self):
-        import websecmap.organizations.signals  # noqa
+        import websecmap.organizations.signals  # noqa  # pylint: disable=unused-import

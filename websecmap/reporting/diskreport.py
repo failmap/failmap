@@ -98,5 +98,5 @@ def _read_json_from_gzip(location):
         with gzip.open(location, "rt") as file:
             return json.loads(file.read())
     except FileNotFoundError:
-        log.info(f"Report does not exist on location {location}.")
+        log.info("Report does not exist on location {%s}.", location)
         return {}

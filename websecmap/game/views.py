@@ -834,10 +834,10 @@ def add_bare_url_features(features, submitted_urls):
 
 
 def organization_in_features(organization, features):
-    id = str(organization.pk)  # stored as string in the feature
+    pk_id = str(organization.pk)  # stored as string in the feature
 
     for feature in features:
-        if feature["properties"]["organization_id"] == id:
+        if feature["properties"]["organization_id"] == pk_id:
             return True
 
     # not in there

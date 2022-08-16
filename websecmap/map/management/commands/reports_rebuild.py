@@ -19,3 +19,5 @@ class Command(GenericTaskCommand):
             return super().handle(self, *args, **options)
         except KeyboardInterrupt:
             log.info("Received keyboard interrupt. Stopped.")
+
+        return ""

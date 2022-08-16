@@ -7,7 +7,7 @@ from django.contrib.syndication.views import Feed
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext as _
 
-from websecmap.map.logic.map_defaults import remark
+from websecmap.map.logic.map_defaults import REMARK
 from websecmap.organizations.models import Organization
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
@@ -92,23 +92,22 @@ class LatestScanFeed(Feed):
     def title(self, scan_type: str = ""):
         if scan_type:
             return f"{scan_type} Scan Updates"
-        else:
-            return "Vulnerabilities Feed"
+
+        return "Vulnerabilities Feed"
 
     def link(self, scan_type: str = ""):
         if scan_type:
             return f"/data/feed/{scan_type}"
-        else:
-            return "/data/feed/"
+
+        return "/data/feed/"
 
     # second parameter via magic
     def items(self, scan_type):
         # print(scan_type)
-        if scan_type in ENDPOINT_SCAN_TYPES:
-            return EndpointGenericScan.objects.filter(type=scan_type).order_by("-last_scan_moment")[0:30]
-
         if scan_type in URL_SCAN_TYPES:
             return UrlGenericScan.objects.filter(type=scan_type).order_by("-last_scan_moment")[0:30]
+
+        return EndpointGenericScan.objects.filter(type=scan_type).order_by("-last_scan_moment")[0:30]
 
     def item_title(self, item):
         calculation = get_severity(item)
@@ -138,9 +137,9 @@ class LatestScanFeed(Feed):
         if item.type in URL_SCAN_TYPES:
             # url generic scan:
             return f"{badge} {rating} - {item.url.url}"
-        else:
-            # endpoint scan
-            return f"{badge} {rating} - {item.endpoint.url.url}"
+
+        # endpoint scan
+        return f"{badge} {rating} - {item.endpoint.url.url}"
 
     def item_description(self, item):
         calculation = get_severity(item)
@@ -154,9 +153,9 @@ class LatestScanFeed(Feed):
         if item.type in URL_SCAN_TYPES:
             # url generic scan:
             return f"{config.PROJECT_WEBSITE}/#updates/{item.last_scan_moment}/{item.url.url}"
-        else:
-            # endpoint scan
-            return f"{config.PROJECT_WEBSITE}/#updates/{item.last_scan_moment}/{item.endpoint.url.url}"
+
+        # endpoint scan
+        return f"{config.PROJECT_WEBSITE}/#updates/{item.last_scan_moment}/{item.endpoint.url.url}"
 
 
 def latest_updates(organization_id):
@@ -180,7 +179,7 @@ def latest_updates(organization_id):
     dataset = {
         "scans": [],
         "render_date": datetime.now(pytz.utc).isoformat(),
-        "remark": remark,
+        "remark": REMARK,
     }
 
     # semi-union, given not all columns are the same. (not python/django-esque solution)
@@ -209,7 +208,7 @@ def latest_updates(organization_id):
                     "organization": organization.name,
                     "organization_id": organization.pk,
                     "url": scan.url.url,
-                    "service": "%s" % scan.url.url,
+                    "service": f"{scan.url.url}",
                     "protocol": scan_type,
                     "port": "",
                     "ip_version": "",

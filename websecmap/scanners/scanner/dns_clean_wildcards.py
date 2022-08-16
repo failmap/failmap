@@ -133,7 +133,7 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
         "status_code": None,
     }:
         # When there are errors, do not try to get subdomains.
-        log.debug(f"{wildcard_url} resulted in an error, skipping.")
+        log.debug("{%s} resulted in an error, skipping.", wildcard_url)
         return identical
 
     # could be that the wildcard renders a different page every time, in that case do not continue.
@@ -150,7 +150,7 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
 
     # todo: this needs access to storage.
     subdomain_urls = subdomains_under_wildcard(wildcard_url)
-    log.debug(f"{wildcard_url} has {len(subdomain_urls)} subdomains.")
+    log.debug("{%s} has {%s} subdomains.", wildcard_url, len(subdomain_urls))
     for subdomain_url in subdomain_urls:
 
         # couldn't get the filtering correct in the subdomains_under_wildcard method.
@@ -166,17 +166,17 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
 
         subdomain_content = site_content(subdomain_url.url)
         if wildcard_content == subdomain_content:
-            log.debug(f"WILDCARD: Content of {subdomain_url} is the same as {wildcard_subdomain}.")
+            log.debug("WILDCARD: Content of {%s} is the same as {%s}.", subdomain_url, wildcard_subdomain)
             identical.append(subdomain_url.pk)
         else:
-            log.debug(f"        : Content of {subdomain_url} differs from {wildcard_subdomain}.")
+            log.debug("        : Content of {%s} differs from {%s}.", subdomain_url, wildcard_subdomain)
 
     return identical
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store(url_ids: List[int]):
-    log.debug(f"Received {len(url_ids)} that have been found to be having the same data as a wildcard.")
+    log.debug("Received {%s} that have been found to be having the same data as a wildcard.", len(url_ids))
 
     for url_id in url_ids:
         url = Url.objects.all().filter(pk=url_id).first()

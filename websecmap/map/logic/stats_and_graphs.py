@@ -115,7 +115,7 @@ def get_organization_vulnerability_timeline_via_name(
 
 
 def stats_determine_when(stat, weeks_back=0):
-    if stat == "now" or stat == "earliest":
+    if stat in ["now", "earliest"]:
         when = datetime.now(pytz.utc)
     else:
         value, unit, _ = stat.split()
@@ -219,7 +219,7 @@ def what_to_improve(country: str, organization_type: str, issue_type: str):
 
     policy = POLICY.get(issue_type, None)
     if not policy:
-        log.debug(f"No policy found for {issue_type}")
+        log.debug("No policy found for {%s}", issue_type)
         return []
 
     country = get_country(country)
