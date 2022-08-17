@@ -32,7 +32,7 @@ from constance import config
 from django.conf import settings
 
 from websecmap.app.progressbar import print_progress_bar
-from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url, Dataset
+from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url
 from websecmap.scanners.scanner.http import resolves
 
 log = logging.getLogger(__package__)
@@ -380,5 +380,11 @@ def save_url(website, failmap_organization):
 def debug_organizations(organizations):
     log.debug("This is the current content of all found organizations (%s): ", len(organizations))
     for organization in organizations:
-        log.debug("%s, %s, %s, %s, %s", organization["name"], organization["address"],
-                  organization["lat"], organization["lng"], organization["websites"])
+        log.debug(
+            "%s, %s, %s, %s, %s",
+            organization["name"],
+            organization["address"],
+            organization["lat"],
+            organization["lng"],
+            organization["websites"],
+        )

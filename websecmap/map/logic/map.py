@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Any, Dict
+from typing import Any, Dict, List
 
 import pytz
 import simplejson as json
@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 from django.db import connection
 from django.utils.text import slugify
 
-from websecmap.map.logic.map_defaults import get_country, get_organization_type, REMARK
+from websecmap.map.logic.map_defaults import REMARK, get_country, get_organization_type
 from websecmap.map.models import MapDataCache
 from websecmap.reporting.diskreport import retrieve_report
 from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
@@ -241,7 +241,7 @@ def get_map_data(
         # filtering with javascript, which is error prone (todo: this will be done in the future, as it responds faster
         # but it will also mean an enormous increase of data sent to the client.)
         # It's actually reasonably fast.
-        high, medium, low, ok = 0, 0, 0, 0
+        high, medium, low, ok = 0, 0, 0, 0  # pylint: disable=invalid-name
         severity = "unknown"
 
         calculation = reports[str(i[6])]
@@ -256,7 +256,7 @@ def get_map_data(
                         high += url_rating["high"]
                         medium += url_rating["medium"]
                         low += url_rating["low"]
-                        ok += url_rating["ok"]
+                        ok += url_rating["ok"]  # pylint: disable=invalid-name
 
                 # it's possible the url doesn't have ratings.
                 for endpoint in url["endpoints"]:
@@ -268,7 +268,7 @@ def get_map_data(
                             high += endpoint_rating["high"]
                             medium += endpoint_rating["medium"]
                             low += endpoint_rating["low"]
-                            ok += endpoint_rating["ok"]
+                            ok += endpoint_rating["ok"]  # pylint: disable=invalid-name
 
             # figure out if red, orange or green:
             # #162, only make things red if there is a critical issue.

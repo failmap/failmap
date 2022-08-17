@@ -159,8 +159,8 @@ def get_layers(country: str = "NL"):
 def get_when(weeks_back):
     if not weeks_back:
         return datetime.now(pytz.utc)
-    else:
-        return datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
+
+    return datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
 
 
 def get_initial_countries():

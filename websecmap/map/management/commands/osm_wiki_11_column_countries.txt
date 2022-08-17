@@ -1,0 +1,77 @@
+|-
+| '''{{flagicon|Bolivia}}''' (proposed)
+| N/A
+| [[wikipedia:es:Department de Bolivia|Department]] / state border
+| Regiones / Region
+| [[wikipedia:es:Provincias de Bolivia|Provincias]] / province
+| Regiones metropolitanas / metropolitan Region
+| [[wikipedia:es:Municipality de Bolivia|Municipality]], [[wikipedia:es:Autonomía indígena originario campesina|Territor
+| Partes del municipio con autoridad, macrodistricts, comunas, juntas vecinales / parts of the municipality with authori
+| Partes del municipio sin autoridad / parts of the municipality without authority
+| Organizaciones territoriales de base (OTB), Barrios, [http://blog.upsa.edu.bo/?p=1817 Unidad Vecinal (UV)] / territori
+|-
+| '''{{flagicon|Germany}}''' see also [[de:Grenze|Grenzen in Deutschland]]
+| N/A
+| ''federal states border'' Bundesland NUTS 1
+| ''state-district border'' Regierungsbezirk NUTS 2
+| ''county borders'' Landkreis / Kreis / kreisfreie Stadt NUTS 3
+| ''amt'' [http://en.wikipedia.org/wiki/Amt_(political_division)] Samtgemeinde, Verwaltungsgemeinschaft LAU 1 (aka NUTS
+| ''Towns, municipality / City-district'' Stadt, Gemeinde LAU 2 (aka NUTS 5)
+| '' Parts of a municipality with parish councils /self_government'' Stadtbezirk / Gemeindeteil mit Selbstverwaltung
+| '' Parts of a municipality without ...'' Stadtteil / Gemeindeteil ohne Selbstverwaltung
+| ''Neighbourhoods'' statistical or historical Stadtviertel etc.
+|-
+| '''{{flagicon|Mozambique}}''' (proposed)
+| N/A
+| States (Províncias)
+| N/A
+| N/A
+| N/A
+| municipality (Municípios)
+| district (districts Municipais)
+| Postos Administrativos
+| Neighbourhoods (Bairros)
+|-
+| '''{{flagicon|Netherlands}}''' Updated as proposed in [http://lists.openstreetmap.org/pipermail/talk-nl/2009-May/00899
+| border around [http://en.wikipedia.org/wiki/Netherlands The Netherlands], and border around other constituent states i
+| province like Zeeland, Noord-Holland etc. ''(provincie)'' NUTS 2 also the [http://en.wikipedia.org/wiki/Caribbean_Neth
+| [http://en.wikipedia.org/wiki/Water_board Water board] boundary ''(waterschap)''
+| [http://nl.wikipedia.org/wiki/Plusregio ''plusregio''] urban Region in some parts of NL (until 2015-01-01)
+| non-official plusregio
+| boundary for municipality ''(gemeente)'' (like Amsterdam , Schiermonnikoog) LAU 2 also special municipality (Bonaire,
+| boundaries for autonomous city district in Amsterdam ''(stadsdelen)'' en Rotterdam ''(deelgemeenten)''
+| boundaries for settlements ''(woonplaatsen)'' (non-autonomous municipal subdivisions)
+| boundaries for neighborhoods ''(wijken)''
+|-
+| '''{{flagicon|Philippines}}'''
+| Region (''Rehiyon'')
+| province (''Lalawigan'')
+| Provincial legislative district
+| Cities/municipality (''Lungsod/bayan'')
+| City/municipal legislative district
+| City/municipal administrative district
+| Barangay zones
+| Barangay
+| Sitio/purok
+|-
+| '''{{flagicon|Poland}}'''
+| N/A
+| [[wikipedia:Voivodeships of Poland|''województwa'']] (voivodships, province, Region). [[WikiProject_Poland/Podzia%C5%8
+| N/A
+| [[wikipedia:Powiat|''powiaty'']] (counties) - some cities have county status - in OSM their borders have both relation
+| [[wikipedia:Gmina|''gminy'']] (municipality) - some cities have municipality status - in OSM their borders have both r
+| cities, towns and Village. <br />(''miasta, miasteczka i wsie''). [[WikiProject_Poland/Podzia%C5%82_administracyjny#Mi
+| City district (''dzielnice'')
+| Przysiółki - usually isolated parts of Village. [[WikiProject_Poland/Podzia%C5%82_administracyjny#Przysi.C3.B3.C5.82ki
+| boundaries for neighborhoods ''(osiedla)''
+|-
+| '''{{flagicon|Turkmenistan}}''' ('''''proposed''''')
+| N/A
+| province / Welayatlar / Области (e.g., Ahal)
+| Provincial district / Welayatyň etraplary / Районы областей (e.g., Ak Bugday etrap)
+| N/A
+| N/A
+| Cities and Towns / Şäherler we Şäherçeler / Города и поселки (e.g., Ashgabat, Dashoguz, Ýölöten)
+| Rural Councils and Municipal Boroughs with mayors, Village / Geňeşler we Şäheryň häkimli uly etraplary, Obalar / Сельс
+| Neighborhoods, Hamlets, Municipal district / Ýaşaýaş toplumlary, Oba ilatly punktlar, Şäheryň kiçi etraplary we etrapç
+| Subdistrict / Etrabyň etraplary / Субмикрорайоны (e.g., Parahat 7/2)

@@ -109,7 +109,7 @@ class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         contest.save()
 
         # create a number of team members.
-        for i in range(12):
+        for _ in range(12):
             generate_team(contest)
 
         self.message_user(request, "Contest user, contest and teams have been created.")
@@ -120,7 +120,7 @@ class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     @transaction.atomic
     def add_a_dozen_teams(self, request, queryset):
         for contest in queryset:
-            for i in range(12):
+            for _ in range(12):
                 generate_team(contest)
 
         self.message_user(request, "Urls have been rejected.")
@@ -189,7 +189,7 @@ def create_printout(contest):
     content += "<br />"
     content += "<h2>Teams</h2>"
     teams = Team.objects.all().filter(participating_in_contest=contest, allowed_to_submit_things=True)
-    p = re.compile(r"<.*?>")
+    compiled_regex = re.compile(r"<.*?>")
     for team in teams:
         teamcontent = ""
         teamcontent += "<hr style='page-break-after: always; border: 0px; padding-bottom: 20px;'>"
@@ -229,7 +229,7 @@ def create_printout(contest):
 
         # only the beginning of the tag, so the closing style and any properties etc don't matter.
         without_html = teamcontent.replace("<br", "\n<br")
-        without_html = p.sub("", without_html)
+        without_html = compiled_regex.sub("", without_html)
 
         stuff = urllib.parse.quote(without_html)
         mailcontent = ""
@@ -261,10 +261,10 @@ def generate_team_password():
 
 
 def generate_pastel_color():
-    def r():
+    def rand():
         return randint(125, 255)
 
-    return f"#{r():02X}{r():02X}{r():02X}"
+    return f"#{rand():02X}{rand():02X}{rand():02X}"
 
 
 def generate_team_name():
@@ -705,7 +705,7 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             url = Url.objects.all().filter(url=urlsubmission.url, is_dead=False).first()
 
             if not url:
-                log.debug("adding new url: {%s}", urlsubmission.url)
+                log.debug("adding new url: %s", urlsubmission.url)
                 # if it already exists, then add the url to the organization.
                 url = Url(url=urlsubmission.url)
                 url.save()

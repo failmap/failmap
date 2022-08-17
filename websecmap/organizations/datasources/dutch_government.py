@@ -12,7 +12,7 @@ https://almanak-redactie.overheid.nl/archive/
 import logging
 import xml.etree.ElementTree as ET
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.organizations.datasources import download_http_get_no_credentials, generic_dataset_import, read_data
 
 log = logging.getLogger(__package__)
@@ -39,36 +39,38 @@ def parse_data(dataset, filename):
     # why can't i use a similar construct as get?
     # i want: bla = et.find(x. alaternative if not found)
     for organization in organizations.iterfind(f"p:{dataset['xml_single']}", namespaces):
-        name = emulate_get(organization, "p:naam", namespaces)
-        if not name:
+        found = {
+            "name": emulate_get(organization, "p:naam", namespaces),
+            "abbreviation": emulate_get(organization, "p:afkorting", namespaces),
+            "contact": organization.find("p:contact", namespaces),
+        }
+
+        found["bezoek_adres"] = found["contact"].find("p:bezoekAdres", namespaces)
+        found["adres"] = found["bezoek_adres"].find("p:adres", namespaces)
+        found["straat"] = emulate_get(found["adres"], "p:straat", namespaces)
+        found["huisnummer"] = emulate_get(found["adres"], "p:huisnummer", namespaces)
+        found["postcode"] = emulate_get(found["adres"], "p:postcode", namespaces)
+        found["plaats"] = emulate_get(found["adres"], "p:plaats", namespaces)
+
+        found["site"] = emulate_get(found["contact"], "p:internet", namespaces)
+
+        if not found["name"]:
             # gemeenschappelijke regelingen has a title, not a name.
-            name = emulate_get(organization, "p:titel", namespaces)
+            found["name"] = emulate_get(organization, "p:titel", namespaces)
 
-        abbreviation = emulate_get(organization, "p:afkorting", namespaces)
-
-        contact = organization.find("p:contact", namespaces)
-        bezoek_adres = contact.find("p:bezoekAdres", namespaces)
-        adres = bezoek_adres.find("p:adres", namespaces)
-        straat = emulate_get(adres, "p:straat", namespaces)
-        huisnummer = emulate_get(adres, "p:huisnummer", namespaces)
-        postcode = emulate_get(adres, "p:postcode", namespaces)
-        plaats = emulate_get(adres, "p:plaats", namespaces)
-
-        site = emulate_get(contact, "p:internet", namespaces)
-
-        if not postcode and not plaats:
+        if not found["postcode"] and not found["plaats"]:
             # try to find something by name... might not have an address...
-            geocoding_hint = f"{name}, Nederland"
+            geocoding_hint = f"{found['name']}, Nederland"
         else:
             geocoding_hint = "Nederland"
 
         found_organizations.append(
             {
-                "name": f"{name} ({abbreviation})" if abbreviation else name,
-                "address": f"{straat} {huisnummer}, {postcode}, {plaats}",
+                "name": f'{found["name"]} ({found["abbreviation"]})' if found["abbreviation"] else found["name"],
+                "address": f'{found["straat"]} {found["huisnummer"]}, {found["postcode"]}, {found["plaats"]}',
                 # make sure that the geocoder is looking at the Netherlands.
                 "geocoding_hint": geocoding_hint,
-                "websites": [site],
+                "websites": [found["site"]],
                 "country": dataset["country"],
                 "layer": dataset["layer"],
                 "lat": None,

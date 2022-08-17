@@ -1,17 +1,16 @@
+import logging
 from datetime import datetime
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import PlannedScan, State
-from websecmap.scanners.scanner.autoexplain_trust_microsoft import plan_scan, compose_planned_scan_task
+from websecmap.scanners.scanner.autoexplain_trust_microsoft import compose_planned_scan_task, plan_scan
 from websecmap.scanners.tests.test_plannedscan import (
-    link_url_to_organization,
-    create_url,
-    create_organization,
     create_endpoint,
     create_endpoint_scan,
+    create_organization,
+    create_url,
+    link_url_to_organization,
 )
-
-import logging
 
 log = logging.getLogger(__package__)
 

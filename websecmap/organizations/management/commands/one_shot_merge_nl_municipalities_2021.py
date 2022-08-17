@@ -8,7 +8,7 @@ from django.db import transaction
 
 from websecmap.map.logic.openstreetmap import update_coordinates
 from websecmap.map.report import recreate_organization_reports
-from websecmap.organizations.adminstrative_transformations import add_url_to_new_organization, merge, dissolve
+from websecmap.organizations.adminstrative_transformations import add_url_to_new_organization, dissolve, merge
 from websecmap.organizations.models import Organization
 
 log = logging.getLogger(__package__)

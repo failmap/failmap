@@ -39,7 +39,7 @@ def add_model_filter(queryset, **kwargs):
     # we expect a Object_filters in kwargs in order for it to work.
     # dashboard.internet_nl_dashboard.models.Account
     # This is probably one of the ugliest ways to do this :)
-    model_filters = str(queryset.model).replace("'>", "").split(".")[-1].lower() + "_filters"
+    model_filters = str(queryset.model).replace("'>", "").split(".", maxsplit=1)[-1].lower() + "_filters"
     log.debug("Checking for filters: %s", model_filters)
 
     if kwargs.get(model_filters, None):
@@ -236,11 +236,11 @@ def url_filters(query, organizations_filter, urls_filter, endpoints_filter):
 # https://chrisalbon.com/python/data_wrangling/break_list_into_chunks_of_equal_size/
 # Create a function called "chunks" with two arguments, l and n: list and number_of_desired_items
 # function could not be named chunks, as that is a reserved word or something.
-def chunks2(my_list, n):
+def chunks2(my_list, chunk_size):
     # For item i in a range that is a length of l,
-    for i in range(0, len(my_list), n):
+    for i in range(0, len(my_list), chunk_size):
         # Create an index range for l of n items:
-        yield my_list[i : i + n]
+        yield my_list[i : i + chunk_size]
 
 
 def unique_and_random(items: List):
@@ -258,10 +258,10 @@ def finish_those_that_wont_be_scanned(scanner: str, scans: List[EndpointGenericS
     Uses in autoexplain methods, where sometimes explanations are not needed or the query
     """
     all_url_ids = [url.id for url in urls]
-    log.debug("All url ids: {%s}.", all_url_ids)
+    log.debug("All url ids: %s.", all_url_ids)
     scanned_url_ids = [epgs.endpoint.url.id for epgs in scans]
-    log.debug("Will not be scanned: {%s}.", all_url_ids)
+    log.debug("Will not be scanned: %s.", all_url_ids)
     will_not_be_scanned = list(set(all_url_ids) - set(scanned_url_ids))
     for not_scanned_id in will_not_be_scanned:
-        log.debug("Not going to scan {%s}, as there is nothing to scan for this url anymore.", not_scanned_id)
+        log.debug("Not going to scan %s, as there is nothing to scan for this url anymore.", not_scanned_id)
         plannedscan.finish("scan", scanner, not_scanned_id)

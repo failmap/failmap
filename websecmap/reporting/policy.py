@@ -1,6 +1,5 @@
 from websecmap.app import log
 from websecmap.reporting import time_cache
-
 from websecmap.reporting.models import ScanPolicy
 
 CACHE_DURATION_SECONDS = 600
@@ -24,14 +23,14 @@ def conclusion_to_score(scan: str = "", conclusion: str = "") -> ScanPolicy:
     to any set of scores we need.
     """
     key = f"{scan}{conclusion}"
-    cached = time_cache.get(key)
+    cached = time_cache.cache_get(key)
     if cached:
         return cached
 
     policy = ScanPolicy.objects.all().filter(scan_type=scan, conclusion=conclusion).first()
 
     if policy:
-        time_cache.set(key, policy)
+        time_cache.cache_set(key, policy)
         return policy
 
     # You'll get an empty score, or should we now add an empty policy to be 'self repairing'. I think so, as there

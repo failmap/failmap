@@ -6,13 +6,12 @@ import logging
 import os
 import time
 
+import celery_statsd
 import flower.utils.broker
 from celery import Celery, Task
 from django.conf import settings
 
 from websecmap.celery.worker import QUEUES_MATCHING_ROLES
-
-import celery_statsd
 
 EXPIRES_IN_ONE_DAY = 86400
 

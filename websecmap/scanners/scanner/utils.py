@@ -4,7 +4,6 @@ from typing import List
 
 from websecmap.app.constance import constance_cached_value
 
-
 CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
 
 
@@ -26,10 +25,10 @@ def get_random_nameserver() -> str:
     return choice(get_nameservers())
 
 
-def in_chunks(my_list, n):
+def in_chunks(my_list, chunk_length):
     # Example: chunks = list(chunks(urls, 25))
     # creates list of lists containing N items.
     # For item i in a range that is a length of l,
-    for i in range(0, len(my_list), n):
+    for i in range(0, len(my_list), chunk_length):
         # Create an index range for l of n items:
-        yield my_list[i : i + n]
+        yield my_list[i : i + chunk_length]

@@ -4,7 +4,7 @@ import pytz
 
 from websecmap.map.models import Configuration, OrganizationReport
 from websecmap.organizations.models import OrganizationType
-from websecmap.reporting.diskreport import store_report, retrieve_report
+from websecmap.reporting.diskreport import retrieve_report, store_report
 from websecmap.scanners.models import PlannedScan
 from websecmap.scanners.plannedscan import plan_outdated_scans
 from websecmap.scanners.tests.test_plannedscan import create_organization, create_url, link_url_to_organization

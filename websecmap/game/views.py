@@ -27,10 +27,7 @@ from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 
 log = logging.getLogger(__package__)
 
-one_minute = 60
-one_hour = 60 * 60
-one_day = 24 * 60 * 60
-ten_minutes = 60 * 10
+ONE_MINUTE = 60
 
 
 # workaround to start a contest view, has to be rewritten to use the configured default and fallback etc
@@ -39,18 +36,18 @@ def get_default_contest(request):
         if request.session.get("contest", 0):
             # log.debug("Returning a contest from session.")
             return Contest.objects.get(id=request.session["contest"])
-        else:
-            # get the first contest that is currently active, if nothing is active, get the first contest.
-            try:
-                # log.debug("Trying to find the earliest active contest")
-                return (
-                    Contest.objects.all()
-                    .filter(until_moment__gte=datetime.now(pytz.utc), from_moment__lte=datetime.now(pytz.utc))
-                    .first()
-                )
-            except ObjectDoesNotExist:
-                # log.debug("Get the first contest ever")
-                return Contest.objects.first()
+
+        # get the first contest that is currently active, if nothing is active, get the first contest.
+        try:
+            # log.debug("Trying to find the earliest active contest")
+            return (
+                Contest.objects.all()
+                .filter(until_moment__gte=datetime.now(pytz.utc), from_moment__lte=datetime.now(pytz.utc))
+                .first()
+            )
+        except ObjectDoesNotExist:
+            # log.debug("Get the first contest ever")
+            return Contest.objects.first()
 
     except (OperationalError, Contest.DoesNotExist):
         # log.debug("Fallback contest value")
@@ -152,7 +149,7 @@ def submit_organisation(request):
     )
 
 
-@cache_page(one_minute)
+@cache_page(ONE_MINUTE)
 def scores(request):
 
     # todo: this param handling code is absolutely disgusting, it should be more beautiful.
@@ -172,10 +169,10 @@ def scores(request):
         contest = get_default_contest(request)
 
     # remove disqualified teams.
-    teams = Team.objects.all().filter(participating_in_contest=contest, allowed_to_submit_things=True)
+    my_teams = Team.objects.all().filter(participating_in_contest=contest, allowed_to_submit_things=True)
 
-    scores = []
-    for team in teams:
+    my_scores = []
+    for team in my_teams:
         """
         Out of simplicity _ALL_ scores are retrieved instead of the last one per URL. Last one-per is not supported
         in Django and therefore requires a lot of code. The deviation is negligible during a contest as not so much
@@ -306,19 +303,19 @@ def scores(request):
             ),
         }
 
-        scores.append(score)
+        my_scores.append(score)
 
     # order the scores from high to low.
-    scores = sorted(scores, key=lambda k: (k["total_score"], k["high"], k["medium"], k["low"]), reverse=True)
+    my_scores = sorted(my_scores, key=lambda k: (k["total_score"], k["high"], k["medium"], k["low"]), reverse=True)
 
     return render(
         request,
         "game/scores.html",
-        {"team": get_team_info(request), "scores": scores, "contest": contest, "menu_selected": "scores"},
+        {"team": get_team_info(request), "scores": my_scores, "contest": contest, "menu_selected": "scores"},
     )
 
 
-@cache_page(one_minute)
+@cache_page(ONE_MINUTE)
 def contests(request):
 
     if request.POST:
@@ -329,8 +326,8 @@ def contests(request):
                 request.session["contest"] = form.cleaned_data["id"]
                 request.session["team"] = None  # resetting the team when switching
                 return redirect("/game/team/")
-            else:
-                request.session["contest"] = None
+
+            request.session["contest"] = None
     else:
         form = ContestForm()
 
@@ -379,11 +376,11 @@ def contests(request):
 # todo: validate organizatio type name...
 
 
-@cache_page(one_minute)
+@cache_page(ONE_MINUTE)
 def submitted_organizations(request):
     contest = get_default_contest(request)
 
-    submitted_organizations = (
+    my_submitted_organizations = (
         OrganizationSubmission.objects.all()
         .filter(added_by_team__participating_in_contest=contest)
         .annotate(num_urls=Count("organization_in_system__u_many_o_upgrade"))
@@ -402,14 +399,14 @@ def submitted_organizations(request):
         request,
         "game/submitted_organizations.html",
         {
-            "submitted_organizations": submitted_organizations,
+            "submitted_organizations": my_submitted_organizations,
             "already_known_organizations": already_known_organizations,
             "contest": get_default_contest(request),
         },
     )
 
 
-@cache_page(one_minute)
+@cache_page(ONE_MINUTE)
 def submitted_urls(request):
     """
     todo: overhaul to vue
@@ -418,7 +415,7 @@ def submitted_urls(request):
     """
     contest = get_default_contest(request)
 
-    submitted_urls = get_submitted_urls(contest)
+    my_submitted_urls = get_submitted_urls(contest)
 
     # sqlite, when there is a NULL in the IN query, the set is NULL and you'll get nothing back.
     # subdomains are irrellevant given contestants cannot add them.
@@ -441,7 +438,7 @@ def submitted_urls(request):
     return render(
         request,
         "game/submitted_urls.html",
-        {"submitted_urls": submitted_urls, "already_known_urls": already_known_urls, "contest": contest},
+        {"submitted_urls": my_submitted_urls, "already_known_urls": already_known_urls, "contest": contest},
     )
 
 
@@ -449,11 +446,11 @@ def rules_help(request):
     return render(request, "game/rules_help.html")
 
 
-@cache_page(one_minute)
-def map(request):
+@cache_page(ONE_MINUTE)
+def game_map(request):
     contest = get_default_contest(request)
 
-    submitted_organizations = (
+    my_submitted_organizations = (
         OrganizationSubmission.objects.all()
         .filter(added_by_team__participating_in_contest=contest)
         .annotate(num_urls=Count("organization_in_system__u_many_o_upgrade"))
@@ -467,7 +464,7 @@ def map(request):
             "contest": contest,
             "team": get_team_info(request),
             "submitted_urls": get_submitted_urls(contest),
-            "submitted_organizations": submitted_organizations,
+            "submitted_organizations": my_submitted_organizations,
         },
     )
 
@@ -476,7 +473,7 @@ def get_submitted_urls(contest):
     # Don't use to_attr or prefetch related, as it is not maintainable code and i could not get it to work at all for
     # hours. which was such a waste.
 
-    submitted_urls = (
+    my_submitted_urls = (
         UrlSubmission.objects.all()
         .filter(added_by_team__participating_in_contest=contest)
         .order_by("for_organization", "-added_on", "url")
@@ -545,7 +542,7 @@ def get_submitted_urls(contest):
         lookup_table[key]["endpoint_scans"].append(endpoint_scan)
 
     custom_submitted_urls = []
-    for submitted_url in submitted_urls:
+    for submitted_url in my_submitted_urls:
         relevant_urls_scans = []
         relevant_endpoint_scans = []
 
@@ -780,10 +777,10 @@ def get_bare_organization_feature(submitted_organization):
     }
 
 
-def add_bare_url_features(features, submitted_urls):
+def add_bare_url_features(features, my_submitted_urls):
 
     # submitted url is always for a single organization.
-    for submitted_url in submitted_urls:
+    for submitted_url in my_submitted_urls:
         # as the submitted urls doesn't have ratings etc, we only check if we need to add the organization
         # to the list of features.
 
@@ -921,8 +918,8 @@ def teams(request):
             if form.cleaned_data["team"]:
                 request.session["team"] = form.cleaned_data["team"].id
                 return redirect("/game/scores/")
-            else:
-                request.session["team"] = None
+
+            request.session["team"] = None
 
             request.session.modified = True
             request.session.save()

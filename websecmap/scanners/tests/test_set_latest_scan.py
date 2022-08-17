@@ -2,7 +2,7 @@ from django.utils.timezone import now
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.management.commands.set_latest_scan import reflag_endpointgenericscan
-from websecmap.scanners.models import EndpointGenericScan, Endpoint
+from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 
 def test_reflag_endpointgenericscan(db):

@@ -57,8 +57,9 @@ def repair_corrupted_coordinate(coordinate):
         organizations = Organization.objects.all().filter(coordinate=coordinate)
 
         log.error(
-            "Discovered a point without a coordinate: ID: {%s}. Used by the following "
-            "organizations: {%s}.", coordinate, organizations
+            "Discovered a point without a coordinate: ID: %s. Used by the following organizations: %s.",
+            coordinate,
+            organizations,
         )
 
         log.info("Erroneous coordinate has been deleted.")
@@ -118,10 +119,14 @@ def move_coordinates_to_country(coordinates, country: str = "NL"):
             if not coordinate_is_in_country(coordinate, "NL"):
                 organizations = Organization.objects.all().filter(coordinate=coordinate)
                 log.error(
-                    "Coordinate {%s} is not in {%s} at all, even if we flip it's axis. "
-                    "This coordinate is being used by {%s}. The coordinate area is: {%s}"
+                    "Coordinate %s is not in %s at all, even if we flip it's axis. "
+                    "This coordinate is being used by %s. The coordinate area is: %s"
                     " Is your geofence correct? Or are you missing parts of your country? "
-                    "(Overseas territories?)", coordinate, country, organizations, coordinate.area
+                    "(Overseas territories?)",
+                    coordinate,
+                    country,
+                    organizations,
+                    coordinate.area,
                 )
 
 
@@ -209,7 +214,8 @@ def dedupe_coordinates():
         # todo: what if one has less precision than the other one? How do we figure that out, if that is a problem?
         if coordinates[0].area == coordinates[1].area:
             log.error(
-                "The first two coordinates of {%s} have the same location. "
-                "Both are {%s}. We've deleted the second one.", organization, coordinates[1].area
+                "The first two coordinates of %s have the same location. " "Both are %s. We've deleted the second one.",
+                organization,
+                coordinates[1].area,
             )
             coordinates[1].delete()

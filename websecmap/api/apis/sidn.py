@@ -1,4 +1,5 @@
 import csv
+import logging
 from datetime import datetime
 from io import StringIO
 
@@ -7,10 +8,8 @@ import tldextract
 from django.contrib.auth.models import User
 from django.db.models import Q
 
-import logging
-
 from websecmap.api.models import SIDNUpload
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import Url

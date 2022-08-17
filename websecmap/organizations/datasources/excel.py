@@ -10,7 +10,7 @@ import logging
 import iso3166
 import pyexcel as p
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.organizations.datasources import download_http_get_no_credentials, generic_dataset_import
 
 log = logging.getLogger(__package__)

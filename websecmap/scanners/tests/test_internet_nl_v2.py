@@ -14,8 +14,8 @@ from websecmap.scanners.scanner.internet_nl_v2_websecmap import (
     lowest_value_in_results,
     process_scan_results,
     progress_running_scan,
-    update_state,
     reuse_last_fields_and_set_them_to_error,
+    update_state,
 )
 
 log = logging.getLogger("websecmap")

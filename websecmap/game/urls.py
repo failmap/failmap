@@ -6,7 +6,7 @@ urlpatterns = [
     path("", views.scores),
     path("scores/", views.scores),
     path("team/", views.teams),
-    path("map/", views.map),
+    path("map/", views.game_map),
     path("submitted_urls/", views.submitted_urls),
     path("rules_help/", views.rules_help),
     path("submitted_organizations/", views.submitted_organizations),

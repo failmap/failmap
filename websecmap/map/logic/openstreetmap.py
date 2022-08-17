@@ -123,8 +123,8 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
     :return:
     """
 
-    log.info("Countries: {%s}", countries)
-    log.info("Region(s): {%s}", organization_types)
+    log.info("Countries: %s", countries)
+    log.info("Region(s): %s", organization_types)
 
     if not countries or countries == [None]:
         countries = ["NL"]
@@ -138,7 +138,7 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
         for organization_type in sorted(organization_types):
 
             if not get_region(country, organization_type):
-                log.info(f"The combination of {country} and {organization_type} does not exist in OSM. Skipping.")
+                log.info("The combination of %s and %s does not exist in OSM. Skipping.", country, organization_type)
                 continue
 
             try:
@@ -188,7 +188,7 @@ def store_import_message(country, organization_type, message):
     # Note, that AdministrativeRegion is written to an old copy of this object in the task chain
     # after import is performed. Therefore explicitly set the update field, so not to lose other data.
 
-    log.debug("Update message received for ({%s}/{%s}): {%s}", country, organization_type, message)
+    log.debug("Update message received for (%s/%s): %s", country, organization_type, message)
 
     region = AdministrativeRegion.objects.filter(country=country, organization_type__name=organization_type).first()
 
@@ -208,7 +208,7 @@ def update_coordinates(countries: List[str] = None, organization_types: List[str
     for country in sorted(countries):
         for organization_type in sorted(organization_types):
 
-            log.info("Attempting to update coordinates for: {%s} {%s}.", country, organization_type)
+            log.info("Attempting to update coordinates for: %s %s.", country, organization_type)
 
             # you are about to load 50 megabyte of data. Or MORE! :)
             try:
@@ -221,7 +221,7 @@ def update_coordinates(countries: List[str] = None, organization_types: List[str
                 store_import_message.apply_async([country, organization_type, ex])
                 return
 
-            log.info("Received coordinate data. Starting with: {%s}", json.dumps(data)[0:200])
+            log.info("Received coordinate data. Starting with: %s", json.dumps(data)[0:200])
 
             log.info("Parsing features:")
             for index, feature in enumerate(data["features"]):
@@ -253,7 +253,7 @@ def resample(feature: Dict, resampling_resolution: float = 0.001):
     # downsample the coordinates using the rdp algorithm, mainly to reduce 50 megabyte to a about 150 kilobytes.
     # The code is a little bit dirty, using these counters. If you can refactor, please do :)
 
-    log.info("Resampling path for {%s}", feature['properties']['name'])
+    log.info("Resampling path for %s", feature["properties"]["name"])
 
     if feature["geometry"]["type"] == "Polygon":
         log.debug("Original length: %s", len(feature["geometry"]["coordinates"][0]))
@@ -320,8 +320,9 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
                 iso3316_2_country_code = iso3316_2_country_code[0:2]
 
         if iso3316_2_country_code and country.upper() != iso3316_2_country_code.upper():
-            log.debug("According to wikidata the imported region is not in {%s} but in {%s}.",
-                      country, iso3316_2_country_code)
+            log.debug(
+                "According to wikidata the imported region is not in %s but in %s.", country, iso3316_2_country_code
+            )
             log.debug("Going to save the region under the new country. You probably got too much data back from OSM")
             country = iso3316_2_country_code.upper()
 
@@ -331,7 +332,7 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
         .filter(name=name, country=country, type__name=organization_type, is_dead=False)
         .exists()
     ):
-        log.debug("Organization {%s} exists in country {%s} and type {%s}, skipping.", name, country, organization_type)
+        log.debug("Organization %s exists in country %s and type %s, skipping.", name, country, organization_type)
         return
 
     new_organization = Organization(
@@ -343,7 +344,7 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
         wikipedia=wikipedia_code,
     )
     new_organization.save()  # has to be done in a separate call. can't append .save() to the organization object.
-    log.info(f"Saved new organization: {new_organization}")
+    log.info("Saved new organization: %s", new_organization)
 
     new_coordinate = Coordinate(
         created_on=when if when else datetime.now(pytz.utc),
@@ -353,7 +354,7 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
         area=coordinates["coordinates"],
     )
     new_coordinate.save()
-    log.info("Saved new coordinate: {%s}", new_coordinate)
+    log.info("Saved new coordinate: %s", new_coordinate)
 
     # try to find official urls for this organization, as it's empty now. All those will then be onboarded and scanned.
     if wikidata_code:
@@ -485,7 +486,7 @@ def add_official_websites(organization, wikidata_code):
         if extract.subdomain:
             organization.add_url(f"{extract.subdomain}.{extract.domain}.{extract.suffix}")
         organization.add_url(f"{extract.domain}.{extract.suffix}")
-        log.debug("Added URL {%s}. If it contained 'www', also without 'www'.", website)
+        log.debug("Added URL %s. If it contained 'www', also without 'www'.", website)
 
 
 def get_data_from_wambachers_zipfile(filename):
@@ -531,7 +532,7 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
     filename = create_evil_filename([country, organization_type, str(timezone.now().date())], "zip")
     filename = settings.TOOLS["openstreetmap"]["output_dir"] + filename
 
-    log.debug("Saving data to {%s}", filename)
+    log.debug("Saving data to %s", filename)
 
     # if the file has been downloaded recently, don't do that again.
     four_hours_ago = time.time() - 14400

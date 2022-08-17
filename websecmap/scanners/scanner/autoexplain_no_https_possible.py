@@ -2,11 +2,11 @@ from datetime import timedelta
 
 from celery import group
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan
-from websecmap.scanners.scanner import unique_and_random, finish_those_that_wont_be_scanned
+from websecmap.scanners.scanner import finish_those_that_wont_be_scanned, unique_and_random
 from websecmap.scanners.scanner.autoexplain_trust_microsoft import (
     autoexplain_trust_microsoft_and_include_their_webserver_headers,
 )

@@ -17,11 +17,10 @@ import sys
 
 from django.conf import settings
 from django.conf.urls import include
-from django.urls import re_path
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.template.response import TemplateResponse
-from django.urls import path
+from django.urls import path, re_path
 from rest_framework import routers, serializers, viewsets
 
 # register Jet Dashboard views

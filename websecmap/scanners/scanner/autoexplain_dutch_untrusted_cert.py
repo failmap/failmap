@@ -1,29 +1,24 @@
 import logging
+import socket
+from base64 import b64decode, b64encode
+from datetime import datetime
 from time import sleep
+from typing import List
 
-from celery import group, Task
+import OpenSSL
+import pytz
+from celery import Task, group
+from django.utils import timezone
+from OpenSSL import SSL
+from OpenSSL.crypto import FILETYPE_PEM, dump_certificate, load_certificate
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan
-from websecmap.scanners.scanner import unique_and_random, finish_those_that_wont_be_scanned
-
+from websecmap.scanners.scanner import finish_those_that_wont_be_scanned, unique_and_random
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
-
-
-from base64 import b64encode, b64decode
-from datetime import datetime
-from typing import List
-import socket
-
-import OpenSSL
-import pytz
-from OpenSSL.crypto import FILETYPE_PEM, dump_certificate, load_certificate
-from django.utils import timezone
-from OpenSSL import SSL
-
 
 log = logging.getLogger(__package__)
 
@@ -80,14 +75,14 @@ def compose_scan_task(urls: List[Url]) -> Task:
 def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
     # https://stackoverflow.com/questions/19145097/getting-certificate-chain-with-python-3-3-ssl-module
     # Relatively new Dutch governmental sites relying on anything less < TLS 1.2 is insane.
-    log.debug("Retrieving certificate chain from {%s}:{%s}.", url, port)
+    log.debug("Retrieving certificate chain from %s:%s.", url, port)
     try:
         # Todo: does still go to the ipv4 version if told to user AF-INET6. The workers should restrict it.
         # Decide which IP-version to use
         socket_ip_version = socket.AF_INET if ip_version == 4 else socket.AF_INET6
         # Use with statements so sockets/connections close automatically
-        with socket.socket(socket_ip_version, socket.SOCK_STREAM) as s:
-            conn = SSL.Connection(context=SSL.Context(SSL.TLSv1_2_METHOD), socket=s)
+        with socket.socket(socket_ip_version, socket.SOCK_STREAM) as sock:
+            conn = SSL.Connection(context=SSL.Context(SSL.TLSv1_2_METHOD), socket=sock)
             conn.connect((url, port))
 
             # Deal with WantReadError errors
@@ -108,9 +103,9 @@ def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
             return serialize_cert_chain(chain) if chain else []
 
     # get address info error (DNS issues) can be retried a few times.
-    except Exception as e:  # noqa
+    except Exception as my_exception:  # noqa
         # Log these exceptions to see what happens.
-        log.debug(e)
+        log.debug(my_exception)
         # Name does not resolve, wantread errors etc etc etc... there is no great code out there and can't make it
         return []
 
@@ -142,7 +137,7 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates:
     last_cert: OpenSSL.crypto.X509 = certificates[-1]
 
     if not isinstance(last_cert, OpenSSL.crypto.X509):
-        log.debug("Not an x509 instance but a {%s}.", type(last_cert))
+        log.debug("Not an x509 instance but a %s.", type(last_cert))
         return False
 
     expected_digest = b"C6:C1:BB:C7:1D:4F:30:C7:6D:4D:B3:AF:B5:D0:66:DE:49:9E:9A:2D"

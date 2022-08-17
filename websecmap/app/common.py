@@ -1,30 +1,33 @@
 import datetime
+
 import simplejson
+
+# Note that the variable "o" is mandatory
 
 
 class ResultEncoder(simplejson.JSONEncoder):
     """JSON encoder that serializes results from celery tasks."""
 
-    def default(self, value):
-        if isinstance(value, Exception):
-            error = {"error": value.__class__.__name__, "message": str(value)}
-            if value.__cause__:
-                error["cause"] = self.default(value.__cause__)
+    def default(self, o):
+        if isinstance(o, Exception):
+            error = {"error": o.__class__.__name__, "message": str(o)}
+            if o.__cause__:
+                error["cause"] = self.default(o.__cause__)
             return error
-        else:
-            return super().default(value)
+
+        return super().default(o)
 
 
 class JSEncoder(simplejson.JSONEncoder):
     """JSON encoder to serialize results to be consumed by Javascript web apps."""
 
-    def default(self, obj):
+    def default(self, o):
         # convert python datetime objects into a standard parsable by javascript
-        if isinstance(obj, datetime.datetime):
-            return obj.isoformat()
-        elif isinstance(obj, datetime.date):
-            return obj.isoformat()
-        elif isinstance(obj, datetime.timedelta):
-            return (datetime.datetime.min + obj).time().isoformat()
-        else:
-            return super().default(obj)
+        if isinstance(o, datetime.datetime):
+            return o.isoformat()
+        if isinstance(o, datetime.date):
+            return o.isoformat()
+        if isinstance(o, datetime.timedelta):
+            return (datetime.datetime.min + o).time().isoformat()
+
+        return super().default(o)

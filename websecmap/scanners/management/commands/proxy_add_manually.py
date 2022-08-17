@@ -16,5 +16,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        for ip in options["ips"]:
-            ScanProxy.add_address(ip)
+        for ip_address in options["ips"]:
+            ScanProxy.add_address(ip_address)

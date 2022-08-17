@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 from dateutil.relativedelta import relativedelta
 
-from websecmap.map.logic.map import get_map_data, get_cached_map_data
+from websecmap.map.logic.map import get_cached_map_data, get_map_data
 from websecmap.map.models import MapDataCache
 from websecmap.organizations.models import OrganizationType
 

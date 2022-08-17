@@ -1,3 +1,7 @@
+# pylint: disable=too-many-lines
+# The amount of lines (1400+) is what you get when also defining constance and admin menus, they can be placed elsewhere
+# at the cost of complexity, which is not a good choice.
+
 """Django settings for websecmap project.
 
 You do not need to edit the settings listed below.
@@ -12,13 +16,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 import os
-from corsheaders.defaults import default_headers
 
 # required until fixed: https://github.com/jazzband/django-constance/issues/263
 from collections import OrderedDict
 from datetime import timedelta
 
 import sentry_sdk
+from corsheaders.defaults import default_headers
 from django.utils.translation import gettext_lazy as _
 from pkg_resources import get_distribution
 from sentry_sdk.integrations.celery import CeleryIntegration
@@ -102,7 +106,6 @@ INSTALLED_APPS = [
     "django_countries",
     "django.contrib.admindocs",
     "django.contrib.humanize",
-    "compressor",
     "django_celery_beat",
     "proxy",
     "django_statsd",
@@ -133,7 +136,7 @@ try:
     # hack to disable django_uwsgi app as it currently conflicts with compressor
     # https://github.com/django-compressor/django-compressor/issues/881
     if not os.environ.get("COMPRESS", False):
-        import django_uwsgi  # NOQA
+        import django_uwsgi  # NOQA  # pylint: disable=unused-import
 
         INSTALLED_APPS += [
             "django_uwsgi",
@@ -144,7 +147,7 @@ except ImportError:
 
 # don't run this in production
 try:
-    import django_extensions  # NOQA
+    import django_extensions  # NOQA  # pylint: disable=unused-import
 
     INSTALLED_APPS += ["django_extensions"]
 except ImportError:
@@ -440,45 +443,15 @@ TOOLS = {
     },
 }
 
-# Compression
-# Django-compressor is used to compress css and js files in production
-# During development this is disabled as it does not provide any feature there
-# Django-compressor configuration defaults take care of this.
-# https://django-compressor.readthedocs.io/en/latest/usage/
-# which plugins to use to find static files
-STATICFILES_FINDERS = (
-    # default static files finders
-    "django.contrib.staticfiles.finders.FileSystemFinder",
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-    # other finders..
-    "compressor.finders.CompressorFinder",
-)
-
-COMPRESS_CSS_FILTERS = ["compressor.filters.cssmin.CSSCompressorFilter"]
-
-# Slimit doesn't work with vue. Tried two versions. Had to rewrite some other stuff.
-# Now using the default, so not explicitly adding that to the settings
-# COMPRESS_JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
-
-# Brotli compress storage gives some issues.
-# This creates the original compressed and a gzipped compressed file.
-COMPRESS_STORAGE = "compressor.storage.GzipCompressorFileStorage"
 
 # Disable caching during development and production.
 # Django only emits caching headers, the webserver/caching-proxy makes sure the rest of the caching is handled.
-
-
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.dummy.DummyCache",
     }
 }
 
-# Enable static file (js/css) compression when not running debug
-# https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_OFFLINE
-COMPRESS_OFFLINE = not DEBUG
-# https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_ENABLED
-# Enabled when debug is off by default.
 
 #####
 # Celery 4.0 settings

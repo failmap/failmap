@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import pytz
 import tldextract
 from django.core.exceptions import ValidationError
-from django.db import models, transaction, IntegrityError
+from django.db import IntegrityError, models, transaction
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
@@ -123,8 +123,8 @@ class Organization(models.Model):
 
         if self.is_dead:
             return f"✝ {self.name}, {self.country}/{type_label} ({self.created_on.strftime('%b %Y')})"
-        else:
-            return f"{self.name}, {self.country}/{type_label} ({self.created_on.strftime('%b %Y')})"
+
+        return f"{self.name}, {self.country}/{type_label} ({self.created_on.strftime('%b %Y')})"
 
     def add_url(self, url: str):
 
@@ -335,8 +335,8 @@ class Url(models.Model):
     def __str__(self):
         if self.is_dead:
             return f"✝ {self.url}"
-        else:
-            return self.url
+
+        return self.url
 
     def make_unresolvable(self, message, date):
         self.not_resolvable = True
@@ -390,50 +390,50 @@ class Url(models.Model):
     @transaction.atomic
     def add_subdomain(self, subdomain, internal_notes: str = ""):
         # import here to prevent circular/cyclic imports, this module imports Url.
-        from websecmap.scanners.scanner.http import resolves
+        from websecmap.scanners.scanner.http import resolves  # pylint: disable=import-outside-toplevel
 
         if not subdomain:
-            return
+            return None
 
         new_url = (subdomain + "." + self.url).lower()
 
         if not Url.is_valid_url(new_url):
             log.debug("Subdomain not valid: %s", new_url)
-            return
+            return None
 
         if Url.objects.all().filter(url=new_url, organization__in=self.organization.all()).exists():
             log.debug("Subdomain already in the database: %s", new_url)
-            return
+            return None
 
         if not resolves(new_url):
             log.debug("New subdomain did not resolve on either ipv4 and ipv6: %s", new_url)
-            return
+            return None
 
         try:
             with transaction.atomic():
                 # we found something that gives the idea that transactions are not working.
-                u, created = Url.objects.get_or_create(url=new_url)
+                my_url, created = Url.objects.get_or_create(url=new_url)
                 if not created:
                     log.warning(
                         "The url already existed in the database, even while all prior checks in "
                         "this transaction told us otherwise."
                     )
-                    return
-        except IntegrityError as e:
-            log.error(e)
-            return
+                    return None
+        except IntegrityError as my_exception:
+            log.error(my_exception)
+            return None
 
         if internal_notes:
-            u.internal_notes = internal_notes
-            u.save()
+            my_url.internal_notes = internal_notes
+            my_url.save()
 
         # A Url needs to have a value for field "id" before a many-to-many relationship can be used.
         for organization in self.organization.all():
-            u.organization.add(organization)
-            u.save()
+            my_url.organization.add(organization)
+            my_url.save()
             log.info("Added url: %s to organization: %s", new_url, organization)
 
-        return u
+        return my_url
 
     @staticmethod
     def is_valid_url(url: str):

@@ -6,13 +6,13 @@ from freezegun import freeze_time
 
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners.models import (
+    Activity,
     Endpoint,
     EndpointGenericScan,
     PlannedScan,
     PlannedScanStatistic,
     Scanner,
     State,
-    Activity,
 )
 from websecmap.scanners.plannedscan import (
     calculate_progress,
@@ -21,8 +21,8 @@ from websecmap.scanners.plannedscan import (
     pickup,
     request,
     reset,
-    store_progress,
     retrieve_endpoints_from_urls,
+    store_progress,
 )
 from websecmap.scanners.scanner.tls_qualys import plan_scan
 

@@ -8,7 +8,7 @@ import json
 import logging
 from copy import copy
 from datetime import datetime, timedelta
-from typing import List, Tuple, Dict, Any
+from typing import Any, Dict, List, Tuple
 
 import pytz
 import tldextract
@@ -18,7 +18,7 @@ from django.db import transaction
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import Endpoint, InternetNLV2Scan, InternetNLV2StateLog, EndpointGenericScan
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, InternetNLV2Scan, InternetNLV2StateLog
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.internet_nl_v2 import InternetNLApiSettings, register, result, status
 
@@ -122,7 +122,7 @@ def initialize_scan(scan_type: str, domains: List[int]) -> int:
 @app.task(queue="storage")
 def check_running_internet_nl_scans() -> Task:
     scans = InternetNLV2Scan.objects.all().exclude(state__in=["finished", "error", "cancelled"])
-    log.debug("Checking the state of scan {%s}.", scans)
+    log.debug("Checking the state of scan %s.", scans)
     tasks = [progress_running_scan(scan.pk) for scan in scans]
 
     return group(tasks)
@@ -189,7 +189,7 @@ def progress_running_scan(scan_id: int) -> Task:
         # because this is a transaction, crashes such as value errors are not written to the database.
         scan = InternetNLV2Scan.objects.get(id=scan_id)
         next_step = steps.get(scan.state, handle_unknown_state)
-        log.debug("Internet.nl scan #{%s} is being progressed from {%s}.", scan.id, scan.state)
+        log.debug("Internet.nl scan #%s is being progressed from %s.", scan.id, scan.state)
         return next_step(scan.id)
 
 
@@ -199,7 +199,7 @@ def recover_and_retry(scan_id: int):
 
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
-        log.debug("Could not retrieve scan {%s}.", scan_id)
+        log.debug("Could not retrieve scan %s.", scan_id)
         return group([])
 
     valid_states = ["requested", "registered", "running scan", "scan results ready", "scan results stored"]
@@ -212,8 +212,9 @@ def recover_and_retry(scan_id: int):
     # get the latest valid state from the scan log:
     latest_valid = InternetNLV2StateLog.objects.all().filter(scan=scan, state__in=valid_states).order_by("-id").first()
 
-    log.debug("Internet.nl scan #{%s} is rolled back to retry from '{%s}' to '{%s}'.",
-              scan.id, scan.state, latest_valid.state)
+    log.debug(
+        "Internet.nl scan #%s is rolled back to retry from '%s' to '%s'.", scan.id, scan.state, latest_valid.state
+    )
 
     if scan.state in error_states:
         update_state(scan.pk, latest_valid.state, f"Rolled back from error state '{scan.state}', retrying.")
@@ -236,7 +237,7 @@ def handle_unknown_state(scan_id):
 
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
-        log.debug("Could not retrieve scan {%s}.", scan_id)
+        log.debug("Could not retrieve scan %s.", scan_id)
         return group([])
 
     # not the state check, but the moment the state was created...
@@ -250,7 +251,7 @@ def handle_unknown_state(scan_id):
 def registering_scan_at_internet_nl(scan_id):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
-        log.debug("Could not retrieve scan {%s}.", scan_id)
+        log.debug("Could not retrieve scan %s.", scan_id)
         return group([])
 
     update_state(scan.pk, "registering", "registering scan at internet.nl")
@@ -274,7 +275,7 @@ def registering_scan_at_internet_nl(scan_id):
 def running_scan(scan_id: int):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
-        log.debug("Could not retrieve scan {%s}.", scan_id)
+        log.debug("Could not retrieve scan %s.", scan_id)
         return group([])
 
     update_state(scan.pk, "running scan", "Running scan at internet.nl")
@@ -288,7 +289,7 @@ def running_scan(scan_id: int):
 def continue_running_scan(scan_id: int):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
-        log.debug("Could not retrieve scan {%s}.", scan_id)
+        log.debug("Could not retrieve scan %s.", scan_id)
         return group([])
 
     if not valid_api_settings(scan):
@@ -300,7 +301,7 @@ def continue_running_scan(scan_id: int):
 def storing_scan_results(scan_id: int):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
-        log.debug("Could not retrieve scan {%s}.", scan_id)
+        log.debug("Could not retrieve scan %s.", scan_id)
         return group([])
 
     update_state(scan.pk, "storing scan results", "")
@@ -314,7 +315,7 @@ def storing_scan_results(scan_id: int):
 def processing_scan_results(scan_id: int):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
-        log.debug("Could not retrieve scan {%s}.", scan_id)
+        log.debug("Could not retrieve scan %s.", scan_id)
         return []
 
     update_state(scan.pk, "processing scan results", "")
@@ -325,7 +326,7 @@ def processing_scan_results(scan_id: int):
 def update_state(scan_id: int, new_state: str, new_state_message: str):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
-        log.debug("Could not retrieve scan {%s}.", scan_id)
+        log.debug("Could not retrieve scan %s.", scan_id)
         return
 
     # see if we need to update anything
@@ -359,7 +360,7 @@ def update_state(scan_id: int, new_state: str, new_state_message: str):
     statelog.last_state_check = datetime.now(pytz.utc)
     statelog.save()
 
-    log.debug("Internet.nl scan #{%s} state changed from '{%s}' to '{%s}'.", scan.id, old_state, new_state)
+    log.debug("Internet.nl scan #%s state changed from '%s' to '%s'.", scan.id, old_state, new_state)
 
 
 def api_has_usable_response(response, scan_id):
@@ -384,6 +385,9 @@ def api_has_usable_response(response, scan_id):
 
     if status_code == 200:
         return True
+
+    update_state(scan_id, "unexpected_response", json.dumps(response_content))
+    return False
 
 
 ########################################################################################################################
@@ -429,12 +433,12 @@ def registration_administration(response: Tuple[int, dict], scan_id: int):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
         log.debug("Could not retrieve scan %s.", scan_id)
-        return []
+        return
 
     if not api_has_usable_response(response, scan.pk):
         return
 
-    status_code, response_content = response
+    _, response_content = response
 
     # todo: duplicated "request" in "request".
     scan.scan_id = response_content["request"]["request_id"]
@@ -473,12 +477,12 @@ def status_administration(response: Tuple[int, dict], scan_id: int):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
         log.debug("Could not retrieve scan %s.", scan_id)
-        return []
+        return
 
     if not api_has_usable_response(response, scan_id):
         return
 
-    status_code, response_content = response
+    _, response_content = response
 
     if response_content["request"]["status"] == "registering":
         # follow scan progression at internet.nl, update the status message with that information.
@@ -526,12 +530,12 @@ def result_administration(response: Tuple[int, dict], scan_id: int):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
         log.debug("Could not retrieve scan %s.", scan_id)
-        return []
+        return
 
     if not api_has_usable_response(response, scan_id):
         return
 
-    status_code, response_content = response
+    _, response_content = response
 
     scan.metadata = response_content["request"]
     scan.retrieved_scan_report = response_content["domains"]
@@ -553,8 +557,8 @@ def process_scan_results(scan_id: int):
 
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
-        log.debug("Could not retrieve scan {%s}.", scan_id)
-        return []
+        log.debug("Could not retrieve scan %s.", scan_id)
+        return
 
     domains = scan.retrieved_scan_report.keys()
 

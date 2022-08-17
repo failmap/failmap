@@ -1,16 +1,15 @@
 import logging
 from datetime import timedelta
 
+import dns
 from celery import group
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan
-import dns
-
-from websecmap.scanners.scanner import unique_and_random, finish_those_that_wont_be_scanned
+from websecmap.scanners.scanner import finish_those_that_wont_be_scanned, unique_and_random
 
 log = logging.getLogger(__package__)
 
@@ -86,11 +85,11 @@ def scan(scan_id):
         result = dns.resolver.resolve(endpoint_generic_scan.endpoint.url.url, "CNAME")
         for cnameval in result:
             # don't accept trickery such as autodiscover.outlook.com.mydomain.com.
-            log.debug("Retrieved cname value: {%s}.", cnameval)
+            log.debug("Retrieved cname value: %s.", cnameval)
             if "autodiscover.outlook.com." == str(cnameval):
                 log.debug("Perfect match, will add automatic explanation.")
                 add_bot_explanation(endpoint_generic_scan, EXPLANATION, timedelta(days=365 * 10))
-    except dns.exception.DNSException as e:
-        log.debug("Received an expectable error from dns server: {%s}.", e)
+    except dns.exception.DNSException as exc:
+        log.debug("Received an expectable error from dns server: %s.", exc)
         # can happen of course.
         # sample: dns.resolver.NXDOMAIN, dns.exception.Timeout, dns.resolver.NoAnswer, dns.query.BadResponse

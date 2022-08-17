@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Url
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
@@ -436,7 +436,7 @@ def discover(url: str, port: int):
         ftp.connect(url, port, FTP_SERVER_TIMEOUT)
         connected = True
         ftp.close()
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         # we really don't care about an url that doesn't repond. 99% will not connect.
         pass
 

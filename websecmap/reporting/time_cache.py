@@ -1,12 +1,13 @@
 # Isn't this what redis is supposed to do? :)
 from datetime import datetime
+
 import pytz
 
 CACHE_DURATION_SECONDS = 600
 CACHE = {}
 
 
-def get(key):
+def cache_get(key):
     expired = datetime.now(pytz.utc).timestamp() - CACHE_DURATION_SECONDS
 
     if CACHE.get(key, None):
@@ -20,6 +21,6 @@ def get(key):
     return None
 
 
-def set(key, value):
+def cache_set(key, value):
     CACHE[key] = {"value": value, "time": datetime.now(pytz.utc).timestamp()}
     return value

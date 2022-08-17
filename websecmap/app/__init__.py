@@ -29,4 +29,5 @@ class Websecmap(AppConfig):
                 )
 
 
-default_app_config = "websecmap.app.Websecmap"
+# This statement might be obsoleted by newer versions of the django framework
+default_app_config = "websecmap.app.Websecmap"  # pylint: disable=invalid-name

@@ -21,7 +21,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         with open("websecmap/organizations/fixtures/testdata.yaml", "r", encoding="utf-8") as yaml_in, open(
-            "websecmap/organizations/fixtures/testdata.json", "w"
+            "websecmap/organizations/fixtures/testdata.json", "w", encoding="utf-8"
         ) as json_out:
 
             yaml_object = yaml.safe_load(yaml_in)  # yaml_object will be a list or a dict

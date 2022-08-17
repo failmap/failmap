@@ -56,12 +56,12 @@ class Command(BaseCommand):
             log.info("Received keyboard interrupt. Stopped.")
 
 
-def valid_date(s):
+def valid_date(string):
     try:
-        return datetime.strptime(s, "%Y-%m-%d")
-    except ValueError:
-        msg = f"Not a valid date: '{s}' - The format is YYYY-MM-DD."
-        raise argparse.ArgumentTypeError(msg)
+        return datetime.strptime(string, "%Y-%m-%d")
+    except ValueError as exc:
+        msg = f"Not a valid date: '{string}' - The format is YYYY-MM-DD."
+        raise argparse.ArgumentTypeError(msg) from exc
 
 
 # This allows for longer / larger revive actions to be cancelled while processing.

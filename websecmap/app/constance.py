@@ -33,7 +33,7 @@ def get_bulk_values_starting_with(starts_with: str):
     values = admin.get_values()
 
     # and now extract the keys we want to have
-    return {key: values[key] for key in values.keys() if key.startswith(starts_with)}
+    return {key: values[key] for key in values if key.startswith(starts_with)}
 
 
 def constance_cached_value(key):

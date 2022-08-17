@@ -11,7 +11,7 @@ from websecmap.app import dashboard_modules
 log = logging.getLogger(__name__)
 
 
-class ResetUserWidgetConfiguration:
+class ResetUserWidgetConfiguration(Dashboard):
     """This makes sure the user widget configurion stored in database is updated when the Dashboard class changes."""
 
     # https://github.com/geex-arts/django-jet/issues/26#issuecomment-309881393
@@ -26,7 +26,7 @@ class ResetUserWidgetConfiguration:
             order = module.order if module.order is not None else int(i / self.columns)
 
             try:
-                obj, created = UserDashboardModule.objects.get_or_create(
+                obj, _ = UserDashboardModule.objects.get_or_create(
                     title=module.title,
                     app_label=self.app_label,
                     user=user.pk,
@@ -57,7 +57,7 @@ class ResetUserWidgetConfiguration:
         self.modules = loaded_modules
 
 
-class CustomIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
+class CustomIndexDashboard(ResetUserWidgetConfiguration):
     columns = 3
 
     def init_with_context(self, context):
@@ -120,7 +120,7 @@ class CustomIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
         )
 
 
-class CustomAppIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
+class CustomAppIndexDashboard(ResetUserWidgetConfiguration):
     columns = 2
 
     def init_with_context(self, context):

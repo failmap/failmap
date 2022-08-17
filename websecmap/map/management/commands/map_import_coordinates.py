@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
         parser.add_argument("--country", help="Country code. Eg: NL, DE, EN", required=False)
 
-        parser.add_argument("--region", help="Region: municipality, province, water\ board ...", required=False)
+        parser.add_argument("--region", help="Region: municipality, province, water board ...", required=False)
 
         parser.add_argument(
             "--date",
@@ -59,6 +59,6 @@ class Command(BaseCommand):
 def valid_date(string):
     try:
         return datetime.strptime(string, "%Y-%m-%d")
-    except ValueError:
+    except ValueError as exc:
         msg = f"Not a valid date: '{string}'."
-        raise ArgumentTypeError(msg)
+        raise ArgumentTypeError(msg) from exc

@@ -82,7 +82,7 @@ def calculate_impact():
             "good": {"high": 0, "medium": 0, "low": 0, "good": 0},
         }
     # count down id's, so there is some feeling on how long it will take.
-    log.debug("Calculating impact for country: {%s}.", config.PROJECT_COUNTRY)
+    log.debug("Calculating impact for country: %s.", config.PROJECT_COUNTRY)
     # do not take endpoints that are "switching" on and off, only alive endpoints and urls
     all_endpoints = (
         Endpoint.objects.all()

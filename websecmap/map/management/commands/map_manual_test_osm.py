@@ -18,7 +18,7 @@ class Command(BaseCommand):
         query = f"""area["ISO3166-2"~"^{country}"]->.gem; relation(area.gem)[type=boundary]
         [boundary=administrative][admin_level={admin_level}]; out geom;"""
 
-        log.debug("Performing overpass query {%s}.", query)
+        log.debug("Performing overpass query %s.", query)
         response = requests.post(
             "http://www.overpass-api.de/api/interpreter",
             data={"data": query, "submit": "Query"},
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         )
 
         log.debug("Response from server:")
-        log.info("{%s}", response.content[0:250])
+        log.info("%s", response.content[0:250])
         response.raise_for_status()
 
         log.info("Test completed successfully.")

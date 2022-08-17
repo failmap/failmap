@@ -10,9 +10,9 @@ import logging
 
 from celery import Task, group
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
@@ -29,10 +29,10 @@ log = logging.getLogger(__package__)
 
 # These messages are translated and expected lateron. Don't edit them unless you're also editing them in the reporting
 # etc etc.
-cleaned_up = "Has a secure equivalent, which wasn't so in the past."
-not_resolvable_at_all = "Cannot be resolved anymore, seems to be cleaned up."
-saved_by_the_bell = "Redirects to a secure site, while a secure counterpart on the standard port is missing."
-no_https_at_all = "Site does not redirect to secure url, and has no secure alternative on a standard port."
+CLEANED_UP = "Has a secure equivalent, which wasn't so in the past."
+NOT_RESOLVABLE_AT_ALL = "Cannot be resolved anymore, seems to be cleaned up."
+SAVED_BY_THE_BELL = "Redirects to a secure site, while a secure counterpart on the standard port is missing."
+NO_HTTPS_AT_ALL = "Site does not redirect to secure url, and has no secure alternative on a standard port."
 
 
 def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
@@ -48,7 +48,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
             endpoint__port=80,
             **urls_filter,
         ).only("id", "url")
-        log.info("Creating scan task {%s} urls for {%s} organizations.", len(urls), len(organizations))
+        log.info("Creating scan task %s urls for %s organizations.", len(urls), len(organizations))
     else:
         urls = Url.objects.filter(
             q_configurations_to_scan(),
@@ -59,7 +59,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
             endpoint__port=80,
             **urls_filter,
         ).only("id", "url")
-        log.info("Creating scan plain http task {%s} urls.", len(urls))
+        log.info("Creating scan plain http task %s urls.", len(urls))
 
     return unique_and_random(urls)
 
@@ -174,7 +174,7 @@ def get_endpoints_with_missing_encryption(url):
 def well_done(endpoint_id):
 
     if endpoint_has_scans("plain_https", endpoint_id):
-        store_endpoint_scan_result("plain_https", endpoint_id, "0", cleaned_up)
+        store_endpoint_scan_result("plain_https", endpoint_id, "0", CLEANED_UP)
 
 
 # Task is written to work both on v4 and v6, but the network conf of the machine differs.
@@ -263,14 +263,14 @@ def store(results, endpoint_id):
     # issue resolved.
     if can_connect_result["result"]:
         if endpoint_has_scans("plain_https", endpoint_id):
-            store_endpoint_scan_result("plain_https", endpoint_id, "0", cleaned_up)
+            store_endpoint_scan_result("plain_https", endpoint_id, "0", CLEANED_UP)
 
     # Really no security at all
     if not can_connect_result["result"] and redirects_to_safety_result is False:
         log.info("%s does not have a https site. Saving/updating scan.", endpoint.url)
-        store_endpoint_scan_result("plain_https", endpoint_id, "1000", no_https_at_all)
+        store_endpoint_scan_result("plain_https", endpoint_id, "1000", NO_HTTPS_AT_ALL)
 
     # some redirections that might have flaws etc.
     if not can_connect_result["result"] and redirects_to_safety_result is True:
         log.info("%s redirects to safety, saved by the bell.", endpoint.url)
-        store_endpoint_scan_result("plain_https", endpoint_id, "25", saved_by_the_bell)
+        store_endpoint_scan_result("plain_https", endpoint_id, "25", SAVED_BY_THE_BELL)

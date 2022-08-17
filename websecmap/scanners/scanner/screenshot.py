@@ -32,8 +32,8 @@ from django.core.files import File
 from django.db.models import Q
 from PIL import Image
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, Screenshot
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.__init__ import endpoint_filters, q_configurations_to_scan, unique_and_random
@@ -101,9 +101,9 @@ def compose_scan_task(urls):
     v4_service = config.SCREENSHOT_API_URL_V4
     v6_service = config.SCREENSHOT_API_URL_V6
 
-    log.info("Trying to make {%s} screenshots.", len(endpoints))
-    log.info("Screenshots will be stored at: {%s}screenshots/", settings.MEDIA_ROOT)
-    log.info("IPv4 screenshot service: {%s}, IPv6 screenshot service: {%s}", v4_service, v6_service)
+    log.info("Trying to make %s screenshots.", len(endpoints))
+    log.info("Screenshots will be stored at: %sscreenshots/", settings.MEDIA_ROOT)
+    log.info("IPv4 screenshot service: %s, IPv6 screenshot service: %s", v4_service, v6_service)
     tasks = [
         make_screenshot.si(v4_service, endpoint.uri_url()) | save_screenshot.s(endpoint.id)
         for endpoint in endpoints
@@ -153,22 +153,24 @@ def save_screenshot(response, endpoint_id):
     if isinstance(response, TimeoutError):
         log.debug(
             "Received exception at save screenshot, not saving. Probably took too long to paint page due to"
-            "a too complex page or a terribly slow server. This is business as usual. Details: {%s}", response
+            "a too complex page or a terribly slow server. This is business as usual. Details: %s",
+            response,
         )
         return False
 
     if isinstance(response, Exception):
         log.exception(
             "Received unexpected exception at save screenshot, not saving. "
-            "Is the screenshot service available at this address? Details: {%s}", response
+            "Is the screenshot service available at this address? Details: %s",
+            response,
         )
         return False
 
     # with an invalid / non-resolvable address, a 500 error is given by the image service.
     if response.status_code == 500:
         log.debug(
-            "Received 500 at the API from {%s}, url probably does not resolve. "
-            "This is business as usual. Not saving.", endpoint_id
+            "Received 500 at the API from %s, url probably does not resolve. " "This is business as usual. Not saving.",
+            endpoint_id,
         )
         return False
 
@@ -178,7 +180,7 @@ def save_screenshot(response, endpoint_id):
         i.thumbnail(size, Image.ANTIALIAS)
         filename = f"{settings.MEDIA_ROOT}screenshots/{endpoint_id}_latest.png"
         i.save(filename, "PNG")
-        log.debug("Image saved as: {%s}.", filename)
+        log.debug("Image saved as: %s.", filename)
 
         scr = Screenshot()
         scr.created_on = datetime.now(pytz.utc).date()
@@ -186,6 +188,8 @@ def save_screenshot(response, endpoint_id):
         scr.image = File(open(filename, "rb"))
         scr.filename = filename
         scr.save()
-        log.debug("Saved in databased as id:{%s} filename:{%s}.", scr.pk, scr.filename)
-    except Exception as e:
-        log.exception(e)
+        log.debug("Saved in databased as id:%s filename:%s.", scr.pk, scr.filename)
+        return True
+    except Exception as my_exception:
+        log.exception(my_exception)
+        return False

@@ -40,6 +40,9 @@ class TaskCommand(BaseCommand):
     # but since management commands are contained in their own invocation this can fly
     args = []
     kwargs = {}
+    # attempt to solve Attribute 'mutual_group'  (attribute-defined-outside-init)
+    mutual_group = None
+    interval = None
 
     def _add_arguments(self, parser):
         """Method to allow subclasses to add command specific arguments."""
@@ -120,14 +123,14 @@ class TaskCommand(BaseCommand):
 
             if options["method"] == "sync":
                 return self.wait_for_result(task_id)
-            else:
-                # if async return taskid to allow query for status later on
-                return [r.id for r in task_id.results]
-        else:
-            # By default execute the task directly without involving celery or a broker.
-            # Return all results without raising exceptions.
-            log.info("Executing task directly.")
-            return self.task.apply(*self.args, **self.kwargs).get(propagate=False)
+
+            # if async return taskid to allow query for status later on
+            return [r.id for r in task_id.results]
+
+        # By default execute the task directly without involving celery or a broker.
+        # Return all results without raising exceptions.
+        log.info("Executing task directly.")
+        return self.task.apply(*self.args, **self.kwargs).get(propagate=False)
 
     def wait_for_result(self, task_id):
         """Wait for all (sub)tasks to complete and return result."""

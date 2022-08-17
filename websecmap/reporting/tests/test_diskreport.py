@@ -4,10 +4,10 @@ from django.utils import timezone
 
 from websecmap.map.models import OrganizationReport
 from websecmap.reporting.diskreport import (
-    sync_reports_from_db_to_disk,
     _read_json_from_gzip,
     location_on_disk,
     retrieve_report,
+    sync_reports_from_db_to_disk,
 )
 from websecmap.scanners.tests.test_plannedscan import create_organization
 

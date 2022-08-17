@@ -2,9 +2,8 @@
 import proxy.views
 from constance import config
 from django.db import connection
-from django.urls import path, register_converter
+from django.urls import path, re_path, register_converter
 from django.views.i18n import JavaScriptCatalog
-from django.urls import re_path
 
 import websecmap.map.logic.rss_feeds
 from websecmap import converters
@@ -42,7 +41,7 @@ static_urlpatterns = [
     path("data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>", views.stats),
     path("data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>/<int:days>/", views.stats),
     path("data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>/<int:days>", views.stats),
-    path("data/stats/what_to_improve/<c:country>/<slug:organization_type>/<str:issue_type>/", views._what_to_improve),
+    path("data/stats/what_to_improve/<c:country>/<slug:organization_type>/<str:issue_type>/", views.v_what_to_improve),
     path("data/short_and_simple_stats/<w:weeks_back>/", views.get_short_and_simple_stats_),
     # defaults
     path("data/defaults/", views.defaults),
@@ -74,7 +73,7 @@ static_urlpatterns = [
         views.organization_vulnerability_timeline,
     ),
     path(
-        "data/organization_vulnerability_timeline/" "<str:organization_name>/<slug:organization_type>/<c:country>",
+        "data/organization_vulnerability_timeline/<str:organization_name>/<slug:organization_type>/<c:country>",
         views.organization_vulnerability_timeline_via_name,
     ),
     path(
@@ -127,14 +126,14 @@ static_urlpatterns = [
     ),
     # Below functions only work in a live environment. You cannot post anything on the public version of this
     # software. It will only work on authenticated domains.
-    path("data/explain/explain/", views._explain),
-    path("data/explain/remove/", views._remove_explain),
-    path("data/admin/urls/add/", views._add_urls),
-    path("data/admin/proxy/add/", views._add_proxies),
-    path("data/admin/map/switch_lat_lng/<oid:organization_id>/", views._switch_lattitude_and_longitude),
-    path("data/admin/organization/add/", views._add_organization),
-    path("data/admin/organization/move_coordinate/", views._move_coordinate),
-    path("data/admin/organization/delete_coordinate/", views._delete_coordinate),
+    path("data/explain/explain/", views.v_explain),
+    path("data/explain/remove/", views.v_remove_explain),
+    path("data/admin/urls/add/", views.v_add_urls),
+    path("data/admin/proxy/add/", views.v_add_proxies),
+    path("data/admin/map/switch_lat_lng/<oid:organization_id>/", views.v_switch_lattitude_and_longitude),
+    path("data/admin/organization/add/", views.v_add_organization),
+    path("data/admin/organization/move_coordinate/", views.v_move_coordinate),
+    path("data/admin/organization/delete_coordinate/", views.v_delete_coordinate),
     # a progress bar for running scans...
     path("data/planned_scan_progress/", views.planned_scan_progress),
     path("data/map_health/<c:country>/<slug:organization_type>/", views.map_health),

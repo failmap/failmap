@@ -11,12 +11,13 @@ from cryptography.x509.oid import NameOID
 
 import websecmap
 from websecmap.organizations.models import Url
-from websecmap.scanners.scanner import autoexplain_dutch_untrusted_cert
-from websecmap.scanners.scanner import autoexplain_trust_microsoft
-from websecmap.scanners.scanner import autoexplain_microsoft_neighboring_services
-from websecmap.scanners.scanner import autoexplain_no_https_microsoft
-
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
+from websecmap.scanners.scanner import (
+    autoexplain_dutch_untrusted_cert,
+    autoexplain_microsoft_neighboring_services,
+    autoexplain_no_https_microsoft,
+    autoexplain_trust_microsoft,
+)
 
 log = logging.getLogger("websecmap")
 

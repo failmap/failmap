@@ -5,11 +5,11 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from websecmap.api.apis.sidn import (
+    get_2ndlevel_domains,
+    get_map_configuration,
     get_uploads,
     get_uploads_with_results,
     sidn_domain_upload,
-    get_map_configuration,
-    get_2ndlevel_domains,
 )
 
 log = logging.getLogger(__package__)

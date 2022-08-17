@@ -1,3 +1,6 @@
+# todo: when removing this file, all tests still seem to run. Is this just a file that should be deleted?
+
+import pytest
 from django.test.runner import DiscoverRunner
 
 
@@ -20,12 +23,11 @@ class PytestTestRunner(DiscoverRunner):
         )
         DiscoverRunner.add_arguments(parser)
 
-    def run_tests(self, test_labels):
+    def run_tests(self, test_labels, extra_tests=None, **kwargs):
         """Run pytest and return the exitcode.
 
         It translates some of Django's test command option to pytest's.
         """
-        import pytest
 
         argv = []
         if self.verbosity == 0:

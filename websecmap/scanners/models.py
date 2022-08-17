@@ -397,48 +397,52 @@ class PlannedScanStatistic(models.Model):
 
 
 class Activity(models.IntegerChoices):
-    unknown = 0, "unknown"
-    discover = 1, "discover"
-    verify = 2, "verify"
-    scan = 3, "scan"
+    # can't switch case anymore. And its also ugly.
+    unknown = 0, "unknown"  # pylint: disable=invalid-name
+    discover = 1, "discover"  # pylint: disable=invalid-name
+    verify = 2, "verify"  # pylint: disable=invalid-name
+    scan = 3, "scan"  # pylint: disable=invalid-name
 
 
 class Scanner(models.IntegerChoices):
     # Map the scanners in __init__.py
-    unknown = 0, "unknown"
-    tls_qualys = 1, "tls_qualys"
-    dnssec = 2, "dnssec"
-    security_headers = 3, "security_headers"
-    plain_http = 4, "plain_http"
-    internet_nl_mail = 5, "internet_nl_mail"
-    ftp = 6, "ftp"
-    dns_endpoints = 7, "dns_endpoints"
-    internet_nl_web = 8, "internet_nl_web"
-    subdomains = 9, "subdomains"
-    dns_known_subdomains = 10, "dns_known_subdomains"
-    dns_clean_wildcards = 11, "dns_clean_wildcards"
-    http = 12, "http"
-    verify_unresolvable = 13, "verify_unresolvable"
-    onboard = 14, "onboard"
-    ipv6 = 15, "ipv6"
-    dns_wildcards = 16, "dns_wildcards"
-    dummy = 17, "dummy"
-    screenshot = 18, "screenshot"
+    unknown = 0, "unknown"  # pylint: disable=invalid-name
+    tls_qualys = 1, "tls_qualys"  # pylint: disable=invalid-name
+    dnssec = 2, "dnssec"  # pylint: disable=invalid-name
+    security_headers = 3, "security_headers"  # pylint: disable=invalid-name
+    plain_http = 4, "plain_http"  # pylint: disable=invalid-name
+    internet_nl_mail = 5, "internet_nl_mail"  # pylint: disable=invalid-name
+    ftp = 6, "ftp"  # pylint: disable=invalid-name
+    dns_endpoints = 7, "dns_endpoints"  # pylint: disable=invalid-name
+    internet_nl_web = 8, "internet_nl_web"  # pylint: disable=invalid-name
+    subdomains = 9, "subdomains"  # pylint: disable=invalid-name
+    dns_known_subdomains = 10, "dns_known_subdomains"  # pylint: disable=invalid-name
+    dns_clean_wildcards = 11, "dns_clean_wildcards"  # pylint: disable=invalid-name
+    http = 12, "http"  # pylint: disable=invalid-name
+    verify_unresolvable = 13, "verify_unresolvable"  # pylint: disable=invalid-name
+    onboard = 14, "onboard"  # pylint: disable=invalid-name
+    ipv6 = 15, "ipv6"  # pylint: disable=invalid-name
+    dns_wildcards = 16, "dns_wildcards"  # pylint: disable=invalid-name
+    dummy = 17, "dummy"  # pylint: disable=invalid-name
+    screenshot = 18, "screenshot"  # pylint: disable=invalid-name
 
-    autoexplain_dutch_untrusted_cert = 100, "autoexplain_dutch_untrusted_cert"
-    autoexplain_trust_microsoft = 101, "autoexplain_trust_microsoft"
-    autoexplain_no_https_microsoft = 102, "autoexplain_no_https_microsoft"
-    autoexplain_microsoft_neighboring_services = 103, "autoexplain_microsoft_neighboring_services"
-    autoexplain_no_https_possible = 104, "autoexplain_no_https_possible"
+    autoexplain_dutch_untrusted_cert = 100, "autoexplain_dutch_untrusted_cert"  # pylint: disable=invalid-name
+    autoexplain_trust_microsoft = 101, "autoexplain_trust_microsoft"  # pylint: disable=invalid-name
+    autoexplain_no_https_microsoft = 102, "autoexplain_no_https_microsoft"  # pylint: disable=invalid-name
+    autoexplain_microsoft_neighboring_services = (  # pylint: disable=invalid-name
+        103,
+        "autoexplain_microsoft_neighboring_services",  # pylint: disable=invalid-name
+    )  # pylint: disable=invalid-name
+    autoexplain_no_https_possible = 104, "autoexplain_no_https_possible"  # pylint: disable=invalid-name
 
 
 class State(models.IntegerChoices):
-    unknown = 0, "unknown"
-    requested = 1, "requested"
-    picked_up = 2, "picked_up"
-    finished = 3, "finished"
-    error = 4, "error"
-    timeout = 5, "timeout"
+    unknown = 0, "unknown"  # pylint: disable=invalid-name
+    requested = 1, "requested"  # pylint: disable=invalid-name
+    picked_up = 2, "picked_up"  # pylint: disable=invalid-name
+    finished = 3, "finished"  # pylint: disable=invalid-name
+    error = 4, "error"  # pylint: disable=invalid-name
+    timeout = 5, "timeout"  # pylint: disable=invalid-name
 
 
 class PlannedScan(models.Model):

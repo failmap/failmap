@@ -1,8 +1,8 @@
+import logging
 from datetime import timedelta
 from typing import Optional
 
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, Screenshot
-import logging
 
 log = logging.getLogger(__package__)
 
@@ -22,7 +22,7 @@ def deduplicate_all_endpoints_sequentially(days: int = 60):
 
     # Iterate over all endpoints from new to old. So all endpoints exist. id descending, newest first.
     for endpoint_id in Endpoint.objects.all().order_by("-discovered_on").only("id").values_list("id", flat=True):
-        log.info(f"Attempting to deduplicate: {endpoint_id}")
+        log.info("Attempting to deduplicate: %s", endpoint_id)
         # Always fetch the latest endpoint state, because it might have been changed by an update.
         fresh_endpoint = Endpoint.objects.all().filter(id=endpoint_id).first()
         if not fresh_endpoint:
@@ -36,10 +36,10 @@ def reduce_if_duplicate_endpoint(endpoint: Endpoint, days: int = 60):
     # Copy the state of the current one to the older one so it's probably alive.
     older_endpoint = get_older_duplicate_endpoint(endpoint, within_days=days)
     if not older_endpoint:
-        log.info(f"No older endpoint exists for {endpoint} in the last {days} days.")
+        log.info("No older endpoint exists for %s in the last %s days.", endpoint, days)
         return
 
-    log.info(f"Going to transfer data from {endpoint} to {older_endpoint}.")
+    log.info("Going to transfer data from %s to %s.", endpoint, older_endpoint)
     # Move all the older stuff to the older endpoint, but set the older endpoint to the current state.
     # This will make the endpoint alive, probably, as that is most likely to be the current state.
     # Afterwards this endpoint becomes useless and can be deleted.
@@ -110,7 +110,7 @@ def deduplicate_all_scans_sequentially():
     for epgs_id in (
         EndpointGenericScan.objects.all().order_by("-rating_determined_on").only("id").values_list("id", flat=True)
     ):
-        log.info("Attempting to deduplicate: {%s}", epgs_id)
+        log.info("Attempting to deduplicate: %s", epgs_id)
         # Always fetch the latest endpoint state, because it might have been changed by an update.
         fresh_epgs = EndpointGenericScan.objects.all().filter(id=epgs_id).first()
         if not fresh_epgs:
@@ -122,10 +122,10 @@ def deduplicate_all_scans_sequentially():
 def reduce_if_duplicate_scan(scan: EndpointGenericScan):
     older_scan = get_older_duplicate_scan(scan)
     if not older_scan:
-        log.info("No older endpoint exists for {%s}.", scan)
+        log.info("No older endpoint exists for %s.", scan)
         return
 
-    log.info("Going to transfer data from {%s} to {%s}.", scan, older_scan)
+    log.info("Going to transfer data from %s to %s.", scan, older_scan)
     # when both scans where stored at the same time, one is the latest scan. Merge those too.
     if not older_scan.is_the_latest_scan:
         log.info("Transferred latest scan information")
@@ -150,8 +150,9 @@ def reduce_if_duplicate_scan(scan: EndpointGenericScan):
 
     # Migrate the last scan moment
     log.debug(
-        "Migrating the last scan moment, setting it to the newer scan. "
-        "From {%s} to {%s}", older_scan.last_scan_moment, scan.last_scan_moment
+        "Migrating the last scan moment, setting it to the newer scan. From %s to %s",
+        older_scan.last_scan_moment,
+        scan.last_scan_moment,
     )
     older_scan.last_scan_moment = scan.last_scan_moment
     older_scan.save()
@@ -187,5 +188,5 @@ def get_older_duplicate_scan(scan: EndpointGenericScan) -> Optional[EndpointGene
         log.info("Previous scan had different characteristics, cannot deduplicate.")
         return None
 
-    log.info("Found a previous scan for {%s}, which is {%s}.", scan, possible_duplicate)
+    log.info("Found a previous scan for %s, which is %s.", scan, possible_duplicate)
     return possible_duplicate

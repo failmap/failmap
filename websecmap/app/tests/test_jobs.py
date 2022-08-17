@@ -2,7 +2,7 @@ import pytest
 from django.contrib.auth.models import User
 
 from websecmap.app.models import Job
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 
 
 @pytest.fixture

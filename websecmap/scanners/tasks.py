@@ -6,6 +6,11 @@ from celery import group
 from websecmap.map.views import screenshot
 from websecmap.scanners import plannedscan, proxy
 from websecmap.scanners.scanner import (
+    autoexplain_dutch_untrusted_cert,
+    autoexplain_microsoft_neighboring_services,
+    autoexplain_no_https_microsoft,
+    autoexplain_no_https_possible,
+    autoexplain_trust_microsoft,
     dns_endpoints,
     dns_known_subdomains,
     dns_wildcards,
@@ -20,11 +25,6 @@ from websecmap.scanners.scanner import (
     subdomains,
     tls_qualys,
     verify_unresolvable,
-    autoexplain_trust_microsoft,
-    autoexplain_no_https_microsoft,
-    autoexplain_microsoft_neighboring_services,
-    autoexplain_dutch_untrusted_cert,
-    autoexplain_no_https_possible,
 )
 
 log = logging.getLogger(__name__)

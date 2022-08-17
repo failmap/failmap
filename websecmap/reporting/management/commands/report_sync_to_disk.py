@@ -3,7 +3,7 @@ import logging
 from django.core.management import BaseCommand
 
 from websecmap.map.models import OrganizationReport
-from websecmap.reporting.diskreport import sync_reports_from_db_to_disk, get_original_storage_location
+from websecmap.reporting.diskreport import get_original_storage_location, sync_reports_from_db_to_disk
 
 log = logging.getLogger(__name__)
 

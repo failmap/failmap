@@ -11,14 +11,14 @@ import logging
 
 from celery import Task, group
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.scanner.__init__ import allowed_to_discover_urls, unique_and_random
 from websecmap.scanners.scanner.subdomains import (
+    dnsrecon_parse_report_contents,
+    get_popular_subdomains,
     url_by_filters,
     wordlist_scan,
-    get_popular_subdomains,
-    dnsrecon_parse_report_contents,
 )
 
 log = logging.getLogger(__package__)

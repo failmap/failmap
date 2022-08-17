@@ -27,7 +27,7 @@ def onboard_after_add(sender, instance, created, **kwargs):
         return
 
     # todo: this signal only comes from the admin interface, run this command when new urls are found elsewhere
-    def compose():
+    def compose():  # pylint: disable=unused-variable
         onboard.compose_task(urls_filter={"url": instance}).apply_async()
 
     # disabled this until the onboarding is fixed. Otherwise we'll get tons and tons of useless exceptions.

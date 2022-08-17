@@ -1,4 +1,7 @@
-def print_progress_bar(iteration, total, prefix="", suffix="", decimals=1, length=100, fill="█"):
+# todo: replace with progress bar library
+def print_progress_bar(
+    iteration, total, prefix="", suffix="", decimals=1, length=100, fill="█"
+):  # pylint: disable=too-many-arguments
     """
     Call in a loop to create terminal progress bar
     @params:

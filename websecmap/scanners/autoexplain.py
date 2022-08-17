@@ -13,6 +13,7 @@ Local, non-vendor policies are not taken into account: they should standardize a
 
 import logging
 from datetime import datetime, timedelta
+
 import pytz
 
 from websecmap.scanners.models import EndpointGenericScan

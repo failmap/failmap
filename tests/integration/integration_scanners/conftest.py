@@ -1,4 +1,5 @@
 """Shared fixtures used by different tests."""
+import logging
 import os
 import signal
 import subprocess
@@ -9,7 +10,6 @@ from pathlib import Path
 import pytest
 
 from websecmap.celery import waitsome
-import logging
 
 TIMEOUT = 30
 log = logging.getLogger(__package__)

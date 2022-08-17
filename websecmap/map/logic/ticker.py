@@ -114,12 +114,19 @@ def get_ticker_data(
     for oldest_urlrating in oldest_urlratings:
         oldest_urlratings_dict[oldest_urlrating.name] = oldest_urlrating
 
-    # insuccesful rebuild? Or not enough organizations?
+    # Unsuccessful rebuild? Or not enough organizations?
     if not newest_urlratings:
         return {"changes": {}, "slogan": config.TICKER_SLOGAN}
 
     changes = []
     for newest_urlrating in newest_urlratings:
+
+        change = {
+            "organization": newest_urlrating.name,
+            "high_now": newest_urlrating.high,
+            "medium_now": newest_urlrating.medium,
+            "low_now": newest_urlrating.low,
+        }
 
         try:
             matching_oldest = oldest_urlratings_dict[newest_urlrating.name]
@@ -127,31 +134,20 @@ def get_ticker_data(
             matching_oldest = None
 
         if not matching_oldest:
-            high_then = medium_then = low_then = "-"
-            high_changes = newest_urlrating.high
-            medium_changes = newest_urlrating.medium
-            low_changes = newest_urlrating.low
+            change["high_then"] = "-"
+            change["medium_then"] = "-"
+            change["low_then"] = "-"
+            change["high_changes"] = newest_urlrating.high
+            change["medium_changes"] = newest_urlrating.medium
+            change["low_changes"] = newest_urlrating.low
 
         else:
-            high_then = matching_oldest.high
-            medium_then = matching_oldest.medium
-            low_then = matching_oldest.low
-            high_changes = newest_urlrating.high - matching_oldest.high
-            medium_changes = newest_urlrating.medium - matching_oldest.medium
-            low_changes = newest_urlrating.low - matching_oldest.low
-
-        change = {
-            "organization": newest_urlrating.name,
-            "high_now": newest_urlrating.high,
-            "medium_now": newest_urlrating.medium,
-            "low_now": newest_urlrating.low,
-            "high_then": high_then,
-            "medium_then": medium_then,
-            "low_then": low_then,
-            "high_changes": high_changes,
-            "medium_changes": medium_changes,
-            "low_changes": int(low_changes),
-        }
+            change["high_then"] = matching_oldest.high
+            change["medium_then"] = matching_oldest.medium
+            change["low_then"] = matching_oldest.low
+            change["high_changes"] = newest_urlrating.high - matching_oldest.high
+            change["medium_changes"] = newest_urlrating.medium - matching_oldest.medium
+            change["low_changes"] = newest_urlrating.low - matching_oldest.low
 
         changes.append(change)
 

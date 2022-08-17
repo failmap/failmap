@@ -18,7 +18,7 @@ from jet.admin import CompactInline
 
 from websecmap import types
 from websecmap.app.models import Job
-from websecmap.celery import PRIO_HIGH, app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, PRIO_HIGH, app
 from websecmap.map.models import OrganizationReport
 from websecmap.organizations import datasources
 from websecmap.organizations.datasources import dutch_government, excel

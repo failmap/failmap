@@ -16,9 +16,9 @@ import requests
 import tldextract
 from celery import Task, group
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.organizations.models import Url
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.scanner import q_configurations_to_scan, unique_and_random, url_filters
 from websecmap.scanners.scanner.http import get_random_user_agent
 from websecmap.scanners.scanner.subdomains import discover_wildcard
@@ -133,7 +133,7 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
         "status_code": None,
     }:
         # When there are errors, do not try to get subdomains.
-        log.debug("{%s} resulted in an error, skipping.", wildcard_url)
+        log.debug("%s resulted in an error, skipping.", wildcard_url)
         return identical
 
     # could be that the wildcard renders a different page every time, in that case do not continue.
@@ -150,7 +150,7 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
 
     # todo: this needs access to storage.
     subdomain_urls = subdomains_under_wildcard(wildcard_url)
-    log.debug("{%s} has {%s} subdomains.", wildcard_url, len(subdomain_urls))
+    log.debug("%s has %s subdomains.", wildcard_url, len(subdomain_urls))
     for subdomain_url in subdomain_urls:
 
         # couldn't get the filtering correct in the subdomains_under_wildcard method.
@@ -166,17 +166,17 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
 
         subdomain_content = site_content(subdomain_url.url)
         if wildcard_content == subdomain_content:
-            log.debug("WILDCARD: Content of {%s} is the same as {%s}.", subdomain_url, wildcard_subdomain)
+            log.debug("WILDCARD: Content of %s is the same as %s.", subdomain_url, wildcard_subdomain)
             identical.append(subdomain_url.pk)
         else:
-            log.debug("        : Content of {%s} differs from {%s}.", subdomain_url, wildcard_subdomain)
+            log.debug("        : Content of %s differs from %s.", subdomain_url, wildcard_subdomain)
 
     return identical
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store(url_ids: List[int]):
-    log.debug("Received {%s} that have been found to be having the same data as a wildcard.", len(url_ids))
+    log.debug("Received %s that have been found to be having the same data as a wildcard.", len(url_ids))
 
     for url_id in url_ids:
         url = Url.objects.all().filter(pk=url_id).first()

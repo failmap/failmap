@@ -2,8 +2,8 @@ import logging
 
 from celery import Task, group
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.scanner import subdomains
 
 log = logging.getLogger(__package__)

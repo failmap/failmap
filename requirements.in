@@ -95,10 +95,6 @@ simplejson
 # autoexplain
 pyopenssl
 
-# static file collection/generation
-django_compressor
-csscompressor
-
 retry
 
 # map, to reduce the number of points (Ramer-Douglas-Peucker algorithm)
@@ -156,3 +152,6 @@ django-cors-headers
 # map management
 djangorestframework
 django-filter
+
+# watchmedo
+argh

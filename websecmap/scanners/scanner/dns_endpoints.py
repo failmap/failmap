@@ -19,7 +19,7 @@ from tenacity import before_log, retry, stop_after_attempt, wait_exponential
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.__init__ import (

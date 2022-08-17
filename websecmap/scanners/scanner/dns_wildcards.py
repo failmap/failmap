@@ -2,9 +2,9 @@ import logging
 
 from celery import Task, group
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.organizations.models import Url
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.scanner import unique_and_random
 from websecmap.scanners.scanner.subdomains import discover_wildcard, url_by_filters
 
@@ -63,23 +63,23 @@ def store_wildcard(result: bool, url_id: int):
     try:
         url = Url.objects.all().get(id=url_id)
     except Url.DoesNotExist:
-        log.debug("Url {%s} does not exist anymore. Not doing anything", url_id)
+        log.debug("Url %s does not exist anymore. Not doing anything", url_id)
         return
 
     # see if we need to do anything, if not, that saves a database operation. Reading is faster than writing.
     if url.uses_dns_wildcard and result:
-        log.debug("No change in wildcard result on {%s}. Wildcard stays enabled.", url)
+        log.debug("No change in wildcard result on %s. Wildcard stays enabled.", url)
         return
 
     if not url.uses_dns_wildcard and not result:
-        log.debug("No change in wildcard result on {%s}. Wildcard stays disabled.", url)
+        log.debug("No change in wildcard result on %s. Wildcard stays disabled.", url)
         return
 
     if result:
-        log.debug("Wildcard discovered on {%s}.", url)
+        log.debug("Wildcard discovered on %s.", url)
         url.uses_dns_wildcard = True
         url.save()
     else:
-        log.debug("Wildcard removed on {%s}.", url)
+        log.debug("Wildcard removed on %s.", url)
         url.uses_dns_wildcard = False
         url.save()

@@ -1,8 +1,10 @@
-from websecmap.organizations.models import Url, Organization
-from websecmap.scanners.scanner.dns_known_subdomains import compose_discover_task
-from websecmap.scanners.scanner.subdomains import get_subdomains, get_popular_subdomains
-from celery import group
 import logging
+
+from celery import group
+
+from websecmap.organizations.models import Organization, Url
+from websecmap.scanners.scanner.dns_known_subdomains import compose_discover_task
+from websecmap.scanners.scanner.subdomains import get_popular_subdomains, get_subdomains
 
 log = logging.getLogger(__package__)
 

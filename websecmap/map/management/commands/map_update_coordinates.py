@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
         parser.add_argument("--country", help="Country code. Eg: NL, DE, EN", required=True)
 
-        parser.add_argument("--region", help="Region: municipality, province, water\ board ...", required=True)
+        parser.add_argument("--region", help="Region: municipality, province, water board ...", required=True)
 
     # https://nl.wikipedia.org/wiki/Gemeentelijke_herindelingen_in_Nederland#Komende_herindelingen
     def handle(self, *app_labels, **options):
@@ -32,9 +32,9 @@ class Command(BaseCommand):
         update_coordinates(when=options["date"], countries=[options["country"]], organization_types=[options["region"]])
 
 
-def valid_date(s):
+def valid_date(string):
     try:
-        return datetime.strptime(s, "%Y-%m-%d")
-    except ValueError:
-        msg = f"Not a valid date: '{s}'."
-        raise ArgumentTypeError(msg)
+        return datetime.strptime(string, "%Y-%m-%d")
+    except ValueError as exc:
+        msg = f"Not a valid date: '{string}'."
+        raise ArgumentTypeError(msg) from exc

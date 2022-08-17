@@ -8,13 +8,13 @@ from django.db import connection
 from statshog.defaults.django import statsd
 
 from websecmap.app.constance import constance_cached_value
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.map.logic.map_health import get_outdated_ratings
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.report import PUBLISHED_SCAN_TYPES
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import SCAN_TYPES_TO_SCANNER, SCANNERS_BY_NAME
-from websecmap.scanners.models import Endpoint, PlannedScan, PlannedScanStatistic, Activity, Scanner, State
+from websecmap.scanners.models import Activity, Endpoint, PlannedScan, PlannedScanStatistic, Scanner, State
 
 log = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ def calculate_progress() -> List[Dict[str, int]]:
     for row in rows:
         overview.append({"scanner": row[0], "activity": row[1], "state": row[2], "amount": row[3]})
 
-    for scanner_id, scanner_name in Scanner.choices:
+    for scanner_id, _ in Scanner.choices:
         # unknown is not used because it is not used
         if scanner_id == 0:
             continue
@@ -179,7 +179,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     # Limit the total amount of picked up to being maximum of MAX_PICKED_UP_SIMULTANEOUSLY.
     headroom = max_picked_up_simultaneously - already_picked_up
     amount = amount if amount <= headroom else headroom
-    log.debug("Picking up maximum {%s} of total {%s} free slots.", amount, headroom)
+    log.debug("Picking up maximum %s of total %s free slots.", amount, headroom)
 
     # oldest first, so ascending dates.-> removed because that makes picking up very slow and complex.
     # whatever is requested should just be handled asap and the things that are requestes should just be empy
@@ -201,14 +201,14 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
         # scan still exists (weirdly enough). Even if there is an on delete cascade. We see that in issue 2424378050.
         try:
             # Use this debug message to retrieve the Url.DoesNotExist as django has to query the ID.
-            log.debug("Picking up scan {%s} with url id: {%s}.", scan.id, scan.url.id)
+            log.debug("Picking up scan %s with url id: %s.", scan.id, scan.url.id)
             urls.append(scan.url)
         except Url.DoesNotExist:
             # Delete this scan as the url id cannot be found, so it cannot be finished.
             log.error("Deleting a scan without an url. The scan will be deleted.", extra={"scan_id": scan.id})
             scan.delete()
 
-    log.debug("Picked up {%s} to {%s} with {%s}.", len(urls), activity, scanner)
+    log.debug("Picked up %s to %s with %s.", len(urls), activity, scanner)
     statsd.incr("scan_planned", len(urls), tags={"state": "pickup", "scanner": scanner, "activity": activity})
     return urls
 
@@ -221,27 +221,27 @@ def request(activity: str, scanner: str, urls: List[int]):
     for url in urls:
         if already_requested(activity, scanner, url):
             statsd.incr("scan_planned", tags={"state": "duplicate_request", "scanner": scanner, "activity": activity})
-            log.debug("Already registered: {%s} on {%s} for {%s}.", activity, scanner, url)
+            log.debug("Already registered: %s on %s for %s.", activity, scanner, url)
             continue
 
         now = datetime.now(pytz.utc)
 
-        ps = PlannedScan()
-        ps.activity = Activity[activity].value
-        ps.scanner = Scanner[scanner].value
-        ps.url = url
-        ps.state = State["requested"].value
-        ps.last_state_change_at = now
+        planned_scan = PlannedScan()
+        planned_scan.activity = Activity[activity].value
+        planned_scan.scanner = Scanner[scanner].value
+        planned_scan.url = url
+        planned_scan.state = State["requested"].value
+        planned_scan.last_state_change_at = now
         # To use the index on requested_at_when times are reduced to whole hours.
         # This is sane enough to allow tons of scans per day still, but the creation
         # of status reports is much faster. Still gives an idea of how many scans are made.
         # The minutes are rounded to every 10 minutes. So there is still a sense of progress and use the index
         discard = timedelta(minutes=now.minute % 10, seconds=now.second, microseconds=now.microsecond)
-        ps.requested_at_when = now - discard
-        ps.save()
+        planned_scan.requested_at_when = now - discard
+        planned_scan.save()
         statsd.incr("scan_planned", tags={"state": "request", "scanner": scanner, "activity": activity})
 
-    log.debug("Requested {%s} with {%s} on {%s} urls.", activity, scanner, len(urls))
+    log.debug("Requested %s with %s on %s urls.", activity, scanner, len(urls))
 
 
 def already_requested(activity: str, scanner: str, url_id: int):
@@ -280,9 +280,9 @@ def set_scan_state(activity: str, scanner: str, url_id: int, state="finished"):
         oldest_scan.finished_at_when = datetime.now(pytz.utc)
         oldest_scan.save()
 
-        log.debug("Altered planned scan state for {%s}. Changing it to {%s} with {%s}.", url_id, activity, scanner)
+        log.debug("Altered planned scan state for %s. Changing it to %s with %s.", url_id, activity, scanner)
     else:
-        log.debug("No planned scan found for {%s}. Ignored.", url_id)
+        log.debug("No planned scan found for %s. Ignored.", url_id)
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
@@ -380,7 +380,6 @@ def list_outdated(published_scan_types):
                 f"{str(item['last_scan'].strftime('%Y-%m-%d %H:%M:%S')):22} {item['scan']:9} "
                 f"{item['activity']:10} {item['scanner']:30} {item['url']:60}"
             )
-    return
 
 
 def deduplicate_plan(planned_items):
@@ -399,13 +398,13 @@ def deduplicate_plan(planned_items):
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_outdated_scans(published_scan_types):
     for map_configuration in filter_map_configs():
-        log.debug("Retrieving outdated scans from config: {%s}.", map_configuration)
+        log.debug("Retrieving outdated scans from config: %s.", map_configuration)
 
         organizations_on_map = Organization.objects.all().filter(
             country=map_configuration["country"], type=map_configuration["organization_type"]
         )
 
-        log.debug("There are {%s} organizations on this map.", len(organizations_on_map))
+        log.debug("There are %s organizations on this map.", len(organizations_on_map))
 
         # Outdated is earlier than the map_health says something is outdated. Otherwise we're always
         # one day behind with scans, and thus is always something outdated.
@@ -459,4 +458,4 @@ def plan_outdated_scans(published_scan_types):
         for item in clean_plan_with_urls:
             request(item["activity"], item["scanner"], [item["url"]])
 
-        log.debug("Planned {%s} scans / verify and discovery tasks.", len(clean_plan_with_urls))
+        log.debug("Planned %s scans / verify and discovery tasks.", len(clean_plan_with_urls))

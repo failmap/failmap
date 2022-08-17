@@ -103,7 +103,7 @@ class Configuration(models.Model):
         help_text="Whether this combination will be scanned by the scanners.", default=False
     )
 
-    class Meta(object):
+    class Meta:
         verbose_name = _("configuration")
         verbose_name_plural = _("configurations")
         ordering = ("display_order",)

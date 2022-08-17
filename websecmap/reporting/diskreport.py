@@ -8,10 +8,12 @@ import gzip
 import json
 import logging
 import os
-from typing import Type, Dict, Union
+from typing import Dict, Type, Union
 
-from django.db.models import Model
 from django.conf import settings
+
+# Models import is used in type hints
+from django.db.models import Model  # pylint: disable=unused-import
 
 from websecmap.map.models import OrganizationReport
 
@@ -98,5 +100,5 @@ def _read_json_from_gzip(location):
         with gzip.open(location, "rt") as file:
             return json.loads(file.read())
     except FileNotFoundError:
-        log.info("Report does not exist on location {%s}.", location)
+        log.info("Report does not exist on location %s.", location)
         return {}

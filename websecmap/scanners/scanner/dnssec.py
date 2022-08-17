@@ -29,7 +29,7 @@ from django.db.models import Q
 
 from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import store_url_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
@@ -83,7 +83,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
 def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    log.info("Creating DNSSEC scan task for {%s} urls.", len(urls))
+    log.info("Creating DNSSEC scan task for %s urls.", len(urls))
     plannedscan.request(activity="scan", scanner="dnssec", urls=urls)
 
 
@@ -190,18 +190,18 @@ def scan_dnssec(self, url: str):
 
     # subprocess.CalledProcessError: non zero exit status
     # OSError: Incorrect permission, file doesn't exist, etc
-    except (subprocess.CalledProcessError, OSError) as e:
+    except (subprocess.CalledProcessError, OSError) as my_exception:
         # If an expected error is encountered put this task back on the queue to be retried.
         # This will keep the chained logic in place (saving result after successful scan).
         # Retry delay and total number of attempts is configured in the task decorator.
         try:
             # Since this action raises an exception itself, any code after this won't be executed.
-            raise self.retry(exc=e)
+            raise self.retry(exc=my_exception)
         except BaseException:
             # If this task still fails after maximum retries the last
             # error will be passed as result to the next task.
             log.exception("Retried %s times and it still failed", MAX_RETRIES)
-            return e
+            return my_exception
 
 
 def analyze_result(result: List[str]):

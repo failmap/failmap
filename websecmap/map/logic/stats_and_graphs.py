@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Dict
@@ -13,7 +14,6 @@ from websecmap.reporting.severity import get_severity
 from websecmap.scanners import POLICY, URL_SCAN_TYPES
 from websecmap.scanners.impact import get_impact
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
-import logging
 
 log = logging.getLogger(__package__)
 
@@ -128,9 +128,9 @@ def stats_determine_when(stat, weeks_back=0):
 
     # optimize: always give back the time 00:00:00, so the query result can be cached as the same query is
     # performed every time.
-    dt = datetime(year=when.year, month=when.month, day=when.day, hour=0, minute=0, second=0, tzinfo=pytz.utc)
+    my_dt = datetime(year=when.year, month=when.month, day=when.day, hour=0, minute=0, second=0, tzinfo=pytz.utc)
     # log.debug("%s: %s (%s weeks back)" % (stat, dt, weeks_back))
-    return dt
+    return my_dt
 
 
 def get_stats_outdated(country, organization_type, weeks_back):
@@ -219,7 +219,7 @@ def what_to_improve(country: str, organization_type: str, issue_type: str):
 
     policy = POLICY.get(issue_type, None)
     if not policy:
-        log.debug("No policy found for {%s}", issue_type)
+        log.debug("No policy found for %s", issue_type)
         return []
 
     country = get_country(country)
@@ -227,8 +227,8 @@ def what_to_improve(country: str, organization_type: str, issue_type: str):
 
     if issue_type in URL_SCAN_TYPES:
         return what_to_improve_ugs(country, organization_type, issue_type, policy)
-    else:
-        return what_to_improve_epgs(country, organization_type, issue_type, policy)
+
+    return what_to_improve_epgs(country, organization_type, issue_type, policy)
 
 
 def what_to_improve_ugs(country: str, organization_type: str, issue_type: str, policy):

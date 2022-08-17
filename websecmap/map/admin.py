@@ -1,7 +1,7 @@
 import logging
 from copy import deepcopy
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
 
 import pytz
 from adminsortable2.admin import SortableAdminMixin
@@ -13,7 +13,7 @@ from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
 from websecmap.app.models import Job
-from websecmap.celery import PRIO_HIGH, app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, PRIO_HIGH, app
 from websecmap.map import models
 from websecmap.map.logic.openstreetmap import import_from_scratch, update_coordinates
 from websecmap.map.models import HighLevelStatistic, MapDataCache, VulnerabilityStatistic

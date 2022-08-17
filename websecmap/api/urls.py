@@ -1,7 +1,5 @@
 from django.contrib.auth import views as auth_views
-from django.urls import path, register_converter
-from django.urls import re_path
-
+from django.urls import path, re_path, register_converter
 
 from websecmap import converters
 from websecmap.api import views

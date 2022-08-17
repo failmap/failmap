@@ -7,7 +7,7 @@ This file contains (or should) verbose explantion of why points are given.
 import json
 import logging
 from datetime import datetime
-from typing import Union, Any, Dict
+from typing import Any, Dict, Union
 
 import pytz
 
@@ -86,40 +86,35 @@ def http_security_headers(scan: Union[EndpointGenericScan, UrlGenericScan]):
     # This function only exists to translate abstracts conclusions to a bit more verbose conclusions
 
     # We add what is done well, so it's more obvious it's checked.
-    if scan.rating == "Unreachable":
-        return conclusion_to_standard_calculation(scan, "unreachable")
+    rating_to_conclusion = {
+        "True": "present",
+        "Using CSP": "using_csp",
+        "Unreachable": "unreachable",
+        "RESTRICTED": "access_restricted",
+        "UNKNOWN": "non_http_response",
+        "SOAP": "soap",
+    }
 
-    if scan.rating == "RESTRICTED":
-        return conclusion_to_standard_calculation(scan, "access_restricted")
+    if scan.rating in rating_to_conclusion:
+        return conclusion_to_standard_calculation(scan, rating_to_conclusion[scan.rating])
 
-    if scan.rating == "UNKNOWN":
-        return conclusion_to_standard_calculation(scan, "non_http_response")
+    if scan.type in ["http_security_header_strict_transport_security"]:
 
-    if scan.rating == "SOAP":
-        return conclusion_to_standard_calculation(scan, "soap")
+        # special case when no insecure alternatives are offered
+        if (
+            scan.explanation == "Security Header not present: Strict-Transport-Security, "
+            "yet offers no insecure http service."
+        ):
+            return conclusion_to_standard_calculation(scan, "missing_but_no_insecure_service_offered")
 
-    if scan.rating == "True":
-        return conclusion_to_standard_calculation(scan, "present")
-    if scan.rating == "Using CSP":
-        return conclusion_to_standard_calculation(scan, "using_csp")
-    else:
-        if scan.type in ["http_security_header_strict_transport_security"]:
+        return conclusion_to_standard_calculation(scan, "missing")
 
-            # special case when no insecure alternatives are offered
-            if (
-                scan.explanation == "Security Header not present: Strict-Transport-Security, "
-                "yet offers no insecure http service."
-            ):
-                return conclusion_to_standard_calculation(scan, "missing_but_no_insecure_service_offered")
-
-            return conclusion_to_standard_calculation(scan, "missing")
-
-        if scan.type in [
-            "http_security_header_x_content_type_options",
-            "http_security_header_x_frame_options",
-            "http_security_header_x_xss_protection",
-        ]:
-            return conclusion_to_standard_calculation(scan, "missing")
+    if scan.type in [
+        "http_security_header_x_content_type_options",
+        "http_security_header_x_frame_options",
+        "http_security_header_x_xss_protection",
+    ]:
+        return conclusion_to_standard_calculation(scan, "missing")
 
     # fallback any other conclusion that has not been handled yet, so you can set it ad-hoc
     return conclusion_to_standard_calculation(scan, scan.rating)
@@ -190,7 +185,7 @@ def internet_nl(scan: Union[EndpointGenericScan, UrlGenericScan]):
 
     # To support old metrics:
     if "~" in scan.rating:
-        requirement_level, scan_value = scan.rating.split("~")
+        _, scan_value = scan.rating.split("~")
         policy = conclusion_to_score(scan.type, scan_value)
         return apply_policy_to_internetnl_calculation(scan, policy)
 
@@ -210,7 +205,7 @@ def standard_calculation(
     error_in_test: bool = False,
 ):
 
-    ok = 0 if any([high, medium, low, not_testable, not_testable, error_in_test]) else 1
+    ok = 0 if any([high, medium, low, not_testable, not_testable, error_in_test]) else 1  # pylint: disable=invalid-name
 
     return {
         "type": scan.type,

@@ -98,7 +98,7 @@ def get_all_explains(country, organization_type, limit=0):
     return explains
 
 
-def get_explanation(type, scan):
+def get_explanation(url_or_endpoint, scan):
     calculation = get_severity(scan)
 
     now = timezone.now().isoformat()
@@ -114,11 +114,11 @@ def get_explanation(type, scan):
         "original_explanation": calculation["explanation"],
     }
 
-    if type == "url":
+    if url_or_endpoint == "url":
         this_explain["organizations"] = scan.url.organization.name
         this_explain["subject"] = str(scan.url.url)
 
-    if type == "endpoint":
+    if url_or_endpoint == "endpoint":
         this_explain["organizations"] = list(scan.endpoint.url.organization.all().values("id", "name"))
         this_explain["subject"] = str("%s - %s/%s - IPv%s") % (
             scan.endpoint.url,

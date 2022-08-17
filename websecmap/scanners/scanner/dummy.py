@@ -11,8 +11,8 @@ import time
 from celery import Task, group
 from django.conf import settings
 
-from websecmap.celery import ParentFailed, app, EXPIRES_IN_ONE_DAY
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.celery import EXPIRES_IN_ONE_DAY, ParentFailed, app
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
@@ -77,7 +77,7 @@ def compose_scan_task(urls):
     """
     endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
     endpoints = unique_and_random(endpoints)
-    log.info("Creating dummy scan task for {%s} endpoints ", len(endpoints))
+    log.info("Creating dummy scan task for %s endpoints ", len(endpoints))
 
     # remove urls that don't have the relevant endpoints anymore
     for url_id in urls_without_endpoints:
@@ -113,7 +113,7 @@ def compose_planned_scan_task(**kwargs):
 
 
 def compose_manual_scan_task(
-    organizations_filter: dict = dict(), urls_filter: dict = dict(), endpoints_filter: dict = dict(), **kwargs
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
     """Compose taskset to scan specified endpoints.
 
@@ -121,6 +121,8 @@ def compose_manual_scan_task(
     For more documentation about this concept, arguments and concrete
     examples of usage refer to `compose_task` in `types.py`.*
     """
+
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
     if not allowed_to_scan("dummy"):
         log.warning("Dummy scanner is not allowed to scan.")
@@ -150,7 +152,7 @@ def store(result, endpoint_id):
     message_result_ok = "Because the result was True"
     message_result_false = "Because the result was False"
 
-    log.debug("Storing result: {%s}, for endpoint: {%s}.", result, endpoint_id)
+    log.debug("Storing result: %s, for endpoint: %s.", result, endpoint_id)
 
     # You can save any (string) value and any (string) message.
     # The EndpointScanManager deduplicates the data for you automatically.
@@ -193,7 +195,7 @@ def scan(self, uri_url):
 
     """
     try:
-        log.info("Start scanning {%s}", uri_url)
+        log.info("Start scanning %s", uri_url)
 
         # Tools and output for this scan are registered in /failmap/settings.py
         # We prefer tools written in python, limiting the amount of dependencies used in the project.
@@ -208,7 +210,7 @@ def scan(self, uri_url):
         # mytool = settings.TOOLS['youtool']['executable']
         # Below demonstrates the usage of settings.
         sample_settings_usage = len(settings.TOOLS)
-        log.debug("{%s} are registered.", sample_settings_usage)
+        log.debug("%s are registered.", sample_settings_usage)
 
         # simulation: sometimes a task fails, for example with network errors etcetera. The task will be retried.
         if not random.randint(0, 5):
@@ -220,17 +222,17 @@ def scan(self, uri_url):
         # simulation: the result can be different
         result = bool(random.randint(0, 1))
 
-        log.info("Done scanning: {%s}, result: {%s}", uri_url, result)
+        log.info("Done scanning: %s, result: %s", uri_url, result)
         return result
-    except SomeError as e:
+    except SomeError as my_exception:
         # If an expected error is encountered put this task back on the queue to be retried.
         # This will keep the chained logic in place (saving result after successful scan).
         # Retry delay and total number of attempts is configured in the task decorator.
         try:
             # Since this action raises an exception itself, any code after this won't be executed.
-            raise self.retry(exc=e)
+            raise self.retry(exc=my_exception)
         except BaseException:
             # If this task still fails after maximum retries the last
             # error will be passed as result to the next task.
             log.exception("Retried %s times and it still failed", MAX_RETRIES)
-            return e
+            return my_exception

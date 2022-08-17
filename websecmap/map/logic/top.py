@@ -4,7 +4,7 @@ from math import ceil
 from django.db import connection
 from django.utils import timezone
 
-from websecmap.map.logic.map_defaults import get_country, get_organization_type, get_when, REMARK
+from websecmap.map.logic.map_defaults import REMARK, get_country, get_organization_type, get_when
 
 log = logging.getLogger(__name__)
 

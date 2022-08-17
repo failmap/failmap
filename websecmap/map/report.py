@@ -17,7 +17,7 @@ from websecmap.map.logic.map_health import update_map_health_reports
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.models import HighLevelStatistic, MapDataCache, OrganizationReport, VulnerabilityStatistic
 from websecmap.organizations.models import Organization, OrganizationType, Url
-from websecmap.reporting.diskreport import store_report, retrieve_report
+from websecmap.reporting.diskreport import retrieve_report, store_report
 from websecmap.reporting.report import (
     START_DATE,
     aggegrate_url_rating_scores,
@@ -27,7 +27,7 @@ from websecmap.reporting.report import (
     relevant_urls_at_timepoint,
     significant_moments,
 )
-from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
+from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES, init_dict
 from websecmap.scanners.scanner.__init__ import q_configurations_to_report
 
 log = logging.getLogger(__package__)
@@ -50,13 +50,15 @@ PUBLISHED_ENDPOINT_SCAN_TYPES = [scan_type for scan_type in PUBLISHED_SCAN_TYPES
 
 
 def compose_task(
-    organizations_filter: dict = dict(),
-    urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
+    organizations_filter: dict = None,
+    urls_filter: dict = None,
+    endpoints_filter: dict = None,
 ) -> Task:
     """
     Compose taskset to rebuild specified organizations/urls.
     """
+
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
     if endpoints_filter:
         raise NotImplementedError("This scanner does not work on a endpoint level.")
@@ -432,34 +434,34 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
             for scan_type in scan_types:
                 # log.debug(scan_type)
                 if scan_type in measurement:
-                    vs = VulnerabilityStatistic()
-                    vs.at_when = when
-                    vs.organization_type = OrganizationType(pk=organization_type_id)
-                    vs.country = country
-                    vs.scan_type = scan_type
-                    vs.high = measurement[scan_type]["high"]
-                    vs.medium = measurement[scan_type]["medium"]
-                    vs.low = measurement[scan_type]["low"]
-                    vs.ok_urls = measurement[scan_type]["ok_urls"]
-                    vs.ok_endpoints = measurement[scan_type]["ok_endpoints"]
+                    vstat = VulnerabilityStatistic()
+                    vstat.at_when = when
+                    vstat.organization_type = OrganizationType(pk=organization_type_id)
+                    vstat.country = country
+                    vstat.scan_type = scan_type
+                    vstat.high = measurement[scan_type]["high"]
+                    vstat.medium = measurement[scan_type]["medium"]
+                    vstat.low = measurement[scan_type]["low"]
+                    vstat.ok_urls = measurement[scan_type]["ok_urls"]
+                    vstat.ok_endpoints = measurement[scan_type]["ok_endpoints"]
 
                     if scan_type in PUBLISHED_SCAN_TYPES:
-                        vs.urls = measurement[scan_type]["applicable_urls"]
-                        vs.endpoints = measurement[scan_type]["applicable_endpoints"]
+                        vstat.urls = measurement[scan_type]["applicable_urls"]
+                        vstat.endpoints = measurement[scan_type]["applicable_endpoints"]
                     else:
                         # total
-                        vs.urls = number_of_urls
-                        vs.endpoints = number_of_endpoints
+                        vstat.urls = number_of_urls
+                        vstat.endpoints = number_of_endpoints
 
                     if scan_type in ENDPOINT_SCAN_TYPES:
-                        vs.ok = measurement[scan_type]["ok_endpoints"]
+                        vstat.ok = measurement[scan_type]["ok_endpoints"]  # pylint: disable=invalid-name
                     elif scan_type in URL_SCAN_TYPES:
-                        vs.ok = measurement[scan_type]["ok_urls"]
+                        vstat.ok = measurement[scan_type]["ok_urls"]
                     else:
                         # total: everything together.
-                        vs.ok = measurement[scan_type]["ok_urls"] + measurement[scan_type]["ok_endpoints"]
+                        vstat.ok = measurement[scan_type]["ok_urls"] + measurement[scan_type]["ok_endpoints"]
 
-                    vs.save()
+                    vstat.save()
 
 
 @app.task(queue="reporting")
@@ -511,9 +513,9 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
                     cached.at_when = when
                     cached.dataset = data
                     cached.save()
-                except OperationalError as a:
+                except OperationalError as my_exception:
                     # The public user does not have permission to run insert statements....
-                    log.exception(a)
+                    log.exception(my_exception)
 
 
 @app.task(queue="reporting")
@@ -650,17 +652,17 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                     # yet there is not enough data to really make a graph.
                     # do not have duplicate urls in the stats.
                     # ratings
-                    for r in url["ratings"]:
+                    for rat in url["ratings"]:
                         # stats over all different ratings
-                        if r["type"] not in measurement["explained"]:
-                            measurement["explained"][r["type"]] = {}
-                            measurement["explained"][r["type"]]["total"] = 0
-                        if not r["explanation"].startswith("Repeated finding."):
-                            if r["explanation"] not in measurement["explained"][r["type"]]:
-                                measurement["explained"][r["type"]][r["explanation"]] = 0
+                        if rat["type"] not in measurement["explained"]:
+                            measurement["explained"][rat["type"]] = {}
+                            measurement["explained"][rat["type"]]["total"] = 0
+                        if not rat["explanation"].startswith("Repeated finding."):
+                            if rat["explanation"] not in measurement["explained"][rat["type"]]:
+                                measurement["explained"][rat["type"]][rat["explanation"]] = 0
 
-                            measurement["explained"][r["type"]][r["explanation"]] += 1
-                            measurement["explained"][r["type"]]["total"] += 1
+                            measurement["explained"][rat["type"]][rat["explanation"]] += 1
+                            measurement["explained"][rat["type"]]["total"] += 1
 
                     for endpoint in url["endpoints"]:
 
@@ -668,17 +670,17 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                         # ratings is not a repeated finding.
                         added_endpoint = False
 
-                        for r in endpoint["ratings"]:
+                        for rat in endpoint["ratings"]:
                             # stats over all different ratings
-                            if r["type"] not in measurement["explained"]:
-                                measurement["explained"][r["type"]] = {}
-                                measurement["explained"][r["type"]]["total"] = 0
-                            if not r["explanation"].startswith("Repeated finding."):
-                                if r["explanation"] not in measurement["explained"][r["type"]]:
-                                    measurement["explained"][r["type"]][r["explanation"]] = 0
+                            if rat["type"] not in measurement["explained"]:
+                                measurement["explained"][rat["type"]] = {}
+                                measurement["explained"][rat["type"]]["total"] = 0
+                            if not rat["explanation"].startswith("Repeated finding."):
+                                if rat["explanation"] not in measurement["explained"][rat["type"]]:
+                                    measurement["explained"][rat["type"]][rat["explanation"]] = 0
 
-                                measurement["explained"][r["type"]][r["explanation"]] += 1
-                                measurement["explained"][r["type"]]["total"] += 1
+                                measurement["explained"][rat["type"]][rat["explanation"]] += 1
+                                measurement["explained"][rat["type"]]["total"] += 1
 
                                 # stats over all endpoints
                                 # duplicates skew these stats.

@@ -1,5 +1,6 @@
 import logging
 from argparse import ArgumentTypeError
+from typing import Callable
 
 from django.core.management.base import BaseCommand
 from iso3166 import countries_by_alpha2
@@ -8,7 +9,8 @@ log = logging.getLogger(__package__)
 
 
 class CalculateCommand(BaseCommand):
-    command = None
+    # Set a sample callable for the command, this will be overridden by implementations
+    command: Callable = lambda days, countries, organization_types: f"{days}{countries}{organization_types}"
 
     def add_arguments(self, parser):
 

@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Tuple
 import dateutil.parser
 import pytz
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.map.map_configs import filter_map_configs, retrieve
 from websecmap.map.models import Configuration, MapHealthReport, OrganizationReport
@@ -45,7 +45,7 @@ def update_map_health_reports(
             total_good = []
             old_date = datetime.now(pytz.utc) - timedelta(days=days_back)
 
-            log.debug("Creating health report of {%s} days back.", days_back)
+            log.debug("Creating health report of %s days back.", days_back)
             for organization in organizations_on_map:
                 # log.debug(f"Creating health report of {organization} at {old_date}.")
                 latest_report = get_latest_report_of_organization(organization, old_date)
@@ -60,7 +60,7 @@ def update_map_health_reports(
 
             report = create_health_report(total_outdated, total_good, published_scan_types)
             # Update reports of a certain day. For example when the report for a single day is re-generated.
-            hr = (
+            health_report = (
                 MapHealthReport.objects.all()
                 .filter(
                     map_configuration=retrieve(country, organization_type_id),
@@ -70,15 +70,15 @@ def update_map_health_reports(
                 )
                 .first()
             )
-            if not hr:
-                hr = MapHealthReport()
-            hr.map_configuration = retrieve(country, organization_type_id)
-            hr.at_when = old_date
-            hr.percentage_up_to_date = report["percentage_up_to_date"]
-            hr.percentage_out_of_date = report["percentage_out_of_date"]
-            hr.outdate_period_in_hours = report["outdate_period_in_hours"]
-            hr.detailed_report = report
-            hr.save()
+            if not health_report:
+                health_report = MapHealthReport()
+            health_report.map_configuration = retrieve(country, organization_type_id)
+            health_report.at_when = old_date
+            health_report.percentage_up_to_date = report["percentage_up_to_date"]
+            health_report.percentage_out_of_date = report["percentage_out_of_date"]
+            health_report.outdate_period_in_hours = report["outdate_period_in_hours"]
+            health_report.detailed_report = report
+            health_report.save()
 
 
 def get_outdated_ratings(
@@ -92,7 +92,7 @@ def get_outdated_ratings(
         if not latest_report:
             continue
 
-        ratings_outdated, ratings_good = split_ratings_between_good_and_bad(latest_report, expiry_time_hours)
+        ratings_outdated, _ = split_ratings_between_good_and_bad(latest_report, expiry_time_hours)
         total_outdated += ratings_outdated
 
     return total_outdated
@@ -161,7 +161,7 @@ def get_lastest_map_health_data(country: str = "NL", organization_type: str = "m
             "per_scan": [],
         }
     try:
-        mh = MapHealthReport.objects.all().filter(map_configuration=map_configuration).latest("at_when")
+        map_health_report = MapHealthReport.objects.all().filter(map_configuration=map_configuration).latest("at_when")
     except MapHealthReport.DoesNotExist:
         return {
             "outdate_period_in_hours": -1,
@@ -172,7 +172,7 @@ def get_lastest_map_health_data(country: str = "NL", organization_type: str = "m
             "per_scan": [],
         }
 
-    return mh.detailed_report
+    return map_health_report.detailed_report
 
 
 def create_health_report(outdated: List, good: List, published_scan_types):
@@ -228,7 +228,7 @@ def create_health_report(outdated: List, good: List, published_scan_types):
             failures_per_scan_type[outdate.get("scan_type", "unknown")] = {"total": 0, "outdated": 0, "good": 0}
         failures_per_scan_type[outdate.get("scan_type", "unknown")]["total"] += 1
         failures_per_scan_type[outdate.get("scan_type", "unknown")]["good"] += 1
-    for key in failures_per_scan_type.keys():
+    for key in failures_per_scan_type:
         per_scan_good = failures_per_scan_type[key]["good"]
         per_scan_outdated = failures_per_scan_type[key]["outdated"]
         per_scan_total = per_scan_good + per_scan_outdated

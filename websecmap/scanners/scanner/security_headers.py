@@ -8,12 +8,12 @@ from typing import Union
 import requests
 import urllib3
 from celery import Task, group
-from requests import ConnectTimeout, ConnectionError, HTTPError, ReadTimeout, Timeout
+from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.structures import CaseInsensitiveDict
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
@@ -94,11 +94,11 @@ def compose_manual_scan_task(
 def compose_scan_task(urls):
     endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
     endpoints = unique_and_random(endpoints)
-    log.debug("Scanning security headers on {%s} endpoints, {%s} urls", len(endpoints), len(urls))
+    log.debug("Scanning security headers on %s endpoints, %s urls", len(endpoints), len(urls))
 
     # remove urls that don't have the relevant endpoints anymore
     for url_id in urls_without_endpoints:
-        log.debug("Finishing scan on {%s} because there are no valid endpoints anymore.", url_id)
+        log.debug("Finishing scan on %s because there are no valid endpoints anymore.", url_id)
         plannedscan.finish("scan", "security_headers", url_id)
 
     tasks = []
@@ -343,7 +343,7 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
                     "http_security_header_strict_transport_security",
                     endpoint_id,
                     "False",
-                    "Security Header not present: Strict-Transport-Security, " "yet offers no insecure http service.",
+                    "Security Header not present: Strict-Transport-Security, yet offers no insecure http service.",
                 )
 
     return {"status": "success"}
@@ -424,13 +424,13 @@ def get_headers(self, uri_uri: str) -> Union[CaseInsensitiveDict, bool]:
         ValueError,
         requests.TooManyRedirects,
         urllib3.exceptions.LocationValueError,
-    ) as e:
+    ) as my_exception:
         # If an expected error is encountered put this task back on the queue to be retried.
         # This will keep the chained logic in place (saving result after successful scan).
         # Retry delay and total number of attempts is configured in the task decorator.
         try:
             # Since this action raises an exception itself, any code after this won't be executed.
-            raise self.retry(exc=e)
+            raise self.retry(exc=my_exception)
         except BaseException:
             # If this task still fails after maximum retries the last
             # error will be passed as result to the next task.
@@ -484,9 +484,9 @@ def get_headers_request(uri_url: str) -> CaseInsensitiveDict:
     # redirects are followed, this gives an indication on how many redirects are followed, and what url the
     # headers are taken from:
     for index, resp in enumerate(response.history):
-        log.debug("- Redirect {%s}: {%s}.", index, resp.url)
+        log.debug("- Redirect %s: %s.", index, resp.url)
 
-    log.debug("- You are now at {%s}.", response.url)
+    log.debug("- You are now at %s.", response.url)
 
     # Removed: only continue for valid responses (eg: 200)
     # Error pages, such as 404 are super fancy, with forms and all kinds of content.

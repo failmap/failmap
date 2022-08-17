@@ -240,7 +240,7 @@ class SeriesOfUrlsReportMixin(
     ExplainedJudgedEndpoints,
     ExplainedUrlIssues,
     ExplainedEndpointIssues,
-):
+):  # pylint: disable=too-many-ancestors
     """
     This contains a series of URL reports statistics, it has the same fields as url report statistics,
     but because this is about multiple urls, it also contains JudgedUrls and ExplainedJudgedUrls.
@@ -255,8 +255,8 @@ class SeriesOfUrlsReportMixin(
     def __str__(self):
         if any([self.high, self.medium, self.low]):
             return f"🔴{self.high} 🔶{self.medium} 🍋{self.low} | {self.at_when.date()}"
-        else:
-            return f"✅ perfect | {self.at_when.date()}"
+
+        return f"✅ perfect | {self.at_when.date()}"
 
     class Meta:
         abstract = True
@@ -271,7 +271,7 @@ class UrlReport(
     ExplainedJudgedEndpoints,
     ExplainedUrlIssues,
     ExplainedEndpointIssues,
-):
+):  # pylint: disable=too-many-ancestors
     """
     A UrlReport is an aggregation of all scans below it: on urls and endpoints. It's all for a single URL.
 

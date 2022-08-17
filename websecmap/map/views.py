@@ -21,10 +21,10 @@ from websecmap.map.logic.admin import (
     add_organization,
     add_proxies,
     add_urls,
+    delete_coordinate,
+    move_coordinate,
     switch_lattitude_and_longitude,
     user_is_staff_member,
-    move_coordinate,
-    delete_coordinate,
 )
 from websecmap.map.logic.datasets import create_filename
 from websecmap.map.logic.explain import explain, get_all_explains, get_recent_explains, remove_explanation
@@ -413,7 +413,7 @@ def index(request, map_configuration=None):
         map_defaults = get_defaults()
 
     # instead of asking for every config variable, get all of them in one go
-    config = get_bulk_values(
+    my_config = get_bulk_values(
         [
             "PROJECT_COUNTRY",
             "PROJECT_NAME",
@@ -478,11 +478,11 @@ def index(request, map_configuration=None):
             request,
             "map/index.html",
             {
-                "configuration": config,
+                "configuration": my_config,
                 "version": __version__,
                 "admin": settings.ADMIN,
                 "sentry_token": settings.SENTRY_TOKEN,
-                "country": config["PROJECT_COUNTRY"],
+                "country": my_config["PROJECT_COUNTRY"],
                 "debug": bool(settings.DEBUG),
                 "language": request.LANGUAGE_CODE[0:2],  # only support 'en' not 'en-gb',
                 "timestamp": datetime.now(pytz.UTC).isoformat(),
@@ -593,7 +593,7 @@ def stats(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAY
 
 
 @cache_page(ONE_HOUR)
-def _what_to_improve(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, issue_type=""):
+def v_what_to_improve(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, issue_type=""):
     reports = what_to_improve(country, organization_type, issue_type)
     return JsonResponse(reports, encoder=JSEncoder, safe=False)
 
@@ -606,24 +606,24 @@ def get_short_and_simple_stats_(request, weeks_back=0):
 
 @cache_page(ONE_HOUR)
 def organization_vulnerability_timeline(request, organization_id: int, days: int = 365):
-    stats = get_organization_vulnerability_timeline(organization_id, days=days)
-    return JsonResponse(stats, encoder=JSEncoder, safe=False)
+    my_stats = get_organization_vulnerability_timeline(organization_id, days=days)
+    return JsonResponse(my_stats, encoder=JSEncoder, safe=False)
 
 
 @cache_page(ONE_HOUR)
 def organization_vulnerability_timeline_via_name(
     request, organization_name: str, organization_type: str = "", country: str = "", days: int = 365
 ):
-    stats = get_organization_vulnerability_timeline_via_name(organization_name, organization_type, country, days)
-    return JsonResponse(stats, encoder=JSEncoder, safe=False)
+    my_stats = get_organization_vulnerability_timeline_via_name(organization_name, organization_type, country, days)
+    return JsonResponse(my_stats, encoder=JSEncoder, safe=False)
 
 
 @cache_page(ONE_HOUR)
 def vulnerability_graphs(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0, days: int = 365
 ):
-    stats = get_vulnerability_graph(country, organization_type, weeks_back, days)
-    return JsonResponse(stats, encoder=JSEncoder)
+    my_stats = get_vulnerability_graph(country, organization_type, weeks_back, days)
+    return JsonResponse(my_stats, encoder=JSEncoder)
 
 
 @cache_page(TEN_MINUTES)
@@ -652,7 +652,7 @@ def ticker(
 
 @cache_page(FOUR_HOURS)
 def map_default(request, days_back: int = 0, displayed_issue: str = "all"):
-    defaults = (
+    my_defaults = (
         Configuration.objects.all()
         .filter(is_displayed=True, is_the_default_option=True)
         .order_by("display_order")
@@ -661,10 +661,10 @@ def map_default(request, days_back: int = 0, displayed_issue: str = "all"):
     )
 
     # On an empty database, just get the Netherlands.
-    if not defaults:
+    if not my_defaults:
         return map_data(request, DEFAULT_COUNTRY, DEFAULT_LAYER, days_back, displayed_issue)
 
-    return map_data(request, defaults["country"], defaults["organization_type__name"], days_back, displayed_issue)
+    return map_data(request, my_defaults["country"], my_defaults["organization_type__name"], days_back, displayed_issue)
 
 
 @cache_page(ONE_HOUR)
@@ -775,15 +775,15 @@ def upcoming_and_past_scans(request):
 def screenshot(request, endpoint_id=0):
     # get the latest screenshot from an endpoint.
 
-    screenshot = Screenshot.objects.all().filter(endpoint=endpoint_id).order_by("-created_on").first()
+    scrsht = Screenshot.objects.all().filter(endpoint=endpoint_id).order_by("-created_on").first()
 
-    if not screenshot:
+    if not scrsht:
         return HttpResponse()
 
-    if not screenshot.image:
+    if not scrsht.image:
         return HttpResponse()
 
-    wrapper = FileWrapper(screenshot.image.file.open("rb"))
+    wrapper = FileWrapper(scrsht.image.file.open("rb"))
     response = HttpResponse(wrapper, content_type="image/PNG")
     return response
 
@@ -797,7 +797,7 @@ def get_json_body(request):
     return user_input
 
 
-def _explain(request):
+def v_explain(request):
     if not request.user.is_authenticated:
         return JsonResponse({}, encoder=JSEncoder, safe=False)
 
@@ -815,45 +815,45 @@ def _explain(request):
 
 
 @user_passes_test(user_is_staff_member)
-def _remove_explain(request):
+def v_remove_explain(request):
     request = get_json_body(request)
     data = remove_explanation(request.get("scan_id"), request.get("scan_type"))
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @user_passes_test(user_is_staff_member)
-def _add_urls(request):
+def v_add_urls(request):
     request = get_json_body(request)
     data = add_urls(request.get("organization_id"), request.get("urls"))
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @user_passes_test(user_is_staff_member)
-def _add_proxies(request):
+def v_add_proxies(request):
     request = get_json_body(request)
     data = add_proxies(request.get("proxies"))
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @user_passes_test(user_is_staff_member)
-def _switch_lattitude_and_longitude(request, organization_id=0):
+def v_switch_lattitude_and_longitude(request, organization_id=0):
     return JsonResponse(switch_lattitude_and_longitude(organization_id), encoder=JSEncoder, safe=False)
 
 
 @user_passes_test(user_is_staff_member)
-def _add_organization(request):
+def v_add_organization(request):
     request = get_json_body(request)
     return JsonResponse(add_organization(request), encoder=JSEncoder, safe=False)
 
 
 @user_passes_test(user_is_staff_member)
-def _move_coordinate(request):
+def v_move_coordinate(request):
     request = get_json_body(request)
     return JsonResponse(move_coordinate(request), encoder=JSEncoder, safe=False)
 
 
 @user_passes_test(user_is_staff_member)
-def _delete_coordinate(request):
+def v_delete_coordinate(request):
     request = get_json_body(request)
     return JsonResponse(delete_coordinate(request), encoder=JSEncoder, safe=False)
 

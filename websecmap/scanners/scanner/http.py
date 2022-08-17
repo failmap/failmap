@@ -30,20 +30,19 @@ import random
 import socket
 from datetime import datetime
 from ipaddress import AddressValueError
-from typing import List, Optional, Dict, Union
+from typing import Dict, List, Optional, Union
 
 import pytz
 import requests
-
 import urllib3
 from celery import Task, group
 from django.conf import settings
 from requests import HTTPError, ReadTimeout, Request, Session, Timeout
-from requests.exceptions import ConnectionError, SSLError, ChunkedEncodingError, ContentDecodingError, ConnectTimeout
+from requests.exceptions import ChunkedEncodingError, ConnectTimeout, ContentDecodingError, SSLError
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, UrlIp
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.__init__ import (
@@ -100,7 +99,7 @@ def filter_discover(organizations_filter: dict = None, urls_filter: dict = None,
 
     if organizations_filter:
         organizations = Organization.objects.filter(**organizations_filter).only("id")
-        log.info("Organization filter applied with {%s} organizations.", len(organizations))
+        log.info("Organization filter applied with %s organizations.", len(organizations))
 
         urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter).only(
             "id", "url"
@@ -111,7 +110,7 @@ def filter_discover(organizations_filter: dict = None, urls_filter: dict = None,
 
     # make sure all urls are unique (some are shared between organizations, or a custom query might dupe them)
     urls = unique_and_random(urls)
-    log.info("Discovering HTTP endpoints for {%s} urls.", len(urls))
+    log.info("Discovering HTTP endpoints for %s urls.", len(urls))
 
     return urls
 
@@ -242,7 +241,7 @@ def compose_verify_task(urls):
         for endpoint in endpoints
     )
 
-    log.info("Verifying {%s} http/https endpoints.", len(endpoints))
+    log.info("Verifying %s http/https endpoints.", len(endpoints))
 
     return tasks
 
@@ -300,8 +299,10 @@ def get_ipv6(url: str):
         # six to four addresses make no sense
         if str(ipv6).startswith("::ffff:"):
             log.debug(
-                "Six-to-Four address {%s} discovered on {%s}, did you configure IPv6 connectivity correctly? "
-                "Removing this IPv6 address from result to prevent database pollution.", ipv6, url
+                "Six-to-Four address %s discovered on %s, did you configure IPv6 connectivity correctly? "
+                "Removing this IPv6 address from result to prevent database pollution.",
+                ipv6,
+                url,
             )
             ipv6 = ""
         else:
@@ -387,8 +388,8 @@ ACCEPTABLE_CONNECTION_ERRORS = [
 ]
 
 
-@app.task(queue="4and6", rate_limit="120/s", bind=True)
-def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> Dict[str, str]:
+@app.task(queue="4and6", rate_limit="120/s")
+def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str, str]:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
 
@@ -481,7 +482,7 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> Di
         strerror = str(my_exception.args)  # Cast whatever we get back to a string. Instead of trace.
         has_acceptable_error = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
         if has_acceptable_error:
-            log.debug("There is a server, but could not communicate directly: {%s}", strerror)
+            log.debug("There is a server, but could not communicate directly: %s", strerror)
             return connection_answer(True, my_exception)
 
         # No acceptable answer? Try a normal connection:
@@ -509,11 +510,11 @@ def can_connect(self, protocol: str, url: str, port: int, ip_version: int) -> Di
             strerror = str(sub_ex.args)
             has_acceptable_error = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
             if has_acceptable_error:
-                log.debug("There is a server, but could not communicate directly: {%s}", strerror)
+                log.debug("There is a server, but could not communicate directly: %s", strerror)
                 return connection_answer(True, sub_ex)
 
             return connection_answer(False, sub_ex)
-        except (ConnectTimeout, Timeout, ReadTimeout) as sub_ex:
+        except (Timeout, ReadTimeout) as sub_ex:
             return connection_answer(False, sub_ex)
         except Exception as sub_ex:
             return connection_answer(False, sub_ex)
@@ -534,10 +535,10 @@ def pretty_print_request(req):
     printed and may differ from the actual request.
     """
     print(
-        "{}\n{}\n{}\n\n{}".format(  # pylint: disable=consider-using-f-string
+        "{}\n{}\n{}\n\n{}".format(
             "-----------START-----------",
             req.method + " " + req.url,
-            "\n".join("{}: {}".format(k, v) for k, v in req.headers.items()),
+            "\n".join("{}: {}".format(k, v) for k, v in req.headers.items()),  # pylint: disable=consider-using-f-string
             req.body,
         )
     )
@@ -669,7 +670,7 @@ def store_url_ips(url: int, ips):
             continue
 
         epip = UrlIp()
-        epip.ip = ip_address
+        epip.ip = ip_address  # pylint: disable=invalid-name
         epip.url = url
         epip.is_unused = False
         epip.discovered_on = datetime.now(pytz.utc)
@@ -728,13 +729,13 @@ def check_network(code_location=""):
     :return:
     """
 
-    log.info("Testing network connection via {%s}.", code_location)
+    log.info("Testing network connection via %s.", code_location)
 
-    log.info("IPv4 is enabled via configuration: {%s}", settings.NETWORK_SUPPORTS_IPV4)
-    log.info("IPv6 is enabled via configuration: {%s}", settings.NETWORK_SUPPORTS_IPV6)
+    log.info("IPv4 is enabled via configuration: %s", settings.NETWORK_SUPPORTS_IPV4)
+    log.info("IPv6 is enabled via configuration: %s", settings.NETWORK_SUPPORTS_IPV6)
 
-    can_ipv4 = can_connect(None, "https", "faalkaart.nl", 443, 4)
-    can_ipv6 = can_connect(None, "https", "faalkaart.nl", 443, 6)
+    can_ipv4 = can_connect("https", "faalkaart.nl", 443, 4)
+    can_ipv6 = can_connect("https", "faalkaart.nl", 443, 6)
 
     if not can_ipv4["result"] or not can_ipv6["result"]:
         raise ConnectionError(
@@ -746,7 +747,7 @@ def check_network(code_location=""):
             f"IPv6 Error: {can_ipv6['error']}"
         )
 
-    log.info("Network could be reached could be reached via {%s}", code_location)
+    log.info("Network could be reached could be reached via %s", code_location)
 
 
 def redirects_to_safety(url: str):
@@ -786,9 +787,9 @@ def redirects_to_safety(url: str):
         if response.history:
             log.debug("Request was redirected, there is hope. Redirect path:")
             for index, resp in enumerate(response.history):
-                log.debug("- Redirect {%s}: {%s}.", index, resp.url)
+                log.debug("- Redirect %s: %s.", index, resp.url)
             log.debug("Final destination:")
-            log.debug("{%s}: {%s}", response.status_code, response.url)
+            log.debug("%s: %s", response.status_code, response.url)
 
             if response.url.startswith("https://"):
                 log.debug("Url starts with https, so it redirects to safety.")
@@ -807,7 +808,7 @@ def redirects_to_safety(url: str):
         requests.exceptions.TooManyRedirects,
     ) as my_exception:
         log.debug("Request resulted into an error, it's not redirecting properly.")
-        log.debug("The error retrieved was: {%s}", my_exception)
+        log.debug("The error retrieved was: %s", my_exception)
         return False
 
 

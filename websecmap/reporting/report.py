@@ -8,14 +8,12 @@ import pytz
 from django.db.models import Q
 
 from websecmap.app.constance import constance_cached_value
-from websecmap.celery import app
+from websecmap.celery import Task, app
 from websecmap.organizations.models import Url
 from websecmap.reporting.models import UrlReport
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
-
-from websecmap.celery import Task
 from websecmap.scanners.scanner.utils import in_chunks
 
 log = logging.getLogger(__package__)
@@ -70,7 +68,7 @@ def recreate_url_report(url_id):
 
     # in cases where there is nothing to report at all.
     if not url_reports:
-        log.debug("Found no url reports for {%s}. Skipping.", url.url)
+        log.debug("Found no url reports for %s. Skipping.", url.url)
         return
 
     # log.debug(url_reports)
@@ -78,7 +76,7 @@ def recreate_url_report(url_id):
     # No new reports: the amount of items in the timeline(+rules) is the same as the existing reports.
     amount_of_existing_reports = UrlReport.objects.all().filter(url=url_id).count()
     if amount_of_existing_reports == len(url_reports):
-        log.debug("There are no new reports for {%s}. Updating the latest one to contain latest scan info.", url.url)
+        log.debug("There are no new reports for %s. Updating the latest one to contain latest scan info.", url.url)
         # latest and last() are equivalent because of the sequential nature of adding reports to the database.
         # Comparison on an integer is faster, so we're using last().
         latest_report = UrlReport.objects.all().filter(url=url_id).last()
@@ -99,7 +97,7 @@ def recreate_url_report(url_id):
         # There are new reports, at least one. See how many are new and add them.
         # As there can be many scans a day, there will probably be many reports created that day.
         amount_of_new_reports = len(url_reports) - amount_of_existing_reports
-        log.debug("Adding {%s} to {%s}.", amount_of_new_reports, url.url)
+        log.debug("Adding %s to %s.", amount_of_new_reports, url.url)
         # due to bugs there could be multiple on a single day... not yet clear why.
         # in that case nothing is added.
         if amount_of_new_reports < 0:
@@ -987,8 +985,7 @@ def inspect_timeline(timeline, url: Url):
                 calculation = get_severity(item)
                 message += (
                     f"|  |  |-  H:{calculation.get('high', '?'):>2} "
-                    f"M:{calculation.get('medium', '?'):>2} L:{calculation.get('low', '?'):>2} {item:<40}"
-                    + newline
+                    f"M:{calculation.get('medium', '?'):>2} L:{calculation.get('low', '?'):>2} {item:<40}" + newline
                 )
 
         if "endpoint_scan" in timeline[moment]:
@@ -997,8 +994,7 @@ def inspect_timeline(timeline, url: Url):
                 calculation = get_severity(item)
                 message += (
                     f"|  |  |-  H:{calculation.get('high', '?'):>2} "
-                    f"M:{calculation.get('medium', '?'):>2} L:{calculation.get('low', '?'):>2} {item:<40}"
-                    + newline
+                    f"M:{calculation.get('medium', '?'):>2} L:{calculation.get('low', '?'):>2} {item:<40}" + newline
                 )
 
         if "dead" in timeline[moment]:

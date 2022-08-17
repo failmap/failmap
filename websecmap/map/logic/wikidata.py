@@ -33,7 +33,7 @@ def get_property_from_code(wikidata_code: str, property_code: str):
         return_value = str(entity.get(client.get(property_code), None))
 
         if not return_value or return_value == "None":
-            log.debug("No {%s} for wikidata code: {%s}", property_code, wikidata_code)
+            log.debug("No %s for wikidata code: %s", property_code, wikidata_code)
             return ""
 
         return return_value

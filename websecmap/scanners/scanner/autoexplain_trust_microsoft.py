@@ -9,12 +9,12 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID
 from django.db.models import Q
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
-from websecmap.scanners.models import EndpointGenericScan, Endpoint
-from websecmap.scanners.scanner import unique_and_random, finish_those_that_wont_be_scanned
+from websecmap.scanners.models import Endpoint, EndpointGenericScan
+from websecmap.scanners.scanner import finish_those_that_wont_be_scanned, unique_and_random
 
 log = logging.getLogger(__package__)
 
@@ -196,7 +196,7 @@ def scan(scan_id):
         return
 
     # when all checks pass, and indeed the SSL_ERROR_BAD_CERT_DOMAIN was found, the finding is explained
-    log.debug("Scan {%s} fits all criteria to be auto explained for incorrect cert usage.", epgs)
+    log.debug("Scan %s fits all criteria to be auto explained for incorrect cert usage.", epgs)
     add_bot_explanation(epgs, "trusted_on_local_device_with_custom_trust_policy", timedelta(days=365 * 10))
     autoexplain_trust_microsoft_and_include_their_webserver_headers(epgs)
 
@@ -207,7 +207,7 @@ def get_relevant_microsoft_domains_from_database() -> List[Url]:
     # Fix #294: A subdomain can be sub-sub-sub domain. So perform a few more queries and get be sure that
     # all subdomains are accounted for.
     possible_urls = []
-    for subdomain in applicable_subdomains.keys():
+    for subdomain in applicable_subdomains:
         possible_urls += list(
             Url.objects.all()
             .filter(Q(computed_subdomain__startswith=f"{subdomain}.") | Q(computed_subdomain=f"{subdomain}"))
@@ -245,15 +245,15 @@ def certificate_matches_microsoft_exception_policy(
     :return:
     """
     if not certificate:
-        log.debug("Could not retrieve certificate for {%s}.", url)
+        log.debug("Could not retrieve certificate for %s.", url)
         return False
 
     if certificate.not_valid_before > datetime.now():
-        log.debug("Certificate for {%s} is not valid before {%s}. Not trusted.", url, certificate.not_valid_before)
+        log.debug("Certificate for %s is not valid before %s. Not trusted.", url, certificate.not_valid_before)
         return False
 
     if datetime.now() > certificate.not_valid_after:
-        log.debug("Certificate for {%s} has expired  {%s}. Not trusted.", url, certificate.not_valid_after)
+        log.debug("Certificate for %s has expired  %s. Not trusted.", url, certificate.not_valid_after)
         return False
 
     # Likely subdomain:
@@ -271,8 +271,11 @@ def certificate_matches_microsoft_exception_policy(
     names = [name.value for name in _names]
     if names[0] not in applicable_subdomains[microsoft_service]:
         log.debug(
-            "Certificate for {%s} not in accepted names, value: {%s}. {%s} not in {%s}. Not trusted.",
-            url, names, names[0], applicable_subdomains[microsoft_service]
+            "Certificate for %s not in accepted names, value: %s. %s not in %s. Not trusted.",
+            url,
+            names,
+            names[0],
+            applicable_subdomains[microsoft_service],
         )
         return False
 
@@ -280,8 +283,7 @@ def certificate_matches_microsoft_exception_policy(
     _names = certificate.issuer.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)
     names = [name.value for name in _names]
     if trusted_organization not in names:
-        log.debug("Certificate for {%s} not handed out by {%s} but by {%s}. Not trusted.",
-                  url, trusted_organization, names)
+        log.debug("Certificate for %s not handed out by %s but by %s. Not trusted.", url, trusted_organization, names)
         return False
 
     return True

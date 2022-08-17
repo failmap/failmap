@@ -1,5 +1,6 @@
-from websecmap.scanners.scanner.utils import get_nameservers
 from constance.test import override_config
+
+from websecmap.scanners.scanner.utils import get_nameservers
 
 
 @override_config(SCANNER_NAMESERVERS='["2.2.2.2", "3.3.3.3"]')

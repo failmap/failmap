@@ -10,9 +10,9 @@ import logging
 
 from celery import Task, group
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.organizations.models import Url
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.scanner.__init__ import (
     allowed_to_scan,
     q_configurations_to_scan,

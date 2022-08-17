@@ -131,7 +131,7 @@ class Command(BaseCommand):
         for item in self.regime:
 
             if PeriodicTask.objects.all().filter(name=item["friendly_name"]).exists():
-                log.warning("Periodic task with {%s} already exists, removing.", item['friendly_name'])
+                log.warning("Periodic task with %s already exists, removing.", item["friendly_name"])
                 PeriodicTask.objects.all().filter(name=item["friendly_name"]).delete()
                 continue
 
@@ -144,4 +144,4 @@ class Command(BaseCommand):
             new_task.queue = "storage"
             new_task.enabled = False
             new_task.save()
-            log.info("Created new task: {%s}", item['friendly_name'])
+            log.info("Created new task: %s", item["friendly_name"])

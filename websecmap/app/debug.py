@@ -2,6 +2,8 @@
 
 import logging
 
+from django.db import connection
+
 log = logging.getLogger(__package__)
 
 
@@ -14,7 +16,6 @@ def count_queries(message: str = ""):
 
     :return:
     """
-    from django.db import connection
 
     queries_performed = len(connection.queries)
     if queries_performed > 9000:
@@ -41,17 +42,13 @@ def count_queries(message: str = ""):
 
 
 def show_last_query():
-    from django.db import connection
-
-    if not len(connection.queries):
+    if not connection.queries:
         return
 
     log.debug(connection.queries[len(connection.queries) - 1])
 
 
 def show_queries():
-    from django.db import connection
-
     log.debug(connection.queries)
 
 
@@ -76,8 +73,6 @@ def query_contains_begin():
     OK, we're rolling with it. Thnx open source docs and django devs for being clear.
     :return:
     """
-    from django.db import connection
-
     for query in connection.queries:
         if query["sql"] == "BEGIN":
             log.error("BEGIN")

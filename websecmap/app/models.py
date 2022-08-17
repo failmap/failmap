@@ -11,7 +11,7 @@ from django.db import models
 from django.utils import timezone
 from jsonfield import JSONField
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 
 log = logging.getLogger(__name__)
 

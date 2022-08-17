@@ -10,12 +10,12 @@ to log network errors. These errors can be retried.
 """
 
 import logging
-from typing import List, Any, Dict
+from typing import Any, Dict, List
 
 import requests
 from requests.auth import HTTPBasicAuth
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 
 log = logging.getLogger(__name__)
 
@@ -48,9 +48,9 @@ def register(domains: List[str], scan_type: str, tracking_information: str, sett
             auth=HTTPBasicAuth(settings["username"], settings["password"]),
             timeout=(300, 300),
         )
-    except requests.RequestException as e:
+    except requests.RequestException as my_exception:
         # This is returned as a catch all for network errors. A network error can be retried.
-        return 599, {"network_error": f"{e.strerror} {repr(e)}"}
+        return 599, {"network_error": f"{my_exception.strerror} {repr(my_exception)}"}
 
     return return_safe_response(response)
 
@@ -85,7 +85,7 @@ def generic_internet_nl_api_request(operation, url: str, settings: Dict[str, Any
         response = requests_function(
             url, auth=HTTPBasicAuth(settings["username"], settings["password"]), timeout=(300, 300)
         )
-    except requests.RequestException as e:
-        return 599, {"network_error": f"{e.strerror} {repr(e)}"}
+    except requests.RequestException as my_exception:
+        return 599, {"network_error": f"{my_exception.strerror} {repr(my_exception)}"}
 
     return return_safe_response(response)

@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from websecmap.scanners.models import PlannedScan, EndpointGenericScan
+from websecmap.scanners.models import EndpointGenericScan, PlannedScan
 from websecmap.scanners.scanner.autoexplain_no_https_possible import plan_scan, scan
 from websecmap.scanners.tests.test_plannedscan import (
-    create_organization,
-    link_url_to_organization,
-    create_url,
     create_endpoint,
     create_endpoint_scan,
+    create_organization,
+    create_url,
+    link_url_to_organization,
 )
 
 

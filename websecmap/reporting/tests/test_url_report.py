@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 
 from websecmap.organizations.models import Url
-from websecmap.reporting.models import UrlReport, ScanPolicy
+from websecmap.reporting.models import ScanPolicy, UrlReport
 from websecmap.reporting.report import create_url_reports, recreate_url_report
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 

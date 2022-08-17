@@ -1,31 +1,30 @@
 import itertools
 import logging
 import random
+import re
 import string
 import tempfile
 from datetime import datetime
-from typing import List, Any, Dict
+from typing import Any, Dict, List
 
 import pytz
+import requests
 from celery import Task, group
 from django.db import connection
 from django.db.models import Q
+from dnsrecon.__main__ import brute_domain, ds_zone_walk
+from dnsrecon.lib.dnshelper import DnsHelper
 from tenacity import before_log, retry, wait_fixed
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.map.logic.map_defaults import get_country
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import plannedscan, init_dict
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, unique_and_random, url_filters
 from websecmap.scanners.scanner.http import get_ips
 
 # Include DNSRecon code from an external dependency. This is cloned recursively and placed outside the django app.
 from websecmap.scanners.scanner.utils import get_random_nameserver
-from dnsrecon.__main__ import ds_zone_walk, brute_domain
-from dnsrecon.lib.dnshelper import DnsHelper
-import re
-import requests
-
 
 log = logging.getLogger(__package__)
 
@@ -384,12 +383,15 @@ def remove_wildcards_using_statistics(found_hosts, url: str):
 
     log.debug("Ip Stats")
     log.debug(ip_stats)
-    # block IP's that are being used more than 10 times. 10, because i like the number. More than 10 sites on
-    # the same server? perfectly possible. With a firewall it might be infinite.
+    return find_interesting_ips(ip_stats, found_hosts)
 
+
+def find_interesting_ips(ip_stats, found_hosts):
     # does this work with amsterdam?
     banned_ips = []
-    for key in ip_stats.keys():
+    for key in ip_stats:
+        # block IP's that are being used more than 10 times. 10, because i like the number. More than 10 sites on
+        # the same server? perfectly possible...
         if ip_stats[key] > 10:
             banned_ips.append(key)
 

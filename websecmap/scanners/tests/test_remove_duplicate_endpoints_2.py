@@ -1,13 +1,13 @@
+import logging
 from datetime import date, datetime, timedelta
 
 import pytz
-from django.utils import timezone
 from deepdiff import DeepDiff
+from django.utils import timezone
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.duplicates import deduplicate_all_endpoints_sequentially, deduplicate_all_scans_sequentially
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
-import logging
 
 log = logging.getLogger(__package__)
 

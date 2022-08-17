@@ -3,11 +3,11 @@ from django.test import TestCase
 
 import websecmap
 from websecmap.api.apis.sidn import (
+    get_2ndlevel_domains,
     get_map_configuration,
+    remove_last_dot,
     sidn_domain_upload,
     sidn_handle_domain_upload,
-    get_2ndlevel_domains,
-    remove_last_dot,
 )
 from websecmap.api.models import SIDNUpload
 from websecmap.organizations.models import Url
