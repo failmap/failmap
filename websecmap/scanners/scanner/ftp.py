@@ -335,7 +335,7 @@ def scan(self, address: str, port: int):
         results["status"] += getattr(my_exception, "message", repr(my_exception))
         # ftplib.error_perm: 502 Command not implemented. We can't assess it further.
         return results
-    except Exception as my_exception:
+    except Exception as my_exception:  # pylint: disable=broad-except
         log.debug("Base Exception %s", my_exception)
         results["status"] += getattr(my_exception, "message", repr(my_exception))
         # Or whatever exception in really rare cases.
@@ -368,7 +368,7 @@ def scan(self, address: str, port: int):
         # log.debug(results)
     except (error_reply, error_perm, error_temp, error_proto) as my_exception:
         results["status"] += "FEAT Command: " + getattr(my_exception, "message", repr(my_exception))
-    except Exception as my_exception:
+    except Exception as my_exception:  # pylint: disable=broad-except
         # and the other few million exception possibilities
         results["status"] += "FEAT Command: " + getattr(my_exception, "message", repr(my_exception))
 
@@ -393,7 +393,7 @@ def scan(self, address: str, port: int):
     try:
         ftp.quit()
         results["status"] += "Quit successfully"
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         ftp.close()
         results["status"] += "Force closed connection"
 
@@ -407,7 +407,7 @@ def try_ssl(ftp):
     except (error_reply, error_perm, error_temp, error_proto) as my_exception:
         log.debug(str(my_exception))
         return False, getattr(my_exception, "message", repr(my_exception))
-    except Exception as my_exception:
+    except Exception as my_exception:  # pylint: disable=broad-except
         log.debug(str(my_exception))
         return False, getattr(my_exception, "message", repr(my_exception))
 
@@ -419,7 +419,7 @@ def try_tls(ftp):
     except (error_reply, error_perm, error_temp, error_proto) as my_exception:
         log.debug(str(my_exception))
         return False, getattr(my_exception, "message", repr(my_exception))
-    except Exception as my_exception:
+    except Exception as my_exception:  # pylint: disable=broad-except
         log.debug(str(my_exception))
         return False, getattr(my_exception, "message", repr(my_exception))
 

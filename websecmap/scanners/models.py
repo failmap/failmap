@@ -103,20 +103,19 @@ class Endpoint(models.Model):
         if count > 0:
             return endpoints[0]
 
-        if count == 0:
-            endpoint = Endpoint()
-            try:
-                endpoint.url = Url.objects.filter(url=url_id).first()
-            except ObjectDoesNotExist:
-                endpoint.url = ""
-            endpoint.port = port
-            endpoint.protocol = protocol
-            endpoint.ip_version = ip_version
-            endpoint.is_dead = False
-            endpoint.discovered_on = datetime.now(pytz.utc)
-            endpoint.save()
+        endpoint = Endpoint()
+        try:
+            endpoint.url = Url.objects.filter(url=url_id).first()
+        except ObjectDoesNotExist:
+            endpoint.url = ""
+        endpoint.port = port
+        endpoint.protocol = protocol
+        endpoint.ip_version = ip_version
+        endpoint.is_dead = False
+        endpoint.discovered_on = datetime.now(pytz.utc)
+        endpoint.save()
 
-            return endpoint
+        return endpoint
 
     @staticmethod
     # while being extermely slow, it sort of works... It's better than waiting for the whole list to download.

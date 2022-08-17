@@ -16,10 +16,12 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from dataclasses import dataclass
 
 log = logging.getLogger(__name__)
 
 
+@dataclass
 class InternetNLApiSettings:
     url: str = ""
     username: str = ""

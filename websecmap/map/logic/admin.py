@@ -235,7 +235,7 @@ def is_valid_ip_address_and_port(address):
 
     try:
         port = int(port)
-    except BaseException:
+    except BaseException:  # pylint: disable=broad-except
         # cannot cast? okbye
         return False
 

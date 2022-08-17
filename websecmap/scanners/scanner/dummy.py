@@ -231,7 +231,7 @@ def scan(self, uri_url):
         try:
             # Since this action raises an exception itself, any code after this won't be executed.
             raise self.retry(exc=my_exception)
-        except BaseException:
+        except BaseException:  # pylint: disable=broad-except
             # If this task still fails after maximum retries the last
             # error will be passed as result to the next task.
             log.exception("Retried %s times and it still failed", MAX_RETRIES)

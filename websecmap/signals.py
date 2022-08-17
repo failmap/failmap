@@ -32,6 +32,6 @@ def configure_workers(sender=None, conf=None, instance=None, **kwargs):
     try:
         # configure worker queues
         conf.update(worker_configuration())
-    except BaseException:
+    except BaseException:  # pylint: disable=broad-except
         log.exception("Failed to setup worker configuration!")
         sys.exit(1)

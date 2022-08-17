@@ -53,6 +53,7 @@ def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpo
 
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="scan", scanner="internet_nl_mail", urls=urls)
+    return group()
 
 
 def compose_scan_task(urls):

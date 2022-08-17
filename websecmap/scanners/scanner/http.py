@@ -195,6 +195,7 @@ def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, end
 
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="verify", scanner="http", urls=urls)
+    return group()
 
 
 @app.task(queue="storage")
@@ -268,7 +269,7 @@ def get_ipv4(url: str):
     try:
         ipv4 = socket.gethostbyname(url)
         log.debug("%s has IPv4 address: %s", url, ipv4)
-    except Exception as ex:
+    except Exception as ex:  # pylint: disable=broad-except
         # when not known: [Errno 8] nodename nor servname provided, or not known
         log.debug("Get IPv4 error on %s: %s", url, ex)
 
@@ -307,7 +308,7 @@ def get_ipv6(url: str):
             ipv6 = ""
         else:
             log.debug("%s has IPv6 address: %s", url, ipv6)
-    except Exception as ex:
+    except Exception as ex:  # pylint: disable=broad-except
         # when not known: [Errno 8nodename nor servname provided, or not known
         log.debug("Get IPv6 error on %s: %s", url, ex)
 
@@ -516,11 +517,11 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
             return connection_answer(False, sub_ex)
         except (Timeout, ReadTimeout) as sub_ex:
             return connection_answer(False, sub_ex)
-        except Exception as sub_ex:
+        except Exception as sub_ex:  # pylint: disable=broad-except
             return connection_answer(False, sub_ex)
 
     # The rest :)
-    except Exception as my_exception:
+    except Exception as my_exception:  # pylint: disable=broad-except
         return connection_answer(False, my_exception)
 
 
@@ -596,7 +597,7 @@ def has_internet_connection(host: str = "8.8.8.8", port: int = 53, connection_ti
         socket.setdefaulttimeout(connection_timeout)
         socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
         return True
-    except Exception as ex:
+    except Exception as ex:  # pylint: disable=broad-except
         log.debug("No internet connection: %s", ex)
         return False
 
@@ -669,7 +670,7 @@ def store_url_ips(url: int, ips):
         if UrlIp.objects.all().filter(url=url, ip=ip_address, is_unused=False).count():
             continue
 
-        epip = UrlIp()
+        epip = UrlIp()  # pylint: disable=invalid-name
         epip.ip = ip_address  # pylint: disable=invalid-name
         epip.url = url
         epip.is_unused = False
@@ -696,7 +697,7 @@ def get_rdns_name(ip_address):
         # takes too long
         # host doesn't exist / unknown host
         pass
-    except BaseException as my_exception:
+    except BaseException as my_exception:  # pylint: disable=broad-except
         log.error("Unknown rdns failure %s on ip %s", str(my_exception), ip_address)
 
     return reverse_name

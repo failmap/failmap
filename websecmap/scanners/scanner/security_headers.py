@@ -225,6 +225,9 @@ def analyze_headers(headers: CaseInsensitiveDict, endpoint_id):
     if service_type == "RESTRICTED":
         return clean_up_existing_headers(endpoint_id, service_type=service_type, reason="authentication_required")
 
+    # fallback
+    return clean_up_existing_headers(endpoint_id, service_type=service_type, reason="unknown_content_type")
+
 
 def analyze_soap_headers(endpoint_id):
     """
@@ -431,7 +434,7 @@ def get_headers(self, uri_uri: str) -> Union[CaseInsensitiveDict, bool]:
         try:
             # Since this action raises an exception itself, any code after this won't be executed.
             raise self.retry(exc=my_exception)
-        except BaseException:
+        except BaseException:  # pylint: disable=broad-except
             # If this task still fails after maximum retries the last
             # error will be passed as result to the next task.
             # Exceptions do not serialize.

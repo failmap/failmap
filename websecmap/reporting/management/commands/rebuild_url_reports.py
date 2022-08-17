@@ -16,6 +16,6 @@ class Command(GenericTaskCommand):
 
         try:
             self.scanner_module = rebuild_url_report
-            return super().handle(self, *args, **options)
+            super().handle(self, *args, **options)
         except KeyboardInterrupt:
             log.info("Received keyboard interrupt. Stopped.")

@@ -69,6 +69,7 @@ class Job(models.Model):
 
         Task signatures are for informational purpose and not functionally required. Currently
         there is no reason to keep large signatures so truncating to arbitrary limit of 1k.
+        # Todo: this thinks it's a form, while it's not.
         """
         data = self.cleaned_data["task"][: 1000 * 1]
 

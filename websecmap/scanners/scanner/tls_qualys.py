@@ -352,7 +352,7 @@ def qualys_scan_bulk(proxy: Dict[str, Any], urls: List[str]):
         pool.close()
         pool.join()
 
-    except Exception as my_exception:
+    except Exception as my_exception:  # pylint: disable=broad-except
         # catch _anything_ that goes wrong, log it to the sentry/logfile
         # This is done to still return the scanproxy so it can be released.
         log.exception("Unexpected crash in qualys bulk scan: %s", my_exception)

@@ -221,9 +221,9 @@ def get_relevant_microsoft_domains_from_database() -> List[Url]:
 def retrieve_certificate(url: str, port: int = 443) -> [x509.Certificate, None]:
     try:
         pem_data = ssl.get_server_certificate((url, port))
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         # One gazillion network errors and transmission issues can occur here.
-        return
+        return None
 
     # load_pem_x509_certificate takes bytes, not string. Vague error happens otherwise, IDE does not type check here.
     return x509.load_pem_x509_certificate(pem_data.encode(), default_backend())

@@ -766,7 +766,7 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         # check if the environment is sane, if not, return a user message with the error
         try:
             datasources.check_environment()
-        except Exception as my_exception:
+        except Exception as my_exception:  # pylint: disable=broad-except
             self.message_user(request, str(my_exception), level=messages.ERROR)
             return
 

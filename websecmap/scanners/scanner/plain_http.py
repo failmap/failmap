@@ -72,6 +72,7 @@ def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpo
 
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="scan", scanner="plain_http", urls=urls)
+    return group()
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)

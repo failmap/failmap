@@ -103,7 +103,7 @@ def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
             return serialize_cert_chain(chain) if chain else []
 
     # get address info error (DNS issues) can be retried a few times.
-    except Exception as my_exception:  # noqa
+    except Exception as my_exception:  # noqa  # pylint: disable=broad-except
         # Log these exceptions to see what happens.
         log.debug(my_exception)
         # Name does not resolve, wantread errors etc etc etc... there is no great code out there and can't make it

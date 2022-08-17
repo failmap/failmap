@@ -125,7 +125,7 @@ def make_screenshot(service: str, endpoint_url: str):
         return make_screenshot_with_u2p(service, endpoint_url)
     except (ConnectionError, TimeoutError) as my_exception:
         return my_exception
-    except Exception as my_exception:
+    except Exception as my_exception:  # pylint: disable=broad-except
         return my_exception
 
 
@@ -169,7 +169,7 @@ def save_screenshot(response, endpoint_id):
     # with an invalid / non-resolvable address, a 500 error is given by the image service.
     if response.status_code == 500:
         log.debug(
-            "Received 500 at the API from %s, url probably does not resolve. " "This is business as usual. Not saving.",
+            "Received 500 at the API from %s, url probably does not resolve. This is business as usual. Not saving.",
             endpoint_id,
         )
         return False
@@ -190,6 +190,6 @@ def save_screenshot(response, endpoint_id):
         scr.save()
         log.debug("Saved in databased as id:%s filename:%s.", scr.pk, scr.filename)
         return True
-    except Exception as my_exception:
+    except Exception as my_exception:  # pylint: disable=broad-except
         log.exception(my_exception)
         return False

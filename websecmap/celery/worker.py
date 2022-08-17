@@ -175,53 +175,36 @@ def worker_verify_role_capabilities(role):
     if role in ROLES_REQUIRING_IPV6 or role in ROLES_REQUIRING_IPV4_AND_IPV6:
         # allow IPv6 support to be faked during development
         if not os.environ.get("NETWORK_SUPPORTS_IPV6", False):
+
             # verify if a https connection to a IPv6 website can be made
-            my_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
-            try:
-                my_socket.connect((config.IPV6_TEST_DOMAIN, 443))
-            except socket.gaierror:
-                # docker container DNS might not be ready, retry
-                raise
-            except BaseException:
-                log.warning("Failed to connect to ipv6 test domain %s via IPv6", config.IPV6_TEST_DOMAIN, exc_info=True)
+            if not connect_socket(socket.AF_INET6, config.IPV6_TEST_DOMAIN):
                 failed = True
 
     if role in ROLES_REQUIRING_IPV4 or role in ROLES_REQUIRING_IPV4_AND_IPV6:
         # verify if a https connection to a website can be made
         # we assume non-ipv4 internet doesn't exist
-        my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-        try:
-            my_socket.connect((config.CONNECTIVITY_TEST_DOMAIN, 443))
-        except socket.gaierror:
-            # docker container DNS might not be ready, retry
-            raise
-        except BaseException:
-            log.warning("Failed to connect to test domain %s via IPv4", config.CONNECTIVITY_TEST_DOMAIN, exc_info=True)
+        if not connect_socket(socket.AF_INET, config.CONNECTIVITY_TEST_DOMAIN):
             failed = True
 
     if role in ROLES_REQUIRING_ANY_NETWORK:
         # one may fail.
-
-        # try v4 first
-        socket_4 = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-        try:
-            socket_4.connect((config.IPV6_TEST_DOMAIN, 443))
-        except socket.gaierror:
-            # docker container DNS might not be ready, retry
-            raise
-        except BaseException:
-            socket_6 = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
-            try:
-                socket_6.connect((config.IPV6_TEST_DOMAIN, 443))
-            except socket.gaierror:
-                # docker container DNS might not be ready, retry
-                raise
-            except BaseException:
-                log.warning(
-                    "Failed to connect to test domain %s via both v6 and v6",
-                    config.CONNECTIVITY_TEST_DOMAIN,
-                    exc_info=True,
-                )
+        if not connect_socket(socket.AF_INET, config.IPV6_TEST_DOMAIN):
+            if not connect_socket(socket.AF_INET6, config.IPV6_TEST_DOMAIN):
                 failed = True
 
     return not failed
+
+
+def connect_socket(inet, domain: str):
+    # socket.AF_INET
+    my_socket = socket.socket(inet, socket.SOCK_STREAM, 0)
+    try:
+        my_socket.connect((domain, 443))
+        return True
+    except socket.gaierror:
+        # docker container DNS might not be ready, retry
+        raise
+    # a million things can go wrong with sockets, and do we really care?
+    except BaseException:  # pylint: disable=broad-except
+        log.warning("Failed to connect to test domain %s via IPv4/6 %s", domain, inet, exc_info=True)
+        return False

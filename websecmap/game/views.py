@@ -899,8 +899,8 @@ def make_new_feature(organization, scan):
 def get_organizations(scan):
     if scan.type in ENDPOINT_SCAN_TYPES:
         return scan.endpoint.url.organization.all()
-    if scan.type in URL_SCAN_TYPES:
-        return scan.url.organization.all()
+
+    return scan.url.organization.all()
 
 
 @login_required(login_url="/authentication/login/")

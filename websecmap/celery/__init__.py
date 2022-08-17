@@ -144,7 +144,7 @@ def status():
             import asyncio
 
             asyncio.set_event_loop(asyncio.new_event_loop())
-        except BaseException:
+        except BaseException:  # pylint: disable=broad-except
             # an eventloop already exists.
             pass
 
