@@ -46,6 +46,7 @@ def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, e
 
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="discover", scanner="dns_known_subdomains", urls=urls)
+    return group()
 
 
 def compose_discover_task(urls):
