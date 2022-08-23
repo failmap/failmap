@@ -443,7 +443,6 @@ TOOLS = {
     },
 }
 
-
 # Disable caching during development and production.
 # Django only emits caching headers, the webserver/caching-proxy makes sure the rest of the caching is handled.
 CACHES = {
@@ -451,7 +450,6 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.dummy.DummyCache",
     }
 }
-
 
 #####
 # Celery 4.0 settings
@@ -953,6 +951,34 @@ CONSTANCE_CONFIG = {
         "where high means incompatible, medium means proof and good means ready.",
         str,
     ),
+    "WEBSITEREGISTER_DOWNLOAD_PAGE": (
+        "https://www.communicatierijk.nl/vakkennis/r/rijkswebsites/"
+        "verplichte-richtlijnen/websiteregister-rijksoverheid",
+        "Page where the download can be found",
+        str,
+    ),
+    "WEBSITEREGISTER_SPREADSHEET_FILE_PATTERN_ON_PAGE": (
+        "binaries\/communicatierijk\/documenten\/publicaties"
+        "\/2016\/05\/26\/websiteregister\/websiteregister-"
+        "rijksoverheid-2...-..-..\.ods",
+        "A way to recognize the ods file for download on that page.",
+        str,
+    ),
+    "INTRO_TITLE_HTML_EN": ("Web Security Map", "English heading of the intro/hero-box on the front page.", str),
+    "INTRO_LEADER_HTML_EN": (
+        "This is a placeholder text that describes the content of this website to the target "
+        "audience. For example: ",
+        "Lead paragraph on the into/hero-box on the front page.",
+        str,
+    ),
+    "INTRO_TITLE_HTML_NL": ("Web Security Map", "Dutch heading of the intro/hero-box on the front page.", str),
+    "INTRO_LEADER_HTML_NL": (
+        "Dit is een voorbeeld tekst, hier moet een omschrijving komen te staan over"
+        "de inhoud van de website gericht op de doelgroep.",
+        "Lead paragraph on the into/hero-box on the front page.",
+        str,
+    ),
+    # todo: add config for enabled languages...
 }
 
 CONSTANCE_CONFIG = add_scanner_fields(CONSTANCE_CONFIG)
@@ -1049,6 +1075,15 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             ),
         ),
         (
+            "Intro text, translated into supported languages",
+            (
+                "INTRO_TITLE_HTML_EN",
+                "INTRO_LEADER_HTML_EN",
+                "INTRO_TITLE_HTML_NL",
+                "INTRO_LEADER_HTML_NL",
+            ),
+        ),
+        (
             "What to show on the reporting page",
             (
                 "SHOW_REPORT_NUMBERS",
@@ -1064,6 +1099,10 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         (
             "Plus",
             ("PLUS_SHOW_INFO",),
+        ),
+        (
+            "Data Import Preferences",
+            ("WEBSITEREGISTER_DOWNLOAD_PAGE", "WEBSITEREGISTER_SPREADSHEET_FILE_PATTERN_ON_PAGE"),
         ),
     ]
 )
@@ -1192,6 +1231,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         "items": [
             {"name": "map.administrativeregion", "label": _("Open Street Map & Wikidata")},
             {"name": "organizations.dataset", "label": "Spreadsheet Import"},
+            {"name": "organizations.genericfiledataset", "label": "File Imports"},
         ],
     },
     {

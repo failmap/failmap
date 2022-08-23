@@ -540,3 +540,29 @@ class Dataset(models.Model):
         "This is different per parser. This field is highly coupled with the code of the parser.",
         default="{}",
     )
+
+
+class GenericFileDataset(models.Model):
+    # Process: a periodic downloader adds files over time. They are then parsed and added to the database.
+
+    # Manual (and automatic) importer for the dutch Websiteregister Rijksoverheid source.
+    file = models.FileField(
+        null=True,
+        blank=True,
+        help_text="Add a file in the format of the websiteregister rijksoverheid.",
+    )
+    file_format = models.CharField(
+        blank=True, null=True, help_text="Basically what parser should handle this file.", max_length=140
+    )
+
+    is_imported = models.BooleanField(
+        default=False,
+    )
+    imported_on = models.DateTimeField(blank=True, null=True)
+    state = models.CharField(blank=True, null=True, max_length=4000)
+    origin = models.CharField(
+        blank=True,
+        null=True,
+        help_text="Some idea what downloaded the file in case of" "an automatic download and parsing.",
+        max_length=250,
+    )

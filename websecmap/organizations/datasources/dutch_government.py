@@ -25,59 +25,74 @@ def parse_data(dataset, filename):
     # how can we identify the correct namespace for p correctly automatically?
     found_organizations = []
 
+    log.debug("Found %s bytes of data in %s.", len(data), filename)
+
     root = ET.fromstring(data)
+
+    log.debug("Root is now: %s", len(root))
+    log.debug(root)
+
     namespace = root.attrib["{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"].split(" ")[0]
     log.debug("Using namespace: %s", namespace)
+    # There is some confusion with getting the namespace with or without S for Security.
+    # retrieving gets it without S, but you need it WITH S. Probably a bug in this split code above...
+    namespace = namespace.replace("http://", "https://")
 
     # of course this doesn't work out the box, so how do we autoregister a namespace?
     ET.register_namespace("p", namespace)
     # so just fake / overwrite the namespaces variable
     namespaces = {"p": namespace}
 
+    log.debug(root.get("organisaties"))
+
     organizations = root.find(f"p:{dataset['xml_plural']}", namespaces)
+    log.debug(organizations)
 
     # why can't i use a similar construct as get?
     # i want: bla = et.find(x. alaternative if not found)
-    for organization in organizations.iterfind(f"p:{dataset['xml_single']}", namespaces):
+    geocoding_hint = "Nederland"
+
+    for organization in organizations:
         found = {
             "name": emulate_get(organization, "p:naam", namespaces),
             "abbreviation": emulate_get(organization, "p:afkorting", namespaces),
             "contact": organization.find("p:contact", namespaces),
         }
 
-        found["bezoek_adres"] = found["contact"].find("p:bezoekAdres", namespaces)
-        found["adres"] = found["bezoek_adres"].find("p:adres", namespaces)
-        found["straat"] = emulate_get(found["adres"], "p:straat", namespaces)
-        found["huisnummer"] = emulate_get(found["adres"], "p:huisnummer", namespaces)
-        found["postcode"] = emulate_get(found["adres"], "p:postcode", namespaces)
-        found["plaats"] = emulate_get(found["adres"], "p:plaats", namespaces)
+        # log.debug(found)
 
-        found["site"] = emulate_get(found["contact"], "p:internet", namespaces)
+        if len(found["contact"]):
+            found["bezoek_adres"] = found["contact"].find("p:bezoekAdres", namespaces)
+            found["adres"] = found["bezoek_adres"].find("p:adres", namespaces)
+            found["straat"] = emulate_get(found["adres"], "p:straat", namespaces)
+            found["huisnummer"] = emulate_get(found["adres"], "p:huisnummer", namespaces)
+            found["postcode"] = emulate_get(found["adres"], "p:postcode", namespaces)
+            found["plaats"] = emulate_get(found["adres"], "p:plaats", namespaces)
 
-        if not found["name"]:
-            # gemeenschappelijke regelingen has a title, not a name.
-            found["name"] = emulate_get(organization, "p:titel", namespaces)
+            found["site"] = emulate_get(found["contact"], "p:internet", namespaces)
 
-        if not found["postcode"] and not found["plaats"]:
-            # try to find something by name... might not have an address...
-            geocoding_hint = f"{found['name']}, Nederland"
-        else:
-            geocoding_hint = "Nederland"
+            if not found["name"]:
+                # gemeenschappelijke regelingen has a title, not a name.
+                found["name"] = emulate_get(organization, "p:titel", namespaces)
 
-        found_organizations.append(
-            {
-                "name": f'{found["name"]} ({found["abbreviation"]})' if found["abbreviation"] else found["name"],
-                "address": f'{found["straat"]} {found["huisnummer"]}, {found["postcode"]}, {found["plaats"]}',
-                # make sure that the geocoder is looking at the Netherlands.
-                "geocoding_hint": geocoding_hint,
-                "websites": [found["site"]],
-                "country": dataset["country"],
-                "layer": dataset["layer"],
-                "lat": None,
-                "lng": None,
-                "dataset": dataset,
-            }
-        )
+            if not found["postcode"] and not found["plaats"]:
+                # try to find something by name... might not have an address...
+                geocoding_hint = f"{found['name']}, Nederland"
+
+            found_organizations.append(
+                {
+                    "name": f'{found["name"]} ({found["abbreviation"]})' if found["abbreviation"] else found["name"],
+                    "address": f'{found["straat"]} {found["huisnummer"]}, {found["postcode"]}, {found["plaats"]}',
+                    # make sure that the geocoder is looking at the Netherlands.
+                    "geocoding_hint": geocoding_hint,
+                    "websites": [found["site"]],
+                    "country": dataset["country"],
+                    "layer": dataset["layer"],
+                    "lat": None,
+                    "lng": None,
+                    "dataset": dataset,
+                }
+            )
 
     # debug_organizations(found_organizations)
 

@@ -22,7 +22,7 @@ from websecmap.celery import EXPIRES_IN_ONE_DAY, PRIO_HIGH, app
 from websecmap.map.models import OrganizationReport
 from websecmap.organizations import datasources
 from websecmap.organizations.datasources import dutch_government, excel
-from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url
+from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url, GenericFileDataset
 from websecmap.reporting.models import UrlReport
 from websecmap.scanners import SCANNERS
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, UrlIp
@@ -805,3 +805,8 @@ def dataset_import_finished(dataset_id):
     dataset.is_imported = True
     dataset.imported_on = datetime.now(pytz.utc)
     dataset.save()
+
+
+@admin.register(GenericFileDataset)
+class GenericFileDatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("id", "file", "file_format", "state", "is_imported", "imported_on")

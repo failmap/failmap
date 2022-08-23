@@ -299,6 +299,10 @@ def config(request):
             "SHOW_DISCLAIMER",
             "DISCLAIMER_HTML",
             "GRADING_POLICY",
+            "INTRO_TITLE_HTML_EN",
+            "INTRO_LEADER_HTML_EN",
+            "INTRO_TITLE_HTML_NL",
+            "INTRO_LEADER_HTML_NL",
         ]
     )
 
@@ -356,6 +360,12 @@ def config(request):
         },
         "announcement": configuration["ANNOUNCEMENT"],
         "disclaimer": configuration["DISCLAIMER_HTML"],
+        "intro": {
+            "title_html_en": configuration["INTRO_TITLE_HTML_EN"],
+            "title_html_nl": configuration["INTRO_TITLE_HTML_NL"],
+            "leader_html_en": configuration["INTRO_LEADER_HTML_EN"],
+            "leader_html_nl": configuration["INTRO_LEADER_HTML_NL"],
+        },
         "responsible_organization": {
             "name": configuration["RESPONSIBLE_ORGANIZATION_NAME"],
             "promo_text": configuration["RESPONSIBLE_ORGANIZATION_PROMO_TEXT"],
