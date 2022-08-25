@@ -303,6 +303,8 @@ def config(request):
             "INTRO_LEADER_HTML_EN",
             "INTRO_TITLE_HTML_NL",
             "INTRO_LEADER_HTML_NL",
+            "CUSTOM_CSS",
+            "LOGO_IMAGE",
         ]
     )
 
@@ -408,6 +410,10 @@ def config(request):
         "country_and_layers": countries_and_layers(),
         "google_maps_api_key": configuration["GOOGLE_MAPS_API_KEY"],
         "grading_policy": configuration["GRADING_POLICY"],
+        "app": {
+            "custom_css": configuration["CUSTOM_CSS"],
+            "logo_image": configuration["LOGO_IMAGE"],
+        }
     }
 
     return JsonResponse(config_object, encoder=JSEncoder)

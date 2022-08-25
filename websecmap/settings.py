@@ -631,7 +631,7 @@ CONSTANCE_ADDITIONAL_FIELDS = {
     "json": [
         "django.forms.fields.CharField",
         {"widget": "django.forms.Textarea"},
-    ],
+    ]
 }
 
 CONSTANCE_CONFIG = {
@@ -978,6 +978,12 @@ CONSTANCE_CONFIG = {
         "Lead paragraph on the into/hero-box on the front page.",
         str,
     ),
+    "CUSTOM_CSS": (
+        "",
+        "Keep things simple",
+        str
+    ),
+    'LOGO_IMAGE': ("", 'SVG Application logo, aim for 50 pixels high.', str),
     # todo: add config for enabled languages...
 }
 
@@ -1104,6 +1110,10 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             "Data Import Preferences",
             ("WEBSITEREGISTER_DOWNLOAD_PAGE", "WEBSITEREGISTER_SPREADSHEET_FILE_PATTERN_ON_PAGE"),
         ),
+        (
+            "App",
+            ("CUSTOM_CSS", "LOGO_IMAGE"),
+        )
     ]
 )
 
