@@ -413,7 +413,7 @@ def config(request):
         "app": {
             "custom_css": configuration["CUSTOM_CSS"],
             "logo_image": configuration["LOGO_IMAGE"],
-        }
+        },
     }
 
     return JsonResponse(config_object, encoder=JSEncoder)
