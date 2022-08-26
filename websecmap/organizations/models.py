@@ -469,6 +469,14 @@ class Url(models.Model):
     @staticmethod
     def add(url: str):
 
+        # Rebuild the url based on the information present:
+        # Preventing idna issues, preventing ports, directories, usernames, passwords and other stuff in urls.
+        extract = tldextract.extract(url)
+        if extract.subdomain:
+            url = f"{extract.subdomain}.{extract.domain}.{extract.suffix}"
+        else:
+            url = f"{extract.domain}.{extract.suffix}"
+
         if not Url.is_valid_url(url):
             raise ValueError(
                 "Url is not valid. It does not follow idna spec or does not have a valid suffix. "

@@ -92,7 +92,11 @@ def download_websiteregister_spreadsheet() -> int:
 @app.task(queue="storage")
 def download_and_import():
     downloaded_file = download_websiteregister_spreadsheet()
-    download = GenericFileDataset.objects.all().get(id=downloaded_file)
+    import_file(downloaded_file)
+
+
+def import_file(generic_file_dataset_id: int):
+    download = GenericFileDataset.objects.all().get(id=generic_file_dataset_id)
     if not download.state == "uploaded":
         return
 
@@ -162,10 +166,14 @@ def match_and_place_row(row: List[str]) -> Dict[str, str]:
     # Example: (DPC/AZ), including braces
     if len(row) > 3:
         # Example: (DPC/AZ), including braces
-        organization_key = f"({row[3]}/{row[2]})"
+        organization_key = f"({row[3].strip()}/{row[2].strip()})"
     else:
         # Example: (AZ), including braces
-        organization_key = f"({row[2]})"
+        organization_key = f"({row[2].strip()})"
+
+    # some bug, still adds the / in front. So just remove that slash
+    if organization_key[1] == "/":
+        organization_key = "(" + organization_key[2 : len(organization_key)]
 
     domain = row[0].replace("http://", "").replace("https://", "")
 
