@@ -1,11 +1,11 @@
-{% load static %} {% load i18n %} {% load leaflet_tags %} {% load compress %}
+{% load static %} {% load i18n %} {% load leaflet_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Failmap - THE GAME</title>
-    {% compress css %}
+
         <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet/dist/leaflet.css"/>
         <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet.markercluster/dist/MarkerCluster.css">
         <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/vue-select/dist/vue-select.css">
@@ -14,7 +14,7 @@
 
         <link rel="stylesheet" type="text/css" href="/static/css/vendor/fa-svg-with-js.css">
         <link rel="stylesheet" type="text/css" href="/static/css/overrides.css">
-    {% endcompress %}
+
 
     {% if debug %}
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue/dist/vue.js"></script>
@@ -33,7 +33,7 @@
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
 
         <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
-    {% else %}{% compress js %}
+    {% else %}
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue/dist/vue.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/vuex/dist/vuex.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue-select/dist/vue-select.js"></script>
@@ -50,7 +50,7 @@
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
 
         <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
-    {% endcompress %}{% endif %}
+    {% endif %}
     {{ form.media }}
 
     <style>

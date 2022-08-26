@@ -1,4 +1,4 @@
-<!DOCTYPE html>{% load compress %}
+<!DOCTYPE html>
 <html lang="{{ language }}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -36,16 +36,16 @@
     <!-- Allow various color schemes -->
     <link id="colorscheme" href="/static//css/colors.trafficlight.css" rel="stylesheet" />
 
-    {% compress css %}
-        <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet/dist/leaflet.css"/>
-        <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet.markercluster/dist/MarkerCluster.css">
-        <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/vue-select/dist/vue-select.css">
-        <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet-fullscreen/dist/leaflet.fullscreen.css">
-        <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet-contextmenu/dist/leaflet.contextmenu.css">
 
-        <link rel="stylesheet" type="text/css" href="/static/css/vendor/fa-svg-with-js.css">
-        <link rel="stylesheet" type="text/css" href="/static/css/overrides.css">
-    {% endcompress %}
+    <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet.markercluster/dist/MarkerCluster.css">
+    <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/vue-select/dist/vue-select.css">
+    <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet-fullscreen/dist/leaflet.fullscreen.css">
+    <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet-contextmenu/dist/leaflet.contextmenu.css">
+
+    <link rel="stylesheet" type="text/css" href="/static/css/vendor/fa-svg-with-js.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/overrides.css">
+
 
     {% if debug %}
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue/dist/vue.js"></script>
@@ -65,7 +65,7 @@
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
 
         <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
-    {% else %}{% compress js %}
+    {% else %}
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue/dist/vue.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue-router/dist/vue-router.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/vuex/dist/vuex.min.js"></script>
@@ -83,7 +83,7 @@
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
 
         <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
-    {% endcompress %}{% endif %}
+    {% endif %}
 
     <script type="text/javascript" src="/static/js/translations/websecmap.js"></script>
     <script type="text/javascript" src="/static/js/translations/internet_nl.js"></script>
