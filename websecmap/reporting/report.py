@@ -102,9 +102,24 @@ def recreate_url_report(url_id):
         # in that case nothing is added.
         if amount_of_new_reports < 0:
             # This should never happen.
+            # Yet it does, because, for example: when deleting an endpoint for some reason, including deleting the
+            # scans that are linked to that endpoint, there are fewer moments to rate the url on. This means
+            # there is a need to rewrite history for that part. This happens with database cleanups for example.
+            # This situation should not result into a 'should not happen' error where reports become stale until
+            # there are enough new findings to warrant a new report. Instead it should rewrite history by removing
+            # all existing reports of this url and writing all new ones.
             log.error(
-                "There are more url reports than relevant moments in time for this url.", extra={"url_id": url_id}
+                "There are more url reports than relevant moments in time for this url. "
+                "Rewriting history for this url.",
+                extra={"url_id": url_id},
             )
+
+            # is the newest / is the latest is automatically set.
+            # This might rewrite something to be empty, if there are indeed no metrics or relevant moments in
+            # time to report on. As long as it reflects the state of the database it's ok.
+            UrlReport.objects.all().filter(url=url_id).delete()
+            for new_report in url_reports:
+                new_report.save()
             return
 
         # The current latest report isn't the latest anymore:
