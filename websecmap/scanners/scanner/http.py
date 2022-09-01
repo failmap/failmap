@@ -800,14 +800,16 @@ def redirects_to_safety(url: str):
 
         log.debug("Request was not redirected, so not going to a safe url.")
         return False
-    except (
-        ConnectTimeout,
-        HTTPError,
-        ReadTimeout,
-        Timeout,
-        ConnectionError,
-        requests.exceptions.TooManyRedirects,
-    ) as my_exception:
+    except (Exception) as my_exception:  # noqa  # pylint: disable=broad-except
+        # Replaces basically everything, it's just a plethora of stuff that can go wrong which is outside of our usecase
+        # ConnectTimeout,
+        # HTTPError,
+        # ReadTimeout,
+        # Timeout,
+        # ConnectionError,
+        # SSLError,
+        # # It seems that a ConnectionError is still showing up, might be a requests.ConnectionError
+        # requests.RequestException
         log.debug("Request resulted into an error, it's not redirecting properly.")
         log.debug("The error retrieved was: %s", my_exception)
         return False
