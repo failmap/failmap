@@ -11,7 +11,7 @@ from deepdiff import DeepDiff
 from django.db.models import Count
 
 from websecmap.app.constance import get_bulk_values_starting_with
-from websecmap.celery import Task, app
+from websecmap.celery import Task, app, EXPIRES_IN_ONE_DAY
 from websecmap.map.logic.map import get_map_data, get_reports_by_ids
 from websecmap.map.logic.map_health import update_map_health_reports
 from websecmap.map.map_configs import filter_map_configs
@@ -147,7 +147,7 @@ def compose_task(
     return task
 
 
-@app.task(queue="reporting")
+@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
 def calculate_vulnerability_statistics(days: int = 366, countries: List = None, organization_types: List = None):
     log.info("Calculation vulnerability graphs")
 
@@ -464,12 +464,12 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                     vstat.save()
 
 
-@app.task(queue="reporting")
+@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
 def calculate_map_data_today():
     calculate_map_data.si(1).apply_async()
 
 
-@app.task(queue="reporting")
+@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
 def calculate_map_data(days: int = 366, countries: List = None, organization_types: List = None):
     from django.db import OperationalError
 
@@ -518,7 +518,7 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
                     log.exception(my_exception)
 
 
-@app.task(queue="reporting")
+@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
 def calculate_high_level_stats(days: int = 1, countries: List = None, organization_types: List = None):
     log.info("Creating high_level_stats")
 
@@ -826,7 +826,7 @@ def relevant_urls_at_timepoint_organization(organization: Organization, when: da
     return relevant_urls_at_timepoint(queryset, when)
 
 
-@app.task(queue="reporting")
+@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
 def default_organization_rating(organizations: List[int]):
     """
     Generate default ratings so all organizations are on the map (as being grey). This prevents
@@ -902,7 +902,7 @@ def default_organization_rating(organizations: List[int]):
         store_report(report.id, "OrganizationReport", default_calculation)
 
 
-@app.task(queue="reporting")
+@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
 def create_organization_reports_now(organizations: List[int]):
     for organization_id in organizations:
         organization = Organization.objects.all().filter(id=organization_id).first()
@@ -913,7 +913,7 @@ def create_organization_reports_now(organizations: List[int]):
         create_organization_report_on_moment(organization, now)
 
 
-@app.task(queue="reporting")
+@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
 def recreate_organization_reports(organizations: List[int]):
     """Remove organization rating and rebuild a new."""
 
@@ -1035,7 +1035,7 @@ def set_dates_to_last_possible_moment(moments: List[datetime]) -> List[datetime]
     return new_moments
 
 
-@app.task(queue="reporting")
+@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
 def update_report_tasks(url_chunk: List[int]):
     """
     A small update function that only rebuilds a single url and the organization report for a single day. Using this

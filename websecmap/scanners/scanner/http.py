@@ -40,7 +40,7 @@ from django.conf import settings
 from requests import HTTPError, ReadTimeout, Request, Session, Timeout
 from requests.exceptions import ChunkedEncodingError, ConnectTimeout, ContentDecodingError, SSLError
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, UrlIp
@@ -115,7 +115,7 @@ def filter_discover(organizations_filter: dict = None, urls_filter: dict = None,
     return urls
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, **kwargs):
     organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
     if not allowed_to_discover_endpoints("http"):
@@ -127,7 +127,7 @@ def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, *
     return urls
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="http", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
@@ -187,7 +187,7 @@ def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, e
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_discover_endpoints("http"):
@@ -198,7 +198,7 @@ def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, end
     return group()
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_verify_task(**kwargs):
     urls = plannedscan.pickup(activity="verify", scanner="http", amount=kwargs.get("amount", 25))
     return compose_verify_task(urls)
@@ -247,7 +247,7 @@ def compose_verify_task(urls):
     return tasks
 
 
-@app.task(queue="4and6")
+@app.task(queue="4and6", expires=EXPIRES_IN_ONE_DAY)
 def get_ips(url: str):
     ipv4 = ""
     ipv6 = ""
@@ -389,7 +389,7 @@ ACCEPTABLE_CONNECTION_ERRORS = [
 ]
 
 
-@app.task(queue="4and6", rate_limit="120/s")
+@app.task(queue="4and6", rate_limit="120/s", expires=EXPIRES_IN_ONE_DAY)
 def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str, str]:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
@@ -546,7 +546,7 @@ def pretty_print_request(req):
     # disabled consider-using-f-string because you can't use backslash statements in f-strings
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def connect_result(result: Dict[str, str], protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
     if result["result"]:
         save_endpoint(protocol, url_id, port, ip_version, f"ok/{origin}/{result['error']}")
@@ -555,7 +555,7 @@ def connect_result(result: Dict[str, str], protocol: str, url_id: int, port: int
     return True
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def connect_result_simple(result: bool, protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
     # no tracing of what went wrong where, will probably be superseeded with connect_result for tracing purposes
     if result:
@@ -623,7 +623,7 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
         log.debug("Endpoint based on parameters was already in database.")
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def kill_url_task(ips, url: Url):
     # only kill if there are no ips.
     if any(ips):
@@ -649,7 +649,7 @@ def kill_url_task(ips, url: Url):
     )
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store_url_ips(url: int, ips):
     """
     Todo: method should be stored in manager

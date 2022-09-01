@@ -8,7 +8,7 @@ import pytz
 from django.db.models import Q
 
 from websecmap.app.constance import constance_cached_value
-from websecmap.celery import Task, app
+from websecmap.celery import Task, app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Url
 from websecmap.reporting.models import UrlReport
 from websecmap.reporting.severity import get_severity
@@ -43,14 +43,14 @@ def get_allowed_to_report():
     return allowed_to_report
 
 
-@app.task(queue="reporting")
+@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
 def recreate_url_reports(urls: List[int]) -> List[Task]:
     """Remove the rating of one url and rebuild anew (not anymore)."""
     # to save many hours of computing and tons of IO, try a smarter approach on creating and saving reports.
     return [(recreate_url_report.si(url_id)) for url_id in urls]
 
 
-@app.task(queue="reporting")
+@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
 def recreate_url_report(url_id):
     """
     This used to rebuild all reports every night. This works fine until there are a lot of urls and a lot of

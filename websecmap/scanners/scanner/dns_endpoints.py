@@ -17,7 +17,7 @@ from celery import Task, group
 from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, Resolver, Timeout
 from tenacity import before_log, retry, stop_after_attempt, wait_exponential
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
@@ -104,27 +104,27 @@ def compose_new_verify_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="discover", scanner="dns_endpoints", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="verify", scanner="dns_endpoints", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_verify_task(**kwargs):
     urls = plannedscan.pickup(activity="verify", scanner="dns_endpoints", amount=kwargs.get("amount", 25))
     return compose_new_verify_task(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="dns_endpoints", amount=kwargs.get("amount", 25))
     return compose_new_discover_task(urls)
@@ -164,7 +164,7 @@ def compose_verify_task(
     return compose_new_verify_task(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def has_soa(url: str):
     """
     The SOA records is the primary check for internet.nl mail. If there is a SOA
@@ -276,7 +276,7 @@ def has_soa(url: str):
     return False
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def has_mx_without_cname(url: str) -> bool:
     """
     If there is an MX record, that is not part of a CNAME, store it as an mx_mail endpoint.
@@ -321,7 +321,7 @@ def has_mx_without_cname(url: str) -> bool:
     return False
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def has_a_or_aaaa(url: str) -> bool:
     """
     used for internet.nl web scans. The issue with regular endpoint is that you never know
