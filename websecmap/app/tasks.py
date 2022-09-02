@@ -4,7 +4,6 @@ from datetime import timedelta, datetime
 from websecmap.app.models import create_job, Job  # noqa  # pylint: disable=unused-import
 from websecmap.organizations.models import GenericFileDataset, Dataset
 from websecmap.scanners.models import TlsQualysScratchpad, PlannedScan, PlannedScanStatistic, InternetNLV2Scan
-from websecmap.map.models import MapDataCache
 from websecmap.api.models import SIDNUpload
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 
