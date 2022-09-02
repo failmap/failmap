@@ -26,43 +26,42 @@ def clean_application_caches_and_logs(retention_days: int = 30):
     # todo: mapdatacache should be synced to disk. Would be faster for retrieval and storage.
     tables_to_reduce = [
         {
-            'model': Job,
-            'time_column': "created_on",
+            "model": Job,
+            "time_column": "created_on",
         },
         {
-            'model': TlsQualysScratchpad,
-            'time_column': "at_when",
+            "model": TlsQualysScratchpad,
+            "time_column": "at_when",
         },
         {
-            'model': PlannedScan,
-            'time_column': "requested_at_when",
+            "model": PlannedScan,
+            "time_column": "requested_at_when",
         },
         {
-            'model': PlannedScanStatistic,
-            'time_column': "at_when",
+            "model": PlannedScanStatistic,
+            "time_column": "at_when",
         },
         {
-            'model': InternetNLV2Scan,
-            'time_column': "created_at_when",
+            "model": InternetNLV2Scan,
+            "time_column": "created_at_when",
         },
         {
-            'model': MapDataCache,
-            'time_column': "cached_on",
+            "model": MapDataCache,
+            "time_column": "cached_on",
         },
         {
-            'model': SIDNUpload,
-            'time_column': "at_when",
+            "model": SIDNUpload,
+            "time_column": "at_when",
         },
         {
-            'model': GenericFileDataset,
-            'time_column': 'imported_on',
+            "model": GenericFileDataset,
+            "time_column": "imported_on",
         },
         {
-            'model': Dataset,
-            'time_column': 'imported_on',
-        }
-
+            "model": Dataset,
+            "time_column": "imported_on",
+        },
     ]
 
     for info in tables_to_reduce:
-        info['model'].objects.all().filter(**{f"{info['time_column']}__lte": days_back}).delete()
+        info["model"].objects.all().filter(**{f"{info['time_column']}__lte": days_back}).delete()

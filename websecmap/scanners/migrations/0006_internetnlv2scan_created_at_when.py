@@ -7,13 +7,13 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0005_auto_20210814_1502'),
+        ("scanners", "0005_auto_20210814_1502"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='internetnlv2scan',
-            name='created_at_when',
+            model_name="internetnlv2scan",
+            name="created_at_when",
             field=models.DateTimeField(auto_now_add=True, db_index=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
