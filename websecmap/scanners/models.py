@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 
@@ -649,6 +650,8 @@ class InternetNLV2Scan(models.Model):
 
     # for error recovery and debugging reasons, store the entire result (which can be pretty huge).
     retrieved_scan_report = JSONField(default=None, blank=True, null=True)
+
+    created_at_when = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def __str__(self):
         return f"{self.pk}: {self.scan_id} {self.state}"

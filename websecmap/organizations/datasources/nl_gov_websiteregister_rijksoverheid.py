@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 from typing import List, Tuple, Dict
 
+import pytz
 import requests
 import tldextract
 from pyexcel_ods import get_data
@@ -104,6 +105,9 @@ def import_file(generic_file_dataset_id: int):
     download.state = f"imported {len(success_domains)} domains sucessfully and {len(error_domains)} failed. "
     if error_domains:
         download.state += f"Amongst failures are: {', '.join(error_domains)}"
+
+    download.is_imported = True
+    download.imported_on = datetime.now(pytz.utc)
     download.save()
 
 
