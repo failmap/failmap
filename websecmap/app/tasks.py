@@ -45,10 +45,12 @@ def clean_application_caches_and_logs(retention_days: int = 30):
             "model": InternetNLV2Scan,
             "time_column": "created_at_when",
         },
-        {
-            "model": MapDataCache,
-            "time_column": "cached_on",
-        },
+        # We're not removing MapDataCaches, because if browsing in the past becomes easier, these caches have to
+        # be rebuilt every day when they are requested.
+        # {
+        #     "model": MapDataCache,
+        #     "time_column": "cached_on",
+        # },
         {
             "model": SIDNUpload,
             "time_column": "at_when",
