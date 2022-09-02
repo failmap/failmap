@@ -6,9 +6,7 @@ import logging
 from typing import Union
 
 import requests
-import urllib3
 from celery import Task, group
-from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.structures import CaseInsensitiveDict
 
 from websecmap.celery import app
@@ -418,23 +416,24 @@ def get_headers(self, uri_uri: str) -> Union[CaseInsensitiveDict, bool]:
     # possibly an error in requests.
     #
     # Possibly tooManyRedirects could be plotted on the map, given this is a configuration error
-    except (
-        ConnectTimeout,
-        HTTPError,
-        ReadTimeout,
-        Timeout,
-        ConnectionError,
-        ValueError,
-        requests.TooManyRedirects,
-        urllib3.exceptions.LocationValueError,
-    ) as my_exception:
+
+    # Tons or errors can occur
+    # ConnectTimeout,
+    # HTTPError,
+    # ReadTimeout,
+    # Timeout,
+    # ConnectionError,
+    # ValueError,
+    # requests.TooManyRedirects,
+    # urllib3.exceptions.LocationValueError,
+    except requests.RequestException as my_exception:  # noqa  # pylint: disable=broad-except
         # If an expected error is encountered put this task back on the queue to be retried.
         # This will keep the chained logic in place (saving result after successful scan).
         # Retry delay and total number of attempts is configured in the task decorator.
         try:
             # Since this action raises an exception itself, any code after this won't be executed.
             raise self.retry(exc=my_exception)
-        except BaseException:  # pylint: disable=broad-except
+        except BaseException:  # noqa  # pylint: disable=broad-except
             # If this task still fails after maximum retries the last
             # error will be passed as result to the next task.
             # Exceptions do not serialize.
