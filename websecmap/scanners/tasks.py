@@ -3,7 +3,6 @@ import logging
 
 from celery import group
 
-from websecmap.map.views import screenshot
 from websecmap.scanners import plannedscan, proxy
 from websecmap.scanners.scanner import (
     autoexplain_dutch_untrusted_cert,
@@ -25,6 +24,8 @@ from websecmap.scanners.scanner import (
     subdomains,
     tls_qualys,
     verify_unresolvable,
+    dns_clean_wildcards,
+    screenshot,
 )
 
 log = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ __scanners__ = [
     dns_endpoints,
     dns_known_subdomains,
     dns_wildcards,
+    dns_clean_wildcards,
     dnssec,
     dummy,
     ftp,

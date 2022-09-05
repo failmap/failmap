@@ -9,7 +9,7 @@ import requests
 from celery import Task, group
 from requests.structures import CaseInsensitiveDict
 
-from websecmap.celery import app
+from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
@@ -60,7 +60,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("security_headers"):
@@ -70,7 +70,7 @@ def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpo
     plannedscan.request(activity="scan", scanner="security_headers", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="security_headers", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -164,7 +164,7 @@ def discover_service_type(headers: CaseInsensitiveDict = None):
     return "UNKNOWN"
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def analyze_headers(headers: CaseInsensitiveDict, endpoint_id):
     # todo: remove code paths, and make a more clear case per header type. That's easier to understand edge cases.
     # todo: Content-Security-Policy, Referrer-Policy
@@ -394,7 +394,7 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
             )
 
 
-@app.task(bind=True, default_retry_delay=1, retry_kwargs={"max_retries": 3})
+@app.task(bind=True, default_retry_delay=1, retry_kwargs={"max_retries": 3}, expires=EXPIRES_IN_ONE_DAY)
 def get_headers(self, uri_uri: str) -> Union[CaseInsensitiveDict, bool]:
     try:
         response = get_headers_request(uri_uri)

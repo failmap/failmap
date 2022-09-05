@@ -13,7 +13,7 @@ from ftplib import FTP, error_perm, error_proto, error_reply, error_temp  # nose
 from celery import Task, group
 from django.utils import timezone
 
-from websecmap.celery import ParentFailed, app
+from websecmap.celery import ParentFailed, app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
@@ -53,7 +53,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("ftp"):
@@ -76,7 +76,7 @@ def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, e
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("ftp"):
@@ -98,7 +98,7 @@ def filter_discover(
     return unique_and_random(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("ftp"):
@@ -109,7 +109,7 @@ def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, e
     return group()
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="ftp", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -157,7 +157,7 @@ def compose_scan_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="ftp", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
@@ -190,7 +190,7 @@ def compose_discover_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_verify_task(**kwargs):
     urls = plannedscan.pickup(activity="verify", scanner="ftp", amount=kwargs.get("amount", 25))
     return compose_verify_task(urls)
@@ -226,7 +226,7 @@ def compose_verify_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store(result: dict, endpoint_id: int):
     """
 
@@ -446,7 +446,7 @@ def discover(url: str, port: int):
     return connected
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
     """
 
