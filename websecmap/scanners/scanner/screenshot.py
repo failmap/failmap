@@ -19,7 +19,6 @@ http://screenshot_v6:1337
 """
 
 import logging
-import urllib.parse
 from datetime import datetime, timedelta
 from io import BytesIO
 
@@ -28,9 +27,8 @@ import requests
 from celery import Task, group
 from constance import config
 from django.conf import settings
-from django.core.files import File
 from django.db.models import Q
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.scanners import init_dict, plannedscan
@@ -88,7 +86,7 @@ def compose_manual_scan_task(
 
 def compose_scan_task(urls):
     endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(
-        urls, protocols=["ftp", "http", "https"], ports=[80, 443, 8443, 8080, 8888, 21]
+        urls, protocols=["http", "https"], ports=[80, 443, 8443, 8080, 8888, 21]
     )
 
     endpoints = unique_and_random(endpoints)
@@ -122,33 +120,32 @@ def compose_scan_task(urls):
 @app.task(queue="screenshot", rate_limit="60/m", expires=EXPIRES_IN_ONE_DAY)
 def make_screenshot(service: str, endpoint_url: str):
     try:
-        return make_screenshot_with_u2p(service, endpoint_url)
+        return make_screenshot_with_browserless(service, endpoint_url)
     except (ConnectionError, TimeoutError) as my_exception:
+        log.debug("Error while making screenshot on %s", endpoint_url)
         return my_exception
     except Exception as my_exception:  # pylint: disable=broad-except
         return my_exception
 
 
-@timeout(20, "Took too long to make screenshot.")
-def make_screenshot_with_u2p(screenshot_service: str, url: str):
-    get_parameters = {
-        "output": "screenshot",
-        "url": url,
-        "viewport.width": 1280,
-        "viewport.height": 720,
-        # also give a result when a 404, https error or whatever is given
-        "ignoreHttpsErrors": True,
-        # gives only the first 'screen' of the page, not the entire page.
-        "screenshot.fullPage": False,
-    }
-    api_call = f"{screenshot_service}/api/render?{urllib.parse.urlencode(get_parameters)}"
+@timeout(30, "Took too long to make screenshot.")
+def make_screenshot_with_browserless(screenshot_service: str, url: str):
     # https://2.python-requests.org/en/latest/user/quickstart/#binary-response-content
-    return requests.get(api_call)
+    return requests.post(
+        screenshot_service,
+        json={
+            "url": url,
+            "options": {
+                "fullPage": False,
+                "type": "png",
+                # "clip": {"height": 720, "width": 1280, "x": 0, "y": 0},
+            },
+        },
+    )
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def save_screenshot(response, endpoint_id):
-
     # it might receive an exception, or "False" when there is no image data due to errors.
     if isinstance(response, TimeoutError):
         log.debug(
@@ -176,7 +173,7 @@ def save_screenshot(response, endpoint_id):
 
     try:
         i = Image.open(BytesIO(response.content))
-        size = 320, 240
+        size = 640, 480
         i.thumbnail(size, Image.ANTIALIAS)
         filename = f"{settings.MEDIA_ROOT}screenshots/{endpoint_id}_latest.png"
         i.save(filename, "PNG")
@@ -184,12 +181,15 @@ def save_screenshot(response, endpoint_id):
 
         scr = Screenshot()
         scr.created_on = datetime.now(pytz.utc).date()
-        scr.endpoint = endpoint_id
-        scr.image = File(open(filename, "rb"))
+        scr.endpoint = Endpoint.objects.all().get(id=endpoint_id)
+        # scr.image = File(open(filename, "rb"))
         scr.filename = filename
         scr.save()
-        log.debug("Saved in databased as id:%s filename:%s.", scr.pk, scr.filename)
+        # log.debug("Saved in databased as id:%s filename:%s.", scr.pk, os.path.basename(scr.filename))
         return True
+    except UnidentifiedImageError:
+        log.debug("Got Unidentified Image, response: ")
+        log.debug(response)
     except Exception as my_exception:  # pylint: disable=broad-except
         log.exception(my_exception)
         return False
