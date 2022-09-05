@@ -157,7 +157,8 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
         log.debug("Address delivers a unique page every time. Checking for wildcards is impossible.")
         return []
 
-    wildcard_content = site_content(f"{random_string()}.{wildcard_url}")
+    random_data = random_string()
+    wildcard_content = site_content(f"{random_data}.{wildcard_url}")
     if wildcard_content == "[ERROR]":
         log.debug("Wildcard retrieval for %s resulted in an error. Skipping domain", wildcard_url)
         return []
@@ -170,7 +171,9 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
             continue
 
         ratio = SequenceMatcher(None, wildcard_content, site_content(subdomain.url)).ratio()
-        log.debug("%s similarity between %s and %s.", round(ratio * 100, 2), wildcard_url, subdomain.url)
+        log.debug(
+            "%s similarity between %s.%s and %s.", round(ratio * 100, 2), random_data, wildcard_url, subdomain.url
+        )
         if ratio > SIMILAR_CONTENT:
             identical.append(subdomain.id)
 

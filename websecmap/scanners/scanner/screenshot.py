@@ -19,6 +19,7 @@ http://screenshot_v6:1337
 """
 
 import logging
+import os
 from datetime import datetime, timedelta
 from io import BytesIO
 
@@ -172,6 +173,9 @@ def save_screenshot(response, endpoint_id):
         return False
 
     try:
+        # screenshot dir might not yet exist
+        os.makedirs(f"{settings.MEDIA_ROOT}screenshots/", exist_ok=True)
+
         i = Image.open(BytesIO(response.content))
         size = 640, 480
         i.thumbnail(size, Image.ANTIALIAS)
