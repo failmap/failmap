@@ -31,10 +31,10 @@ def prepare(requests_mock):
     Url(**{"url": "13.example.com"}).save()
 
     # Check for duplicates
-    requests_mock.get("https://10.example.com", text="this is subdomain, this is subdomain, this is subdomain 10")
-    requests_mock.get("https://11.example.com", text="this is subdomain, this is subdomain, this is subdomain 7")
+    requests_mock.get("https://10.example.com", text="this is subdomain, this is subdomain, this is subdomain 1")
+    requests_mock.get("https://11.example.com", text="this is subdomain, this is subdomain, this is subdomain 1")
     requests_mock.get("https://12.example.com", text="and now for something completely different")
-    requests_mock.get("https://13.example.com", text="this is subdomain, this is subdomain, this is subdomain 7")
+    requests_mock.get("https://13.example.com", text="this is subdomain, this is subdomain, this is subdomain 1")
 
 
 def test_get_identical_sites_on_wildcard_url(db, requests_mock):

@@ -9,7 +9,7 @@ import logging
 import random
 import string
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import List
 
 import pytz
 import requests
@@ -91,54 +91,50 @@ def subdomains_under_wildcard(url: str) -> List[Url]:
     )
 
 
-def site_content(url) -> Dict[str, Any]:
+def site_content(url) -> str:
+    # Attempt cleanup on both http and https. It kills the url, not endpoints, so any http or https is fine (sort of)
+    # Having wildcard on https and not on http is not possible since wilcards happen at dns level
     try:
-        # Sites as deventer.nl have a different page every load.
-        # Sites as hollandskroon.nl have a different page every load. So can't check that automatically.
-        response = requests.get(
-            f"https://{url}/",
-            allow_redirects=True,
-            verify=False,  # nosec: certificate validity is checked elsewhere, having some https > none
-            # User agent has to be the same. It's very much possible a webserver responds differently per user agent
-            # for example when seeing an outdated user agent, it might advice you to upgrade.
-            headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"
-            },
-            timeout=(30, 30),
-        )
-        # remove timestamps from headers, and also include header hash in response.
-        # dates are always unique if we check it later...
-        if "Date" in response.headers:
-            del response.headers["Date"]
-        if "date" in response.headers:
-            del response.headers["date"]
-        return {
-            "headers": response.headers,
-            "content": response.content,
-            "status_code": response.status_code,
-        }
-    except requests.RequestException as exc:
-        log.debug("Received exception on %s: %s", url, exc)
-        return {
-            "headers": None,
-            "content": None,
-            "status_code": None,
-        }
+        data = site_content_request(f"https://{url}")
+        return data
+    except requests.RequestException:
+        try:
+            data = site_content_request(f"http://{url}")  # noqa
+            return data
+        except requests.RequestException as exc:
+            log.debug(exc)
+            return "[ERROR]"
+
+
+def site_content_request(full_url) -> str:
+    # Sites as deventer.nl have a different page every load.
+    # Sites as hollandskroon.nl have a different page every load. So can't check that automatically.
+    response = requests.get(
+        f"{full_url}/",
+        allow_redirects=True,
+        verify=False,  # nosec: certificate validity is checked elsewhere, having some https > none
+        # User agent has to be the same. It's very much possible a webserver responds differently per user agent
+        # for example when seeing an outdated user agent, it might advice you to upgrade.
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"
+        },
+        timeout=(30, 30),
+    )
+
+    return response.text
 
 
 def content_is_stable(url: str):
     first_run = site_content(f"{random_string()}.{url}")
     for _ in range(0, 3):
-        first = first_run["content"]
         second_run = site_content(f"{random_string()}.{url}")
-        second = second_run["content"]
         # None indicated no connection or another error, which means you cannot compare
-        if first is None or second is None:
+        if first_run is None or second_run is None:
             log.debug("Error while retrieving page. Cannot compare.")
             return False
-        match = SequenceMatcher(None, first, second)
+        match = SequenceMatcher(None, first_run, second_run)
         ratio = match.ratio()
         log.debug(f"Similarity between content is: {round(ratio * 100, 2)}%")
         if ratio < SIMILAR_CONTENT:
@@ -152,54 +148,31 @@ def random_string(length: int = 16):
 
 @app.task(queue="all_internet", expires=EXPIRES_IN_ONE_DAY)
 def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
-    identical = []
 
     if not discover_wildcard(wildcard_url):
         log.debug("No wildcard found at %s.", wildcard_url)
-        return identical
+        return []
 
-    wildcard_subdomain = random_string()
-    wildcard_content = site_content(f"{wildcard_subdomain}.{wildcard_url}")
-
-    if wildcard_content == {
-        "headers": None,
-        "content": None,
-        "status_code": None,
-    }:
-        # When there are errors, do not try to get subdomains.
-        log.debug(
-            "Wildcard retrieval for %s resulted in an error: probably wildcard not enabled. Skipping domain",
-            wildcard_url,
-        )
-        return identical
-
-    # could be that the wildcard renders a different page every time, in that case do not continue.
-    # this happens for deventer and hollandskroon
-    # Todo: it has to have a percentage similarity, so things like forgery-protection-tokens, timestamps
-    # and other minor changes do not affect this scan.
     if not content_is_stable(wildcard_url):
-        log.debug(
-            "Address delivers a unique page every time. "
-            "Therefore automatically checking for wildcards is impossible."
-        )
-        return identical
+        log.debug("Address delivers a unique page every time. Checking for wildcards is impossible.")
+        return []
 
-    subdomain_urls = subdomains_under_wildcard(wildcard_url)
-    log.debug("%s has %s subdomains.", wildcard_url, len(subdomain_urls))
-    for subdomain_url in subdomain_urls:
+    wildcard_content = site_content(f"{random_string()}.{wildcard_url}")
+    if wildcard_content == "[ERROR]":
+        log.debug("Wildcard retrieval for %s resulted in an error. Skipping domain", wildcard_url)
+        return []
+
+    identical = []
+    for subdomain in subdomains_under_wildcard(wildcard_url):
 
         # couldn't get the filtering correct in the subdomains_under_wildcard method.
-        if subdomain_url.url == wildcard_url:
+        if subdomain.url == wildcard_url:
             continue
 
-        match = SequenceMatcher(None, wildcard_content["content"], site_content(subdomain_url.url)["content"])
-        ratio = match.ratio()
-        log.debug("Similarity between %s and %s is: %s", wildcard_url, subdomain_url.url, round(ratio * 100, 2))
+        ratio = SequenceMatcher(None, wildcard_content, site_content(subdomain.url)).ratio()
+        log.debug("%s similarity between %s and %s.", round(ratio * 100, 2), wildcard_url, subdomain.url)
         if ratio > SIMILAR_CONTENT:
-            log.debug("WILDCARD: Content of %s is the same as %s.", subdomain_url.url, wildcard_subdomain)
-            identical.append(subdomain_url.id)
-        else:
-            log.debug("        : Content of %s differs from %s.", subdomain_url.url, wildcard_subdomain)
+            identical.append(subdomain.id)
 
     log.debug("Found %s domains to be having the same data as a wildcard.", len(identical))
     return identical
