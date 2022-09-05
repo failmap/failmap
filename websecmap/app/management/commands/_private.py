@@ -76,14 +76,7 @@ class TaskCommand(BaseCommand):
     def handle(self, *args, **options):
         """Command handle logic, eg: logging."""
         # set django loglevel based on `-v` argument
-        verbosity = int(options["verbosity"])
-        root_logger = logging.getLogger("")
-        if verbosity == 2:
-            root_logger.setLevel(logging.DEBUG)
-        elif verbosity == 1:
-            root_logger.setLevel(logging.INFO)
-        elif verbosity == 0:
-            root_logger.setLevel(logging.ERROR)
+        apply_log_verbosity(options)
 
         self.interval = options["interval"]
 
@@ -280,10 +273,37 @@ class ScannerTaskCommand(TaskCommand):
             endpoints_filter,
         )
 
+        apply_log_verbosity(options)
+
         # compose set of tasks to be executed
         return self.scanner_module.compose_manual_scan_task(
             organizations_filter=organizations_filter, urls_filter=urls_filter, endpoints_filter=endpoints_filter
         )
+
+
+def apply_log_verbosity(options):
+    if "verbosity" not in options:
+        return
+
+    verbosity = int(options["verbosity"])
+
+    # to comply with thee levels
+    levels = {
+        0: "ERROR",
+        1: "INFO",
+        2: "DEBUG",
+        3: "DEBUG",
+    }
+
+    # also log django internals
+    if verbosity == 3:
+        logger = logging.getLogger("django")
+        logger.setLevel(levels[verbosity])
+        logger = logging.getLogger("celery")
+        logger.setLevel(levels[verbosity])
+
+    logger = logging.getLogger("websecmap")
+    logger.setLevel(levels[verbosity])
 
 
 class DiscoverTaskCommand(TaskCommand):

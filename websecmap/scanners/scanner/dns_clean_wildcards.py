@@ -20,10 +20,14 @@ from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.scanner import q_configurations_to_scan, unique_and_random, url_filters
-from websecmap.scanners.scanner.http import get_random_user_agent
 from websecmap.scanners.scanner.subdomains import discover_wildcard
+from difflib import SequenceMatcher
 
 log = logging.getLogger(__name__)
+
+# Just changing csrf and a timestamp means a difference of just 0.9925592245505369, so 0.98 is very liberal
+# Higher is more similar.
+SIMILAR_CONTENT = 0.98
 
 
 def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
@@ -62,7 +66,7 @@ def compose_manual_scan_task(
     return compose_scan_task(urls)
 
 
-def compose_scan_task(urls):
+def compose_scan_task(urls: List[Url]):
     tasks = []
 
     for url in urls:
@@ -80,10 +84,10 @@ def subdomains_under_wildcard(url: str) -> List[Url]:
     # In this case do care about dead/not resolvable.
     # Dead will not change the state (we don't revive them)...
     # not resolvable will mean slower testing.
-    return list(
-        Url.objects.all().filter(
-            is_dead=False, not_resolvable=False, computed_domain=result.domain, computed_suffix=result.suffix
-        )
+    return (
+        Url.objects.all()
+        .filter(is_dead=False, not_resolvable=False, computed_domain=result.domain, computed_suffix=result.suffix)
+        .values_list("id", "url", named=True)
     )
 
 
@@ -95,7 +99,13 @@ def site_content(url) -> Dict[str, Any]:
             f"https://{url}/",
             allow_redirects=True,
             verify=False,  # nosec: certificate validity is checked elsewhere, having some https > none
-            headers={"User-Agent": get_random_user_agent()},
+            # User agent has to be the same. It's very much possible a webserver responds differently per user agent
+            # for example when seeing an outdated user agent, it might advice you to upgrade.
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"
+            },
             timeout=(30, 30),
         )
         # remove timestamps from headers, and also include header hash in response.
@@ -109,7 +119,8 @@ def site_content(url) -> Dict[str, Any]:
             "content": response.content,
             "status_code": response.status_code,
         }
-    except requests.RequestException:
+    except requests.RequestException as exc:
+        log.debug("Received exception on %s: %s", url, exc)
         return {
             "headers": None,
             "content": None,
@@ -117,14 +128,37 @@ def site_content(url) -> Dict[str, Any]:
         }
 
 
+def content_is_stable(url: str):
+    first_run = site_content(f"{random_string()}.{url}")
+    for _ in range(0, 3):
+        first = first_run["content"]
+        second_run = site_content(f"{random_string()}.{url}")
+        second = second_run["content"]
+        # None indicated no connection or another error, which means you cannot compare
+        if first is None or second is None:
+            log.debug("Error while retrieving page. Cannot compare.")
+            return False
+        match = SequenceMatcher(None, first, second)
+        ratio = match.ratio()
+        log.debug(f"Similarity between content is: {round(ratio * 100, 2)}%")
+        if ratio < SIMILAR_CONTENT:
+            return False
+    return True
+
+
+def random_string(length: int = 16):
+    return "".join(random.choice(string.ascii_lowercase) for _ in range(length))
+
+
 @app.task(queue="all_internet", expires=EXPIRES_IN_ONE_DAY)
 def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
     identical = []
 
     if not discover_wildcard(wildcard_url):
+        log.debug("No wildcard found at %s.", wildcard_url)
         return identical
 
-    wildcard_subdomain = "".join(random.choice(string.ascii_lowercase) for i in range(16))
+    wildcard_subdomain = random_string()
     wildcard_content = site_content(f"{wildcard_subdomain}.{wildcard_url}")
 
     if wildcard_content == {
@@ -133,22 +167,23 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
         "status_code": None,
     }:
         # When there are errors, do not try to get subdomains.
-        log.debug("%s resulted in an error, skipping.", wildcard_url)
+        log.debug(
+            "Wildcard retrieval for %s resulted in an error: probably wildcard not enabled. Skipping domain",
+            wildcard_url,
+        )
         return identical
 
     # could be that the wildcard renders a different page every time, in that case do not continue.
     # this happens for deventer and hollandskroon
-    wildcard_content2 = site_content(f"{wildcard_subdomain}.{wildcard_url}")
-    wildcard_content3 = site_content(f"{wildcard_subdomain}.{wildcard_url}")
-    wildcard_content4 = site_content(f"{wildcard_subdomain}.{wildcard_url}")
-
-    if not all(element == wildcard_content for element in [wildcard_content2, wildcard_content3, wildcard_content4]):
+    # Todo: it has to have a percentage similarity, so things like forgery-protection-tokens, timestamps
+    # and other minor changes do not affect this scan.
+    if not content_is_stable(wildcard_url):
         log.debug(
-            "Address delivers a unique page every time. Therefore automatically checking for wildcards is impossible."
+            "Address delivers a unique page every time. "
+            "Therefore automatically checking for wildcards is impossible."
         )
         return identical
 
-    # todo: this needs access to storage.
     subdomain_urls = subdomains_under_wildcard(wildcard_url)
     log.debug("%s has %s subdomains.", wildcard_url, len(subdomain_urls))
     for subdomain_url in subdomain_urls:
@@ -157,27 +192,21 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
         if subdomain_url.url == wildcard_url:
             continue
 
-        # Not needed: in this case the www. is the same as the (steady) wildcard. And thus is also not useful.
-        # Don't remove the www. prefix subdomain of the 2nd level domain, that domain is
-        # intended to be the same as the 2nd level domain.
-        # if subdomain_url.url == f"www.{wildcard_url.url}":
-        #     log.debug(f"Will keep {subdomain_url.url} as that is intended to be the same as {wildcard_url.url}")
-        #     continue
-
-        subdomain_content = site_content(subdomain_url.url)
-        if wildcard_content == subdomain_content:
-            log.debug("WILDCARD: Content of %s is the same as %s.", subdomain_url, wildcard_subdomain)
-            identical.append(subdomain_url.pk)
+        match = SequenceMatcher(None, wildcard_content["content"], site_content(subdomain_url.url)["content"])
+        ratio = match.ratio()
+        log.debug("Similarity between %s and %s is: %s", wildcard_url, subdomain_url.url, round(ratio * 100, 2))
+        if ratio > SIMILAR_CONTENT:
+            log.debug("WILDCARD: Content of %s is the same as %s.", subdomain_url.url, wildcard_subdomain)
+            identical.append(subdomain_url.id)
         else:
-            log.debug("        : Content of %s differs from %s.", subdomain_url, wildcard_subdomain)
+            log.debug("        : Content of %s differs from %s.", subdomain_url.url, wildcard_subdomain)
 
+    log.debug("Found %s domains to be having the same data as a wildcard.", len(identical))
     return identical
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store(url_ids: List[int]):
-    log.debug("Received %s that have been found to be having the same data as a wildcard.", len(url_ids))
-
     for url_id in url_ids:
         url = Url.objects.all().filter(pk=url_id).first()
         if not url:
