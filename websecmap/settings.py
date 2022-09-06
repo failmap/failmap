@@ -864,9 +864,9 @@ CONSTANCE_CONFIG = {
     "COMPLY_OR_EXPLAIN_EMAIL_ADDRESS": ("", "E-mail where to receive explanations.", str),
     "COMPLY_OR_EXPLAIN_EMAIL_SUBJECT": ("Explanation of finding", "Standard subject for explanations.", str),
     "COMPLY_OR_EXPLAIN_EMAIL_BODY": (
-        "Hi!,\n\nI would like to explain the below finding.\n\nAddress: %{url}\nScan Type"
-        ": %{scan_type}\nScan ID: %{scan_id}\nImpact: High: %{high}, Medium %{medium},"
-        " Low: %{low}.\n\nI believe the finding to be incorrect. This is why:\n[... "
+        "Hi!,\n\nI would like to explain the below finding.\n\nAddress: {0}\nScan Type"
+        ": {1}\nScan ID: {2}\nImpact: High: {3}, Medium {4},"
+        " Low: {5}.\n\nI believe the finding to be incorrect. This is why:\n[... "
         "please enter your explanation for review here ...]\n\nI acknowledge that this "
         "finding will be published together with my organizations name.\n\ntip: please "
         "refer to documentation or standards where possible. Be aware that an "
