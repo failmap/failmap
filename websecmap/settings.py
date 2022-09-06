@@ -862,6 +862,27 @@ CONSTANCE_CONFIG = {
         str,
     ),
     "COMPLY_OR_EXPLAIN_EMAIL_ADDRESS": ("", "E-mail where to receive explanations.", str),
+    "COMPLY_OR_EXPLAIN_EMAIL_SUBJECT": ("Explanation of finding", "Standard subject for explanations.", str),
+    "COMPLY_OR_EXPLAIN_EMAIL_BODY": (
+        "Hi!,\n\nI would like to explain the below finding.\n\nAddress: %{url}\nScan Type"
+        ": %{scan_type}\nScan ID: %{scan_id}\nImpact: High: %{high}, Medium %{medium},"
+        " Low: %{low}.\n\nI believe the finding to be incorrect. This is why:\n[... "
+        "please enter your explanation for review here ...]\n\nI acknowledge that this "
+        "finding will be published together with my organizations name.\n\ntip: please "
+        "refer to documentation or standards where possible. Be aware that an "
+        "explanation is valid for one year by default.\n\nKind regards,\n",
+        "Standard mail content for explanations",
+        str,
+    ),
+    "SHOW_SEND_IN_NEW_DOMAINS": (False, "Show button that opens an e-mail to send in new domains.", bool),
+    "NEW_DOMAINS_EMAIL_ADDRESS": ("", "E-mail where to receive new domains.", str),
+    "NEW_DOMAINS_EMAIL_SUBJECT": ("New subdomains for ...", "Standard email subject.", str),
+    "NEW_DOMAINS_EMAIL_BODY": (
+        "Dear,\n\nPlease add the following domains to the map:\n\nTip: send a "
+        "zonefile with all domains if possible.\n\nKind regards,\n\n",
+        "Standard email body.",
+        str,
+    ),
     "SCAN_AT_ALL": (
         True,
         "This quickly enables or disabled all scans. Note that scans in the scan queue will still be processed.",
@@ -1057,6 +1078,17 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_COMPLY_OR_EXPLAIN_DISCUSS",
                 "COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK",
                 "COMPLY_OR_EXPLAIN_EMAIL_ADDRESS",
+                "COMPLY_OR_EXPLAIN_EMAIL_SUBJECT",
+                "COMPLY_OR_EXPLAIN_EMAIL_BODY",
+            ),
+        ),
+        (
+            "Send in new domains button",
+            (
+                "SHOW_SEND_IN_NEW_DOMAINS",
+                "NEW_DOMAINS_EMAIL_ADDRESS",
+                "NEW_DOMAINS_EMAIL_SUBJECT",
+                "NEW_DOMAINS_EMAIL_BODY",
             ),
         ),
         (

@@ -236,6 +236,7 @@ def config(request):
             "SHOW_INTRO",
             "SHOW_CHARTS",
             "SHOW_COMPLY_OR_EXPLAIN",
+            "SHOW_SEND_IN_NEW_DOMAINS",
             "SHOW_SCAN_SCHEDULE",
             "SHOW_DATASETS",
             "SHOW_ANNOUNCEMENT",
@@ -330,6 +331,7 @@ def config(request):
             "report_risk_summary": configuration["SHOW_REPORT_RISK_SUMMARY"],
             "report_content": configuration["SHOW_REPORT_CONTENT"],
             "disclaimer": configuration["SHOW_DISCLAIMER"],
+            "send_in_new_domains": configuration["SHOW_SEND_IN_NEW_DOMAINS"],
             "issues": {
                 "ftp": configuration["SHOW_FTP"],
                 "plain_https": configuration["SHOW_PLAIN_HTTPS"],
@@ -404,6 +406,13 @@ def config(request):
         "comply_or_explain": {
             "forum_link": configuration["COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK"],
             "email_address": configuration["COMPLY_OR_EXPLAIN_EMAIL_ADDRESS"],
+            "email_subject": configuration["COMPLY_OR_EXPLAIN_EMAIL_SUBJECT"],
+            "email_body": configuration["COMPLY_OR_EXPLAIN_EMAIL_BODY"],
+        },
+        "send_in_new_domains": {
+            "email_address": configuration["NEW_DOMAINS_EMAIL_ADDRESS"],
+            "email_subject": configuration["NEW_DOMAINS_EMAIL_SUBJECT"],
+            "email_body": configuration["NEW_DOMAINS_EMAIL_BODY"],
         },
         "debug": bool(settings.DEBUG),
         "admin": settings.ADMIN,
