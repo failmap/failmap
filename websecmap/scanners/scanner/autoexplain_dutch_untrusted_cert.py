@@ -2,7 +2,6 @@ import logging
 import socket
 from base64 import b64decode, b64encode
 from datetime import datetime
-from time import sleep
 from typing import List
 
 import OpenSSL
@@ -11,7 +10,7 @@ from celery import Task, group
 from django.utils import timezone
 from OpenSSL import SSL
 from OpenSSL.crypto import FILETYPE_PEM, dump_certificate, load_certificate
-
+from OpenSSL.SSL import Error as SSLError
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
@@ -69,43 +68,87 @@ def compose_scan_task(urls: List[Url]) -> Task:
     return group(tasks)
 
 
-@app.task(
-    autoretry_for=(socket.gaierror,), retry_kwargs={"max_retries": 10, "countdown": 2}, expires=EXPIRES_IN_ONE_DAY
-)
+# https://www.pyopenssl.org/en/stable/api/ssl.html
+# todo: upgrade pyopenssl and support TLS_METHOD for tls 1.3
+# from new to obsolete...
+methods = [
+    (SSL.TLSv1_2_METHOD, "SSL.TLSv1_2_METHOD"),
+    (SSL.TLSv1_1_METHOD, "SSL.TLSv1_1_METHOD"),
+    (SSL.TLSv1_METHOD, "SSL.TLSv1_METHOD"),
+    (SSL.SSLv23_METHOD, "SSL.SSLv23_METHOD"),
+    # (SSL.SSLv3_METHOD, "SSL.SSLv3_METHOD"), not supported by openssl anymore
+    # (SSL.SSLv2_METHOD, "SSL.SSLv2_METHOD"), not supported by openssl anymore
+]
+
+
+@app.task(expires=EXPIRES_IN_ONE_DAY)
 def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
+    chain = []
+    for method, method_name in methods:
+        chain = get_cert_chain_call(url, port, ip_version, method, method_name)
+        if chain:
+            return chain
+    return chain
+
+
+# https://badssl.com/
+def get_cert_chain_call(url, port, ip_version, method, method_name):
     # https://stackoverflow.com/questions/19145097/getting-certificate-chain-with-python-3-3-ssl-module
     # Relatively new Dutch governmental sites relying on anything less < TLS 1.2 is insane.
-    log.debug("Retrieving certificate chain from %s:%s.", url, port)
+    log.debug("Retrieving certificate chain from %s:%s via ipv%s on tls method %s.", url, port, ip_version, method_name)
     try:
         # Todo: does still go to the ipv4 version if told to user AF-INET6. The workers should restrict it.
         # Decide which IP-version to use
         socket_ip_version = socket.AF_INET if ip_version == 4 else socket.AF_INET6
         # Use with statements so sockets/connections close automatically
         with socket.socket(socket_ip_version, socket.SOCK_STREAM) as sock:
-            conn = SSL.Connection(context=SSL.Context(SSL.TLSv1_2_METHOD), socket=sock)
+            # future methods only need TLS_METHOD....
+            sock.settimeout(10)
+            conn = SSL.Connection(context=SSL.Context(method), socket=sock)
             conn.connect((url, port))
+            conn.setblocking(1)
+            conn.do_handshake()
+            conn.set_tlsext_host_name(url.encode())
 
-            # Deal with WantReadError errors
-            attempts = 300
-            attempt = 0
-            while attempt <= attempts:
-                try:
-                    attempt += 1
-                    conn.do_handshake()
-                except SSL.WantReadError:
-                    sleep(0.01)
-                    conn.bio_read(4096)
-                else:
-                    break
+            # Deal with WantReadError errors, probably not needed with setblocking
+            # attempts = 300
+            # attempt = 0
+            # while attempt <= attempts:
+            #     try:
+            #         attempt += 1
+            #         conn.do_handshake()
+            #     except SSL.WantReadError:
+            #         sleep(0.01)
+            #         conn.bio_read(4096)
+            #     else:
+            #         break
 
             chain = conn.get_peer_cert_chain()
             conn.close()
             return serialize_cert_chain(chain) if chain else []
 
+    except ValueError:
+        # SSLv2_METHOD and SSLv3_METHOD
+        # ValueError("No such protocol")
+        return []
+
+    except SSLError:
+        # OpenSSL.SSL.Error: [('SSL routines', 'ssl_choose_client_version', 'wrong ssl version')]
+        return []
+
+    except socket.gaierror:
+        # socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+        # basically not resolving. Given this scanner will not kill off anything that doesnt resolve...
+        return []
+
+    except socket.error:
+        # timeout reached probably
+        return []
+
     # get address info error (DNS issues) can be retried a few times.
     except Exception as my_exception:  # noqa  # pylint: disable=broad-except
         # Log these exceptions to see what happens.
-        log.debug(my_exception)
+        log.exception(my_exception, extra={"hostname": url, "port": port, "ip": ip_version, "method": method_name})
         # Name does not resolve, wantread errors etc etc etc... there is no great code out there and can't make it
         return []
 
@@ -178,7 +221,6 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates:
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store_bot_explaination_if_needed(needed: bool, scan_id: int):
-
     scan = EndpointGenericScan.objects.all().filter(pk=scan_id).first()
     if not scan:
         return
