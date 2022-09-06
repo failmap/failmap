@@ -890,7 +890,7 @@ CONSTANCE_CONFIG = {
         "Notice: be aware that everything is scanned and updated routinely. This can take a few days.\n\n\n"
         "Dear,\n\nIt seems there is some incorrect data on the map, the following is incorrect:\n\n1: ...\n2: ..."
         "\n3: ...\n\n\n Tip: include an explanation why the measurement is wrong, to speed up resolving this issue."
-        "\n\n\nKind regards,\n"
+        "\n\n\nKind regards,\n",
         "Standard email body.",
         str,
     ),
