@@ -53,8 +53,8 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
         is_dead=False,
         url__not_resolvable=False,
         url__is_dead=False,
-        protocol__in=["http", "https", "ftp"],
-        port__in=[80, 443, 8443, 8080, 8888, 21],
+        protocol__in=["http", "https", "dns_a_aaaa"],
+        port__in=[80, 443, 8443, 8080, 8888, 21, 0],
     )
     # Without screenshot OR with a screenshot over a month ago
     endpoints = endpoints.filter((Q(screenshot__isnull=True) | Q(screenshot__created_on__lt=one_month_ago)))
@@ -87,7 +87,7 @@ def compose_manual_scan_task(
 
 def compose_scan_task(urls):
     endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(
-        urls, protocols=["http", "https"], ports=[80, 443, 8443, 8080, 8888, 21]
+        urls, protocols=["http", "https", "dns_a_aaaa"], ports=[80, 443, 8443, 8080, 8888, 21, 0]
     )
 
     endpoints = unique_and_random(endpoints)
@@ -100,9 +100,9 @@ def compose_scan_task(urls):
     v4_service = config.SCREENSHOT_API_URL_V4
     v6_service = config.SCREENSHOT_API_URL_V6
 
-    log.info("Trying to make %s screenshots.", len(endpoints))
-    log.info("Screenshots will be stored at: %sscreenshots/", settings.MEDIA_ROOT)
-    log.info("IPv4 screenshot service: %s, IPv6 screenshot service: %s", v4_service, v6_service)
+    log.debug("Trying to make %s screenshots.", len(endpoints))
+    log.debug("Screenshots will be stored at: %sscreenshots/", settings.MEDIA_ROOT)
+    log.debug("IPv4 screenshot service: %s, IPv6 screenshot service: %s", v4_service, v6_service)
     tasks = [
         make_screenshot.si(v4_service, endpoint.uri_url()) | save_screenshot.s(endpoint.id)
         for endpoint in endpoints

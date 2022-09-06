@@ -80,7 +80,15 @@ class Endpoint(models.Model):
         return f"IPv{self.ip_version} {self.protocol}/{self.port} | [{self.id}] {self.url} "
 
     def uri_url(self):
-        return f"{self.protocol}://{self.url.url}:{self.port}"
+        # dns_a_aaaa is an ipv6 A/AAAA record, which might lead to a webserver. Assuming that webserver
+        # is available over https (as that should be the standard). It might not be reachable.
+        protocol = "https" if self.protocol == "dns_a_aaaa" else self.protocol
+
+        # dns_a_aaaa does not have a port as it's not on http level, it has port set to 0.
+        if self.port:
+            return f"{protocol}://{self.url.url}:{self.port}"
+
+        return f"{self.protocol}://{self.url.url}"
 
     # when testing for ipv4 or ipv6, an endpoint is mutually exclusive.
     def is_ipv4(self):
