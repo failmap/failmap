@@ -42,6 +42,9 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     else:
         urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter)
 
+    # Don't scan where you will not connect or where there is an administrative no (dead) on the url.
+    urls = urls.filter(is_dead=False, not_resolvable=False)
+
     # We only perform an IN query, and need nothing of these urls except the ID:
     urls = urls.only("id")
 
@@ -193,7 +196,7 @@ def analyze_headers(headers: CaseInsensitiveDict, endpoint_id):
         if not existing_header_scans:
             # kombu.exceptions.EncodeError: Object of type ParentFailed is not JSON serializable
             # return ParentFailed("Skipping http header result parsing because scan failed.", cause=headers)
-            return {"status": "success"}
+            return {"status": "unreachable-without-prior-scans"}
 
         # There used to be stringent filtering here: for oserror and ECONNRESET in the exception, but the fact is
         # that there are so many possible network errors, that it's always a struggle to keep up to date.
@@ -205,7 +208,7 @@ def analyze_headers(headers: CaseInsensitiveDict, endpoint_id):
                 scan.type, endpoint_id, "Unreachable", "Address became unreachable.", str(headers)
             )
 
-        return {"status": "success"}
+        return {"status": "unreachable-set-to-unreachable"}
 
     # determine what kind of service we're dealing with.
     service_type = discover_service_type(headers)
@@ -430,10 +433,12 @@ def get_headers(self, uri_uri: str) -> Union[CaseInsensitiveDict, bool]:
         # If an expected error is encountered put this task back on the queue to be retried.
         # This will keep the chained logic in place (saving result after successful scan).
         # Retry delay and total number of attempts is configured in the task decorator.
+        log.exception("Could not request headers, exception: %s", my_exception)
         try:
             # Since this action raises an exception itself, any code after this won't be executed.
             raise self.retry(exc=my_exception)
-        except BaseException:  # noqa  # pylint: disable=broad-except
+        except BaseException as exc:  # noqa  # pylint: disable=broad-except
+            log.exception("After retries still could not get headers: %s", exc)
             # If this task still fails after maximum retries the last
             # error will be passed as result to the next task.
             # Exceptions do not serialize.
