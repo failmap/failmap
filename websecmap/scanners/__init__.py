@@ -631,6 +631,23 @@ SCANNERS = [
         "plannable_activities": ["scan"],
         "python_module": "autoexplain_no_https_possible",
     },
+    {
+        "name": "screenshot",
+        "verbose name": "Screenshot Maker",
+        "description": "Creates screenshot to accompany the report with some pictures",
+        "can discover endpoints": False,
+        "can verify endpoints": False,
+        "can discover urls": False,
+        "can verify urls": False,
+        "can scan endpoints": True,
+        "can scan urls": False,
+        "needs results from": [],
+        "creates endpoint scan types": [],
+        "creates url scan types": [],
+        # Shorthand of "can discover, verify etc"
+        "plannable_activities": ["scan"],
+        "python_module": "screenshot",
+    },
 ]
 
 # todo: should we move the scanner definitions to different scanners and harvest them here?
