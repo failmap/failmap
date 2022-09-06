@@ -284,6 +284,8 @@ def config(request):
             "PROJECT_FACEBOOK",
             "COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK",
             "COMPLY_OR_EXPLAIN_EMAIL_ADDRESS",
+            "COMPLY_OR_EXPLAIN_EMAIL_SUBJECT",
+            "COMPLY_OR_EXPLAIN_EMAIL_BODY",
             "MAPBOX_ACCESS_TOKEN",
             "GITTER_CHAT_ENABLE",
             "GITTER_CHAT_CHANNEL",
@@ -306,6 +308,14 @@ def config(request):
             "INTRO_LEADER_HTML_NL",
             "CUSTOM_CSS",
             "LOGO_IMAGE",
+            "SHOW_SEND_IN_NEW_DOMAINS",
+            "NEW_DOMAINS_EMAIL_ADDRESS",
+            "NEW_DOMAINS_EMAIL_SUBJECT",
+            "NEW_DOMAINS_EMAIL_BODY",
+            "SHOW_INCORRECT_FINDING",
+            "INCORRECT_FINDING_EMAIL_ADDRESS",
+            "INCORRECT_FINDING_EMAIL_SUBJECT",
+            "INCORRECT_FINDING_EMAIL_BODY",
         ]
     )
 
@@ -332,6 +342,7 @@ def config(request):
             "report_content": configuration["SHOW_REPORT_CONTENT"],
             "disclaimer": configuration["SHOW_DISCLAIMER"],
             "send_in_new_domains": configuration["SHOW_SEND_IN_NEW_DOMAINS"],
+            "incorrect_finding": configuration["SHOW_INCORRECT_FINDING"],
             "issues": {
                 "ftp": configuration["SHOW_FTP"],
                 "plain_https": configuration["SHOW_PLAIN_HTTPS"],
@@ -413,6 +424,11 @@ def config(request):
             "email_address": configuration["NEW_DOMAINS_EMAIL_ADDRESS"],
             "email_subject": configuration["NEW_DOMAINS_EMAIL_SUBJECT"],
             "email_body": configuration["NEW_DOMAINS_EMAIL_BODY"],
+        },
+        "incorrect_finding": {
+            "email_address": configuration["INCORRECT_FINDING_EMAIL_ADDRESS"],
+            "email_subject": configuration["INCORRECT_FINDING_EMAIL_SUBJECT"],
+            "email_body": configuration["INCORRECT_FINDING_EMAIL_BODY"],
         },
         "debug": bool(settings.DEBUG),
         "admin": settings.ADMIN,

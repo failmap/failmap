@@ -883,6 +883,17 @@ CONSTANCE_CONFIG = {
         "Standard email body.",
         str,
     ),
+    "SHOW_INCORRECT_FINDING": (False, "Show button that opens an e-mail to report incorrect findings.", bool),
+    "INCORRECT_FINDING_EMAIL_ADDRESS": ("", "E-mail where to receive incorrect findings.", str),
+    "INCORRECT_FINDING_EMAIL_SUBJECT": ("Incorrect finding on {0}", "Standard email subject.", str),
+    "INCORRECT_FINDING_EMAIL_BODY": (
+        "Notice: be aware that everything is scanned and updated routinely. This can take a few days.\n\n\n"
+        "Dear,\n\nIt seems there is some incorrect data on the map, the following is incorrect:\n\n1: ...\n2: ..."
+        "\n3: ...\n\n\n Tip: include an explanation why the measurement is wrong, to speed up resolving this issue."
+        "\n\n\nKind regards,\n"
+        "Standard email body.",
+        str,
+    ),
     "SCAN_AT_ALL": (
         True,
         "This quickly enables or disabled all scans. Note that scans in the scan queue will still be processed.",
@@ -1089,6 +1100,15 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "NEW_DOMAINS_EMAIL_ADDRESS",
                 "NEW_DOMAINS_EMAIL_SUBJECT",
                 "NEW_DOMAINS_EMAIL_BODY",
+            ),
+        ),
+        (
+            "Report incorrect findings",
+            (
+                "SHOW_INCORRECT_FINDING",
+                "INCORRECT_FINDING_EMAIL_ADDRESS",
+                "INCORRECT_FINDING_EMAIL_SUBJECT",
+                "INCORRECT_FINDING_EMAIL_BODY",
             ),
         ),
         (
