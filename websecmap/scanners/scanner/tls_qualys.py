@@ -636,10 +636,6 @@ def save_scan(url: str, data: Any):
         store_endpoint_scan_result("tls_qualys_certificate_trusted", failmap_endpoint.pk, trust, "")
         store_endpoint_scan_result("tls_qualys_encryption_quality", failmap_endpoint.pk, rating_no_trust, "")
 
-    # Store IP address of the scan as metadata
-    # ips = [ipaddress.ip_address(endpoint["ipAddress"]).compressed for endpoint in data["endpoints"]]
-    # Not used anymore.
-    # store_url_ips(url, ips)
     return
 
 

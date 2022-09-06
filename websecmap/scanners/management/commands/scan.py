@@ -21,14 +21,14 @@ scanners = {
     "onboard": onboard,
     "dummy": dummy,
     "dnssec": dnssec,
-    "headers": security_headers,
-    "plain": plain_http,
-    "tlsq": tls_qualys,
+    "security_headers": security_headers,
+    "plain_http": plain_http,
+    "tls_qualys": tls_qualys,
     "ftp": ftp,
-    "mail": internet_nl_v2_mail,
+    "internet_nl_v2_mail": internet_nl_v2_mail,
     "screenshot": screenshot,
-    "internet_nl_web_v2": internet_nl_v2_web,
-    "clean_wildcards": dns_clean_wildcards,
+    "internet_nl_v2_web": internet_nl_v2_web,
+    "dns_clean_wildcards": dns_clean_wildcards,
 }
 
 

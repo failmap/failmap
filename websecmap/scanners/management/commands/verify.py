@@ -11,7 +11,7 @@ scanners = {
     "http": http,
     "subdomains": subdomains,
     "dns_endpoints": dns_endpoints,
-    "unresolvable": verify_unresolvable,
+    "verify_unresolvable": verify_unresolvable,
 }
 
 

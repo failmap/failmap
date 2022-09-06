@@ -10,9 +10,9 @@ scanners = {
     "ftp": ftp,
     "http": http,
     "subdomains": subdomains,
-    "known_subdomains": dns_known_subdomains,
+    "dns_known_subdomains": dns_known_subdomains,
     "dns_endpoints": dns_endpoints,
-    "wildcards": dns_wildcards,
+    "dns_wildcards": dns_wildcards,
 }
 
 

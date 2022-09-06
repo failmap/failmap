@@ -52,7 +52,6 @@ from websecmap.scanners.scanner.__init__ import (
     unique_and_random,
 )
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
-from websecmap.scanners.timeout import timeout
 
 # suppress InsecureRequestWarning, we do those request on purpose.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -88,8 +87,6 @@ between bytes sent from the server. In 99.9% of cases, this is the time before t
 of the same stuff is re-discovered.
 """
 READ_TIMEOUT = 30
-
-RDNS_TIMEOUT = 30
 
 
 def filter_discover(organizations_filter: dict = None, urls_filter: dict = None, **kwargs):
@@ -647,60 +644,6 @@ def kill_url_task(ips, url: Url):
     UrlIp.objects.all().filter(url=url).update(
         is_unused=True, is_unused_since=datetime.now(pytz.utc), is_unused_reason="Url was killed"
     )
-
-
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def store_url_ips(url: int, ips):
-    """
-    Todo: method should be stored in manager
-
-    Be sure to give all ip's that are currently active in one call. Mix IPv4 and IPv6.
-
-    the http endpoint finder will clash with qualys on this method, until we're using the same
-    method to discover all ip's this url currently has.
-    """
-
-    for ip_address in ips:
-
-        # sometimes there is no ipv4 or 6 address... or you get some other dirty dataset.
-        if not ip_address:
-            continue
-
-        # the same thing that exists already? don't do anything about it.
-        if UrlIp.objects.all().filter(url=url, ip=ip_address, is_unused=False).count():
-            continue
-
-        epip = UrlIp()  # pylint: disable=invalid-name
-        epip.ip = ip_address  # pylint: disable=invalid-name
-        epip.url = url
-        epip.is_unused = False
-        epip.discovered_on = datetime.now(pytz.utc)
-        try:
-            epip.rdns_name = get_rdns_name(ip_address)
-        except TimeoutError:
-            # we'll have to do without.
-            epip.rdns_name = ""
-        epip.save()
-
-    # and then clean up all that are not in the current set of ip's.
-    UrlIp.objects.all().filter(url=url, is_unused=False).exclude(ip__in=ips).update(
-        is_unused=True, is_unused_since=datetime.now(pytz.utc), is_unused_reason="cleanup at storing new endpoints"
-    )
-
-
-@timeout(RDNS_TIMEOUT)
-def get_rdns_name(ip_address):
-    reverse_name = ""
-    try:
-        reverse_name = socket.gethostbyaddr(ip_address)
-    except (TimeoutError, socket.herror):
-        # takes too long
-        # host doesn't exist / unknown host
-        pass
-    except BaseException as my_exception:  # pylint: disable=broad-except
-        log.error("Unknown rdns failure %s on ip %s", str(my_exception), ip_address)
-
-    return reverse_name
 
 
 def endpoint_exists(url_id: int, port: int, protocol: str, ip_version: int) -> int:
