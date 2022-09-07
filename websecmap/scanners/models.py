@@ -47,13 +47,18 @@ class Endpoint(models.Model):
         default=4,
     )
 
-    port = models.IntegerField(default=443, help_text="Ports range from 1 to 65535.")  # 1 to 65535
+    port = models.IntegerField(
+        default=443,
+        help_text="Ports range from 1 to 65535.",
+        db_index=True,  # mainly to speeed up the admin interface
+    )  # 1 to 65535
 
     protocol = models.CharField(
         max_length=20,
         help_text="Lowercase. Mostly application layer protocols, such as HTTP, FTP,"
         "SSH and so on. For more, read here: "
         "https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol",
+        db_index=True,  # mainly to speeed up the admin interface
     )
 
     discovered_on = models.DateTimeField(blank=True, null=True)
@@ -517,6 +522,7 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
         max_length=128,
         default=0,
         help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent.",
+        db_index=True,  # mainly needed for responsive admin interface
     )
     explanation = models.CharField(
         max_length=255, default=0, help_text="Short explanation from the scanner on how the rating came to be."
@@ -536,7 +542,8 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
     rating_determined_on = models.DateTimeField(
         help_text="This is when the current rating was first discovered. It may be obsoleted by"
         "another rating or explanation (which might have the same rating). This date "
-        "cannot change once it's set."
+        "cannot change once it's set.",
+        db_index=True,  # mainly needed for responsive admin interface
     )
 
     class Meta:

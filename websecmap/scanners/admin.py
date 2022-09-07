@@ -168,6 +168,9 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         ),
     )
 
+    # shave off a second and more when there are many results
+    show_full_result_count = False
+
     def explain(self, instance):
         return format_html("<a href='./{}/change/#/tab/module_1/'>Explain</a>", instance.pk)
 
