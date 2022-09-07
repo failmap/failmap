@@ -4,6 +4,7 @@ from websecmap.scanners.scanner.screenshot import (
     make_screenshot_with_browserless,
     save_screenshot,
     deserialize_image_to_image,
+    determine_subdir,
 )
 from django.conf import settings
 import os
@@ -43,4 +44,16 @@ def test_make_screenshot_with_browserless(requests_mock, db, current_path):
     save_screenshot(data, Endpoint.objects.all().first().id)
     assert Screenshot.objects.all().count() == 1
 
-    assert os.path.exists(f"{settings.MEDIA_ROOT}screenshots/{end.id}_latest.png")
+    subdir = determine_subdir(end.id)
+
+    assert os.path.exists(f"{settings.MEDIA_ROOT}screenshots/{subdir}/{end.id}_latest.png")
+
+
+def test_determine_subdir():
+
+    assert "000" == determine_subdir(999)
+    assert "000" == determine_subdir(0)
+    assert "100" == determine_subdir(1000)
+    assert "100" == determine_subdir(10000)
+    assert "100" == determine_subdir(100000)
+    assert "100" == determine_subdir(1000000)

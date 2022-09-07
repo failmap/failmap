@@ -175,6 +175,17 @@ def deserialize_image_to_image(image_data: str) -> Image:
     return Image.open(BytesIO(base64.b64decode(image_data.encode(encoding="utf-8"))))
 
 
+def determine_subdir(sequence_number: int) -> str:
+    if sequence_number <= 999:
+        return "000"
+    return str(sequence_number)[0:3]
+
+
+def create_dir_if_not_exists(directory: str):
+    if not os.path.isdir(directory):
+        os.makedirs(directory, exist_ok=True)
+
+
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def save_screenshot(response: Dict[str, Union[str, bool, int]], endpoint_id: int):
 
@@ -183,14 +194,20 @@ def save_screenshot(response: Dict[str, Union[str, bool, int]], endpoint_id: int
         return False
 
     try:
+        # making sure all storage stuff is prepared
         os.makedirs(f"{settings.MEDIA_ROOT}screenshots/", exist_ok=True)  # screenshot dir might not yet exist
+        out_dir: str = f"{settings.MEDIA_ROOT}screenshots/{determine_subdir(endpoint_id)}/"
+        filename = f"{out_dir}{endpoint_id}_latest.png"
+        create_dir_if_not_exists(out_dir)
+
+        # actual saving of the image to disk
         i = deserialize_image_to_image(response["screenshot"])
         size = 640, 360  # widescreen
         i.thumbnail(size, Image.ANTIALIAS)
-        filename = f"{settings.MEDIA_ROOT}screenshots/{endpoint_id}_latest.png"
         i.save(filename, "PNG")
         log.debug("Image saved as: %s.", filename)
 
+        # administration of the image, which is used to plan scans
         scr = Screenshot()
         scr.created_on = datetime.now(pytz.utc).date()
         scr.endpoint = Endpoint.objects.all().get(id=endpoint_id)
