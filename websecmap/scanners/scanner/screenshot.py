@@ -17,7 +17,7 @@ Which defaults to:
 http://screenshot_v4:1337
 http://screenshot_v6:1337
 """
-
+import base64
 import logging
 import os
 from datetime import datetime, timedelta
@@ -134,7 +134,7 @@ def make_screenshot(service: str, endpoint_url: str):
 
 
 @timeout(30, "Took too long to make screenshot.")
-def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[str, Union[str, bool, bytes, int]]:
+def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[str, Union[str, bool, int]]:
     # https://2.python-requests.org/en/latest/user/quickstart/#binary-response-content
 
     try:
@@ -153,7 +153,7 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
         # make a serializable dict as an answer
         return {
             # binary data
-            "screenshot": answer.content,
+            "screenshot": base64.b64encode(answer.content),
             "status_code": answer.status_code,
             "success": True,
             "error_message": "",
@@ -172,7 +172,7 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def save_screenshot(response: Dict[str, Union[str, bool, bytes, int]], endpoint_id: int):
+def save_screenshot(response: Dict[str, Union[str, bool, int]], endpoint_id: int):
 
     if not response["success"]:
         log.debug("Could not get screenshot on endpoint %s, returned %s ", endpoint_id, response)
@@ -180,7 +180,7 @@ def save_screenshot(response: Dict[str, Union[str, bool, bytes, int]], endpoint_
 
     try:
         os.makedirs(f"{settings.MEDIA_ROOT}screenshots/", exist_ok=True)  # screenshot dir might not yet exist
-        i = Image.open(BytesIO(response["screenshot"]))
+        i = Image.open(BytesIO(base64.b64decode(response["screenshot"])))
         size = 640, 360  # widescreen
         i.thumbnail(size, Image.ANTIALIAS)
         filename = f"{settings.MEDIA_ROOT}screenshots/{endpoint_id}_latest.png"
