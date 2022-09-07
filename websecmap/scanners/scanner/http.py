@@ -386,7 +386,7 @@ ACCEPTABLE_CONNECTION_ERRORS = [
 ]
 
 
-@app.task(queue="4and6", rate_limit="120/s", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="4and6", expires=EXPIRES_IN_ONE_DAY)
 def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str, str]:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.

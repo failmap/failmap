@@ -14,7 +14,6 @@ from django.db import connection
 from django.db.models import Q
 from dnsrecon.__main__ import brute_domain, ds_zone_walk
 from dnsrecon.lib.dnshelper import DnsHelper
-from tenacity import before_log, retry, wait_fixed
 
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.map.logic.map_defaults import get_country
@@ -427,9 +426,8 @@ def remove_wildcards(urls: List[Url]):
 
 
 # don't overload the crt.sh service, rate limit
-# todo: create a generic: go to $page with $parameter and scrape all urls.
-@app.task(ignore_result=True, queue="discover_subdomains", rate_limit="2/m")
-@retry(wait=wait_fixed(30), before=before_log(log, logging.DEBUG))
+# rate limit is implemented in queue system, dont hard-code it in the worst way possible.
+@app.task(queue="discover_subdomains")
 def certificate_transparency_scan(url: str):
     """
     Checks the certificate transparency database for subdomains. Using a regex the subdomains
@@ -491,7 +489,7 @@ def store_certificate_transparency_results(subdomains: List[str], url_id) -> Lis
 
 
 # this is a fairly safe scanner, and can be run pretty quiclkly (no clue if parralelisation works)
-@app.task(ignore_result=True, queue="discover_subdomains", rate_limit="4/m")
+@app.task(ignore_result=True, queue="discover_subdomains")
 def nsec_scan(url: str):
     """
     Tries to use nsec (dnssec) walking. Does not use nsec3 (hashes).
