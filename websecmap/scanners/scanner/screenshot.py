@@ -103,16 +103,19 @@ def compose_scan_task(urls):
     log.debug("Trying to make %s screenshots.", len(endpoints))
     log.debug("Screenshots will be stored at: %sscreenshots/", settings.MEDIA_ROOT)
     log.debug("IPv4 screenshot service: %s, IPv6 screenshot service: %s", v4_service, v6_service)
-    tasks = [
-        make_screenshot.si(v4_service, endpoint.uri_url()) | save_screenshot.s(endpoint.id)
-        for endpoint in endpoints
-        if endpoint.ip_version == 4
-    ]
-    tasks += [
-        make_screenshot.si(v6_service, endpoint.uri_url()) | save_screenshot.s(endpoint.id)
-        for endpoint in endpoints
-        if endpoint.ip_version == 6
-    ]
+    tasks = []
+    if v4_service:
+        tasks += [
+            make_screenshot.si(v4_service, endpoint.uri_url()) | save_screenshot.s(endpoint.id)
+            for endpoint in endpoints
+            if endpoint.ip_version == 4
+        ]
+    if v6_service:
+        tasks += [
+            make_screenshot.si(v6_service, endpoint.uri_url()) | save_screenshot.s(endpoint.id)
+            for endpoint in endpoints
+            if endpoint.ip_version == 6
+        ]
 
     return group(tasks)
 

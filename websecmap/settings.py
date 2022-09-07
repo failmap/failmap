@@ -956,8 +956,12 @@ CONSTANCE_CONFIG = {
     "PRO_EMAIL_SSL_KEYFILE": ("", "See django mail settings.", str),
     "PRO_EMAIL_SSL_CERTFILE": ("", "See django mail settings.", str),
     # Screenshots:
-    "SCREENSHOT_API_URL_V4": ("http://screenshot_v4:1337", "Use this service to create a screenshot over v4.", str),
-    "SCREENSHOT_API_URL_V6": ("http://screenshot_v6:1337", "Use this service to create a screenshot over v6.", str),
+    "SCREENSHOT_API_URL_V4": (
+        "http://websecmap-screenshot:3000",
+        "Use this service to create a screenshot over v4. Empty means no screenshots.",
+        str,
+    ),
+    "SCREENSHOT_API_URL_V6": ("", "Use this service to create a screenshot over v6. Empty means no screenshots", str),
     # tilanus zorgkaart nederland:
     "ZORGKAART_ENDPOINT": ("https://", "Endpoint of the zorgkaart service.", str),
     "ZORGKAART_USERNAME": ("", "Username to connect to the zorgkaart service.", str),
