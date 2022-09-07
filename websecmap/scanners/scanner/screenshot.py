@@ -121,7 +121,7 @@ def compose_scan_task(urls):
 
 
 # We expect the screenshot tool to hang at non responsive urls.
-@app.task(queue="screenshot", rate_limit="60/m", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="screenshot", expires=EXPIRES_IN_ONE_DAY)
 def make_screenshot(service: str, endpoint_url: str):
     try:
         return make_screenshot_with_browserless(service, endpoint_url)

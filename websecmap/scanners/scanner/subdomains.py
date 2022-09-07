@@ -70,7 +70,7 @@ def compose_manual_discover_task(organizations_filter: dict = None, urls_filter:
     return compose_discover_task(urls)
 
 
-def compose_discover_task(urls) -> Task:
+def compose_discover_task(urls: List[Url]) -> Task:
     task = group(
         certificate_transparency_scan.si(url.url)
         | store_certificate_transparency_results.s(url.id)
@@ -301,14 +301,14 @@ def dnsrecon_parse_report_contents(contents: List, url: Dict[str, Any]):
 
             added = db_url.add_subdomain(subdomain.lower())
             if added:
-                addedlist.append(added)
+                addedlist.append(added.url)
 
     return addedlist
 
 
 # place it on the IPv4 queue, so it can scale using cloud workers :)
 # It seems that a rate limited task blocks an entire worker for any other tasks.
-@app.task(ignore_result=True, queue="known_subdomains", rate_limit="60/h")
+@app.task(ignore_result=True, queue="known_subdomains")
 def wordlist_scan(url: str, wordlist: List[str]):
     """
     60/h = 10.000 scans / week.
