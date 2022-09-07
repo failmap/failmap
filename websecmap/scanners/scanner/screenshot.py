@@ -22,6 +22,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 from io import BytesIO
+from typing import Dict, Union
 
 import pytz
 import requests
@@ -133,54 +134,54 @@ def make_screenshot(service: str, endpoint_url: str):
 
 
 @timeout(30, "Took too long to make screenshot.")
-def make_screenshot_with_browserless(screenshot_service: str, url: str):
+def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[str, Union[str, bool, bytes, int]]:
     # https://2.python-requests.org/en/latest/user/quickstart/#binary-response-content
-    return requests.post(
-        screenshot_service,
-        json={
-            "url": url,
-            "options": {
-                "fullPage": False,
-                "type": "png",
-                # "clip": {"height": 720, "width": 1280, "x": 0, "y": 0},
+
+    try:
+        answer = requests.post(
+            screenshot_service,
+            json={
+                "url": url,
+                "options": {
+                    "fullPage": False,
+                    "type": "png",
+                    # "clip": {"height": 720, "width": 1280, "x": 0, "y": 0},
+                },
             },
-        },
-    )
+        )
+
+        # make a serializable dict as an answer
+        return {
+            # binary data
+            "screenshot": answer.content,
+            "status_code": answer.status_code,
+            "success": True,
+            "error_message": "",
+            "url": url,
+            "screenshot_service": screenshot_service,
+        }
+    except requests.RequestException as exc:
+        return {
+            "screenshot": b"",
+            "status_code": 0,
+            "success": False,
+            "error_message": str(exc),
+            "url": url,
+            "screenshot_service": screenshot_service,
+        }
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def save_screenshot(response, endpoint_id):
-    # it might receive an exception, or "False" when there is no image data due to errors.
-    if isinstance(response, TimeoutError):
-        log.debug(
-            "Received exception at save screenshot, not saving. Probably took too long to paint page due to"
-            "a too complex page or a terribly slow server. This is business as usual. Details: %s",
-            response,
-        )
-        return False
+def save_screenshot(response: Dict[str, Union[str, bool, bytes, int]], endpoint_id: int):
 
-    if isinstance(response, Exception):
-        log.exception(
-            "Received unexpected exception at save screenshot, not saving. "
-            "Is the screenshot service available at this address? Details: %s",
-            response,
-        )
-        return False
-
-    # with an invalid / non-resolvable address, a 500 error is given by the image service.
-    if response.status_code == 500:
-        log.debug(
-            "Received 500 at the API from %s, url probably does not resolve. This is business as usual. Not saving.",
-            endpoint_id,
-        )
+    if not response["success"]:
+        log.debug("Could not get screenshot on endpoint %s, returned %s ", endpoint_id, response)
         return False
 
     try:
-        # screenshot dir might not yet exist
-        os.makedirs(f"{settings.MEDIA_ROOT}screenshots/", exist_ok=True)
-
-        i = Image.open(BytesIO(response.content))
-        size = 640, 480
+        os.makedirs(f"{settings.MEDIA_ROOT}screenshots/", exist_ok=True)  # screenshot dir might not yet exist
+        i = Image.open(BytesIO(response["screenshot"]))
+        size = 640, 360  # widescreen
         i.thumbnail(size, Image.ANTIALIAS)
         filename = f"{settings.MEDIA_ROOT}screenshots/{endpoint_id}_latest.png"
         i.save(filename, "PNG")
@@ -189,14 +190,13 @@ def save_screenshot(response, endpoint_id):
         scr = Screenshot()
         scr.created_on = datetime.now(pytz.utc).date()
         scr.endpoint = Endpoint.objects.all().get(id=endpoint_id)
-        # scr.image = File(open(filename, "rb"))
         scr.filename = filename
         scr.save()
-        # log.debug("Saved in databased as id:%s filename:%s.", scr.pk, os.path.basename(scr.filename))
         return True
     except UnidentifiedImageError:
         log.debug("Got Unidentified Image, response: ")
         log.debug(response)
     except Exception as my_exception:  # pylint: disable=broad-except
         log.exception(my_exception)
-        return False
+
+    return False
