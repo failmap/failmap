@@ -153,7 +153,7 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
         # make a serializable dict as an answer
         return {
             # binary data
-            "screenshot": base64.b64encode(answer.content),
+            "screenshot": base64.b64encode(answer.content).decode(encoding="utf-8"),
             "status_code": answer.status_code,
             "success": True,
             "error_message": "",
@@ -171,6 +171,10 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
         }
 
 
+def deserialize_image_to_image(image_data: str) -> Image:
+    return Image.open(BytesIO(base64.b64decode(image_data.encode(encoding="utf-8"))))
+
+
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def save_screenshot(response: Dict[str, Union[str, bool, int]], endpoint_id: int):
 
@@ -180,7 +184,7 @@ def save_screenshot(response: Dict[str, Union[str, bool, int]], endpoint_id: int
 
     try:
         os.makedirs(f"{settings.MEDIA_ROOT}screenshots/", exist_ok=True)  # screenshot dir might not yet exist
-        i = Image.open(BytesIO(base64.b64decode(response["screenshot"])))
+        i = deserialize_image_to_image(response["screenshot"])
         size = 640, 360  # widescreen
         i.thumbnail(size, Image.ANTIALIAS)
         filename = f"{settings.MEDIA_ROOT}screenshots/{endpoint_id}_latest.png"

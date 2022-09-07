@@ -1,0 +1,46 @@
+from websecmap.organizations.models import Organization, Url
+from websecmap.scanners.models import Endpoint, Screenshot
+from websecmap.scanners.scanner.screenshot import (
+    make_screenshot_with_browserless,
+    save_screenshot,
+    deserialize_image_to_image,
+)
+from django.conf import settings
+import os
+
+
+def test_make_screenshot_with_browserless(requests_mock, db, current_path):
+    with open(f"{current_path}/websecmap/scanners/tests/testdata/pixel.png", "rb") as file_handle:
+        pixel = file_handle.read()
+
+    requests_mock.post("https://example.com", content=pixel)
+
+    data = make_screenshot_with_browserless("https://example.com", "basisbeveiliging.nl")
+
+    # Note that the file is not binary.
+    assert data == {
+        "error_message": "",
+        "screenshot": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NgAAIAAAUAAR4f7BQAAAAASUVORK5CYII=",
+        "screenshot_service": "https://example.com",
+        "status_code": 200,
+        "success": True,
+        "url": "basisbeveiliging.nl",
+    }
+
+    # Check that we get an image:
+    image_data = deserialize_image_to_image(data["screenshot"])
+    assert image_data.size == (1, 1)
+
+    org = Organization(**{"name": "test"})
+    org.save()
+    url = Url(**{"url": "example.com"})
+    url.save()
+    org.add_url(url.url)
+    end = Endpoint(**{"url": url})
+    end.save()
+
+    assert Screenshot.objects.all().count() == 0
+    save_screenshot(data, Endpoint.objects.all().first().id)
+    assert Screenshot.objects.all().count() == 1
+
+    assert os.path.exists(f"{settings.MEDIA_ROOT}screenshots/{end.id}_latest.png")
