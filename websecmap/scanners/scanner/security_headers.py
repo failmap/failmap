@@ -3,7 +3,7 @@ Check if the https site uses HSTS to tell the browser the site should only be re
 (useful until browsers do https by default, instead of by choice)
 """
 import logging
-from typing import Union
+from typing import Union, Dict
 
 import requests
 from celery import Task, group
@@ -168,9 +168,12 @@ def discover_service_type(headers: CaseInsensitiveDict = None):
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def analyze_headers(headers: CaseInsensitiveDict, endpoint_id):
+def analyze_headers(headers: Dict, endpoint_id):
     # todo: remove code paths, and make a more clear case per header type. That's easier to understand edge cases.
     # todo: Content-Security-Policy, Referrer-Policy
+
+    # prevent all issues with capitalization
+    headers = CaseInsensitiveDict(headers)
 
     # if scan task failed, ignore the result (exception) and report failed status
     # Exceptions do not serialize.
@@ -397,52 +400,24 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
             )
 
 
-@app.task(bind=True, default_retry_delay=1, retry_kwargs={"max_retries": 3}, expires=EXPIRES_IN_ONE_DAY)
-def get_headers(self, uri_uri: str) -> Union[CaseInsensitiveDict, bool]:
+@app.task(expires=EXPIRES_IN_ONE_DAY)
+def get_headers(uri_uri: str) -> Union[Dict, bool]:
     try:
         response = get_headers_request(uri_uri)
         # Object of type CaseInsensitiveDict is not JSON serializable.
-        return response
+        return dict(response)
 
-    # The amount of possible return states is overwhelming :)
+    except requests.RequestException as my_exception:
+        # This is completely expected and happens all the time
+        log.debug("Could not request headers, exception: %s", my_exception)
+    except BaseException as exc:  # noqa  # pylint: disable=broad-except
+        # Something weird is going on, we want to know this.
+        log.exception("After retries still could not get headers: %s", exc)
+        # If this task still fails after maximum retries the last
+        # error will be passed as result to the next task.
+        # Exceptions do not serialize.
 
-    # Solving https://sentry.io/internet-cleanup-foundation/faalkaart/issues/460895712/
-    #         https://sentry.io/internet-cleanup-foundation/faalkaart/issues/460895699/
-    # ValueError, really don't know how to further handle it.
-    #
-    # Solving https://sentry.io/internet-cleanup-foundation/faalkaart/issues/425503689/
-    # requests.TooManyRedirects
-    #
-    # Solving https://sentry.io/internet-cleanup-foundation/faalkaart/issues/425507209/
-    # LocationValueError - No host specified.
-    # it redirects to something like https:/// (with three slashes) and then somewhere it crashes
-    # possibly an error in requests.
-    #
-    # Possibly tooManyRedirects could be plotted on the map, given this is a configuration error
-
-    # Tons or errors can occur
-    # ConnectTimeout,
-    # HTTPError,
-    # ReadTimeout,
-    # Timeout,
-    # ConnectionError,
-    # ValueError,
-    # requests.TooManyRedirects,
-    # urllib3.exceptions.LocationValueError,
-    except requests.RequestException as my_exception:  # noqa  # pylint: disable=broad-except
-        # If an expected error is encountered put this task back on the queue to be retried.
-        # This will keep the chained logic in place (saving result after successful scan).
-        # Retry delay and total number of attempts is configured in the task decorator.
-        log.exception("Could not request headers, exception: %s", my_exception)
-        try:
-            # Since this action raises an exception itself, any code after this won't be executed.
-            raise self.retry(exc=my_exception)
-        except BaseException as exc:  # noqa  # pylint: disable=broad-except
-            log.exception("After retries still could not get headers: %s", exc)
-            # If this task still fails after maximum retries the last
-            # error will be passed as result to the next task.
-            # Exceptions do not serialize.
-            return False
+    return False
 
 
 def get_headers_request(uri_url: str) -> CaseInsensitiveDict:
