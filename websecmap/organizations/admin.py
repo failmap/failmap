@@ -18,7 +18,7 @@ from jet.admin import CompactInline
 
 from websecmap import types
 from websecmap.app.models import Job
-from websecmap.celery import EXPIRES_IN_ONE_DAY, PRIO_HIGH, app
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.map.models import OrganizationReport
 from websecmap.organizations import datasources
 from websecmap.organizations.datasources import dutch_government, excel
@@ -257,7 +257,7 @@ class ActionMixin:
 
         task = task_composer(**filters)
         task_name = f"{name} ({','.join(map(str, list(queryset)))}) "
-        job = Job.create(task, task_name, request, priority=PRIO_HIGH)
+        job = Job.create(task, task_name, request)
         link = reverse("admin:app_job_change", args=(job.id,))
         self.message_user(request, f'Job created, <a href="{link}">{task_name}</a>')
 

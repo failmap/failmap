@@ -13,7 +13,7 @@ from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
 from websecmap.app.models import Job
-from websecmap.celery import EXPIRES_IN_ONE_DAY, PRIO_HIGH, app
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.map import models
 from websecmap.map.logic.openstreetmap import import_from_scratch, update_coordinates
 from websecmap.map.models import HighLevelStatistic, MapDataCache, VulnerabilityStatistic
@@ -69,7 +69,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         task_name = f"{'Import region'} ({','.join(map(str, list(queryset)))}) "
         task = group(tasks)
 
-        job = Job.create(task, task_name, request, priority=PRIO_HIGH)
+        job = Job.create(task, task_name, request)
         link = reverse("admin:app_job_change", args=(job.id,))
         self.message_user(request, f'Job created, <a href="{link}">{task_name}</a>')
 
@@ -94,7 +94,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         task_name = f"{'Update region'} ({','.join(map(str, list(queryset)))}) "
         task = group(tasks)
 
-        job = Job.create(task, task_name, request, priority=PRIO_HIGH)
+        job = Job.create(task, task_name, request)
         link = reverse("admin:app_job_change", args=(job.id,))
         self.message_user(request, f'Job created, <a href="{link}">{task_name}</a>')
 
