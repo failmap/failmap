@@ -468,7 +468,8 @@ def certificate_transparency_scan(url: str):
         subdomains.remove("25")
 
     log.debug("Found subdomains: %s", subdomains)
-    return subdomains
+    # set is not json serializable
+    return list(subdomains)
 
 
 @app.task(queue="storage")
