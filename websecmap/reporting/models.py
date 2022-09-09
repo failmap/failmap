@@ -335,4 +335,9 @@ class ScanPolicy(AllIssuesCombined):
     )
 
     def __str__(self):
-        return f"🏅 [{self.scan_type} {self.conclusion}]"
+        # Django admin cannot deal with emojis, such as 🏅 (django 3 at least)
+        # b'INSERT INTO `django_admin_log` (`action_time`, `user_id`, `content_type_id`, `object_id`, `object_repr`,
+        #   `action_flag`, `change_message`) VALUES (\'2022-09-09 07:52:07.296311\', 1, 62, \'942\',
+        #   \'\xf0\x9f\x8f\x85 [internet_nl_mail_ipv6 passed]\', 1, \'[{\\"added\\": {}}]\')'
+        # -> (1366, "Incorrect string value: '\\xF0\\x9F\\x8F\\x85 [...' for column 'object_repr' at row 1")
+        return f"[{self.scan_type} {self.conclusion}]"

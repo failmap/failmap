@@ -401,6 +401,11 @@ SCANNERS = [
         "can scan urls": False,
         "needs results from": ["dns_endpoints"],
         "creates endpoint scan types": [
+            # categories:
+            "internet_nl_mail_ipv6",
+            "internet_nl_mail_dnssec",
+            "internet_nl_mail_auth",
+            "internet_nl_mail_tls",
             # used in dashboard and websecmap
             "internet_nl_mail_starttls_tls_available",
             "internet_nl_mail_auth_spf_exist",
@@ -488,6 +493,11 @@ SCANNERS = [
         "can scan urls": False,
         "needs results from": ["dns_endpoints"],
         "creates endpoint scan types": [
+            # categories:
+            "internet_nl_web_ipv6",
+            "internet_nl_web_dnssec",
+            "internet_nl_web_tls",
+            "internet_nl_web_appsecpriv",
             # used in websecmap and dashboard
             "internet_nl_web_ipv6_ws_similar",
             # used in dashboard
