@@ -172,9 +172,6 @@ def analyze_headers(headers: Dict, endpoint_id):
     # todo: remove code paths, and make a more clear case per header type. That's easier to understand edge cases.
     # todo: Content-Security-Policy, Referrer-Policy
 
-    # prevent all issues with capitalization
-    headers = CaseInsensitiveDict(headers)
-
     # if scan task failed, ignore the result (exception) and report failed status
     # Exceptions do not serialize.
     if isinstance(headers, bool):
@@ -213,7 +210,8 @@ def analyze_headers(headers: Dict, endpoint_id):
 
         return {"status": "unreachable-set-to-unreachable"}
 
-    # determine what kind of service we're dealing with.
+    # prevent all issues with capitalization, x-XSS and X-Xss etc are all used out there
+    headers = CaseInsensitiveDict(headers)
     service_type = discover_service_type(headers)
 
     endpoint = Endpoint.objects.all().filter(pk=endpoint_id).only("pk", "url__id", "protocol").first()
