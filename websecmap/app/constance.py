@@ -3,8 +3,18 @@ from typing import List
 
 import pytz
 from constance import config
+from requests.structures import CaseInsensitiveDict
 
 constance_cache = {}
+
+
+def get_all_values() -> CaseInsensitiveDict:
+    # Returned case insensitive to prevent hours of fun between caps and non-caps
+
+    # solves: django.core.exceptions.AppRegistryNotReady: Apps aren't loaded yet.
+    from constance import admin  # pylint: disable=import-outside-toplevel
+
+    return CaseInsensitiveDict(admin.get_values())
 
 
 def get_bulk_values(keys: List[str]):

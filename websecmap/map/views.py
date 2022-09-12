@@ -15,7 +15,7 @@ from django.views.decorators.cache import cache_page
 
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
-from websecmap.app.constance import get_bulk_values
+from websecmap.app.constance import get_bulk_values, get_all_values
 from websecmap.map.logic import datasets
 from websecmap.map.logic.admin import (
     add_organization,
@@ -56,7 +56,7 @@ from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
 from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
 from websecmap.map.models import Configuration, OrganizationReport
 from websecmap.organizations.models import Organization
-from websecmap.scanners import plannedscan
+from websecmap.scanners import plannedscan, ALL_SCAN_TYPES
 from websecmap.scanners.models import Screenshot
 
 log = logging.getLogger(__package__)
@@ -215,111 +215,10 @@ def countries_and_layers():
     return countries
 
 
-@cache_page(ONE_HOUR)
-def config(request):
-    configuration = get_bulk_values(
-        [
-            "PROJECT_COUNTRY",
-            "PROJECT_NAME",
-            "INFO_HEADING",
-            "INFO_TITLE_1",
-            "INFO_CONTENT_1",
-            "INFO_TITLE_2",
-            "INFO_CONTENT_2",
-            "INFO_TITLE_3",
-            "INFO_CONTENT_3",
-            "INFO_TITLE_4",
-            "INFO_CONTENT_4",
-            "INFO_TITLE_5",
-            "INFO_CONTENT_5",
-            "PROJECT_TAGLINE",
-            "SHOW_INTRO",
-            "SHOW_CHARTS",
-            "SHOW_COMPLY_OR_EXPLAIN",
-            "SHOW_SEND_IN_NEW_DOMAINS",
-            "SHOW_SCAN_SCHEDULE",
-            "SHOW_DATASETS",
-            "SHOW_ANNOUNCEMENT",
-            "SHOW_EXTENSIVE_STATISTICS",
-            "SHOW_STATS_NUMBERS",
-            "SHOW_STATS_IMPROVEMENTS",
-            "SHOW_STATS_GRAPHS",
-            "SHOW_STATS_CHANGES",
-            "SHOW_REPORT_NUMBERS",
-            "SHOW_REPORT_CHARTS",
-            "SHOW_REPORT_RISK_SUMMARY",
-            "SHOW_REPORT_CONTENT",
-            "SHOW_TICKER",
-            "SHOW_SERVICES",
-            "SHOW_SERVICES_TABLE",
-            "SHOW_FTP",
-            "SHOW_PLAIN_HTTPS",
-            "SHOW_DNSSEC",
-            "PLUS_SHOW_INFO",
-            "SHOW_HTTP_SECURITY_HEADER_STRICT_TRANSPORT_SECURITY",
-            "SHOW_HTTP_SECURITY_HEADER_X_CONTENT_TYPE_OPTIONS",
-            "SHOW_HTTP_SECURITY_HEADER_X_FRAME_OPTIONS",
-            "SHOW_HTTP_SECURITY_HEADER_X_XSS_PROTECTION",
-            "SHOW_TLS_QUALYS_CERTIFICATE_TRUSTED",
-            "SHOW_TLS_QUALYS_ENCRYPTION_QUALITY",
-            "SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_AVAILABLE",
-            "SHOW_INTERNET_NL_MAIL_AUTH_SPF_EXIST",
-            "SHOW_INTERNET_NL_MAIL_AUTH_DKIM_EXIST",
-            "SHOW_INTERNET_NL_MAIL_AUTH_DMARC_EXIST",
-            "RESPONSIBLE_ORGANIZATION_NAME",
-            "RESPONSIBLE_ORGANIZATION_PROMO_TEXT",
-            "RESPONSIBLE_ORGANIZATION_WEBSITE",
-            "RESPONSIBLE_ORGANIZATION_MAIL",
-            "RESPONSIBLE_ORGANIZATION_TWITTER",
-            "RESPONSIBLE_ORGANIZATION_FACEBOOK",
-            "RESPONSIBLE_ORGANIZATION_LINKEDIN",
-            "RESPONSIBLE_ORGANIZATION_WHATSAPP",
-            "RESPONSIBLE_ORGANIZATION_PHONE",
-            "PROJECT_NAME",
-            "PROJECT_TAGLINE",
-            "PROJECT_COUNTRY",
-            "PROJECT_MAIL",
-            "PROJECT_ISSUE_MAIL",
-            "PROJECT_TWITTER",
-            "PROJECT_FACEBOOK",
-            "COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK",
-            "COMPLY_OR_EXPLAIN_EMAIL_ADDRESS",
-            "COMPLY_OR_EXPLAIN_EMAIL_SUBJECT",
-            "COMPLY_OR_EXPLAIN_EMAIL_BODY",
-            "MAPBOX_ACCESS_TOKEN",
-            "GITTER_CHAT_ENABLE",
-            "GITTER_CHAT_CHANNEL",
-            "ANNOUNCEMENT",
-            "SHOW_INTERNET_NL_V6_WEB_IPV6",
-            "SHOW_INTERNET_NL_V6_WEB_IPV6_READY",
-            "SHOW_INTERNET_NL_V6_WEB_IPV6_PROOF",
-            "SHOW_INTERNET_NL_V6_WEB_IPV6_INCOMPATIBLE",
-            "SHOW_INTERNET_NL_V6_MAIL_IPV6",
-            "SHOW_INTERNET_NL_V6_MAIL_IPV6_READY",
-            "SHOW_INTERNET_NL_V6_MAIL_IPV6_PROOF",
-            "SHOW_INTERNET_NL_V6_MAIL_IPV6_INCOMPATIBLE",
-            "GOOGLE_MAPS_API_KEY",
-            "SHOW_DISCLAIMER",
-            "DISCLAIMER_HTML",
-            "GRADING_POLICY",
-            "INTRO_TITLE_HTML_EN",
-            "INTRO_LEADER_HTML_EN",
-            "INTRO_TITLE_HTML_NL",
-            "INTRO_LEADER_HTML_NL",
-            "CUSTOM_CSS",
-            "LOGO_IMAGE",
-            "SHOW_SEND_IN_NEW_DOMAINS",
-            "NEW_DOMAINS_EMAIL_ADDRESS",
-            "NEW_DOMAINS_EMAIL_SUBJECT",
-            "NEW_DOMAINS_EMAIL_BODY",
-            "SHOW_INCORRECT_FINDING",
-            "INCORRECT_FINDING_EMAIL_ADDRESS",
-            "INCORRECT_FINDING_EMAIL_SUBJECT",
-            "INCORRECT_FINDING_EMAIL_BODY",
-        ]
-    )
-
-    config_object = {
+def config_content():
+    # This is converted to some hierarchy to make more sense, and to _not_ export things like keys
+    configuration = get_all_values()
+    base_config = {
         "show": {
             "intro": configuration["SHOW_INTRO"],
             "charts": configuration["SHOW_CHARTS"],
@@ -343,35 +242,7 @@ def config(request):
             "disclaimer": configuration["SHOW_DISCLAIMER"],
             "send_in_new_domains": configuration["SHOW_SEND_IN_NEW_DOMAINS"],
             "incorrect_finding": configuration["SHOW_INCORRECT_FINDING"],
-            "issues": {
-                "ftp": configuration["SHOW_FTP"],
-                "plain_https": configuration["SHOW_PLAIN_HTTPS"],
-                "dnssec": configuration["SHOW_DNSSEC"],
-                "http_security_header_strict_transport_security": configuration[
-                    "SHOW_HTTP_SECURITY_HEADER_STRICT_TRANSPORT_SECURITY"
-                ],
-                "http_security_header_x_content_type_options": configuration[
-                    "SHOW_HTTP_SECURITY_HEADER_X_CONTENT_TYPE_OPTIONS"
-                ],
-                "http_security_header_x_frame_options": configuration["SHOW_HTTP_SECURITY_HEADER_X_FRAME_OPTIONS"],
-                "http_security_header_x_xss_protection": configuration["SHOW_HTTP_SECURITY_HEADER_X_XSS_PROTECTION"],
-                "tls_qualys_certificate_trusted": configuration["SHOW_TLS_QUALYS_CERTIFICATE_TRUSTED"],
-                "tls_qualys_encryption_quality": configuration["SHOW_TLS_QUALYS_ENCRYPTION_QUALITY"],
-                "internet_nl_mail_starttls_tls_available": configuration[
-                    "SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_AVAILABLE"
-                ],
-                "internet_nl_mail_auth_spf_exist": configuration["SHOW_INTERNET_NL_MAIL_AUTH_SPF_EXIST"],
-                "internet_nl_mail_auth_dkim_exist": configuration["SHOW_INTERNET_NL_MAIL_AUTH_DKIM_EXIST"],
-                "internet_nl_mail_auth_dmarc_exist": configuration["SHOW_INTERNET_NL_MAIL_AUTH_DMARC_EXIST"],
-                "internet_nl_v6_web_ipv6": configuration["SHOW_INTERNET_NL_V6_WEB_IPV6"],
-                "internet_nl_v6_web_ipv6_ready": configuration["SHOW_INTERNET_NL_V6_WEB_IPV6_READY"],
-                "internet_nl_v6_web_ipv6_proof": configuration["SHOW_INTERNET_NL_V6_WEB_IPV6_PROOF"],
-                "internet_nl_v6_web_ipv6_incompatible": configuration["SHOW_INTERNET_NL_V6_WEB_IPV6_INCOMPATIBLE"],
-                "internet_nl_v6_mail_ipv6": configuration["SHOW_INTERNET_NL_V6_MAIL_IPV6"],
-                "internet_nl_v6_mail_ipv6_ready": configuration["SHOW_INTERNET_NL_V6_MAIL_IPV6_READY"],
-                "internet_nl_v6_mail_ipv6_proof": configuration["SHOW_INTERNET_NL_V6_MAIL_IPV6_PROOF"],
-                "internet_nl_v6_mail_ipv6_incompatible": configuration["SHOW_INTERNET_NL_V6_MAIL_IPV6_INCOMPATIBLE"],
-            },
+            "issues": {},
         },
         "announcement": configuration["ANNOUNCEMENT"],
         "disclaimer": configuration["DISCLAIMER_HTML"],
@@ -441,7 +312,15 @@ def config(request):
         },
     }
 
-    return JsonResponse(config_object, encoder=JSEncoder)
+    for scan_type in sorted(ALL_SCAN_TYPES):
+        base_config["show"]["issues"][scan_type.lower()] = configuration[f"show_{scan_type}"]
+
+    return base_config
+
+
+@cache_page(ONE_HOUR)
+def config(request) -> JsonResponse:
+    return JsonResponse(config_content(), encoder=JSEncoder)
 
 
 @cache_page(ONE_HOUR)

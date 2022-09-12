@@ -1,4 +1,4 @@
-from websecmap.scanners import SCANNERS
+from websecmap.scanners import SCANNERS, ALL_SCAN_TYPES
 
 
 def add_scanner_fields(constance_config):
@@ -95,10 +95,10 @@ def add_scanner_fieldsets(constance_config_fieldsets):
 
         options = (f"USE_SCANNER_{scanner['name'].upper()}",)
 
-        for scan_type in scanner["creates endpoint scan types"] + scanner["creates url scan types"]:
+        for scan_type in ALL_SCAN_TYPES:
             options += (f"REPORT_INCLUDE_{scan_type.upper()}",)
 
-        for scan_type in scanner["creates endpoint scan types"] + scanner["creates url scan types"]:
+        for scan_type in ALL_SCAN_TYPES:
             options += (f"SHOW_{scan_type.upper()}",)
 
         scanner_config_per_scanner = (scanner["verbose name"], options)
