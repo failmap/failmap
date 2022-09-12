@@ -204,6 +204,7 @@ def standard_calculation(
     not_applicable: bool = False,
     error_in_test: bool = False,
 ):
+    # Scan might be high, medium, low, whatever, but the policy decides what that means.
 
     ok = 0 if any([high, medium, low, not_testable, not_testable, error_in_test]) else 1  # pylint: disable=invalid-name
 
@@ -239,14 +240,16 @@ def standard_calculation_for_internet_nl(
 
     # V1 reports do not have json stored in the explanation, only text messages or nothing.
     # So, only parse this is it contains json at all. To improve speed, first check the first letter.
-    if explanation[0:1] == "{":
+    if scan.explanation and scan.explanation[0:1] == "{":
         try:
-            data = json.loads(explanation)
+            data = json.loads(scan.explanation.strip())
             calc["translation"] = data.get("translation", "")
             calc["technical_details"] = scan.evidence
-        except json.decoder.JSONDecodeError:
+        except json.decoder.JSONDecodeError as exc:
             # not a json value, nothing is done with the explanation field otherwise
-            pass
+            log.debug(
+                "explanation in internet.nl scan was not json compatible. Error: %s, Json: %s", exc, scan.explanation
+            )
 
     # The original value contains more nuance than the agregation to high, medium and low. So use the translation but
     # also the original rating to show the correct icon. This is also used to determine the progression compared to

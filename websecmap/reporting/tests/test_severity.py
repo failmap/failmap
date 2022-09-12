@@ -10,7 +10,6 @@ def test_internet_nl_standard_calculation(db):
 
     # Api v1 does not have json content, api v2 does.
     scan = EndpointGenericScan()
-    scan.explanation = "test"
     scan.rating_determined_on = now
     scan.last_scan_moment = now
     scan.type = "test"
@@ -33,7 +32,8 @@ def test_internet_nl_standard_calculation(db):
         "test_result": 0,
     }
 
-    value = standard_calculation_for_internet_nl(scan, '{"translation": "test"}', 0, 0, 0, False, False, False)
+    scan.explanation = '{"translation": "test"}'
+    value = standard_calculation_for_internet_nl(scan, "", 0, 0, 0, False, False, False)
 
     assert value == {
         "type": "test",
