@@ -323,7 +323,7 @@ def analyze_result(result: List[str]):
         #     log.info(line)
         #     errors.append(line)
 
-    highest_level = "ERROR" if errors else "WARNING" if warnings else "INFO" if infos else "NONE"
+    highest_level: str = "ERROR" if errors else "WARNING" if warnings else "INFO" if infos else "NONE"
 
     if highest_level == "NONE":
         raise ValueError(f"Did not correctly parse DNSSCAN result string. {result}")
@@ -341,4 +341,4 @@ def analyze_result(result: List[str]):
     # log.debug("Relevant:")
     # log.debug(relevant_strings)
 
-    return highest_level, relevant_strings
+    return highest_level.lower(), relevant_strings

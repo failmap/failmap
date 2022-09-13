@@ -1,17 +1,19 @@
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
-from typing import Dict
+from typing import Dict, List
 
 import pytz
 from dateutil.relativedelta import relativedelta
+from django.db.models import Q
 from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import get_country, get_default_country, get_default_layer, get_organization_type
 from websecmap.map.models import Configuration, HighLevelStatistic, OrganizationReport, VulnerabilityStatistic
 from websecmap.organizations.models import Organization
+from websecmap.reporting.models import ScanPolicy
 from websecmap.reporting.severity import get_severity
-from websecmap.scanners import POLICY, URL_SCAN_TYPES
+from websecmap.scanners import URL_SCAN_TYPES
 from websecmap.scanners.impact import get_impact
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 
@@ -19,7 +21,6 @@ log = logging.getLogger(__package__)
 
 
 def get_vulnerability_graph(country, organization_type, weeks_back, days: int = 365):
-
     organization_type_id = get_organization_type(organization_type)
     country = get_country(country)
     when = timezone.now() - relativedelta(weeks=int(weeks_back))
@@ -100,7 +101,6 @@ def get_organization_vulnerability_timeline(organization_id: int, days: int = 36
 def get_organization_vulnerability_timeline_via_name(
     organization_name: str, organization_type: str = "", country: str = "", days: int = 365
 ):
-
     layer = get_organization_type(organization_type) if organization_type else get_default_layer()
     country = get_country(code=country) if country else get_default_country()
 
@@ -217,27 +217,31 @@ def get_stats(country, organization_type, weeks_back, days: int = 365):
 def what_to_improve(country: str, organization_type: str, issue_type: str):
     # todo: check if the layer is published.
 
-    policy = POLICY.get(issue_type, None)
-    if not policy:
-        log.debug("No policy found for %s", issue_type)
-        return []
+    # Get high and medium, low stuff from policy from the scanner where where this issue_type
+    conclusions_that_can_be_improved = (
+        ScanPolicy.objects.all()
+        .filter(scan_type=issue_type)
+        .filter(Q(high__gte=1) | Q(medium__gte=1) | Q(low__gte=1))
+        .values_list("conclusion", flat=True)
+    )
 
     country = get_country(country)
     organization_type = get_organization_type(organization_type)
 
     if issue_type in URL_SCAN_TYPES:
-        return what_to_improve_ugs(country, organization_type, issue_type, policy)
+        return what_to_improve_ugs(country, organization_type, issue_type, conclusions_that_can_be_improved)
 
-    return what_to_improve_epgs(country, organization_type, issue_type, policy)
+    return what_to_improve_epgs(country, organization_type, issue_type, conclusions_that_can_be_improved)
 
 
-def what_to_improve_ugs(country: str, organization_type: str, issue_type: str, policy):
+def what_to_improve_ugs(country: str, organization_type: str, issue_type: str, policy: List[str]):
     # todo: how to outer join on organization type and country?
+
     scans = UrlGenericScan.objects.all().filter(
         type=issue_type,
         is_the_latest_scan=True,
         comply_or_explain_is_explained=False,
-        rating__in=policy["high"] + policy["medium"],
+        rating__in=policy,
         url__is_dead=False,
         url__not_resolvable=False,
         url__organization__country=country,
@@ -263,12 +267,12 @@ def what_to_improve_ugs(country: str, organization_type: str, issue_type: str, p
     return [dict(t) for t in {tuple(d.items()) for d in dicts}]
 
 
-def what_to_improve_epgs(country: str, organization_type: str, issue_type: str, policy):
+def what_to_improve_epgs(country: str, organization_type: str, issue_type: str, policy: List[str]):
     scans = EndpointGenericScan.objects.all().filter(
         type=issue_type,
         is_the_latest_scan=True,
         comply_or_explain_is_explained=False,
-        rating__in=policy["high"] + policy["medium"],
+        rating__in=policy,
         endpoint__is_dead=False,
         endpoint__url__is_dead=False,
         endpoint__url__not_resolvable=False,

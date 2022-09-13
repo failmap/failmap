@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from websecmap.reporting.severity import standard_calculation_for_internet_nl
+from websecmap.reporting.severity import internet_nl, get_score_from_policy
 from websecmap.scanners.models import EndpointGenericScan
 
 
-def test_internet_nl_standard_calculation(db):
+def test_internet_nl_standard_calculation(db, default_policy):
 
     now = datetime.now()
 
@@ -12,42 +12,43 @@ def test_internet_nl_standard_calculation(db):
     scan = EndpointGenericScan()
     scan.rating_determined_on = now
     scan.last_scan_moment = now
-    scan.type = "test"
+    scan.type = "internet_nl_web_https_tls_clientreneg"
+    scan.rating = "failed"
 
-    value = standard_calculation_for_internet_nl(scan, "", 0, 0, 0, False, False, False)
+    value = get_score_from_policy(scan)
 
     assert value == {
-        "type": "test",
+        "type": "internet_nl_web_https_tls_clientreneg",
         "explanation": "",
         "since": now.isoformat(),
         "last_scan": now.isoformat(),
-        "high": 0,
+        "high": 1,
         "medium": 0,
         "low": 0,
         # If all are 0, then it's ok.
-        "ok": 1,
-        "not_testable": False,
-        "not_applicable": False,
-        "error_in_test": False,
-        "test_result": 0,
+        "ok": 0,
+        "not_testable": 0,
+        "not_applicable": 0,
+        "error_in_test": 0,
     }
 
     scan.explanation = '{"translation": "test"}'
-    value = standard_calculation_for_internet_nl(scan, "", 0, 0, 0, False, False, False)
+    scan.evidence = "my_evidence"
+    value = internet_nl(scan)
 
     assert value == {
-        "type": "test",
         "translation": "test",
+        "test_result": "failed",
+        "technical_details": "my_evidence",
+        "type": "internet_nl_web_https_tls_clientreneg",
         "explanation": "",
-        "technical_details": 0,
         "since": now.isoformat(),
         "last_scan": now.isoformat(),
-        "high": 0,
+        "high": 1,
         "medium": 0,
         "low": 0,
-        "ok": 1,
-        "not_testable": False,
-        "not_applicable": False,
-        "error_in_test": False,
-        "test_result": 0,
+        "ok": 0,
+        "not_testable": 0,
+        "not_applicable": 0,
+        "error_in_test": 0,
     }

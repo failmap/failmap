@@ -22,7 +22,7 @@ def test_analyze_result():
     result = result.splitlines()
     level, relevant = analyze_result(result)
 
-    assert level == "INFO"
+    assert level == "info"
 
     # standard error
     result = """0.000: INFO Begin testing DNSSEC for faalkaart.nl.
@@ -37,7 +37,7 @@ def test_analyze_result():
     result = result.splitlines()
     level, relevant = analyze_result(result)
 
-    assert level == "ERROR"
+    assert level == "error"
 
     # subtle missing DNSSEC
     result = """0.000: INFO Begin testing DNSSEC for faalkaart.nl.
@@ -52,7 +52,7 @@ def test_analyze_result():
     result = result.splitlines()
     level, relevant = analyze_result(result)
 
-    assert level == "ERROR"
+    assert level == "error"
 
     # missing translation files
     result = """
@@ -68,7 +68,7 @@ def test_analyze_result():
     result = result.splitlines()
     level, relevant = analyze_result(result)
 
-    assert level == "ERROR"
+    assert level == "error"
 
     # Testing that MISSING_DS warning does not result in a warning, see the scanner documentation that this warning
     # is suppressed.
@@ -113,7 +113,7 @@ def test_analyze_result():
     result = result.splitlines()
     level, relevant = analyze_result(result)
 
-    assert level == "INFO"
+    assert level == "info"
 
     # Verify that other warnings indeed deliver a warning.
     result = """0.000: INFO Begin testing DNSSEC for faalkaart.nl.
@@ -132,4 +132,4 @@ def test_analyze_result():
     result = result.splitlines()
     level, relevant = analyze_result(result)
 
-    assert level == "WARNING"
+    assert level == "warning"

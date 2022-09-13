@@ -264,14 +264,21 @@ def store(results, endpoint_id):
     # issue resolved.
     if can_connect_result["result"]:
         if endpoint_has_scans("plain_https", endpoint_id):
-            store_endpoint_scan_result("plain_https", endpoint_id, "0", CLEANED_UP)
+            store_endpoint_scan_result("plain_https", endpoint_id, "redirecting_properly", CLEANED_UP)
 
     # Really no security at all
     if not can_connect_result["result"] and redirects_to_safety_result is False:
         log.info("%s does not have a https site. Saving/updating scan.", endpoint.url)
-        store_endpoint_scan_result("plain_https", endpoint_id, "1000", NO_HTTPS_AT_ALL)
+        store_endpoint_scan_result(
+            "plain_https", endpoint_id, "no_https_redirect_and_no_https_on_standard_port", NO_HTTPS_AT_ALL
+        )
 
     # some redirections that might have flaws etc.
     if not can_connect_result["result"] and redirects_to_safety_result is True:
         log.info("%s redirects to safety, saved by the bell.", endpoint.url)
-        store_endpoint_scan_result("plain_https", endpoint_id, "25", SAVED_BY_THE_BELL)
+        store_endpoint_scan_result(
+            "plain_https",
+            endpoint_id,
+            "https_redirect_on_insecure_port_and_no_https_on_standard_port",
+            SAVED_BY_THE_BELL,
+        )

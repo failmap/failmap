@@ -1,6 +1,53 @@
 """
 Check if the https site uses HSTS to tell the browser the site should only be reached over HTTPS.
 (useful until browsers do https by default, instead of by choice)
+
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
+prevents reflected xss
+
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+prevents clickjacking
+
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+forces the content-type to be leading for defining a type of file (not the browser guess)
+The browser guess could execute the file, for example with the wrong plugin.
+Basically the server admin should fix the browser, instead of the other way around.
+
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+Will be the browser default. Forces https, even if http resources are available.
+
+The preload list is idiotic: it should contain any site in the world.
+A whopping 1 municipality in NL uses the preload list (eg knows if it's existence).
+preload list is obscure and a dirty fix for a structural problem.
+
+Another weird thing is: the default / recommendation for hsts is off. Many sites, esp. in
+governments have a once-a-year cycle for doing something requires. So HSTS should be
+longer than a year, like one year and three months. Some site punish long hsts times.
+
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Public-Key-Pins
+Has the potential to make your site unreachable if not properly (automatically) maintained
+The backup cert strategy is also incredibly complex. Creating the right hash is also hard.
+So if you don't use this. There should be another way to link the content of the site to
+the transport.
+header likely to be killed like p3p
+'Public-Key-Pins': 0,
+Classified as: Ignored
+
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+Very complex header to specify what resources can be loaded from where. Especially useful
+when loading in third party content such as horrible ads. Prevents against xss
+
+Flash, PDF and other exploit prone things can be embedded. Should never happen:
+the content should always be none(?).
+if not set to none, it is 200 points for allowing flash and pdf to be embedded at all :)
+'X-Permitted-Cross-Domain-Policies':
+Classified as: Ignored
+
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
+largely unsupported
+What referrer should be allowed to access the resource. Security on referrer headers? No.
+'Referrer-Policy':
+Classified as: Ignored
 """
 import logging
 from typing import Union, Dict
@@ -123,7 +170,7 @@ def discover_service_type(headers: CaseInsensitiveDict = None):
     """
     if not headers:
         log.debug("No headers present, falling back to service type HTTP.")
-        return "HTTP"
+        return "http"
 
     # Soap messages, they don't need any standard http web headers at all.
     # known are: X-WSSecurity-Enabled, X-WSSecurity-For, X-OAuth-Enabled, WWW-Authenticate
@@ -131,7 +178,7 @@ def discover_service_type(headers: CaseInsensitiveDict = None):
     # Soap security checks are harder, and headers are much harder to implement correctly.
     if "X-SOAP-Enabled" in headers:
         log.debug("Service type to be discovered as: SOAP.")
-        return "SOAP"
+        return "soap"
 
     # Do not assume headers for sites with Basic Authentication and login portals. The application behind the
     # login can set the headers to whatever it sees fit. Connecting those sites to the internet is still stupid,
@@ -142,7 +189,7 @@ def discover_service_type(headers: CaseInsensitiveDict = None):
     # basic authentication.
     if "www-authenticate" in headers:
         log.debug("Authentication required to discover headers. Reporting this as unknown.")
-        return "RESTRICTED"
+        return "access_restricted"
 
     # We're going to ignore all service types, except whatever looks like html/xhtml/etc
     # So text/plain, text/json and such are ignored.
@@ -161,10 +208,10 @@ def discover_service_type(headers: CaseInsensitiveDict = None):
 
     # text/html can have many charsets, such as us-ascii.
     if content_type.lower() in html_content_types or "text/html" in content_type.lower():
-        return "HTTP"
+        return "http"
 
     log.debug("Unknown service type discovered.")
-    return "UNKNOWN"
+    return "non_http_response"
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
@@ -205,7 +252,7 @@ def analyze_headers(headers: Dict, endpoint_id):
 
         for scan in existing_header_scans:
             store_endpoint_scan_result(
-                scan.type, endpoint_id, "Unreachable", "Address became unreachable.", str(headers)
+                scan.type, endpoint_id, "unreachable", "Address became unreachable.", str(headers)
             )
 
         return {"status": "unreachable-set-to-unreachable"}
@@ -218,13 +265,13 @@ def analyze_headers(headers: Dict, endpoint_id):
     if not endpoint:
         return {"status": "success"}
 
-    if service_type == "HTTP":
+    if service_type == "http":
         return analyze_website_headers(endpoint_id, endpoint.url.id, endpoint.protocol, headers)
-    if service_type == "SOAP":
+    if service_type == "soap":
         return analyze_soap_headers(endpoint_id)
-    if service_type == "UNKNOWN":
+    if service_type == "non_http_response":
         return clean_up_existing_headers(endpoint_id, service_type=service_type, reason="unknown_content_type")
-    if service_type == "RESTRICTED":
+    if service_type == "access_restricted":
         return clean_up_existing_headers(endpoint_id, service_type=service_type, reason="authentication_required")
 
     # fallback
@@ -251,7 +298,7 @@ def analyze_soap_headers(endpoint_id):
     )
 
     for scan in existing_header_scans:
-        store_endpoint_scan_result(scan.type, endpoint_id, "SOAP", "Header not relevant for SOAP service.")
+        store_endpoint_scan_result(scan.type, endpoint_id, "soap", "Header not relevant for SOAP service.")
 
     return {"status": "success"}
 
@@ -339,7 +386,7 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
                 store_endpoint_scan_result(
                     "http_security_header_strict_transport_security",
                     endpoint_id,
-                    "True",
+                    "present",
                     headers["Strict-Transport-Security"],
                 )
             else:
@@ -347,7 +394,7 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
                 store_endpoint_scan_result(
                     "http_security_header_strict_transport_security",
                     endpoint_id,
-                    "False",
+                    "missing_but_no_insecure_service_offered",
                     "Security Header not present: Strict-Transport-Security, yet offers no insecure http service.",
                 )
 
@@ -361,10 +408,10 @@ def generic_check(endpoint_id: int, headers, header):
 
     if header in headers.keys():
         log.debug("Has %s", header)
-        store_endpoint_scan_result(scan_type, endpoint_id, "True", headers[header])
+        store_endpoint_scan_result(scan_type, endpoint_id, "present", headers[header])
     else:
         log.debug("Has no %s", header)
-        store_endpoint_scan_result(scan_type, endpoint_id, "False", f"Security Header not present: {header}")
+        store_endpoint_scan_result(scan_type, endpoint_id, "missing", f"Security Header not present: {header}")
 
 
 def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
@@ -373,7 +420,7 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
     # this is case insensitive
     if header in headers.keys():
         log.debug("Has %s", header)
-        store_endpoint_scan_result(scan_type, endpoint_id, "True", headers[header])
+        store_endpoint_scan_result(scan_type, endpoint_id, "present", headers[header])
     else:
         # CSP fallback:
         log.debug("CSP fallback used for %s", header)
@@ -381,7 +428,7 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
             store_endpoint_scan_result(
                 scan_type=scan_type,
                 endpoint_id=endpoint_id,
-                rating="Using CSP",
+                rating="using_csp",
                 message=f"Content-Security-Policy header found, which can handle the security from {header}. "
                 f"Value (possibly truncated): {headers['Content-Security-Policy'][0:80]}...",
                 evidence=headers["Content-Security-Policy"],
@@ -392,7 +439,7 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
             store_endpoint_scan_result(
                 scan_type=scan_type,
                 endpoint_id=endpoint_id,
-                rating="False",
+                rating="missing",
                 message=f"Security Header not present: {header}, alternative header "
                 f"Content-Security-Policy not present.",
             )
