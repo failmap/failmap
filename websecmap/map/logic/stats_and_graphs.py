@@ -225,6 +225,8 @@ def what_to_improve(country: str, organization_type: str, issue_type: str):
         .values_list("conclusion", flat=True)
     )
 
+    log.debug("Conclusions that can be improved: %s", conclusions_that_can_be_improved)
+
     country = get_country(country)
     organization_type = get_organization_type(organization_type)
 
