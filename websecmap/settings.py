@@ -1168,8 +1168,14 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         ),
         (
             "App",
-            ("CUSTOM_CSS", "LOGO_IMAGE", "RELEVANT_FOR_UI_HIGH",
-             "RELEVANT_FOR_UI_MEDIUM", "RELEVANT_FOR_UI_LOW", "RELEVANT_FOR_UI_GOOD"),
+            (
+                "CUSTOM_CSS",
+                "LOGO_IMAGE",
+                "RELEVANT_FOR_UI_HIGH",
+                "RELEVANT_FOR_UI_MEDIUM",
+                "RELEVANT_FOR_UI_LOW",
+                "RELEVANT_FOR_UI_GOOD",
+            ),
         ),
     ]
 )

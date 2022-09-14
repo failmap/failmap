@@ -314,7 +314,7 @@ def config_content():
                 "medium": configuration["RELEVANT_FOR_UI_MEDIUM"],
                 "low": configuration["RELEVANT_FOR_UI_LOW"],
                 "good": configuration["RELEVANT_FOR_UI_GOOD"],
-            }
+            },
         },
     }
 

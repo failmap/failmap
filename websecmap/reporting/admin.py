@@ -82,7 +82,18 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.ScanPolicy)
 class ScanPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
-    list_display = ("summary", "scan_type", "conclusion", "explanation", "high", "medium", "low", "ok", "error_in_test", "annotation")
+    list_display = (
+        "summary",
+        "scan_type",
+        "conclusion",
+        "explanation",
+        "high",
+        "medium",
+        "low",
+        "ok",
+        "error_in_test",
+        "annotation",
+    )
 
     list_filter = ["scan_type", "high", "medium", "low", "ok", "error_in_test", "conclusion"]
 
