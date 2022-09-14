@@ -113,7 +113,7 @@ def parse_internetnl_nl_explanation_data(scan: EndpointGenericScan) -> Dict[str,
 def get_severity(scan: Union[EndpointGenericScan, UrlGenericScan]) -> Dict[str, Any]:
     scanner = SCAN_TYPES_TO_SCANNER.get(scan.type, {"name": "dummy"})
 
-    if scanner in ["internet_nl_mail", "internet_nl_web"]:
+    if scanner["name"] in ["internet_nl_mail", "internet_nl_web"]:
         calculation = internet_nl(scan)
     else:
         calculation = get_score_from_policy(scan)
