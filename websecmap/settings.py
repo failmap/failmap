@@ -1016,6 +1016,10 @@ CONSTANCE_CONFIG = {
     ),
     "CUSTOM_CSS": ("", "Keep things simple", str),
     "LOGO_IMAGE": ("", "SVG Application logo, aim for 50 pixels high.", str),
+    "RELEVANT_FOR_UI_HIGH": (True, "If HIGH should be shown in best/worst, statistics", bool),
+    "RELEVANT_FOR_UI_MEDIUM": (True, "If MEDIUM should be shown in best/worst, statistics", bool),
+    "RELEVANT_FOR_UI_LOW": (True, "If LOW should be shown in best/worst, statistics", bool),
+    "RELEVANT_FOR_UI_GOOD": (True, "If GOOD should be shown in best/worst, statistics", bool),
     # todo: add config for enabled languages...
 }
 
@@ -1164,7 +1168,8 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         ),
         (
             "App",
-            ("CUSTOM_CSS", "LOGO_IMAGE"),
+            ("CUSTOM_CSS", "LOGO_IMAGE", "RELEVANT_FOR_UI_HIGH",
+             "RELEVANT_FOR_UI_MEDIUM", "RELEVANT_FOR_UI_LOW", "RELEVANT_FOR_UI_GOOD"),
         ),
     ]
 )

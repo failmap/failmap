@@ -309,6 +309,12 @@ def config_content():
         "app": {
             "custom_css": configuration["CUSTOM_CSS"],
             "logo_image": configuration["LOGO_IMAGE"],
+            "relevant_for_ui": {
+                "high": configuration["RELEVANT_FOR_UI_HIGH"],
+                "medium": configuration["RELEVANT_FOR_UI_MEDIUM"],
+                "low": configuration["RELEVANT_FOR_UI_LOW"],
+                "good": configuration["RELEVANT_FOR_UI_GOOD"],
+            }
         },
     }
 
