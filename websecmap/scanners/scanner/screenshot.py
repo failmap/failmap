@@ -115,7 +115,8 @@ def compose_scan_task(urls):
         tasks += [
             make_screenshot.si(v6_service, endpoint.uri_url()) | save_screenshot.s(endpoint.id)
             for endpoint in endpoints
-            if endpoint.ip_version == 6
+            # For v6 you may also scan dns_a_aaaa to see if there is a site at the v6 address.
+            if endpoint.ip_version in [6, 0]
         ]
 
     return group(tasks)
