@@ -6,8 +6,9 @@ import re
 import subprocess
 import time
 from datetime import datetime
+from io import BytesIO
 from subprocess import CalledProcessError
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import pytz
 import requests
@@ -918,3 +919,58 @@ def osmtogeojson_available():
         return False
     except FileNotFoundError:
         return False
+
+
+def download_geojson_data(link: str) -> Dict[str, Any]:
+    """
+
+    Data returned:
+    {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": [
+              [
+                [
+                  [
+                    -63.0504802,
+                    18.0242265
+                  ],
+                  [
+                ....
+                  [
+                    -63.12331165,
+                    18.048913036
+                  ]
+                ]
+              ]
+            ]
+          },
+          "properties": {
+            "osm_id": -1231790,
+            "boundary": "administrative",
+            "admin_level": 3,
+            "parents": "-2323309",
+            "name": "Sint Maarten",
+            "local_name": "Sint Maarten",
+            "name_en": "Sint Maarten"
+          }
+        }
+      ]
+    }
+
+    """
+    # oh no! key leakage :)
+    log.debug("Downloading from %s", link)
+    try:
+        data = requests.get(link)
+        f = gzip.open(BytesIO(data.content), "r")
+        file_content = f.read()
+        file_content = file_content.decode("utf-8")
+        return json.loads(file_content)
+    except requests.RequestException as exc:
+        log.info("Could not download osm file, error returned: %s", exc)
+        return {"features": []}
