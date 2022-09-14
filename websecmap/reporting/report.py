@@ -598,8 +598,7 @@ def create_url_reports(url: Url) -> List[UrlReport]:
                         calculations.append(
                             {
                                 "type": endpoint_scan_type,
-                                "explanation": "Repeated finding. Probably because this url changed IP adresses or has "
-                                "multiple IP adresses (common for failover / load-balancing).",
+                                "explanation": "repeated_finding",
                                 "high": 0,
                                 "medium": 0,
                                 "low": 0,
