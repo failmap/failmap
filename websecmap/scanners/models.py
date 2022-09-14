@@ -93,7 +93,7 @@ class Endpoint(models.Model):
         if self.port:
             return f"{protocol}://{self.url.url}:{self.port}"
 
-        return f"{self.protocol}://{self.url.url}"
+        return f"{protocol}://{self.url.url}"
 
     # when testing for ipv4 or ipv6, an endpoint is mutually exclusive.
     def is_ipv4(self):
