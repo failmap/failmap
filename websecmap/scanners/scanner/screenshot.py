@@ -138,18 +138,19 @@ def make_screenshot(service: str, endpoint_url: str):
 def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[str, Union[str, bool, int]]:
     # https://2.python-requests.org/en/latest/user/quickstart/#binary-response-content
 
+    message = {
+        "url": url,
+        "options": {
+            "fullPage": False,
+            "type": "png",
+            # "clip": {"height": 720, "width": 1280, "x": 0, "y": 0},
+        },
+    }
+
+    log.debug("Sending message %s to %s", message, screenshot_service)
+
     try:
-        answer = requests.post(
-            screenshot_service,
-            json={
-                "url": url,
-                "options": {
-                    "fullPage": False,
-                    "type": "png",
-                    # "clip": {"height": 720, "width": 1280, "x": 0, "y": 0},
-                },
-            },
-        )
+        answer = requests.post(screenshot_service, json=message)
 
         # make a serializable dict as an answer
         return {
@@ -163,7 +164,7 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
         }
     except requests.RequestException as exc:
         return {
-            "screenshot": b"",
+            "screenshot": "",
             "status_code": 0,
             "success": False,
             "error_message": str(exc),
@@ -189,7 +190,6 @@ def create_dir_if_not_exists(directory: str):
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def save_screenshot(response: Dict[str, Union[str, bool, int]], endpoint_id: int):
-
     if not response["success"]:
         log.debug("Could not get screenshot on endpoint %s, returned %s ", endpoint_id, response)
         return False
