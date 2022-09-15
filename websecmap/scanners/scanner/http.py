@@ -28,7 +28,7 @@ import ipaddress
 import logging
 import random
 import socket
-from datetime import datetime
+from datetime import datetime, timedelta
 from ipaddress import AddressValueError
 from typing import Dict, List, Optional, Union
 
@@ -601,23 +601,38 @@ def has_internet_connection(host: str = "8.8.8.8", port: int = 53, connection_ti
 
 def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
     # prevent duplication
-    if not endpoint_exists(url_id, port, protocol, ip_version):
-        endpoint = Endpoint()
-        endpoint.url = Url.objects.all().filter(id=url_id).first()
-
-        endpoint.port = port
-        endpoint.protocol = protocol
-        endpoint.ip_version = ip_version
-
-        endpoint.is_dead = False
-        endpoint.discovered_on = datetime.now(pytz.utc)
-        # endpoint.dossier = "Found using the http scanner."  #
-        # no other place to put it:
-        endpoint.is_dead_reason = origin
-        endpoint.save()
-        log.info("Added endpoint added to database: %s", endpoint)
-    else:
+    if endpoint_exists(url_id, port, protocol, ip_version):
         log.debug("Endpoint based on parameters was already in database.")
+        return
+
+    # network outages and such might have killed the endpoint. It's unlikely that an endpoint
+    # is meant to be offline for a few days and then be up again. It _IS_ possible and there are
+    # use cases. Switching hosts for example. But everyone wants the least amount of downtime.
+    # Being unavailable for 30 days is a nice window.
+    similar = get_similar_dead_endpoint_in_last_n_days(url_id, port, protocol, ip_version, days=30)
+    if similar:
+        log.debug("Similar endpoint found that died in the last 30 days, reviving: %s", similar)
+        similar.is_dead = False
+        similar.is_dead_since = None
+        similar.is_dead_reason += "Revived."
+        similar.is_dead_reason = origin
+        similar.save()
+        return
+
+    endpoint = Endpoint()
+    endpoint.url = Url.objects.all().filter(id=url_id).first()
+
+    endpoint.port = port
+    endpoint.protocol = protocol
+    endpoint.ip_version = ip_version
+
+    endpoint.is_dead = False
+    endpoint.discovered_on = datetime.now(pytz.utc)
+    # endpoint.dossier = "Found using the http scanner."  #
+    # no other place to put it:
+    endpoint.is_dead_reason = origin
+    endpoint.save()
+    log.info("Added endpoint added to database: %s", endpoint)
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
@@ -651,6 +666,19 @@ def endpoint_exists(url_id: int, port: int, protocol: str, ip_version: int) -> i
         Endpoint.objects.all()
         .filter(url=url_id, port=port, ip_version=ip_version, protocol=protocol, is_dead=False)
         .count()
+    )
+
+
+def get_similar_dead_endpoint_in_last_n_days(
+    url_id: int, port: int, protocol: str, ip_version: int, days: int = 30
+) -> Endpoint:
+    days_ago = datetime.now() - timedelta(days=days)
+    return (
+        Endpoint.objects.all()
+        .filter(
+            url=url_id, port=port, ip_version=ip_version, protocol=protocol, is_dead=True, is_dead_since__gte=days_ago
+        )
+        .last()
     )
 
 
