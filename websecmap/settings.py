@@ -1373,6 +1373,17 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         ],
     },
     {
+        "label": _("Scanners"),
+        "items": [
+            {"name": "scanners.scanner", "label": "Scanners"},
+            {"name": "scanners.scantype", "label": "Scan Types"},
+            {"name": "scanners.scantypesecondopinionlink", "label": "Second Opinion Links"},
+            {"name": "scanners.scantypedocumentationlink", "label": "Documentation Links"},
+            {"name": "scanners.scantypecategory", "label": "Scan Type Categories"},
+            {"name": "scanners.scanneractivity", "label": "Scanner Activities"},
+        ],
+    },
+    {
         "label": _("🐒 API"),
         "items": [
             {"name": "api.sidnupload"},

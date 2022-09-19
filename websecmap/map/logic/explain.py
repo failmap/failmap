@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.reporting.severity import get_severity
-from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
+from websecmap.scanners.scanmetadata import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 
 

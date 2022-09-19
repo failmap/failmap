@@ -469,3 +469,40 @@ class PlannedScanStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ("at_when", "data")
     list_filter = ["at_when"][::-1]
     fields = ("at_when", "data")
+
+
+@admin.register(models.Scanner)
+class ScannerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("name", "description", "to")
+    save_as = True
+    ...
+
+
+@admin.register(models.ScanType)
+class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("name", "description")
+    save_as = True
+    list_per_page = 400
+    ...
+
+
+@admin.register(models.ScanTypeSecondOpinionLink)
+class ScanTypeSecondOpinionLinkAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("provider", "friendly_name", "url")
+    ...
+
+
+@admin.register(models.ScanTypeDocumentationLink)
+class ScanTypeScanTypeDocumentationLink(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("provider", "friendly_name", "url")
+    ...
+
+
+@admin.register(models.ScanTypeCategory)
+class ScanTypeCategoryAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.ScannerActivity)
+class ScannerActivityAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    ...

@@ -10,7 +10,7 @@ from django.utils.text import slugify
 from websecmap.map.logic.map_defaults import REMARK, get_country, get_organization_type
 from websecmap.map.models import MapDataCache
 from websecmap.reporting.diskreport import retrieve_report
-from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
+from websecmap.scanners.scanmetadata import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
 
 def get_reports_by_ids(ids: List[str]) -> Dict[str, Dict[Any, Any]]:

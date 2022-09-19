@@ -9,7 +9,6 @@ from websecmap.map.models import OrganizationReport
 def get_ticker_data(
     country: str = "NL", organization_type: str = "municipality", weeks_back: int = 0, weeks_duration: int = 0
 ):
-
     weeks_back = int(weeks_back)
     weeks_duration = int(weeks_duration)
 
@@ -36,7 +35,9 @@ def get_ticker_data(
             name,
             high,
             medium,
-            low
+            low,
+            ok,
+            at_when
         FROM
             map_organizationreport
         INNER JOIN
@@ -77,7 +78,9 @@ def get_ticker_data(
             name,
             high,
             medium,
-            low
+            low,
+            ok,
+            at_when
         FROM
                map_organizationreport
         INNER JOIN
@@ -123,9 +126,12 @@ def get_ticker_data(
 
         change = {
             "organization": newest_urlrating.name,
-            "high_now": newest_urlrating.high,
-            "medium_now": newest_urlrating.medium,
-            "low_now": newest_urlrating.low,
+            "now": {
+                "high": newest_urlrating.high,
+                "medium": newest_urlrating.medium,
+                "low": newest_urlrating.low,
+                "ok": newest_urlrating.ok,
+            },
         }
 
         try:
@@ -134,22 +140,69 @@ def get_ticker_data(
             matching_oldest = None
 
         if not matching_oldest:
-            change["high_then"] = "-"
-            change["medium_then"] = "-"
-            change["low_then"] = "-"
-            change["high_changes"] = newest_urlrating.high
-            change["medium_changes"] = newest_urlrating.medium
-            change["low_changes"] = newest_urlrating.low
+            score = {
+                "new": True,
+                "time_now": newest_urlrating.at_when,
+                "time_then": None,
+                "difference_in_days": None,
+                "then": {"high": 0, "medium": 0, "low": 0, "ok": 0},
+                "changes": {
+                    "high": newest_urlrating.high,
+                    "medium": newest_urlrating.medium,
+                    "low": newest_urlrating.low,
+                    "ok": newest_urlrating.ok,
+                },
+                "direction": {
+                    "high": "up" if newest_urlrating.high else "steady",
+                    "medium": "up" if newest_urlrating.medium else "steady",
+                    "low": "up" if newest_urlrating.low else "steady",
+                    "ok": "up" if newest_urlrating.ok else "steady",
+                },
+                "human_direction": {
+                    "high": "worse" if newest_urlrating.high else "steady",
+                    "medium": "worse" if newest_urlrating.medium else "steady",
+                    "low": "worse" if newest_urlrating.low else "steady",
+                    "ok": "better" if newest_urlrating.ok else "steady",
+                },
+            }
 
         else:
-            change["high_then"] = matching_oldest.high
-            change["medium_then"] = matching_oldest.medium
-            change["low_then"] = matching_oldest.low
-            change["high_changes"] = newest_urlrating.high - matching_oldest.high
-            change["medium_changes"] = newest_urlrating.medium - matching_oldest.medium
-            change["low_changes"] = newest_urlrating.low - matching_oldest.low
+            ch_high = newest_urlrating.high - matching_oldest.high
+            ch_mid = newest_urlrating.medium - matching_oldest.medium
+            ch_low = newest_urlrating.low - matching_oldest.low
+            ch_ok = newest_urlrating.ok - matching_oldest.ok
+            score = {
+                "new": False,
+                "time_now": newest_urlrating.at_when,
+                "time_then": matching_oldest.at_when,
+                "difference_in_days": (newest_urlrating.at_when - matching_oldest.at_when).days,
+                "then": {
+                    "high": matching_oldest.high,
+                    "medium": matching_oldest.medium,
+                    "low": matching_oldest.low,
+                    "ok": matching_oldest.ok,
+                },
+                "changes": {
+                    "high": ch_high,
+                    "medium": ch_mid,
+                    "low": ch_low,
+                    "ok": ch_ok,
+                },
+                "direction": {
+                    "high": "up" if ch_high else "steady" if ch_high == 0 else "down",
+                    "medium": "up" if ch_mid else "steady" if ch_mid == 0 else "down",
+                    "low": "up" if ch_low else "steady" if ch_low == 0 else "down",
+                    "ok": "up" if ch_ok else "steady" if ch_ok == 0 else "down",
+                },
+                "human_direction": {
+                    "high": "worse" if ch_high else "steady" if ch_high == 0 else "better",
+                    "medium": "worse" if ch_mid else "steady" if ch_mid == 0 else "better",
+                    "low": "worse" if ch_low else "steady" if ch_low == 0 else "better",
+                    "ok": "better" if ch_ok else "steady" if ch_ok == 0 else "worse",
+                },
+            }
 
-        changes.append(change)
+        changes.append({**change, **score})
 
     data = {"changes": changes, "slogan": config.TICKER_SLOGAN}
 

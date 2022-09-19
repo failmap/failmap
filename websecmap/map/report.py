@@ -27,7 +27,8 @@ from websecmap.reporting.report import (
     relevant_urls_at_timepoint,
     significant_moments,
 )
-from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES, init_dict
+from websecmap.scanners import init_dict
+from websecmap.scanners.scanmetadata import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.scanner.__init__ import q_configurations_to_report
 
 log = logging.getLogger(__package__)

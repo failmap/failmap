@@ -25,7 +25,7 @@ from websecmap.organizations.datasources import dutch_government, excel
 from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid import import_file
 from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url, GenericFileDataset
 from websecmap.reporting.models import UrlReport
-from websecmap.scanners import SCANNERS
+from websecmap.scanners.scanmetadata import SCANNERS
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, UrlIp
 
 

@@ -1,7 +1,7 @@
 import logging
 
 from websecmap.app.management.commands._private import VerifyTaskCommand
-from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
+from websecmap.scanners.scanmetadata import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 
 log = logging.getLogger(__name__)

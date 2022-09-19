@@ -56,7 +56,8 @@ from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
 from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
 from websecmap.map.models import Configuration, OrganizationReport
 from websecmap.organizations.models import Organization
-from websecmap.scanners import plannedscan, ALL_SCAN_TYPES
+from websecmap.scanners import plannedscan
+from websecmap.scanners.scanmetadata import ALL_SCAN_TYPES
 from websecmap.scanners.models import Screenshot
 
 log = logging.getLogger(__package__)

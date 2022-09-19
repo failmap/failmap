@@ -416,7 +416,7 @@ class Activity(models.IntegerChoices):
     scan = 3, "scan"  # pylint: disable=invalid-name
 
 
-class Scanner(models.IntegerChoices):
+class ScannerNames(models.IntegerChoices):
     # Map the scanners in __init__.py
     unknown = 0, "unknown"  # pylint: disable=invalid-name
     tls_qualys = 1, "tls_qualys"  # pylint: disable=invalid-name
@@ -469,8 +469,8 @@ class PlannedScan(models.Model):
     )
 
     scanner = models.PositiveSmallIntegerField(
-        choices=Scanner.choices,
-        default=Scanner.unknown,
+        choices=ScannerNames.choices,
+        default=ScannerNames.unknown,
         db_index=True,
     )
 
@@ -708,3 +708,85 @@ class TlsQualysScratchpad(models.Model):
     domain = models.CharField(max_length=255)
     at_when = models.DateTimeField(auto_now_add=True)
     data = models.TextField()
+
+
+class ScanTypeSecondOpinionLink(models.Model):
+    url = models.CharField(max_length=200, blank=True, null=True)
+    provider = models.CharField(max_length=200, blank=True, null=True)
+    friendly_name = models.CharField(max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.provider}"
+
+
+class ScanTypeDocumentationLink(models.Model):
+    url = models.CharField(max_length=200, blank=True, null=True)
+    provider = models.CharField(max_length=200, blank=True, null=True)
+    friendly_name = models.CharField(max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.provider}"
+
+
+class ScanTypeCategory(models.Model):
+    # used in the frontend. Things like:
+    # integrity, confidentiality, availability, email, website, dns,
+    name = models.CharField(max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class ScanSubject(models.IntegerChoices):
+    ENDPOINT = 0, "endpoint"
+    URL = 1, "url"
+
+
+class ScannerActivity(models.Model):
+    # discover, verify, scan
+    name = models.CharField(max_length=40, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class ScanType(models.Model):
+    name = models.CharField(max_length=200, blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    second_opinion_links = models.ManyToManyField(to=ScanTypeSecondOpinionLink)
+    documentation_links = models.ManyToManyField(to=ScanTypeDocumentationLink)
+    category = models.ManyToManyField(to=ScanTypeCategory)
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class Scanner(models.Model):
+    name = models.CharField(max_length=200, blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    to = models.PositiveSmallIntegerField(
+        choices=ScanSubject.choices,
+        default=ScanSubject.ENDPOINT,
+        db_index=True,
+    )
+    plannable_activities = models.ManyToManyField(to=ScannerActivity)
+
+    # currently limited to one scanner. This might become something else in the future
+    # usually the hierarchy should be stored externally, but the limit to one has served
+    # well for years.
+    needs_results_from = models.ForeignKey("self", blank=True, on_delete=models.CASCADE, default="", null=True)
+
+    # These are derivatives of the scantype
+    # can_discover_endpoints = models.BooleanField()
+    # can_verify_endpoints = models.BooleanField()
+    # can_scan_endpoints = models.BooleanField()
+    # can_discover_urls = models.BooleanField()
+    # can_verify_urls = models.BooleanField()
+    # can_scan_urls = models.BooleanField()
+    # creates_url_scan_types ...
+    # creates_endpoint_scan_types ...
+
+    creates_scan_types = models.ManyToManyField(to=ScanType, blank=True)
+
+    def __str__(self):
+        return f"{self.name}"

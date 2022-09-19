@@ -322,6 +322,7 @@ class ScanPolicy(AllIssuesCombined):
         db_index=True,
     )
     conclusion = models.CharField(
+        # the result that something gets from the scanner.
         max_length=128,
         default="",
     )

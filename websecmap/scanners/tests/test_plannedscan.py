@@ -11,7 +11,7 @@ from websecmap.scanners.models import (
     EndpointGenericScan,
     PlannedScan,
     PlannedScanStatistic,
-    Scanner,
+    ScannerNames,
     State,
 )
 from websecmap.scanners.plannedscan import (
@@ -90,7 +90,7 @@ def test_plannedscan(db):
     assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 2
     assert calculate_progress() == [
         {
-            "scanner": Scanner["tls_qualys"].value,
+            "scanner": ScannerNames["tls_qualys"].value,
             "activity": Activity["scan"].value,
             "state": State["requested"].value,
             "amount": 2,
@@ -102,7 +102,7 @@ def test_plannedscan(db):
     assert PlannedScan.objects.all().filter(state=State["picked_up"]).count() == 2
     assert calculate_progress() == [
         {
-            "scanner": Scanner["tls_qualys"].value,
+            "scanner": ScannerNames["tls_qualys"].value,
             "activity": Activity["scan"].value,
             "state": State["picked_up"].value,
             "amount": 2,
@@ -121,17 +121,17 @@ def test_plannedscan(db):
         {
             "activity": Activity["scan"].value,
             "amount": 0,
-            "scanner": Scanner["tls_qualys"].value,
+            "scanner": ScannerNames["tls_qualys"].value,
             "state": State["requested"].value,
         },
         {
             "activity": Activity["scan"].value,
             "amount": 0,
-            "scanner": Scanner["tls_qualys"].value,
+            "scanner": ScannerNames["tls_qualys"].value,
             "state": State["picked_up"].value,
         },
         {
-            "scanner": Scanner["tls_qualys"].value,
+            "scanner": ScannerNames["tls_qualys"].value,
             "activity": Activity["scan"].value,
             "state": State["finished"].value,
             "amount": 2,
@@ -170,7 +170,7 @@ def test_plan_scans(db):
         plan_scan()
         assert calculate_progress() == [
             {
-                "scanner": Scanner["tls_qualys"].value,
+                "scanner": ScannerNames["tls_qualys"].value,
                 "activity": Activity["scan"].value,
                 "state": State["requested"].value,
                 "amount": 2,
@@ -181,7 +181,7 @@ def test_plan_scans(db):
         plan_scan()
         assert calculate_progress() == [
             {
-                "scanner": Scanner["tls_qualys"].value,
+                "scanner": ScannerNames["tls_qualys"].value,
                 "activity": Activity["scan"].value,
                 "state": State["requested"].value,
                 "amount": 2,
@@ -218,7 +218,7 @@ def test_plan_scans(db):
         assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 1
         assert calculate_progress() == [
             {
-                "scanner": Scanner["tls_qualys"].value,
+                "scanner": ScannerNames["tls_qualys"].value,
                 "activity": Activity["scan"].value,
                 "state": State["requested"].value,
                 "amount": 1,
@@ -235,7 +235,7 @@ def test_plan_scans(db):
         assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 2
         assert calculate_progress() == [
             {
-                "scanner": Scanner["tls_qualys"].value,
+                "scanner": ScannerNames["tls_qualys"].value,
                 "activity": Activity["scan"].value,
                 "state": State["requested"].value,
                 "amount": 2,

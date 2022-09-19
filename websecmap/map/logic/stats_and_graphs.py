@@ -13,7 +13,7 @@ from websecmap.map.models import Configuration, HighLevelStatistic, Organization
 from websecmap.organizations.models import Organization
 from websecmap.reporting.models import ScanPolicy
 from websecmap.reporting.severity import get_severity
-from websecmap.scanners import URL_SCAN_TYPES
+from websecmap.scanners.scanmetadata import URL_SCAN_TYPES
 from websecmap.scanners.impact import get_impact
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 

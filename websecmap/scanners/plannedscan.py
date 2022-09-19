@@ -13,8 +13,8 @@ from websecmap.map.logic.map_health import get_outdated_ratings
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.report import PUBLISHED_SCAN_TYPES
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import SCAN_TYPES_TO_SCANNER, SCANNERS_BY_NAME
-from websecmap.scanners.models import Activity, Endpoint, PlannedScan, PlannedScanStatistic, Scanner, State
+from websecmap.scanners.scanmetadata import SCAN_TYPES_TO_SCANNER, SCANNERS_BY_NAME
+from websecmap.scanners.models import Activity, Endpoint, PlannedScan, PlannedScanStatistic, ScannerNames, State
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ def store_progress():
     # Also send it to statsd for nicer metrics:
     for row in progress:
         activity = Activity(row["activity"]).label
-        scanner = Scanner(row["scanner"]).label
+        scanner = ScannerNames(row["scanner"]).label
         state = State(row["state"]).label
 
         statsd.gauge("scan_progress", row["amount"], tags={"state": state, "scanner": scanner, "activity": activity})
@@ -71,7 +71,7 @@ def calculate_progress() -> List[Dict[str, int]]:
     for row in rows:
         overview.append({"scanner": row[0], "activity": row[1], "state": row[2], "amount": row[3]})
 
-    for scanner_id, _ in Scanner.choices:
+    for scanner_id, _ in ScannerNames.choices:
         # unknown is not used because it is not used
         if scanner_id == 0:
             continue
@@ -133,13 +133,15 @@ def retry():
     # todo: configure this in the future.
     # all times are in hours
     default_timeout = 4
-    retry_policy = [{"scanners": [Scanner.internet_nl_web.value, Scanner.internet_nl_mail.value], "hours": 48}]
+    retry_policy = [
+        {"scanners": [ScannerNames.internet_nl_web.value, ScannerNames.internet_nl_mail.value], "hours": 48}
+    ]
 
     # add a policy for all unmentioned scanners:
     mentioned_scanners = [policy["scanners"] for policy in retry_policy]
     # https://stackoverflow.com/questions/11264684/flatten-list-of-lists
     mentioned_scanners = [val for sublist in mentioned_scanners for val in sublist]
-    unmentioned_scanners = list(set(Scanner.values) - set(mentioned_scanners))
+    unmentioned_scanners = list(set(ScannerNames.values) - set(mentioned_scanners))
     retry_policy.append({"scanners": unmentioned_scanners, "hours": default_timeout})
 
     # apply the policy:
@@ -166,7 +168,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     # as long as they are handled faster.
     already_picked_up = (
         PlannedScan.objects.all()
-        .filter(activity=Activity[activity].value, scanner=Scanner[scanner].value, state=State["picked_up"].value)
+        .filter(activity=Activity[activity].value, scanner=ScannerNames[scanner].value, state=State["picked_up"].value)
         .count()
     )
 
@@ -185,7 +187,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     # whatever is requested should just be handled asap and the things that are requestes should just be empy
     # at the end of the day. So no .order_by("requested_at_when")
     scans = PlannedScan.objects.all().filter(
-        activity=Activity[activity].value, scanner=Scanner[scanner].value, state=State["requested"].value
+        activity=Activity[activity].value, scanner=ScannerNames[scanner].value, state=State["requested"].value
     )[0:amount]
 
     # cannot update once a slice has been taken
@@ -228,7 +230,7 @@ def request(activity: str, scanner: str, urls: List[int]):
 
         planned_scan = PlannedScan()
         planned_scan.activity = Activity[activity].value
-        planned_scan.scanner = Scanner[scanner].value
+        planned_scan.scanner = ScannerNames[scanner].value
         planned_scan.url = url
         planned_scan.state = State["requested"].value
         planned_scan.last_state_change_at = now
@@ -249,7 +251,7 @@ def already_requested(activity: str, scanner: str, url_id: int):
         PlannedScan.objects.all()
         .filter(
             activity=Activity[activity].value,
-            scanner=Scanner[scanner].value,
+            scanner=ScannerNames[scanner].value,
             url=url_id,
             state__in=[State["requested"].value, State["picked_up"].value],
         )
@@ -268,7 +270,7 @@ def set_scan_state(activity: str, scanner: str, url_id: int, state="finished"):
         PlannedScan.objects.all()
         .filter(
             activity=Activity[activity].value,
-            scanner=Scanner[scanner].value,
+            scanner=ScannerNames[scanner].value,
             url=url_id,
             state=State["picked_up"].value,
         )
@@ -356,7 +358,7 @@ def list_outdated(published_scan_types):
             scanner = SCAN_TYPES_TO_SCANNER[outdated_result["scan_type"]]
             plan.append(
                 {
-                    "scanner": Scanner[scanner["name"]].value,
+                    "scanner": ScannerNames[scanner["name"]].value,
                     "url": outdated_result["url"],
                     "activity": Activity["scan"].value,
                     "last_scan": outdated_result["last_scan"],
