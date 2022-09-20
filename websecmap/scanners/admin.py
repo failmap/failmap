@@ -5,6 +5,7 @@ from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 from jet.filters import RelatedFieldAjaxListFilter
 
+from websecmap.map.admin import ordering_actions
 from websecmap.scanners import models
 from websecmap.scanners.models import State
 from websecmap.scanners.proxy import check_proxy
@@ -473,6 +474,7 @@ class PlannedScanStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.Scanner)
 class ScannerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    help_text = "test"
     list_display = ("name", "description", "to")
     save_as = True
     ...
@@ -480,16 +482,50 @@ class ScannerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.ScanType)
 class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("name", "description")
+    list_display = ("display_order", "id", "name", "description")
     save_as = True
     list_per_page = 400
-    ...
+    actions = ordering_actions()
+
+    def save_model(self, request, obj, form, change):
+        # allows to place a new item at the right position, moving certain items up.
+        # if the display_order is zero, autoplace the item.
+
+        if obj.display_order:
+            super().save_model(request, obj, form, change)
+
+        else:
+            country_exists = (
+                models.ScanType.objects.all().filter(country=obj.country).order_by("-display_order").first()
+            )
+
+            if country_exists:
+                # if there is something form this country, place it where it belongs and move the rest +=1
+                new_number = country_exists.display_order + 1
+
+                moveup = models.ScanType.objects.all().filter(display_order__gte=new_number).order_by("-display_order")
+                for config in moveup:
+                    config.display_order += 1
+                    config.save()
+
+                obj.display_order = country_exists.display_order + 1
+                super().save_model(request, obj, form, change)
+
+            else:
+                # if there is nothing from this country, then add it at the end.
+                tmp = models.ScanType.objects.all().order_by("-display_order").first()
+
+                if tmp:
+                    obj.display_order = tmp.display_order + 1
+                else:
+                    obj.display_order = 1
+
+                super().save_model(request, obj, form, change)
 
 
 @admin.register(models.ScanTypeSecondOpinionLink)
 class ScanTypeSecondOpinionLinkAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ("provider", "friendly_name", "url")
-    ...
 
 
 @admin.register(models.ScanTypeDocumentationLink)

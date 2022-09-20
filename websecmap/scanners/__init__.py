@@ -25,6 +25,10 @@ DETAILS = {
 }
 
 """
+import json
+
+default_app_config = "websecmap.scanners.apps.ScannersConfig"
+
 
 SCANNERS = [
     {
@@ -529,11 +533,28 @@ SCANNERS = [
     },
 ]
 
-# todo: should we move the scanner definitions to different scanners and harvest them here?
+
+# this will be moved to __init__.py
+def read_scan_config_from_file():
+    # No try and except: just crash when things go south:
+    try:
+        with open("scanmetadata_bootstrap_cache_writable_by_application/constance_definitions.json", "rt") as handle:
+            data = handle.read()
+    except BaseException as exc:
+        print("Error opening scan metadata file in scanmetadata_bootstrap_cache/constance_definitions.json.")
+        raise Exception from exc
+
+    return json.loads(data)
+
+
+# todo: something is not right here..
+# SCANNERS = read_scan_config_from_file()
+# print(SCANNERS)
 
 # todo: we're missing a separate nsec scanner it seems, should be separated from DNS scans.
 # todo: add beta scanners, for which no permission checks are needed at all.
 # not as relevant as this behavior is included in generic DNS scanning
+
 
 AVAILABLE_SCANNERS = []
 ENDPOINT_SCAN_TYPES = []

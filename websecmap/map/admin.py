@@ -171,6 +171,84 @@ def add_configuration(country: str, organization_type: int):
     configuration.save()
 
 
+def ordering_actions():
+    actions = []
+
+    def reorder(self, request, queryset):
+
+        first_order = None
+
+        for configuration in queryset:
+
+            # set the first order, and keep counting from that.
+            if not first_order:
+                if not int(configuration.display_order):
+                    first_order = 0
+                    configuration.display_order = 0
+                else:
+                    first_order = configuration.display_order
+            else:
+                # second and more
+                first_order += 1
+                configuration.display_order = first_order
+
+            configuration.save()
+
+    reorder.short_description = "Reorder"
+    actions.append(reorder)
+
+    @transaction.atomic
+    def move_up(self, request, queryset):
+
+        for configuration in queryset:
+            next_config = (
+                models.Configuration.objects.all()
+                .order_by("-display_order")
+                .filter(display_order__lt=configuration.display_order)
+                .first()
+            )
+            if not next_config:
+                log.debug("No next one")
+                continue
+
+            log.debug("Moving up: %s to %s", configuration.display_order, next_config.display_order)
+            tmp = deepcopy(next_config.display_order)
+            next_config.display_order = configuration.display_order
+            configuration.display_order = tmp
+
+            next_config.save(update_fields=["display_order"])
+            configuration.save(update_fields=["display_order"])
+
+    move_up.short_description = "Move Up"
+    actions.append(move_up)
+
+    @transaction.atomic
+    def move_down(self, request, queryset):
+
+        for configuration in reversed(queryset):
+            previous_config = (
+                models.Configuration.objects.all()
+                .order_by("display_order")
+                .filter(display_order__gt=configuration.display_order)
+                .first()
+            )
+            if not previous_config:
+                log.debug("No previous one")
+                continue
+
+            log.debug("Moving down: %s to %s", configuration.display_order, previous_config.display_order)
+            tmp = deepcopy(previous_config.display_order)
+            previous_config.display_order = configuration.display_order
+            configuration.display_order = tmp
+
+            previous_config.save(update_fields=["display_order"])
+            configuration.save(update_fields=["display_order"])
+
+    move_down.short_description = "Move Down"
+    actions.append(move_down)
+    return actions
+
+
 @admin.register(models.Configuration)
 # ImportExportModelAdmin and SortableAdminMixin don't work together.
 # as sortableadmin contains a bug causing double ID's, we're prefering importexportmodeladmin. Makes ordering
@@ -341,78 +419,7 @@ class ConfigurationAdmin(
     remove_default.short_description = "😭  Remove default"
     actions.append(remove_default)
 
-    def reorder(self, request, queryset):
-
-        first_order = None
-
-        for configuration in queryset:
-
-            # set the first order, and keep counting from that.
-            if not first_order:
-                if not int(configuration.display_order):
-                    first_order = 0
-                    configuration.display_order = 0
-                else:
-                    first_order = configuration.display_order
-            else:
-                # second and more
-                first_order += 1
-                configuration.display_order = first_order
-
-            configuration.save()
-
-    reorder.short_description = "Reorder"
-    actions.append(reorder)
-
-    @transaction.atomic
-    def move_up(self, request, queryset):
-
-        for configuration in queryset:
-            next_config = (
-                models.Configuration.objects.all()
-                .order_by("-display_order")
-                .filter(display_order__lt=configuration.display_order)
-                .first()
-            )
-            if not next_config:
-                log.debug("No next one")
-                continue
-
-            log.debug("Moving up: %s to %s", configuration.display_order, next_config.display_order)
-            tmp = deepcopy(next_config.display_order)
-            next_config.display_order = configuration.display_order
-            configuration.display_order = tmp
-
-            next_config.save(update_fields=["display_order"])
-            configuration.save(update_fields=["display_order"])
-
-    move_up.short_description = "Move Up"
-    actions.append(move_up)
-
-    @transaction.atomic
-    def move_down(self, request, queryset):
-
-        for configuration in reversed(queryset):
-            previous_config = (
-                models.Configuration.objects.all()
-                .order_by("display_order")
-                .filter(display_order__gt=configuration.display_order)
-                .first()
-            )
-            if not previous_config:
-                log.debug("No previous one")
-                continue
-
-            log.debug("Moving down: %s to %s", configuration.display_order, previous_config.display_order)
-            tmp = deepcopy(previous_config.display_order)
-            previous_config.display_order = configuration.display_order
-            configuration.display_order = tmp
-
-            previous_config.save(update_fields=["display_order"])
-            configuration.save(update_fields=["display_order"])
-
-    move_down.short_description = "Move Down"
-    actions.append(move_down)
+    actions += ordering_actions()
 
 
 @admin.register(models.MapHealthReport)

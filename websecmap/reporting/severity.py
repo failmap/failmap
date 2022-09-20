@@ -13,7 +13,7 @@ import pytz
 
 from websecmap.reporting.models import ScanPolicy
 from websecmap.reporting.policy import conclusion_to_score
-from websecmap.scanners.scanmetadata import SCAN_TYPES_TO_SCANNER
+from websecmap.scanners import SCAN_TYPES_TO_SCANNER
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 
 log = logging.getLogger(__package__)

@@ -2,4 +2,7 @@ from django.apps import AppConfig
 
 
 class ScannersConfig(AppConfig):
-    name = "scanners"
+    name = "websecmap.scanners"
+
+    def ready(self):
+        import websecmap.scanners.signals  # noqa

@@ -5,6 +5,7 @@ from websecmap.scanners import SCANNERS, ALL_SCAN_TYPES
 # you can for example at startup check the file and the startup again after everything is loaded?
 # And then give a warning you need to reload the thing when changing this. And include a standard file...
 
+
 def add_scanner_fields(constance_config):
     """
     Add a series of configuration options depending on the scanners in websecmap.

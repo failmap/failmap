@@ -1,4 +1,19 @@
-from websecmap.scanners.scanmetadata import get_scanners_for_backend, get_scanners_for_frontend
+from websecmap.scanners import read_scan_config_from_file
+from websecmap.scanners.scanmetadata import (
+    get_scanners_for_backend,
+    get_scanners_for_frontend,
+    dump_scan_config_to_file,
+)
+
+import os
+
+
+def test_dump_to_file(db, default_scan_metadata, tmpdir):
+    # This makes the default policy also the one read by default.
+    os.makedirs("scanmetadata_bootstrap_cache_writable_by_application", exist_ok=True)
+    dump_scan_config_to_file()
+    data = read_scan_config_from_file()
+    assert data == get_scanners_for_backend()
 
 
 def test_get_scanners_for_backend(db, default_scan_metadata):

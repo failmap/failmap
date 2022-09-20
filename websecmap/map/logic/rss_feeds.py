@@ -10,7 +10,7 @@ from django.utils.translation import ugettext as _
 from websecmap.map.logic.map_defaults import REMARK
 from websecmap.organizations.models import Organization
 from websecmap.reporting.severity import get_severity
-from websecmap.scanners.scanmetadata import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
+from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 
 

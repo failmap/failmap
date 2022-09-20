@@ -1,17 +1,30 @@
+import json
+from collections import defaultdict
+from typing import Dict, Any, List
+
+from websecmap.app import log
+from websecmap.app.constance import get_all_values
 from websecmap.reporting.models import ScanPolicy
 from websecmap.scanners.models import Scanner, ScanSubject, ScanType
 
 
 def dump_scan_config_to_file():
+    # Todo: when to run this? After a signal a setting has changed? Probably.
     # This is performed every time this app has started. It will overwrite the shipped scanner settings.
     # This solves a chicken and egg problem of 'what fields are available' before it's possible to access
     # the database.
-    ...
-
-
-# this will be moved to __init__.py
-def read_scan_config_from_file():
-    ...
+    data = get_scanners_for_backend()
+    try:
+        with open("scanmetadata_bootstrap_cache_writable_by_application/constance_definitions.json", "wt") as handle:
+            handle.write(json.dumps(data))
+    except PermissionError:
+        log.error(
+            "Permission error: Cannot write scan metadata to "
+            "scanmetadata_bootstrap_cache/constance_definitions.json "
+            "Make sure this file is writable unless you're not planning to change scanners"
+        )
+    # Continue operating.
+    return
 
 
 def get_scanners_for_backend():
@@ -60,6 +73,45 @@ def get_scanners_for_backend():
     return results
 
 
+def allowed_to_show(settings: Any, scan_type_name: str):
+    # settings is a CaseInsensitiveDict
+    setting_name = f"SHOW_{scan_type_name}"
+    if setting_name not in settings:
+        return False
+
+    return settings[setting_name]
+
+
+def scan_type_policy_to_text(policy: ScanPolicy) -> List[str]:
+    texts = []
+
+    if policy.high:
+        texts.append("high")
+    if policy.medium:
+        texts.append("medium")
+    if policy.low:
+        texts.append("low")
+    if policy.ok:
+        texts.append("ok")
+
+    return texts
+
+
+def get_impacts_per_scan_type() -> Dict[str, List[str]]:
+    # to speed up stuff....
+    policies = defaultdict(list)
+
+    for policy in ScanPolicy.objects.all():
+        policies[policy.scan_type] += scan_type_policy_to_text(policy)
+
+    # remove redundant items
+    new_policies = {}
+    for policyx in policies:
+        new_policies[policyx] = list(sorted(list(set(policies[policyx]))))
+
+    return dict(new_policies)
+
+
 def get_scanners_for_frontend():
     # frontend scanners have details about documentation and stuff...
     # this is issue focussed, example:
@@ -82,63 +134,32 @@ def get_scanners_for_frontend():
     #         category: ['dns', 'confidentiality', 'integrity']
     #       },
 
-    # todo: get constance settings for what is shown in the frontend.
+    all_settings = get_all_values()
+    # we'rel looking for SHOW_ISSUE_NAME_IN_CAPS
 
-    results = []
-    for scan_type in ScanType.objects.all():
+    # todo: ordering is relevant to the frontend. Make sure to add an order to the scan types.
+
+    possible_relevant_impacts = get_impacts_per_scan_type()
+
+    results = {}
+    scantypes = ScanType.objects.all()
+    for scan_type in scantypes:
         # the relevant impacts are not directly coupled to the scanners yet, this might give some small management
         # issues. For now it's fine. A future version can solve this.
         # you need all of them...
-        possible_relevant_impacts = (
-            ScanPolicy.objects.all()
-            .filter(scan_type=scan_type.name)
-            .values_list("high", "medium", "low", "ok", named=True)
-        )
-        all_impacts = []
-        for rel in possible_relevant_impacts:
-            if rel.high:
-                all_impacts.append("high")
-            if rel.medium:
-                all_impacts.append("medium")
-            if rel.low:
-                all_impacts.append("low")
-            if rel.ok:
-                all_impacts.append("ok")
+
+        if not allowed_to_show(all_settings, scan_type.name):
+            continue
 
         data = {
             "name": scan_type.name,
             "id": scan_type.id,
             "category": sorted(list(scan_type.category.all().values_list("name", flat=True))),
-            "relevant impacts": sorted(list(set(all_impacts))),
+            "relevant impacts": possible_relevant_impacts[scan_type.name],
             "documentation links": list(scan_type.documentation_links.all().values("url", "friendly_name")),
             "second opinion links": list(scan_type.second_opinion_links.all().values("url", "friendly_name")),
         }
 
-        results.append(data)
+        results[scan_type.name] = data
 
     return results
-
-
-SCANNERS = get_scanners_for_backend()
-AVAILABLE_SCANNERS = []
-ENDPOINT_SCAN_TYPES = []
-URL_SCAN_TYPES = []
-for scanner in SCANNERS:
-    AVAILABLE_SCANNERS += scanner["name"]
-    ENDPOINT_SCAN_TYPES = list(set(ENDPOINT_SCAN_TYPES + scanner["creates endpoint scan types"]))
-    URL_SCAN_TYPES = list(set(URL_SCAN_TYPES + scanner["creates url scan types"]))
-
-ALL_SCAN_TYPES = URL_SCAN_TYPES + ENDPOINT_SCAN_TYPES
-
-# convert endpoint scan types to scanners, so we know what endpoint scan type belongs to what scanner
-SCAN_TYPES_TO_SCANNER = {}
-for scanner in SCANNERS:
-    for scan_type in scanner["creates endpoint scan types"]:
-        SCAN_TYPES_TO_SCANNER[scan_type] = scanner
-
-    for scan_type in scanner["creates url scan types"]:
-        SCAN_TYPES_TO_SCANNER[scan_type] = scanner
-
-SCANNERS_BY_NAME = {}
-for scanner in SCANNERS:
-    SCANNERS_BY_NAME[scanner["name"]] = scanner

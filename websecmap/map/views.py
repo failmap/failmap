@@ -57,8 +57,9 @@ from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
 from websecmap.map.models import Configuration, OrganizationReport
 from websecmap.organizations.models import Organization
 from websecmap.scanners import plannedscan
-from websecmap.scanners.scanmetadata import ALL_SCAN_TYPES
+from websecmap.scanners import ALL_SCAN_TYPES
 from websecmap.scanners.models import Screenshot
+from websecmap.scanners.scanmetadata import get_scanners_for_frontend
 
 log = logging.getLogger(__package__)
 
@@ -219,6 +220,7 @@ def countries_and_layers():
 def config_content():
     # This is converted to some hierarchy to make more sense, and to _not_ export things like keys
     configuration = get_all_values()
+    scan_types = get_scanners_for_frontend()
     base_config = {
         "show": {
             "intro": configuration["SHOW_INTRO"],
@@ -319,6 +321,7 @@ def config_content():
                 "good": configuration["RELEVANT_FOR_UI_GOOD"],
             },
         },
+        "scan_types": scan_types,
     }
 
     for scan_type in sorted(ALL_SCAN_TYPES):

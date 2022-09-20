@@ -756,6 +756,14 @@ class ScanType(models.Model):
     second_opinion_links = models.ManyToManyField(to=ScanTypeSecondOpinionLink)
     documentation_links = models.ManyToManyField(to=ScanTypeDocumentationLink)
     category = models.ManyToManyField(to=ScanTypeCategory)
+    display_order = models.PositiveIntegerField(
+        _("order"),
+        default=0,
+        blank=False,
+        null=False,
+        help_text="Setting this to 0 will automatically set the country at a guessed position. For example: near the"
+        "same country or at the end of the list.",
+    )
 
     def __str__(self):
         return f"{self.name}"

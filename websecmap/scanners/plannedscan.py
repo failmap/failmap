@@ -13,7 +13,7 @@ from websecmap.map.logic.map_health import get_outdated_ratings
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.report import PUBLISHED_SCAN_TYPES
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.scanmetadata import SCAN_TYPES_TO_SCANNER, SCANNERS_BY_NAME
+from websecmap.scanners import SCAN_TYPES_TO_SCANNER, SCANNERS_BY_NAME
 from websecmap.scanners.models import Activity, Endpoint, PlannedScan, PlannedScanStatistic, ScannerNames, State
 
 log = logging.getLogger(__name__)
