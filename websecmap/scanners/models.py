@@ -424,6 +424,7 @@ class State(models.IntegerChoices):
     error = 4, "error"  # pylint: disable=invalid-name
     timeout = 5, "timeout"  # pylint: disable=invalid-name
 
+
 # https://docs.djangoproject.com/en/dev/topics/db/models/#id6
 class GenericScanMixin(ExplainMixin, LatestScanMixin):
     """
@@ -692,9 +693,13 @@ class Scanner(models.Model):
 
     # a scanner in the python code does NOT know what id it has. We can force id's, but then use names instead so its
     # easier to understand. Somewhere a translation needs to be made.
-    python_name = models.CharField(max_length=200, blank=True, null=True,
-                                   help_text="The name as used in the python code. This is fragile so only change"
-                                             " this when you know what you are doing.")
+    python_name = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text="The name as used in the python code. This is fragile so only change"
+        " this when you know what you are doing.",
+    )
     description = models.CharField(max_length=255, blank=True, null=True)
     to = models.PositiveSmallIntegerField(
         choices=ScanSubject.choices,
@@ -707,8 +712,9 @@ class Scanner(models.Model):
     # usually the hierarchy should be stored externally, but the limit to one has served
     # well for years.
     # Removed db constraint in order to easily import data.
-    needs_results_from = models.ForeignKey("self", blank=True, on_delete=models.CASCADE, default="", null=True,
-                                           db_constraint=False)
+    needs_results_from = models.ForeignKey(
+        "self", blank=True, on_delete=models.CASCADE, default="", null=True, db_constraint=False
+    )
 
     # These are derivatives of the scantype
     # can_discover_endpoints = models.BooleanField()
@@ -769,4 +775,3 @@ class PlannedScanError(models.Model):
     planned_scan = models.ForeignKey(PlannedScan, on_delete=models.CASCADE)
 
     debug_information = models.CharField(max_length=512)
-

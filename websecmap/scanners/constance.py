@@ -1,4 +1,4 @@
-from websecmap.scanners import SCANNERS, ALL_SCAN_TYPES
+from websecmap.scanners import SCANNERS
 
 
 # todo: read this from a dumped file or so instead of accessing the database.
@@ -17,7 +17,7 @@ def add_scanner_fields(constance_config):
     """
     # Add rate limiting per scanner and activity:
     for scanner in SCANNERS:
-        python_name = scanner['python_name']
+        python_name = scanner["python_name"]
         for plannable_activity in scanner["plannable_activities"]:
             variable_name = f"RATE_LIMIT_{python_name.upper()}_{plannable_activity.upper()}"
             constance_config[variable_name] = (
@@ -28,7 +28,7 @@ def add_scanner_fields(constance_config):
 
     # Generate Scanner Settings:
     for scanner in SCANNERS:
-        python_name = scanner['python_name'].upper()
+        python_name = scanner["python_name"].upper()
 
         scan_types = scanner["creates_endpoint_scan_types"] + scanner["creates_url_scan_types"]
 

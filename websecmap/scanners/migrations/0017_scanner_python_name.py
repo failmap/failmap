@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0016_auto_20220921_0959'),
+        ("scanners", "0016_auto_20220921_0959"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='scanner',
-            name='python_name',
-            field=models.CharField(blank=True, help_text='The name as used in the python code. This is fragile so only change this when you know what you are doing.', max_length=200, null=True),
+            model_name="scanner",
+            name="python_name",
+            field=models.CharField(
+                blank=True,
+                help_text="The name as used in the python code. This is fragile so only change this when you know what you are doing.",
+                max_length=200,
+                null=True,
+            ),
         ),
     ]

@@ -7,21 +7,21 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0015_scantype_display_order'),
+        ("scanners", "0015_scantype_display_order"),
     ]
 
     operations = [
         migrations.RemoveIndex(
-            model_name='plannedscan',
-            name='scanners_pl_scanner_b2f5af_idx',
+            model_name="plannedscan",
+            name="scanners_pl_scanner_b2f5af_idx",
         ),
         migrations.AlterField(
-            model_name='plannedscan',
-            name='scanner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='scanners.scanner'),
+            model_name="plannedscan",
+            name="scanner",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="scanners.scanner"),
         ),
         migrations.AddIndex(
-            model_name='plannedscan',
-            index=models.Index(fields=['scanner', 'activity', 'state'], name='scanners_pl_scanner_f3f83b_idx'),
+            model_name="plannedscan",
+            index=models.Index(fields=["scanner", "activity", "state"], name="scanners_pl_scanner_f3f83b_idx"),
         ),
     ]

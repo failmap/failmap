@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Tuple
 
 import dateutil.parser
 import pytz
@@ -14,8 +14,7 @@ from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.report import PUBLISHED_SCAN_TYPES
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import SCAN_TYPES_TO_SCANNER, SCANNERS_BY_ID, SCANNERS_BY_PYTHON_NAME
-from websecmap.scanners.models import Activity, Endpoint, PlannedScan, PlannedScanStatistic, State, \
-    Scanner
+from websecmap.scanners.models import Activity, Endpoint, PlannedScan, PlannedScanStatistic, State, Scanner
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +33,7 @@ def store_progress():
     # Also send it to statsd for nicer metrics:
     for row in progress:
         activity = Activity(row["activity"]).label
-        scanner = SCANNERS_BY_ID.get(row["scanner"], {'name': 'unknown'})['name']
+        scanner = SCANNERS_BY_ID.get(row["scanner"], {"name": "unknown"})["name"]
         state = State(row["state"]).label
 
         statsd.gauge("scan_progress", row["amount"], tags={"state": state, "scanner": scanner, "activity": activity})
@@ -130,12 +129,17 @@ def retry():
     """
 
     internetnl_scanner_ids = list(
-        Scanner.objects.all().filter(python_name__in=['internet_nl_web', 'internet_nl_mail']).values_list('id',
-                                                                                                           Flat=True))
-    other_scanner_ids = list(Scanner.objects.all().exclude(python_name__in=['internet_nl_web', 'internet_nl_mail']).values_list('id', Flat=True))
+        Scanner.objects.all()
+        .filter(python_name__in=["internet_nl_web", "internet_nl_mail"])
+        .values_list("id", Flat=True)
+    )
+    other_scanner_ids = list(
+        Scanner.objects.all()
+        .exclude(python_name__in=["internet_nl_web", "internet_nl_mail"])
+        .values_list("id", Flat=True)
+    )
 
-    retry_policy = [{"scanners": internetnl_scanner_ids, "hours": 48},
-                    {"scanners": other_scanner_ids, "hours": 4}]
+    retry_policy = [{"scanners": internetnl_scanner_ids, "hours": 48}, {"scanners": other_scanner_ids, "hours": 4}]
 
     # apply the policy:
     for policy in retry_policy:
@@ -166,7 +170,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     # as long as they are handled faster.
     already_picked_up = (
         PlannedScan.objects.all()
-        .filter(activity=Activity[activity].value, scanner=python_scanner['id'], state=State["picked_up"].value)
+        .filter(activity=Activity[activity].value, scanner=python_scanner["id"], state=State["picked_up"].value)
         .count()
     )
 
@@ -185,7 +189,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     # whatever is requested should just be handled asap and the things that are requestes should just be empy
     # at the end of the day. So no .order_by("requested_at_when")
     scans = PlannedScan.objects.all().filter(
-        activity=Activity[activity].value, scanner=python_scanner['id'], state=State["requested"].value
+        activity=Activity[activity].value, scanner=python_scanner["id"], state=State["requested"].value
     )[0:amount]
 
     # cannot update once a slice has been taken
@@ -364,7 +368,7 @@ def list_outdated(published_scan_types):
             scanner = SCAN_TYPES_TO_SCANNER[outdated_result["scan_type"]]
             plan.append(
                 {
-                    "scanner": scanner['id'],
+                    "scanner": scanner["id"],
                     "url": outdated_result["url"],
                     "activity": Activity["scan"].value,
                     "last_scan": outdated_result["last_scan"],
@@ -425,7 +429,7 @@ def plan_outdated_scans(published_scan_types):
             scanner = SCAN_TYPES_TO_SCANNER[outdated_result["scan_type"]]
             plan.append(
                 {
-                    "scanner": scanner['id'],
+                    "scanner": scanner["id"],
                     "url": outdated_result["url"],
                     "activity": "scan",
                 }

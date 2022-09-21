@@ -26,7 +26,7 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 # use same result backend as we use for broker url
 # If broker_url is None, you  might not have started websecmap correctly. See docs/source/conf.py for a correct example.
 if not app.conf.broker_url:
-    log.error('Application was not started correctly, app.conf not available.')
+    log.error("Application was not started correctly, app.conf not available.")
 else:
     app.conf.result_backend = app.conf.broker_url.replace("amqp://", "rpc://")
 

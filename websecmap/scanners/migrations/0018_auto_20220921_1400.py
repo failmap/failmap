@@ -7,13 +7,20 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scanners', '0017_scanner_python_name'),
+        ("scanners", "0017_scanner_python_name"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='scanner',
-            name='needs_results_from',
-            field=models.ForeignKey(blank=True, db_constraint=False, default='', null=True, on_delete=django.db.models.deletion.CASCADE, to='scanners.scanner'),
+            model_name="scanner",
+            name="needs_results_from",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                default="",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="scanners.scanner",
+            ),
         ),
     ]

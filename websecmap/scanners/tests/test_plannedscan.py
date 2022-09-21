@@ -12,7 +12,8 @@ from websecmap.scanners.models import (
     EndpointGenericScan,
     PlannedScan,
     PlannedScanStatistic,
-    State, Scanner,
+    State,
+    Scanner,
 )
 from websecmap.scanners.plannedscan import (
     calculate_progress,

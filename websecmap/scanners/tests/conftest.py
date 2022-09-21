@@ -24,5 +24,3 @@ def faaloniae():
         "url": url,
         "endpoint": endpoint,
     }
-
-
