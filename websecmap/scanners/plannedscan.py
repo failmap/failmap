@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 
 import dateutil.parser
 import pytz
@@ -13,8 +13,9 @@ from websecmap.map.logic.map_health import get_outdated_ratings
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.report import PUBLISHED_SCAN_TYPES
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import SCAN_TYPES_TO_SCANNER, SCANNERS_BY_NAME
-from websecmap.scanners.models import Activity, Endpoint, PlannedScan, PlannedScanStatistic, ScannerNames, State
+from websecmap.scanners import SCAN_TYPES_TO_SCANNER, SCANNERS_BY_ID, SCANNERS_BY_PYTHON_NAME
+from websecmap.scanners.models import Activity, Endpoint, PlannedScan, PlannedScanStatistic, State, \
+    Scanner
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ def store_progress():
     # Also send it to statsd for nicer metrics:
     for row in progress:
         activity = Activity(row["activity"]).label
-        scanner = ScannerNames(row["scanner"]).label
+        scanner = SCANNERS_BY_ID.get(row["scanner"], {'name': 'unknown'})['name']
         state = State(row["state"]).label
 
         statsd.gauge("scan_progress", row["amount"], tags={"state": state, "scanner": scanner, "activity": activity})
@@ -55,11 +56,11 @@ def calculate_progress() -> List[Dict[str, int]]:
     # i'm _DONE_ with the obscuring of group_by and counts using terrible abstractions.
     # so here is a raw query that just works on all databases and is trivially simple to understand.
     sql = """SELECT
-                scanner, activity, state, count(id) as amount
+                scanner_id, activity, state, count(id) as amount
             FROM
                 scanners_plannedscan
             GROUP BY
-                scanner, activity, state
+                scanner_id, activity, state
             """
 
     cursor = connection.cursor()
@@ -67,14 +68,12 @@ def calculate_progress() -> List[Dict[str, int]]:
     rows = cursor.fetchall()
 
     # when there are 0 records, there is of course no row created. But there might have been in the past.
-    overview = []
+    overview: List[Dict[str, int]] = []
     for row in rows:
         overview.append({"scanner": row[0], "activity": row[1], "state": row[2], "amount": row[3]})
 
-    for scanner_id, _ in ScannerNames.choices:
-        # unknown is not used because it is not used
-        if scanner_id == 0:
-            continue
+    for scanner in Scanner.objects.all():
+        scanner_id = scanner.id
 
         if scanner_has_finished_tasks(scanner_id, overview):
             # scan, discover and verify, not all scanners will perform all three.
@@ -130,19 +129,13 @@ def retry():
     but after days!
     """
 
-    # todo: configure this in the future.
-    # all times are in hours
-    default_timeout = 4
-    retry_policy = [
-        {"scanners": [ScannerNames.internet_nl_web.value, ScannerNames.internet_nl_mail.value], "hours": 48}
-    ]
+    internetnl_scanner_ids = list(
+        Scanner.objects.all().filter(python_name__in=['internet_nl_web', 'internet_nl_mail']).values_list('id',
+                                                                                                           Flat=True))
+    other_scanner_ids = list(Scanner.objects.all().exclude(python_name__in=['internet_nl_web', 'internet_nl_mail']).values_list('id', Flat=True))
 
-    # add a policy for all unmentioned scanners:
-    mentioned_scanners = [policy["scanners"] for policy in retry_policy]
-    # https://stackoverflow.com/questions/11264684/flatten-list-of-lists
-    mentioned_scanners = [val for sublist in mentioned_scanners for val in sublist]
-    unmentioned_scanners = list(set(ScannerNames.values) - set(mentioned_scanners))
-    retry_policy.append({"scanners": unmentioned_scanners, "hours": default_timeout})
+    retry_policy = [{"scanners": internetnl_scanner_ids, "hours": 48},
+                    {"scanners": other_scanner_ids, "hours": 4}]
 
     # apply the policy:
     for policy in retry_policy:
@@ -163,12 +156,17 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     amount: the amount of plannedscans to pick up
     """
 
+    python_scanner = SCANNERS_BY_PYTHON_NAME.get(scanner, None)
+    if not python_scanner:
+        log.error(f"Scan requested for {scanner}, but no such scanner registered in metadata database. Not picked up.")
+        return []
+
     # Do not pickup more if there are already 500 items picked up. Having more than 500 items picked up means
     # a throughput error. If you want to go faster you can always increase the frequency of things being picked up
     # as long as they are handled faster.
     already_picked_up = (
         PlannedScan.objects.all()
-        .filter(activity=Activity[activity].value, scanner=ScannerNames[scanner].value, state=State["picked_up"].value)
+        .filter(activity=Activity[activity].value, scanner=python_scanner['id'], state=State["picked_up"].value)
         .count()
     )
 
@@ -187,7 +185,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     # whatever is requested should just be handled asap and the things that are requestes should just be empy
     # at the end of the day. So no .order_by("requested_at_when")
     scans = PlannedScan.objects.all().filter(
-        activity=Activity[activity].value, scanner=ScannerNames[scanner].value, state=State["requested"].value
+        activity=Activity[activity].value, scanner=python_scanner['id'], state=State["requested"].value
     )[0:amount]
 
     # cannot update once a slice has been taken
@@ -219,9 +217,13 @@ def request(activity: str, scanner: str, urls: List[int]):
     # should it be deduplicated? i mean: if there already is a specific planned scan, it doesn't
     # need to be created again: that would just be more work. Think so, otherwise the finish and start will
     # mix for different scans. So we can't do bulk inserts, but we can do better state logging
+    python_scanner = SCANNERS_BY_PYTHON_NAME.get(scanner, None)
+    if not python_scanner:
+        log.error(f"Scan requested for {scanner}, but no such scanner registered in metadata database. Not requested.")
+        return
 
     for url in urls:
-        if already_requested(activity, scanner, url):
+        if already_requested(activity, python_scanner["id"], url):
             statsd.incr("scan_planned", tags={"state": "duplicate_request", "scanner": scanner, "activity": activity})
             log.debug("Already registered: %s on %s for %s.", activity, scanner, url)
             continue
@@ -230,7 +232,7 @@ def request(activity: str, scanner: str, urls: List[int]):
 
         planned_scan = PlannedScan()
         planned_scan.activity = Activity[activity].value
-        planned_scan.scanner = ScannerNames[scanner].value
+        planned_scan.scanner = python_scanner["id"]
         planned_scan.url = url
         planned_scan.state = State["requested"].value
         planned_scan.last_state_change_at = now
@@ -246,12 +248,12 @@ def request(activity: str, scanner: str, urls: List[int]):
     log.debug("Requested %s with %s on %s urls.", activity, scanner, len(urls))
 
 
-def already_requested(activity: str, scanner: str, url_id: int):
+def already_requested(activity: str, scanner: int, url_id: int):
     return (
         PlannedScan.objects.all()
         .filter(
             activity=Activity[activity].value,
-            scanner=ScannerNames[scanner].value,
+            scanner=scanner,
             url=url_id,
             state__in=[State["requested"].value, State["picked_up"].value],
         )
@@ -261,16 +263,20 @@ def already_requested(activity: str, scanner: str, url_id: int):
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def finish(activity: str, scanner: str, url_id: int):
-    set_scan_state(activity, scanner, url_id, "finished")
+    scanner = SCANNERS_BY_PYTHON_NAME.get(scanner, None)
+    if not scanner:
+        log.debug(f"Scanner {scanner} was not found, ignoring.")
+
+    set_scan_state(activity, scanner.id, url_id, "finished")
     statsd.incr("scan_planned", tags={"state": "finished", "scanner": scanner, "activity": activity})
 
 
-def set_scan_state(activity: str, scanner: str, url_id: int, state="finished"):
+def set_scan_state(activity: str, scanner_id: int, url_id: int, state="finished"):
     oldest_scan = (
         PlannedScan.objects.all()
         .filter(
             activity=Activity[activity].value,
-            scanner=ScannerNames[scanner].value,
+            scanner=scanner_id,
             url=url_id,
             state=State["picked_up"].value,
         )
@@ -282,7 +288,7 @@ def set_scan_state(activity: str, scanner: str, url_id: int, state="finished"):
         oldest_scan.finished_at_when = datetime.now(pytz.utc)
         oldest_scan.save()
 
-        log.debug("Altered planned scan state for %s. Changing it to %s with %s.", url_id, activity, scanner)
+        log.debug("Altered planned scan state for %s. Changing it to %s with %s.", url_id, activity, scanner_id)
     else:
         log.debug("No planned scan found for %s. Ignored.", url_id)
 
@@ -358,7 +364,7 @@ def list_outdated(published_scan_types):
             scanner = SCAN_TYPES_TO_SCANNER[outdated_result["scan_type"]]
             plan.append(
                 {
-                    "scanner": ScannerNames[scanner["name"]].value,
+                    "scanner": scanner['id'],
                     "url": outdated_result["url"],
                     "activity": Activity["scan"].value,
                     "last_scan": outdated_result["last_scan"],
@@ -419,7 +425,7 @@ def plan_outdated_scans(published_scan_types):
             scanner = SCAN_TYPES_TO_SCANNER[outdated_result["scan_type"]]
             plan.append(
                 {
-                    "scanner": scanner["name"],
+                    "scanner": scanner['id'],
                     "url": outdated_result["url"],
                     "activity": "scan",
                 }
@@ -427,20 +433,20 @@ def plan_outdated_scans(published_scan_types):
 
             # see if there are requirements for verification or discovery from other scanners:
             # log.debug(f"There are {len(scanner['needs results from'])} underlaying scanners.")
-            for underlaying_scanner in scanner["needs results from"]:
-                underlaying_scanner_details = SCANNERS_BY_NAME[underlaying_scanner]
+            for underlaying_scanner in scanner["needs_results_from"]:
+                underlaying_scanner_details = SCANNERS_BY_ID[underlaying_scanner]
 
                 if any(
                     [
-                        underlaying_scanner_details["can discover endpoints"],
-                        underlaying_scanner_details["can discover urls"],
+                        underlaying_scanner_details["can_discover_endpoints"],
+                        underlaying_scanner_details["can_discover_urls"],
                     ]
                 ):
                     plan.append({"scanner": underlaying_scanner, "url": outdated_result["url"], "activity": "discover"})
                 if any(
                     [
-                        underlaying_scanner_details["can verify endpoints"],
-                        underlaying_scanner_details["can verify urls"],
+                        underlaying_scanner_details["can_verify_endpoints"],
+                        underlaying_scanner_details["can_verify_urls"],
                     ]
                 ):
                     plan.append({"scanner": underlaying_scanner, "url": outdated_result["url"], "activity": "verify"})

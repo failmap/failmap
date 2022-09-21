@@ -416,38 +416,6 @@ class Activity(models.IntegerChoices):
     scan = 3, "scan"  # pylint: disable=invalid-name
 
 
-class ScannerNames(models.IntegerChoices):
-    # Map the scanners in __init__.py
-    unknown = 0, "unknown"  # pylint: disable=invalid-name
-    tls_qualys = 1, "tls_qualys"  # pylint: disable=invalid-name
-    dnssec = 2, "dnssec"  # pylint: disable=invalid-name
-    security_headers = 3, "security_headers"  # pylint: disable=invalid-name
-    plain_http = 4, "plain_http"  # pylint: disable=invalid-name
-    internet_nl_mail = 5, "internet_nl_mail"  # pylint: disable=invalid-name
-    ftp = 6, "ftp"  # pylint: disable=invalid-name
-    dns_endpoints = 7, "dns_endpoints"  # pylint: disable=invalid-name
-    internet_nl_web = 8, "internet_nl_web"  # pylint: disable=invalid-name
-    subdomains = 9, "subdomains"  # pylint: disable=invalid-name
-    dns_known_subdomains = 10, "dns_known_subdomains"  # pylint: disable=invalid-name
-    dns_clean_wildcards = 11, "dns_clean_wildcards"  # pylint: disable=invalid-name
-    http = 12, "http"  # pylint: disable=invalid-name
-    verify_unresolvable = 13, "verify_unresolvable"  # pylint: disable=invalid-name
-    onboard = 14, "onboard"  # pylint: disable=invalid-name
-    ipv6 = 15, "ipv6"  # pylint: disable=invalid-name
-    dns_wildcards = 16, "dns_wildcards"  # pylint: disable=invalid-name
-    dummy = 17, "dummy"  # pylint: disable=invalid-name
-    screenshot = 18, "screenshot"  # pylint: disable=invalid-name
-
-    autoexplain_dutch_untrusted_cert = 100, "autoexplain_dutch_untrusted_cert"  # pylint: disable=invalid-name
-    autoexplain_trust_microsoft = 101, "autoexplain_trust_microsoft"  # pylint: disable=invalid-name
-    autoexplain_no_https_microsoft = 102, "autoexplain_no_https_microsoft"  # pylint: disable=invalid-name
-    autoexplain_microsoft_neighboring_services = (  # pylint: disable=invalid-name
-        103,
-        "autoexplain_microsoft_neighboring_services",  # pylint: disable=invalid-name
-    )  # pylint: disable=invalid-name
-    autoexplain_no_https_possible = 104, "autoexplain_no_https_possible"  # pylint: disable=invalid-name
-
-
 class State(models.IntegerChoices):
     unknown = 0, "unknown"  # pylint: disable=invalid-name
     requested = 1, "requested"  # pylint: disable=invalid-name
@@ -455,56 +423,6 @@ class State(models.IntegerChoices):
     finished = 3, "finished"  # pylint: disable=invalid-name
     error = 4, "error"  # pylint: disable=invalid-name
     timeout = 5, "timeout"  # pylint: disable=invalid-name
-
-
-class PlannedScan(models.Model):
-    """
-    A planned scan is always performed per url, even if the scan itself is about endpoints. The endpoints can be
-    retrieved at a later state,
-    """
-
-    url = models.ForeignKey(Url, on_delete=models.CASCADE)
-    activity = models.PositiveSmallIntegerField(
-        choices=Activity.choices, default=Activity.unknown, db_index=True, help_text="discover, verify or scan"
-    )
-
-    scanner = models.PositiveSmallIntegerField(
-        choices=ScannerNames.choices,
-        default=ScannerNames.unknown,
-        db_index=True,
-    )
-
-    state = models.PositiveSmallIntegerField(
-        choices=State.choices,
-        default=State.unknown,
-        db_index=True,
-    )
-
-    """
-        WHERE
-        requested_at_when >= '%(when)s'
-    """
-    requested_at_when = models.DateTimeField(db_index=True)
-
-    last_state_change_at = models.DateTimeField(
-        null=True,
-    )
-
-    finished_at_when = models.DateTimeField(null=True, help_text="when finished, timeout, error")
-
-    # add joined index over scanner, activity, state, so queries are faster:
-    # see: https://docs.djangoproject.com/en/3.0/ref/models/options/#indexes
-    class Meta:
-        indexes = [models.Index(fields=["scanner", "activity", "state"])]
-
-
-class PlannedScanError(models.Model):
-    # since many plannedscans will run just fine, don't add this information to that model.
-
-    planned_scan = models.ForeignKey(PlannedScan, on_delete=models.CASCADE)
-
-    debug_information = models.CharField(max_length=512)
-
 
 # https://docs.djangoproject.com/en/dev/topics/db/models/#id6
 class GenericScanMixin(ExplainMixin, LatestScanMixin):
@@ -771,6 +689,12 @@ class ScanType(models.Model):
 
 class Scanner(models.Model):
     name = models.CharField(max_length=200, blank=True, null=True)
+
+    # a scanner in the python code does NOT know what id it has. We can force id's, but then use names instead so its
+    # easier to understand. Somewhere a translation needs to be made.
+    python_name = models.CharField(max_length=200, blank=True, null=True,
+                                   help_text="The name as used in the python code. This is fragile so only change"
+                                             " this when you know what you are doing.")
     description = models.CharField(max_length=255, blank=True, null=True)
     to = models.PositiveSmallIntegerField(
         choices=ScanSubject.choices,
@@ -782,7 +706,9 @@ class Scanner(models.Model):
     # currently limited to one scanner. This might become something else in the future
     # usually the hierarchy should be stored externally, but the limit to one has served
     # well for years.
-    needs_results_from = models.ForeignKey("self", blank=True, on_delete=models.CASCADE, default="", null=True)
+    # Removed db constraint in order to easily import data.
+    needs_results_from = models.ForeignKey("self", blank=True, on_delete=models.CASCADE, default="", null=True,
+                                           db_constraint=False)
 
     # These are derivatives of the scantype
     # can_discover_endpoints = models.BooleanField()
@@ -798,3 +724,49 @@ class Scanner(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+
+
+class PlannedScan(models.Model):
+    """
+    A planned scan is always performed per url, even if the scan itself is about endpoints. The endpoints can be
+    retrieved at a later state,
+    """
+
+    url = models.ForeignKey(Url, on_delete=models.CASCADE)
+    activity = models.PositiveSmallIntegerField(
+        choices=Activity.choices, default=Activity.unknown, db_index=True, help_text="discover, verify or scan"
+    )
+
+    scanner = models.ForeignKey(Scanner, on_delete=models.CASCADE)
+
+    state = models.PositiveSmallIntegerField(
+        choices=State.choices,
+        default=State.unknown,
+        db_index=True,
+    )
+
+    """
+        WHERE
+        requested_at_when >= '%(when)s'
+    """
+    requested_at_when = models.DateTimeField(db_index=True)
+
+    last_state_change_at = models.DateTimeField(
+        null=True,
+    )
+
+    finished_at_when = models.DateTimeField(null=True, help_text="when finished, timeout, error")
+
+    # add joined index over scanner, activity, state, so queries are faster:
+    # see: https://docs.djangoproject.com/en/3.0/ref/models/options/#indexes
+    class Meta:
+        indexes = [models.Index(fields=["scanner", "activity", "state"])]
+
+
+class PlannedScanError(models.Model):
+    # since many plannedscans will run just fine, don't add this information to that model.
+
+    planned_scan = models.ForeignKey(PlannedScan, on_delete=models.CASCADE)
+
+    debug_information = models.CharField(max_length=512)
+

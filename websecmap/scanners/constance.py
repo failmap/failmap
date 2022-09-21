@@ -17,51 +17,53 @@ def add_scanner_fields(constance_config):
     """
     # Add rate limiting per scanner and activity:
     for scanner in SCANNERS:
+        python_name = scanner['python_name']
         for plannable_activity in scanner["plannable_activities"]:
-            variable_name = f"RATE_LIMIT_{scanner['name'].upper()}_{plannable_activity.upper()}"
+            variable_name = f"RATE_LIMIT_{python_name.upper()}_{plannable_activity.upper()}"
             constance_config[variable_name] = (
                 500,
-                f"Simultaneous {plannable_activity.upper()} tasks for {scanner['name'].upper()}.",
+                f"Simultaneous {plannable_activity.upper()} tasks for {python_name.upper()}.",
                 int,
             )
 
     # Generate Scanner Settings:
     for scanner in SCANNERS:
+        python_name = scanner['python_name'].upper()
 
-        scan_types = scanner["creates endpoint scan types"] + scanner["creates url scan types"]
+        scan_types = scanner["creates_endpoint_scan_types"] + scanner["creates_url_scan_types"]
 
         if scan_types:
             # No scanner options when there are no scan types, those are usually discovery scanners.
             scanner_config = {
-                f"USE_SCANNER_{scanner['name'].upper()}": (
+                f"USE_SCANNER_{python_name}": (
                     True,
-                    f"Do you want to use the {scanner['name']} scanner?",
+                    f"Do you want to use the {scanner['python_name']} scanner?",
                     bool,
                 ),
             }
             constance_config = {**constance_config, **scanner_config}
 
-        if scanner["can discover endpoints"]:
+        if scanner["can_discover_endpoints"]:
             scanner_config = {
-                f"DISCOVER_ENDPOINTS_USING_{scanner['name'].upper()}": (
+                f"DISCOVER_ENDPOINTS_USING_{python_name}": (
                     True,
-                    f"Do you want to discover endpoints using the {scanner['name']} scanner?",
+                    f"Do you want to discover endpoints using the {python_name} scanner?",
                     bool,
                 ),
             }
             constance_config = {**constance_config, **scanner_config}
 
-        if scanner["can discover urls"]:
+        if scanner["can_discover_urls"]:
             scanner_config = {
-                f"DISCOVER_URLS_USING_{scanner['name'].upper()}": (
+                f"DISCOVER_URLS_USING_{python_name}": (
                     True,
-                    f"Do you want to discover urls using the {scanner['name']} scanner?",
+                    f"Do you want to discover urls using the {python_name} scanner?",
                     bool,
                 ),
             }
             constance_config = {**constance_config, **scanner_config}
 
-        for scan_type in scanner["creates endpoint scan types"] + scanner["creates url scan types"]:
+        for scan_type in scanner["creates_endpoint_scan_types"] + scanner["creates_url_scan_types"]:
             scanner_config = {
                 f"REPORT_INCLUDE_{scan_type.upper()}": (
                     True,
@@ -71,7 +73,7 @@ def add_scanner_fields(constance_config):
             }
             constance_config = {**constance_config, **scanner_config}
 
-        for scan_type in scanner["creates endpoint scan types"] + scanner["creates url scan types"]:
+        for scan_type in scanner["creates_endpoint_scan_types"] + scanner["creates_url_scan_types"]:
             scanner_config = {
                 f"SHOW_{scan_type.upper()}": (True, f"Do you want to show {scan_type} issues on the website?", bool),
             }
@@ -84,29 +86,29 @@ def add_scanner_fieldsets(constance_config_fieldsets):
     # now create the menus for these scanners.
     discover_set = ("SCAN_AT_ALL",)
     for scanner in SCANNERS:
-        if scanner["can discover urls"]:
-            discover_set += (f"DISCOVER_URLS_USING_{scanner['name'].upper()}",)
+        if scanner["can_discover_urls"]:
+            discover_set += (f"DISCOVER_URLS_USING_{scanner['python_name'].upper()}",)
 
     for scanner in SCANNERS:
-        if scanner["can discover endpoints"]:
-            discover_set += (f"DISCOVER_ENDPOINTS_USING_{scanner['name'].upper()}",)
+        if scanner["can_discover_endpoints"]:
+            discover_set += (f"DISCOVER_ENDPOINTS_USING_{scanner['python_name'].upper()}",)
 
     scanner_config_set = []
     for scanner in SCANNERS:
 
-        scan_types = scanner["creates endpoint scan types"] + scanner["creates url scan types"]
+        scan_types = scanner["creates_endpoint_scan_types"] + scanner["creates_url_scan_types"]
         if not scan_types:
             continue
 
-        options = (f"USE_SCANNER_{scanner['name'].upper()}",)
+        options = (f"USE_SCANNER_{scanner['python_name'].upper()}",)
 
-        for scan_type in ALL_SCAN_TYPES:
+        for scan_type in scan_types:
             options += (f"REPORT_INCLUDE_{scan_type.upper()}",)
 
-        for scan_type in ALL_SCAN_TYPES:
+        for scan_type in scan_types:
             options += (f"SHOW_{scan_type.upper()}",)
 
-        scanner_config_per_scanner = (scanner["verbose name"], options)
+        scanner_config_per_scanner = (scanner["python_name"], options)
         scanner_config_set += (scanner_config_per_scanner,)
 
     constance_config_fieldsets.update(
@@ -121,7 +123,7 @@ def add_scanner_fieldsets(constance_config_fieldsets):
     rate_limit = ()
     for scanner in SCANNERS:
         for plannable_activity in scanner["plannable_activities"]:
-            variable_name = f"RATE_LIMIT_{scanner['name'].upper()}_{plannable_activity.upper()}"
+            variable_name = f"RATE_LIMIT_{scanner['python_name'].upper()}_{plannable_activity.upper()}"
             rate_limit += (variable_name,)
 
     constance_config_fieldsets.update(

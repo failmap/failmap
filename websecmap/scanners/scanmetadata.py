@@ -9,10 +9,13 @@ from websecmap.scanners.models import Scanner, ScanSubject, ScanType
 
 
 def dump_scan_config_to_file():
-    # Todo: when to run this? After a signal a setting has changed? Probably.
     # This is performed every time this app has started. It will overwrite the shipped scanner settings.
     # This solves a chicken and egg problem of 'what fields are available' before it's possible to access
     # the database.
+    # To update the shipped scanner metadata fixture:
+    # websecmap dumpdata scanners.scanner scanners.scantype scanners.scantypesecondopinionlink
+    # scanners.scantypedocumentationlink scanners.scantypecategory scanners.scanneractivity
+    # > websecmap/scanners/fixtures/scanmetadata.json
     data = get_scanners_for_backend()
     try:
         with open("scanmetadata_bootstrap_cache_writable_by_application/constance_definitions.json", "wt") as handle:
@@ -47,26 +50,28 @@ def get_scanners_for_backend():
                 scanner.creates_scan_types.all().filter(scanner=scanner).values_list("name", flat=True)
             )
 
+        # make sure this maps to the classes correctly, so use "plannable_activities" instead of with spaces
         scanner_data = {
             "id": scanner.id,
             "name": scanner.name,
+            "python_name": scanner.python_name,
             "description": scanner.description,
             "plannable_activities": sorted(planable_activities),
-            "creates endpoint scan types": sorted(endpoint_scan_types),
-            "creates url scan types": sorted(url_scan_types),
-            "can scan endpoints": True
+            "creates_endpoint_scan_types": sorted(endpoint_scan_types),
+            "creates_url_scan_types": sorted(url_scan_types),
+            "can_scan_endpoints": True
             if "scan" in planable_activities and scanner.to == ScanSubject.ENDPOINT
             else False,
-            "can discover endpoints": True
+            "can_discover_endpoints": True
             if "discover" in planable_activities and scanner.to == ScanSubject.ENDPOINT
             else False,
-            "can verify endpoints": True
+            "can_verify_endpoints": True
             if "verify" in planable_activities and scanner.to == ScanSubject.ENDPOINT
             else False,
-            "can scan urls": True if "scan" in planable_activities and scanner.to == ScanSubject.URL else False,
-            "can discover urls": True if "discover" in planable_activities and scanner.to == ScanSubject.URL else False,
-            "can verify urls": True if "verify" in planable_activities and scanner.to == ScanSubject.URL else False,
-            "needs results from": [scanner.needs_results_from.id] if scanner.needs_results_from else [],
+            "can_scan_urls": True if "scan" in planable_activities and scanner.to == ScanSubject.URL else False,
+            "can_discover_urls": True if "discover" in planable_activities and scanner.to == ScanSubject.URL else False,
+            "can_verify_urls": True if "verify" in planable_activities and scanner.to == ScanSubject.URL else False,
+            "needs_results_from": [scanner.needs_results_from.id] if scanner.needs_results_from else [],
         }
         results.append(scanner_data)
 
@@ -142,7 +147,7 @@ def get_scanners_for_frontend():
     possible_relevant_impacts = get_impacts_per_scan_type()
 
     results = {}
-    scantypes = ScanType.objects.all()
+    scantypes = ScanType.objects.all().order_by('display_order')
     for scan_type in scantypes:
         # the relevant impacts are not directly coupled to the scanners yet, this might give some small management
         # issues. For now it's fine. A future version can solve this.
