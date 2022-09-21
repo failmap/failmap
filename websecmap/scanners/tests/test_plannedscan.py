@@ -1,7 +1,6 @@
 import logging
 from datetime import timedelta
 
-from coverage.control import override_config
 from django.utils import timezone
 from freezegun import freeze_time
 
@@ -79,7 +78,6 @@ def create_endpoint_scan(endpoint, type, rating, at_when):
     return egs
 
 
-@override_config(YOUR_NAME="Arthur of Camelot")
 def test_plannedscan(db, default_scan_metadata):
     o = create_organization("Test")
     u1 = create_url("example.com")

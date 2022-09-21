@@ -236,7 +236,7 @@ def request(activity: str, scanner: str, urls: List[int]):
 
         planned_scan = PlannedScan()
         planned_scan.activity = Activity[activity].value
-        planned_scan.scanner = python_scanner["id"]
+        planned_scan.scanner = Scanner.objects.get(pk=python_scanner["id"])
         planned_scan.url = url
         planned_scan.state = State["requested"].value
         planned_scan.last_state_change_at = now
@@ -271,7 +271,7 @@ def finish(activity: str, scanner: str, url_id: int):
     if not scanner:
         log.debug(f"Scanner {scanner} was not found, ignoring.")
 
-    set_scan_state(activity, scanner.id, url_id, "finished")
+    set_scan_state(activity, scanner["id"], url_id, "finished")
     statsd.incr("scan_planned", tags={"state": "finished", "scanner": scanner, "activity": activity})
 
 

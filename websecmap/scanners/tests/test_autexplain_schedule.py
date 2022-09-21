@@ -15,7 +15,7 @@ from websecmap.scanners.tests.test_plannedscan import (
 log = logging.getLogger(__package__)
 
 
-def test_compose_scan_task(db, mocker):
+def test_compose_scan_task(db, mocker, default_scan_metadata):
     # disable the actual scan, so it can be run in a test:
     mocker.patch("websecmap.scanners.scanner.autoexplain_trust_microsoft", return_value=True)
 

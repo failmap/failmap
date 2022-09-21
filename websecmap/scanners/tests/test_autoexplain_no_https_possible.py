@@ -11,7 +11,7 @@ from websecmap.scanners.tests.test_plannedscan import (
 )
 
 
-def test_autoexplain_no_https_possible(db):
+def test_autoexplain_no_https_possible(db, default_scan_metadata):
 
     # Three different endpoints, one will be explained because it has the pki subdomain and a 1000 score.
     o = create_organization("Test")

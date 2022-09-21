@@ -11,7 +11,8 @@ NON_EXISTING_ORGANIZATION = "faaloniet"
 def test_dummy(responses, db, faaloniae):
     """Test running dummy scan."""
 
-    result = json.loads(call_command("scan", "dummy", "-v3", "-o", TEST_ORGANIZATION))
+    # todo: dummy scan is not used right now. Not in db for lazyness
+    result = json.loads(call_command("scan", "ftp", "-v3", "-o", TEST_ORGANIZATION))
 
     # dummy returns random success/failure results, only check if there is a result, not the result itself
     assert result[0] is None
