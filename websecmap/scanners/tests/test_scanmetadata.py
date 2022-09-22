@@ -1,4 +1,5 @@
-from websecmap.scanners import read_scan_config_from_file
+from websecmap.scanners import read_scan_config_from_file, SCANNERS_BY_ID
+from websecmap.scanners.models import Scanner
 from websecmap.scanners.scanmetadata import (
     get_scanners_for_backend,
     get_scanners_for_frontend,
@@ -46,7 +47,15 @@ def test_get_scanners_for_frontend(db, default_scan_metadata, default_policy):
 
     assert len(data) > 10
 
-    keys = ["data", "documentation links", "id", "name", "relevant impacts", "second opinion links"]
+    keys = ["documentation links", "id", "name", "relevant impacts", "second opinion links", "category"]
 
     for key in keys:
         assert key in data["ftp"]
+
+
+def test_do_scanner_ids_match(db, default_scan_metadata):
+    # data = read_scan_config_from_file()
+
+    for scanner in Scanner.objects.all():
+        scanner_dict = SCANNERS_BY_ID[scanner.id]
+        assert scanner_dict["python_name"] == scanner.python_name

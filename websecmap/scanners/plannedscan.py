@@ -429,7 +429,7 @@ def plan_outdated_scans(published_scan_types):
             scanner = SCAN_TYPES_TO_SCANNER[outdated_result["scan_type"]]
             plan.append(
                 {
-                    "scanner": scanner["id"],
+                    "scanner": scanner["python_name"],
                     "url": outdated_result["url"],
                     "activity": "scan",
                 }
@@ -446,14 +446,26 @@ def plan_outdated_scans(published_scan_types):
                         underlaying_scanner_details["can_discover_urls"],
                     ]
                 ):
-                    plan.append({"scanner": underlaying_scanner, "url": outdated_result["url"], "activity": "discover"})
+                    plan.append(
+                        {
+                            "scanner": underlaying_scanner_details["python_name"],
+                            "url": outdated_result["url"],
+                            "activity": "discover",
+                        }
+                    )
                 if any(
                     [
                         underlaying_scanner_details["can_verify_endpoints"],
                         underlaying_scanner_details["can_verify_urls"],
                     ]
                 ):
-                    plan.append({"scanner": underlaying_scanner, "url": outdated_result["url"], "activity": "verify"})
+                    plan.append(
+                        {
+                            "scanner": underlaying_scanner_details["python_name"],
+                            "url": outdated_result["url"],
+                            "activity": "verify",
+                        }
+                    )
 
         # there can be many duplicate tasks, especially when there are multiple scan results from a single scanner.
         clean_plan = deduplicate_plan(plan)
