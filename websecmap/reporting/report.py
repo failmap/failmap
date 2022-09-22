@@ -13,7 +13,7 @@ from websecmap.organizations.models import Url, Organization
 from websecmap.reporting.models import UrlReport, ScanPolicy
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES, SCANNERS_BY_SCAN_TYPE
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, ScanType, ScanSubject
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, ScanSubject, UrlGenericScan
 from websecmap.scanners.scanner.utils import in_chunks
 
 log = logging.getLogger(__package__)
@@ -1277,42 +1277,40 @@ def add_ultimate_report(name: str = "test_organization", url: str = "example.com
 
     org = Organization()
     org.name = name
+    org.save()
 
-    url = Url()
-    url.url = url
-    url.save()
+    new_url = Url()
+    new_url.url = url
+    new_url.save()
 
-    url.organization.add(org)
-    url.save()
+    new_url.organization.add(org)
+    new_url.save()
 
     # does it matter what endpoint? guess not...
     endp = Endpoint()
-    endp.url = url
+    endp.url = new_url
     endp.save()
 
-    attach_ultimate_report(url, endp)
+    attach_ultimate_report(new_url, endp)
 
 
 def attach_ultimate_report_to_everything_in_database():
     for url in Url.objects.all():
+        log.debug("")
         for endpoint in url.endpoint_set.all():
             attach_ultimate_report(url, endpoint)
 
 
 def attach_ultimate_report(url: Url, endpoint: Endpoint):
-
+    log.debug(f"Attaching ultimate report to {url}, endpoint: {endpoint}.")
     now = datetime.now(pytz.utc)
 
-    # scantypes = ScanType.objects.all()
-    # scantype_obj_by_name = {}
-    # for sca in scantypes:
-    #     scantype_obj_by_name[sca.name] = sca
-
+    # This approach is dumb and inefficient, but good enough for testing
     for policy in ScanPolicy.objects.all():
 
         scanner = SCANNERS_BY_SCAN_TYPE[policy.scan_type]
 
-        if scanner['to'] == ScanSubject.URL:
+        if scanner["to"] == ScanSubject.URL:
             epgs = UrlGenericScan()
             epgs.url = url
             epgs.type = policy.scan_type

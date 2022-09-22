@@ -495,9 +495,7 @@ class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             super().save_model(request, obj, form, change)
 
         else:
-            item_exists = (
-                models.ScanType.objects.all().filter(name=obj.name).order_by("-display_order").first()
-            )
+            item_exists = models.ScanType.objects.all().filter(name=obj.name).order_by("-display_order").first()
 
             if item_exists:
                 # if there is something form this item, place it where it belongs and move the rest +=1
