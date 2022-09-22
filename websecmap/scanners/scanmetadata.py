@@ -142,12 +142,10 @@ def get_scanners_for_frontend():
     all_settings = get_all_values()
     # we'rel looking for SHOW_ISSUE_NAME_IN_CAPS
 
-    # todo: ordering is relevant to the frontend. Make sure to add an order to the scan types.
-
     possible_relevant_impacts = get_impacts_per_scan_type()
 
     results = {}
-    scantypes = ScanType.objects.all().order_by("display_order")
+    scantypes = ScanType.objects.all().order_by("display_order").only("id", "name").prefetch_related("category")
     for scan_type in scantypes:
         # the relevant impacts are not directly coupled to the scanners yet, this might give some small management
         # issues. For now it's fine. A future version can solve this.
