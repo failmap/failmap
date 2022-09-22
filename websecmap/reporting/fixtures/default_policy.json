@@ -829,168 +829,6 @@
 },
 {
   "model": "reporting.scanpolicy",
-  "pk": 74,
-  "fields": {
-    "total_issues": 0,
-    "high": 1,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_v6_mail_ipv6",
-    "conclusion": "incompatible",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 75,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 1,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_v6_mail_ipv6",
-    "conclusion": "proof",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 76,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_v6_mail_ipv6",
-    "conclusion": "ready",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 77,
-  "fields": {
-    "total_issues": 0,
-    "high": 1,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_v6_mail_ipv6_incompatible",
-    "conclusion": "True",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 78,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_v6_mail_ipv6_incompatible",
-    "conclusion": "False",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 79,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 1,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_v6_mail_ipv6_proof",
-    "conclusion": "True",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 80,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_v6_mail_ipv6_proof",
-    "conclusion": "False",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 81,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_v6_mail_ipv6_ready",
-    "conclusion": "True",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 82,
-  "fields": {
-    "total_issues": 0,
-    "high": 1,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_v6_mail_ipv6_ready",
-    "conclusion": "False",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
   "pk": 274,
   "fields": {
     "total_issues": 0,
@@ -1027,24 +865,6 @@
 },
 {
   "model": "reporting.scanpolicy",
-  "pk": 276,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 1,
-    "scan_type": "internet_nl_mail_auth_dmarc_ext_destination",
-    "conclusion": "error",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
   "pk": 277,
   "fields": {
     "total_issues": 0,
@@ -1056,24 +876,6 @@
     "not_testable": 0,
     "error_in_test": 1,
     "scan_type": "internet_nl_mail_auth_dmarc_policy",
-    "conclusion": "error",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 278,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 1,
-    "scan_type": "internet_nl_mail_auth_dmarc_policy_only",
     "conclusion": "error",
     "explanation": "",
     "annotation": ""
@@ -1711,60 +1513,6 @@
 },
 {
   "model": "reporting.scanpolicy",
-  "pk": 314,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 1,
-    "scan_type": "internet_nl_mail_non_sending_domain",
-    "conclusion": "error",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 315,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 1,
-    "scan_type": "internet_nl_mail_server_configured",
-    "conclusion": "error",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 316,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 1,
-    "scan_type": "internet_nl_mail_servers_testable",
-    "conclusion": "error",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
   "pk": 317,
   "fields": {
     "total_issues": 0,
@@ -1866,24 +1614,6 @@
     "not_testable": 0,
     "error_in_test": 1,
     "scan_type": "internet_nl_mail_starttls_dane_rollover",
-    "conclusion": "error",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 323,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 1,
-    "scan_type": "internet_nl_mail_starttls_dane_ta",
     "conclusion": "error",
     "explanation": "",
     "annotation": ""
@@ -2172,24 +1902,6 @@
     "not_testable": 0,
     "error_in_test": 1,
     "scan_type": "internet_nl_web_appsecpriv_x_frame_options",
-    "conclusion": "error",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 340,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 1,
-    "scan_type": "internet_nl_web_appsecpriv_x_xss_protection",
     "conclusion": "error",
     "explanation": "",
     "annotation": ""
@@ -2748,24 +2460,6 @@
     "not_testable": 0,
     "error_in_test": 1,
     "scan_type": "internet_nl_web_legacy_category_ipv6",
-    "conclusion": "error",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 372,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 1,
-    "scan_type": "internet_nl_web_legacy_dane",
     "conclusion": "error",
     "explanation": "",
     "annotation": ""
@@ -5023,24 +4717,6 @@
 },
 {
   "model": "reporting.scanpolicy",
-  "pk": 498,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 1,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_web_legacy_dane",
-    "conclusion": "info",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
   "pk": 499,
   "fields": {
     "total_issues": 0,
@@ -6456,24 +6132,6 @@
     "not_testable": 1,
     "error_in_test": 0,
     "scan_type": "internet_nl_web_legacy_category",
-    "conclusion": "not_tested",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 578,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 1,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_web_legacy_dane",
     "conclusion": "not_tested",
     "explanation": "",
     "annotation": ""
@@ -8173,24 +7831,6 @@
 },
 {
   "model": "reporting.scanpolicy",
-  "pk": 673,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_web_legacy_dane",
-    "conclusion": "passed",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
   "pk": 674,
   "fields": {
     "total_issues": 0,
@@ -9120,24 +8760,6 @@
     "not_testable": 0,
     "error_in_test": 0,
     "scan_type": "internet_nl_web_legacy_category",
-    "conclusion": "warning",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 726,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 1,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_web_legacy_dane",
     "conclusion": "warning",
     "explanation": "",
     "annotation": ""
@@ -12975,222 +12597,6 @@
     "conclusion": "not_applicable",
     "explanation": "",
     "annotation": "Missing policy added automatically. Please set up any explanation and scoring if needed."
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 943,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_mail_ipv6",
-    "conclusion": "passed",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 944,
-  "fields": {
-    "total_issues": 0,
-    "high": 1,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_mail_ipv6",
-    "conclusion": "failed",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 945,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 1,
-    "scan_type": "internet_nl_mail_ipv6",
-    "conclusion": "error",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 946,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_mail_dnssec",
-    "conclusion": "passed",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 947,
-  "fields": {
-    "total_issues": 0,
-    "high": 1,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_mail_dnssec",
-    "conclusion": "failed",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 948,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 1,
-    "scan_type": "internet_nl_mail_dnssec",
-    "conclusion": "error",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 949,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_mail_auth",
-    "conclusion": "passed",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 950,
-  "fields": {
-    "total_issues": 0,
-    "high": 1,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_mail_auth",
-    "conclusion": "failed",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 951,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 1,
-    "scan_type": "internet_nl_mail_auth",
-    "conclusion": "error",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 952,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_mail_tls",
-    "conclusion": "passed",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 953,
-  "fields": {
-    "total_issues": 0,
-    "high": 1,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 0,
-    "scan_type": "internet_nl_mail_tls",
-    "conclusion": "failed",
-    "explanation": "",
-    "annotation": ""
-  }
-},
-{
-  "model": "reporting.scanpolicy",
-  "pk": 954,
-  "fields": {
-    "total_issues": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
-    "ok": 0,
-    "not_applicable": 0,
-    "not_testable": 0,
-    "error_in_test": 1,
-    "scan_type": "internet_nl_mail_tls",
-    "conclusion": "error",
-    "explanation": "",
-    "annotation": ""
   }
 },
 {

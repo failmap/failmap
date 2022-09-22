@@ -495,24 +495,24 @@ class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             super().save_model(request, obj, form, change)
 
         else:
-            country_exists = (
-                models.ScanType.objects.all().filter(country=obj.country).order_by("-display_order").first()
+            item_exists = (
+                models.ScanType.objects.all().filter(name=obj.name).order_by("-display_order").first()
             )
 
-            if country_exists:
-                # if there is something form this country, place it where it belongs and move the rest +=1
-                new_number = country_exists.display_order + 1
+            if item_exists:
+                # if there is something form this item, place it where it belongs and move the rest +=1
+                new_number = item_exists.display_order + 1
 
                 moveup = models.ScanType.objects.all().filter(display_order__gte=new_number).order_by("-display_order")
                 for config in moveup:
                     config.display_order += 1
                     config.save()
 
-                obj.display_order = country_exists.display_order + 1
+                obj.display_order = item_exists.display_order + 1
                 super().save_model(request, obj, form, change)
 
             else:
-                # if there is nothing from this country, then add it at the end.
+                # if there is nothing from this item, then add it at the end.
                 tmp = models.ScanType.objects.all().order_by("-display_order").first()
 
                 if tmp:

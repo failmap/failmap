@@ -1301,7 +1301,7 @@ def attach_ultimate_report_to_everything_in_database():
 
 def attach_ultimate_report(url: Url, endpoint: Endpoint):
 
-    now = datetime.now()
+    now = datetime.now(pytz.utc)
 
     # scantypes = ScanType.objects.all()
     # scantype_obj_by_name = {}

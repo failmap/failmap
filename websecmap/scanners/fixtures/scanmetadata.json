@@ -211,7 +211,6 @@
       1
     ],
     "creates_scan_types": [
-      21,
       22,
       23,
       24,
@@ -434,7 +433,9 @@
     "plannable_activities": [
       1
     ],
-    "creates_scan_types": []
+    "creates_scan_types": [
+      131
+    ]
   }
 },
 {
@@ -612,78 +613,6 @@
     "category": [
       2,
       4
-    ]
-  }
-},
-{
-  "model": "scanners.scantype",
-  "pk": 18,
-  "fields": {
-    "name": "internet_nl_mail_ipv6",
-    "description": null,
-    "display_order": 2100,
-    "second_opinion_links": [
-      6
-    ],
-    "documentation_links": [
-      11
-    ],
-    "category": [
-      5
-    ]
-  }
-},
-{
-  "model": "scanners.scantype",
-  "pk": 19,
-  "fields": {
-    "name": "internet_nl_mail_dnssec",
-    "description": null,
-    "display_order": 2200,
-    "second_opinion_links": [
-      6
-    ],
-    "documentation_links": [
-      11
-    ],
-    "category": [
-      5
-    ]
-  }
-},
-{
-  "model": "scanners.scantype",
-  "pk": 20,
-  "fields": {
-    "name": "internet_nl_mail_auth",
-    "description": null,
-    "display_order": 2300,
-    "second_opinion_links": [
-      6
-    ],
-    "documentation_links": [
-      11
-    ],
-    "category": [
-      5
-    ]
-  }
-},
-{
-  "model": "scanners.scantype",
-  "pk": 21,
-  "fields": {
-    "name": "internet_nl_mail_tls",
-    "description": null,
-    "display_order": 2400,
-    "second_opinion_links": [
-      6
-    ],
-    "documentation_links": [
-      11
-    ],
-    "category": [
-      5
     ]
   }
 },
@@ -2502,6 +2431,24 @@
     ],
     "category": [
       4
+    ]
+  }
+},
+{
+  "model": "scanners.scantype",
+  "pk": 131,
+  "fields": {
+    "name": "dummy",
+    "description": null,
+    "display_order": 3004,
+    "second_opinion_links": [
+      3
+    ],
+    "documentation_links": [
+      1
+    ],
+    "category": [
+      1
     ]
   }
 },
