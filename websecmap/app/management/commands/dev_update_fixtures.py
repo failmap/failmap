@@ -1,10 +1,6 @@
+import sys
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
-
-
-def dump_to_file(data, path):
-    with open(path, "wt") as handle:
-        handle.write(data)
 
 
 class Command(BaseCommand):
@@ -26,27 +22,31 @@ class Command(BaseCommand):
 
         This fixture makes it possible to use this same database in tests.
         """
-        dump_to_file(
-            call_command(
-                "dumpdata",
-                "scanners.scanner",
-                "scanners.scantype",
-                "scanners.scantypesecondopinionlink",
-                "scanners.scantypedocumentationlink",
-                "scanners.scantypecategory",
-                "scanners.scanneractivity",
-            ),
-            "websecmap/scanners/fixtures/scanmetadata.json",
+        sysout = sys.stdout
+        sys.stdout = open("websecmap/scanners/fixtures/scanmetadata.json", 'wt')
+        call_command(
+            "dumpdata",
+            "scanners.scanner",
+            "scanners.scantype",
+            "scanners.scantypesecondopinionlink",
+            "scanners.scantypedocumentationlink",
+            "scanners.scantypecategory",
+            "scanners.scanneractivity",
         )
+        sys.stdout = sysout
 
         """
         ScanPolicy is a summary of all possible results of all scans types.
         """
-        dump_to_file(
-            call_command("dumpdata", "reporting.scanpolicy"), "websecmap/reporting/fixtures/default_policy.json"
-        )
+        sysout = sys.stdout
+        sys.stdout = open("websecmap/reporting/fixtures/default_policy.json", 'wt')
+        call_command("dumpdata", "reporting.scanpolicy"),
+        sys.stdout = sysout
 
         """
         Periodic tasks like scanning and such are handled in celery beat.
         """
-        dump_to_file(call_command("dumpdata", "django_celery_beat"), "websecmap/app/fixtures/periodic_tasks.json")
+        sysout = sys.stdout
+        sys.stdout = open("websecmap/app/fixtures/periodic_tasks.json", 'wt')
+        call_command("dumpdata", "django_celery_beat")
+        sys.stdout = sysout
