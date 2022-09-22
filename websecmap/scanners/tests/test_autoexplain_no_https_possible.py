@@ -19,13 +19,13 @@ def test_autoexplain_no_https_possible(db, default_scan_metadata):
     link_url_to_organization(u1, o)
     e1 = create_endpoint(u1, 4, "https", 443)
     e2 = create_endpoint(u1, 6, "https", 443)
-    es1 = create_endpoint_scan(e1, "plain_https", "1000", datetime(2020, 1, 1))
-    es2 = create_endpoint_scan(e2, "plain_https", "0", datetime(2020, 1, 1))
+    es1 = create_endpoint_scan(e1, "plain_http", "1000", datetime(2020, 1, 1))
+    es2 = create_endpoint_scan(e2, "plain_http", "0", datetime(2020, 1, 1))
 
     u2 = create_url("sip.example2.com")
     link_url_to_organization(u2, o)
     e3 = create_endpoint(u2, 4, "https", 443)
-    es3 = create_endpoint_scan(e3, "plain_https", "1000", datetime(2020, 1, 1))
+    es3 = create_endpoint_scan(e3, "plain_http", "1000", datetime(2020, 1, 1))
 
     plan_scan()
 

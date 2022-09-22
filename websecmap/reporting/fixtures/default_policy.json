@@ -191,7 +191,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "plain_https",
+    "scan_type": "plain_http",
     "conclusion": "no_https_redirect_and_no_https_on_standard_port",
     "explanation": "Site does not redirect to secure url, and has no secure alternative on a standard port.",
     "annotation": ""
@@ -209,7 +209,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "plain_https",
+    "scan_type": "plain_http",
     "conclusion": "https_redirect_on_insecure_port_and_no_https_on_standard_port",
     "explanation": "Redirects to a secure site, while a secure counterpart on the standard port is missing.",
     "annotation": ""
@@ -821,7 +821,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "plain_https",
+    "scan_type": "plain_http",
     "conclusion": "redirecting_properly",
     "explanation": "Has a secure equivalent, which wasn't so in the past.",
     "annotation": ""
@@ -12863,7 +12863,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "plain_https",
+    "scan_type": "plain_http",
     "conclusion": "25",
     "explanation": "Redirects to a secure site, while a secure counterpart on the standard port is missing.",
     "annotation": ""
@@ -12881,7 +12881,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "plain_https",
+    "scan_type": "plain_http",
     "conclusion": "1000",
     "explanation": "Site does not redirect to secure url, and has no secure alternative on a standard port.",
     "annotation": ""
@@ -12899,7 +12899,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "plain_https",
+    "scan_type": "plain_http",
     "conclusion": "0",
     "explanation": "Has a secure equivalent, which wasn't so in the past.",
     "annotation": ""
@@ -12917,7 +12917,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "plain_https",
+    "scan_type": "plain_http",
     "conclusion": "200",
     "explanation": "",
     "annotation": "Missing policy added automatically. Please set up any explanation and scoring if needed."
@@ -12935,7 +12935,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "plain_https",
+    "scan_type": "plain_http",
     "conclusion": "200",
     "explanation": "",
     "annotation": "Missing policy added automatically. Please set up any explanation and scoring if needed."

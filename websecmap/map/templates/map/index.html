@@ -394,7 +394,7 @@
                             plus_info: {{ configuration.PLUS_SHOW_INFO | lower }},
                             issues: {
                                 ftp: {{ configuration.SHOW_FTP | lower }},
-                                plain_https: {{ configuration.SHOW_PLAIN_HTTPS | lower }},
+                                plain_http: {{ configuration.SHOW_PLAIN_HTTP | lower }},
                                 dnssec: {{ configuration.SHOW_DNSSEC | lower }},
                                 http_security_header_strict_transport_security: {{ configuration.SHOW_HTTP_SECURITY_HEADER_STRICT_TRANSPORT_SECURITY| lower }},
                                 http_security_header_x_content_type_options: {{ configuration.SHOW_HTTP_SECURITY_HEADER_X_CONTENT_TYPE_OPTIONS| lower }},
@@ -522,8 +522,8 @@
                             "category": ['confidentiality', 'integrity']
                         },
 
-                        "plain_https": {
-                            "name": "plain_https",
+                        "plain_http": {
+                            "name": "plain_http",
                             "second opinion links": [{
                                 "url": "https://www.ssllabs.com/ssltest/analyze.html?d=${url.url}&hideResults=on&latest",
                                 "language": "EN",
@@ -855,7 +855,7 @@
                             this.all_issues['DNSSEC'],
                             this.all_issues["tls_qualys_certificate_trusted"],
                             this.all_issues["tls_qualys_encryption_quality"],
-                            this.all_issues["plain_https"],
+                            this.all_issues["plain_http"],
                             this.all_issues["ftp"],
                             this.all_issues["internet_nl_mail_starttls_tls_available"],
                             this.all_issues["internet_nl_mail_auth_spf_exist"],

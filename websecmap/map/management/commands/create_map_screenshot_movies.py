@@ -43,7 +43,7 @@ class Command(BaseCommand):
             "tls_qualys_certificate_trusted",
             "tls_qualys_encryption_quality",
             "http_security_header_strict_transport_security",
-            "plain_https",
+            "plain_http",
         ]
 
         map_configurations = Configuration.objects.all()

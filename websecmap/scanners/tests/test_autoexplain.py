@@ -56,7 +56,7 @@ def test_autoexplain_no_https_microsoft(db, mocker):
         rating="25",
         rating_determined_on=datetime.datetime.now(pytz.utc),
         is_the_latest_scan=True,
-        type="plain_https",
+        type="plain_http",
     )
 
     class Answer:

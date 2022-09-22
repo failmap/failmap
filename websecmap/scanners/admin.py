@@ -475,7 +475,7 @@ class PlannedScanStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.Scanner)
 class ScannerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     help_text = "test"
-    list_display = ("name", "description", "to")
+    list_display = ("name", "python_name", "description", "to")
     save_as = True
     ...
 

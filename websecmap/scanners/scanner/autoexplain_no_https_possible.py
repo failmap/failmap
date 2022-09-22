@@ -14,7 +14,7 @@ from websecmap.scanners.scanner.autoexplain_trust_microsoft import (
 SCANNER = "autoexplain_no_https_possible"
 
 query = EndpointGenericScan.objects.all().filter(
-    type="plain_https",
+    type="plain_http",
     is_the_latest_scan=True,
     rating="1000",
 )
@@ -68,7 +68,7 @@ def scan(scan_id: int):
     if a_scan.endpoint.url.computed_subdomain not in excepted_subdomains:
         return
 
-    # The plain_https rating is removed
+    # The plain_http rating is removed
     add_bot_explanation(a_scan, "domain_hosts_certificate_revocation_list", timedelta(days=365 * 10))
 
     # Also remove associated HSTS header rating, there will not be a HSTS of course for this domain.

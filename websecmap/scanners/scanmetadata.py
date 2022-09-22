@@ -2,6 +2,8 @@ import json
 from collections import defaultdict
 from typing import Dict, Any, List
 
+from django.db.models import Prefetch
+
 from websecmap.app import log
 from websecmap.app.constance import get_all_values
 from websecmap.reporting.models import ScanPolicy
@@ -56,6 +58,7 @@ def get_scanners_for_backend():
             "name": scanner.name,
             "python_name": scanner.python_name,
             "description": scanner.description,
+            "to": scanner.to,
             "plannable_activities": sorted(planable_activities),
             "creates_endpoint_scan_types": sorted(endpoint_scan_types),
             "creates_url_scan_types": sorted(url_scan_types),
@@ -118,34 +121,21 @@ def get_impacts_per_scan_type() -> Dict[str, List[str]]:
 
 
 def get_scanners_for_frontend():
-    # frontend scanners have details about documentation and stuff...
-    # this is issue focussed, example:
-    # dnssec: {
-    #         name: "dnssec",
-    #         "second opinion links": [sol.zonemaster],
-    #         "documentation links": [dol.wikipedia_dnssec],
-    #         "relevant impacts": ["high"],
-    #         statistics: {
-    #           good: [
-    #             {
-    #               label: 'DNSSEC correct', explanation: 'DNSSEC seems to be implemented sufficiently.'
-    #             }],
-    #           medium: [],
-    #           bad: [{
-    #             label: 'DNSSEC incorrect',
-    #             explanation: 'DNSSEC is incorrectly or not configured (errors found).'
-    #           }]
-    #         },
-    #         category: ['dns', 'confidentiality', 'integrity']
-    #       },
+    # frontend scanners have details about documentation
 
     all_settings = get_all_values()
-    # we'rel looking for SHOW_ISSUE_NAME_IN_CAPS
-
     possible_relevant_impacts = get_impacts_per_scan_type()
 
     results = {}
-    scantypes = ScanType.objects.all().order_by("display_order").only("id", "name").prefetch_related("category")
+    scantypes = (
+        ScanType.objects.all()
+        .order_by("display_order")
+        .prefetch_related(
+            Prefetch("category", to_attr="cat"),
+            Prefetch("documentation_links", to_attr="doc"),
+            Prefetch("second_opinion_links", to_attr="sec"),
+        )
+    )
     for scan_type in scantypes:
         # the relevant impacts are not directly coupled to the scanners yet, this might give some small management
         # issues. For now it's fine. A future version can solve this.
@@ -157,10 +147,10 @@ def get_scanners_for_frontend():
         data = {
             "name": scan_type.name,
             "id": scan_type.id,
-            "category": sorted(list(scan_type.category.all().values_list("name", flat=True))),
+            "category": [item.name for item in scan_type.cat],
             "relevant impacts": possible_relevant_impacts[scan_type.name],
-            "documentation links": list(scan_type.documentation_links.all().values("url", "friendly_name")),
-            "second opinion links": list(scan_type.second_opinion_links.all().values("url", "friendly_name")),
+            "documentation links": [{"name": item.friendly_name, "url": item.url} for item in scan_type.doc],
+            "second opinion links": [{"name": item.friendly_name, "url": item.url} for item in scan_type.sec],
         }
 
         results[scan_type.name] = data

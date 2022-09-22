@@ -174,8 +174,8 @@ def get_endpoints_with_missing_encryption(url):
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def well_done(endpoint_id):
 
-    if endpoint_has_scans("plain_https", endpoint_id):
-        store_endpoint_scan_result("plain_https", endpoint_id, "0", CLEANED_UP)
+    if endpoint_has_scans("plain_http", endpoint_id):
+        store_endpoint_scan_result("plain_http", endpoint_id, "0", CLEANED_UP)
 
 
 # Task is written to work both on v4 and v6, but the network conf of the machine differs.
@@ -263,21 +263,21 @@ def store(results, endpoint_id):
 
     # issue resolved.
     if can_connect_result["result"]:
-        if endpoint_has_scans("plain_https", endpoint_id):
-            store_endpoint_scan_result("plain_https", endpoint_id, "redirecting_properly", CLEANED_UP)
+        if endpoint_has_scans("plain_http", endpoint_id):
+            store_endpoint_scan_result("plain_http", endpoint_id, "redirecting_properly", CLEANED_UP)
 
     # Really no security at all
     if not can_connect_result["result"] and redirects_to_safety_result is False:
         log.info("%s does not have a https site. Saving/updating scan.", endpoint.url)
         store_endpoint_scan_result(
-            "plain_https", endpoint_id, "no_https_redirect_and_no_https_on_standard_port", NO_HTTPS_AT_ALL
+            "plain_http", endpoint_id, "no_https_redirect_and_no_https_on_standard_port", NO_HTTPS_AT_ALL
         )
 
     # some redirections that might have flaws etc.
     if not can_connect_result["result"] and redirects_to_safety_result is True:
         log.info("%s redirects to safety, saved by the bell.", endpoint.url)
         store_endpoint_scan_result(
-            "plain_https",
+            "plain_http",
             endpoint_id,
             "https_redirect_on_insecure_port_and_no_https_on_standard_port",
             SAVED_BY_THE_BELL,

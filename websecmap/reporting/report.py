@@ -9,11 +9,11 @@ from django.db.models import Q
 
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import Task, app, EXPIRES_IN_ONE_DAY
-from websecmap.organizations.models import Url
-from websecmap.reporting.models import UrlReport
+from websecmap.organizations.models import Url, Organization
+from websecmap.reporting.models import UrlReport, ScanPolicy
 from websecmap.reporting.severity import get_severity
-from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
+from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES, SCANNERS_BY_SCAN_TYPE
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, ScanType, ScanSubject
 from websecmap.scanners.scanner.utils import in_chunks
 
 log = logging.getLogger(__package__)
@@ -1267,3 +1267,62 @@ def relevant_urls_at_timepoint(queryset, when: datetime):
     )
     # print(both.query)
     return list(set(both))
+
+
+def add_ultimate_report(name: str = "test_organization", url: str = "example.com"):
+    """
+    Creates all findings from all scans for a domain and organization of choice. This can be used to test the front
+    end reporting capabilities and used in testcases to see if everything is parsed correctly.
+    """
+
+    org = Organization()
+    org.name = name
+
+    url = Url()
+    url.url = url
+    url.save()
+
+    url.organization.add(org)
+    url.save()
+
+    # does it matter what endpoint? guess not...
+    endp = Endpoint()
+    endp.url = url
+    endp.save()
+
+    attach_ultimate_report(url, endp)
+
+
+def attach_ultimate_report_to_everything_in_database():
+    for url in Url.objects.all():
+        for endpoint in url.endpoint_set.all():
+            attach_ultimate_report(url, endpoint)
+
+
+def attach_ultimate_report(url: Url, endpoint: Endpoint):
+
+    now = datetime.now()
+
+    # scantypes = ScanType.objects.all()
+    # scantype_obj_by_name = {}
+    # for sca in scantypes:
+    #     scantype_obj_by_name[sca.name] = sca
+
+    for policy in ScanPolicy.objects.all():
+
+        scanner = SCANNERS_BY_SCAN_TYPE[policy.scan_type]
+
+        if scanner['to'] == ScanSubject.URL:
+            epgs = UrlGenericScan()
+            epgs.url = url
+            epgs.type = policy.scan_type
+            epgs.rating = policy.conclusion
+            epgs.rating_determined_on = now
+            epgs.save()
+        else:
+            epgs = EndpointGenericScan()
+            epgs.endpoint = endpoint
+            epgs.type = policy.scan_type
+            epgs.rating = policy.conclusion
+            epgs.rating_determined_on = now
+            epgs.save()

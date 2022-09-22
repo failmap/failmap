@@ -159,7 +159,7 @@ The admin interface lists four types of scans:
 
 #### Endpoint Generic Scans
 These are actually a variety of different scans stored in the same database structure. The scans saved here are:
-HTTP header scans, ftp and plain_https scans.
+HTTP header scans, ftp and plain_http scans.
 
 #### TLS Qualys scans
 Scans on the HTTPS quality, performed by Qualys.

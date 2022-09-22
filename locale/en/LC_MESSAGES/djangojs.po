@@ -404,7 +404,7 @@ msgid "report_header_tls_qualys"
 msgstr ""
 
 #: static/js/script.js
-msgid "report_header_plain_https"
+msgid "report_header_plain_http"
 msgstr ""
 
 #: static/js/script.js
@@ -516,7 +516,7 @@ msgid "X-XSS-Protection"
 msgstr ""
 
 #: static/js/script.js
-msgid "plain_https"
+msgid "plain_http"
 msgstr ""
 
 #: static/js/script.js

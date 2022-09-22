@@ -41,14 +41,16 @@
   "pk": 3,
   "fields": {
     "name": "Missing HTTPS endpoints",
-    "python_name": "plain_https",
+    "python_name": "plain_http",
     "description": "Scans HTTP endpoints to see if there is an HTTPS counterpart.",
     "to": 0,
     "needs_results_from": 10,
     "plannable_activities": [
       1
     ],
-    "creates_scan_types": []
+    "creates_scan_types": [
+      4
+    ]
   }
 },
 {
@@ -424,7 +426,7 @@
   "model": "scanners.scanner",
   "pk": 21,
   "fields": {
-    "name": "Dummy Scanner (for testcases)",
+    "name": "Dummy Scanner (for testcases )",
     "python_name": "dummy",
     "description": "Scanner that does exactly nothing",
     "to": 0,
@@ -499,7 +501,7 @@
   "model": "scanners.scantype",
   "pk": 4,
   "fields": {
-    "name": "plain_https",
+    "name": "plain_http",
     "description": "Missing Encryption next to unencrypted HTTP",
     "display_order": 30,
     "second_opinion_links": [

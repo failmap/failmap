@@ -18,7 +18,7 @@ SCANNER = "autoexplain_no_https_microsoft"
 EXPLANATION = "service_intentionally_designed_this_way"
 
 query = EndpointGenericScan.objects.all().filter(
-    type="plain_https",
+    type="plain_http",
     is_the_latest_scan=True,
     comply_or_explain_is_explained=False,
     endpoint__is_dead=False,

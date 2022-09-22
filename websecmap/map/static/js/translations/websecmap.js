@@ -122,11 +122,10 @@ const messages = {
         "Missing X-Content-Type-Options header.": "Missing X-Content-Type-Options header.",
 
 
-        // plain_https
+        // plain_http
         "http": "Website (http)",
 
         "plain_http": "Missing transport encryption",
-        "plain_https": "Missing transport encryption (HTTP only)",
         "Redirect from unsafe address": "Redirect from unsafe address",
         "Site does not redirect to secure url, and has no secure alternative on a standard port.": "Site does not redirect to secure url, and has no secure alternative on a standard port.",
         "Has a secure equivalent, which wasn't so in the past.": "Has a secure equivalent, which wasn't so in the past.",
@@ -279,8 +278,8 @@ const messages = {
         "Missing X-Content-Type-Options header.": "Missing X-Content-Type-Options header.",
 
 
-        // plain_https
-        "plain_https": "Ontbrekende versleuteling (HTTP only)",
+        // plain_http
+        "plain_http": "Ontbrekende versleuteling (HTTP only)",
         "Redirect from unsafe address": "Redirect from unsafe address",
         "Site does not redirect to secure url, and has no secure alternative on a standard port.": "Site does not redirect to secure url, and has no secure alternative on a standard port.",
         "Has a secure equivalent, which wasn't so in the past.": "Has a secure equivalent, which wasn't so in the past.",

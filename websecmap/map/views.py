@@ -365,7 +365,7 @@ def index(request, map_configuration=None):
             "SHOW_SERVICES",
             "SHOW_SERVICES_TABLE",
             "SHOW_FTP",
-            "SHOW_PLAIN_HTTPS",
+            "SHOW_PLAIN_HTTP",
             "SHOW_DNSSEC",
             "PLUS_SHOW_INFO",
             "SHOW_HTTP_SECURITY_HEADER_STRICT_TRANSPORT_SECURITY",

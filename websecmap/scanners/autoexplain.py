@@ -46,5 +46,5 @@ def autoexplain_pki_subdomain():
     """
 
     # applicable_subdomains = 'pki'
-    # scan_type = 'plain_https'
+    # scan_type = 'plain_http'
     raise NotImplementedError

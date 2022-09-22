@@ -45,6 +45,17 @@ SCANNERS_BY_PYTHON_NAME: Dict[str, Any] = {}
 for scanner in SCANNERS:
     SCANNERS_BY_PYTHON_NAME[scanner["python_name"]] = scanner
 
+SCANNERS_BY_PYTHON_NAME: Dict[str, Any] = {}
+for scanner in SCANNERS:
+    SCANNERS_BY_PYTHON_NAME[scanner["python_name"]] = scanner
+
+SCANNERS_BY_SCAN_TYPE: Dict[str, Any] = {}
+for scanner in SCANNERS:
+    for epst in scanner["creates_endpoint_scan_types"]:
+        SCANNERS_BY_SCAN_TYPE[epst] = scanner
+    for epst in scanner["creates_url_scan_types"]:
+        SCANNERS_BY_SCAN_TYPE[epst] = scanner
+
 # todo: add config options for each of the scans defined above, include them in constance.
 # todo: check these config options dynamically at the right moments, so to reduce maintenance.
 

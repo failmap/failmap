@@ -82,7 +82,7 @@ class Command(BaseCommand):
         # dnssec: scan
         plan_daily("dnssec", "scan", "every day"),
         consume("dnssec", "planned_scan", "every 10 minutes", amount=50),
-        # plain_https: scan
+        # plain_http: scan
         plan_daily("plain_http", "scan", "every day"),
         consume("plain_http", "planned_scan", "every 10 minutes", amount=200),
         # subdomains: verify, discover
