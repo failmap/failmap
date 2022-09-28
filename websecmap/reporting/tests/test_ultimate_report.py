@@ -10,6 +10,9 @@ def test_create_ultimate_report(db, default_scan_metadata, default_policy):
     # this integrity is also not desired, as you might want to collect metrics first and then
     # determine what to use them for.
 
+    # Todo: not all metrics are ending up in one report, probably because the reporting part might just take one
+    # metric
+
     # this should run without crashes
     add_ultimate_report()
     create_organization_reports_now([Organization.objects.all().first().id])

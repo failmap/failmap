@@ -155,7 +155,8 @@ class CoordinateAdminInline(CompactInline):
 class OrganizationRatingAdminInline(CompactInline):
     model = OrganizationReport
     extra = 0
-    readonly_fields = ("organization", "high", "medium", "low", "at_when", "calculation")
+    # with dozens of forms, the field limit is easily exceeded.
+    readonly_fields = [f.name for f in OrganizationReport._meta.fields]
     can_delete = False
     ordering = ["-at_when"]
 
@@ -163,7 +164,8 @@ class OrganizationRatingAdminInline(CompactInline):
 class UrlRatingAdminInline(CompactInline):
     model = UrlReport
     extra = 0
-    readonly_fields = ("url", "high", "medium", "low", "at_when", "calculation")
+    # with dozens of forms, the field limit is easily exceeded.
+    readonly_fields = [f.name for f in UrlReport._meta.fields]
     can_delete = False
     ordering = ["-at_when"]
 
@@ -223,14 +225,14 @@ class ActionMixin:
 
         for scanner in SCANNERS:
             # these discover:
-            if scanner["can discover urls"] or scanner["can discover endpoints"]:
+            if scanner["can_discover_urls"] or scanner["can_discover_endpoints"]:
                 func = discover_function_maker(scanner["name"], scanner["name"])
                 unique_name = f"discover_{scanner['name']}"
                 actions[unique_name] = (func, unique_name, f"🗺 {scanner['name']}")
 
         for scanner in SCANNERS:
             # these verify:
-            if scanner["can verify urls"] or scanner["can verify endpoints"]:
+            if scanner["can_verify_urls"] or scanner["can_verify_endpoints"]:
                 func = verify_function_maker(scanner["name"], scanner["name"])
                 unique_name = f"verify_{scanner['name']}"
                 actions[unique_name] = (func, unique_name, f"[X] {scanner['name']}")
@@ -322,7 +324,6 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
 # https://docs.djangoproject.com/en/2.0/ref/forms/validation/
 class MyUrlAdminForm(forms.ModelForm):
-    @property
     def clean_url(self):
 
         url_string = self.data.get("url")
@@ -397,6 +398,10 @@ class MyUrlAdminForm(forms.ModelForm):
         if Url.objects.all().filter(url=self.data.get("url"), is_dead=False).count() > 1:
             # format_html = XSS :)
             raise ValidationError(format_html(_(message)))
+
+    class Meta:
+        model = Url
+        fields = "__all__"
 
 
 class HasEndpointScansListFilter(admin.SimpleListFilter):
@@ -585,7 +590,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
             f"</span> <span style='color: yellow'>{urlreport.low}</span>"
         )
 
-    inlines = [UrlGenericScanAdminInline, EndpointAdminInline, UrlRatingAdminInline, UrlIpInline]
+    inlines = [UrlGenericScanAdminInline, EndpointAdminInline, UrlRatingAdminInline]
 
     actions = []
 
