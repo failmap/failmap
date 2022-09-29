@@ -1035,6 +1035,8 @@ CONSTANCE_CONFIG = {
     "RELEVANT_FOR_UI_MEDIUM": (True, "If MEDIUM should be shown in best/worst, statistics", bool),
     "RELEVANT_FOR_UI_LOW": (True, "If LOW should be shown in best/worst, statistics", bool),
     "RELEVANT_FOR_UI_GOOD": (True, "If GOOD should be shown in best/worst, statistics", bool),
+    "FOOTER_CONTENT_HTML_EN": ("", "Links and other html stuff on the footer of the page. HTML in a container.", str),
+    "FOOTER_CONTENT_HTML_NL": ("", "Links and other html stuff on the footer of the page. HTML in a container.", str),
     # todo: add config for enabled languages...
 }
 
@@ -1160,6 +1162,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "INTRO_LEADER_HTML_NL",
             ),
         ),
+        ("Footer", ("FOOTER_CONTENT_HTML_EN", "FOOTER_CONTENT_HTML_NL")),
         (
             "What to show on the reporting page",
             (

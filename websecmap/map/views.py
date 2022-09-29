@@ -257,6 +257,10 @@ def config_content():
             "leader_html_en": configuration["INTRO_LEADER_HTML_EN"],
             "leader_html_nl": configuration["INTRO_LEADER_HTML_NL"],
         },
+        "footer": {
+            "content_html_en": configuration["FOOTER_CONTENT_HTML_EN"],
+            "content_html_nl": configuration["FOOTER_CONTENT_HTML_NL"],
+        },
         "responsible_organization": {
             "name": configuration["RESPONSIBLE_ORGANIZATION_NAME"],
             "promo_text": configuration["RESPONSIBLE_ORGANIZATION_PROMO_TEXT"],
