@@ -1030,6 +1030,7 @@ CONSTANCE_CONFIG = {
     ),
     "CUSTOM_CSS": ("", "Keep things simple", str),
     "LOGO_IMAGE": ("", "SVG Application logo, aim for 50 pixels high.", str),
+    "FAVICON": ("websecmap", "Choose your pre-shipped from the favicons directory.", str),
     "RELEVANT_FOR_UI_HIGH": (True, "If HIGH should be shown in best/worst, statistics", bool),
     "RELEVANT_FOR_UI_MEDIUM": (True, "If MEDIUM should be shown in best/worst, statistics", bool),
     "RELEVANT_FOR_UI_LOW": (True, "If LOW should be shown in best/worst, statistics", bool),
@@ -1187,6 +1188,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             (
                 "CUSTOM_CSS",
                 "LOGO_IMAGE",
+                "FAVICON",
                 "RELEVANT_FOR_UI_HIGH",
                 "RELEVANT_FOR_UI_MEDIUM",
                 "RELEVANT_FOR_UI_LOW",
