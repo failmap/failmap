@@ -118,8 +118,11 @@ class ScanPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         if obj.not_testable:
             text += "❌ Not Testable"
 
+        if obj.ok:
+            text += "🟢 ok"
+
         if not text:
-            text = "🟢 ok"
+            text = "⚪ neutral"
 
         return format_html(text)
 

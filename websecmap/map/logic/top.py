@@ -39,7 +39,8 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", week
               low,
               total_urls,
               total_endpoints,
-              organization.is_dead
+              organization.is_dead,
+              ok
             FROM map_organizationreport
             INNER JOIN
               organization on organization.id = map_organizationreport.organization_id
@@ -95,7 +96,9 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", wee
                 medium,
                 low,
                 total_urls,
-                total_endpoints
+                total_endpoints,
+                organization.is_dead,
+                ok
             FROM map_organizationreport
             INNER JOIN
               organization on organization.id = map_organizationreport.organization_id
@@ -157,11 +160,13 @@ def rows_to_dataset(rows, when):
             "high": i[6],
             "medium": i[7],
             "low": i[8],
+            "ok": i[12],
             "total_urls": i[9],
             "total_endpoints": i[10],
             "high_div_endpoints": f"{ceil((int(i[6]) / int(i[10])) * 100)}" if i[10] else 0,
             "mid_div_endpoints": f"{ceil((int(i[7]) / int(i[10])) * 100)}" if i[10] else 0,
             "low_div_endpoints": f"{ceil((int(i[8]) / int(i[10])) * 100)}" if i[10] else 0,
+            "ok_div_endpoints": f"{ceil((int(i[12]) / int(i[10])) * 100)}" if i[10] else 0,
             # Add all percentages, which is sort of an indication how bad / well the organization is doing overall.
             "relative": (
                 ceil((int(i[6]) / int(i[10])) * 1000)

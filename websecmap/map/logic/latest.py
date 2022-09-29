@@ -62,6 +62,7 @@ def get_all_latest_scans(country, organization_type):
                     "high": calculation.get("high", 0),
                     "medium": calculation.get("medium", 0),
                     "low": calculation.get("low", 0),
+                    "ok": calculation.get("ok", 0),
                     "last_scan_humanized": naturaltime(scan.last_scan_moment),
                     "last_scan_moment": scan.last_scan_moment.isoformat(),
                 }
@@ -105,6 +106,7 @@ def get_all_latest_scans(country, organization_type):
                     "high": calculation.get("high", 0),
                     "medium": calculation.get("medium", 0),
                     "low": calculation.get("low", 0),
+                    "ok": calculation.get("ok", 0),
                     "last_scan_humanized": naturaltime(scan.last_scan_moment),
                     "last_scan_moment": scan.last_scan_moment.isoformat(),
                 }

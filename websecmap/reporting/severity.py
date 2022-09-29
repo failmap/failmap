@@ -48,7 +48,6 @@ def strip_policy_data(policy: ScanPolicy) -> Dict[str, Any]:
     data.pop("annotation", None)
     data.pop("id", None)
     data.pop("total_issues", None)
-    data.pop("ok", None)
     data.pop("scan_type", None)
     data.pop("conclusion", None)
     return data
@@ -60,13 +59,12 @@ def standard_calculation(
     high: int = 0,
     medium: int = 0,
     low: int = 0,
+    ok: int = 0,
     not_testable: bool = False,
     not_applicable: bool = False,
     error_in_test: bool = False,
 ) -> Dict[str, Any]:
     # Scan might be high, medium, low, whatever, but the policy decides what that means.
-
-    ok = 0 if any([high, medium, low, not_testable, not_testable, error_in_test]) else 1  # pylint: disable=invalid-name
 
     return {
         "type": scan.type,

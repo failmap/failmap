@@ -75,7 +75,7 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
         if "ratings" in urlrating.calculation:
             for rating in urlrating.calculation["ratings"]:
                 if rating["type"] not in new_measurement:
-                    new_measurement[rating["type"]] = {"high": 0, "medium": 0, "low": 0}
+                    new_measurement[rating["type"]] = {"high": 0, "medium": 0, "low": 0, "ok": 0}
 
                 if rating["type"] not in scan_types:
                     scan_types.append(rating["type"])
@@ -83,6 +83,7 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
                 new_measurement[rating["type"]]["high"] += rating["high"]
                 new_measurement[rating["type"]]["medium"] += rating["medium"]
                 new_measurement[rating["type"]]["low"] += rating["low"]
+                new_measurement[rating["type"]]["ok"] += rating["ok"]
 
         if "endpoints" not in urlrating.calculation:
             continue
@@ -90,7 +91,7 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
         for endpoint in urlrating.calculation["endpoints"]:
             for rating in endpoint["ratings"]:
                 if rating["type"] not in new_measurement:
-                    new_measurement[rating["type"]] = {"high": 0, "medium": 0, "low": 0}
+                    new_measurement[rating["type"]] = {"high": 0, "medium": 0, "low": 0, "ok": 0}
 
                 if rating["type"] not in scan_types:
                     scan_types.append(rating["type"])
@@ -98,6 +99,7 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
                 new_measurement[rating["type"]]["high"] += rating["high"]
                 new_measurement[rating["type"]]["medium"] += rating["medium"]
                 new_measurement[rating["type"]]["low"] += rating["low"]
+                new_measurement[rating["type"]]["ok"] += rating["ok"]
 
     # and the oldest stats, which should be the same function
     for urlrating in oldest_urlratings:
@@ -105,7 +107,7 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
         if "ratings" in urlrating.calculation:
             for rating in urlrating.calculation["ratings"]:
                 if rating["type"] not in old_measurement:
-                    old_measurement[rating["type"]] = {"high": 0, "medium": 0, "low": 0}
+                    old_measurement[rating["type"]] = {"high": 0, "medium": 0, "low": 0, "ok": 0}
 
                 if rating["type"] not in scan_types:
                     scan_types.append(rating["type"])
@@ -113,6 +115,7 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
                 old_measurement[rating["type"]]["high"] += rating["high"]
                 old_measurement[rating["type"]]["medium"] += rating["medium"]
                 old_measurement[rating["type"]]["low"] += rating["low"]
+                old_measurement[rating["type"]]["ok"] += rating["ok"]
 
         if "endpoints" not in urlrating.calculation:
             continue
@@ -120,7 +123,7 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
         for endpoint in urlrating.calculation["endpoints"]:
             for rating in endpoint["ratings"]:
                 if rating["type"] not in old_measurement:
-                    old_measurement[rating["type"]] = {"high": 0, "medium": 0, "low": 0}
+                    old_measurement[rating["type"]] = {"high": 0, "medium": 0, "low": 0, "ok": 0}
 
                 if rating["type"] not in scan_types:
                     scan_types.append(rating["type"])
@@ -128,6 +131,7 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
                 old_measurement[rating["type"]]["high"] += rating["high"]
                 old_measurement[rating["type"]]["medium"] += rating["medium"]
                 old_measurement[rating["type"]]["low"] += rating["low"]
+                old_measurement[rating["type"]]["ok"] += rating["ok"]
 
     # and now do some magic to see the changes in this timespan:
     changes = {}
@@ -147,17 +151,20 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
                 "high": old_measurement[scan_type].get("high", 0),
                 "medium": old_measurement[scan_type].get("medium", 0),
                 "low": old_measurement[scan_type].get("low", 0),
+                "ok": old_measurement[scan_type].get("ok", 0),
             },
             "new": {
                 "date": when,
                 "high": new_measurement[scan_type].get("high", 0),
                 "medium": new_measurement[scan_type].get("medium", 0),
                 "low": new_measurement[scan_type].get("low", 0),
+                "ok": new_measurement[scan_type].get("ok", 0),
             },
             "improvements": {
                 "high": old_measurement[scan_type].get("high", 0) - new_measurement[scan_type].get("high", 0),
                 "medium": old_measurement[scan_type].get("medium", 0) - new_measurement[scan_type].get("medium", 0),
                 "low": old_measurement[scan_type].get("low", 0) - new_measurement[scan_type].get("low", 0),
+                "ok": old_measurement[scan_type].get("ok", 0) - new_measurement[scan_type].get("ok", 0),
             },
         }
 
@@ -169,12 +176,14 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
                 "medium": changes.get("overall", {}).get("old", {}).get("medium", 0)
                 + changes[scan_type]["old"]["medium"],
                 "low": changes.get("overall", {}).get("old", {}).get("low", 0) + changes[scan_type]["old"]["low"],
+                "ok": changes.get("overall", {}).get("old", {}).get("ok", 0) + changes[scan_type]["old"]["ok"],
             },
             "new": {
                 "high": changes.get("overall", {}).get("new", {}).get("high", 0) + changes[scan_type]["new"]["high"],
                 "medium": changes.get("overall", {}).get("new", {}).get("medium", 0)
                 + changes[scan_type]["new"]["medium"],
                 "low": changes.get("overall", {}).get("new", {}).get("low", 0) + changes[scan_type]["new"]["low"],
+                "ok": changes.get("overall", {}).get("new", {}).get("ok", 0) + changes[scan_type]["new"]["ok"],
             },
             "improvements": {
                 "high": changes.get("overall", {}).get("improvements", {}).get("high", 0)
@@ -183,6 +192,8 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
                 + changes[scan_type]["improvements"]["medium"],
                 "low": changes.get("overall", {}).get("improvements", {}).get("low", 0)
                 + changes[scan_type]["improvements"]["low"],
+                "ok": changes.get("overall", {}).get("improvements", {}).get("ok", 0)
+                + changes[scan_type]["improvements"]["ok"],
             },
         }
 

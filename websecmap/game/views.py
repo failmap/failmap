@@ -244,8 +244,10 @@ def scores(request):
             final_calculation["high"] += temp_calculation["high"]
             final_calculation["medium"] += temp_calculation["medium"]
             final_calculation["low"] += temp_calculation["low"]
+            final_calculation["ok"] += temp_calculation["ok"]
 
         score_multiplier = {
+            "ok": 1,
             "low": 100,
             "medium": 250,
             "high": 1000,
@@ -280,6 +282,9 @@ def scores(request):
             "low": final_calculation["low"],
             "low_multiplier": score_multiplier["low"],
             "low_score": final_calculation["low"] * score_multiplier["low"],
+            "ok": final_calculation["ok"],
+            "ok_multiplier": score_multiplier["ok"],
+            "ok_score": final_calculation["ok"] * score_multiplier["ok"],
             "added_organizations": added_organizations,
             "added_organizations_multiplier": score_multiplier["organization"],
             "added_organizations_score": added_organizations * score_multiplier["organization"],
@@ -731,6 +736,7 @@ def update_feature(feature, scan):
     feature["properties"]["high"] += calculation["high"]
     feature["properties"]["medium"] += calculation["medium"]
     feature["properties"]["low"] += calculation["low"]
+    feature["properties"]["ok"] += calculation["ok"]
 
     color = (
         "red"
@@ -760,6 +766,7 @@ def get_bare_organization_feature(submitted_organization):
             "high": 0,
             "medium": 0,
             "low": 0,
+            "ok": 0,
             "data_from": 0,
             "color": "pending",
             "total_urls": 0,
@@ -810,6 +817,7 @@ def add_bare_url_features(features, my_submitted_urls):
                 "high": 0,
                 "medium": 0,
                 "low": 0,
+                "ok": 0,
                 "data_from": 0,
                 "color": "pending",
                 "total_urls": 0,
@@ -879,6 +887,7 @@ def make_new_feature(organization, scan):
             "high": calculation["high"],
             "medium": calculation["medium"],
             "low": calculation["low"],
+            "ok": calculation["ok"],
             "data_from": scan.last_scan_moment,
             "color": color,
             "total_urls": 0,  # = 100%

@@ -55,6 +55,7 @@ def get_organization_report_by_id(organization_id: int, weeks_back: int = 0):
             "organizationreport__high",
             "organizationreport__medium",
             "organizationreport__low",
+            "organizationreport__ok",
         ).latest("organizationreport__at_when")
     except Organization.DoesNotExist:
         return {}
@@ -74,6 +75,7 @@ def get_organization_report_by_id(organization_id: int, weeks_back: int = 0):
         "high": values["organizationreport__high"],
         "medium": values["organizationreport__medium"],
         "low": values["organizationreport__low"],
+        "ok": values["organizationreport__ok"],
     }
 
     return report
