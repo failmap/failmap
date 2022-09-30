@@ -493,7 +493,8 @@ def organization_report_by_id(
         return empty_response()
 
     report = get_organization_report_by_id(organization_id, weeks_back)
-    return JsonResponse(report, safe=False, encoder=JSEncoder)
+    return HttpResponse(orjson.dumps(report), "text/json", 200)
+    # return JsonResponse(report, safe=False, encoder=JSEncoder)
 
 
 @cache_page(ONE_HOUR)
@@ -510,43 +511,50 @@ def organization_report_by_name(
     report = get_organization_report_by_name(
         organization_name=organization_name, country=country, organization_type=organization_type, weeks_back=weeks_back
     )
-    return JsonResponse(report, safe=False, encoder=JSEncoder)
+    return HttpResponse(orjson.dumps(report), "text/json", 200)
+    # return JsonResponse(report, safe=False, encoder=JSEncoder)
 
 
 @cache_page(ONE_HOUR)
 def top_fail(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
     data = get_top_fail_data(country, organization_type, weeks_back)
-    return JsonResponse(data, encoder=JSEncoder, safe=False)
+    return HttpResponse(orjson.dumps(data), "text/json", 200)
+    # return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @cache_page(ONE_HOUR)
 def top_win(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
     data = get_top_win_data(country, organization_type, weeks_back)
-    return JsonResponse(data, encoder=JSEncoder, safe=False)
+    return HttpResponse(orjson.dumps(data), "text/json", 200)
+    # return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @cache_page(ONE_HOUR)
 def stats(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0, days: int = 365):
     reports = get_stats(country, organization_type, weeks_back, days)
-    return JsonResponse(reports, encoder=JSEncoder)
+    return HttpResponse(orjson.dumps(reports), "text/json", 200)
+    # return JsonResponse(reports, encoder=JSEncoder)
 
 
 @cache_page(ONE_HOUR)
 def v_what_to_improve(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, issue_type=""):
     reports = what_to_improve(country, organization_type, issue_type)
-    return JsonResponse(reports, encoder=JSEncoder, safe=False)
+    return HttpResponse(orjson.dumps(reports), "text/json", 200)
+    # return JsonResponse(reports, encoder=JSEncoder, safe=False)
 
 
 @cache_page(ONE_HOUR)
 def get_short_and_simple_stats_(request, weeks_back=0):
     data = get_short_and_simple_stats(weeks_back)
-    return JsonResponse(data, encoder=JSEncoder)
+    return HttpResponse(orjson.dumps(data), "text/json", 200)
+    # return JsonResponse(data, encoder=JSEncoder)
 
 
 @cache_page(ONE_HOUR)
 def organization_vulnerability_timeline(request, organization_id: int, days: int = 365):
     my_stats = get_organization_vulnerability_timeline(organization_id, days=days)
-    return JsonResponse(my_stats, encoder=JSEncoder, safe=False)
+    # return JsonResponse(my_stats, encoder=JSEncoder, safe=False)
+    return HttpResponse(orjson.dumps(my_stats), "text/json", 200)
 
 
 @cache_page(ONE_HOUR)
@@ -554,7 +562,8 @@ def organization_vulnerability_timeline_via_name(
     request, organization_name: str, organization_type: str = "", country: str = "", days: int = 365
 ):
     my_stats = get_organization_vulnerability_timeline_via_name(organization_name, organization_type, country, days)
-    return JsonResponse(my_stats, encoder=JSEncoder, safe=False)
+    return HttpResponse(orjson.dumps(my_stats), "text/json", 200)
+    # return JsonResponse(my_stats, encoder=JSEncoder, safe=False)
 
 
 @cache_page(ONE_HOUR)
@@ -562,7 +571,8 @@ def vulnerability_graphs(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0, days: int = 365
 ):
     my_stats = get_vulnerability_graph(country, organization_type, weeks_back, days)
-    return JsonResponse(my_stats, encoder=JSEncoder)
+    return HttpResponse(orjson.dumps(my_stats), "text/json", 200)
+    # return JsonResponse(my_stats, encoder=JSEncoder)
 
 
 @cache_page(TEN_MINUTES)
@@ -574,7 +584,9 @@ def improvements(
     weeks_duration: int = 0,
 ):
     changes = get_improvements(country, organization_type, weeks_back, weeks_duration)
-    return JsonResponse(changes, encoder=JSEncoder)
+    return HttpResponse(orjson.dumps(changes), "text/json", 200)
+
+    # return JsonResponse(changes, encoder=JSEncoder)
 
 
 @cache_page(ONE_HOUR)
@@ -586,7 +598,8 @@ def ticker(
     weeks_duration: int = 0,
 ):
     data = get_ticker_data(country, organization_type, weeks_back, weeks_duration)
-    return JsonResponse(data, encoder=JSEncoder, safe=False)
+    return HttpResponse(orjson.dumps(data), "text/json", 200)
+    # return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @cache_page(FOUR_HOURS)
@@ -671,19 +684,23 @@ def map_data(
 ):
     data = get_map_data(country, organization_type, days_back, displayed_issue)
 
-    return JsonResponse(data, encoder=JSEncoder)
+    return HttpResponse(orjson.dumps(data), "text/json", 200)
+
+    # return JsonResponse(data, encoder=JSEncoder)
 
 
 @cache_page(TEN_MINUTES)
 def all_latest_scans(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER):
     dataset = get_all_latest_scans(country, organization_type)
-    return JsonResponse(dataset, encoder=JSEncoder)
+    return HttpResponse(orjson.dumps(dataset), "text/json", 200)
+    # return JsonResponse(dataset, encoder=JSEncoder)
 
 
 @cache_page(TEN_MINUTES)
 def explain_list(request, country, organization_type):
     data = get_recent_explains(country, organization_type)
-    return JsonResponse(data, encoder=JSEncoder, safe=False)
+    return HttpResponse(orjson.dumps(dataset), "text/json", 200)
+    # return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @cache_page(TEN_MINUTES)
@@ -691,7 +708,9 @@ def updates_on_organization(request, organization_id):
     if not organization_id:
         return empty_response()
 
-    return JsonResponse(latest_updates(organization_id), encoder=JSEncoder)
+    data = latest_updates(organization_id)
+    return HttpResponse(orjson.dumps(data), "text/json", 200)
+    # return JsonResponse(data, encoder=JSEncoder)
 
 
 def organization_autcomplete(
@@ -709,7 +728,8 @@ def organization_autcomplete(
 @cache_page(TEN_MINUTES)
 def upcoming_and_past_scans(request):
     data = get_next_and_last_scans()
-    return JsonResponse(data, encoder=JSEncoder, safe=False)
+    return HttpResponse(orjson.dumps(data), "text/json", 200)
+    # return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @cache_page(ONE_DAY)
