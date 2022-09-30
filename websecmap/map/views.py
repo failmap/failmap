@@ -4,6 +4,7 @@ from datetime import datetime
 from wsgiref.util import FileWrapper
 
 import django_excel as excel
+import orjson
 import pytz
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
@@ -220,7 +221,7 @@ def countries_and_layers():
 def config_content():
     # This is converted to some hierarchy to make more sense, and to _not_ export things like keys
     configuration = get_all_values()
-    scan_types = get_scanners_for_frontend()
+    scan_types = get_scanners_for_frontend(configuration)
     base_config = {
         "show": {
             "intro": configuration["SHOW_INTRO"],
@@ -336,8 +337,9 @@ def config_content():
 
 
 @cache_page(ONE_HOUR)
-def config(request) -> JsonResponse:
-    return JsonResponse(config_content(), encoder=JSEncoder)
+def config(request) -> HttpResponse:
+    # return JsonResponse(config_content(), encoder=orjson.dumps)
+    return HttpResponse(orjson.dumps(config_content()), "text/json", 200)
 
 
 @cache_page(ONE_HOUR)
@@ -620,7 +622,7 @@ def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type
         report = (
             OrganizationReport.objects.all()
             .filter(organization=record.id)
-            .only("total_urls", "total_endpoints", "high", "medium", "low", "at_when")
+            .only("total_urls", "total_endpoints", "high", "medium", "low", "ok", "at_when")
             .last()
         )
         if report:
@@ -635,6 +637,7 @@ def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type
                     "high": report.high,
                     "medium": report.medium,
                     "low": report.low,
+                    "ok": report.ok,
                     "at_when": report.at_when,
                 }
             )
@@ -650,6 +653,7 @@ def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type
                     "high": 0,
                     "medium": 0,
                     "low": 0,
+                    "ok": 0,
                     "at_when": None,
                 }
             )

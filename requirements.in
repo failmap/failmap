@@ -92,6 +92,9 @@ urllib3
 # needed for mapping reasons.
 simplejson
 
+# orjson is much faster, so lets use that.
+orjson
+
 # autoexplain
 pyopenssl
 

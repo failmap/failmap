@@ -92,7 +92,7 @@ def get_organization_vulnerability_timeline(organization_id: int, days: int = 36
                 "high": rating.url_issues_high + rating.endpoint_issues_high,
                 "medium": rating.url_issues_medium + rating.endpoint_issues_medium,
                 "low": rating.url_issues_low + rating.endpoint_issues_low,
-                "ok": rating.url_issues_ok + rating.endpoint_issues_ok,
+                "ok": rating.url_ok + rating.endpoint_ok,
             }
         )
 

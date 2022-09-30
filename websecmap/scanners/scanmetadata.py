@@ -5,7 +5,6 @@ from typing import Dict, Any, List
 from django.db.models import Prefetch
 
 from websecmap.app import log
-from websecmap.app.constance import get_all_values
 from websecmap.reporting.models import ScanPolicy
 from websecmap.scanners.models import Scanner, ScanSubject, ScanType
 
@@ -109,26 +108,23 @@ def get_impacts_per_scan_type() -> Dict[str, List[str]]:
     # to speed up stuff....
     policies = defaultdict(list)
 
-    for policy in ScanPolicy.objects.all():
-        policies[policy.scan_type] += scan_type_policy_to_text(policy)
+    for policy in ScanPolicy.objects.all().only("scan_type", "high", "medium", "low", "ok"):
+        # remove redundant items
+        if policy not in policies[policy.scan_type]:
+            policies[policy.scan_type] += scan_type_policy_to_text(policy)
 
-    # remove redundant items
-    new_policies = {}
-    for policyx in policies:
-        new_policies[policyx] = list(sorted(list(set(policies[policyx]))))
-
-    return dict(new_policies)
+    return policies
 
 
-def get_scanners_for_frontend():
+def get_scanners_for_frontend(all_settings):
     # frontend scanners have details about documentation
 
-    all_settings = get_all_values()
     possible_relevant_impacts = get_impacts_per_scan_type()
 
     results = {}
     scantypes = (
         ScanType.objects.all()
+        .only("id", "name")
         .order_by("display_order")
         .prefetch_related(
             Prefetch("category", to_attr="cat"),

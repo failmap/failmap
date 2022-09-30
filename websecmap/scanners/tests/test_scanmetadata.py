@@ -1,3 +1,4 @@
+from websecmap.app.constance import get_all_values
 from websecmap.scanners import read_scan_config_from_file, SCANNERS_BY_ID
 from websecmap.scanners.models import Scanner
 from websecmap.scanners.scanmetadata import (
@@ -43,7 +44,7 @@ def test_get_scanners_for_backend(db, default_scan_metadata):
 
 
 def test_get_scanners_for_frontend(db, default_scan_metadata, default_policy):
-    data = get_scanners_for_frontend()
+    data = get_scanners_for_frontend(get_all_values())
 
     assert len(data) > 10
 
