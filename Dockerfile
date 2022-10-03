@@ -1,5 +1,5 @@
 # base build on small footprint image
-FROM alpine:3.16 as build
+FROM alpine:3.12 as build
 
 RUN apk --no-cache add \
   build-base \
@@ -42,7 +42,7 @@ COPY requirements.txt requirements-deploy.txt requirements.in requirements-deplo
 RUN pip install -qr /source/requirements.txt -r /source/requirements-deploy.txt
 
 # restart with a clean image
-FROM alpine:3.16
+FROM alpine:3.12
 
 USER root
 
