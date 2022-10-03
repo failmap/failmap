@@ -28,8 +28,7 @@ Web Security Map depends on tons of services and open source projects.
 
 *   TLS Ratings: [Qualys SSL labs](https://www.ssllabs.com/ssltest/)
 
-*   DNS exploration: [DNS Recon](https://github.com/darkoperator/dnsrecon),
-[theHarvester](https://github.com/laramies/theHarvester)
+*   DNS exploration: [DNS Recon](https://github.com/darkoperator/dnsrecon)
 
 *   Styling: [Twitter Bootstrap](http://getbootstrap.com/) \+ creativity
 

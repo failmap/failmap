@@ -11,7 +11,7 @@ import time
 from celery import Task, group
 from django.conf import settings
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, ParentFailed, app
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
@@ -143,7 +143,9 @@ def store(result, endpoint_id):
     """
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
-        return ParentFailed("skipping result parsing because scan failed.", cause=result)
+        # return ParentFailed("skipping result parsing because scan failed.", cause=result)
+        # return the same type and structure
+        return {"status": "failure", "result": f"ParentFailed due to {result}."}
 
     # Messages are translated for display. Add the exact messages in: /failmap/map/static/js/script.js
     # Run "failmap translate" to have the messages added to:
