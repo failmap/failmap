@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict, Any
 import json
 
@@ -6,7 +7,9 @@ default_app_config = "websecmap.scanners.apps.ScannersConfig"
 
 def read_scan_config_from_file():
     # No try and except: just crash when things go south:
-    bootstrap_file_location = "scanmetadata_bootstrap_cache_writable_by_application/constance_definitions.json"
+    path = Path(__file__).parent.parent.parent
+
+    bootstrap_file_location = f"{path}/scanmetadata_bootstrap_cache_writable_by_application/constance_definitions.json"
     print(f"Attempting to read constance definitions from {bootstrap_file_location}.")
 
     try:
