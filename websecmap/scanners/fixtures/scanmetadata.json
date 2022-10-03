@@ -1,441 +1,65 @@
 [
 {
-  "model": "scanners.scanner",
+  "model": "scanners.scanneractivity",
   "pk": 1,
   "fields": {
-    "name": "TLS Quality from Qualys",
-    "python_name": "tls_qualys",
-    "description": "Investigate HTTPS services on port 443 to find the quality and security on it's encryption.",
-    "to": 0,
-    "needs_results_from": 10,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": [
-      1,
-      2
-    ]
+    "name": "scan"
   }
 },
 {
-  "model": "scanners.scanner",
+  "model": "scanners.scanneractivity",
   "pk": 2,
   "fields": {
-    "name": "File Transfer Protocol using HTTPS",
-    "python_name": "ftp",
-    "description": "Scans FTP services on port 21 (default port) if they support TLS or SSL.",
-    "to": 0,
-    "needs_results_from": 2,
-    "plannable_activities": [
-      1,
-      2,
-      3
-    ],
-    "creates_scan_types": [
-      3
-    ]
+    "name": "discover"
   }
 },
 {
-  "model": "scanners.scanner",
+  "model": "scanners.scanneractivity",
   "pk": 3,
   "fields": {
-    "name": "Missing HTTPS endpoints",
-    "python_name": "plain_http",
-    "description": "Scans HTTP endpoints to see if there is an HTTPS counterpart.",
-    "to": 0,
-    "needs_results_from": 10,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": [
-      4
-    ]
+    "name": "verify"
   }
 },
 {
-  "model": "scanners.scanner",
+  "model": "scanners.scantypecategory",
+  "pk": 1,
+  "fields": {
+    "name": "confidentiality"
+  }
+},
+{
+  "model": "scanners.scantypecategory",
+  "pk": 2,
+  "fields": {
+    "name": "integrity"
+  }
+},
+{
+  "model": "scanners.scantypecategory",
+  "pk": 3,
+  "fields": {
+    "name": "availability"
+  }
+},
+{
+  "model": "scanners.scantypecategory",
   "pk": 4,
   "fields": {
-    "name": "DNSSEC Domain Name Security",
-    "python_name": "dnssec",
-    "description": "Scans HTTP endpoints to see if there is an HTTPS counterpart.",
-    "to": 1,
-    "needs_results_from": null,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": [
-      5
-    ]
+    "name": "website"
   }
 },
 {
-  "model": "scanners.scanner",
+  "model": "scanners.scantypecategory",
   "pk": 5,
   "fields": {
-    "name": "HTTP Security Headers (multiple ports)",
-    "python_name": "security_headers",
-    "description": "Contacts HTTP services to determine if all security headers are enabled.",
-    "to": 0,
-    "needs_results_from": 10,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": [
-      6,
-      7,
-      8,
-      9
-    ]
+    "name": "email"
   }
 },
 {
-  "model": "scanners.scanner",
+  "model": "scanners.scantypecategory",
   "pk": 6,
   "fields": {
-    "name": "Discover Subdomains (NSEC + crt.sh) (internal)",
-    "python_name": "subdomains",
-    "description": "Uses NSEC1 and Certificate Tranparency to discover new urls.",
-    "to": 1,
-    "needs_results_from": null,
-    "plannable_activities": [
-      2,
-      3
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 7,
-  "fields": {
-    "name": "dns_known_subdomains (internal)",
-    "python_name": "dns_known_subdomains",
-    "description": "Subdomain discovery using known subdomains",
-    "to": 1,
-    "needs_results_from": null,
-    "plannable_activities": [
-      2
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 8,
-  "fields": {
-    "name": "Remove useless wildcard websites (internal)",
-    "python_name": "dns_clean_wildcards",
-    "description": "Subdomain discovery using known subdomains",
-    "to": 1,
-    "needs_results_from": null,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 9,
-  "fields": {
-    "name": "Discover Wildcards on Domains (internal)",
-    "python_name": "dns_wildcards",
-    "description": "Discover if a domain/subdomain has a wildcard DNS entry.",
-    "to": 1,
-    "needs_results_from": null,
-    "plannable_activities": [
-      2
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 10,
-  "fields": {
-    "name": "HTTP/HTTPS endpoints on various ports (internal)",
-    "python_name": "http",
-    "description": "Discovers and verifies the existence of HTTP/HTTPS services on standard and alternative ports.",
-    "to": 0,
-    "needs_results_from": null,
-    "plannable_activities": [
-      2,
-      3
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 11,
-  "fields": {
-    "name": "Verify that unresolvable HTTP(S) endpoints still are",
-    "python_name": "verify_unresolvable",
-    "description": "Discovers and verifies the existence of HTTP/HTTPS services on standard and alternative ports.",
-    "to": 0,
-    "needs_results_from": 10,
-    "plannable_activities": [
-      3
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 12,
-  "fields": {
-    "name": "Find DNS endpoints for Internet.nl scans",
-    "python_name": "dns_endpoints",
-    "description": "Finds DNS pointers towards supposedly existing services. Used for internet.nl scans.",
-    "to": 0,
-    "needs_results_from": null,
-    "plannable_activities": [
-      2,
-      3
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 13,
-  "fields": {
-    "name": "Internet.nl Mail Test",
-    "python_name": "internet_nl_mail",
-    "description": "Scan recipient for STARTTLS, SPF, DKIM and DMARC using internet.nl",
-    "to": 0,
-    "needs_results_from": 12,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": [
-      22,
-      23,
-      24,
-      25,
-      26,
-      27,
-      28,
-      29,
-      30,
-      31,
-      32,
-      33,
-      34,
-      35,
-      36,
-      37,
-      38,
-      39,
-      40,
-      41,
-      42,
-      43,
-      44,
-      45,
-      46,
-      47,
-      48,
-      49,
-      50,
-      51,
-      52,
-      53,
-      54,
-      55,
-      56,
-      57,
-      58,
-      59,
-      60,
-      61,
-      62,
-      63,
-      64,
-      65,
-      67,
-      68,
-      69,
-      70,
-      71,
-      72,
-      73,
-      74,
-      75,
-      76,
-      77
-    ]
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 14,
-  "fields": {
-    "name": "Automatic Explain: untrusted Dutch State certificates",
-    "python_name": "autoexplain_dutch_untrusted_cert",
-    "description": "Explains specific TLS certificates that are not trusted by default.",
-    "to": 0,
-    "needs_results_from": null,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 15,
-  "fields": {
-    "name": "Automatic Explain: Trust Microsoft Services",
-    "python_name": "autoexplain_trust_microsoft",
-    "description": "Trusts certain microsoft services such as SIP, Lyndiscover and others with.",
-    "to": 0,
-    "needs_results_from": null,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 16,
-  "fields": {
-    "name": "autoexplain_microsoft_neighboring_services",
-    "python_name": "autoexplain_microsoft_neighboring_services",
-    "description": "Explains new neighboring services of endpoints already explained by trust microsoft.",
-    "to": 0,
-    "needs_results_from": null,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 17,
-  "fields": {
-    "name": "Automatic Explain: no https on microsoft services",
-    "python_name": "autoexplain_no_https_microsoft",
-    "description": "Allows certain microsoft services that don't require https to result in a high risk issue.",
-    "to": 0,
-    "needs_results_from": null,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 18,
-  "fields": {
-    "name": "Automatic Explain: no https possible",
-    "python_name": "autoexplain_no_https_possible",
-    "description": "Removes https requirement from subdomains that don't have https requirements.",
-    "to": 0,
-    "needs_results_from": null,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 19,
-  "fields": {
-    "name": "Screenshot Maker",
-    "python_name": "screenshot",
-    "description": "Creates screenshot to accompany the report with some pictures",
-    "to": 0,
-    "needs_results_from": null,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": []
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 20,
-  "fields": {
-    "name": "Internet.nl Website Test",
-    "python_name": "internet_nl_web",
-    "description": "Scan recipient for HTTPS, Security Headers, IPv6 and DNSSEC using internet.nl",
-    "to": 0,
-    "needs_results_from": 12,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": [
-      79,
-      80,
-      81,
-      83,
-      84,
-      85,
-      86,
-      87,
-      88,
-      89,
-      90,
-      91,
-      92,
-      93,
-      94,
-      95,
-      96,
-      97,
-      98,
-      99,
-      100,
-      101,
-      102,
-      103,
-      104,
-      105,
-      109,
-      110,
-      111,
-      112,
-      113,
-      114,
-      115,
-      116,
-      118,
-      119,
-      120,
-      121,
-      122,
-      124,
-      125,
-      126,
-      127,
-      128,
-      129,
-      130
-    ]
-  }
-},
-{
-  "model": "scanners.scanner",
-  "pk": 21,
-  "fields": {
-    "name": "Dummy Scanner (for testcases )",
-    "python_name": "dummy",
-    "description": "Scanner that does exactly nothing",
-    "to": 0,
-    "needs_results_from": null,
-    "plannable_activities": [
-      1
-    ],
-    "creates_scan_types": [
-      131
-    ]
+    "name": "dns"
   }
 },
 {
@@ -2651,66 +2275,442 @@
   }
 },
 {
-  "model": "scanners.scantypecategory",
-  "pk": 1,
-  "fields": {
-    "name": "confidentiality"
-  }
-},
-{
-  "model": "scanners.scantypecategory",
+  "model": "scanners.scanner",
   "pk": 2,
   "fields": {
-    "name": "integrity"
+    "name": "File Transfer Protocol using HTTPS",
+    "python_name": "ftp",
+    "description": "Scans FTP services on port 21 (default port) if they support TLS or SSL.",
+    "to": 0,
+    "needs_results_from": 2,
+    "plannable_activities": [
+      1,
+      2,
+      3
+    ],
+    "creates_scan_types": [
+      3
+    ]
   }
 },
 {
-  "model": "scanners.scantypecategory",
-  "pk": 3,
-  "fields": {
-    "name": "availability"
-  }
-},
-{
-  "model": "scanners.scantypecategory",
+  "model": "scanners.scanner",
   "pk": 4,
   "fields": {
-    "name": "website"
+    "name": "DNSSEC Domain Name Security",
+    "python_name": "dnssec",
+    "description": "Scans HTTP endpoints to see if there is an HTTPS counterpart.",
+    "to": 1,
+    "needs_results_from": null,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": [
+      5
+    ]
   }
 },
 {
-  "model": "scanners.scantypecategory",
-  "pk": 5,
-  "fields": {
-    "name": "email"
-  }
-},
-{
-  "model": "scanners.scantypecategory",
+  "model": "scanners.scanner",
   "pk": 6,
   "fields": {
-    "name": "dns"
+    "name": "Discover Subdomains (NSEC + crt.sh) (internal)",
+    "python_name": "subdomains",
+    "description": "Uses NSEC1 and Certificate Tranparency to discover new urls.",
+    "to": 1,
+    "needs_results_from": null,
+    "plannable_activities": [
+      2,
+      3
+    ],
+    "creates_scan_types": []
   }
 },
 {
-  "model": "scanners.scanneractivity",
-  "pk": 1,
+  "model": "scanners.scanner",
+  "pk": 7,
   "fields": {
-    "name": "scan"
+    "name": "dns_known_subdomains (internal)",
+    "python_name": "dns_known_subdomains",
+    "description": "Subdomain discovery using known subdomains",
+    "to": 1,
+    "needs_results_from": null,
+    "plannable_activities": [
+      2
+    ],
+    "creates_scan_types": []
   }
 },
 {
-  "model": "scanners.scanneractivity",
-  "pk": 2,
+  "model": "scanners.scanner",
+  "pk": 8,
   "fields": {
-    "name": "discover"
+    "name": "Remove useless wildcard websites (internal)",
+    "python_name": "dns_clean_wildcards",
+    "description": "Subdomain discovery using known subdomains",
+    "to": 1,
+    "needs_results_from": null,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": []
   }
 },
 {
-  "model": "scanners.scanneractivity",
-  "pk": 3,
+  "model": "scanners.scanner",
+  "pk": 9,
   "fields": {
-    "name": "verify"
+    "name": "Discover Wildcards on Domains (internal)",
+    "python_name": "dns_wildcards",
+    "description": "Discover if a domain/subdomain has a wildcard DNS entry.",
+    "to": 1,
+    "needs_results_from": null,
+    "plannable_activities": [
+      2
+    ],
+    "creates_scan_types": []
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 10,
+  "fields": {
+    "name": "HTTP/HTTPS endpoints on various ports (internal)",
+    "python_name": "http",
+    "description": "Discovers and verifies the existence of HTTP/HTTPS services on standard and alternative ports.",
+    "to": 0,
+    "needs_results_from": null,
+    "plannable_activities": [
+      2,
+      3
+    ],
+    "creates_scan_types": []
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 12,
+  "fields": {
+    "name": "Find DNS endpoints for Internet.nl scans",
+    "python_name": "dns_endpoints",
+    "description": "Finds DNS pointers towards supposedly existing services. Used for internet.nl scans.",
+    "to": 0,
+    "needs_results_from": null,
+    "plannable_activities": [
+      2,
+      3
+    ],
+    "creates_scan_types": []
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 14,
+  "fields": {
+    "name": "Automatic Explain: untrusted Dutch State certificates",
+    "python_name": "autoexplain_dutch_untrusted_cert",
+    "description": "Explains specific TLS certificates that are not trusted by default.",
+    "to": 0,
+    "needs_results_from": null,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": []
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 15,
+  "fields": {
+    "name": "Automatic Explain: Trust Microsoft Services",
+    "python_name": "autoexplain_trust_microsoft",
+    "description": "Trusts certain microsoft services such as SIP, Lyndiscover and others with.",
+    "to": 0,
+    "needs_results_from": null,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": []
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 16,
+  "fields": {
+    "name": "autoexplain_microsoft_neighboring_services",
+    "python_name": "autoexplain_microsoft_neighboring_services",
+    "description": "Explains new neighboring services of endpoints already explained by trust microsoft.",
+    "to": 0,
+    "needs_results_from": null,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": []
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 17,
+  "fields": {
+    "name": "Automatic Explain: no https on microsoft services",
+    "python_name": "autoexplain_no_https_microsoft",
+    "description": "Allows certain microsoft services that don't require https to result in a high risk issue.",
+    "to": 0,
+    "needs_results_from": null,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": []
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 18,
+  "fields": {
+    "name": "Automatic Explain: no https possible",
+    "python_name": "autoexplain_no_https_possible",
+    "description": "Removes https requirement from subdomains that don't have https requirements.",
+    "to": 0,
+    "needs_results_from": null,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": []
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 19,
+  "fields": {
+    "name": "Screenshot Maker",
+    "python_name": "screenshot",
+    "description": "Creates screenshot to accompany the report with some pictures",
+    "to": 0,
+    "needs_results_from": null,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": []
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 21,
+  "fields": {
+    "name": "Dummy Scanner (for testcases )",
+    "python_name": "dummy",
+    "description": "Scanner that does exactly nothing",
+    "to": 0,
+    "needs_results_from": null,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": [
+      131
+    ]
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 22,
+  "fields": {
+    "name": "TLS Quality from Qualys",
+    "python_name": "tls_qualys",
+    "description": "Investigate HTTPS services on port 443 to find the quality and security on it's encryption.",
+    "to": 0,
+    "needs_results_from": 10,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": [
+      1,
+      2
+    ]
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 23,
+  "fields": {
+    "name": "Missing HTTPS endpoints",
+    "python_name": "plain_http",
+    "description": "Scans HTTP endpoints to see if there is an HTTPS counterpart.",
+    "to": 0,
+    "needs_results_from": 10,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": [
+      4
+    ]
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 24,
+  "fields": {
+    "name": "HTTP Security Headers (multiple ports)",
+    "python_name": "security_headers",
+    "description": "Contacts HTTP services to determine if all security headers are enabled.",
+    "to": 0,
+    "needs_results_from": 10,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": [
+      6,
+      7,
+      8,
+      9
+    ]
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 25,
+  "fields": {
+    "name": "Verify that unresolvable HTTP(S) endpoints still are",
+    "python_name": "verify_unresolvable",
+    "description": "Discovers and verifies the existence of HTTP/HTTPS services on standard and alternative ports.",
+    "to": 0,
+    "needs_results_from": 10,
+    "plannable_activities": [
+      3
+    ],
+    "creates_scan_types": []
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 26,
+  "fields": {
+    "name": "Internet.nl Mail Test",
+    "python_name": "internet_nl_mail",
+    "description": "Scan recipient for STARTTLS, SPF, DKIM and DMARC using internet.nl",
+    "to": 0,
+    "needs_results_from": 12,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": [
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77
+    ]
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 27,
+  "fields": {
+    "name": "Internet.nl Website Test",
+    "python_name": "internet_nl_web",
+    "description": "Scan recipient for HTTPS, Security Headers, IPv6 and DNSSEC using internet.nl",
+    "to": 0,
+    "needs_results_from": 12,
+    "plannable_activities": [
+      1
+    ],
+    "creates_scan_types": [
+      79,
+      80,
+      81,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115,
+      116,
+      118,
+      119,
+      120,
+      121,
+      122,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130
+    ]
   }
 }
 ]

@@ -26,12 +26,12 @@ class Command(BaseCommand):
         sys.stdout = open("websecmap/scanners/fixtures/scanmetadata.json", "wt")
         call_command(
             "dumpdata",
-            "scanners.scanner",
+            "scanners.scanneractivity",
+            "scanners.scantypecategory",
             "scanners.scantype",
             "scanners.scantypesecondopinionlink",
             "scanners.scantypedocumentationlink",
-            "scanners.scantypecategory",
-            "scanners.scanneractivity",
+            "scanners.scanner",
             "--indent",
             2,
         )
