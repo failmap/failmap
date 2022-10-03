@@ -225,7 +225,9 @@ _commit_update: requirements.txt
 	git commit -m "Updated requirements."
 
 ${pip-compile} ${pip-sync}: | ${pip}
-	${env} ${pip} install --quiet pip-tools
+	# importlib 5 has issues with AttributeError: 'EntryPoints' object has no attribute 'get' in python 3.7
+	# the changelog says they have removed some shims.
+	${env} ${pip} install --quiet pip-tools "importlib-metadata<5"
 
 ${python} ${pip}:
 	@if ! command -v python3 &>/dev/null;then \
