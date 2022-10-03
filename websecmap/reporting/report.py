@@ -68,7 +68,11 @@ def recreate_url_report(url_id):
 
     # in cases where there is nothing to report at all.
     if not url_reports:
-        log.debug("Found no url reports for %s. Skipping.", url.url)
+        # In the case of all scan types that have been found on this url are not being reported anymore, the timeline
+        # can be empty. With an empty timeline no prior urls are removed.
+        # clean old url reports to avoid mismatches in statistics and preventing irrelevant old data:
+        log.debug("Found no url reports for %s. Cleaning old url reports.", url.url)
+        UrlReport.objects.all().filter(url=url).delete()
         return
 
     # log.debug(url_reports)
@@ -367,9 +371,11 @@ def create_timeline(url: Url):
     :return:
     """
     scan_types = get_allowed_to_report()
-    # log.debug("Report includes the following scan types: %s" % scan_types)
+    log.debug("Report includes the following scan types: %s" % scan_types)
 
     moments, happenings = significant_moments(urls=[url], reported_scan_types=scan_types)
+
+    log.debug(f"Found {len(moments)} significant moments for {url.url}")
 
     timeline = {}
 
@@ -954,11 +960,12 @@ def add_statistics_to_calculation(calculation, amount_of_issues):
     calculation["url_issues_high"] = amount_of_issues["url"]["high"]
     calculation["url_issues_medium"] = amount_of_issues["url"]["medium"]
     calculation["url_issues_low"] = amount_of_issues["url"]["low"]
-    calculation["url_ok"] = amount_of_issues["overall_judgements"]["ok"]
+    calculation["url_ok"] = amount_of_issues["url"]["ok"]
     calculation["total_endpoint_issues"] = amount_of_issues["endpoint"]["any"]
     calculation["endpoint_issues_high"] = amount_of_issues["endpoint"]["high"]
     calculation["endpoint_issues_medium"] = amount_of_issues["endpoint"]["medium"]
     calculation["endpoint_issues_low"] = amount_of_issues["endpoint"]["low"]
+    calculation["endpoint_ok"] = amount_of_issues["endpoint"]["ok"]
     calculation["explained_total_issues"] = amount_of_issues["overall_explained"]["any"]
     calculation["explained_high"] = amount_of_issues["url_explained_judgements"]["high"]
     calculation["explained_medium"] = amount_of_issues["url_explained_judgements"]["medium"]
@@ -998,8 +1005,9 @@ def inspect_timeline(timeline, url: Url):
             for item in timeline[moment]["url_scan"]["scans"]:
                 calculation = get_severity(item)
                 message += (
-                    f"|  |  |-  H:{calculation.get('high', '?'):>2} "
-                    f"M:{calculation.get('medium', '?'):>2} L:{calculation.get('low', '?'):>2} {item:<40}" + newline
+                    f"|  |  |-  H:{calculation.get('high', '?'):>3} "
+                    f"M:{calculation.get('medium', '?'):>3} L:{calculation.get('low', '?'):>3} {str(item):<40}"
+                    + newline
                 )
 
         if "endpoint_scan" in timeline[moment]:
@@ -1007,8 +1015,9 @@ def inspect_timeline(timeline, url: Url):
             for item in timeline[moment]["endpoint_scan"]["scans"]:
                 calculation = get_severity(item)
                 message += (
-                    f"|  |  |-  H:{calculation.get('high', '?'):>2} "
-                    f"M:{calculation.get('medium', '?'):>2} L:{calculation.get('low', '?'):>2} {item:<40}" + newline
+                    f"|  |  |-  H:{calculation.get('high', '?'):>3} "
+                    f"M:{calculation.get('medium', '?'):>3} L:{calculation.get('low', '?'):>3} {str(item):<40}"
+                    + newline
                 )
 
         if "dead" in timeline[moment]:
@@ -1076,9 +1085,11 @@ def aggegrate_url_rating_scores(url_ratings: List, only_include_issues: List[str
         "url_issues_high",
         "url_issues_medium",
         "url_issues_low",
+        "url_ok",
         "endpoint_issues_high",
         "endpoint_issues_medium",
         "endpoint_issues_low",
+        "endpoint_ok",
     ]
 
     scores = {
@@ -1129,9 +1140,13 @@ def aggegrate_url_rating_scores(url_ratings: List, only_include_issues: List[str
         scores["url_issues_high"] += calculation["url_issues_high"]
         scores["url_issues_medium"] += calculation["url_issues_medium"]
         scores["url_issues_low"] += calculation["url_issues_low"]
+        scores["url_ok"] += calculation["url_ok"]
         scores["endpoint_issues_high"] += calculation["endpoint_issues_high"]
         scores["endpoint_issues_medium"] += calculation["endpoint_issues_medium"]
         scores["endpoint_issues_low"] += calculation["endpoint_issues_low"]
+        scores["endpoint_ok"] += calculation.get("endpoint_ok", 0)  # really old metrics have wrong scan types that are
+        # not included in the report anymore. This means that a new urlrating will not be created and the old ones
+        # stay in the database (which is wrong(!) and thus is missing the endpoint_ok value.
 
         scores["explained_total_endpoint_issues"] += calculation["explained_total_endpoint_issues"]
         scores["explained_endpoint_issues_high"] += calculation["explained_endpoint_issues_high"]

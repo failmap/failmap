@@ -893,9 +893,11 @@ def default_organization_rating(organizations: List[int]):
                 "url_issues_high": 0,
                 "url_issues_medium": 0,
                 "url_issues_low": 0,
+                "url_ok": 0,
                 "endpoint_issues_high": 0,
                 "endpoint_issues_medium": 0,
                 "endpoint_issues_low": 0,
+                "endpoint_ok": 0,
                 "urls": [],
                 "total_issues": 0,
             }

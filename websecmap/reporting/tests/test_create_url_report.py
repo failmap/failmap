@@ -156,6 +156,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy):
         "endpoint_issues_high": 0,
         "endpoint_issues_low": 0,
         "endpoint_issues_medium": 0,
+        "endpoint_ok": 1,
         "endpoints": [
             {
                 "concat": "https/443 IPv4",
@@ -177,14 +178,14 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy):
                         "comply_or_explain_explanation": "",
                         "comply_or_explain_explanation_valid_until": "",
                         "comply_or_explain_valid_at_time_of_report": False,
-                        "error_in_test": False,
+                        "error_in_test": 0,
                         "explanation": "Good Transport Security, rated A.",
                         "high": 0,
                         "is_explained": False,
                         "low": 0,
                         "medium": 0,
-                        "not_applicable": False,
-                        "not_testable": False,
+                        "not_applicable": 0,
+                        "not_testable": 0,
                         "ok": 1,
                         "scan": epgs2.id,
                         "scan_type": "tls_qualys_encryption_quality",
@@ -227,7 +228,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy):
         "url_issues_high": 0,
         "url_issues_low": 0,
         "url_issues_medium": 0,
-        "url_ok": 1,
+        "url_ok": 0,
     }
 
     # in the last report, where a scan on endpoint 2 happened, it will be ignored (the scan is ignored because the
@@ -252,6 +253,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy):
         "endpoint_issues_high": 0,
         "endpoint_issues_low": 0,
         "endpoint_issues_medium": 0,
+        "endpoint_ok": 1,
         "endpoints": [
             {
                 "concat": "https/443 IPv4",
@@ -273,14 +275,14 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy):
                         "comply_or_explain_explanation": "",
                         "comply_or_explain_explanation_valid_until": "",
                         "comply_or_explain_valid_at_time_of_report": False,
-                        "error_in_test": False,
+                        "error_in_test": 0,
                         "explanation": "Perfect Transport Security, rated A+.",
                         "high": 0,
                         "is_explained": False,
                         "low": 0,
                         "medium": 0,
-                        "not_applicable": False,
-                        "not_testable": False,
+                        "not_applicable": 0,
+                        "not_testable": 0,
                         "ok": 1,
                         "scan": epgs5.id,
                         "scan_type": "tls_qualys_encryption_quality",
@@ -323,5 +325,5 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy):
         "url_issues_high": 0,
         "url_issues_low": 0,
         "url_issues_medium": 0,
-        "url_ok": 1,
+        "url_ok": 0,
     }

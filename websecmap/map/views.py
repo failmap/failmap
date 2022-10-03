@@ -699,7 +699,7 @@ def all_latest_scans(request, country: str = DEFAULT_COUNTRY, organization_type=
 @cache_page(TEN_MINUTES)
 def explain_list(request, country, organization_type):
     data = get_recent_explains(country, organization_type)
-    return HttpResponse(orjson.dumps(dataset), "text/json", 200)
+    return HttpResponse(orjson.dumps(data), "text/json", 200)
     # return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
