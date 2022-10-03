@@ -173,7 +173,7 @@ openpyxl==3.0.6
     #   tablib
 ordered-set==4.0.2
     # via deepdiff
-orjson==3.8.0
+orjson==3.7.12
     # via -r requirements.in
 pillow==8.3.2
     # via

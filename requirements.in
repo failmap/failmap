@@ -93,7 +93,7 @@ urllib3
 simplejson
 
 # orjson is much faster, so lets use that.
-orjson
+orjson<3.8
 
 # autoexplain
 pyopenssl
