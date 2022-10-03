@@ -1,5 +1,6 @@
 import json
 from collections import defaultdict
+from pathlib import Path
 from typing import Dict, Any, List
 
 from django.db.models import Prefetch
@@ -17,9 +18,18 @@ def dump_scan_config_to_file():
     # websecmap dumpdata scanners.scanner scanners.scantype scanners.scantypesecondopinionlink
     # scanners.scantypedocumentationlink scanners.scantypecategory scanners.scanneractivity
     # > websecmap/scanners/fixtures/scanmetadata.json
+
+    path = Path(__file__).parent.parent.parent
+
     data = get_scanners_for_backend()
+    # empty database, or initialization
+    if not data:
+        return
+
     try:
-        with open("scanmetadata_bootstrap_cache_writable_by_application/constance_definitions.json", "wt") as handle:
+        with open(
+            f"{path}/scanmetadata_bootstrap_cache_writable_by_application/constance_definitions.json", "wt"
+        ) as handle:
             handle.write(json.dumps(data))
     except PermissionError:
         log.error(
