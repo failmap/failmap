@@ -39,6 +39,7 @@ ENV PATH $VIRTUAL_ENV/bin:$PATH
 ENV CRYPTOGRAPHY_DONT_BUILD_RUST 1
 
 COPY requirements.txt requirements-deploy.txt requirements.in requirements-deploy.in /source/
+RUN pip install --upgrade pip
 RUN pip install -qr /source/requirements.txt -r /source/requirements-deploy.txt
 
 # restart with a clean image
