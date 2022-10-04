@@ -226,23 +226,23 @@ class ActionMixin:
         for scanner in SCANNERS:
             # these discover:
             if scanner["can_discover_urls"] or scanner["can_discover_endpoints"]:
-                func = discover_function_maker(scanner["name"], scanner["name"])
-                unique_name = f"discover_{scanner['name']}"
-                actions[unique_name] = (func, unique_name, f"🗺 {scanner['name']}")
+                func = discover_function_maker(scanner["python_name"], scanner["python_name"])
+                unique_name = f"discover_{scanner['python_name']}"
+                actions[unique_name] = (func, unique_name, f"🗺 {scanner['python_name']}")
 
         for scanner in SCANNERS:
             # these verify:
             if scanner["can_verify_urls"] or scanner["can_verify_endpoints"]:
-                func = verify_function_maker(scanner["name"], scanner["name"])
-                unique_name = f"verify_{scanner['name']}"
-                actions[unique_name] = (func, unique_name, f"[X] {scanner['name']}")
+                func = verify_function_maker(scanner["python_name"], scanner["python_name"])
+                unique_name = f"verify_{scanner['python_name']}"
+                actions[unique_name] = (func, unique_name, f"[X] {scanner['python_name']}")
 
         for scanner in SCANNERS:
             # these create scans
             if scanner["creates_endpoint_scan_types"] or scanner["creates_url_scan_types"]:
-                func = scan_function_maker(scanner["name"], scanner["name"])
-                unique_name = f"scan_{scanner['name']}"
-                actions[unique_name] = (func, unique_name, f"🔬 {scanner['name']}")
+                func = scan_function_maker(scanner["python_name"], scanner["python_name"])
+                unique_name = f"scan_{scanner['python_name']}"
+                actions[unique_name] = (func, unique_name, f"🔬 {scanner['python_name']}")
 
         return actions
 
