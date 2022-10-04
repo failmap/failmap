@@ -331,7 +331,9 @@ def config_content():
     }
 
     for scan_type in sorted(ALL_SCAN_TYPES):
-        base_config["show"]["issues"][scan_type.lower()] = configuration[f"show_{scan_type}"]
+        # only include the issues that are published, not everything that exists.
+        if configuration[f"show_{scan_type}"] or configuration[f"report_include_{scan_type}"]:
+            base_config["show"]["issues"][scan_type.lower()] = configuration[f"show_{scan_type}"]
 
     return base_config
 
