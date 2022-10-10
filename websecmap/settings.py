@@ -996,6 +996,9 @@ CONSTANCE_CONFIG = {
     "RELEVANT_FOR_UI_GOOD": (True, "If GOOD should be shown in best/worst, statistics", bool),
     "FOOTER_CONTENT_HTML_EN": ("", "Links and other html stuff on the footer of the page. HTML in a container.", str),
     "FOOTER_CONTENT_HTML_NL": ("", "Links and other html stuff on the footer of the page. HTML in a container.", str),
+    "SECURITY_TXT_IS_REDIRECTED": (False, "When a redirect is used, it will not show the content anymore.", bool),
+    "SECURITY_TXT_REDIRECT_URL": ("", "The url where security.txt resides", str),
+    "SECURITY_TXT_CONTENT": ("", "The content of the security.txt file, located at .well-known/security.txt", str),
     # todo: add config for enabled languages...
 }
 
@@ -1157,6 +1160,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "RELEVANT_FOR_UI_GOOD",
             ),
         ),
+        ("security.txt", ("SECURITY_TXT_IS_REDIRECTED", "SECURITY_TXT_REDIRECT_URL", "SECURITY_TXT_CONTENT")),
     ]
 )
 

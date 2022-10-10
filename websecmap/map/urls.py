@@ -23,7 +23,8 @@ static_urlpatterns = [
     path("", views.index),
     path("data/config/", views.config),
     path("empty", views.emptypage),
-    path("security.txt", views.security_txt),
+    path("security.txt", views.security_txt, name="security_txt"),
+    path(".well-known/security.txt", views.security_txt, name="well_known_security_txt"),
     path("robots.txt", views.robots_txt),
     path("manifest.json", views.manifest_json),
     # Unused:

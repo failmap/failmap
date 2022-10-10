@@ -8,7 +8,7 @@ import orjson
 import pytz
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.text import slugify
 from django.utils.translation import ugettext as _
@@ -447,7 +447,12 @@ def robots_txt(request):
 
 @cache_page(ONE_DAY)
 def security_txt(request):
-    return render(request, "map/security.txt", content_type="text/plain")
+    config = get_bulk_values(["SECURITY_TXT_IS_REDIRECTED", "SECURITY_TXT_REDIRECT_URL", "SECURITY_TXT_CONTENT"])
+
+    if config["SECURITY_TXT_IS_REDIRECTED"]:
+        return HttpResponseRedirect(config["SECURITY_TXT_REDIRECT_URL"])
+
+    return HttpResponse(config["SECURITY_TXT_CONTENT"], content_type="text/plain")
 
 
 @cache_page(ONE_DAY)
