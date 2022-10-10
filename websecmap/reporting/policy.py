@@ -23,10 +23,12 @@ def conclusion_to_score(scan: str = "", conclusion: str = "") -> ScanPolicy:
     to any set of scores we need.
     """
     key = f"{scan}{conclusion}"
-    if cached := time_cache.cache_get(key):
+    cached = time_cache.cache_get(key)
+    if cached:
         return cached
 
-    if policy := ScanPolicy.objects.all().filter(scan_type=scan, conclusion=conclusion).first():
+    policy = ScanPolicy.objects.all().filter(scan_type=scan, conclusion=conclusion).first()
+    if policy:
         time_cache.cache_set(key, policy)
         return policy
 

@@ -120,7 +120,8 @@ def recreate_url_report(url_id):
             return
 
         # The current latest report isn't the latest anymore:
-        if latest_report := UrlReport.objects.all().filter(url=url_id).last():
+        latest_report = UrlReport.objects.all().filter(url=url_id).last()
+        if latest_report:
             latest_report.is_the_newest = False
             latest_report.save()
 

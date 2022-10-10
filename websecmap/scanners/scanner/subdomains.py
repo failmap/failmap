@@ -288,7 +288,8 @@ def dnsrecon_parse_report_contents(contents: List, url: Dict[str, Any]):
             if not db_url:
                 continue
 
-            if added := db_url.add_subdomain(subdomain.lower()):
+            added = db_url.add_subdomain(subdomain.lower())
+            if added:
                 addedlist.append(added.url)
 
     return addedlist
@@ -457,7 +458,8 @@ def store_certificate_transparency_results(subdomains: List[str], url_id) -> Lis
 
     addedlist = []
     for subdomain in subdomains:
-        if added := db_url.add_subdomain(subdomain):
+        added = db_url.add_subdomain(subdomain)
+        if added:
             addedlist.append(added)
 
     return addedlist

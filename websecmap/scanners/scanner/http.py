@@ -571,7 +571,8 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
         log.debug("Endpoint based on parameters was already in database.")
         return
 
-    if similar := get_similar_dead_endpoint_in_last_n_days(url_id, port, protocol, ip_version, days=30):
+    similar = get_similar_dead_endpoint_in_last_n_days(url_id, port, protocol, ip_version, days=30)
+    if similar:
         return revive_similar_endpoint(similar, origin)
     endpoint = Endpoint()
     endpoint.url = Url.objects.all().filter(id=url_id).first()

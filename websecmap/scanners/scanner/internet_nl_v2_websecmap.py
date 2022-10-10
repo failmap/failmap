@@ -330,7 +330,8 @@ def update_state(scan_id: int, new_state: str, new_state_message: str):
         log.debug("Could not retrieve scan %s.", scan_id)
         return
 
-    if existing_log := InternetNLV2StateLog.objects.all().filter(scan=scan).order_by("-at_when").first():
+    existing_log = InternetNLV2StateLog.objects.all().filter(scan=scan).order_by("-at_when").first()
+    if existing_log:
         # in case there is already a scan, and no state change:
         # Scan.state needs to be taken into account: there could be a mismatch between the log and the scan,
         # and the scan is leading. The same issue is fixed in the internet.nl dashboard, see "test_scan".
