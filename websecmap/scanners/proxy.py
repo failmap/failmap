@@ -140,16 +140,18 @@ def release_claim_after_timeout(proxy: Dict[str, Any]):
     if not db_proxy:
         return
 
-    if db_proxy.last_claim_at:
-        if all(
-            [
-                db_proxy.last_claim_at < datetime.now(pytz.utc) - timedelta(hours=3),
-                db_proxy.currently_used_in_tls_qualys_scan,
-            ]
-        ):
-            log.warning("Force released proxy %s because of a claim timeout period of 3 hours.", db_proxy.pk)
-            db_proxy.currently_used_in_tls_qualys_scan = False
-            db_proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
+    if not db_proxy.last_claim_at:
+        return
+
+    if all(
+        [
+            db_proxy.last_claim_at < datetime.now(pytz.utc) - timedelta(hours=3),
+            db_proxy.currently_used_in_tls_qualys_scan,
+        ]
+    ):
+        log.warning("Force released proxy %s because of a claim timeout period of 3 hours.", db_proxy.pk)
+        db_proxy.currently_used_in_tls_qualys_scan = False
+        db_proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
 
 
 @app.task(queue="internet", expires=EXPIRES_IN_ONE_DAY)

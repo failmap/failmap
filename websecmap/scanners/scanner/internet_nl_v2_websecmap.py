@@ -241,9 +241,10 @@ def handle_unknown_state(scan_id):
         return group([])
 
     # not the state check, but the moment the state was created...
-    if scan.state in timeouts:
-        if scan.last_state_change + timedelta(seconds=timeouts[scan.state]) < datetime.now(pytz.utc):
-            return group(update_state(scan.pk, "timeout", f"The state '{scan.state}' timed out, attempting to retry."))
+    if scan.state in timeouts and scan.last_state_change + timedelta(seconds=timeouts[scan.state]) < datetime.now(
+        pytz.utc
+    ):
+        return group(update_state(scan.pk, "timeout", f"The state '{scan.state}' timed out, attempting to retry."))
 
     return group([])
 
@@ -329,11 +330,7 @@ def update_state(scan_id: int, new_state: str, new_state_message: str):
         log.debug("Could not retrieve scan %s.", scan_id)
         return
 
-    # see if we need to update anything
-    existing_log = InternetNLV2StateLog.objects.all().filter(scan=scan).order_by("-at_when").first()
-
-    if existing_log:
-
+    if existing_log := InternetNLV2StateLog.objects.all().filter(scan=scan).order_by("-at_when").first():
         # in case there is already a scan, and no state change:
         # Scan.state needs to be taken into account: there could be a mismatch between the log and the scan,
         # and the scan is leading. The same issue is fixed in the internet.nl dashboard, see "test_scan".
@@ -346,21 +343,23 @@ def update_state(scan_id: int, new_state: str, new_state_message: str):
             return
 
     old_state = copy(scan.state)
-    scan.state = new_state
-    scan.state_message = new_state_message[0:200]
-    scan.last_state_check = datetime.now(pytz.utc)
+    _apply_similar_properties_to_object(new_state, scan, new_state_message)
     scan.last_state_change = datetime.now(pytz.utc)
     scan.save()
 
     statelog = InternetNLV2StateLog()
     statelog.scan = scan
     statelog.at_when = datetime.now(pytz.utc)
-    statelog.state = new_state
-    statelog.state_message = new_state_message[0:200]
-    statelog.last_state_check = datetime.now(pytz.utc)
+    _apply_similar_properties_to_object(new_state, statelog, new_state_message)
     statelog.save()
 
     log.debug("Internet.nl scan #%s state changed from '%s' to '%s'.", scan.id, old_state, new_state)
+
+
+def _apply_similar_properties_to_object(new_state, arg1, new_state_message):
+    arg1.state = new_state
+    arg1.state_message = new_state_message[:200]
+    arg1.last_state_check = datetime.now(pytz.utc)
 
 
 def api_has_usable_response(response, scan_id):
@@ -711,15 +710,14 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
 
     # prepare for calculated results
     scan_data["results"]["calculated_results"] = {}
-    if scan_type == "web":
-        scan_data = calculate_forum_standaardisatie_views_web(scan_data)
-        calculate_ipv6_views_web(scan_data)
+    if scan_type == "mail":
+        calculate_ipv6_views_mail(scan_data)
     elif scan_type == "mail_dashboard":
         scan_data = calculate_forum_standaardisatie_views_mail(scan_data)
         calculate_ipv6_views_mail(scan_data)
-    elif scan_type == "mail":
-        calculate_ipv6_views_mail(scan_data)
-
+    elif scan_type == "web":
+        scan_data = calculate_forum_standaardisatie_views_web(scan_data)
+        calculate_ipv6_views_web(scan_data)
     store_test_results(endpoint.pk, scan_data["results"]["calculated_results"])
 
 
@@ -967,14 +965,14 @@ def calculate_ipv6_views_web(scan_data):
     # Calculations:
 
     # Ready means 5x passed verdict
-    if 5 == [ns_address, ns_reach, ws_address, ws_reach, ws_similar].count("passed"):
+    if [ns_address, ns_reach, ws_address, ws_reach, ws_similar].count("passed") == 5:
         web_ipv6 = "ready"
         web_ipv6_ready = True
         attach_web_scores(scan_data, "web", web_ipv6, web_ipv6_ready, web_ipv6_proof, web_ipv6_incompatible)
         return
 
     # Proof means only 3x passed verdict on 3 to 5
-    if 3 == [ws_address, ws_reach, ws_similar].count("passed"):
+    if [ws_address, ws_reach, ws_similar].count("passed") == 3:
         web_ipv6 = "proof"
         web_ipv6_proof = True
         attach_web_scores(scan_data, "web", web_ipv6, web_ipv6_ready, web_ipv6_proof, web_ipv6_incompatible)
@@ -994,7 +992,6 @@ def attach_web_scores(
     web_ipv6_proof: bool = False,
     web_ipv6_incompatible: bool = False,
 ):
-
     if "calculated_results" not in scan_data["results"]:
         scan_data["results"] = {"calculated_results": {}}
 
@@ -1037,14 +1034,14 @@ def calculate_ipv6_views_mail(scan_data):
 
     # Calculations:
     # Ready means 4x passed verdict
-    if 4 == [ns_address, ns_reach, mx_address, mx_reach].count("passed"):
+    if [ns_address, ns_reach, mx_address, mx_reach].count("passed") == 4:
         mail_ipv6 = "ready"
         mail_ipv6_ready = True
         attach_web_scores(scan_data, "mail", mail_ipv6, mail_ipv6_ready, mail_ipv6_proof, mail_ipv6_incompatible)
         return
 
     # Proof means only 2 passed verdict on 3 and 4
-    if 2 == [mx_address, mx_reach].count("passed"):
+    if [mx_address, mx_reach].count("passed") == 2:
         mail_ipv6 = "proof"
         mail_ipv6_proof = True
         attach_web_scores(scan_data, "mail", mail_ipv6, mail_ipv6_ready, mail_ipv6_proof, mail_ipv6_incompatible)
@@ -1075,11 +1072,10 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     # https://github.com/internetstandards/Internet.nl-dashboard/issues/183
     if scan_data["results"]["tests"]["mail_auth_dkim_exist"]["status"] == "passed":
         add_calculation(scan_data=scan_data, new_key="mail_legacy_dkim", required_values=["mail_auth_dkim_exist"])
+    elif custom_api_field_results["mail_non_sending_domain"]:
+        add_instant_calculation(scan_data, "mail_legacy_dkim", "not_applicable")
     else:
-        if custom_api_field_results["mail_non_sending_domain"]:
-            add_instant_calculation(scan_data, "mail_legacy_dkim", "not_applicable")
-        else:
-            add_calculation(scan_data=scan_data, new_key="mail_legacy_dkim", required_values=["mail_auth_dkim_exist"])
+        add_calculation(scan_data=scan_data, new_key="mail_legacy_dkim", required_values=["mail_auth_dkim_exist"])
 
     # SPF
     add_calculation(scan_data=scan_data, new_key="mail_legacy_spf", required_values=["mail_auth_spf_exist"])
@@ -1178,16 +1174,15 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
         add_instant_calculation(scan_data, "mail_legacy_dane", "unreachable")
     elif custom_api_field_results["mail_servers_testable_status"] == "untestable":
         add_instant_calculation(scan_data, "mail_legacy_dane", "untestable")
-    else:
+    elif scan_data["results"]["tests"]["mail_starttls_tls_available"]["status"] == "failed":
         # #205 -> if starttls_failed failed, then dane test is not performed.
-        if scan_data["results"]["tests"]["mail_starttls_tls_available"]["status"] == "failed":
-            add_instant_calculation(scan_data, "mail_legacy_dane", "failed")
-        else:
-            add_calculation(
-                scan_data=scan_data,
-                new_key="mail_legacy_dane",
-                required_values=["mail_starttls_dane_exist", "mail_starttls_dane_valid"],
-            )
+        add_instant_calculation(scan_data, "mail_legacy_dane", "failed")
+    else:
+        add_calculation(
+            scan_data=scan_data,
+            new_key="mail_legacy_dane",
+            required_values=["mail_starttls_dane_exist", "mail_starttls_dane_valid"],
+        )
 
     # IPv6 Nameserver
     add_calculation(

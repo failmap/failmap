@@ -747,8 +747,7 @@ def screenshot(request, endpoint_id=0):
         return HttpResponse()
 
     wrapper = FileWrapper(scrsht.image.file.open("rb"))
-    response = HttpResponse(wrapper, content_type="image/PNG")
-    return response
+    return HttpResponse(wrapper, content_type="image/PNG")
 
 
 def get_json_body(request):

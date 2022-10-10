@@ -83,10 +83,7 @@ def get_tasks(url, normal_tasks, tld_tasks):
     if url.is_top_level():
         scanners += tld_tasks
 
-    tasks = []
-    for scanner in scanners:
-        tasks.append(scanner(urls_filter={"url": url}))
-
+    tasks = [scanner(urls_filter={"url": url}) for scanner in scanners]
     return group(tasks)
 
 

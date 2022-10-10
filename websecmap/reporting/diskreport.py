@@ -40,7 +40,7 @@ def location_on_disk(report_id: Union[int, str], model: Union[str, Type["Model"]
         return f"{storage_location_of_model(model)}/{report_id}.gson"
 
     # Any report ids larger than 999 (or fff) will get their own subdirectory based on their first 3 characters:
-    subdirectory = report_id[0:3]
+    subdirectory = report_id[:3]
     subdir_storage_directory = f"{storage_location_of_model(model)}/{subdirectory}/"
     if not os.path.isdir(subdir_storage_directory):
         os.makedirs(subdir_storage_directory, exist_ok=True)
@@ -49,11 +49,7 @@ def location_on_disk(report_id: Union[int, str], model: Union[str, Type["Model"]
 
 
 def storage_location_of_model(model: Union[str, Type["Model"]] = "OrganizationReport"):
-    if isinstance(model, str):
-        model_name = model
-    else:
-        model_name = model.__name__
-
+    model_name = model if isinstance(model, str) else model.__name__
     return f"{get_original_storage_location()}{model_name}"
 
 
@@ -68,7 +64,7 @@ def sync_reports_from_db_to_disk(model: Type["Model"] = OrganizationReport, limi
     Don't forget to optimize tables afterwards otherwise disk space is not reclaimed.
     """
 
-    for report in OrganizationReport.objects.all().only("id")[0:limit]:
+    for report in OrganizationReport.objects.all().only("id")[:limit]:
         sync_report_from_db_to_disk(report.id, model)
 
 

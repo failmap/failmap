@@ -92,7 +92,7 @@ READ_TIMEOUT = 30
 def filter_discover(organizations_filter: dict = None, urls_filter: dict = None, **kwargs):
     # ignore administratively dead domains by default.
     organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
-    urls_filter = {"is_dead": False} if not urls_filter else urls_filter
+    urls_filter = urls_filter or {"is_dead": False}
 
     if organizations_filter:
         organizations = Organization.objects.filter(**organizations_filter).only("id")
@@ -246,15 +246,8 @@ def compose_verify_task(urls):
 
 @app.task(queue="4and6", expires=EXPIRES_IN_ONE_DAY)
 def get_ips(url: str):
-    ipv4 = ""
-    ipv6 = ""
-
-    if settings.NETWORK_SUPPORTS_IPV4:
-        ipv4 = get_ipv4(url)
-
-    if settings.NETWORK_SUPPORTS_IPV6:
-        ipv6 = get_ipv6(url)
-
+    ipv4 = get_ipv4(url) if settings.NETWORK_SUPPORTS_IPV4 else ""
+    ipv6 = get_ipv6(url) if settings.NETWORK_SUPPORTS_IPV6 else ""
     return ipv4, ipv6
 
 
@@ -522,27 +515,6 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
         return connection_answer(False, my_exception)
 
 
-# thank you https://stackoverflow.com/questions/20658572/python-requests-print-entire-http-request-raw
-def pretty_print_request(req):
-    """
-    At this point it is completely built and ready
-    to be fired; it is "prepared".
-
-    However pay attention at the formatting used in
-    this function because it is programmed to be pretty
-    printed and may differ from the actual request.
-    """
-    print(
-        "{}\n{}\n{}\n\n{}".format(
-            "-----------START-----------",
-            req.method + " " + req.url,
-            "\n".join("{}: {}".format(k, v) for k, v in req.headers.items()),  # pylint: disable=consider-using-f-string
-            req.body,
-        )
-    )
-    # disabled consider-using-f-string because you can't use backslash statements in f-strings
-
-
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def connect_result(result: Dict[str, str], protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
     if result["result"]:
@@ -564,23 +536,17 @@ def connect_result_simple(result: bool, protocol: str, url_id: int, port: int, i
 
 def resolves(url: str):
     (ip4, ip6) = get_ips(url)
-    if ip4 or ip6:
-        return True
-    return False
+    return bool(ip4 or ip6)
 
 
 def resolves_on_v4(url: str):
     (ip4, _) = get_ips(url)
-    if ip4:
-        return True
-    return False
+    return bool(ip4)
 
 
 def resolves_on_v6(url: str):
     (_, ip6) = get_ips(url)
-    if ip6:
-        return True
-    return False
+    return bool(ip6)
 
 
 def has_internet_connection(host: str = "8.8.8.8", port: int = 53, connection_timeout: int = 10):
@@ -605,20 +571,8 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
         log.debug("Endpoint based on parameters was already in database.")
         return
 
-    # network outages and such might have killed the endpoint. It's unlikely that an endpoint
-    # is meant to be offline for a few days and then be up again. It _IS_ possible and there are
-    # use cases. Switching hosts for example. But everyone wants the least amount of downtime.
-    # Being unavailable for 30 days is a nice window.
-    similar = get_similar_dead_endpoint_in_last_n_days(url_id, port, protocol, ip_version, days=30)
-    if similar:
-        log.debug("Similar endpoint found that died in the last 30 days, reviving: %s", similar)
-        similar.is_dead = False
-        similar.is_dead_since = None
-        similar.is_dead_reason += "Revived."
-        similar.is_dead_reason = origin
-        similar.save()
-        return
-
+    if similar := get_similar_dead_endpoint_in_last_n_days(url_id, port, protocol, ip_version, days=30):
+        return revive_similar_endpoint(similar, origin)
     endpoint = Endpoint()
     endpoint.url = Url.objects.all().filter(id=url_id).first()
 
@@ -633,6 +587,16 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
     endpoint.is_dead_reason = origin
     endpoint.save()
     log.info("Added endpoint added to database: %s", endpoint)
+
+
+def revive_similar_endpoint(similar, origin):
+    log.debug("Similar endpoint found that died in the last 30 days, reviving: %s", similar)
+    similar.is_dead = False
+    similar.is_dead_since = None
+    similar.is_dead_reason += "Revived."
+    similar.is_dead_reason = origin
+    similar.save()
+    return
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
@@ -757,18 +721,7 @@ def redirects_to_safety(url: str):
         )
 
         if response.history:
-            log.debug("Request was redirected, there is hope. Redirect path:")
-            for index, resp in enumerate(response.history):
-                log.debug("- Redirect %s: %s.", index, resp.url)
-            log.debug("Final destination:")
-            log.debug("%s: %s", response.status_code, response.url)
-
-            if response.url.startswith("https://"):
-                log.debug("Url starts with https, so it redirects to safety.")
-                return True
-            log.debug("Url is not redirecting to a safe url.")
-            return False
-
+            return _follow_history_up_until_safety(response)
         log.debug("Request was not redirected, so not going to a safe url.")
         return False
     except (Exception) as my_exception:  # noqa  # pylint: disable=broad-except
@@ -784,6 +737,20 @@ def redirects_to_safety(url: str):
         log.debug("Request resulted into an error, it's not redirecting properly.")
         log.debug("The error retrieved was: %s", my_exception)
         return False
+
+
+def _follow_history_up_until_safety(response):
+    log.debug("Request was redirected, there is hope. Redirect path:")
+    for index, resp in enumerate(response.history):
+        log.debug("- Redirect %s: %s.", index, resp.url)
+    log.debug("Final destination:")
+    log.debug("%s: %s", response.status_code, response.url)
+
+    if response.url.startswith("https://"):
+        log.debug("Url starts with https, so it redirects to safety.")
+        return True
+    log.debug("Url is not redirecting to a safe url.")
+    return False
 
 
 # http://useragentstring.com/pages/useragentstring.php/

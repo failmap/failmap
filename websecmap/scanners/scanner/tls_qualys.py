@@ -628,11 +628,7 @@ def save_scan(url: str, data: Any):
         rating = qualys_endpoint["grade"]
         rating_no_trust = qualys_endpoint["gradeTrustIgnored"]
 
-        if rating == "T":
-            trust = "not trusted"
-        else:
-            trust = "trusted"
-
+        trust = "not trusted" if rating == "T" else "trusted"
         store_endpoint_scan_result("tls_qualys_certificate_trusted", failmap_endpoint.pk, trust, "")
         store_endpoint_scan_result("tls_qualys_encryption_quality", failmap_endpoint.pk, rating_no_trust, "")
 

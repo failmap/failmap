@@ -89,7 +89,7 @@ def parse_internetnl_nl_explanation_data(scan: EndpointGenericScan) -> Dict[str,
 
     # V1 reports do not have json stored in the explanation, only text messages or nothing.
     # So, only parse this is it contains json at all. To improve speed, first check the first letter.
-    if scan.explanation and scan.explanation[0:1] == "{":
+    if scan.explanation and scan.explanation[:1] == "{":
         try:
             data = json.loads(scan.explanation.strip())
             custom_fields["translation"] = data.get("translation", "")

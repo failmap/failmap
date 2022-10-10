@@ -110,12 +110,11 @@ def deduplicate_all_scans_sequentially():
     for epgs_id in (
         EndpointGenericScan.objects.all().order_by("-rating_determined_on").only("id").values_list("id", flat=True)
     ):
-        log.info("Attempting to deduplicate: %s", epgs_id)
         # Always fetch the latest endpoint state, because it might have been changed by an update.
-        fresh_epgs = EndpointGenericScan.objects.all().filter(id=epgs_id).first()
-        if not fresh_epgs:
-            continue
-        reduce_if_duplicate_scan(fresh_epgs)
+        log.info("Attempting to deduplicate: %s", epgs_id)
+
+        if fresh_epgs := EndpointGenericScan.objects.all().filter(id=epgs_id).first():
+            reduce_if_duplicate_scan(fresh_epgs)
     log.info("done")
 
 

@@ -145,14 +145,12 @@ def compose_scan_task(urls):
         plannedscan.finish("scan", "ftp", url_id)
 
     log.info("Scanning FTP servers on %s endpoints.", len(endpoints))
-    tasks = []
-
-    for endpoint in endpoints:
-        tasks.append(
-            scan.si(endpoint.url.url, endpoint.port).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
-            | store.s(endpoint.id)
-            | plannedscan.finish.si("scan", "ftp", endpoint.url.pk)
-        )
+    tasks = [
+        scan.si(endpoint.url.url, endpoint.port).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
+        | store.s(endpoint.id)
+        | plannedscan.finish.si("scan", "ftp", endpoint.url.pk)
+        for endpoint in endpoints
+    ]
 
     return group(tasks)
 
@@ -214,14 +212,12 @@ def compose_verify_task(urls):
     for url_id in urls_without_endpoints:
         plannedscan.finish("verify", "ftp", url_id)
 
-    tasks = []
-
-    for endpoint in endpoints:
-        tasks.append(
-            discover.si(endpoint.url.url, endpoint.port).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
-            | store_when_new_or_kill_if_gone.s(endpoint.url.pk, endpoint.port, "ftp", endpoint.ip_version)
-            | plannedscan.finish.si("verify", "ftp", endpoint.url.pk)
-        )
+    tasks = [
+        discover.si(endpoint.url.url, endpoint.port).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
+        | store_when_new_or_kill_if_gone.s(endpoint.url.pk, endpoint.port, "ftp", endpoint.ip_version)
+        | plannedscan.finish.si("verify", "ftp", endpoint.url.pk)
+        for endpoint in endpoints
+    ]
 
     return group(tasks)
 
@@ -480,19 +476,16 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
             # log.debug(f"No FTP server is running on {url}.")
             return
 
-        # new endpoint! Store this endpoint as existing. Hooray, we found something new to scan.
-        # We will not set old endpoints to alive.
-        if connected:
-            db_url = Url.objects.all().filter(id=url).first()
-            if not db_url:
-                return
-
-            log.debug("New FTP server discovered on %s.", url)
-            endpoint = Endpoint(
-                url=db_url, port=port, protocol=protocol, ip_version=ip_version, discovered_on=timezone.now()
-            )
-            endpoint.save()
+        db_url = Url.objects.all().filter(id=url).first()
+        if not db_url:
             return
+
+        log.debug("New FTP server discovered on %s.", url)
+        endpoint = Endpoint(
+            url=db_url, port=port, protocol=protocol, ip_version=ip_version, discovered_on=timezone.now()
+        )
+        endpoint.save()
+        return
 
     # endpoint was alive and still is. Nothing changed. We don't have a last seen date. So do nothing.
     if not endpoint.is_dead and connected:

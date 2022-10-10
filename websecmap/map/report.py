@@ -107,10 +107,12 @@ def compose_task(
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")
-        log.debug("Organization filter: %s", organizations_filter)
-        log.debug("Url filter: %s", urls_filter)
-        log.debug("urls to display: %s", q_configurations_to_report())
-        log.debug("organizations to display: %s", q_configurations_to_report("organization"))
+        log.debug("Organization filter: %s, Url filter: %s", organizations_filter, urls_filter)
+        log.debug(
+            "urls to display: %s, organizations, to display: %s",
+            q_configurations_to_report(),
+            q_configurations_to_report("organization"),
+        )
         return group()
 
     log.debug("Number of tasks: %s", len(tasks))
@@ -143,9 +145,7 @@ def compose_task(
         )
 
     # Make sure all other reporting tasks are done
-    task = group(tasks) | group(subtasks)
-
-    return task
+    return group(tasks) | group(subtasks)
 
 
 @app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
@@ -155,13 +155,15 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
     map_configurations = filter_map_configs(countries=countries, organization_types=organization_types)
 
     for map_configuration in map_configurations:
-        scan_types = set()  # set instead of list to prevent checking if something is in there already.
-        scan_types.add("total")  # the total would be separated per char if directly passed into set()
+        # set instead of list to prevent checking if something is in there already.
+        # the total would be separated per char if directly passed into set()
+
+        scan_types = {"total"}
         organization_type_id = map_configuration["organization_type"]
         country = map_configuration["country"]
 
         # for the entire year, starting with oldest (in case the other tasks are not ready)
-        for days_back in list(reversed(range(0, days))):
+        for days_back in list(reversed(range(days))):
             measurement = {
                 "total": {
                     "high": 0,
@@ -323,16 +325,11 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
 
             organizationratings = OrganizationReport.objects.raw(sql)
 
-            needed_reports = []
-            for organizationrating in organizationratings:
-                needed_reports.append(str(organizationrating.pk))
+            needed_reports = [str(organizationrating.pk) for organizationrating in organizationratings]
 
             reports = get_reports_by_ids(needed_reports)
 
-            direct_reports = []
-            for report in reports:
-                direct_reports.append(reports[report])
-
+            direct_reports = [reports[report] for report in reports]
             number_of_endpoints = 0
             number_of_urls = 0
             # log.debug(sql)
@@ -482,7 +479,7 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
     scan_types = ["all"] + PUBLISHED_SCAN_TYPES
 
     for map_configuration in map_configurations:
-        for days_back in list(reversed(range(0, days))):
+        for days_back in list(reversed(range(days))):
             when = datetime.now(pytz.utc) - timedelta(days=days_back)
             for scan_type in scan_types:
 
@@ -526,7 +523,7 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
     map_configurations = filter_map_configs(countries=countries, organization_types=organization_types)
 
     for map_configuration in map_configurations:
-        for days_back in list(reversed(range(0, days))):
+        for days_back in list(reversed(range(days))):
             log.debug(
                 "For country: %s type: %s days back: %s",
                 map_configuration["country"],
@@ -604,10 +601,7 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
 
             ratings = OrganizationReport.objects.raw(sql)
 
-            needed_reports = []
-            for organizationrating in ratings:
-                needed_reports.append(str(organizationrating.id))
-
+            needed_reports = [str(organizationrating.id) for organizationrating in ratings]
             reports = get_reports_by_ids(needed_reports)
 
             noduplicates = []
@@ -631,12 +625,14 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                 measurement["total_urls"] += len(calculation["organization"]["urls"])
 
                 measurement["good_urls"] += sum(
-                    [lx["high"] == 0 and lx["medium"] == 0 for lx in calculation["organization"]["urls"]]
+                    lx["high"] == 0 and lx["medium"] == 0 for lx in calculation["organization"]["urls"]
                 )
+
                 measurement["medium_urls"] += sum(
-                    [lx["high"] == 0 and lx["medium"] > 0 for lx in calculation["organization"]["urls"]]
+                    lx["high"] == 0 and lx["medium"] > 0 for lx in calculation["organization"]["urls"]
                 )
-                measurement["high_urls"] += sum([lx["high"] > 0 for lx in calculation["organization"]["urls"]])
+
+                measurement["high_urls"] += sum(lx["high"] > 0 for lx in calculation["organization"]["urls"])
 
                 measurement["included_organizations"] += 1
 
@@ -656,8 +652,7 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                     for rat in url["ratings"]:
                         # stats over all different ratings
                         if rat["type"] not in measurement["explained"]:
-                            measurement["explained"][rat["type"]] = {}
-                            measurement["explained"][rat["type"]]["total"] = 0
+                            measurement["explained"][rat["type"]] = {"total": 0}
                         if not rat["explanation"].startswith("Repeated finding."):
                             if rat["explanation"] not in measurement["explained"][rat["type"]]:
                                 measurement["explained"][rat["type"]][rat["explanation"]] = 0
@@ -674,8 +669,7 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                         for rat in endpoint["ratings"]:
                             # stats over all different ratings
                             if rat["type"] not in measurement["explained"]:
-                                measurement["explained"][rat["type"]] = {}
-                                measurement["explained"][rat["type"]]["total"] = 0
+                                measurement["explained"][rat["type"]] = {"total": 0}
                             if not rat["explanation"].startswith("Repeated finding."):
                                 if rat["explanation"] not in measurement["explained"][rat["type"]]:
                                     measurement["explained"][rat["type"]][rat["explanation"]] = 0
@@ -795,27 +789,32 @@ def create_organization_report_on_moment(organization: Organization, when: datet
     # this is 10% faster without deepdiff, the major pain is elsewhere.
     last_report_data = retrieve_report(last.id, "OrganizationReport")
     if DeepDiff(last_report_data, calculation, ignore_order=True, report_repetition=True):
-        log.info("The calculation for %s on %s has changed, so we're saving this rating.", organization, when)
+        save_organization_report_on_moment(organization, when, scores, calculation)
 
-        # remove urls and name from scores object, so it can be used as initialization parameters (saves lines)
-        # this is by reference, meaning that the calculation will be affected if we don't work on a clone.
-        init_scores = deepcopy(scores)
-        del init_scores["name"]
-        del init_scores["urls"]
-
-        organizationrating = OrganizationReport(**init_scores)
-        organizationrating.organization = organization
-        organizationrating.at_when = when
-        organizationrating.calculation = None
-        organizationrating.save()
-
-        store_report(organizationrating.pk, "OrganizationReport", calculation)
-
-        log.info("Saved report for %s on %s.", organization, when)
     else:
         # This happens because some urls are dead etc: our filtering already removes this from the relevant information
         # at this point in time. But since it's still a significant moment, it will just show that nothing has changed.
         log.warning("The calculation for %s on %s is the same as the previous one. Not saving.", organization, when)
+
+
+def save_organization_report_on_moment(organization, when, scores, calculation):
+    log.info("The calculation for %s on %s has changed, so we're saving this rating.", organization, when)
+
+    # remove urls and name from scores object, so it can be used as initialization parameters (saves lines)
+    # this is by reference, meaning that the calculation will be affected if we don't work on a clone.
+    init_scores = deepcopy(scores)
+    del init_scores["name"]
+    del init_scores["urls"]
+
+    organizationrating = OrganizationReport(**init_scores)
+    organizationrating.organization = organization
+    organizationrating.at_when = when
+    organizationrating.calculation = None
+    organizationrating.save()
+
+    store_report(organizationrating.pk, "OrganizationReport", calculation)
+
+    log.info("Saved report for %s on %s.", organization, when)
 
 
 def relevant_urls_at_timepoint_organization(organization: Organization, when: datetime):
@@ -846,7 +845,7 @@ def default_organization_rating(organizations: List[int]):
 
         log.info("Giving organization a default rating: %s", organization)
 
-        when = organization.created_on if organization.created_on else START_DATE
+        when = organization.created_on or START_DATE
 
         report = OrganizationReport()
         report.at_when = when
@@ -1020,22 +1019,15 @@ def datetime_to_last_day_of_the_week(some_datetime: datetime) -> datetime:
 
 def reduce_to_days(moments: List[datetime]) -> List[datetime]:
     # reduce to only the dates.
-    reduced_datetimes: List[date] = list(set([moment.date() for moment in moments]))
+    reduced_datetimes: List[date] = list({moment.date() for moment in moments})
 
-    # pick the first possible moment on the date:
-    as_datetimes = [
+    return [
         datetime(year=moment.year, month=moment.month, day=moment.day, tzinfo=pytz.utc) for moment in reduced_datetimes
     ]
 
-    return as_datetimes
-
 
 def set_dates_to_last_possible_moment(moments: List[datetime]) -> List[datetime]:
-    new_moments = []
-    for moment in moments:
-        new_moments.append(datetime(moment.year, moment.month, moment.day, 23, 59, 59, 999999, tzinfo=pytz.utc))
-
-    return new_moments
+    return [datetime(moment.year, moment.month, moment.day, 23, 59, 59, 999999, tzinfo=pytz.utc) for moment in moments]
 
 
 @app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)

@@ -71,18 +71,12 @@ def get_scanners_for_backend():
             "plannable_activities": sorted(planable_activities),
             "creates_endpoint_scan_types": sorted(endpoint_scan_types),
             "creates_url_scan_types": sorted(url_scan_types),
-            "can_scan_endpoints": True
-            if "scan" in planable_activities and scanner.to == ScanSubject.ENDPOINT
-            else False,
-            "can_discover_endpoints": True
-            if "discover" in planable_activities and scanner.to == ScanSubject.ENDPOINT
-            else False,
-            "can_verify_endpoints": True
-            if "verify" in planable_activities and scanner.to == ScanSubject.ENDPOINT
-            else False,
-            "can_scan_urls": True if "scan" in planable_activities and scanner.to == ScanSubject.URL else False,
-            "can_discover_urls": True if "discover" in planable_activities and scanner.to == ScanSubject.URL else False,
-            "can_verify_urls": True if "verify" in planable_activities and scanner.to == ScanSubject.URL else False,
+            "can_scan_endpoints": "scan" in planable_activities and scanner.to == ScanSubject.ENDPOINT,
+            "can_discover_endpoints": "discover" in planable_activities and scanner.to == ScanSubject.ENDPOINT,
+            "can_verify_endpoints": "verify" in planable_activities and scanner.to == ScanSubject.ENDPOINT,
+            "can_scan_urls": "scan" in planable_activities and scanner.to == ScanSubject.URL,
+            "can_discover_urls": "discover" in planable_activities and scanner.to == ScanSubject.URL,
+            "can_verify_urls": "verify" in planable_activities and scanner.to == ScanSubject.URL,
             "needs_results_from": [scanner.needs_results_from.id] if scanner.needs_results_from else [],
         }
         results.append(scanner_data)
@@ -93,10 +87,7 @@ def get_scanners_for_backend():
 def allowed_to_show(settings: Any, scan_type_name: str):
     # settings is a CaseInsensitiveDict
     setting_name = f"SHOW_{scan_type_name}"
-    if setting_name not in settings:
-        return False
-
-    return settings[setting_name]
+    return False if setting_name not in settings else settings[setting_name]
 
 
 def scan_type_policy_to_text(policy: ScanPolicy) -> List[str]:

@@ -23,7 +23,7 @@ import logging
 import subprocess
 from typing import List
 
-from celery import Task, group
+from celery import group
 from django.conf import settings
 from django.db.models import Q
 
@@ -104,7 +104,7 @@ def compose_manual_scan_task(
     return compose_scan_task(urls)
 
 
-def compose_scan_task(urls) -> Task:
+def compose_scan_task(urls) -> group:
     """Compose taskset to scan toplevel domains.
 
     DNSSEC is implemented on a (top level) url. It's useless to scan per-endpoint.
@@ -116,19 +116,14 @@ def compose_scan_task(urls) -> Task:
     # create tasks for scanning all selected endpoints as a single managable group
     # Sending entire objects is possible. How signatures (.s and .si) work is documented:
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
-    task = group(
+    return group(
         scan_dnssec.si(url.url) | store_dnssec.s(url.pk) | plannedscan.finish.si("scan", "dnssec", url.pk)
         for url in urls
     )
 
-    return task
-
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def store_dnssec(result: List[str], url_id: int):
-    """
-    :param result:
-    """
 
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
@@ -137,21 +132,21 @@ def store_dnssec(result: List[str], url_id: int):
     # relevant helps to store the minimum amount of information.
     level, _ = analyze_result(result)
 
-    # Messages are translated for display. Add the exact messages in: /failmap/map/static/js/script.js
-    # Run "failmap translate" to have the messages added to:
-    # /failmap/map/locale/*/djangojs.po
-    # /failmap/map/locale/*/django.po
-    # translate them and then run "failmap translate" again.
-    messages = {
-        "ERROR": "DNSSEC is incorrectly or not configured (errors found).",
-        "WARNING": "DNSSEC is incorrectly configured (warnings found).",
-        "INFO": "DNSSEC seems to be implemented sufficiently.",
-    }
-
     log.debug("Storing result: %s, for url: %s.", result, url_id)
     # You can save any (string) value and any (string) message.
     # The EndpointScanManager deduplicates the data for you automatically.
     if result:
+        # Messages are translated for display. Add the exact messages in: /failmap/map/static/js/script.js
+        # Run "failmap translate" to have the messages added to:
+        # /failmap/map/locale/*/djangojs.po
+        # /failmap/map/locale/*/django.po
+        # translate them and then run "failmap translate" again.
+        messages = {
+            "ERROR": "DNSSEC is incorrectly or not configured (errors found).",
+            "WARNING": "DNSSEC is incorrectly configured (warnings found).",
+            "INFO": "DNSSEC seems to be implemented sufficiently.",
+        }
+
         store_url_scan_result("dnssec", url_id, level, messages[level], evidence=",\n".join(result))
 
     # return something informative
@@ -196,7 +191,7 @@ def scan_dnssec(self, url: str):
         # Retry delay and total number of attempts is configured in the task decorator.
         try:
             # Since this action raises an exception itself, any code after this won't be executed.
-            raise self.retry(exc=my_exception)
+            raise self.retry(exc=my_exception) from my_exception
         except BaseException:  # pylint: disable=broad-except
             # If this task still fails after maximum retries the last
             # error will be passed as result to the next task.
@@ -229,7 +224,7 @@ def analyze_result(result: List[str]):
     for line in result:
         # remove the cringy timestamp
         line = line.strip()
-        line = line[line.find(" ") : len(line)].strip()
+        line = line[line.find(" ") :].strip()
 
         # log.debug(line)
 
@@ -313,15 +308,15 @@ def analyze_result(result: List[str]):
             log.info(line)
             errors.append(line)
 
-        # NSEC_NOT_FOUND can still mean NSEC3PARAM_FOUND and NSEC3_ITERATIONS_OK
-        # so we don't need to check on this NSEC parameter
-        # if line.startswith("%s" % "INFO [DNSSEC:NSEC_NOT_FOUND]"):
-        #     log.info(line)
-        #     errors.append(line)
+            # NSEC_NOT_FOUND can still mean NSEC3PARAM_FOUND and NSEC3_ITERATIONS_OK
+            # so we don't need to check on this NSEC parameter
+            # if line.startswith("%s" % "INFO [DNSSEC:NSEC_NOT_FOUND]"):
+            #     log.info(line)
+            #     errors.append(line)
 
-        # if line.startswith("%s" % "INFO [DNSSEC:SKIPPED_NO_KEYS]"):
-        #     log.info(line)
-        #     errors.append(line)
+            # if line.startswith("%s" % "INFO [DNSSEC:SKIPPED_NO_KEYS]"):
+            #     log.info(line)
+            #     errors.append(line)
 
     highest_level: str = "ERROR" if errors else "WARNING" if warnings else "INFO" if infos else "NONE"
 

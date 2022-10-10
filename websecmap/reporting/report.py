@@ -34,13 +34,7 @@ def get_allowed_to_report():
     :return:
     """
 
-    allowed_to_report = []
-
-    for scan_type in ALL_SCAN_TYPES:
-        if constance_cached_value("REPORT_INCLUDE_" + scan_type.upper()):
-            allowed_to_report.append(scan_type)
-
-    return allowed_to_report
+    return [scan_type for scan_type in ALL_SCAN_TYPES if constance_cached_value(f"REPORT_INCLUDE_{scan_type.upper()}")]
 
 
 @app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
@@ -84,15 +78,14 @@ def recreate_url_report(url_id):
         # latest and last() are equivalent because of the sequential nature of adding reports to the database.
         # Comparison on an integer is faster, so we're using last().
         latest_report = UrlReport.objects.all().filter(url=url_id).last()
-        if not latest_report.is_the_newest:
-            # A bug introduced before made dead / not_resolvable ursl not the latest:
-            if not url.is_dead and not url.not_resolvable:
-                # Do not create exception in this case. But note it in the logs that something is wrong.
-                # This needs to be adressed manually probably for each case till a bug is found.
-                log.error(
-                    "Attempting to delete not the latest report, this should not occur!",
-                    extra={"url": url.url, "report_id": latest_report.id},
-                )
+        # A bug introduced before made dead / not_resolvable ursl not the latest:
+        if not latest_report.is_the_newest and not url.is_dead and not url.not_resolvable:
+            # Do not create exception in this case. But note it in the logs that something is wrong.
+            # This needs to be adressed manually probably for each case till a bug is found.
+            log.error(
+                "Attempting to delete not the latest report, this should not occur!",
+                extra={"url": url.url, "report_id": latest_report.id},
+            )
         latest_report.delete()
         # [1, 2, 3][-1:].pop()
         new_latest_report = url_reports[-1:].pop()
@@ -127,8 +120,7 @@ def recreate_url_report(url_id):
             return
 
         # The current latest report isn't the latest anymore:
-        latest_report = UrlReport.objects.all().filter(url=url_id).last()
-        if latest_report:
+        if latest_report := UrlReport.objects.all().filter(url=url_id).last():
             latest_report.is_the_newest = False
             latest_report.save()
 
@@ -322,12 +314,7 @@ def latest_rating_per_day_only(scans):
                     scan.type,
                 )
 
-    # return a list of scans:
-    filtered_scans = []
-    for dt_hash in hash_table:
-        filtered_scans.append(dt_hash["scan"])
-
-    return filtered_scans
+    return [dt_hash["scan"] for dt_hash in hash_table]
 
 
 def in_hash_table(hash_table, a_hash):
@@ -341,11 +328,7 @@ def in_hash_table(hash_table, a_hash):
 
 def hash_scan_per_day_and_type(scan):
     # hopefully it doesn't run extra queries?
-    if scan.type in URL_SCAN_TYPES:
-        primary_key = scan.url.pk
-    else:
-        primary_key = scan.endpoint.pk
-
+    primary_key = scan.url.pk if scan.type in URL_SCAN_TYPES else scan.endpoint.pk
     return f"{primary_key}{scan.type}{scan.rating_determined_on.replace(second=59, microsecond=999999)}"
 
 
@@ -371,7 +354,7 @@ def create_timeline(url: Url):
     :return:
     """
     scan_types = get_allowed_to_report()
-    log.debug("Report includes the following scan types: %s" % scan_types)
+    log.debug("Report includes the following scan types: %s", scan_types)
 
     moments, happenings = significant_moments(urls=[url], reported_scan_types=scan_types)
 
@@ -500,9 +483,7 @@ def create_url_reports(url: Url) -> List[UrlReport]:
 
         # reverse the relation: so we know all ratings per endpoint.
         # It is not really relevant what endpoints _really_ exist.
-        endpoint_scans = {}
-        for scan in timeline[moment]["endpoint_scans"]:
-            endpoint_scans[scan.endpoint.id] = []
+        endpoint_scans = {scan.endpoint.id: [] for scan in timeline[moment]["endpoint_scans"]}
 
         for scan in timeline[moment]["endpoint_scans"]:
             endpoint_scans[scan.endpoint.id].append(scan)
@@ -637,7 +618,6 @@ def create_url_reports(url: Url) -> List[UrlReport]:
         for scan in timeline[moment]["url_scans"]:
             url_scans[scan.url.id].append(scan)
 
-        url_calculations = []
         these_url_scans = {}
         url_scan_types = URL_SCAN_TYPES
 
@@ -654,9 +634,11 @@ def create_url_reports(url: Url) -> List[UrlReport]:
         # propagate the ratings to the next iteration.
         previous_url_ratings[url.id] = these_url_scans
 
-        for url_scan_type in url_scan_types:
-            if url_scan_type in these_url_scans:
-                url_calculations.append(get_severity(these_url_scans[url_scan_type]))
+        url_calculations = [
+            get_severity(these_url_scans[url_scan_type])
+            for url_scan_type in url_scan_types
+            if url_scan_type in these_url_scans
+        ]
 
         # prevent empty ratings cluttering the database and skewing the stats.
         # todo: only do this if there never was a urlrating before this.
@@ -727,19 +709,19 @@ def judge(amount_of_issues, clean_issues_for_judgement, key, reports: List):
 
     # Now we know the statistics for the endpoint, we can add a judgement to the endpoint.
     if judgement_issues[key]["high"]:
-        amount_of_issues[key + "_judgements"]["high"] += 1
+        amount_of_issues[f"{key}_judgements"]["high"] += 1
         return amount_of_issues, judgement_issues
 
     if judgement_issues[key]["medium"]:
-        amount_of_issues[key + "_judgements"]["medium"] += 1
+        amount_of_issues[f"{key}_judgements"]["medium"] += 1
         return amount_of_issues, judgement_issues
 
     if judgement_issues[key]["low"]:
-        amount_of_issues[key + "_judgements"]["low"] += 1
+        amount_of_issues[f"{key}_judgements"]["low"] += 1
         return amount_of_issues, judgement_issues
 
     if judgement_issues[key]["ok"]:
-        amount_of_issues[key + "_judgements"]["ok"] += 1
+        amount_of_issues[f"{key}_judgements"]["ok"] += 1
         return amount_of_issues, judgement_issues
 
     # nothing is set? weird... no. Because explained can be zero if things are not explained.
@@ -986,52 +968,54 @@ def add_statistics_to_calculation(calculation, amount_of_issues):
 
 
 def inspect_timeline(timeline, url: Url):
-    newline = "\r\n"
     message = ""
-    message += "" + newline
-    message += "This timeline shows all changes over time on the following url:" + newline
-    message += "Use this timeline for debugging purposes, to see what changes are registered." + newline
-    message += "" + newline
+    newline = "\r\n"
+    message += f"{newline}"
+    message += f"This timeline shows all changes over time on the following url:{newline}"
+    message += f"Use this timeline for debugging purposes, to see what changes are registered.{newline}"
+    message += f"{newline}"
     message += url.url + newline
     for moment in timeline:
 
-        message += "|" + newline
-        message += f"|- {moment}" + newline
+        message += f"|{newline}"
+        message += f"|- {moment}{newline}"
         # for debugging
         # message += "|- %s: Contents: %s" % (moment, timeline[moment]) + newline
 
         if "url_scan" in timeline[moment]:
-            message += "|  |- url scan" + newline
+            message += f"|  |- url scan{newline}"
             for item in timeline[moment]["url_scan"]["scans"]:
                 calculation = get_severity(item)
                 message += (
-                    f"|  |  |-  H:{calculation.get('high', '?'):>3} "
-                    f"M:{calculation.get('medium', '?'):>3} L:{calculation.get('low', '?'):>3} {str(item):<40}"
-                    + newline
+                    f"|  |  |-  "
+                    f"H:{calculation.get('high', '?'):>3} "
+                    f"M:{calculation.get('medium', '?'):>3} "
+                    f"L:{calculation.get('low', '?'):>3} {str(item):<40}{newline}"
                 )
 
         if "endpoint_scan" in timeline[moment]:
-            message += "|  |- endpoint scan" + newline
+            message += f"|  |- endpoint scan{newline}"
             for item in timeline[moment]["endpoint_scan"]["scans"]:
                 calculation = get_severity(item)
                 message += (
-                    f"|  |  |-  H:{calculation.get('high', '?'):>3} "
-                    f"M:{calculation.get('medium', '?'):>3} L:{calculation.get('low', '?'):>3} {str(item):<40}"
-                    + newline
+                    f"|  |  |-  "
+                    f"H:{calculation.get('high', '?'):>3} "
+                    f"M:{calculation.get('medium', '?'):>3} "
+                    f"L:{calculation.get('low', '?'):>3} {str(item):<40}{newline}"
                 )
 
         if "dead" in timeline[moment]:
-            message += "|  |- dead endpoints" + newline
+            message += f"|  |- dead endpoints{newline}"
             for endpoint in timeline[moment]["dead_endpoints"]:
-                message += f"|  |  |- {endpoint}" + newline
+                message += f"|  |  |- {endpoint}{newline}"
 
         if "url_not_resolvable" in timeline[moment]:
-            message += "|  |- url became not resolvable" + newline
+            message += f"|  |- url became not resolvable{newline}"
 
         if "url_is_dead" in timeline[moment]:
-            message += "|  |- url died" + newline
+            message += f"|  |- url died{newline}"
 
-    message += "" + newline
+    message += f"{newline}"
     # support this on command line
     # print(message) Use a command for this
 
@@ -1328,14 +1312,11 @@ def attach_ultimate_report(url: Url, endpoint: Endpoint):
         if scanner["to"] == ScanSubject.URL:
             epgs = UrlGenericScan()
             epgs.url = url
-            epgs.type = policy.scan_type
-            epgs.rating = policy.conclusion
-            epgs.rating_determined_on = now
-            epgs.save()
         else:
             epgs = EndpointGenericScan()
             epgs.endpoint = endpoint
-            epgs.type = policy.scan_type
-            epgs.rating = policy.conclusion
-            epgs.rating_determined_on = now
-            epgs.save()
+
+        epgs.rating_determined_on = now
+        epgs.rating = policy.conclusion
+        epgs.type = policy.scan_type
+        epgs.save()

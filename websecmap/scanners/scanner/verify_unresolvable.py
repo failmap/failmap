@@ -39,10 +39,9 @@ def compose_manual_verify_task(
 
 
 def compose_verify_task(urls) -> Task:
-    task = group(
+    return group(
         subdomains.url_resolves.si(url.url)
         | subdomains.handle_resolves.s(url.pk)
         | plannedscan.finish.si("verify", "verify_unresolvable", url.pk)
         for url in urls
     )
-    return task

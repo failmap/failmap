@@ -186,7 +186,4 @@ def is_improved(first_scan, last_scan):
         return last_scan in ["low", "good"]
     if first_scan == "low":
         return last_scan in ["good"]
-    if first_scan == "good" and last_scan != "good":
-        return False
-
-    return True
+    return first_scan != "good" or last_scan == "good"

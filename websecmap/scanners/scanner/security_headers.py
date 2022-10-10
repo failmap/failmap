@@ -149,15 +149,14 @@ def compose_scan_task(urls):
         log.debug("Finishing scan on %s because there are no valid endpoints anymore.", url_id)
         plannedscan.finish("scan", "security_headers", url_id)
 
-    tasks = []
-    for endpoint in endpoints:
-        tasks.append(
+    return group(
+        [
             get_headers.si(endpoint.uri_url()).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
             | analyze_headers.s(endpoint.pk)
             | plannedscan.finish.si("scan", "security_headers", endpoint.url.pk)
-        )
-
-    return group(tasks)
+            for endpoint in endpoints
+        ]
+    )
 
 
 def discover_service_type(headers: CaseInsensitiveDict = None):
@@ -377,26 +376,24 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
     """
     if protocol == "https":
         # runs any unsecured http service? (on ANY port).
-        unsecure_services = Endpoint.objects.all().filter(url=url, protocol="http", is_dead=False).exists()
-        if unsecure_services:
+        if Endpoint.objects.all().filter(url=url, protocol="http", is_dead=False).exists():
             generic_check(endpoint_id, headers, "Strict-Transport-Security")
+        elif "Strict-Transport-Security" in headers:
+            log.debug("Has Strict-Transport-Security")
+            store_endpoint_scan_result(
+                "http_security_header_strict_transport_security",
+                endpoint_id,
+                "present",
+                headers["Strict-Transport-Security"],
+            )
         else:
-            if "Strict-Transport-Security" in headers:
-                log.debug("Has Strict-Transport-Security")
-                store_endpoint_scan_result(
-                    "http_security_header_strict_transport_security",
-                    endpoint_id,
-                    "present",
-                    headers["Strict-Transport-Security"],
-                )
-            else:
-                log.debug("Has no Strict-Transport-Security, yet offers no insecure http service.")
-                store_endpoint_scan_result(
-                    "http_security_header_strict_transport_security",
-                    endpoint_id,
-                    "missing_but_no_insecure_service_offered",
-                    "Security Header not present: Strict-Transport-Security, yet offers no insecure http service.",
-                )
+            log.debug("Has no Strict-Transport-Security, yet offers no insecure http service.")
+            store_endpoint_scan_result(
+                "http_security_header_strict_transport_security",
+                endpoint_id,
+                "missing_but_no_insecure_service_offered",
+                "Security Header not present: Strict-Transport-Security, yet offers no insecure http service.",
+            )
 
     return {"status": "success"}
 
@@ -430,7 +427,7 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
                 endpoint_id=endpoint_id,
                 rating="using_csp",
                 message=f"Content-Security-Policy header found, which can handle the security from {header}. "
-                f"Value (possibly truncated): {headers['Content-Security-Policy'][0:80]}...",
+                f"Value (possibly truncated): {headers['Content-Security-Policy'][:80]}...",
                 evidence=headers["Content-Security-Policy"],
             )
 

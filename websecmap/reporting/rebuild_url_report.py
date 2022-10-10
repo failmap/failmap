@@ -28,6 +28,4 @@ def compose_task(**kwargs) -> Task:
 
     log.debug("Number of tasks: %s", len(tasks))
 
-    task = group(tasks)
-
-    return task
+    return group(tasks)

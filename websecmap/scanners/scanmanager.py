@@ -21,7 +21,7 @@ def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, me
 
     # To deduplicate data, only store changes to scans. We'll update just the scan moment, and the rest stays the same.
     # The amount of data saved runs in the gigabytes. So it's worth the while doing it like this :)
-    if epgs.explanation == str(message) and epgs.rating == str(rating):
+    if epgs.explanation == message and epgs.rating == rating:
         log.debug("Scan had the same rating and message, updating last_scan_moment only.")
         epgs.last_scan_moment = datetime.now(pytz.utc)
         epgs.save(update_fields=["last_scan_moment"])
@@ -35,12 +35,12 @@ def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, me
 
     epgs = EndpointGenericScan()
     # very long csp headers for example
-    epgs.explanation = message[0:255]
+    epgs.explanation = message[:255]
     epgs.rating = rating
     epgs.endpoint = Endpoint.objects.all().filter(id=endpoint_id).first()
     epgs.type = scan_type
     # Very long CSP headers for example take a lot of space.
-    epgs.evidence = evidence[0:9000]
+    epgs.evidence = evidence[:9000]
     epgs.last_scan_moment = datetime.now(pytz.utc)
     epgs.rating_determined_on = datetime.now(pytz.utc)
     epgs.is_the_latest_scan = True
@@ -73,7 +73,7 @@ def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str
 
     # last scan had exactly the same result, so don't create a new scan and just update the last scan date.
     # while we have type hinting, it's still possible to pass in a boolean and then you compare a str to a bool...
-    if genericscan.explanation == str(message) and genericscan.rating == str(rating):
+    if genericscan.explanation == message and genericscan.rating == rating:
         log.debug("Scan had the same rating and message, updating last_scan_moment only.")
         genericscan.last_scan_moment = datetime.now(pytz.utc)
         genericscan.save(update_fields=["last_scan_moment"])

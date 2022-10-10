@@ -178,9 +178,7 @@ def deserialize_image_to_image(image_data: str) -> Image:
 
 
 def determine_subdir(sequence_number: int) -> str:
-    if sequence_number <= 999:
-        return "000"
-    return str(sequence_number)[0:3]
+    return "000" if sequence_number <= 999 else str(sequence_number)[:3]
 
 
 def create_dir_if_not_exists(directory: str):

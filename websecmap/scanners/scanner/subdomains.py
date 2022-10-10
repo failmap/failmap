@@ -70,7 +70,7 @@ def compose_manual_discover_task(organizations_filter: dict = None, urls_filter:
 
 
 def compose_discover_task(urls: List[Url]) -> Task:
-    task = group(
+    return group(
         certificate_transparency_scan.si(url.url)
         | store_certificate_transparency_results.s(url.id)
         | nsec_scan.si(url.url)
@@ -78,7 +78,6 @@ def compose_discover_task(urls: List[Url]) -> Task:
         | plannedscan.finish.si("discover", "subdomains", url.pk)
         for url in urls
     )
-    return task
 
 
 def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
@@ -122,11 +121,10 @@ def compose_manual_verify_task(
 
 
 def compose_verify_task(urls):
-    task = group(
+    return group(
         url_resolves.si(url.url) | handle_resolves.s(url.pk) | plannedscan.finish.si("verify", "subdomains", url.pk)
         for url in urls
     )
-    return task
 
 
 def filter_discover(
@@ -148,13 +146,8 @@ def filter_discover(
 # this is so fast, the overhead on running this elsewhere is insane... requires both ipv4 and 6 capabilities
 @app.task(queue="internet")
 def url_resolves(url: str):
-
     ipv4, ipv6 = get_ips(url)
-
-    if not ipv4 and not ipv6:
-        return False
-
-    return True
+    return bool(ipv4 or ipv6)
 
 
 @app.task(queue="storage")
@@ -214,12 +207,11 @@ def has_wildcards(urls: List[Dict[str, Any]]):
         if url_discover_wildcard(url["url"]):
             log.info("Domain %s uses wildcards, DNS brute force not possible", url["url"])
             db_url.uses_dns_wildcard = True
-            db_url.save()
             urls_with_wildcards.append(url)
         else:
             db_url.uses_dns_wildcard = False
-            db_url.save()
             urls_without_wildcards.append(url)
+        db_url.save()
 
     log.debug(
         "Of the %s urls, %s had a wildcard and %s did not.",
@@ -245,19 +237,17 @@ def discover_wildcard(url: str):
     """
     log.debug("Checking for DNS wildcards on domain: %s", url)
 
-    wildcard = False
-
     resolver = DnsHelper(url, [get_random_nameserver()], 3)
 
     # Do this test twice, there are dns servers that say NO the first time, but say yes the second (i mean wtf)
-    ips_1 = resolver.get_a(f"{''.join(random.choice(string.ascii_lowercase) for i in range(16))}.{url}")
-    ips_2 = resolver.get_a(f"{''.join(random.choice(string.ascii_lowercase) for i in range(16))}.{url}")
+    ips_1 = resolver.get_a(f"{''.join(random.choice(string.ascii_lowercase) for _ in range(16))}.{url}")
+    ips_2 = resolver.get_a(f"{''.join(random.choice(string.ascii_lowercase) for _ in range(16))}.{url}")
 
     if len(ips_1) > 0 or len(ips_2) > 0:
         log.debug("%s has wildcards enabled.", url)
         return True
 
-    return wildcard
+    return False
 
 
 @app.task(queue="storage")
@@ -270,15 +260,15 @@ def dnsrecon_parse_report_contents(contents: List, url: Dict[str, Any]):
     ]
     """
     addedlist = []
+    # https://stackoverflow.com/questions/11328940/check-if-list-item-contains-items-fro
+    # strings: dkim etc
+    # target: cname
+    # arguments: dnsrecon
+    # ns_server: nameserver used
+    bad = ["arguments", "ns_server", "mname", "Version", "exchange", "strings", "target"]
     for record in contents:
         # brutally ignore all kinds of info from other structures.
         log.debug("Record: %s", record)
-        # https://stackoverflow.com/questions/11328940/check-if-list-item-contains-items-fro
-        # strings: dkim etc
-        # target: cname
-        # arguments: dnsrecon
-        # ns_server: nameserver used
-        bad = ["arguments", "ns_server", "mname", "Version", "exchange", "strings", "target"]
         my_list = list(record.keys())
         if [e for e in bad if e in "\n".join(my_list)]:
             continue
@@ -288,18 +278,17 @@ def dnsrecon_parse_report_contents(contents: List, url: Dict[str, Any]):
             continue
 
         if record["name"].endswith(url["url"]) and record["name"].lower() != url["url"].lower():
-            subdomain = record["name"][0 : -len(url["url"]) - 1]
+            subdomain = record["name"][: -len(url["url"]) - 1]
             # remove wildcards: "name": "*.woonsubsidie.amsterdam.nl",
-            if subdomain[0:2] == "*.":
-                subdomain = subdomain[2 : len(subdomain)]
+            if subdomain[:2] == "*.":
+                subdomain = subdomain[2:]
 
             # will check for resolve and if this is a wildcard.
             db_url = Url.objects.all().filter(pk=url["id"]).first()
             if not db_url:
                 continue
 
-            added = db_url.add_subdomain(subdomain.lower())
-            if added:
+            if added := db_url.add_subdomain(subdomain.lower()):
                 addedlist.append(added.url)
 
     return addedlist
@@ -386,14 +375,9 @@ def remove_wildcards_using_statistics(found_hosts, url: str):
 
 
 def find_interesting_ips(ip_stats, found_hosts):
-    # does this work with amsterdam?
-    banned_ips = []
-    for key in ip_stats:
-        # block IP's that are being used more than 10 times. 10, because i like the number. More than 10 sites on
-        # the same server? perfectly possible...
-        if ip_stats[key] > 10:
-            banned_ips.append(key)
-
+    # block IP's that are being used more than 10 times. 10, because i like the number. More than 10 sites on
+    # the same server? perfectly possible...
+    banned_ips = [key for key in ip_stats if ip_stats[key] > 10]
     log.debug("Banned IPS")
     log.debug(banned_ips)
 
@@ -401,13 +385,11 @@ def find_interesting_ips(ip_stats, found_hosts):
     # remove all found hosts that are on the banned IP list:
     for host in found_hosts:
 
-        if "address" in host:
-            if host["address"] not in banned_ips:
-                interesting_found_hosts.append(host)
+        if "address" in host and host["address"] not in banned_ips:
+            interesting_found_hosts.append(host)
 
-        if "target" in host:
-            if host["target"] not in banned_ips:
-                interesting_found_hosts.append(host)
+        if "target" in host and host["target"] not in banned_ips:
+            interesting_found_hosts.append(host)
 
     log.debug("Interesting hosts")
     log.debug(interesting_found_hosts)
@@ -416,13 +398,7 @@ def find_interesting_ips(ip_stats, found_hosts):
 
 
 def remove_wildcards(urls: List[Url]):
-
-    urls_without_wildcards = []
-    for url in urls:
-        if not url_discover_wildcard(url):
-            urls_without_wildcards.append(url)
-
-    return urls_without_wildcards
+    return [url for url in urls if not url_discover_wildcard(url)]
 
 
 # don't overload the crt.sh service, rate limit
@@ -438,8 +414,8 @@ def certificate_transparency_scan(url: str):
     """
 
     # https://crt.sh/?q=%25.zutphen.nl
-    crt_sh_url = "https://crt.sh/?q=%25." + str(url)
-    pattern = r"[^\s%>]*\." + str(url.replace(".", r"\."))  # harder string formatting :)
+    crt_sh_url = f"https://crt.sh/?q=%25.{url}"
+    pattern = r"[^\s%>]*\." + url.replace(".", r"\.")
 
     response = requests.get(crt_sh_url, timeout=(30, 30), allow_redirects=False)
     matches = re.findall(pattern, response.text)
@@ -453,7 +429,7 @@ def certificate_transparency_scan(url: str):
         # brute force dns scan and some other places. Adding the logic here will increase complexity.
         match = match.replace("*.", "")
         if match != url:
-            subdomains.append(match[0 : len(match) - len(url) - 1])  # wraps around
+            subdomains.append(match[: len(match) - len(url) - 1])  # wraps around
 
     subdomains = [x.lower() for x in subdomains]  # do lowercase normalization elsewhere
     subdomains = set(subdomains)
@@ -481,8 +457,7 @@ def store_certificate_transparency_results(subdomains: List[str], url_id) -> Lis
 
     addedlist = []
     for subdomain in subdomains:
-        added = db_url.add_subdomain(subdomain)
-        if added:
+        if added := db_url.add_subdomain(subdomain):
             addedlist.append(added)
 
     return addedlist
@@ -505,8 +480,7 @@ def nsec_scan(url: str):
     :return:
     """
     resolver = DnsHelper(url, [get_random_nameserver()], 3)
-    records = ds_zone_walk(resolver, url, 3)
-    return records
+    return ds_zone_walk(resolver, url, 3)
 
 
 def get_subdomains(countries: List, organization_types: List = None):

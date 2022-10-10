@@ -8,7 +8,7 @@ https://stackoverflow.com/questions/20475552/python-requests-library-redirect-ne
 """
 import logging
 
-from celery import Task, group
+from celery import group
 
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.organizations.models import Organization, Url
@@ -83,7 +83,7 @@ def compose_planned_scan_task(**kwargs):
 
 def compose_manual_scan_task(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
-) -> Task:
+) -> group:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     # We might not be allowed to scan for this at all.
     if not allowed_to_scan("plain_http"):
@@ -103,17 +103,19 @@ def compose_scan_task(urls):
         if not any([complete_endpoints, incomplete_endpoints]):
             tasks.append(plannedscan.finish.si("scan", "plain_http", url.pk))
 
-        for complete_endpoint in complete_endpoints:
-            tasks.append(well_done.si(complete_endpoint.pk) | plannedscan.finish.si("scan", "plain_http", url.pk))
+        tasks.extend(
+            well_done.si(complete_endpoint.pk) | plannedscan.finish.si("scan", "plain_http", url.pk)
+            for complete_endpoint in complete_endpoints
+        )
 
-        for incomplete_endpoint in incomplete_endpoints:
-            tasks.append(
-                scan.si(incomplete_endpoint.ip_version, incomplete_endpoint.url.url).set(
-                    queue=CELERY_IP_VERSION_QUEUE_NAMES[incomplete_endpoint.ip_version]
-                )
-                | store.s(incomplete_endpoint.pk)
-                | plannedscan.finish.si("scan", "plain_http", url.pk)
+        tasks.extend(
+            scan.si(incomplete_endpoint.ip_version, incomplete_endpoint.url.url).set(
+                queue=CELERY_IP_VERSION_QUEUE_NAMES[incomplete_endpoint.ip_version]
             )
+            | store.s(incomplete_endpoint.pk)
+            | plannedscan.finish.si("scan", "plain_http", url.pk)
+            for incomplete_endpoint in incomplete_endpoints
+        )
 
     if not tasks:
         log.warning("Applied filters resulted in no urls, thus no plain http tasks!")
@@ -157,17 +159,15 @@ def get_endpoints_with_missing_encryption(url):
             has_https_v6 = True
 
     if has_http_v4:
-        if not has_https_v4:
-            incomplete_endpoints.append(http_v4_endpoint)
-        else:
+        if has_https_v4:
             complete_endpoints.append(http_v4_endpoint)
-
-    if has_http_v6:
-        if not has_https_v6:
-            incomplete_endpoints.append(http_v6_endpoint)
         else:
+            incomplete_endpoints.append(http_v4_endpoint)
+    if has_http_v6:
+        if has_https_v6:
             complete_endpoints.append(http_v6_endpoint)
-
+        else:
+            incomplete_endpoints.append(http_v6_endpoint)
     return complete_endpoints, incomplete_endpoints
 
 
@@ -211,23 +211,21 @@ def scan(ip_version: int, url: str):
     resolves = False
     if ip_version == 4:
         resolves = resolves_on_v4(url)
-    if ip_version == 6:
+    elif ip_version == 6:
         resolves = resolves_on_v6(url)
 
     if not resolves:
         # no need to further check, can't even get the IP address...
         return False, False, False
 
+    # if you cannot connect to a secure endpoint, we're going to find out of there is redirect.
+    # The worker (should) only resolve domain names only over ipv4 or ipv6. (A / AAAA).
+    # Currenlty docker does not support that. Which means a lot of network rewriting for dealing with
+    # all edge cases of HTTP.
+
     # retry harder!
     can_connect_result = can_connect(protocol="https", url=url, port=443, ip_version=ip_version)
-    redirects_to_safety_result = None
-
-    # if you cannot connect to a secure endpoint, we're going to find out of there is redirect.
-    if not can_connect_result["result"]:
-        # The worker (should) only resolve domain names only over ipv4 or ipv6. (A / AAAA).
-        # Currenlty docker does not support that. Which means a lot of network rewriting for dealing with
-        # all edge cases of HTTP.
-        redirects_to_safety_result = redirects_to_safety(f"http://{url}:80")
+    redirects_to_safety_result = None if can_connect_result["result"] else redirects_to_safety(f"http://{url}:80")
 
     return resolves, can_connect_result, redirects_to_safety_result
 
@@ -262,9 +260,8 @@ def store(results, endpoint_id):
     )
 
     # issue resolved.
-    if can_connect_result["result"]:
-        if endpoint_has_scans("plain_http", endpoint_id):
-            store_endpoint_scan_result("plain_http", endpoint_id, "redirecting_properly", CLEANED_UP)
+    if can_connect_result["result"] and endpoint_has_scans("plain_http", endpoint_id):
+        store_endpoint_scan_result("plain_http", endpoint_id, "redirecting_properly", CLEANED_UP)
 
     # Really no security at all
     if not can_connect_result["result"] and redirects_to_safety_result is False:

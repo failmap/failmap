@@ -41,7 +41,7 @@ def store_progress():
 
 def get_latest_progress():
     pss = PlannedScanStatistic.objects.last()
-    return {} if not pss else pss.data
+    return pss.data if pss else {}
 
 
 def calculate_progress() -> List[Dict[str, int]]:
@@ -67,9 +67,9 @@ def calculate_progress() -> List[Dict[str, int]]:
     rows = cursor.fetchall()
 
     # when there are 0 records, there is of course no row created. But there might have been in the past.
-    overview: List[Dict[str, int]] = []
-    for row in rows:
-        overview.append({"scanner": row[0], "activity": row[1], "state": row[2], "amount": row[3]})
+    overview: List[Dict[str, int]] = [
+        {"scanner": row[0], "activity": row[1], "state": row[2], "amount": row[3]} for row in rows
+    ]
 
     for scanner in Scanner.objects.all():
         scanner_id = scanner.id
@@ -91,9 +91,7 @@ def calculate_progress() -> List[Dict[str, int]]:
 
 
 def already_in_overview(overview, scanner, activity, state):
-    return sum(
-        [bool(row["scanner"] == scanner and row["activity"] == activity and row["state"] == state) for row in overview]
-    )
+    return sum(row["scanner"] == scanner and row["activity"] == activity and row["state"] == state for row in overview)
 
 
 def scanner_has_finished_tasks(scanner_id, overview):
@@ -182,7 +180,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
 
     # Limit the total amount of picked up to being maximum of MAX_PICKED_UP_SIMULTANEOUSLY.
     headroom = max_picked_up_simultaneously - already_picked_up
-    amount = amount if amount <= headroom else headroom
+    amount = min(amount, headroom)
     log.debug("Picking up maximum %s of total %s free slots.", amount, headroom)
 
     # oldest first, so ascending dates.-> removed because that makes picking up very slow and complex.
@@ -190,7 +188,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     # at the end of the day. So no .order_by("requested_at_when")
     scans = PlannedScan.objects.all().filter(
         activity=Activity[activity].value, scanner=python_scanner["id"], state=State["requested"].value
-    )[0:amount]
+    )[:amount]
 
     # cannot update once a slice has been taken
     for scan in scans:
@@ -335,7 +333,7 @@ def retrieve_endpoints_from_urls(
     # endpoints could be deleted, removed, dead, whatever, in that case the planned scan has to be
     # deleted as well. We have to know what urls are not in the set we requested, so those urls can
     # be removed from the planned scans.
-    urls_without_endpoints = list(set(urls) - set([ep.url.id for ep in endpoints]))
+    urls_without_endpoints = list(set(urls) - {ep.url.id for ep in endpoints})
 
     return endpoints, urls_without_endpoints
 
