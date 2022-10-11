@@ -2,7 +2,7 @@
 from datetime import timedelta, datetime
 
 from websecmap.app.models import create_job, Job  # noqa  # pylint: disable=unused-import
-from websecmap.organizations.models import GenericFileDataset, Dataset
+from websecmap.organizations.models import Dataset
 from websecmap.scanners.models import TlsQualysScratchpad, PlannedScan, PlannedScanStatistic, InternetNLV2Scan
 from websecmap.api.models import SIDNUpload
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
@@ -54,10 +54,11 @@ def clean_application_caches_and_logs(retention_days: int = 30):
             "model": SIDNUpload,
             "time_column": "at_when",
         },
-        {
-            "model": GenericFileDataset,
-            "time_column": "imported_on",
-        },
+        # 30 days is way to fast for manual inspection of these sources
+        # {
+        #     "model": GenericFileDataset,
+        #     "time_column": "imported_on",
+        # },
         {
             "model": Dataset,
             "time_column": "imported_on",

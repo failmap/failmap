@@ -568,6 +568,7 @@ class GenericFileDataset(models.Model):
     )
     imported_on = models.DateTimeField(blank=True, null=True)
     state = models.CharField(blank=True, null=True, max_length=4000)
+    parser_info = models.CharField(blank=True, null=True, max_length=4000)
     origin = models.CharField(
         blank=True,
         null=True,
