@@ -13,42 +13,44 @@ from websecmap.celery import app
 from websecmap.organizations.models import Organization, GenericFileDataset, OrganizationType, Coordinate
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+GOVERNMENT_REGISTER_FILES = [
+    "Gemeenten",
+    "Provincies",
+    "Waterschappen",
+    "Gemeenschappelijke regelingen",
+    "Regionale samenwerkingsorganen",
+    "Grensoverschrijdende gemeenschappelijke regelingen",
+    "Grensoverschrijdende regionale samenwerkingsorganen",
+    "Koepelorganisaties",
+    "Caribische openbare lichamen",
+    "Aruba, Curaçao en Sint Maarten",
+    "Openbare lichamen voor beroep en bedrijf",
+    "Kabinet van de Koning",
+    "Hoge Colleges van Staat",
+    "Ministeries",
+    "Agentschappen",
+    "Interdepartementale commissies",
+    "Adviescolleges",
+    "Zelfstandige bestuursorganen",
+    "Politie en brandweer",
+    "Rechtspraak",
+]
+
+
+GOVERNMENT_REGISTER_BASE_URL = "https://organisaties.overheid.nl/export"
+
 
 def download_government_register_csvs() -> List[int]:
-    base_url = "https://organisaties.overheid.nl/export"
-
-    files = [
-        "Gemeenten",
-        "Provincies",
-        "Waterschappen",
-        "Gemeenschappelijke regelingen",
-        "Regionale samenwerkingsorganen",
-        "Grensoverschrijdende gemeenschappelijke regelingen",
-        "Grensoverschrijdende regionale samenwerkingsorganen",
-        "Koepelorganisaties",
-        "Caribische openbare lichamen",
-        "Aruba, Curaçao en Sint Maarten",
-        "Openbare lichamen voor beroep en bedrijf",
-        "Kabinet van de Koning",
-        "Hoge Colleges van Staat",
-        "Ministeries",
-        "Agentschappen",
-        "Interdepartementale commissies",
-        "Adviescolleges",
-        "Zelfstandige bestuursorganen",
-        "Politie en brandweer",
-        "Rechtspraak",
-    ]
 
     # todo: how do you know what goes to what layer?
     return [
         download_and_save_dataset(
-            f"{base_url}/{file}",
+            f"{GOVERNMENT_REGISTER_BASE_URL}/{file}",
             f"register_overheidsorganisaties_layer_{file}",
             f"register_overheidsorganisaties_layer_{file}_%s.csv",
             file,
         )
-        for file in files
+        for file in GOVERNMENT_REGISTER_FILES
     ]
 
 

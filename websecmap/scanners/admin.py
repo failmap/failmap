@@ -487,7 +487,7 @@ class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdminMixin
     save_as = True
     list_per_page = 400
     actions = ordering_actions()
-    ordering = ['display_order']
+    ordering = ["display_order"]
 
     def save_model(self, request, obj, form, change):
         # allows to place a new item at the right position, moving certain items up.
