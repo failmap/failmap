@@ -106,7 +106,8 @@ class Configuration(models.Model):
     class Meta:
         verbose_name = _("configuration")
         verbose_name_plural = _("configurations")
-        ordering = ("display_order",)
+        # django-admin-sortable2
+        ordering = ["display_order"]
 
     def __str__(self):
         return f"{self.country}/{self.organization_type}"

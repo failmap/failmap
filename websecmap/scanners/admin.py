@@ -1,3 +1,4 @@
+from adminsortable2.admin import SortableAdminMixin
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -481,11 +482,12 @@ class ScannerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 @admin.register(models.ScanType)
-class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdminMixin):
     list_display = ("display_order", "id", "name", "description")
     save_as = True
     list_per_page = 400
     actions = ordering_actions()
+    ordering = ['display_order']
 
     def save_model(self, request, obj, form, change):
         # allows to place a new item at the right position, moving certain items up.
