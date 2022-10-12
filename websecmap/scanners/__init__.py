@@ -7,7 +7,7 @@ default_app_config = "websecmap.scanners.apps.ScannersConfig"
 
 def read_scan_config_from_file():
     # No try and except: just crash when things go south:
-    path = Path(__file__).parent.parent.parent
+    path = Path(__file__).parent
 
     bootstrap_file_location = f"{path}/scanmetadata_bootstrap_cache_writable_by_application/constance_definitions.json"
     print(f"Attempting to read constance definitions from {bootstrap_file_location}.")

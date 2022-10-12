@@ -117,7 +117,6 @@ COPY /tools/dnssec.pl /usr/local/bin/dnssec.pl
 
 # copy dependencies that are not in pypi or otherwise not available with ease
 COPY ./vendor/ /source/vendor/
-COPY ./scanmetadata_bootstrap_cache_writable_by_application/ /source/scanmetadata_bootstrap_cache_writable_by_application/
 
 # copy and install websecmap source last, as this changes most often, this improves docker cache
 COPY setup.py README.md /source/

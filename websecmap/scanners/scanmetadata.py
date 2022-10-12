@@ -19,7 +19,7 @@ def dump_scan_config_to_file():
     # scanners.scantypedocumentationlink scanners.scantypecategory scanners.scanneractivity
     # > websecmap/scanners/fixtures/scanmetadata.json
 
-    path = Path(__file__).parent.parent.parent
+    path = Path(__file__).parent
 
     data = get_scanners_for_backend()
     # empty database, or initialization
