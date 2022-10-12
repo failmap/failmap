@@ -1,0 +1,15 @@
+# Another file with yet another crappy syntax.
+# https://packaging.python.org/en/latest/guides/using-manifest-in/
+
+# Directories with non-python files are usually ignored when the app is embedded...
+
+# Scan metadata
+include websecmap/scanners/scanmetadata_bootstrap_cache_writable_by_application/constance_definitions.json
+include websecmap/scanners/scanmetadata_bootstrap_cache_writable_by_application/constance_definitions_default.json
+include websecmap/scanners/fixtures/scanmetadata.json
+
+# Standard periodic tasks
+include websecmap/app/fixtures/periodic_tasks.json
+
+# Scan policy
+include websecmap/reporting/fixtures/default_policy.json
