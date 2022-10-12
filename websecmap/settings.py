@@ -96,7 +96,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "import_export",
-    "websecmap.fail",
     "websecmap.organizations.apps.OrganizationsConfig",  # because some signals need this.
     "websecmap.scanners",
     "websecmap.reporting",
@@ -1485,3 +1484,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAdminUser"],
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
 }
+
+
+# Django 3.2
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

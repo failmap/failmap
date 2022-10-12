@@ -6,6 +6,7 @@ from typing import List, Tuple, Dict, Any
 import pytz
 import requests
 from django.utils import timezone
+from django.utils.text import slugify
 from requests import RequestException
 
 from websecmap.app import log
@@ -48,7 +49,7 @@ def download_government_register_csvs() -> List[int]:
             f"{GOVERNMENT_REGISTER_BASE_URL}/{file}",
             f"register_overheidsorganisaties_layer_{file}",
             f"register_overheidsorganisaties_layer_{file}_%s.csv",
-            file,
+            slugify(file),
         )
         for file in GOVERNMENT_REGISTER_FILES
     ]
@@ -60,21 +61,23 @@ def download_and_save_dataset(
     filename="websiteregister_rijksoverheid_%s.ods",
     layer: str = "",
 ) -> int:
+    log.debug(f"Downloading dataset {download_link} into {layer}")
     idataset = GenericFileDataset()
     idataset.file_format = file_format
     idataset.is_imported = False
+    idataset.origin = "register_overheidsorganisaties"
+
     now = datetime.now().isoformat()
     try:
         response = requests.get(download_link)
         idataset.file = SimpleUploadedFile(filename.format(now), response.content)
-        idataset.origin = "register_overheidsorganisaties"
         idataset.state = "uploaded"
-        idataset.parse_data = json.dumps(
+        idataset.parser_info = json.dumps(
             {"origin": "register_overheidsorganisaties", "state": "uploaded", "layer": layer}
         )
     except RequestException as exc:
-        idataset.origin = "failed_file_download"
-        idataset.state = json.dumps(
+        idataset.state = "failed_file_download"
+        idataset.parser_info = json.dumps(
             {
                 "origin": "register_overheidsorganisaties",
                 "state": "failed_file_download",
@@ -93,7 +96,7 @@ def download_and_import():
 
 
 def process_finished_downloads():
-    files = GenericFileDataset.objects.all().get(state="uploaded")
+    files = GenericFileDataset.objects.all().filter(state="uploaded", origin="register_overheidsorganisaties")
 
     for file in files:
         import_file(file.id)
@@ -104,7 +107,15 @@ def import_file(generic_file_dataset_id: int):
     if download.state != "uploaded":
         return
 
-    parser_info = json.loads(download.parser_info)
+    if not download.parser_info:
+        log.warning("No parser information found for dataset %s", generic_file_dataset_id)
+        return
+
+    try:
+        parser_info = json.loads(download.parser_info)
+    except json.JSONDecodeError:
+        log.warning(f"Could not parse data from generic file dataset: {download}")
+        return
     _ = import_register_overheidsorganisaties(download.file.path, parser_info["layer"])
 
     # if error_domains:
@@ -176,7 +187,8 @@ def add_sites(organization: Organization, row: Dict[str, Any]):
 
 
 def create_name(row):
-    if row["Afkorting"]:
-        return f"{row['Officiële naam']} ({row['Afkorting']})"
-    else:
-        return row["Officiële naam"]
+
+    # some evil encoding in the provided files makes everything hard. Because using UTF-8 would be just weird?
+
+    key = "Officiële naam" if "Officiële naam" in row else '\ufeff"Offici\u00eble naam"'
+    return f"{row[key]} ({row['Afkorting']})" if row["Afkorting"] else row[key]

@@ -8,7 +8,7 @@ amqp==2.6.1
     # via kombu
 argh==0.26.2
     # via -r requirements.in
-asgiref==3.3.1
+asgiref==3.5.2
     # via django
 babel==2.9.0
     # via -r requirements.in
@@ -48,7 +48,7 @@ defusedxml==0.6.0
     # via odfpy
 diff-match-patch==20200713
     # via django-import-export
-django==3.1.13
+django==3.2.16
     # via
     #   -r requirements.in
     #   django-3-jet
@@ -82,7 +82,7 @@ django-constance[database]==2.8.0
     # via -r requirements.in
 django-cors-headers==3.7.0
     # via -r requirements.in
-django-countries==7.0
+django-countries==7.4.2
     # via -r requirements.in
 django-crispy-forms==1.11.0
     # via -r requirements.in
@@ -285,6 +285,8 @@ tldextract==3.1.0
     # via -r requirements.in
 tornado==6.1
     # via flower
+typing-extensions==4.4.0
+    # via django-countries
 urllib3==1.26.6
     # via
     #   -r requirements.in

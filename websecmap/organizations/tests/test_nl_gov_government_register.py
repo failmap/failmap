@@ -4,7 +4,7 @@ from websecmap.organizations.datasources.nl_gov_government_register import (
     GOVERNMENT_REGISTER_FILES,
     GOVERNMENT_REGISTER_BASE_URL,
 )
-from websecmap.organizations.models import OrganizationType, Organization, Url, GenericFileDataset
+from websecmap.organizations.models import OrganizationType, Organization, Url, GenericFileDataset, Coordinate
 from websecmap.organizations.tests.test_nl_gov_websiteregister_rijksoverheid import binary
 
 
@@ -17,13 +17,29 @@ def test_import_register_overheidsorganisaties(db):
 
     # todo: check order of lat/lon in database for area
     # Now load a file with the following changes:
-    # - move a point
-    # - rename an organization
-    # - add an extra site to an organization
-    # - delete an entire organization
-    # - add one extra organization
+    # - move a point: Justis
+    # - rename an organization: KNMI
+    # - add an extra site to an organization: NFI -> nfi.nl
+    # - delete an entire organization: there are a lot less organizations in this file, nothing will be deleted
+    #   as this is not an authoritative file
+    # - add one extra organization:  Het net iets Betere Nederlands Forensisch Instituut
 
     # todo: see if all the individual changes are reflected in the database
+    location = "websecmap/organizations/tests/nl_gov_government_register/Agentschappen_Mutated.csv"
+    import_register_overheidsorganisaties(location, "agentschappen")
+
+    # the same
+    assert OrganizationType.objects.filter(name="agentschappen").count() == 1
+
+    # +2, betere NFI and KNMI 2.0
+    assert Organization.objects.all().count() == 30
+
+    # +1, nfi.nl, plus the domain of knmi 2.0 ofc
+    assert Url.objects.all().count() == 30
+
+    # +1, a moved point. plus knmi 2.0 and betere NFI
+    assert Coordinate.objects.all().count() == 31
+    assert Coordinate.objects.all().filter(is_dead=True).count() == 1
 
 
 def _import_agentschappen(location):
@@ -32,6 +48,7 @@ def _import_agentschappen(location):
     assert OrganizationType.objects.filter(name="agentschappen").count() == 1
     assert Organization.objects.all().count() == 28
     assert Url.objects.all().count() == 29
+    assert Coordinate.objects.all().count() == 28
 
 
 def test_download_government_register_csvs(db, requests_mock, current_path):

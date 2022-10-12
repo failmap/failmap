@@ -17,7 +17,7 @@ def read_scan_config_from_file():
             data = handle.read()
     except BaseException as exc:
         print(bootstrap_file_location)
-        raise Exception from exc
+        raise FileNotFoundError(bootstrap_file_location) from exc
 
     if not data:
         raise SystemError(
