@@ -52,3 +52,29 @@ def test_internet_nl_standard_calculation(db, default_policy):
         "not_applicable": 0,
         "error_in_test": 0,
     }
+
+    # special case for internet.nl scores:
+    scan.type = "internet_nl_mail_dashboard_overall_score"
+    # scan.explanation = "testing no crashes on non json data and overriding this value"
+    # see that the translation still is carred on with it...
+    scan.explanation = '{"translation": "test"}'
+    # 42 in the default policy is well in the high risk range.
+    scan.rating = "42"
+    scan.evidence = "https://internet.nl/123123/scan/somethingsomethingsomethingdarkside"
+    value = internet_nl(scan)
+    assert value == {
+        "translation": "test",
+        "test_result": "42",
+        "technical_details": "https://internet.nl/123123/scan/somethingsomethingsomethingdarkside",
+        "type": "internet_nl_mail_dashboard_overall_score",
+        "explanation": "42 https://internet.nl/123123/scan/somethingsomethingsomethingdarkside",
+        "since": now.isoformat(),
+        "last_scan": now.isoformat(),
+        "high": 1,
+        "medium": 0,
+        "low": 0,
+        "ok": 0,
+        "not_testable": 0,
+        "not_applicable": 0,
+        "error_in_test": 0,
+    }

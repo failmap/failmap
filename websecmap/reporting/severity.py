@@ -35,8 +35,16 @@ def internet_nl(scan: Union[EndpointGenericScan, UrlGenericScan]) -> Dict[str, A
         policy = conclusion_to_score(scan.type, scan.rating)
 
     data = strip_policy_data(policy)
+
     calc = standard_calculation(scan, **data)
     custom_fields = parse_internetnl_nl_explanation_data(scan)
+
+    log.error(scan.type)
+
+    if scan.type in ["internet_nl_mail_dashboard_overall_score", "internet_nl_web_overall_score"]:
+        log.debug("Overwriting explanation to contain internet.nl score and link, so it can be aggregated")
+        calc["explanation"] = f"{scan.rating} {scan.evidence}"
+
     return {**calc, **custom_fields}
 
 
@@ -82,7 +90,7 @@ def standard_calculation(
 
 
 def parse_internetnl_nl_explanation_data(scan: EndpointGenericScan) -> Dict[str, Any]:
-    custom_fields = {}
+    custom_fields = {"translation": "", "technical_details": "", "test_result": ""}
 
     # the explanation is a bunch of json, that is not really workable. These fields are split into separate data
     # and should be the same for everything except the score.
