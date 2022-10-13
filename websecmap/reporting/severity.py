@@ -39,8 +39,6 @@ def internet_nl(scan: Union[EndpointGenericScan, UrlGenericScan]) -> Dict[str, A
     calc = standard_calculation(scan, **data)
     custom_fields = parse_internetnl_nl_explanation_data(scan)
 
-    log.error(scan.type)
-
     if scan.type in ["internet_nl_mail_dashboard_overall_score", "internet_nl_web_overall_score"]:
         log.debug("Overwriting explanation to contain internet.nl score and link, so it can be aggregated")
         calc["explanation"] = f"{scan.rating} {scan.evidence}"
