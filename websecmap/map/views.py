@@ -252,16 +252,6 @@ def config_content():
         },
         "announcement": configuration["ANNOUNCEMENT"],
         "disclaimer": configuration["DISCLAIMER_HTML"],
-        "intro": {
-            "title_html_en": configuration["INTRO_TITLE_HTML_EN"],
-            "title_html_nl": configuration["INTRO_TITLE_HTML_NL"],
-            "leader_html_en": configuration["INTRO_LEADER_HTML_EN"],
-            "leader_html_nl": configuration["INTRO_LEADER_HTML_NL"],
-        },
-        "footer": {
-            "content_html_en": configuration["FOOTER_CONTENT_HTML_EN"],
-            "content_html_nl": configuration["FOOTER_CONTENT_HTML_NL"],
-        },
         "responsible_organization": {
             "name": configuration["RESPONSIBLE_ORGANIZATION_NAME"],
             "promo_text": configuration["RESPONSIBLE_ORGANIZATION_PROMO_TEXT"],
@@ -282,18 +272,53 @@ def config_content():
             "twitter": configuration["PROJECT_TWITTER"],
             "facebook": configuration["PROJECT_FACEBOOK"],
         },
-        "info": {
-            "heading": configuration["INFO_HEADING"],
-            "title_1": configuration["INFO_TITLE_1"],
-            "content_1": configuration["INFO_CONTENT_1"],
-            "title_2": configuration["INFO_TITLE_2"],
-            "content_2": configuration["INFO_CONTENT_2"],
-            "title_3": configuration["INFO_TITLE_3"],
-            "content_3": configuration["INFO_CONTENT_3"],
-            "title_4": configuration["INFO_TITLE_4"],
-            "content_4": configuration["INFO_CONTENT_4"],
-            "title_5": configuration["INFO_TITLE_5"],
-            "content_5": configuration["INFO_CONTENT_5"],
+        "translations": {
+            "en": {
+                "landing": {
+                    "title": configuration["INTRO_TITLE_HTML_EN"],
+                    "leader": configuration["INTRO_LEADER_HTML_EN"],
+                },
+                "info": {
+                    "title": configuration["INFO_TITLE_EN"],
+                    "heading": configuration["INFO_HEADING_EN"],
+                    "title_1": configuration["INFO_TITLE_1_EN"],
+                    "content_1": configuration["INFO_CONTENT_1_EN"],
+                    "title_2": configuration["INFO_TITLE_2_EN"],
+                    "content_2": configuration["INFO_CONTENT_2_EN"],
+                    "title_3": configuration["INFO_TITLE_3_EN"],
+                    "content_3": configuration["INFO_CONTENT_3_EN"],
+                    "title_4": configuration["INFO_TITLE_4_EN"],
+                    "content_4": configuration["INFO_CONTENT_4_EN"],
+                    "title_5": configuration["INFO_TITLE_5_EN"],
+                    "content_5": configuration["INFO_CONTENT_5_EN"],
+                },
+                "footer": {
+                    "content_html": configuration["FOOTER_CONTENT_HTML_EN"],
+                },
+            },
+            "nl": {
+                "landing": {
+                    "title": configuration["INTRO_TITLE_HTML_NL"],
+                    "leader": configuration["INTRO_LEADER_HTML_NL"],
+                },
+                "info": {
+                    "title": configuration["INFO_TITLE_NL"],
+                    "heading": configuration["INFO_HEADING_NL"],
+                    "title_1": configuration["INFO_TITLE_1_NL"],
+                    "content_1": configuration["INFO_CONTENT_1_NL"],
+                    "title_2": configuration["INFO_TITLE_2_NL"],
+                    "content_2": configuration["INFO_CONTENT_2_NL"],
+                    "title_3": configuration["INFO_TITLE_3_NL"],
+                    "content_3": configuration["INFO_CONTENT_3_NL"],
+                    "title_4": configuration["INFO_TITLE_4_NL"],
+                    "content_4": configuration["INFO_CONTENT_4_NL"],
+                    "title_5": configuration["INFO_TITLE_5_NL"],
+                    "content_5": configuration["INFO_CONTENT_5_NL"],
+                },
+                "footer": {
+                    "content": configuration["FOOTER_CONTENT_HTML_NL"],
+                },
+            },
         },
         "comply_or_explain": {
             "forum_link": configuration["COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK"],
