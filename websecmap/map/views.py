@@ -293,7 +293,7 @@ def config_content():
                     "content_5": configuration["INFO_CONTENT_5_EN"],
                 },
                 "footer": {
-                    "content_html": configuration["FOOTER_CONTENT_HTML_EN"],
+                    "content": configuration["FOOTER_CONTENT_HTML_EN"],
                 },
             },
             "nl": {
