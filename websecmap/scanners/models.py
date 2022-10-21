@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 
 from websecmap.organizations.models import Url
+from websecmap.reporting.models import ScanPolicy
 
 
 class Endpoint(models.Model):
@@ -734,6 +735,25 @@ class Scanner(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+
+
+class FollowUpScan(models.Model):
+    # Used to schedule comply or explain scans after a certain scan has run. This means comply or explain
+    # scanners can be performed on a more lax schedule. This just creates planned scans, it does not
+    # build a more complex task with all kinds of extra subtasks from the other scanners: a scanner may not function
+    # or may be buggy or whatever, which should not influence the tasks created. Comply or explain tasks are executed
+    # pretty swiftly usually.
+    run_follow_up_on_any_of_these_policies = models.ManyToManyField(
+        ScanPolicy,
+        blank=True,
+        help_text="There are conditions here on when the follow up will be performed. This is a 'rough conclusion', "
+        "which is used to auto-document when corrections are applied.",
+    )
+
+    follow_up_scanner = models.ForeignKey(Scanner, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"First: ... Then: {self.follow_up_scanner.name}"
 
 
 class PlannedScan(models.Model):

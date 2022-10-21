@@ -542,3 +542,16 @@ class ScanTypeCategoryAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.ScannerActivity)
 class ScannerActivityAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ...
+
+
+@admin.register(models.FollowUpScan)
+class FollowUpScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("id", "relevant_policies", "follow_up_scanner")
+
+    def relevant_policies(self, obj):
+        return "\n".join(
+            [
+                f"{p.summary_text_and_emoji()} - {p.scan_type} - " f"{p.conclusion}"
+                for p in obj.run_follow_up_on_any_of_these_policies.all()
+            ]
+        )

@@ -481,3 +481,43 @@ def plan_outdated_scans(published_scan_types):
             request(item["activity"], item["scanner"], [item["url"]])
 
         log.debug("Planned %s scans / verify and discovery tasks.", len(clean_plan_with_urls))
+
+
+def plan_follow_up_scan():
+    """
+    Based on the conclusion a new scan is scheduled. We'll receive a ton of conclusions because a scanner can
+    have multiple conclusions. But the follow up only happens on certain conclusions. It is independent if that
+    conclusion is rated as high/medium/low/neutral/ok etc: that's just a setting of the scan policy.
+
+    These follow ups are just to make certain measurements are correct or corrected.
+
+    todo: perhaps make a dict of scan types and conclusions. What would work / be the easiest from other scanners?
+
+    Could this be preloaded, to prevent a query after each scan? Or could we just see what new scans have been done
+    in the past 10 minutes and plan scans as a result on that? This would be more efficient AND
+
+    Run every 5 minutes and see what happened in the last 5 minutes. That prevents a lot of complexity.
+    This also reduces the need to know what scanner created any result. You only need to detect the scanpolicy.
+
+    """
+
+    # Find all recent url/endpoint scan results
+    # See if there are any that match the re-scan policy
+    # request a scan for the matches
+    # scanner_python_name, url_that_has_been_scanned, scan_types, conclusions_received
+
+    """Something like this:
+    select * FROM scanners_endpointgenericscan as epgs
+    INNER JOIN reporting_scanpolicy policy ON (epgs.rating = policy.conclusion AND epgs.type = policy.scan_type)
+    INNER JOIN scanners_followupscan_run_follow_up_on_any_of_these_policies as policy_limitation ON
+    (policy.id = policy_limitation.scanpolicy_id)
+    INNER JOIN scanners_followupscan ON (scanners_followupscan.id = policy_limitation.followupscan_id)
+    INNER JOIN scanners_scanner as scanner ON (scanner.id = scanners_followupscan.follow_up_scanner_id)
+    INNER JOIN scanners_endpoint ON (scanners_endpoint.id  = epgs.endpoint_id)
+    INNER JOIN url ON (url.id = scanners_endpoint.url_id)
+    WHERE epgs.rating_determined_on > '2022-09-21 00:00:00.000000'
+    -- scanner.python_name, url.url
+    """
+
+    #
+    ...

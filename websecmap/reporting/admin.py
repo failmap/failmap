@@ -98,33 +98,7 @@ class ScanPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_filter = ["scan_type", "high", "medium", "low", "ok", "error_in_test", "conclusion"]
 
     def summary(self, obj):
-        text = ""
-
-        if obj.low:
-            text += "🟡 low"
-
-        if obj.medium:
-            text += "🟠 medium"
-
-        if obj.high:
-            text += "🔴 high"
-
-        if obj.error_in_test:
-            text += "❌ error"
-
-        if obj.not_applicable:
-            text += "❌ N/A"
-
-        if obj.not_testable:
-            text += "❌ Not Testable"
-
-        if obj.ok:
-            text += "🟢 ok"
-
-        if not text:
-            text = "⚪ neutral"
-
-        return format_html(text)
+        return format_html(obj.summary_text_and_emoji())
 
     fields = (
         "annotation",
