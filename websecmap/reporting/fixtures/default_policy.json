@@ -12994,5 +12994,1409 @@
     "explanation": "using_csp",
     "annotation": "Missing policy added automatically. Please set up any explanation and scoring if needed."
   }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 977,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 978,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 979,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 980,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 981,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 982,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_web_rpki",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 983,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_appsecpriv_securitytxt",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 984,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_appsecpriv_securitytxt",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 985,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_appsecpriv_securitytxt",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 986,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_appsecpriv_securitytxt",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 987,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_appsecpriv_securitytxt",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 988,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_web_appsecpriv_securitytxt",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 989,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 990,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 991,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 992,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 993,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 994,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_mail_rpki",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 995,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki_exists",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 996,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki_exists",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 997,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki_exists",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 998,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki_exists",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 999,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki_exists",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1000,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_web_rpki_exists",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1001,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki_valid",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1002,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki_valid",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1003,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki_valid",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1004,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki_valid",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1005,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_rpki_valid",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1006,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_web_rpki_valid",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1007,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_ns_rpki_exists",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1008,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_ns_rpki_exists",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1009,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_ns_rpki_exists",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1010,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_ns_rpki_exists",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1011,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_ns_rpki_exists",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1012,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_web_ns_rpki_exists",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1013,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_ns_rpki_valid",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1014,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_ns_rpki_valid",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1015,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_ns_rpki_valid",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1016,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_ns_rpki_valid",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1017,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_web_ns_rpki_valid",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1018,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_web_ns_rpki_valid",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1019,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki_exists",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1020,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki_exists",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1021,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki_exists",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1022,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki_exists",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1023,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki_exists",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1024,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_mail_rpki_exists",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1025,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki_valid",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1026,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki_valid",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1027,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki_valid",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1028,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki_valid",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1029,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_rpki_valid",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1030,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_mail_rpki_valid",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1031,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_ns_rpki_exists",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1032,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_ns_rpki_exists",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1033,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_ns_rpki_exists",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1034,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_ns_rpki_exists",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1035,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_ns_rpki_exists",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1036,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_mail_ns_rpki_exists",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1037,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_ns_rpki_valid",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1038,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_ns_rpki_valid",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1039,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_ns_rpki_valid",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1040,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_ns_rpki_valid",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1041,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_ns_rpki_valid",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1042,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_mail_ns_rpki_valid",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1043,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_mx_ns_rpki_exists",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1044,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_mx_ns_rpki_exists",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1045,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_mx_ns_rpki_exists",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1046,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_mx_ns_rpki_exists",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1047,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_mx_ns_rpki_exists",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1048,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_mail_mx_ns_rpki_exists",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1049,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_mx_ns_rpki_valid",
+    "conclusion": "failed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1050,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_mx_ns_rpki_valid",
+    "conclusion": "warning",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1051,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_mx_ns_rpki_valid",
+    "conclusion": "passed",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1052,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 1,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_mx_ns_rpki_valid",
+    "conclusion": "not_tested",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1053,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "internet_nl_mail_mx_ns_rpki_valid",
+    "conclusion": "info",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1054,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 1,
+    "scan_type": "internet_nl_mail_mx_ns_rpki_valid",
+    "conclusion": "error",
+    "explanation": "",
+    "annotation": ""
+  }
 }
 ]
