@@ -483,11 +483,20 @@ class ScannerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.ScanType)
 class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdminMixin):
-    list_display = ("display_order", "id", "name", "description")
+    list_display = ("display_order", "id", "name", "description", "category2", "documentation_links2", "second_opinion_links2")
     save_as = True
     list_per_page = 400
     actions = ordering_actions()
     ordering = ["display_order"]
+
+    def category2(self, obj):
+        return [tag.name for tag in obj.category.all()]
+
+    def documentation_links2(self, obj):
+        return [tag.provider for tag in obj.documentation_links.all()]
+
+    def second_opinion_links2(self, obj):
+        return [tag.provider for tag in obj.second_opinion_links.all()]
 
     def save_model(self, request, obj, form, change):
         # allows to place a new item at the right position, moving certain items up.

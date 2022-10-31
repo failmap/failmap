@@ -32,7 +32,8 @@ class Command(BaseCommand):
             "scanners.scantypesecondopinionlink",
             "scanners.scantypedocumentationlink",
             "scanners.scanner",
-            "scanners.followupscan" "--indent",
+            "scanners.followupscan",
+            "--indent",
             2,
         )
         sys.stdout = sysout
