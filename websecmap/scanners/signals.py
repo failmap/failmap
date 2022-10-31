@@ -3,7 +3,7 @@ from django.dispatch import receiver
 
 from websecmap.scanners.models import Scanner, ScanType
 from websecmap.scanners.scanmetadata import dump_scan_config_to_file
-
+import pytest_is_running
 
 # @receiver(config_updated)
 # def constance_updated(sender, key, old_value, new_value, **kwargs):
@@ -13,7 +13,7 @@ from websecmap.scanners.scanmetadata import dump_scan_config_to_file
 import sys
 
 # Only when running. During testing you should not re-dump stuff to a file and polute that file
-if "pytest" not in "".join(sys.argv):
+if not pytest_is_running.is_running():
 
     @receiver(post_save, sender=Scanner)
     def update_scanner_config(sender, instance, **kwargs):

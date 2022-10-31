@@ -159,3 +159,5 @@ django-filter
 
 # watchmedo
 argh
+
+pytest-is-running
