@@ -131,6 +131,7 @@ def test_internet_nl_store_testresults(db):
                     "web_dnssec": {"verdict": "passed", "status": "passed"},
                     "web_https": {"verdict": "failed", "status": "failed"},
                     "web_appsecpriv": {"verdict": "warning", "status": "warning"},
+                    "web_rpki": {"verdict": "passed", "status": "passed"},
                 },
                 "tests": {
                     "web_ipv6_ns_address": {
@@ -233,6 +234,11 @@ def test_internet_nl_store_testresults(db):
                         "verdict": "not-tested",
                         "technical_details": [],
                     },
+                    "web_appsecpriv_securitytxt": {"status": "passed", "verdict": "good"},
+                    "web_rpki_exists": {"status": "passed", "verdict": "good"},
+                    "web_rpki_valid": {"status": "passed", "verdict": "good"},
+                    "web_ns_rpki_exists": {"status": "passed", "verdict": "good"},
+                    "web_ns_rpki_valid": {"status": "passed", "verdict": "good"},
                 },
                 "custom": {"tls_1_3_support": "yes"},
             },
@@ -247,6 +253,7 @@ def test_internet_nl_store_testresults(db):
                     "web_dnssec": {"verdict": "failed", "status": "failed"},
                     "web_https": {"verdict": "failed", "status": "failed"},
                     "web_appsecpriv": {"verdict": "warning", "status": "warning"},
+                    "web_rpki": {"verdict": "passed", "status": "passed"},
                 },
                 "tests": {
                     "web_ipv6_ns_address": {
@@ -435,6 +442,11 @@ def test_internet_nl_store_testresults(db):
                         "verdict": "bad",
                         "technical_details": [["2603:1027::e", "None"], ["52.112.196.45", "None"]],
                     },
+                    "web_appsecpriv_securitytxt": {"status": "passed", "verdict": "good"},
+                    "web_rpki_exists": {"status": "passed", "verdict": "good"},
+                    "web_rpki_valid": {"status": "passed", "verdict": "good"},
+                    "web_ns_rpki_exists": {"status": "passed", "verdict": "good"},
+                    "web_ns_rpki_valid": {"status": "passed", "verdict": "good"},
                 },
                 "custom": {"tls_1_3_support": "yes"},
             },
@@ -475,7 +487,10 @@ def test_internet_nl_store_testresults(db):
     create_url_reports(url2)
 
     # is there a series of imports?
-    assert EndpointGenericScan.objects.all().count() == 104
+    assert EndpointGenericScan.objects.all().count() == 116
+
+    # debug: check new field names:
+    # log.error(list(EndpointGenericScan.objects.all().values_list('type', flat=True)))
 
     # are the web scans imported
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_appsecpriv_x_xss_protection").count() == 2
@@ -498,6 +513,9 @@ def test_internet_nl_store_testresults(db):
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_v6_web_ipv6_ready").count() == 2
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_v6_web_ipv6_proof").count() == 2
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_v6_web_ipv6_incompatible").count() == 2
+
+    # internet_nl_web_ns_rpki_exists
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_ns_rpki_exists").count() == 2
 
     scan_data = test_results["lyncdiscover.vng.nl"]
 
@@ -543,6 +561,7 @@ def test_internet_nl_store_testresults(db):
                     "mail_dnssec": {"verdict": "passed", "status": "passed"},
                     "mail_auth": {"verdict": "passed", "status": "passed"},
                     "mail_starttls": {"verdict": "failed", "status": "failed"},
+                    "mail_rpki": {"verdict": "passed", "status": "passed"},
                 },
                 "tests": {
                     "mail_ipv6_ns_address": {
@@ -764,6 +783,13 @@ def test_internet_nl_store_testresults(db):
                             "data_matrix": [["fallback.dommel.nl.", "yes"], ["mail.dommel.nl.", "yes"]]
                         },
                     },
+                    # rpki fields
+                    "mail_rpki_exists": {"status": "passed", "verdict": "good"},
+                    "mail_rpki_valid": {"status": "passed", "verdict": "good"},
+                    "mail_ns_rpki_exists": {"status": "passed", "verdict": "good"},
+                    "mail_ns_rpki_valid": {"status": "passed", "verdict": "good"},
+                    "mail_mx_ns_rpki_exists": {"status": "passed", "verdict": "good"},
+                    "mail_mx_ns_rpki_valid": {"status": "passed", "verdict": "good"},
                 },
                 # mail non sending domain is True, so we can check that the dkim value form issue #183 will prevail
                 # over the data returned.
@@ -808,6 +834,7 @@ def test_internet_nl_store_testresults(db):
         "internet_nl_v6_mail_ipv6_ready",
         "internet_nl_v6_mail_ipv6_proof",
         "internet_nl_v6_mail_ipv6_incompatible",
+        "internet_nl_mail_ns_rpki_valid",
     ]
 
     for field in should_be_present:
@@ -817,7 +844,9 @@ def test_internet_nl_store_testresults(db):
     # +1 due to adding mail_sending_domain
     # + 8 for 2x ipv6 web results
     # + 4 for 1x ipv6 mail results
-    assert EndpointGenericScan.objects.all().count() == 96 + 53 + 2 + 8 + 4
+    # = 163
+    # + rpki fields = 182
+    assert EndpointGenericScan.objects.all().count() == 182
 
     create_url_reports(url1)
 

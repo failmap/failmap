@@ -674,6 +674,7 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
             "mail_dnssec": "dnssec",
             "mail_auth": "auth",
             "mail_starttls": "tls",
+            "mail_rpki": "rpki",
         },
         # this is the same as mail, and a trivial way to write this fallback
         "mail_dashboard": {
@@ -681,12 +682,14 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
             "mail_dnssec": "dnssec",
             "mail_auth": "auth",
             "mail_starttls": "tls",
+            "mail_rpki": "rpki",
         },
         "web": {
             "web_ipv6": "ipv6",
             "web_dnssec": "dnssec",
             "web_https": "tls",
             "web_appsecpriv": "appsecpriv",
+            "web_rpki": "rpki",
         },
     }
 
@@ -694,7 +697,12 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
     # no technical details here:
     for category in scan_data["results"]["categories"].keys():
         # to keep APIv2 field names in line with APIv1, so we don't have to rename fields and all reports stay valid.
-        scan_type_field = f"internet_nl_{scan_type}_{api_v2_categories_to_v1_categories[scan_type][category]}"
+        try:
+            scan_type_field = f"internet_nl_{scan_type}_{api_v2_categories_to_v1_categories[scan_type][category]}"
+        except KeyError:
+            # new category created probably... remove the web or mail prefix and use it:
+            catname = category.replace("web_", "").replace("mail_", "")
+            scan_type_field = f"internet_nl_{scan_type}_{catname}"
 
         store_endpoint_scan_result(
             scan_type=scan_type_field,
