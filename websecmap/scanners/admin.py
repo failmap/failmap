@@ -483,7 +483,15 @@ class ScannerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.ScanType)
 class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdminMixin):
-    list_display = ("display_order", "id", "name", "description", "category2", "documentation_links2", "second_opinion_links2")
+    list_display = (
+        "display_order",
+        "id",
+        "name",
+        "description",
+        "category2",
+        "documentation_links2",
+        "second_opinion_links2",
+    )
     save_as = True
     list_per_page = 400
     actions = ordering_actions()

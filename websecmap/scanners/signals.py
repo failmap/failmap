@@ -10,7 +10,6 @@ import pytest_is_running
 #     # A reboot is needed until it goes into effect. This is fragile because of a misconfig app can crash
 #     dump_scan_config_to_file()
 
-import sys
 
 # Only when running. During testing you should not re-dump stuff to a file and polute that file
 if not pytest_is_running.is_running():

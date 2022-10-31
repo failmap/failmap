@@ -6,14 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reporting', '0014_auto_20220812_1220'),
-        ('scanners', '0021_alter_followupscan_follow_up_scanner'),
+        ("reporting", "0014_auto_20220812_1220"),
+        ("scanners", "0021_alter_followupscan_follow_up_scanner"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='followupscan',
-            name='run_follow_up_on_any_of_these_policies',
-            field=models.ManyToManyField(blank=True, db_constraint=False, help_text="There are conditions here on when the follow up will be performed. This is a 'rough conclusion', which is used to auto-document when corrections are applied.", to='reporting.ScanPolicy'),
+            model_name="followupscan",
+            name="run_follow_up_on_any_of_these_policies",
+            field=models.ManyToManyField(
+                blank=True,
+                db_constraint=False,
+                help_text="There are conditions here on when the follow up will be performed. This is a 'rough conclusion', which is used to auto-document when corrections are applied.",
+                to="reporting.ScanPolicy",
+            ),
         ),
     ]

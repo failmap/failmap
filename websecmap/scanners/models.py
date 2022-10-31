@@ -748,7 +748,7 @@ class FollowUpScan(models.Model):
         blank=True,
         help_text="There are conditions here on when the follow up will be performed. This is a 'rough conclusion', "
         "which is used to auto-document when corrections are applied.",
-        db_constraint=False
+        db_constraint=False,
     )
 
     follow_up_scanner = models.ForeignKey(Scanner, on_delete=models.CASCADE, db_constraint=False)
