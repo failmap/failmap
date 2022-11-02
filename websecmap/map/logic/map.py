@@ -10,7 +10,7 @@ from django.utils.text import slugify
 from websecmap.map.logic.map_defaults import REMARK, get_country, get_organization_type
 from websecmap.map.models import MapDataCache
 from websecmap.reporting.diskreport import retrieve_report
-from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 
 def get_reports_by_ids(ids: List[str]) -> Dict[str, Dict[Any, Any]]:
@@ -64,6 +64,7 @@ def get_cached_map_data(
 def get_map_data(
     country: str = "NL", organization_type: str = "municipality", days_back: int = 0, displayed_issue: str = None
 ):
+    metadata = get_backend_scanmetadata()
 
     # A bug in the live version (possibly due to |safe) gives a Country(code='NL')} instead of
     # the country code of the country. Here this is worked around, but something is wrong and should be fixed.
@@ -71,20 +72,21 @@ def get_map_data(
         country = country.code
 
     when = datetime.now(pytz.utc) - relativedelta(days=int(days_back))
+    metadata = get_backend_scanmetadata()
 
     desired_url_scans = []
     desired_endpoint_scans = []
 
-    if displayed_issue in URL_SCAN_TYPES:
+    if displayed_issue in metadata["url_scan_types"]:
         desired_url_scans += [displayed_issue]
 
-    if displayed_issue in ENDPOINT_SCAN_TYPES:
+    if displayed_issue in metadata["endpoint_scan_types"]:
         desired_endpoint_scans += [displayed_issue]
 
     # fallback if no data is "all", which is the default.
     if not desired_url_scans and not desired_endpoint_scans:
-        desired_url_scans = URL_SCAN_TYPES
-        desired_endpoint_scans = ENDPOINT_SCAN_TYPES
+        desired_url_scans = metadata["url_scan_types"]
+        desired_endpoint_scans = metadata["endpoint_scan_types"]
 
         filters = ["all"]
     else:

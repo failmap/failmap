@@ -6,8 +6,8 @@ from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.reporting.severity import get_severity
-from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 
 def get_recent_explains(country, organization_type):
@@ -131,11 +131,12 @@ def get_explanation(url_or_endpoint, scan):
 
 
 def get_scan(scan_id: int, scan_type: str) -> Union[EndpointGenericScan, UrlGenericScan, None]:
+    metadata = get_backend_scanmetadata()
 
-    if scan_type in ENDPOINT_SCAN_TYPES:
+    if scan_type in metadata["endpoint_scan_types"]:
         return EndpointGenericScan.objects.all().filter(pk=scan_id, type=scan_type, is_the_latest_scan=True).first()
 
-    if scan_type in URL_SCAN_TYPES:
+    if scan_type in metadata["url_scan_types"]:
         return UrlGenericScan.objects.all().filter(pk=scan_id, type=scan_type, is_the_latest_scan=True).first()
 
     return None

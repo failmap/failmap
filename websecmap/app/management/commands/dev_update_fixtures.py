@@ -12,13 +12,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """
-        This fixture is a workaround to enable users to enable and disable scanners using the constance admin
-        webinterface.
-        It is also used for rate limits. These constance variables are loaded at bootstrap of the application, before
-        the database is run. It is by design that database access is not available when declaring constance variables.
-
-        Thus the database is written to a file, the file is loaded up at boot and the settings are created. Every time
-        one of the below models is changed, a constance_definitions.json file is dumped to disk to a writable directory.
+        These fixtures are shipped with the default product. Be sure to know that your database is fully OK before
+        committing changes to these files!
 
         This fixture makes it possible to use this same database in tests.
         """

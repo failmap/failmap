@@ -68,6 +68,8 @@
   "fields": {
     "name": "tls_qualys_certificate_trusted",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 21,
     "second_opinion_links": [
       2,
@@ -89,6 +91,8 @@
   "fields": {
     "name": "tls_qualys_encryption_quality",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 20,
     "second_opinion_links": [
       2
@@ -109,6 +113,8 @@
   "fields": {
     "name": "ftp",
     "description": "File Transfer Protocol (FTP)",
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 40,
     "second_opinion_links": [
       7
@@ -128,6 +134,8 @@
   "fields": {
     "name": "plain_http",
     "description": "Missing Encryption next to unencrypted HTTP",
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 30,
     "second_opinion_links": [
       2,
@@ -149,6 +157,8 @@
   "fields": {
     "name": "dnssec",
     "description": "Availability and usage of Domain Name Security (DNSSEC)",
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 10,
     "second_opinion_links": [
       8
@@ -167,6 +177,8 @@
   "fields": {
     "name": "http_security_header_strict_transport_security",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 3000,
     "second_opinion_links": [
       3
@@ -187,6 +199,8 @@
   "fields": {
     "name": "http_security_header_x_content_type_options",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 3001,
     "second_opinion_links": [
       3
@@ -207,6 +221,8 @@
   "fields": {
     "name": "http_security_header_x_frame_options",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 3002,
     "second_opinion_links": [
       3
@@ -227,6 +243,8 @@
   "fields": {
     "name": "http_security_header_x_xss_protection",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 3003,
     "second_opinion_links": [
       3
@@ -246,6 +264,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_tls_available",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2410,
     "second_opinion_links": [
       6
@@ -264,6 +284,8 @@
   "fields": {
     "name": "internet_nl_mail_auth_spf_exist",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2330,
     "second_opinion_links": [
       6
@@ -282,6 +304,8 @@
   "fields": {
     "name": "internet_nl_mail_auth_dkim_exist",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2320,
     "second_opinion_links": [
       6
@@ -300,6 +324,8 @@
   "fields": {
     "name": "internet_nl_mail_auth_dmarc_exist",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2310,
     "second_opinion_links": [
       6
@@ -318,6 +344,8 @@
   "fields": {
     "name": "internet_nl_mail_ipv6_mx_reach",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2105,
     "second_opinion_links": [
       6
@@ -336,6 +364,8 @@
   "fields": {
     "name": "internet_nl_mail_ipv6_ns_reach",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2103,
     "second_opinion_links": [
       6
@@ -354,6 +384,8 @@
   "fields": {
     "name": "internet_nl_mail_ipv6_ns_address",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2102,
     "second_opinion_links": [
       6
@@ -372,6 +404,8 @@
   "fields": {
     "name": "internet_nl_mail_ipv6_mx_address",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2104,
     "second_opinion_links": [
       6
@@ -390,6 +424,8 @@
   "fields": {
     "name": "internet_nl_mail_dnssec_mx_exist",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2202,
     "second_opinion_links": [
       6
@@ -408,6 +444,8 @@
   "fields": {
     "name": "internet_nl_mail_dnssec_mx_valid",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2203,
     "second_opinion_links": [
       6
@@ -426,6 +464,8 @@
   "fields": {
     "name": "internet_nl_mail_dnssec_mailto_valid",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2204,
     "second_opinion_links": [
       6
@@ -444,6 +484,8 @@
   "fields": {
     "name": "internet_nl_mail_dnssec_mailto_exist",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2205,
     "second_opinion_links": [
       6
@@ -462,6 +504,8 @@
   "fields": {
     "name": "internet_nl_mail_auth_spf_policy",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2331,
     "second_opinion_links": [
       6
@@ -480,6 +524,8 @@
   "fields": {
     "name": "internet_nl_mail_auth_dmarc_policy",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2311,
     "second_opinion_links": [
       6
@@ -498,6 +544,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_tls_keyexchange",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2414,
     "second_opinion_links": [
       6
@@ -516,6 +564,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_tls_compress",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2416,
     "second_opinion_links": [
       6
@@ -534,6 +584,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_cert_sig",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2432,
     "second_opinion_links": [
       6
@@ -552,6 +604,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_cert_pubkey",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2431,
     "second_opinion_links": [
       6
@@ -570,6 +624,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_dane_rollover",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2452,
     "second_opinion_links": [
       6
@@ -588,6 +644,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_tls_secreneg",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2417,
     "second_opinion_links": [
       6
@@ -606,6 +664,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_dane_exist",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2450,
     "second_opinion_links": [
       6
@@ -624,6 +684,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_dane_valid",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2451,
     "second_opinion_links": [
       6
@@ -642,6 +704,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_tls_ciphers",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2412,
     "second_opinion_links": [
       6
@@ -660,6 +724,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_tls_clientreneg",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2418,
     "second_opinion_links": [
       6
@@ -678,6 +744,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_cert_chain",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2430,
     "second_opinion_links": [
       6
@@ -696,6 +764,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_tls_version",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2411,
     "second_opinion_links": [
       6
@@ -714,6 +784,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_cert_domain",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2433,
     "second_opinion_links": [
       6
@@ -732,6 +804,8 @@
   "fields": {
     "name": "internet_nl_mail_dashboard_tls",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2401,
     "second_opinion_links": [
       6
@@ -750,6 +824,8 @@
   "fields": {
     "name": "internet_nl_mail_dashboard_auth",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2301,
     "second_opinion_links": [
       6
@@ -768,6 +844,8 @@
   "fields": {
     "name": "internet_nl_mail_dashboard_dnssec",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2201,
     "second_opinion_links": [
       6
@@ -786,6 +864,8 @@
   "fields": {
     "name": "internet_nl_mail_dashboard_ipv6",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2101,
     "second_opinion_links": [
       6
@@ -804,6 +884,8 @@
   "fields": {
     "name": "internet_nl_mail_dashboard_overall_score",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2000,
     "second_opinion_links": [
       6
@@ -822,6 +904,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_dmarc",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2601,
     "second_opinion_links": [
       6
@@ -840,6 +924,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_dkim",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2602,
     "second_opinion_links": [
       6
@@ -858,6 +944,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_spf",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2603,
     "second_opinion_links": [
       6
@@ -876,6 +964,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_dmarc_policy",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2604,
     "second_opinion_links": [
       6
@@ -894,6 +984,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_spf_policy",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2605,
     "second_opinion_links": [
       6
@@ -912,6 +1004,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_start_tls",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2606,
     "second_opinion_links": [
       6
@@ -930,6 +1024,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_start_tls_ncsc",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2607,
     "second_opinion_links": [
       6
@@ -948,6 +1044,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_dnssec_email_domain",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2608,
     "second_opinion_links": [
       6
@@ -966,6 +1064,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_dnssec_mx",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2609,
     "second_opinion_links": [
       6
@@ -984,6 +1084,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_dane",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2610,
     "second_opinion_links": [
       6
@@ -1002,6 +1104,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_ipv6_nameserver",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2612,
     "second_opinion_links": [
       6
@@ -1020,6 +1124,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_ipv6_mailserver",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2613,
     "second_opinion_links": [
       6
@@ -1038,6 +1144,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_tls_cipherorder",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2413,
     "second_opinion_links": [
       6
@@ -1056,6 +1164,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_tls_keyexchangehash",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2415,
     "second_opinion_links": [
       6
@@ -1074,6 +1184,8 @@
   "fields": {
     "name": "internet_nl_mail_starttls_tls_0rtt",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2419,
     "second_opinion_links": [
       6
@@ -1092,6 +1204,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_mail_non_sending_domain",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2614,
     "second_opinion_links": [
       6
@@ -1110,6 +1224,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_mail_sending_domain",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2615,
     "second_opinion_links": [
       6
@@ -1128,6 +1244,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_mail_server_testable",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2616,
     "second_opinion_links": [
       6
@@ -1146,6 +1264,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_mail_server_reachable",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2617,
     "second_opinion_links": [
       6
@@ -1164,6 +1284,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_domain_has_mx",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2618,
     "second_opinion_links": [
       6
@@ -1182,6 +1304,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_tls_1_3",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2620,
     "second_opinion_links": [
       6
@@ -1200,6 +1324,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_category_ipv6",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2611,
     "second_opinion_links": [
       6
@@ -1218,6 +1344,8 @@
   "fields": {
     "name": "internet_nl_mail_legacy_category",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2600,
     "second_opinion_links": [
       6
@@ -1236,6 +1364,8 @@
   "fields": {
     "name": "internet_nl_web_ipv6",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1100,
     "second_opinion_links": [
       3
@@ -1254,6 +1384,8 @@
   "fields": {
     "name": "internet_nl_web_dnssec",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1200,
     "second_opinion_links": [
       3
@@ -1272,6 +1404,8 @@
   "fields": {
     "name": "internet_nl_web_tls",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1300,
     "second_opinion_links": [
       3
@@ -1290,6 +1424,8 @@
   "fields": {
     "name": "internet_nl_web_ipv6_ws_similar",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1105,
     "second_opinion_links": [
       3
@@ -1308,6 +1444,8 @@
   "fields": {
     "name": "internet_nl_web_ipv6_ws_address",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1103,
     "second_opinion_links": [
       3
@@ -1326,6 +1464,8 @@
   "fields": {
     "name": "internet_nl_web_ipv6_ns_reach",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1102,
     "second_opinion_links": [
       3
@@ -1344,6 +1484,8 @@
   "fields": {
     "name": "internet_nl_web_ipv6_ws_reach",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1104,
     "second_opinion_links": [
       3
@@ -1362,6 +1504,8 @@
   "fields": {
     "name": "internet_nl_web_ipv6_ns_address",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1101,
     "second_opinion_links": [
       3
@@ -1380,6 +1524,8 @@
   "fields": {
     "name": "internet_nl_web_dnssec_valid",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1202,
     "second_opinion_links": [
       3
@@ -1398,6 +1544,8 @@
   "fields": {
     "name": "internet_nl_web_dnssec_exist",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1201,
     "second_opinion_links": [
       3
@@ -1416,6 +1564,8 @@
   "fields": {
     "name": "internet_nl_web_https_tls_keyexchange",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1323,
     "second_opinion_links": [
       3
@@ -1434,6 +1584,8 @@
   "fields": {
     "name": "internet_nl_web_https_tls_compress",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1325,
     "second_opinion_links": [
       3
@@ -1452,6 +1604,8 @@
   "fields": {
     "name": "internet_nl_web_https_cert_sig",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1342,
     "second_opinion_links": [
       3
@@ -1470,6 +1624,8 @@
   "fields": {
     "name": "internet_nl_web_https_cert_pubkey",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1341,
     "second_opinion_links": [
       3
@@ -1488,6 +1644,8 @@
   "fields": {
     "name": "internet_nl_web_https_dane_valid",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1345,
     "second_opinion_links": [
       3
@@ -1506,6 +1664,8 @@
   "fields": {
     "name": "internet_nl_web_https_tls_secreneg",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1326,
     "second_opinion_links": [
       3
@@ -1524,6 +1684,8 @@
   "fields": {
     "name": "internet_nl_web_https_http_hsts",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1313,
     "second_opinion_links": [
       3
@@ -1542,6 +1704,8 @@
   "fields": {
     "name": "internet_nl_web_https_http_compress",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1312,
     "second_opinion_links": [
       3
@@ -1560,6 +1724,8 @@
   "fields": {
     "name": "internet_nl_web_https_dane_exist",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1344,
     "second_opinion_links": [
       3
@@ -1578,6 +1744,8 @@
   "fields": {
     "name": "internet_nl_web_https_http_available",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1310,
     "second_opinion_links": [
       3
@@ -1596,6 +1764,8 @@
   "fields": {
     "name": "internet_nl_web_https_tls_ciphers",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1321,
     "second_opinion_links": [
       3
@@ -1614,6 +1784,8 @@
   "fields": {
     "name": "internet_nl_web_https_tls_clientreneg",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1327,
     "second_opinion_links": [
       3
@@ -1632,6 +1804,8 @@
   "fields": {
     "name": "internet_nl_web_https_tls_version",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1320,
     "second_opinion_links": [
       3
@@ -1650,6 +1824,8 @@
   "fields": {
     "name": "internet_nl_web_https_cert_chain",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1340,
     "second_opinion_links": [
       3
@@ -1668,6 +1844,8 @@
   "fields": {
     "name": "internet_nl_web_https_http_redirect",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1311,
     "second_opinion_links": [
       3
@@ -1686,6 +1864,8 @@
   "fields": {
     "name": "internet_nl_web_https_cert_domain",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1343,
     "second_opinion_links": [
       3
@@ -1704,6 +1884,8 @@
   "fields": {
     "name": "internet_nl_web_overall_score",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1000,
     "second_opinion_links": [
       3
@@ -1722,6 +1904,8 @@
   "fields": {
     "name": "internet_nl_web_legacy_dnssec",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1601,
     "second_opinion_links": [
       3
@@ -1740,6 +1924,8 @@
   "fields": {
     "name": "internet_nl_web_legacy_tls_available",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1602,
     "second_opinion_links": [
       3
@@ -1758,6 +1944,8 @@
   "fields": {
     "name": "internet_nl_web_legacy_tls_ncsc_web",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1603,
     "second_opinion_links": [
       3
@@ -1776,6 +1964,8 @@
   "fields": {
     "name": "internet_nl_web_legacy_https_enforced",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1604,
     "second_opinion_links": [
       3
@@ -1794,6 +1984,8 @@
   "fields": {
     "name": "internet_nl_web_legacy_hsts",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1605,
     "second_opinion_links": [
       3
@@ -1812,6 +2004,8 @@
   "fields": {
     "name": "internet_nl_web_legacy_ipv6_nameserver",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1607,
     "second_opinion_links": [
       3
@@ -1830,6 +2024,8 @@
   "fields": {
     "name": "internet_nl_web_legacy_ipv6_webserver",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1608,
     "second_opinion_links": [
       3
@@ -1848,6 +2044,8 @@
   "fields": {
     "name": "internet_nl_web_appsecpriv",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1400,
     "second_opinion_links": [
       3
@@ -1866,6 +2064,8 @@
   "fields": {
     "name": "internet_nl_web_appsecpriv_csp",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1403,
     "second_opinion_links": [
       3
@@ -1884,6 +2084,8 @@
   "fields": {
     "name": "internet_nl_web_appsecpriv_referrer_policy",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1404,
     "second_opinion_links": [
       3
@@ -1902,6 +2104,8 @@
   "fields": {
     "name": "internet_nl_web_appsecpriv_x_content_type_options",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1402,
     "second_opinion_links": [
       3
@@ -1920,6 +2124,8 @@
   "fields": {
     "name": "internet_nl_web_appsecpriv_x_frame_options",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1401,
     "second_opinion_links": [
       3
@@ -1938,6 +2144,8 @@
   "fields": {
     "name": "internet_nl_web_https_tls_cipherorder",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1322,
     "second_opinion_links": [
       3
@@ -1956,6 +2164,8 @@
   "fields": {
     "name": "internet_nl_web_https_tls_0rtt",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1328,
     "second_opinion_links": [
       3
@@ -1974,6 +2184,8 @@
   "fields": {
     "name": "internet_nl_web_https_tls_ocsp",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1329,
     "second_opinion_links": [
       3
@@ -1992,6 +2204,8 @@
   "fields": {
     "name": "internet_nl_web_https_tls_keyexchangehash",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1324,
     "second_opinion_links": [
       3
@@ -2010,6 +2224,8 @@
   "fields": {
     "name": "internet_nl_web_legacy_tls_1_3",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1609,
     "second_opinion_links": [
       3
@@ -2028,6 +2244,8 @@
   "fields": {
     "name": "internet_nl_web_legacy_category_ipv6",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1606,
     "second_opinion_links": [
       3
@@ -2046,6 +2264,8 @@
   "fields": {
     "name": "internet_nl_web_legacy_category",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1600,
     "second_opinion_links": [
       3
@@ -2064,6 +2284,8 @@
   "fields": {
     "name": "dummy",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 3004,
     "second_opinion_links": [
       3
@@ -2082,6 +2304,8 @@
   "fields": {
     "name": "internet_nl_web_appsecpriv_securitytxt",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1405,
     "second_opinion_links": [
       3
@@ -2101,6 +2325,8 @@
   "fields": {
     "name": "internet_nl_web_rpki",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1500,
     "second_opinion_links": [
       3
@@ -2120,6 +2346,8 @@
   "fields": {
     "name": "internet_nl_web_rpki_exists",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1501,
     "second_opinion_links": [
       3
@@ -2139,6 +2367,8 @@
   "fields": {
     "name": "internet_nl_web_rpki_valid",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1502,
     "second_opinion_links": [
       3
@@ -2158,6 +2388,8 @@
   "fields": {
     "name": "internet_nl_web_ns_rpki_exists",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1503,
     "second_opinion_links": [
       3
@@ -2177,6 +2409,8 @@
   "fields": {
     "name": "internet_nl_web_ns_rpki_valid",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 1504,
     "second_opinion_links": [
       3
@@ -2196,6 +2430,8 @@
   "fields": {
     "name": "internet_nl_mail_rpki",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2500,
     "second_opinion_links": [
       6
@@ -2215,6 +2451,8 @@
   "fields": {
     "name": "internet_nl_mail_rpki_exists",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2501,
     "second_opinion_links": [
       6
@@ -2234,6 +2472,8 @@
   "fields": {
     "name": "internet_nl_mail_rpki_valid",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2502,
     "second_opinion_links": [
       6
@@ -2253,6 +2493,8 @@
   "fields": {
     "name": "internet_nl_mail_ns_rpki_exists",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2503,
     "second_opinion_links": [
       6
@@ -2272,6 +2514,8 @@
   "fields": {
     "name": "internet_nl_mail_ns_rpki_valid",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2504,
     "second_opinion_links": [
       6
@@ -2291,6 +2535,8 @@
   "fields": {
     "name": "internet_nl_mail_mx_ns_rpki_exists",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2505,
     "second_opinion_links": [
       6
@@ -2310,6 +2556,8 @@
   "fields": {
     "name": "internet_nl_mail_mx_ns_rpki_valid",
     "description": null,
+    "include_in_report": true,
+    "show_in_frontend": true,
     "display_order": 2506,
     "second_opinion_links": [
       6
@@ -2547,8 +2795,15 @@
     "python_name": "ftp",
     "description": "Scans FTP services on port 21 (default port) if they support TLS or SSL.",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 200,
     "needs_results_from": 2,
     "plannable_activities": [
+      1,
+      2,
+      3
+    ],
+    "enabled_activities": [
       1,
       2,
       3
@@ -2566,8 +2821,13 @@
     "python_name": "dnssec",
     "description": "Scans HTTP endpoints to see if there is an HTTPS counterpart.",
     "to": 1,
+    "enabled": true,
+    "rate_limit": 500,
     "needs_results_from": null,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": [
@@ -2583,8 +2843,14 @@
     "python_name": "subdomains",
     "description": "Uses NSEC1 and Certificate Tranparency to discover new urls.",
     "to": 1,
+    "enabled": true,
+    "rate_limit": 10,
     "needs_results_from": null,
     "plannable_activities": [
+      2,
+      3
+    ],
+    "enabled_activities": [
       2,
       3
     ],
@@ -2599,8 +2865,13 @@
     "python_name": "dns_known_subdomains",
     "description": "Subdomain discovery using known subdomains",
     "to": 1,
+    "enabled": true,
+    "rate_limit": 10,
     "needs_results_from": null,
     "plannable_activities": [
+      2
+    ],
+    "enabled_activities": [
       2
     ],
     "creates_scan_types": []
@@ -2614,8 +2885,13 @@
     "python_name": "dns_clean_wildcards",
     "description": "Subdomain discovery using known subdomains",
     "to": 1,
+    "enabled": true,
+    "rate_limit": 20,
     "needs_results_from": null,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": []
@@ -2629,8 +2905,13 @@
     "python_name": "dns_wildcards",
     "description": "Discover if a domain/subdomain has a wildcard DNS entry.",
     "to": 1,
+    "enabled": true,
+    "rate_limit": 20,
     "needs_results_from": null,
     "plannable_activities": [
+      2
+    ],
+    "enabled_activities": [
       2
     ],
     "creates_scan_types": []
@@ -2644,8 +2925,14 @@
     "python_name": "http",
     "description": "Discovers and verifies the existence of HTTP/HTTPS services on standard and alternative ports.",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 500,
     "needs_results_from": null,
     "plannable_activities": [
+      2,
+      3
+    ],
+    "enabled_activities": [
       2,
       3
     ],
@@ -2660,8 +2947,14 @@
     "python_name": "dns_endpoints",
     "description": "Finds DNS pointers towards supposedly existing services. Used for internet.nl scans.",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 500,
     "needs_results_from": null,
     "plannable_activities": [
+      2,
+      3
+    ],
+    "enabled_activities": [
       2,
       3
     ],
@@ -2676,8 +2969,13 @@
     "python_name": "autoexplain_dutch_untrusted_cert",
     "description": "Explains specific TLS certificates that are not trusted by default.",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 750,
     "needs_results_from": null,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": []
@@ -2691,8 +2989,13 @@
     "python_name": "autoexplain_trust_microsoft",
     "description": "Trusts certain microsoft services such as SIP, Lyndiscover and others with.",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 500,
     "needs_results_from": null,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": []
@@ -2706,8 +3009,13 @@
     "python_name": "autoexplain_microsoft_neighboring_services",
     "description": "Explains new neighboring services of endpoints already explained by trust microsoft.",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 500,
     "needs_results_from": null,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": []
@@ -2721,8 +3029,13 @@
     "python_name": "autoexplain_no_https_microsoft",
     "description": "Allows certain microsoft services that don't require https to result in a high risk issue.",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 500,
     "needs_results_from": null,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": []
@@ -2736,8 +3049,13 @@
     "python_name": "autoexplain_no_https_possible",
     "description": "Removes https requirement from subdomains that don't have https requirements.",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 500,
     "needs_results_from": null,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": []
@@ -2751,8 +3069,13 @@
     "python_name": "screenshot",
     "description": "Creates screenshot to accompany the report with some pictures",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 500,
     "needs_results_from": null,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": []
@@ -2766,8 +3089,13 @@
     "python_name": "dummy",
     "description": "Scanner that does exactly nothing",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 500,
     "needs_results_from": null,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": [
@@ -2783,8 +3111,13 @@
     "python_name": "tls_qualys",
     "description": "Investigate HTTPS services on port 443 to find the quality and security on it's encryption.",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 1500,
     "needs_results_from": 10,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": [
@@ -2801,8 +3134,13 @@
     "python_name": "plain_http",
     "description": "Scans HTTP endpoints to see if there is an HTTPS counterpart.",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 500,
     "needs_results_from": 10,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": [
@@ -2818,8 +3156,13 @@
     "python_name": "security_headers",
     "description": "Contacts HTTP services to determine if all security headers are enabled.",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 500,
     "needs_results_from": 10,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": [
@@ -2838,8 +3181,13 @@
     "python_name": "verify_unresolvable",
     "description": "Discovers and verifies the existence of HTTP/HTTPS services on standard and alternative ports.",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 500,
     "needs_results_from": 10,
     "plannable_activities": [
+      3
+    ],
+    "enabled_activities": [
       3
     ],
     "creates_scan_types": []
@@ -2853,8 +3201,13 @@
     "python_name": "internet_nl_mail",
     "description": "Scan recipient for STARTTLS, SPF, DKIM and DMARC using internet.nl",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 2500,
     "needs_results_from": 12,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": [
@@ -2931,8 +3284,13 @@
     "python_name": "internet_nl_web",
     "description": "Scan recipient for HTTPS, Security Headers, IPv6 and DNSSEC using internet.nl",
     "to": 0,
+    "enabled": true,
+    "rate_limit": 2500,
     "needs_results_from": 12,
     "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
       1
     ],
     "creates_scan_types": [

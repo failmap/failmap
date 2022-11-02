@@ -25,9 +25,8 @@ from websecmap.organizations.datasources import dutch_government, excel
 from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid import import_file
 from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url, GenericFileDataset
 from websecmap.reporting.models import UrlReport
-from websecmap.scanners import SCANNERS
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, UrlIp
-
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 log = logging.getLogger(__name__)
 
@@ -223,21 +222,24 @@ class ActionMixin:
         # this makes sure already existing actions are also returned
         actions = super().get_actions(request)
 
-        for scanner in SCANNERS:
+        metadata = get_backend_scanmetadata()
+        scanners = metadata["scanners"]
+
+        for scanner in scanners:
             # these discover:
             if scanner["can_discover_urls"] or scanner["can_discover_endpoints"]:
                 func = discover_function_maker(scanner["python_name"], scanner["python_name"])
                 unique_name = f"discover_{scanner['python_name']}"
                 actions[unique_name] = (func, unique_name, f"🗺 {scanner['python_name']}")
 
-        for scanner in SCANNERS:
+        for scanner in scanners:
             # these verify:
             if scanner["can_verify_urls"] or scanner["can_verify_endpoints"]:
                 func = verify_function_maker(scanner["python_name"], scanner["python_name"])
                 unique_name = f"verify_{scanner['python_name']}"
                 actions[unique_name] = (func, unique_name, f"[X] {scanner['python_name']}")
 
-        for scanner in SCANNERS:
+        for scanner in scanners:
             # these create scans
             if scanner["creates_endpoint_scan_types"] or scanner["creates_url_scan_types"]:
                 func = scan_function_maker(scanner["python_name"], scanner["python_name"])

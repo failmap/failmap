@@ -476,9 +476,28 @@ class PlannedScanStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.Scanner)
 class ScannerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     help_text = "test"
-    list_display = ("id", "name", "python_name", "description", "to", "needs_results_from")
+    list_display = ("id", "name", "python_name", "enabled", "rate_limit", "description", "to", "needs_results_from")
     save_as = True
-    ...
+
+    actions = []
+
+    def enable(self, request, queryset):
+        for instance in queryset:
+            instance.enabled = True
+            instance.save()
+        self.message_user(request, f"{queryset.count()} items enabled.")
+
+    enable.short_description = "Enable"
+    actions.append("enable")
+
+    def disable(self, request, queryset):
+        for instance in queryset:
+            instance.enabled = False
+            instance.save()
+        self.message_user(request, f"{queryset.count()} items disabled.")
+
+    disable.short_description = "Disable"
+    actions.append("disable")
 
 
 @admin.register(models.ScanType)
@@ -487,6 +506,8 @@ class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdminMixin
         "display_order",
         "id",
         "name",
+        "include_in_report",
+        "show_in_frontend",
         "description",
         "category2",
         "documentation_links2",
@@ -496,6 +517,42 @@ class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdminMixin
     list_per_page = 400
     actions = ordering_actions()
     ordering = ["display_order"]
+
+    def enable_show_in_frontend(self, request, queryset):
+        for instance in queryset:
+            instance.show_in_frontend = True
+            instance.save()
+        self.message_user(request, f"{queryset.count()} items enabled in frontend.")
+
+    enable_show_in_frontend.short_description = "Show in Frontend"
+    actions.append("enable_show_in_frontend")
+
+    def disable_show_in_frontend(self, request, queryset):
+        for instance in queryset:
+            instance.show_in_frontend = False
+            instance.save()
+        self.message_user(request, f"{queryset.count()} items disabled in frontend.")
+
+    disable_show_in_frontend.short_description = "Hidden in Frontend"
+    actions.append("disable_show_in_frontend")
+
+    def enable_include_in_report(self, request, queryset):
+        for instance in queryset:
+            instance.include_in_report = True
+            instance.save()
+        self.message_user(request, f"{queryset.count()} included in report.")
+
+    enable_include_in_report.short_description = "Include in report"
+    actions.append("enable_include_in_report")
+
+    def disable_include_in_report(self, request, queryset):
+        for instance in queryset:
+            instance.include_in_report = False
+            instance.save()
+        self.message_user(request, f"{queryset.count()} excluded from report.")
+
+    disable_include_in_report.short_description = "Excluded from report"
+    actions.append("disable_include_in_report")
 
     def category2(self, obj):
         return [tag.name for tag in obj.category.all()]

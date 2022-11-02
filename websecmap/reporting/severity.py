@@ -13,8 +13,8 @@ import pytz
 
 from websecmap.reporting.models import ScanPolicy
 from websecmap.reporting.policy import conclusion_to_score
-from websecmap.scanners import SCAN_TYPES_TO_SCANNER
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 log = logging.getLogger(__package__)
 
@@ -115,7 +115,9 @@ def parse_internetnl_nl_explanation_data(scan: EndpointGenericScan) -> Dict[str,
 
 
 def get_severity(scan: Union[EndpointGenericScan, UrlGenericScan]) -> Dict[str, Any]:
-    scanner = SCAN_TYPES_TO_SCANNER.get(scan.type, {"name": "dummy"})
+    metadata = get_backend_scanmetadata()
+
+    scanner = metadata["scan_types_to_scanner"].get(scan.type, {"name": "dummy"})
 
     if scanner["python_name"] in ["internet_nl_mail", "internet_nl_web"]:
         calculation = internet_nl(scan)

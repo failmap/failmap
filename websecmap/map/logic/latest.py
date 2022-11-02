@@ -5,12 +5,13 @@ from django.db.models import Count, Q
 from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import REMARK, get_country, get_organization_type
-from websecmap.map.report import PUBLISHED_ENDPOINT_SCAN_TYPES, PUBLISHED_URL_SCAN_TYPES
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 
 def get_all_latest_scans(country, organization_type):
+    metadata = get_backend_scanmetadata()
 
     dataset = {
         "scans": defaultdict(list),
@@ -23,7 +24,7 @@ def get_all_latest_scans(country, organization_type):
 
     # Really get the latest, without double results that apply for multiple organizations.
     # Do not show anything that is dead, on any level.
-    for scan_type in PUBLISHED_ENDPOINT_SCAN_TYPES:
+    for scan_type in metadata["published_endpoint_scan_types"]:
         scans = (
             EndpointGenericScan.objects.filter(
                 type=scan_type,
@@ -43,7 +44,7 @@ def get_all_latest_scans(country, organization_type):
                 )
             )
             .filter(n_urls__gte=1)
-            .order_by("-rating_determined_on")[0:6]
+            .order_by("-rating_determined_on")[:6]
         )
 
         print(scans.query)
@@ -68,7 +69,7 @@ def get_all_latest_scans(country, organization_type):
                 }
             )
 
-    for scan_type in PUBLISHED_URL_SCAN_TYPES:
+    for scan_type in metadata["published_url_scan_types"]:
 
         scans = (
             UrlGenericScan.objects.filter(
@@ -88,7 +89,7 @@ def get_all_latest_scans(country, organization_type):
                 )
             )
             .filter(n_urls=1)
-            .order_by("-rating_determined_on")[0:6]
+            .order_by("-rating_determined_on")[:6]
         )
 
         for scan in scans:

@@ -1,21 +1,10 @@
 from websecmap.app.constance import get_all_values
-from websecmap.scanners import read_scan_config_from_file, SCANNERS_BY_ID
 from websecmap.scanners.models import Scanner
 from websecmap.scanners.scanmetadata import (
     get_scanners_for_backend,
     get_scanners_for_frontend,
-    dump_scan_config_to_file,
+    get_backend_scanmetadata,
 )
-
-import os
-
-
-def test_dump_to_file(db, default_scan_metadata, tmpdir):
-    # This makes the default policy also the one read by default.
-    os.makedirs("scanmetadata_bootstrap_cache_writable_by_application", exist_ok=True)
-    dump_scan_config_to_file()
-    data = read_scan_config_from_file()
-    assert data == get_scanners_for_backend()
 
 
 def test_get_scanners_for_backend(db, default_scan_metadata):
@@ -55,8 +44,8 @@ def test_get_scanners_for_frontend(db, default_scan_metadata, default_policy):
 
 
 def test_do_scanner_ids_match(db, default_scan_metadata):
-    # data = read_scan_config_from_file()
+    metadata = get_backend_scanmetadata()
 
     for scanner in Scanner.objects.all():
-        scanner_dict = SCANNERS_BY_ID[scanner.id]
+        scanner_dict = metadata["scanners_by_id"][scanner.id]
         assert scanner_dict["python_name"] == scanner.python_name

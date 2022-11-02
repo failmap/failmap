@@ -10,7 +10,6 @@ from celery import group
 from deepdiff import DeepDiff
 from django.db.models import Count
 
-from websecmap.app.constance import get_bulk_values_starting_with
 from websecmap.celery import Task, app, EXPIRES_IN_ONE_DAY
 from websecmap.map.logic.map import get_map_data, get_reports_by_ids
 from websecmap.map.logic.map_health import update_map_health_reports
@@ -21,33 +20,16 @@ from websecmap.reporting.diskreport import retrieve_report, store_report
 from websecmap.reporting.report import (
     START_DATE,
     aggegrate_url_rating_scores,
-    get_allowed_to_report,
     get_latest_urlratings_fast,
     recreate_url_reports,
     relevant_urls_at_timepoint,
     significant_moments,
 )
 from websecmap.scanners import init_dict
-from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 from websecmap.scanners.scanner.__init__ import q_configurations_to_report
 
 log = logging.getLogger(__package__)
-
-
-def get_published_scan_types():
-    report_metrics = get_bulk_values_starting_with("REPORT_INCLUDE_")
-    # Only where the settings is true:
-    return [
-        report_metric_k.replace("REPORT_INCLUDE_", "").lower()
-        for report_metric_k in report_metrics.keys()
-        if report_metrics[report_metric_k]
-    ]
-
-
-PUBLISHED_SCAN_TYPES = get_published_scan_types()
-
-PUBLISHED_URL_SCAN_TYPES = [scan_type for scan_type in PUBLISHED_SCAN_TYPES if scan_type in URL_SCAN_TYPES]
-PUBLISHED_ENDPOINT_SCAN_TYPES = [scan_type for scan_type in PUBLISHED_SCAN_TYPES if scan_type in ENDPOINT_SCAN_TYPES]
 
 
 def compose_task(
@@ -58,6 +40,7 @@ def compose_task(
     """
     Compose taskset to rebuild specified organizations/urls.
     """
+    metadata = get_backend_scanmetadata()
 
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
@@ -127,21 +110,21 @@ def compose_task(
             calculate_vulnerability_statistics.si(1, organizations_filter["country__in"])
             | calculate_map_data.si(1, organizations_filter["country__in"])
             | calculate_high_level_stats.si(1, organizations_filter["country__in"])
-            | update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1, organizations_filter["country__in"])
+            | update_map_health_reports.si(metadata["published_scan_types"], 1, organizations_filter["country__in"])
         )
     elif organizations_filter.get("country", None):
         subtasks.append(
             calculate_vulnerability_statistics.si(1, [organizations_filter["country"]])
             | calculate_map_data.si(1, [organizations_filter["country"]])
             | calculate_high_level_stats.si(1, [organizations_filter["country"]])
-            | update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1, [organizations_filter["country"]])
+            | update_map_health_reports.si(metadata["published_scan_types"], 1, [organizations_filter["country"]])
         )
     else:
         subtasks.append(
             calculate_vulnerability_statistics.si(1)
             | calculate_map_data.si(1)
             | calculate_high_level_stats.si(1)
-            | update_map_health_reports.si(PUBLISHED_SCAN_TYPES, 1)
+            | update_map_health_reports.si(metadata["published_scan_types"], 1)
         )
 
     # Make sure all other reporting tasks are done
@@ -151,6 +134,7 @@ def compose_task(
 @app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
 def calculate_vulnerability_statistics(days: int = 366, countries: List = None, organization_types: List = None):
     log.info("Calculation vulnerability graphs")
+    metadata = get_backend_scanmetadata()
 
     map_configurations = filter_map_configs(countries=countries, organization_types=organization_types)
 
@@ -443,7 +427,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                     vstat.ok_urls = measurement[scan_type]["ok_urls"]
                     vstat.ok_endpoints = measurement[scan_type]["ok_endpoints"]
 
-                    if scan_type in PUBLISHED_SCAN_TYPES:
+                    if scan_type in metadata["published_scan_types"]:
                         vstat.urls = measurement[scan_type]["applicable_urls"]
                         vstat.endpoints = measurement[scan_type]["applicable_endpoints"]
                     else:
@@ -451,9 +435,9 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                         vstat.urls = number_of_urls
                         vstat.endpoints = number_of_endpoints
 
-                    if scan_type in ENDPOINT_SCAN_TYPES:
+                    if scan_type in metadata["endpoint_scan_types"]:
                         vstat.ok = measurement[scan_type]["ok_endpoints"]  # pylint: disable=invalid-name
-                    elif scan_type in URL_SCAN_TYPES:
+                    elif scan_type in metadata["url_scan_types"]:
                         vstat.ok = measurement[scan_type]["ok_urls"]
                     else:
                         # total: everything together.
@@ -471,12 +455,14 @@ def calculate_map_data_today():
 def calculate_map_data(days: int = 366, countries: List = None, organization_types: List = None):
     from django.db import OperationalError
 
+    metadata = get_backend_scanmetadata()
+
     log.info("calculate_map_data")
 
     map_configurations = filter_map_configs(countries=countries, organization_types=organization_types)
 
     # the "all" filter will retrieve all layers at once
-    scan_types = ["all"] + PUBLISHED_SCAN_TYPES
+    scan_types = ["all"] + metadata["published_scan_types"]
 
     for map_configuration in map_configurations:
         for days_back in list(reversed(range(days))):
@@ -920,6 +906,7 @@ def recreate_organization_reports(organizations: List[int]):
     """Remove organization rating and rebuild a new."""
 
     # todo: only for allowed organizations...
+    metadata = get_backend_scanmetadata()
 
     for organization_id in organizations:
         organization = Organization.objects.all().filter(id=organization_id).first()
@@ -933,7 +920,7 @@ def recreate_organization_reports(organizations: List[int]):
 
         # and then rebuild the ratings per moment, which is a maximum of one per day.
         urls = Url.objects.filter(organization__in=organizations)
-        moments, _ = significant_moments(urls=urls, reported_scan_types=get_allowed_to_report())
+        moments, _ = significant_moments(urls=urls, reported_scan_types=metadata["published_scan_types"]())
 
         moments = reduce_to_save_data(moments)
         for moment in moments:

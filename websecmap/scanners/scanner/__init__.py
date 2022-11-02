@@ -9,7 +9,7 @@ from django.db.models import Q
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
-from websecmap.scanners.models import Endpoint, EndpointGenericScan
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, Scanner
 
 log = logging.getLogger(__name__)
 
@@ -57,35 +57,36 @@ def add_model_filter(queryset, **kwargs):
 
 # simply matching config variables to modules.
 # Note that .__module__  is always celery.local :)
-def allowed_to_scan(scanner_name: str = ""):
+def allowed_to_scan(scanner_name: str = "", activity: str = None):
+    # scanner_name: python name of the scanner, as used in the database
+    # This can be optimized with the walrus operator at the cost of readability. Dont do bool( x:=sdasd.fiaasd...)
+    # activity is the name of the plannable activity in text, such as "scan" "verify" "discover"
 
     if not config.SCAN_AT_ALL:
         return False
 
-    if scanner_name == "dummy":
+    # Is this scanner enabled?
+    scan_data = Scanner.objects.all().filter(python_name=scanner_name, enabled=True).first()
+    if not scan_data:
+        return False
+
+    # No specific activity? And it was enabled above? Lfg
+    if not activity:
         return True
 
-    try:
-        return getattr(config, f"USE_SCANNER_{scanner_name.upper()}")
-    except AttributeError:
-        log.debug("Scanner %s is not allowed to scan due to setting.", scanner_name)
-        return False
+    enabled_activity = scan_data.enabled_activities.filter(name=activity).first()
+    if enabled_activity:
+        return True
+
+    return False
 
 
 def allowed_to_discover_urls(scanner_name: str = ""):
-    try:
-        return getattr(config, f"DISCOVER_URLS_USING_{scanner_name.upper()}")
-    except AttributeError:
-        log.debug("Scanner %s is not allowed to discover urls due to setting.", scanner_name)
-        return False
+    return allowed_to_scan(scanner_name, "discover")
 
 
 def allowed_to_discover_endpoints(scanner_name: str = ""):
-    try:
-        return getattr(config, f"DISCOVER_ENDPOINTS_USING_{scanner_name.upper()}")
-    except AttributeError:
-        log.debug("Scanner %s is not allowed to discover endpoints due to setting.", scanner_name)
-        return False
+    return allowed_to_scan(scanner_name, "discover")
 
 
 def q_configurations_to_scan(level: str = "url"):

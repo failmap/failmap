@@ -22,8 +22,8 @@ from websecmap.game.forms import ContestForm, OrganisationSubmissionForm, TeamFo
 from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.reporting.severity import get_severity
-from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 log = logging.getLogger(__package__)
 
@@ -151,6 +151,7 @@ def submit_organisation(request):
 
 @cache_page(ONE_MINUTE)
 def scores(request):
+    metadata = get_backend_scanmetadata()
 
     # todo: this param handling code is absolutely disgusting, it should be more beautiful.
     # todo: should we just get the last contest if there is no contest at all?
@@ -184,7 +185,7 @@ def scores(request):
                 endpoint__url__urlsubmission__added_by_team=team.id,
                 endpoint__url__urlsubmission__has_been_accepted=True,
                 rating_determined_on__lte=contest.until_moment,
-                type__in=ENDPOINT_SCAN_TYPES,
+                type__in=metadata["endpoint_scan_types"],
             )
         )
 
@@ -193,7 +194,7 @@ def scores(request):
                 url__urlsubmission__added_by_team=team.id,
                 url__urlsubmission__has_been_accepted=True,
                 rating_determined_on__lte=contest.until_moment,
-                type__in=URL_SCAN_TYPES,
+                type__in=metadata["url_scan_types"],
             )
         )
 
@@ -576,6 +577,7 @@ def contest_map_data(request):
     :param contest_id:
     :return:
     """
+    metadata = get_backend_scanmetadata()
 
     contest = get_default_contest(request)
 
@@ -604,7 +606,7 @@ def contest_map_data(request):
         .filter(
             endpoint__url__urlsubmission__added_by_team__participating_in_contest=contest.pk,
             endpoint__url__urlsubmission__has_been_accepted=True,
-            type__in=ENDPOINT_SCAN_TYPES,
+            type__in=metadata["endpoint_scan_types"],
             rating_determined_on__lte=contest.until_moment,
         )
         .prefetch_related("endpoint__url__organization")
@@ -616,7 +618,7 @@ def contest_map_data(request):
         .filter(
             url__urlsubmission__added_by_team__participating_in_contest=contest.pk,
             url__urlsubmission__has_been_accepted=True,
-            type__in=URL_SCAN_TYPES,
+            type__in=metadata["url_scan_types"],
             rating_determined_on__lte=contest.until_moment,
         )
         .prefetch_related("url__organization")
@@ -906,7 +908,9 @@ def make_new_feature(organization, scan):
 
 
 def get_organizations(scan):
-    if scan.type in ENDPOINT_SCAN_TYPES:
+    metadata = get_backend_scanmetadata()
+
+    if scan.type in metadata["endpoint_scan_types"]:
         return scan.endpoint.url.organization.all()
 
     return scan.url.organization.all()

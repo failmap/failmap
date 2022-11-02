@@ -5,9 +5,9 @@ from logging import getLogger
 
 from constance import config
 
-from websecmap.map.report import PUBLISHED_ENDPOINT_SCAN_TYPES, PUBLISHED_URL_SCAN_TYPES
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 log = getLogger(__package__)
 
@@ -20,6 +20,8 @@ def report_impact_to_commandline():
 
 
 def calculate_impact():
+    metadata = get_backend_scanmetadata()
+
     """
     Based on scans: the first and the last measurement, calculates numbers on how much has changed. It takes
     into account how much endpoints / urls are deleted. This script is slow, but also simple. This simplicty
@@ -72,7 +74,7 @@ def calculate_impact():
             "good": {"high": 0, "medium": 0, "low": 0, "good": 0},
         },
     }
-    published_scans = PUBLISHED_ENDPOINT_SCAN_TYPES + PUBLISHED_URL_SCAN_TYPES
+    published_scans = metadata["published_scan_types"]
     # we'll ignore explanations
     for scan_type in published_scans:
         impact["scan_types"][scan_type] = {

@@ -13,9 +13,9 @@ from websecmap.map.models import Configuration, HighLevelStatistic, Organization
 from websecmap.organizations.models import Organization
 from websecmap.reporting.models import ScanPolicy
 from websecmap.reporting.severity import get_severity
-from websecmap.scanners import URL_SCAN_TYPES
 from websecmap.scanners.impact import get_impact
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 log = logging.getLogger(__package__)
 
@@ -217,6 +217,7 @@ def get_stats(country, organization_type, weeks_back, days: int = 365):
 
 def what_to_improve(country: str, organization_type: str, issue_type: str):
     # todo: check if the layer is published.
+    metadata = get_backend_scanmetadata()
 
     # Get high and medium, low stuff from policy from the scanner where where this issue_type
     conclusions_that_can_be_improved = (
@@ -231,7 +232,7 @@ def what_to_improve(country: str, organization_type: str, issue_type: str):
     country = get_country(country)
     organization_type = get_organization_type(organization_type)
 
-    if issue_type in URL_SCAN_TYPES:
+    if issue_type in metadata["url_scan_types"]:
         return what_to_improve_ugs(country, organization_type, issue_type, conclusions_that_can_be_improved)
 
     return what_to_improve_epgs(country, organization_type, issue_type, conclusions_that_can_be_improved)

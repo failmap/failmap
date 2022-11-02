@@ -11,7 +11,7 @@ from websecmap.scanners.tests.test_plannedscan import create_organization, creat
 
 
 # todo: id's change ofc during tests, and therefore reset the id's in the db at start of test.
-def test_plan_outdated_scans(db, default_scan_metadata):
+def test_plan_outdated_scans(db, default_scan_metadata, default_policy):
     o = create_organization("Test")
     u1 = create_url("example.com")
     link_url_to_organization(u1, o)

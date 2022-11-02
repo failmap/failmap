@@ -4,8 +4,8 @@ from datetime import datetime
 import pytz
 from django.core.management.base import BaseCommand
 
-from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 log = logging.getLogger(__name__)
 
@@ -18,10 +18,12 @@ class Command(BaseCommand):
     make sense at all, but works."""
 
     def handle(self, *args, **options):
-        for scan_type in URL_SCAN_TYPES:
+        metadata = get_backend_scanmetadata()
+
+        for scan_type in metadata["url_scan_types"]:
             reflag_urlgenericscan(scan_type=scan_type)
 
-        for scan_type in ENDPOINT_SCAN_TYPES:
+        for scan_type in metadata["endpoint_scan_types"]:
             reflag_endpointgenericscan(scan_type=scan_type)
 
 

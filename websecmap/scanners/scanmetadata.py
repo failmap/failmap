@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from pathlib import Path
+from functools import lru_cache
 from typing import Dict, Any, List
 
 from django.db.models import Prefetch
@@ -8,37 +8,6 @@ from django.db.models import Prefetch
 from websecmap.app import log
 from websecmap.reporting.models import ScanPolicy
 from websecmap.scanners.models import Scanner, ScanSubject, ScanType
-
-
-def dump_scan_config_to_file():
-    # This is performed every time this app has started. It will overwrite the shipped scanner settings.
-    # This solves a chicken and egg problem of 'what fields are available' before it's possible to access
-    # the database.
-    # To update the shipped scanner metadata fixture:
-    # websecmap dumpdata scanners.scanner scanners.scantype scanners.scantypesecondopinionlink
-    # scanners.scantypedocumentationlink scanners.scantypecategory scanners.scanneractivity
-    # > websecmap/scanners/fixtures/scanmetadata.json
-
-    path = Path(__file__).parent
-
-    data = get_scanners_for_backend()
-    # empty database, or initialization
-    if not data:
-        return
-
-    try:
-        with open(
-            f"{path}/scanmetadata_bootstrap_cache_writable_by_application/constance_definitions.json", "wt"
-        ) as handle:
-            handle.write(json.dumps(data))
-    except PermissionError:
-        log.error(
-            "Permission error: Cannot write scan metadata to "
-            "scanmetadata_bootstrap_cache/constance_definitions.json "
-            "Make sure this file is writable unless you're not planning to change scanners"
-        )
-    # Continue operating.
-    return
 
 
 def get_scanners_for_backend():
@@ -153,3 +122,71 @@ def get_scanners_for_frontend(all_settings):
         results[scan_type.name] = data
 
     return results
+
+
+@lru_cache(maxsize=128, typed=False)
+def get_backend_scanmetadata():
+    # These used to be constants like SCANNERS, ALL SCAN TYPES, SCANNERS_BY_NAME etc, but these are now configured
+    # and stored in the database. So... not constant
+    # To avoid hits on the database for this usage an LRU cache is used. When scan metadata is changed, the app
+    # should re-load:
+    # Todo: cache the data for 10 minutes or so like the constance cache...? This might have side effects.
+
+    scanners = get_scanners_for_backend()
+
+    endpoint_scan_types = []
+    url_scan_types = []
+    for scanner in scanners:
+        endpoint_scan_types = list(set(endpoint_scan_types + scanner["creates_endpoint_scan_types"]))
+        url_scan_types = list(set(url_scan_types + scanner["creates_url_scan_types"]))
+
+    all_scan_types = url_scan_types + endpoint_scan_types
+
+    # convert endpoint scan types to scanners, so we know what endpoint scan type belongs to what scanner
+    scan_types_to_scanner = {}
+    for scanner in scanners:
+        for scan_type in scanner["creates_endpoint_scan_types"]:
+            scan_types_to_scanner[scan_type] = scanner
+
+        for scan_type in scanner["creates_url_scan_types"]:
+            scan_types_to_scanner[scan_type] = scanner
+
+    scanners_by_id = {scanner["id"]: scanner for scanner in scanners}
+
+    # It's impossible to know what ID you have as a scanner. We _CAN_ force it but we wont as it will become a mess.
+    scanners_by_python_name: Dict[str, Any] = {scanner["python_name"]: scanner for scanner in scanners}
+
+    scanners_by_scan_type: Dict[str, Any] = {}
+    for scanner in scanners:
+        for epst in scanner["creates_endpoint_scan_types"]:
+            scanners_by_scan_type[epst] = scanner
+        for epst in scanner["creates_url_scan_types"]:
+            scanners_by_scan_type[epst] = scanner
+
+    # todo: add config options for each of the scans defined above, include them in constance.
+    # todo: check these config options dynamically at the right moments, so to reduce maintenance.
+
+    published_scan_types = list(ScanType.objects.all().filter(include_in_report=True).values_list("name", flat=True))
+
+    published_url_scan_types = [scan_type for scan_type in published_scan_types if scan_type in url_scan_types]
+    published_endpoint_scan_types = [
+        scan_type for scan_type in published_scan_types if scan_type in endpoint_scan_types
+    ]
+
+    metadata = {
+        "scanners": scanners,
+        "all_scan_types": all_scan_types,
+        "scanners_by_id": scanners_by_id,
+        "scanners_by_python_name": scanners_by_python_name,
+        "scanners_by_scan_type": scanners_by_scan_type,
+        "scan_types_to_scanner": scan_types_to_scanner,
+        "url_scan_types": url_scan_types,
+        "endpoint_scan_types": endpoint_scan_types,
+        "published_scan_types": published_scan_types,
+        "published_url_scan_types": published_url_scan_types,
+        "published_endpoint_scan_types": published_endpoint_scan_types,
+    }
+
+    log.error(json.dumps(metadata, indent=2))
+
+    return metadata

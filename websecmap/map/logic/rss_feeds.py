@@ -10,8 +10,8 @@ from django.utils.translation import ugettext as _
 from websecmap.map.logic.map_defaults import REMARK
 from websecmap.organizations.models import Organization
 from websecmap.reporting.severity import get_severity
-from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 
 class UpdatesOnOrganizationFeed(Feed):
@@ -84,6 +84,10 @@ class LatestScanFeed(Feed):
 
     description = "Overview of the latest scans."
 
+    metadata = None
+    def __init__(self, *args, **kwargs):
+        self.metadata = get_backend_scanmetadata()
+
     # magic
     def get_object(self, request, *args, **kwargs):
         # print("args: %s" % kwargs['scan_type'])
@@ -104,7 +108,7 @@ class LatestScanFeed(Feed):
     # second parameter via magic
     def items(self, scan_type):
         # print(scan_type)
-        if scan_type in URL_SCAN_TYPES:
+        if scan_type in self.metadata["url_scan_types"]:
             return UrlGenericScan.objects.filter(type=scan_type).order_by("-last_scan_moment")[0:30]
 
         return EndpointGenericScan.objects.filter(type=scan_type).order_by("-last_scan_moment")[0:30]
@@ -134,7 +138,7 @@ class LatestScanFeed(Feed):
             else "🍋"
         )
 
-        if item.type in URL_SCAN_TYPES:
+        if item.type in self.metadata["url_scan_types"]:
             # url generic scan:
             return f"{badge} {rating} - {item.url.url}"
 
@@ -150,7 +154,7 @@ class LatestScanFeed(Feed):
 
     # item_link is only needed if NewsItem has no get_absolute_url method.
     def item_link(self, item):
-        if item.type in URL_SCAN_TYPES:
+        if item.type in self.metadata["url_scan_types"]:
             # url generic scan:
             return f"{config.PROJECT_WEBSITE}/#updates/{item.last_scan_moment}/{item.url.url}"
 
@@ -169,6 +173,7 @@ def latest_updates(organization_id):
     We're not filtering any further: given this might result in turning a blind eye to low or medium vulnerabilities.
     :return:
     """
+    metadata = get_backend_scanmetadata()
 
     try:
         # todo: check that the organization is displayed on the map
@@ -185,11 +190,11 @@ def latest_updates(organization_id):
     # semi-union, given not all columns are the same. (not python/django-esque solution)
     generic_endpoint_scans = list(
         EndpointGenericScan.objects.filter(
-            endpoint__url__organization=organization, type__in=ENDPOINT_SCAN_TYPES
+            endpoint__url__organization=organization, type__in=metadata["endpoint_scan_types"]
         ).order_by("-rating_determined_on")[0:60]
     )
     url_endpoint_scans = list(
-        UrlGenericScan.objects.filter(url__organization=organization, type__in=URL_SCAN_TYPES).order_by(
+        UrlGenericScan.objects.filter(url__organization=organization, type__in=metadata["url_scan_types"]).order_by(
             "-rating_determined_on"
         )[0:60]
     )
@@ -201,7 +206,7 @@ def latest_updates(organization_id):
     for scan in scans:
         scan_type = scan.type
         calculation = get_severity(scan)
-        if scan_type in URL_SCAN_TYPES:
+        if scan_type in metadata["url_scan_types"]:
             # url scans
             dataset["scans"].append(
                 {

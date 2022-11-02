@@ -9,7 +9,7 @@ from websecmap.reporting.models import ScanPolicy
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 
 
-def test_config(db):
+def test_config(db, default_scan_metadata):
     conf = config_content()
     assert conf["project"]["country"] == "NL"
     assert conf["debug"] is False
@@ -69,7 +69,7 @@ def setup():
     ScanPolicy(**{"scan_type": "dnssec", "conclusion": "error", "high": 1}).save()
 
 
-def test_what_to_improve(db):
+def test_what_to_improve(db, default_scan_metadata):
     # Add two tests to the db, one that needs to be improved, and one that doesn't.
     # The view should show 1 thing... for both endpoint and url
 

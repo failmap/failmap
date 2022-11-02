@@ -11,10 +11,9 @@ from websecmap.app.constance import constance_cached_value
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.map.logic.map_health import get_outdated_ratings
 from websecmap.map.map_configs import filter_map_configs
-from websecmap.map.report import PUBLISHED_SCAN_TYPES
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import SCAN_TYPES_TO_SCANNER, SCANNERS_BY_ID, SCANNERS_BY_PYTHON_NAME
 from websecmap.scanners.models import Activity, Endpoint, PlannedScan, PlannedScanStatistic, State, Scanner
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +23,8 @@ def store_progress():
     """
     Runs every N minutes (periodic task) and stores the latest calculated progress in the db.
     """
+    metadata = get_backend_scanmetadata()
+
     progress = calculate_progress()
     pss = PlannedScanStatistic()
     pss.at_when = datetime.now(pytz.utc)
@@ -33,7 +34,7 @@ def store_progress():
     # Also send it to statsd for nicer metrics:
     for row in progress:
         activity = Activity(row["activity"]).label
-        scanner = SCANNERS_BY_ID.get(row["scanner"], {"name": "unknown"})["name"]
+        scanner = metadata["scanners_by_id"].get(row["scanner"], {"name": "unknown"})["name"]
         state = State(row["state"]).label
 
         statsd.gauge("scan_progress", row["amount"], tags={"state": state, "scanner": scanner, "activity": activity})
@@ -158,7 +159,9 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     amount: the amount of plannedscans to pick up
     """
 
-    python_scanner = SCANNERS_BY_PYTHON_NAME.get(scanner, None)
+    metadata = get_backend_scanmetadata()
+
+    python_scanner = metadata["scanners_by_python_name"].get(scanner, None)
     if not python_scanner:
         log.error(f"Scan requested for {scanner}, but no such scanner registered in metadata database. Not picked up.")
         return []
@@ -219,7 +222,9 @@ def request(activity: str, scanner: str, urls: List[int]):
     # should it be deduplicated? i mean: if there already is a specific planned scan, it doesn't
     # need to be created again: that would just be more work. Think so, otherwise the finish and start will
     # mix for different scans. So we can't do bulk inserts, but we can do better state logging
-    python_scanner = SCANNERS_BY_PYTHON_NAME.get(scanner, None)
+    metadata = get_backend_scanmetadata()
+
+    python_scanner = metadata["scanners_by_python_name"].get(scanner, None)
     if not python_scanner:
         log.error(f"Scan requested for {scanner}, but no such scanner registered in metadata database. Not requested.")
         return
@@ -265,7 +270,8 @@ def already_requested(activity: str, scanner: int, url_id: int):
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def finish(activity: str, scanner: str, url_id: int):
-    scanner = SCANNERS_BY_PYTHON_NAME.get(scanner, None)
+    metadata = get_backend_scanmetadata()
+    scanner = metadata["scanners_by_python_name"].get(scanner, None)
     if not scanner:
         log.debug(f"Scanner {scanner} was not found, ignoring.")
 
@@ -341,17 +347,22 @@ def retrieve_endpoints_from_urls(
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def websecmap_plan_outdated_scans():
     # one without parameters
-    return plan_outdated_scans(PUBLISHED_SCAN_TYPES)
+    metadata = get_backend_scanmetadata()
+
+    return plan_outdated_scans(metadata["published_scan_types"])
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def websecmap_list_outdated():
     # one without parameters
-    return list_outdated(PUBLISHED_SCAN_TYPES)
+    metadata = get_backend_scanmetadata()
+    return list_outdated(metadata["published_scan_types"])
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def list_outdated(published_scan_types):
+    metadata = get_backend_scanmetadata()
+
     for map_configuration in filter_map_configs():
         print(f"Outdated items for {map_configuration['country']}/{map_configuration['organization_type__name']}:")
         organizations_on_map = Organization.objects.all().filter(
@@ -363,7 +374,7 @@ def list_outdated(published_scan_types):
         relevant_outdated = [item for item in outdated if item.get("scan_type", "unknown") in published_scan_types]
         plan = []
         for outdated_result in relevant_outdated:
-            scanner = SCAN_TYPES_TO_SCANNER[outdated_result["scan_type"]]
+            scanner = metadata["scan_types_to_scanner"][outdated_result["scan_type"]]
             plan.append(
                 {
                     "scanner": scanner["id"],
@@ -407,6 +418,8 @@ def deduplicate_plan(planned_items):
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def plan_outdated_scans(published_scan_types):
+    metadata = get_backend_scanmetadata()
+
     for map_configuration in filter_map_configs():
         log.debug("Retrieving outdated scans from config: %s.", map_configuration)
 
@@ -424,7 +437,7 @@ def plan_outdated_scans(published_scan_types):
         # plan scans for outdated results:
         plan = []
         for outdated_result in relevant_outdated:
-            scanner = SCAN_TYPES_TO_SCANNER[outdated_result["scan_type"]]
+            scanner = metadata["scan_types_to_scanner"][outdated_result["scan_type"]]
             plan.append(
                 {
                     "scanner": scanner["python_name"],
@@ -436,7 +449,7 @@ def plan_outdated_scans(published_scan_types):
             # see if there are requirements for verification or discovery from other scanners:
             # log.debug(f"There are {len(scanner['needs results from'])} underlaying scanners.")
             for underlaying_scanner in scanner["needs_results_from"]:
-                underlaying_scanner_details = SCANNERS_BY_ID[underlaying_scanner]
+                underlaying_scanner_details = metadata["scanners_by_id"][underlaying_scanner]
 
                 if any(
                     [

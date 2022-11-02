@@ -7,13 +7,12 @@ from typing import List, Union
 import pytz
 from django.db.models import Q
 
-from websecmap.app.constance import constance_cached_value
 from websecmap.celery import Task, app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Url, Organization
 from websecmap.reporting.models import UrlReport, ScanPolicy
 from websecmap.reporting.severity import get_severity
-from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES, SCANNERS_BY_SCAN_TYPE
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, ScanSubject, UrlGenericScan
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 from websecmap.scanners.scanner.utils import in_chunks
 
 log = logging.getLogger(__package__)
@@ -25,16 +24,6 @@ Warning: Make sure the output of a rebuild has ID's in chronological order.
 
 This code doesn't understand anything else than urls.
 """
-
-
-def get_allowed_to_report():
-    """
-    Retrieves from settings what scan types will be included in the report.
-
-    :return:
-    """
-
-    return [scan_type for scan_type in ALL_SCAN_TYPES if constance_cached_value(f"REPORT_INCLUDE_{scan_type.upper()}")]
 
 
 @app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
@@ -329,7 +318,9 @@ def in_hash_table(hash_table, a_hash):
 
 def hash_scan_per_day_and_type(scan):
     # hopefully it doesn't run extra queries?
-    primary_key = scan.url.pk if scan.type in URL_SCAN_TYPES else scan.endpoint.pk
+    metadata = get_backend_scanmetadata()
+
+    primary_key = scan.url.pk if scan.type in metadata["url_scan_types"] else scan.endpoint.pk
     return f"{primary_key}{scan.type}{scan.rating_determined_on.replace(second=59, microsecond=999999)}"
 
 
@@ -354,7 +345,9 @@ def create_timeline(url: Url):
 
     :return:
     """
-    scan_types = get_allowed_to_report()
+    metadata = get_backend_scanmetadata()
+
+    scan_types = metadata["published_scan_types"]
     log.debug("Report includes the following scan types: %s", scan_types)
 
     moments, happenings = significant_moments(urls=[url], reported_scan_types=scan_types)
@@ -458,6 +451,7 @@ def create_url_reports(url: Url) -> List[UrlReport]:
     previous_endpoints = []
     url_was_once_rated = False
     dead_endpoints = set()
+    metadata = get_backend_scanmetadata()
 
     # work on a sorted timeline as otherwise this code is non-deterministic!
     for index, moment in enumerate(sorted(timeline)):
@@ -534,11 +528,11 @@ def create_url_reports(url: Url) -> List[UrlReport]:
             these_endpoint_scans = {}
             if endpoint.id in endpoint_scans:
                 for scan in endpoint_scans[endpoint.id]:
-                    if scan.type in ENDPOINT_SCAN_TYPES:
+                    if scan.type in metadata["endpoint_scan_types"]:
                         these_endpoint_scans[scan.type] = scan
 
             # enrich the ratings with previous ratings, without overwriting them.
-            for endpoint_scan_type in ENDPOINT_SCAN_TYPES:
+            for endpoint_scan_type in metadata["endpoint_scan_types"]:
                 if all(
                     [
                         endpoint_scan_type not in these_endpoint_scans,
@@ -574,7 +568,7 @@ def create_url_reports(url: Url) -> List[UrlReport]:
                 # todo: this can be a defaultdict
                 given_ratings[label] = []
 
-            for endpoint_scan_type in ENDPOINT_SCAN_TYPES:
+            for endpoint_scan_type in metadata["endpoint_scan_types"]:
                 if endpoint_scan_type in these_endpoint_scans:
                     if endpoint_scan_type not in given_ratings[label]:
                         calculations.append(get_severity(these_endpoint_scans[endpoint_scan_type]))
@@ -620,11 +614,11 @@ def create_url_reports(url: Url) -> List[UrlReport]:
             url_scans[scan.url.id].append(scan)
 
         these_url_scans = {}
-        url_scan_types = URL_SCAN_TYPES
+        url_scan_types = metadata["url_scan_types"]
 
         if url.id in url_scans:
             for scan in url_scans[url.id]:
-                if scan.type in URL_SCAN_TYPES:
+                if scan.type in metadata["url_scan_types"]:
                     these_url_scans[scan.type] = scan
 
         # enrich the ratings with previous ratings, which saves queries.
@@ -1304,11 +1298,12 @@ def attach_ultimate_report_to_everything_in_database():
 def attach_ultimate_report(url: Url, endpoint: Endpoint):
     log.debug(f"Attaching ultimate report to {url}, endpoint: {endpoint}.")
     now = datetime.now(pytz.utc)
+    metadata = get_backend_scanmetadata()
 
     # This approach is dumb and inefficient, but good enough for testing
     for policy in ScanPolicy.objects.all():
 
-        scanner = SCANNERS_BY_SCAN_TYPE[policy.scan_type]
+        scanner = metadata["scanners_by_scan_type"][policy.scan_type]
 
         if scanner["to"] == ScanSubject.URL:
             epgs = UrlGenericScan()

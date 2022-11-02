@@ -676,6 +676,22 @@ class ScanType(models.Model):
     second_opinion_links = models.ManyToManyField(to=ScanTypeSecondOpinionLink)
     documentation_links = models.ManyToManyField(to=ScanTypeDocumentationLink)
     category = models.ManyToManyField(to=ScanTypeCategory)
+    include_in_report = models.BooleanField(
+        default=False,
+        help_text="When included into the report the value is also"
+        " used when building statistics. It will be "
+        "in the report that is on the front end, but "
+        "might not be set to visible.",
+    )
+    show_in_frontend = models.BooleanField(
+        default=False,
+        help_text="Show this value in the front end, it might be "
+        "included"
+        "in the report but just not shown. Notice that "
+        "things that are in the report do count towards "
+        "statistics, so its unusual to disable this without"
+        " also disabling report inclusion.",
+    )
     display_order = models.PositiveIntegerField(
         _("order"),
         default=0,
@@ -711,7 +727,25 @@ class Scanner(models.Model):
         default=ScanSubject.ENDPOINT,
         db_index=True,
     )
-    plannable_activities = models.ManyToManyField(to=ScannerActivity)
+    plannable_activities = models.ManyToManyField(
+        to=ScannerActivity, help_text="All possible activities this scanner" "can perform"
+    )
+
+    enabled = models.BooleanField(
+        default=False,
+        help_text="When the scanner is enabled with will performed the" "allowed activities listed below.",
+    )
+    enabled_activities = models.ManyToManyField(
+        to=ScannerActivity,
+        help_text="The activities this scanner is " "allowed to perform, which is a subset of" " plannable activities.",
+        related_name="scanner_enabled_activities",
+    )
+    rate_limit = models.IntegerField(
+        default=500,
+        help_text="The maximum number of simultaneous tasks inside the "
+        "queue. Tweak this setting to not overwhelm workers and "
+        "gradually work through all planned tasks.",
+    )
 
     # currently limited to one scanner. This might become something else in the future
     # usually the hierarchy should be stored externally, but the limit to one has served

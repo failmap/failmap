@@ -3,14 +3,16 @@ from typing import List
 
 from websecmap.map.logic.map_health import update_map_health_reports
 from websecmap.map.management.commands.custom_commands import CalculateCommand
-from websecmap.map.report import PUBLISHED_SCAN_TYPES
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 log = logging.getLogger(__package__)
 
 
 def _update_map_health_reports(days: int = 366, countries: List = None, organization_types: List = None):
+    metadata = get_backend_scanmetadata()
+
     update_map_health_reports(
-        PUBLISHED_SCAN_TYPES, days=days, countries=countries, organization_types=organization_types
+        metadata["published_scan_types"], days=days, countries=countries, organization_types=organization_types
     )
 
 

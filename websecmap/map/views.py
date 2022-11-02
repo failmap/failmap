@@ -58,9 +58,8 @@ from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
 from websecmap.map.models import Configuration, OrganizationReport
 from websecmap.organizations.models import Organization
 from websecmap.scanners import plannedscan
-from websecmap.scanners import ALL_SCAN_TYPES
 from websecmap.scanners.models import Screenshot
-from websecmap.scanners.scanmetadata import get_scanners_for_frontend
+from websecmap.scanners.scanmetadata import get_scanners_for_frontend, get_backend_scanmetadata
 
 log = logging.getLogger(__package__)
 
@@ -220,6 +219,8 @@ def countries_and_layers():
 
 def config_content():
     # This is converted to some hierarchy to make more sense, and to _not_ export things like keys
+    metadata = get_backend_scanmetadata()
+
     configuration = get_all_values()
     scan_types = get_scanners_for_frontend(configuration)
     base_config = {
@@ -355,10 +356,9 @@ def config_content():
         "scan_types": scan_types,
     }
 
-    for scan_type in sorted(ALL_SCAN_TYPES):
-        # only include the issues that are published, not everything that exists.
-        if configuration[f"show_{scan_type}"] or configuration[f"report_include_{scan_type}"]:
-            base_config["show"]["issues"][scan_type.lower()] = configuration[f"show_{scan_type}"]
+    # todo: only include the issues that are published, not everything that exists.
+    for scan_type in sorted(metadata["published_scan_types"]):
+        base_config["show"]["issues"][scan_type.lower()] = True
 
     return base_config
 

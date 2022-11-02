@@ -28,7 +28,6 @@ from pkg_resources import get_distribution
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 
-from websecmap.scanners.constance import add_scanner_fields, add_scanner_fieldsets
 
 __version__ = get_distribution(__name__.split(".", 1)[0]).version
 
@@ -1014,8 +1013,6 @@ CONSTANCE_CONFIG = {
     # todo: add config for enabled languages...
 }
 
-CONSTANCE_CONFIG = add_scanner_fields(CONSTANCE_CONFIG)
-
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
     [
         (
@@ -1163,7 +1160,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         ),
         (
             "Scanning preferences",
-            ("SCANNER_NAMESERVERS",),
+            ("SCAN_AT_ALL", "SCANNER_NAMESERVERS"),
         ),
         (
             "Plus",
@@ -1186,13 +1183,6 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             ),
         ),
         ("security.txt", ("SECURITY_TXT_IS_REDIRECTED", "SECURITY_TXT_REDIRECT_URL", "SECURITY_TXT_CONTENT")),
-    ]
-)
-
-CONSTANCE_CONFIG_FIELDSETS = add_scanner_fieldsets(CONSTANCE_CONFIG_FIELDSETS)
-
-CONSTANCE_CONFIG_FIELDSETS.update(
-    [
         ("Fair / Stand options", ("SHOW_TICKER", "TICKER_SLOGAN", "TICKER_VISIBLE_VIA_JS_COMMAND")),
         (
             "Developer configuration. For debugging and verification",

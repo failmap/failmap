@@ -88,7 +88,7 @@ def test_plannedscan(db, default_scan_metadata):
     scanner = Scanner.objects.all().get(python_name="tls_qualys")
     scanner_id = scanner.id
 
-    request(scanner="tls_qualys", activity="scan", urls=[u1, u2])
+    request(scanner="tls_qualys", activity="scan", urls=[u1.id, u2.id])
     assert PlannedScan.objects.all().count() == 2
     assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 2
     assert calculate_progress() == [
@@ -152,7 +152,7 @@ def test_plannedscan(db, default_scan_metadata):
     assert PlannedScanStatistic.objects.count() == 2
 
     # make sure only the latest is retrieved:
-    request(scanner="tls_qualys", activity="scan", urls=[u1, u2])
+    request(scanner="tls_qualys", activity="scan", urls=[u1.id, u2.id])
     store_progress()
     assert get_latest_progress() == calculate_progress()
     assert PlannedScanStatistic.objects.count() == 3

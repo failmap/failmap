@@ -12,7 +12,7 @@ TEST_ORGANIZATION = "faalonië"
 NON_EXISTING_ORGANIZATION = "faaloniet"
 
 
-def test_security_headers(responses, db, faaloniae):
+def test_security_headers(responses, db, faaloniae, default_scan_metadata):
     """Test running security headers scan."""
 
     responses.add(responses.GET, "https://" + faaloniae["url"].url + ":443/", headers=SECURITY_HEADERS)
@@ -22,7 +22,7 @@ def test_security_headers(responses, db, faaloniae):
     assert result[0] is None
 
 
-def test_security_headers_all(responses, db, faaloniae):
+def test_security_headers_all(responses, db, faaloniae, default_scan_metadata):
     """Test defaulting to all organizations."""
 
     responses.add(responses.GET, "https://" + faaloniae["url"].url + ":443/", headers=SECURITY_HEADERS)
@@ -32,7 +32,7 @@ def test_security_headers_all(responses, db, faaloniae):
     assert result[0] is None
 
 
-def test_security_headers_notfound(responses, db, faaloniae):
+def test_security_headers_notfound(responses, db, faaloniae, default_scan_metadata):
     """Test invalid organization."""
 
     # should work fine, it will start a scan on nothing, so it's done quickly :)
@@ -42,7 +42,7 @@ def test_security_headers_notfound(responses, db, faaloniae):
 
 
 # todo: could do a redirect test
-def test_security_headers_failure(responses, db, faaloniae):
+def test_security_headers_failure(responses, db, faaloniae, default_scan_metadata):
     """Test with failing endpoint."""
 
     responses.add(responses.GET, "https://" + faaloniae["url"].url + ":443/", status=500)
