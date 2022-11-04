@@ -85,6 +85,7 @@ class LatestScanFeed(Feed):
     description = "Overview of the latest scans."
 
     metadata = None
+
     def __init__(self, *args, **kwargs):
         self.metadata = get_backend_scanmetadata()
 

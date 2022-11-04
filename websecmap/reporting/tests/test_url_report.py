@@ -8,7 +8,7 @@ from websecmap.reporting.report import create_url_reports, recreate_url_report
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 
-def test_url_report(db, default_policy):
+def test_url_report(db, default_policy, default_scan_metadata):
     # Url test.nl has been created
     day_0 = datetime(day=1, month=1, year=2000, tzinfo=pytz.utc)
     # First endpoint was created, first OK scan
@@ -138,7 +138,7 @@ def test_url_report(db, default_policy):
         assert report.is_the_newest is False
 
 
-def test_aggegrate_error_in_report(db, default_policy):
+def test_aggegrate_error_in_report(db, default_policy, default_scan_metadata):
 
     # check if the scan policies have loaded
     assert ScanPolicy.objects.all().count() > 10
@@ -167,6 +167,8 @@ def test_aggegrate_error_in_report(db, default_policy):
     report = UrlReport.objects.all().order_by("pk").last()
 
     # assert report.__dict__ == {}
+
+    assert report
 
     assert report.endpoint_error_in_test == 1
     # This is 0 because this is not an endpoint level error, but an url_level_error

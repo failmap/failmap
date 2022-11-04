@@ -7,7 +7,6 @@ import pytz
 from django.db import connection
 from statshog.defaults.django import statsd
 
-from websecmap.app.constance import constance_cached_value
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.map.logic.map_health import get_outdated_ratings
 from websecmap.map.map_configs import filter_map_configs
@@ -175,8 +174,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
         .count()
     )
 
-    rate_limit_setting = f"RATE_LIMIT_{scanner.upper()}_{activity.upper()}"
-    max_picked_up_simultaneously = constance_cached_value(rate_limit_setting)
+    max_picked_up_simultaneously = python_scanner["rate_limit"]
 
     if already_picked_up >= max_picked_up_simultaneously:
         return []
