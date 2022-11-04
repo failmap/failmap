@@ -3,7 +3,6 @@ from typing import Dict, Any, List
 
 from django.db.models import Prefetch
 
-from websecmap.app import log
 from websecmap.reporting.models import ScanPolicy
 from websecmap.reporting.time_cache import cache_set, cache_get
 from websecmap.scanners.models import Scanner, ScanSubject, ScanType
@@ -15,8 +14,8 @@ def get_scanners_for_backend():
     results = []
     # todo: prefetch scan_types to improve speed of loading
     scanners = Scanner.objects.all().prefetch_related(
-        Prefetch('plannable_activities', to_attr='plannable'),
-        Prefetch('creates_scan_types', to_attr='created_scan_types'),
+        Prefetch("plannable_activities", to_attr="plannable"),
+        Prefetch("creates_scan_types", to_attr="created_scan_types"),
     )
     for scanner in scanners:
         endpoint_scan_types = []
@@ -134,7 +133,7 @@ def get_backend_scanmetadata():
     data = _get_backend_scanmetadata()
     # no data in database it seems, this happens during running the entire test suite at some point, and the
     # cache is thus incorrect and will crash all other tests...
-    if not data['scanners']:
+    if not data["scanners"]:
         return data
 
     data = cache_set("backend_scanmetadata", data)

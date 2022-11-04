@@ -5,6 +5,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from websecmap.organizations.models import Organization, Url
+from websecmap.reporting.models import ScanPolicy
 from websecmap.scanners.models import (
     Activity,
     Endpoint,
@@ -13,6 +14,7 @@ from websecmap.scanners.models import (
     PlannedScanStatistic,
     State,
     Scanner,
+    FollowUpScan,
 )
 from websecmap.scanners.plannedscan import (
     calculate_progress,
@@ -23,6 +25,7 @@ from websecmap.scanners.plannedscan import (
     reset,
     retrieve_endpoints_from_urls,
     store_progress,
+    plan_follow_up_scans,
 )
 from websecmap.scanners.scanner.tls_qualys import plan_scan
 
@@ -160,7 +163,6 @@ def test_plannedscan(db, default_scan_metadata):
 
 
 def test_plan_scans(db, default_scan_metadata):
-
     scanner = Scanner.objects.all().get(python_name="tls_qualys")
     scanner_id = scanner.id
 
@@ -259,3 +261,76 @@ def test_retrieve_endpoints_from_urls(db):
 
     assert endpoints == [e1]
     assert urls_without_endpoints == [u2.id]
+
+
+def test_plan_follow_up_scan(db, default_scan_metadata, default_policy):
+    """
+    A follow up scan happens when one of the policies match with what is found.
+    """
+    now = timezone.now()
+    yesterday = now - timedelta(days=1)
+
+    # Eg: make a follow up scan with a simple policy:
+    tls_scanner = Scanner.objects.all().filter(python_name="tls_qualys").first()
+    policy = ScanPolicy.objects.all().filter(scan_type="tls_qualys_encryption_quality", conclusion="F").first()
+    follow = FollowUpScan.objects.create(follow_up_scanner=tls_scanner)
+    follow.run_follow_up_on_any_of_these_policies.add(policy)
+
+    # prepare an endpoint:
+    u1 = Url.objects.create(url="example.nl")
+    e1 = Endpoint.objects.create(url=u1, protocol="http", port="443")
+
+    # Some things that does not match the policy
+    EndpointGenericScan.objects.create(
+        endpoint=e1,
+        rating="G",
+        type="tls_qualys_encryption_quality",
+        last_scan_moment=now,
+        rating_determined_on=yesterday,
+    )
+    EndpointGenericScan.objects.create(
+        endpoint=e1,
+        rating="False",
+        type="tls_qualys_certificate_trusted",
+        last_scan_moment=now,
+        rating_determined_on=yesterday,
+    )
+    # or are too old:
+    EndpointGenericScan.objects.create(
+        endpoint=e1,
+        rating="A",
+        type="tls_qualys_encryption_quality",
+        last_scan_moment=yesterday,
+        rating_determined_on=yesterday,
+    )
+
+    # This should not deliver any new scan request:
+    plan_follow_up_scans()
+    assert PlannedScan.objects.all().count() == 0
+
+    # Something that matches the policy and is accurate:
+    EndpointGenericScan.objects.create(
+        endpoint=e1,
+        rating="F",
+        type="tls_qualys_encryption_quality",
+        last_scan_moment=now,
+        rating_determined_on=yesterday,
+    )
+    EndpointGenericScan.objects.create(
+        endpoint=e1,
+        rating="F",
+        type="tls_qualys_encryption_quality",
+        last_scan_moment=now,
+        rating_determined_on=yesterday,
+    )
+    EndpointGenericScan.objects.create(
+        endpoint=e1,
+        rating="F",
+        type="tls_qualys_encryption_quality",
+        last_scan_moment=now,
+        rating_determined_on=yesterday,
+    )
+    plan_follow_up_scans()
+    plan_follow_up_scans()
+    plan_follow_up_scans()
+    assert PlannedScan.objects.all().count() == 1

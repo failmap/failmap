@@ -5,13 +5,23 @@ from typing import Dict, List, Tuple
 import dateutil.parser
 import pytz
 from django.db import connection
+from django.db.models import Prefetch
 from statshog.defaults.django import statsd
 
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.map.logic.map_health import get_outdated_ratings
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.models import Activity, Endpoint, PlannedScan, PlannedScanStatistic, State, Scanner
+from websecmap.scanners.models import (
+    Activity,
+    Endpoint,
+    PlannedScan,
+    PlannedScanStatistic,
+    State,
+    Scanner,
+    FollowUpScan,
+    EndpointGenericScan,
+)
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 log = logging.getLogger(__name__)
@@ -494,7 +504,9 @@ def plan_outdated_scans(published_scan_types):
         log.debug("Planned %s scans / verify and discovery tasks.", len(clean_plan_with_urls))
 
 
-def plan_follow_up_scan():
+# todo: the storage queue might be too busy for this... should become a new queue...
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+def plan_follow_up_scans(**kwargs):
     """
     Based on the conclusion a new scan is scheduled. We'll receive a ton of conclusions because a scanner can
     have multiple conclusions. But the follow up only happens on certain conclusions. It is independent if that
@@ -530,5 +542,33 @@ def plan_follow_up_scan():
     -- scanner.python_name, url.url
     """
 
-    #
-    ...
+    amount_of_minutes_of_scan_history = 20
+    if kwargs.get("in_the_last_N_minutes"):
+        amount_of_minutes_of_scan_history = int(kwargs.get("amount_of_minutes_of_scan_history"))
+
+    # Instead of this here is a slow and dumb implementation, which works when run every ten minutes or so
+
+    metadata = get_backend_scanmetadata()
+
+    for follow_up_scan in FollowUpScan.objects.all().prefetch_related(
+        Prefetch("run_follow_up_on_any_of_these_policies", to_attr="otherpolicies")
+    ):
+        # are there scans in the last 10 minutes that match this policy:
+        for policy in follow_up_scan.otherpolicies:
+
+            scans_matching_policy = EndpointGenericScan.objects.all().filter(
+                type=policy.scan_type,
+                rating=policy.conclusion,
+                last_scan_moment__gt=datetime.now() - timedelta(minutes=amount_of_minutes_of_scan_history),
+            )
+
+            for scan_matching_policy in scans_matching_policy:
+                # Request all activities from this scanner
+
+                scanner = metadata["scan_types_to_scanner"].get(policy.scan_type, None)
+
+                if not scanner:
+                    continue
+
+                for activity in scanner["plannable_activities"]:
+                    request(scanner=scanner["python_name"], activity=activity, urls=[scan_matching_policy.endpoint.url])
