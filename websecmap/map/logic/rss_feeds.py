@@ -84,11 +84,6 @@ class LatestScanFeed(Feed):
 
     description = "Overview of the latest scans."
 
-    metadata = None
-
-    def __init__(self, *args, **kwargs):
-        self.metadata = get_backend_scanmetadata()
-
     # magic
     def get_object(self, request, *args, **kwargs):
         # print("args: %s" % kwargs['scan_type'])
@@ -108,13 +103,15 @@ class LatestScanFeed(Feed):
 
     # second parameter via magic
     def items(self, scan_type):
+        metadata = get_backend_scanmetadata()
         # print(scan_type)
-        if scan_type in self.metadata["url_scan_types"]:
+        if scan_type in metadata["url_scan_types"]:
             return UrlGenericScan.objects.filter(type=scan_type).order_by("-last_scan_moment")[0:30]
 
         return EndpointGenericScan.objects.filter(type=scan_type).order_by("-last_scan_moment")[0:30]
 
     def item_title(self, item):
+        metadata = get_backend_scanmetadata()
         calculation = get_severity(item)
         if not calculation:
             return ""
@@ -139,7 +136,7 @@ class LatestScanFeed(Feed):
             else "🍋"
         )
 
-        if item.type in self.metadata["url_scan_types"]:
+        if item.type in metadata["url_scan_types"]:
             # url generic scan:
             return f"{badge} {rating} - {item.url.url}"
 
@@ -155,7 +152,8 @@ class LatestScanFeed(Feed):
 
     # item_link is only needed if NewsItem has no get_absolute_url method.
     def item_link(self, item):
-        if item.type in self.metadata["url_scan_types"]:
+        metadata = get_backend_scanmetadata()
+        if item.type in metadata["url_scan_types"]:
             # url generic scan:
             return f"{config.PROJECT_WEBSITE}/#updates/{item.last_scan_moment}/{item.url.url}"
 
