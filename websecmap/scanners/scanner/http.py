@@ -52,6 +52,7 @@ from websecmap.scanners.scanner.__init__ import (
     unique_and_random,
 )
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
+from requests_toolbelt.adapters import host_header_ssl
 
 # suppress InsecureRequestWarning, we do those request on purpose.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -449,12 +450,45 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
         # Certificate did not match expected hostname: 85.119.104.84.
         Certificate: {'subject': ((('commonName', 'webdiensten.drechtsteden.nl'),),)
         """
-        my_request = requests.get(
+
+        s = requests.Session()
+        s.mount("https://", host_header_ssl.HostHeaderSSLAdapter())
+
+        my_request = s.get(
             uri,
             timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
             allow_redirects=False,  # redirect = connection
             verify=False,  # nosec any tls = connection
-            headers={"Host": url, "User-Agent": get_random_user_agent()},
+            headers={
+                "Host": url,
+                "User-Agent": get_random_user_agent(),
+                # some headers to make this look like a browser request, some domains otherwise just
+                # refuse to serve:
+                "Accept": "text/html,application/xhtml+xml,application/xml;q",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Encoding": "gzip, deflate, br",
+                "DNT": "1",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1",
+                "Pragma": "no-cache",
+                "Cache-Control": "no-cache",
+                # """
+                # Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+                # Accept-Language: en-US,en;q=0.5
+                # Accept-Encoding: gzip, deflate, br
+                # DNT: 1
+                # Connection: keep-alive
+                # Cookie: __Host-Xsrf-Legacy-Portal=jPSty7jGg5CZZlRE7wAlX7YRFkF...
+                # Upgrade-Insecure-Requests: 1
+                # Sec-Fetch-Dest: document
+                # Sec-Fetch-Mode: navigate
+                # Sec-Fetch-Site: none
+                # Sec-Fetch-User: ?1
+                # Pragma: no-cache
+                # Cache-Control: no-cache
+                # TE: trailers
+                # """
+            },
         )
         if my_request.status_code:
             log.debug("%s: Host: %s Status: %s", uri, url, my_request.status_code)
@@ -464,12 +498,18 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
         # probably never reached, exception thrown when no status code is present
         return connection_answer(True, "no_http_status_code")
     except (ConnectTimeout, Timeout, ReadTimeout) as my_exception:
+        log.debug("ConnectTimeout, Timeout, ReadTimeout")
+        log.debug(my_exception)
         return connection_answer(False, my_exception)
     except (ChunkedEncodingError, ContentDecodingError) as my_exception:
+        log.debug("ChunkedEncodingError, ContentDecodingError")
+        log.debug(my_exception)
         # There is a connection and you can get something back. But it doesn't decode properly.
         # For example InvalidChunkLength(got length b'<!DOCTYPE html>\\n', 0 bytes read)",
         return connection_answer(True, my_exception)
-    except (ConnectionRefusedError, ConnectionError, HTTPError, SSLError) as my_exception:
+    except (ConnectionRefusedError, ConnectionError, HTTPError, SSLError, requests.RequestException) as my_exception:
+        log.debug("ConnectionRefusedError, ConnectionError, HTTPError, SSLError, ConnectionResetError")
+        log.debug(my_exception)
         strerror = str(my_exception.args)  # Cast whatever we get back to a string. Instead of trace.
         has_acceptable_error = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
         if has_acceptable_error:
@@ -496,7 +536,9 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
                 allow_redirects=False,
             )
             return connection_answer(True, "found_with_hostname")
-        except (ConnectionRefusedError, ConnectionError, HTTPError) as sub_ex:
+        except (ConnectionRefusedError, HTTPError) as sub_ex:
+            log.debug("ConnectionRefusedError, HTTPError")
+            log.debug(my_exception)
             # Same handling as above.
             strerror = str(sub_ex.args)
             has_acceptable_error = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
@@ -506,12 +548,18 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
 
             return connection_answer(False, sub_ex)
         except (Timeout, ReadTimeout) as sub_ex:
+            log.debug("Timeout, ReadTimeout")
+            log.debug(my_exception)
             return connection_answer(False, sub_ex)
         except Exception as sub_ex:  # pylint: disable=broad-except
+            log.debug("Exception 2")
+            log.debug(my_exception)
             return connection_answer(False, sub_ex)
 
     # The rest :)
     except Exception as my_exception:  # pylint: disable=broad-except
+        log.debug("Exception 1")
+        log.debug(my_exception)
         return connection_answer(False, my_exception)
 
 
@@ -566,14 +614,26 @@ def has_internet_connection(host: str = "8.8.8.8", port: int = 53, connection_ti
 
 
 def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
+    log.debug(
+        "Endpoint save attempt: protocol: %s, url_id: %s, port: %s, ip_version: %s, origin: %s.",
+        protocol,
+        url_id,
+        port,
+        ip_version,
+        origin,
+    )
+
     # prevent duplication
     if endpoint_exists(url_id, port, protocol, ip_version):
-        log.debug("Endpoint based on parameters was already in database.")
+        log.debug("Endpoint is already in the database")
         return
 
-    similar = get_similar_dead_endpoint_in_last_n_days(url_id, port, protocol, ip_version, days=30)
+    similar = get_similar_dead_endpoint_in_last_n_days(url_id, port, protocol, ip_version, days=60)
     if similar:
+        log.debug("Reviving similar endpoint")
         return revive_similar_endpoint(similar, origin)
+
+    log.debug("Saving new endpoint")
     endpoint = Endpoint()
     endpoint.url = Url.objects.all().filter(id=url_id).first()
 
@@ -648,6 +708,14 @@ def get_similar_dead_endpoint_in_last_n_days(
 
 
 def kill_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
+    log.debug(
+        "Killing endpoint: protocol: %s, url_id: %s, port: %s, ip_version: %s, origin: %s.",
+        protocol,
+        url_id,
+        port,
+        ip_version,
+        origin,
+    )
     eps = Endpoint.objects.all().filter(url=url_id, port=port, ip_version=ip_version, protocol=protocol, is_dead=False)
 
     for endpoint in eps:
@@ -671,6 +739,7 @@ def check_network(code_location=""):
     log.info("IPv4 is enabled via configuration: %s", settings.NETWORK_SUPPORTS_IPV4)
     log.info("IPv6 is enabled via configuration: %s", settings.NETWORK_SUPPORTS_IPV6)
 
+    # todo: this does not work in all cases, you should run this over the v4 and v6 queues respectively
     can_ipv4 = can_connect("https", "faalkaart.nl", 443, 4)
     can_ipv6 = can_connect("https", "faalkaart.nl", 443, 6)
 

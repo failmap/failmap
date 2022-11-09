@@ -244,9 +244,12 @@ requests==2.25.1
     #   googlemaps
     #   python-resize-image
     #   requests-file
+    #   requests-toolbelt
     #   tldextract
 requests-file==1.5.1
     # via tldextract
+requests-toolbelt==0.10.1
+    # via -r requirements.in
 retry==0.9.2
     # via -r requirements.in
 sentry-sdk==0.20.2
