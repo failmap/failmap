@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Dict, Any
 
 import pytz
 from constance import config
@@ -12,6 +13,17 @@ from websecmap.organizations.models import Organization
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
+
+
+def _scanner_metadata_available_for_scan_type(scan_metadata: Dict[Any, Any], scan_type: str) -> bool:
+    # in some cases you can requests scan types that are still in the database but the scanner is not in use
+    # anymore. Prevent that from happening to only show scan types that are currently in the database.
+    try:
+        scanner = scan_metadata["scan_types_to_scanner"].get(scan_type)
+    except KeyError:
+        return False
+
+    return bool(scanner)
 
 
 class UpdatesOnOrganizationFeed(Feed):
@@ -91,7 +103,7 @@ class LatestScanFeed(Feed):
 
     def title(self, scan_type: str = ""):
         if scan_type:
-            return f"{scan_type} Scan Updates"
+            return f"{scan_type.replace('_', ' ').capitalize()} Scan Updates"
 
         return "Vulnerabilities Feed"
 
@@ -112,6 +124,10 @@ class LatestScanFeed(Feed):
 
     def item_title(self, item):
         metadata = get_backend_scanmetadata()
+
+        if not _scanner_metadata_available_for_scan_type(metadata, item.type):
+            return ""
+
         calculation = get_severity(item)
         if not calculation:
             return ""
@@ -144,6 +160,11 @@ class LatestScanFeed(Feed):
         return f"{badge} {rating} - {item.endpoint.url.url}"
 
     def item_description(self, item):
+
+        metadata = get_backend_scanmetadata()
+        if not _scanner_metadata_available_for_scan_type(metadata, item.type):
+            return ""
+
         calculation = get_severity(item)
         return _(calculation.get("explanation", ""))
 
@@ -204,6 +225,10 @@ def latest_updates(organization_id):
 
     for scan in scans:
         scan_type = scan.type
+
+        if not _scanner_metadata_available_for_scan_type(metadata, scan_type):
+            continue
+
         calculation = get_severity(scan)
         if scan_type in metadata["url_scan_types"]:
             # url scans
