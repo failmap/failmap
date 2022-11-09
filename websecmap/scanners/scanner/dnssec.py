@@ -142,9 +142,9 @@ def store_dnssec(result: List[str], url_id: int):
         # /failmap/map/locale/*/django.po
         # translate them and then run "failmap translate" again.
         messages = {
-            "ERROR": "DNSSEC is incorrectly or not configured (errors found).",
-            "WARNING": "DNSSEC is incorrectly configured (warnings found).",
-            "INFO": "DNSSEC seems to be implemented sufficiently.",
+            "error": "DNSSEC is incorrectly or not configured (errors found).",
+            "warning": "DNSSEC is incorrectly configured (warnings found).",
+            "info": "DNSSEC seems to be implemented sufficiently.",
         }
 
         store_url_scan_result("dnssec", url_id, level, messages[level], evidence=",\n".join(result))
