@@ -139,12 +139,12 @@ def retry():
     internetnl_scanner_ids = list(
         Scanner.objects.all()
         .filter(python_name__in=["internet_nl_web", "internet_nl_mail"])
-        .values_list("id", Flat=True)
+        .values_list("id", flat=True)
     )
     other_scanner_ids = list(
         Scanner.objects.all()
         .exclude(python_name__in=["internet_nl_web", "internet_nl_mail"])
-        .values_list("id", Flat=True)
+        .values_list("id", flat=True)
     )
 
     retry_policy = [{"scanners": internetnl_scanner_ids, "hours": 48}, {"scanners": other_scanner_ids, "hours": 4}]
