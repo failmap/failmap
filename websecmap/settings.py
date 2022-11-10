@@ -723,6 +723,12 @@ CONSTANCE_CONFIG = {
         "",
         bool,
     ),
+    "SHOW_MULTI_MAP_SUMMARY_TABLE": (
+      False,
+      "Shows a list of all maps and scores of organizations and domains, only useful "
+      "when there are more maps than to fill the screen.",
+      bool
+    ),
     "SHOW_CHARTS": (
         True,
         "Shows the list of charts. Those are the lists of all good / bad organizations ordered "
@@ -1113,6 +1119,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             "What to show on the website",
             (
                 "SHOW_INTRO",
+                "SHOW_MULTI_MAP_SUMMARY_TABLE",
                 "SHOW_CHARTS",
                 "SHOW_EXTENSIVE_STATISTICS",
                 "SHOW_DATASETS",

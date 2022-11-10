@@ -226,6 +226,7 @@ def config_content():
     base_config = {
         "show": {
             "intro": configuration["SHOW_INTRO"],
+            "multi_map_summary_table": configuration['SHOW_MULTI_MAP_SUMMARY_TABLE'],
             "charts": configuration["SHOW_CHARTS"],
             "comply_or_explain": configuration["SHOW_COMPLY_OR_EXPLAIN"],
             "scan_schedule": configuration["SHOW_SCAN_SCHEDULE"],
