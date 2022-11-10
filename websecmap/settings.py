@@ -911,17 +911,6 @@ CONSTANCE_CONFIG = {
         "only once every 10 minutes.",
         "json",
     ),
-    "ENABLE_PRO": (False, "Todo: implement.", bool),
-    "PRO_REPLY_TO_MAIL_ADDRESS": ("", "Reply mail address used when sending PRO mails.", str),
-    # django mail settings, but managed dynamically
-    "PRO_EMAIL_HOST": ("", "See django mail settings.", str),
-    "PRO_EMAIL_PORT": ("", "See django mail settings.", str),
-    "PRO_EMAIL_USERNAME": ("", "See django mail settings.", str),
-    "PRO_EMAIL_PASSWORD": ("", "See django mail settings.", str),
-    "PRO_EMAIL_USE_TLS": ("", "See django mail settings.", str),
-    "PRO_EMAIL_USE_SSL": ("", "See django mail settings.", str),
-    "PRO_EMAIL_SSL_KEYFILE": ("", "See django mail settings.", str),
-    "PRO_EMAIL_SSL_CERTFILE": ("", "See django mail settings.", str),
     # Screenshots:
     "SCREENSHOT_API_URL_V4": (
         "http://websecmap-screenshot:3000/screenshot/",
@@ -1197,20 +1186,6 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             ("INTERNET_NL_API_USERNAME", "INTERNET_NL_API_PASSWORD", "INTERNET_NL_API_URL", "INTERNET_NL_MAXIMUM_URLS"),
         ),
         ("Screenshot service options", ("SCREENSHOT_API_URL_V4", "SCREENSHOT_API_URL_V6")),
-        ('<span class="beta">beta</span> Pro (in development)', ("ENABLE_PRO", "PRO_REPLY_TO_MAIL_ADDRESS")),
-        (
-            '<span class="beta">beta</span> Pro Mail Settings (in development)',
-            (
-                "PRO_EMAIL_HOST",
-                "PRO_EMAIL_PORT",
-                "PRO_EMAIL_USERNAME",
-                "PRO_EMAIL_PASSWORD",
-                "PRO_EMAIL_USE_TLS",
-                "PRO_EMAIL_USE_SSL",
-                "PRO_EMAIL_SSL_KEYFILE",
-                "PRO_EMAIL_SSL_CERTFILE",
-            ),
-        ),
         (
             '<span class="beta">beta</span> Zorgkaart Nederland (Tilanus)',
             ("ZORGKAART_ENDPOINT", "ZORGKAART_USERNAME", "ZORGKAART_PASSWORD", "ZORGKAART_FILTER"),
