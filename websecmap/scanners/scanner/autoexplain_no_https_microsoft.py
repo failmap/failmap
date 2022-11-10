@@ -24,7 +24,7 @@ query = EndpointGenericScan.objects.all().filter(
     endpoint__is_dead=False,
     endpoint__protocol="http",
     endpoint__port=80,
-    rating="25",
+    rating="https_redirect_on_insecure_port_and_no_https_on_standard_port",
 )
 
 

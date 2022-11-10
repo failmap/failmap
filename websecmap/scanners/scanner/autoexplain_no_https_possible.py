@@ -16,7 +16,7 @@ SCANNER = "autoexplain_no_https_possible"
 query = EndpointGenericScan.objects.all().filter(
     type="plain_http",
     is_the_latest_scan=True,
-    rating="1000",
+    rating="no_https_redirect_and_no_https_on_standard_port",
 )
 
 # The PKI domain is excepted as it often hosted Certificate Revocation Lists
