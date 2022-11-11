@@ -149,6 +149,9 @@ QUEUES_MATCHING_ROLES = {
     "screenshot": [
         Queue("screenshot"),
     ],
+    "followupscan": [
+        Queue("followupscan"),
+    ],
 }
 
 
@@ -160,7 +163,8 @@ def worker_configuration():
     log.info("Configuring worker for role: %s", role)
 
     # configure which queues should be consumed depending on assigned role for this worker
-    return {"task_queues": QUEUES_MATCHING_ROLES[role]}
+    # fall back to storage if the queue is not defined above, to prevent crashes
+    return {"task_queues": QUEUES_MATCHING_ROLES.get(role, QUEUES_MATCHING_ROLES['storage'])}
 
 
 @retry(tries=3, delay=5)
