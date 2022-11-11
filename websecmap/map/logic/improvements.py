@@ -1,22 +1,18 @@
-from datetime import timedelta
+from datetime import timedelta, date
 
 from django.utils import timezone
 
-from websecmap.map.logic.map_defaults import get_country, get_organization_type, get_when
+from websecmap.map.logic.map_defaults import determine_when, get_country, get_organization_type
 from websecmap.reporting.models import UrlReport
 
 
-def get_improvements(country, organization_type, weeks_back, weeks_duration):
+def get_improvements(country, organization_type, days_back, duration: int = 7, at_date: date = None):
     # todo: adjustable timespan
-    # todo: adjustable weeks_back
+    # todo: adjustable days_back
 
-    weeks_back = int(weeks_back)
-    weeks_duration = int(weeks_duration)
+    days_back = int(days_back)
 
-    if not weeks_duration:
-        weeks_duration = 1
-
-    when = get_when(weeks_back)
+    when = determine_when(days_back, at_date)
 
     # looks a lot like graphs, but then just subtract/add some values and done (?)
 
@@ -52,7 +48,7 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
         INNER JOIN
             (
                 SELECT MAX(id) as id2 FROM reporting_urlreport or2
-                WHERE at_when <= '{when - timedelta(days=(weeks_duration * 7))}' GROUP BY url_id
+                WHERE at_when <= '{when - timedelta(days=duration)}' GROUP BY url_id
             ) as x
         ON x.id2 = reporting_urlreport.id
         INNER JOIN url ON reporting_urlreport.url_id = url.id
@@ -147,7 +143,7 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
 
         changes[scan_type] = {
             "old": {
-                "date": timezone.now() - timedelta(days=(weeks_duration * 7)),
+                "date": timezone.now() - timedelta(days=duration),
                 "high": old_measurement[scan_type].get("high", 0),
                 "medium": old_measurement[scan_type].get("medium", 0),
                 "low": old_measurement[scan_type].get("low", 0),

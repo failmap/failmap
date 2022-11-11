@@ -1,15 +1,17 @@
 import logging
+from datetime import date
+
 from math import ceil
 
 from django.db import connection
 from django.utils import timezone
 
-from websecmap.map.logic.map_defaults import REMARK, get_country, get_organization_type, get_when
+from websecmap.map.logic.map_defaults import REMARK, determine_when, get_country, get_organization_type
 
 log = logging.getLogger(__name__)
 
 
-def get_top_win_data(country: str = "NL", organization_type="municipality", weeks_back=0):
+def get_top_win_data(country: str = "NL", organization_type="municipality", days_back=0, at_date: date = None):
     """
     Can't use the object.raw syntax of django. OperationalError: near "%": syntax error...
     Probably not supported, although the manual says so. Maybe because we use a multiline string?
@@ -20,10 +22,10 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", week
     When doing it right, the exception happens: format requires a mapping. Then just rely on the checks we do.
     :param country:
     :param organization_type:
-    :param weeks_back:
+    :param days_back:
     :return:
     """
-    when = get_when(weeks_back)
+    when = determine_when(days_back, at_date)
 
     cursor = connection.cursor()
     sql = f"""
@@ -79,9 +81,9 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", week
     return rows_to_dataset(rows, when)
 
 
-def get_top_fail_data(country: str = "NL", organization_type="municipality", weeks_back=0):
+def get_top_fail_data(country: str = "NL", organization_type="municipality", days_back=0, at_date: date = None):
 
-    when = get_when(weeks_back)
+    when = determine_when(days_back, at_date)
     cursor = connection.cursor()
 
     sql = f"""

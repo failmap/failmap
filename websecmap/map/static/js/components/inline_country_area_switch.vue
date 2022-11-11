@@ -136,9 +136,9 @@ Vue.component('inline-country-area-switch', {
                 x.setDate(x.getDate() - i);
 
                 if (i === 0)
-                    objs.push({'weeks_back': i/7, 'human_date': this.$i18n.t("mapstatebar.today")});
+                    objs.push({'days_back': i, 'human_date': this.$i18n.t("mapstatebar.today")});
                 else
-                    objs.push({'weeks_back': i/7, 'human_date': x.humanTimeStamp()});
+                    objs.push({'days_back': i, 'human_date': x.humanTimeStamp()});
             }
 
             return objs;

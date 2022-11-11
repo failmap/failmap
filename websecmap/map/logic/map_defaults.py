@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 
 import iso3166
 import pytz
@@ -156,11 +156,19 @@ def get_layers(country: str = "NL"):
     return list(layers)
 
 
-def get_when(weeks_back):
-    if not weeks_back:
+def get_when(days_back: int) -> datetime:
+    if not days_back:
         return datetime.now(pytz.utc)
 
-    return datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
+    return datetime.now(pytz.utc) - relativedelta(days=int(days_back))
+
+
+def determine_when(days_back: int = 0, at_date: date = None) -> date:
+    # Possible to go back some days from now.
+    # Possible to specify a specific date
+    # Possible to specify a number of days back from a specific date
+    some_date = at_date or datetime.now(pytz.utc).date()
+    return some_date - relativedelta(days=days_back)
 
 
 def get_initial_countries():

@@ -724,10 +724,10 @@ CONSTANCE_CONFIG = {
         bool,
     ),
     "SHOW_MULTI_MAP_SUMMARY_TABLE": (
-      False,
-      "Shows a list of all maps and scores of organizations and domains, only useful "
-      "when there are more maps than to fill the screen.",
-      bool
+        False,
+        "Shows a list of all maps and scores of organizations and domains, only useful "
+        "when there are more maps than to fill the screen.",
+        bool,
     ),
     "SHOW_CHARTS": (
         True,

@@ -164,7 +164,7 @@ def worker_configuration():
 
     # configure which queues should be consumed depending on assigned role for this worker
     # fall back to storage if the queue is not defined above, to prevent crashes
-    return {"task_queues": QUEUES_MATCHING_ROLES.get(role, QUEUES_MATCHING_ROLES['storage'])}
+    return {"task_queues": QUEUES_MATCHING_ROLES.get(role, QUEUES_MATCHING_ROLES["storage"])}
 
 
 @retry(tries=3, delay=5)

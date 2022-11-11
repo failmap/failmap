@@ -1,6 +1,6 @@
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, date
 from wsgiref.util import FileWrapper
 
 import django_excel as excel
@@ -70,6 +70,10 @@ ONE_DAY = 24 * 60 * 60
 TEN_MINUTES = 60 * 10
 
 DEFAULT_FILE_FORMAT = "json"
+
+
+def json_response(data: dict) -> HttpResponse:
+    return HttpResponse(orjson.dumps(data), content_type="text/json", status=200)
 
 
 def empty_response():
@@ -172,7 +176,7 @@ def inject_default_language_cookie(request, response) -> HttpResponse:
     if "preferred_language" not in request.COOKIES:
         # Get the accept language,
         # Add the cookie to render.
-        accept_language = request.LANGUAGE_CODE[0:2]  # only support 'en' not 'en-gb'
+        accept_language = request.LANGUAGE_CODE[:2]  # only support 'en' not 'en-gb'
         response.set_cookie(key="preferred_language", value=accept_language)
 
     return response
@@ -226,7 +230,7 @@ def config_content():
     base_config = {
         "show": {
             "intro": configuration["SHOW_INTRO"],
-            "multi_map_summary_table": configuration['SHOW_MULTI_MAP_SUMMARY_TABLE'],
+            "multi_map_summary_table": configuration["SHOW_MULTI_MAP_SUMMARY_TABLE"],
             "charts": configuration["SHOW_CHARTS"],
             "comply_or_explain": configuration["SHOW_COMPLY_OR_EXPLAIN"],
             "scan_schedule": configuration["SHOW_SCAN_SCHEDULE"],
@@ -520,14 +524,14 @@ def manifest_json(request):
 
 @cache_page(ONE_HOUR)
 def organization_report_by_id(
-    request, country: str = DEFAULT_COUNTRY, organization_type: str = DEFAULT_LAYER, organization_id=None, weeks_back=0
+    request,
+    country: str = DEFAULT_COUNTRY,
+    organization_type: str = DEFAULT_LAYER,
+    organization_id=None,
+    days_back=0,
+    at_date: date = None,
 ):
-    if not organization_id:
-        return empty_response()
-
-    report = get_organization_report_by_id(organization_id, weeks_back)
-    return HttpResponse(orjson.dumps(report), content_type="text/json", status=200)
-    # return JsonResponse(report, safe=False, encoder=JSEncoder)
+    return json_response(get_organization_report_by_id(organization_id, days_back, at_date=at_date))
 
 
 @cache_page(ONE_HOUR)
@@ -536,76 +540,83 @@ def organization_report_by_name(
     country: str = DEFAULT_COUNTRY,
     organization_type: str = DEFAULT_LAYER,
     organization_name=None,
-    weeks_back=0,
+    days_back=0,
+    at_date: date = None,
 ):
     if not (organization_name and country and organization_type):
         return empty_response()
 
-    report = get_organization_report_by_name(
-        organization_name=organization_name, country=country, organization_type=organization_type, weeks_back=weeks_back
+    return json_response(
+        get_organization_report_by_name(
+            organization_name=organization_name,
+            country=country,
+            organization_type=organization_type,
+            days_back=days_back,
+            at_date=at_date,
+        )
     )
-    return HttpResponse(orjson.dumps(report), content_type="text/json", status=200)
-    # return JsonResponse(report, safe=False, encoder=JSEncoder)
 
 
 @cache_page(ONE_HOUR)
-def top_fail(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
-    data = get_top_fail_data(country, organization_type, weeks_back)
-    return HttpResponse(orjson.dumps(data), content_type="text/json", status=200)
-    # return JsonResponse(data, encoder=JSEncoder, safe=False)
+def top_fail(
+    request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, days_back=0, at_date: date = None
+):
+    return json_response(get_top_fail_data(country, organization_type, days_back, at_date=at_date))
 
 
 @cache_page(ONE_HOUR)
-def top_win(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
-    data = get_top_win_data(country, organization_type, weeks_back)
-    return HttpResponse(orjson.dumps(data), content_type="text/json", status=200)
-    # return JsonResponse(data, encoder=JSEncoder, safe=False)
+def top_win(
+    request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, days_back=0, at_date: date = None
+):
+    return json_response(get_top_win_data(country, organization_type, days_back, at_date=at_date))
 
 
 @cache_page(ONE_HOUR)
-def stats(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0, days: int = 365):
-    reports = get_stats(country, organization_type, weeks_back, days)
-    return HttpResponse(orjson.dumps(reports), content_type="text/json", status=200)
-    # return JsonResponse(reports, encoder=JSEncoder)
+def stats(
+    request,
+    country: str = DEFAULT_COUNTRY,
+    organization_type=DEFAULT_LAYER,
+    days_back=0,
+    duration: int = 365,
+    at_date: date = None,
+):
+    return json_response(get_stats(country, organization_type, days_back, duration, at_date=at_date))
 
 
 @cache_page(ONE_HOUR)
 def v_what_to_improve(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, issue_type=""):
-    reports = what_to_improve(country, organization_type, issue_type)
-    return HttpResponse(orjson.dumps(reports), content_type="text/json", status=200)
-    # return JsonResponse(reports, encoder=JSEncoder, safe=False)
+    return json_response(what_to_improve(country, organization_type, issue_type))
 
 
 @cache_page(ONE_HOUR)
-def get_short_and_simple_stats_(request, weeks_back=0):
-    data = get_short_and_simple_stats(weeks_back)
-    return HttpResponse(orjson.dumps(data), content_type="text/json", status=200)
-    # return JsonResponse(data, encoder=JSEncoder)
+def get_short_and_simple_stats_(request, days_back=0, at_date: date = None):
+    return json_response(get_short_and_simple_stats(days_back, at_date=at_date))
 
 
 @cache_page(ONE_HOUR)
-def organization_vulnerability_timeline(request, organization_id: int, days: int = 365):
-    my_stats = get_organization_vulnerability_timeline(organization_id, days=days)
-    # return JsonResponse(my_stats, encoder=JSEncoder, safe=False)
-    return HttpResponse(orjson.dumps(my_stats), content_type="text/json", status=200)
+def organization_vulnerability_timeline(request, organization_id: int, duration: int = 365):
+    return json_response(get_organization_vulnerability_timeline(organization_id, duration=duration))
 
 
 @cache_page(ONE_HOUR)
 def organization_vulnerability_timeline_via_name(
-    request, organization_name: str, organization_type: str = "", country: str = "", days: int = 365
+    request, organization_name: str, organization_type: str = "", country: str = "", duration: int = 365
 ):
-    my_stats = get_organization_vulnerability_timeline_via_name(organization_name, organization_type, country, days)
-    return HttpResponse(orjson.dumps(my_stats), content_type="text/json", status=200)
-    # return JsonResponse(my_stats, encoder=JSEncoder, safe=False)
+    return json_response(
+        get_organization_vulnerability_timeline_via_name(organization_name, organization_type, country, duration)
+    )
 
 
 @cache_page(ONE_HOUR)
 def vulnerability_graphs(
-    request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0, days: int = 365
+    request,
+    country: str = DEFAULT_COUNTRY,
+    organization_type=DEFAULT_LAYER,
+    days_back=0,
+    duration: int = 365,
+    at_date: date = None,
 ):
-    my_stats = get_vulnerability_graph(country, organization_type, weeks_back, days)
-    return HttpResponse(orjson.dumps(my_stats), content_type="text/json", status=200)
-    # return JsonResponse(my_stats, encoder=JSEncoder)
+    return json_response(get_vulnerability_graph(country, organization_type, days_back, duration, at_date=at_date))
 
 
 @cache_page(TEN_MINUTES)
@@ -613,13 +624,11 @@ def improvements(
     request,
     country: str = DEFAULT_COUNTRY,
     organization_type: str = DEFAULT_LAYER,
-    weeks_back: int = 0,
-    weeks_duration: int = 0,
+    days_back: int = 0,
+    duration: int = 0,
+    at_date: date = None,
 ):
-    changes = get_improvements(country, organization_type, weeks_back, weeks_duration)
-    return HttpResponse(orjson.dumps(changes), content_type="text/json", status=200)
-
-    # return JsonResponse(changes, encoder=JSEncoder)
+    return json_response(get_improvements(country, organization_type, days_back, duration, at_date=at_date))
 
 
 @cache_page(ONE_HOUR)
@@ -627,16 +636,15 @@ def ticker(
     request,
     country: str = DEFAULT_COUNTRY,
     organization_type: str = DEFAULT_LAYER,
-    weeks_back: int = 0,
-    weeks_duration: int = 0,
+    days_back: int = 0,
+    duration: int = 0,
+    at_date: date = None,
 ):
-    data = get_ticker_data(country, organization_type, weeks_back, weeks_duration)
-    return HttpResponse(orjson.dumps(data), content_type="text/json", status=200)
-    # return JsonResponse(data, encoder=JSEncoder, safe=False)
+    return json_response(get_ticker_data(country, organization_type, days_back, duration, at_date=at_date))
 
 
 @cache_page(FOUR_HOURS)
-def map_default(request, days_back: int = 0, displayed_issue: str = "all"):
+def map_default(request, days_back: int = 0, displayed_issue: str = "all", at_date: date = None):
     my_defaults = (
         Configuration.objects.all()
         .filter(is_displayed=True, is_the_default_option=True)
@@ -647,9 +655,16 @@ def map_default(request, days_back: int = 0, displayed_issue: str = "all"):
 
     # On an empty database, just get the Netherlands.
     if not my_defaults:
-        return map_data(request, DEFAULT_COUNTRY, DEFAULT_LAYER, days_back, displayed_issue)
+        return map_data(request, DEFAULT_COUNTRY, DEFAULT_LAYER, days_back, displayed_issue, at_date=at_date)
 
-    return map_data(request, my_defaults["country"], my_defaults["organization_type__name"], days_back, displayed_issue)
+    return map_data(
+        request,
+        my_defaults["country"],
+        my_defaults["organization_type__name"],
+        days_back,
+        displayed_issue,
+        at_date=at_date,
+    )
 
 
 @cache_page(ONE_HOUR)
@@ -714,36 +729,26 @@ def map_data(
     organization_type: str = DEFAULT_LAYER,
     days_back: int = 0,
     displayed_issue: str = "all",
+    at_date: date = None,
 ):
-    data = get_map_data(country, organization_type, days_back, displayed_issue)
+    data = get_map_data(country, organization_type, days_back, displayed_issue, at_date=at_date)
 
     return HttpResponse(orjson.dumps(data), content_type="text/json", status=200)
-
-    # return JsonResponse(data, encoder=JSEncoder)
 
 
 @cache_page(TEN_MINUTES)
 def all_latest_scans(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER):
-    dataset = get_all_latest_scans(country, organization_type)
-    return HttpResponse(orjson.dumps(dataset), content_type="text/json", status=200)
-    # return JsonResponse(dataset, encoder=JSEncoder)
+    return json_response(get_all_latest_scans(country, organization_type))
 
 
 @cache_page(TEN_MINUTES)
 def explain_list(request, country, organization_type):
-    data = get_recent_explains(country, organization_type)
-    return HttpResponse(orjson.dumps(data), content_type="text/json", status=200)
-    # return JsonResponse(data, encoder=JSEncoder, safe=False)
+    return json_response(get_recent_explains(country, organization_type))
 
 
 @cache_page(TEN_MINUTES)
 def updates_on_organization(request, organization_id):
-    if not organization_id:
-        return empty_response()
-
-    data = latest_updates(organization_id)
-    return HttpResponse(orjson.dumps(data), content_type="text/json", status=200)
-    # return JsonResponse(data, encoder=JSEncoder)
+    return json_response(latest_updates(organization_id))
 
 
 def organization_autcomplete(
@@ -760,9 +765,7 @@ def organization_autcomplete(
 
 @cache_page(TEN_MINUTES)
 def upcoming_and_past_scans(request):
-    data = get_next_and_last_scans()
-    return HttpResponse(orjson.dumps(data), content_type="text/json", status=200)
-    # return JsonResponse(data, encoder=JSEncoder, safe=False)
+    return json_response(get_next_and_last_scans())
 
 
 @cache_page(ONE_DAY)
@@ -810,15 +813,13 @@ def v_explain(request):
 @user_passes_test(user_is_staff_member)
 def v_remove_explain(request):
     request = get_json_body(request)
-    data = remove_explanation(request.get("scan_id"), request.get("scan_type"))
-    return JsonResponse(data, encoder=JSEncoder, safe=False)
+    return json_response(remove_explanation(request.get("scan_id"), request.get("scan_type")))
 
 
 @user_passes_test(user_is_staff_member)
 def v_add_urls(request):
     request = get_json_body(request)
-    data = add_urls(request.get("organization_id"), request.get("urls"))
-    return JsonResponse(data, encoder=JSEncoder, safe=False)
+    return json_response(add_urls(request.get("organization_id"), request.get("urls")))
 
 
 @user_passes_test(user_is_staff_member)

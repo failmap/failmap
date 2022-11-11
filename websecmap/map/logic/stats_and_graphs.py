@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Dict, List
 
 import pytz
@@ -8,7 +8,13 @@ from dateutil.relativedelta import relativedelta
 from django.db.models import Q
 from django.utils import timezone
 
-from websecmap.map.logic.map_defaults import get_country, get_default_country, get_default_layer, get_organization_type
+from websecmap.map.logic.map_defaults import (
+    get_country,
+    get_default_country,
+    get_default_layer,
+    get_organization_type,
+    determine_when,
+)
 from websecmap.map.models import Configuration, HighLevelStatistic, OrganizationReport, VulnerabilityStatistic
 from websecmap.organizations.models import Organization
 from websecmap.reporting.models import ScanPolicy
@@ -20,12 +26,12 @@ from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 log = logging.getLogger(__package__)
 
 
-def get_vulnerability_graph(country, organization_type, weeks_back, days: int = 365):
+def get_vulnerability_graph(country, organization_type, days_back, duration: int = 365, at_date: date = None):
     organization_type_id = get_organization_type(organization_type)
     country = get_country(country)
-    when = timezone.now() - relativedelta(weeks=int(weeks_back))
+    when = determine_when(days_back, at_date)
 
-    one_year_ago = when - timedelta(days=days)
+    one_year_ago = when - timedelta(days=duration)
 
     data = (
         VulnerabilityStatistic.objects.all()
@@ -72,8 +78,8 @@ def get_vulnerability_graph(country, organization_type, weeks_back, days: int = 
     return stats
 
 
-def get_organization_vulnerability_timeline(organization_id: int, days: int = 365):
-    one_year_ago = timezone.now() - timedelta(days=days)
+def get_organization_vulnerability_timeline(organization_id: int, duration: int = 365):
+    one_year_ago = timezone.now() - timedelta(days=duration)
 
     ratings = (
         OrganizationReport.objects.all()
@@ -100,7 +106,7 @@ def get_organization_vulnerability_timeline(organization_id: int, days: int = 36
 
 
 def get_organization_vulnerability_timeline_via_name(
-    organization_name: str, organization_type: str = "", country: str = "", days: int = 365
+    organization_name: str, organization_type: str = "", country: str = "", duration: int = 365
 ):
     layer = get_organization_type(organization_type) if organization_type else get_default_layer()
     country = get_country(code=country) if country else get_default_country()
@@ -112,10 +118,10 @@ def get_organization_vulnerability_timeline_via_name(
     if not organization:
         return []
 
-    return get_organization_vulnerability_timeline(organization.id, days)
+    return get_organization_vulnerability_timeline(organization.id, duration)
 
 
-def stats_determine_when(stat, weeks_back=0):
+def stats_determine_when(stat, days_back=0):
     if stat in ["now", "earliest"]:
         when = datetime.now(pytz.utc)
     else:
@@ -124,23 +130,23 @@ def stats_determine_when(stat, weeks_back=0):
 
     # take into account the starting point
     # eg: now = 1 march, starting point: 1 january. Difference is N days. Subtract N from when.
-    if weeks_back:
-        when = when - relativedelta(weeks=int(weeks_back))
+    if days_back:
+        when = when - relativedelta(days=int(days_back))
 
     # optimize: always give back the time 00:00:00, so the query result can be cached as the same query is
     # performed every time.
     my_dt = datetime(year=when.year, month=when.month, day=when.day, hour=0, minute=0, second=0, tzinfo=pytz.utc)
-    # log.debug("%s: %s (%s weeks back)" % (stat, dt, weeks_back))
+    # log.debug("%s: %s (%s weeks back)" % (stat, dt, days_back))
     return my_dt
 
 
-def get_stats_outdated(country, organization_type, weeks_back):
+def get_stats_outdated(country, organization_type, days_back):
     """
     Stats are calculated using websecmap calculate_high_level_statistics
 
     :param country:
     :param organization_type:
-    :param weeks_back:
+    :param days_back:
     :return:
     """
 
@@ -156,7 +162,7 @@ def get_stats_outdated(country, organization_type, weeks_back):
 
     reports = {}
     for stat in timeframes:
-        when = stats_determine_when(stat, weeks_back).date()
+        when = stats_determine_when(stat, days_back).date()
 
         # seven queryies, but __never__ a missing result.
         stats = (
@@ -173,20 +179,20 @@ def get_stats_outdated(country, organization_type, weeks_back):
     return reports
 
 
-def get_stats(country, organization_type, weeks_back, days: int = 365):
+def get_stats(country, organization_type, days_back, duration: int = 365, at_date: date = None):
     """
     Stats are calculated using websecmap calculate_high_level_statistics
 
     :return:
     """
 
-    when = datetime.now(pytz.utc) - relativedelta(days=int(weeks_back * 7))
+    when = determine_when(days_back, at_date)
 
     # seven queryies, but __never__ a missing result.
     stats = (
         HighLevelStatistic.objects.all()
         .filter(country=country, organization_type=get_organization_type(organization_type), at_when__lte=when)
-        .order_by("-at_when")[0:days]
+        .order_by("-at_when")[0:duration]
     )
 
     reports = {"organizations": [], "urls": [], "explained": {}, "endpoints_now": 0, "endpoint": []}
@@ -303,8 +309,8 @@ def what_to_improve_epgs(country: str, organization_type: str, issue_type: str, 
     return [dict(t) for t in {tuple(d.items()) for d in dicts}]
 
 
-def get_short_and_simple_stats(weeks_back: int = 0) -> Dict:
-    when = datetime.now(pytz.utc) - relativedelta(days=int(weeks_back * 7))
+def get_short_and_simple_stats(days_back: int = 0, at_date: date = None) -> Dict:
+    when = determine_when(days_back, at_date)
 
     configurations = Configuration.objects.all().filter(is_displayed=True).order_by("display_order")
 

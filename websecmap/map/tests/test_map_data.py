@@ -19,10 +19,11 @@ def test_get_cached_map_data(db):
     mdc = MapDataCache()
     mdc.country = "NL"
     mdc.organization_type = ot
-    mdc.at_when = datetime.now(pytz.utc) - relativedelta(days=int(8))
+    mdc.at_when = datetime.now(pytz.utc) - relativedelta(days=8)
     mdc.dataset = expected_result
     mdc.filters = ["all"]
     mdc.save()
 
     assert get_map_data(country="NL", organization_type="test", days_back=8) == expected_result
     assert get_cached_map_data(country="NL", organization_type="test", days_back=8) == expected_result
+    assert get_cached_map_data(country="NL", organization_type="test", at_date=mdc.at_when) == expected_result

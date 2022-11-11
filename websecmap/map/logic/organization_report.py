@@ -1,4 +1,5 @@
 import logging
+from datetime import date
 
 from django.utils.text import slugify
 
@@ -7,7 +8,7 @@ from websecmap.map.logic.map_defaults import (
     DEFAULT_LAYER,
     get_country,
     get_organization_type,
-    get_when,
+    determine_when,
 )
 from websecmap.organizations.models import Organization
 from websecmap.reporting.diskreport import retrieve_report
@@ -16,7 +17,11 @@ log = logging.getLogger(__package__)
 
 
 def get_organization_report_by_name(
-    country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, organization_name=None, weeks_back=0
+    country: str = DEFAULT_COUNTRY,
+    organization_type=DEFAULT_LAYER,
+    organization_name=None,
+    days_back=0,
+    at_date: date = None,
 ):
 
     organization = Organization.objects.filter(
@@ -32,13 +37,13 @@ def get_organization_report_by_name(
     if not organization:
         return {}
 
-    return get_organization_report_by_id(organization.pk, weeks_back)
+    return get_organization_report_by_id(organization.pk, days_back, at_date)
 
 
-def get_organization_report_by_id(organization_id: int, weeks_back: int = 0):
+def get_organization_report_by_id(organization_id: int, days_back: int = 0, at_date: date = None):
     # todo: check if the organization / layer is displayed on the map.
 
-    when = get_when(weeks_back)
+    when = determine_when(days_back, at_date)
 
     organization = Organization.objects.all().filter(pk=organization_id)
     if not organization:

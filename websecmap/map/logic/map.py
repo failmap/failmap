@@ -1,13 +1,12 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Any, Dict, List
 
 import pytz
 import simplejson as json
-from dateutil.relativedelta import relativedelta
 from django.db import connection
 from django.utils.text import slugify
 
-from websecmap.map.logic.map_defaults import REMARK, get_country, get_organization_type
+from websecmap.map.logic.map_defaults import REMARK, get_country, get_organization_type, determine_when
 from websecmap.map.models import MapDataCache
 from websecmap.reporting.diskreport import retrieve_report
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
@@ -23,7 +22,11 @@ def get_reports_by_ids(ids: List[str]) -> Dict[str, Dict[Any, Any]]:
 
 
 def get_cached_map_data(
-    country: str = "NL", organization_type: str = "municipality", days_back: int = 0, filters: List[str] = None
+    country: str = "NL",
+    organization_type: str = "municipality",
+    days_back: int = 0,
+    filters: List[str] = None,
+    at_date: date = None,
 ):
     """
     Caching is split up into two queries. This is done on purpose, as MySQL cannot deal with text fields efficiently.
@@ -44,7 +47,7 @@ def get_cached_map_data(
         .filter(
             country=country,
             organization_type=get_organization_type(organization_type),
-            at_when=datetime.now(pytz.utc) - relativedelta(days=int(days_back)),
+            at_when=determine_when(days_back, at_date),
             filters=filters,
         )
         .defer("dataset")
@@ -62,16 +65,18 @@ def get_cached_map_data(
 
 
 def get_map_data(
-    country: str = "NL", organization_type: str = "municipality", days_back: int = 0, displayed_issue: str = None
+    country: str = "NL",
+    organization_type: str = "municipality",
+    days_back: int = 0,
+    displayed_issue: str = None,
+    at_date: date = None,
 ):
-    metadata = get_backend_scanmetadata()
-
     # A bug in the live version (possibly due to |safe) gives a Country(code='NL')} instead of
     # the country code of the country. Here this is worked around, but something is wrong and should be fixed.
     if hasattr(country, "code"):
         country = country.code
 
-    when = datetime.now(pytz.utc) - relativedelta(days=int(days_back))
+    when = determine_when(days_back, at_date)
     metadata = get_backend_scanmetadata()
 
     desired_url_scans = []
@@ -92,7 +97,7 @@ def get_map_data(
     else:
         filters = desired_url_scans + desired_endpoint_scans
 
-    cached = get_cached_map_data(country, organization_type, days_back, filters)
+    cached = get_cached_map_data(country, organization_type, days_back, filters, at_date)
 
     if cached:
         return cached

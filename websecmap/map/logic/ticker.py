@@ -1,26 +1,24 @@
-from datetime import timedelta
+from datetime import timedelta, date
 
 from constance import config
 
-from websecmap.map.logic.map_defaults import get_country, get_organization_type, get_when
+from websecmap.map.logic.map_defaults import determine_when, get_country, get_organization_type
 from websecmap.map.models import OrganizationReport
 
 
 def get_ticker_data(
-    country: str = "NL", organization_type: str = "municipality", weeks_back: int = 0, weeks_duration: int = 0
+    country: str = "NL",
+    organization_type: str = "municipality",
+    days_back: int = 0,
+    duration: int = 10,
+    at_date: date = None,
 ):
-    weeks_back = int(weeks_back)
-    weeks_duration = int(weeks_duration)
-
     # Gives ticker data of organizations, like in news scrolling:
     # On organization level, could be on URL level in the future (selecing more cool urls?)
     # Organizations are far more meaningful.
     # Amsterdam 42 +1, 32 +2, 12 -, Zutphen 12 -3, 32 -1, 3 +3, etc.
 
-    if not weeks_duration:
-        weeks_duration = 10
-
-    when = get_when(weeks_back)
+    when = determine_when(days_back, at_date)
 
     # looks a lot like graphs, but then just subtract/add some values and done (?)
 
@@ -90,7 +88,7 @@ def get_ticker_data(
                 INNER JOIN organization as filter_organization
                 ON (filter_organization.id = or2.organization_id)
                 WHERE
-                    at_when <= '{when - timedelta(days=(weeks_duration * 7))}'
+                    at_when <= '{when - timedelta(days=duration)}'
                     AND filter_organization.country='{my_country}'
                     AND filter_organization.type_id={my_organization_type}
                GROUP BY organization_id
@@ -98,10 +96,10 @@ def get_ticker_data(
         ON stacked_organizationreport.id2 = map_organizationreport.id
         INNER JOIN organization ON map_organizationreport.organization_id = organization.id
         WHERE
-        (('{when - timedelta(days=(weeks_duration * 7))}' BETWEEN organization.created_on AND organization.is_dead_since
+        (('{when - timedelta(days=duration)}' BETWEEN organization.created_on AND organization.is_dead_since
                AND organization.is_dead = 1
                ) OR (
-               organization.created_on <= '{when - timedelta(days=(weeks_duration * 7))}'
+               organization.created_on <= '{when - timedelta(days=duration)}'
                AND organization.is_dead = 0
         ))
         AND organization.type_id = '{my_organization_type}'

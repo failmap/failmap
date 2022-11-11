@@ -52,7 +52,7 @@
                                 <span class="caret"></span></a>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown2" style="z-index: 100000">
                                 <template v-for="week in weeks">
-                                    <a  class="dropdown-item" v-on:click="set_week(week.weeks_back)">{{week.human_date}}</a>
+                                    <a  class="dropdown-item" v-on:click="set_week(week.days_back)">{{week.human_date}}</a>
                                 </template>
                             </div>
                         </li>
@@ -170,9 +170,9 @@ Vue.component('Mapstatebar', {
                 x.setDate(x.getDate() - i);
 
                 if (i === 0)
-                    objs.push({'weeks_back': i/7, 'human_date': this.$i18n.t("mapstatebar.today")});
+                    objs.push({'days_back': i, 'human_date': this.$i18n.t("mapstatebar.today")});
                 else
-                    objs.push({'weeks_back': i/7, 'human_date': x.humanTimeStamp()});
+                    objs.push({'days_back': i, 'human_date': x.humanTimeStamp()});
             }
 
             return objs;

@@ -142,7 +142,7 @@ def get_scan(scan_id: int, scan_type: str) -> Union[EndpointGenericScan, UrlGene
     return None
 
 
-def explain(scan_id: int, scan_type: str, explanation: str, explained_by: str, days: int = 365) -> Dict[str, Any]:
+def explain(scan_id: int, scan_type: str, explanation: str, explained_by: str, duration: int = 365) -> Dict[str, Any]:
 
     scan = get_scan(scan_id, scan_type)
     if not scan:
@@ -164,7 +164,7 @@ def explain(scan_id: int, scan_type: str, explanation: str, explained_by: str, d
     scan.comply_or_explain_is_explained = True
     scan.comply_or_explain_explained_by = explained_by
     scan.comply_or_explain_explained_on = timezone.now()
-    scan.comply_or_explain_explanation_valid_until = timezone.now() + timedelta(days=int(days))
+    scan.comply_or_explain_explanation_valid_until = timezone.now() + timedelta(days=int(duration))
     scan.comply_or_explain_explanation = explanation
     scan.comply_or_explain_case_handled_by = "Logged in user..."
     scan.save()
