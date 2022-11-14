@@ -505,7 +505,7 @@ def plan_outdated_scans(published_scan_types):
 
 
 # todo: the storage queue might be too busy for this... should become a new queue...
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="followupscan", expires=EXPIRES_IN_ONE_DAY)
 def plan_follow_up_scans(**kwargs):
     """
     Based on the conclusion a new scan is scheduled. We'll receive a ton of conclusions because a scanner can
