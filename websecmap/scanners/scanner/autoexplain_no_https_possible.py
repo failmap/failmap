@@ -62,7 +62,7 @@ def scan(scan_id: int):
         return
 
     # Only 1000: where there is NO https. 25 points is a redirect, which is not OK for PKI/CRL!
-    if not a_scan.rating == "no_https_redirect_and_no_https_on_standard_port":
+    if a_scan.rating != "no_https_redirect_and_no_https_on_standard_port":
         return
 
     if a_scan.endpoint.url.computed_subdomain not in excepted_subdomains:

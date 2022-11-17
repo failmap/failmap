@@ -27,6 +27,7 @@ from websecmap.scanners.plannedscan import (
     store_progress,
     plan_follow_up_scans,
 )
+from websecmap.scanners.scanner.autoexplain_no_https_possible import scan
 from websecmap.scanners.scanner.tls_qualys import plan_scan
 
 log = logging.getLogger("websecmap")
@@ -277,7 +278,7 @@ def test_plan_follow_up_scan(db, default_scan_metadata, default_policy):
     follow.run_follow_up_on_any_of_these_policies.add(policy)
 
     # prepare an endpoint:
-    u1 = Url.objects.create(url="example.nl")
+    u1 = Url.objects.create(url="pki.example.nl")
     e1 = Endpoint.objects.create(url=u1, protocol="http", port="443")
 
     # Some things that does not match the policy
@@ -334,3 +335,25 @@ def test_plan_follow_up_scan(db, default_scan_metadata, default_policy):
     plan_follow_up_scans()
     plan_follow_up_scans()
     assert PlannedScan.objects.all().count() == 1
+
+    planned = PlannedScan.objects.all().last()
+    assert planned.scanner.python_name == "tls_qualys"
+
+    # plan plain_http:
+    epgs = EndpointGenericScan.objects.create(
+        endpoint=e1,
+        rating="no_https_redirect_and_no_https_on_standard_port",
+        type="plain_http",
+        last_scan_moment=now,
+        rating_determined_on=yesterday,
+    )
+    plan_follow_up_scans()
+    assert PlannedScan.objects.all().count() == 2
+
+    planned = PlannedScan.objects.all().last()
+    assert planned.scanner.python_name == "plain_http"
+    assert planned.url.url == "pki.example.nl"
+
+    scan(epgs.id)
+    explained = EndpointGenericScan.objects.get(id=epgs.id)
+    assert explained.comply_or_explain_is_explained is True

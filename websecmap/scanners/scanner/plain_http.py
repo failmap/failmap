@@ -175,7 +175,7 @@ def get_endpoints_with_missing_encryption(url):
 def well_done(endpoint_id):
 
     if endpoint_has_scans("plain_http", endpoint_id):
-        store_endpoint_scan_result("plain_http", endpoint_id, "0", CLEANED_UP)
+        store_endpoint_scan_result("plain_http", endpoint_id, "redirecting_properly", CLEANED_UP)
 
 
 # Task is written to work both on v4 and v6, but the network conf of the machine differs.

@@ -231,6 +231,7 @@ def request(activity: str, scanner: str, urls: List[int]):
     # need to be created again: that would just be more work. Think so, otherwise the finish and start will
     # mix for different scans. So we can't do bulk inserts, but we can do better state logging
     metadata = get_backend_scanmetadata()
+    log.debug("Requested %s with %s on %s urls.", activity, scanner, len(urls))
 
     python_scanner = metadata["scanners_by_python_name"].get(scanner, None)
     if not python_scanner:
@@ -259,8 +260,6 @@ def request(activity: str, scanner: str, urls: List[int]):
         planned_scan.requested_at_when = now - discard
         planned_scan.save()
         statsd.incr("scan_planned", tags={"state": "request", "scanner": scanner, "activity": activity})
-
-    log.debug("Requested %s with %s on %s urls.", activity, scanner, len(urls))
 
 
 def already_requested(activity: str, scanner: int, url_id: int):
@@ -546,6 +545,8 @@ def plan_follow_up_scans(**kwargs):
     if kwargs.get("in_the_last_N_minutes"):
         amount_of_minutes_of_scan_history = int(kwargs.get("amount_of_minutes_of_scan_history"))
 
+    log.debug("Adding follow up scans to results from the last %s minutes.", amount_of_minutes_of_scan_history)
+
     # Instead of this here is a slow and dumb implementation, which works when run every ten minutes or so
 
     metadata = get_backend_scanmetadata()
@@ -556,19 +557,29 @@ def plan_follow_up_scans(**kwargs):
         # are there scans in the last 10 minutes that match this policy:
         for policy in follow_up_scan.otherpolicies:
 
+            log.debug("Checking if there are follow ups for %s, %s", policy.scan_type, policy.conclusion)
+
             scans_matching_policy = EndpointGenericScan.objects.all().filter(
                 type=policy.scan_type,
                 rating=policy.conclusion,
-                last_scan_moment__gt=datetime.now() - timedelta(minutes=amount_of_minutes_of_scan_history),
+                last_scan_moment__gt=datetime.now(pytz.utc) - timedelta(minutes=amount_of_minutes_of_scan_history),
             )
 
             for scan_matching_policy in scans_matching_policy:
                 # Request all activities from this scanner
-
                 scanner = metadata["scan_types_to_scanner"].get(policy.scan_type, None)
 
                 if not scanner:
+                    log.warning(
+                        "Could not find a scanner matching scan type %s, cannot add follow up scan.", policy.scan_type
+                    )
                     continue
 
                 for activity in scanner["plannable_activities"]:
+                    log.debug(
+                        "- Planning activity %s with scanner %s, for url %s",
+                        activity,
+                        scanner["python_name"],
+                        scan_matching_policy.endpoint.url,
+                    )
                     request(scanner=scanner["python_name"], activity=activity, urls=[scan_matching_policy.endpoint.url])

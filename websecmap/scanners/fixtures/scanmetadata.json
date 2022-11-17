@@ -3368,5 +3368,35 @@
       11
     ]
   }
+},
+{
+  "model": "scanners.followupscan",
+  "pk": 3,
+  "fields": {
+    "follow_up_scanner": 16,
+    "run_follow_up_on_any_of_these_policies": [
+      9
+    ]
+  }
+},
+{
+  "model": "scanners.followupscan",
+  "pk": 4,
+  "fields": {
+    "follow_up_scanner": 15,
+    "run_follow_up_on_any_of_these_policies": [
+      9
+    ]
+  }
+},
+{
+  "model": "scanners.followupscan",
+  "pk": 5,
+  "fields": {
+    "follow_up_scanner": 17,
+    "run_follow_up_on_any_of_these_policies": [
+      12
+    ]
+  }
 }
 ]
