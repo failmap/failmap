@@ -55,7 +55,7 @@ from websecmap.map.logic.stats_and_graphs import (
 from websecmap.map.logic.ticker import get_ticker_data
 from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
 from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
-from websecmap.map.models import Configuration, OrganizationReport
+from websecmap.map.models import Configuration, OrganizationReport, LandingPage
 from websecmap.organizations.models import Organization
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Screenshot
@@ -225,6 +225,19 @@ def config_content():
     # This is converted to some hierarchy to make more sense, and to _not_ export things like keys
     metadata = get_backend_scanmetadata()
 
+    # To enable landing pages, reset the application(!)
+    lps = {}
+    landingpages = (
+        LandingPage.objects.all()
+        .filter(enabled=True)
+        .prefetch_related("map_configuration", "map_configuration__organization_type")
+    )
+    for landingpage in landingpages:
+        lps[landingpage.directory] = {
+            "country": landingpage.map_configuration.country.code,
+            "layer": landingpage.map_configuration.organization_type.name,
+        }
+
     configuration = get_all_values()
     scan_types = get_scanners_for_frontend(configuration)
     base_config = {
@@ -357,6 +370,7 @@ def config_content():
                 "low": configuration["RELEVANT_FOR_UI_LOW"],
                 "good": configuration["RELEVANT_FOR_UI_GOOD"],
             },
+            "landing_pages": lps,
         },
         "scan_types": scan_types,
     }

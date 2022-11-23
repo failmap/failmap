@@ -600,7 +600,7 @@ def save_scan(url: str, data: Any):
         log.debug("Message for endpoint %s is %s.", qualys_endpoint["ipAddress"], message)
 
         # Qualys might discover endpoints we don't have yet. In that case, be pragmatic and create the endpoint.
-        failmap_endpoint = Endpoint.force_get(db_url, ip_version, "https", 443)
+        failmap_endpoint = Endpoint.force_get(db_url.id, ip_version, "https", 443)
 
         if message in [
             "Unable to connect to the server",

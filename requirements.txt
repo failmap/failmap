@@ -216,6 +216,8 @@ python-crontab==2.5.1
     # via django-celery-beat
 python-dateutil==2.8.1
     # via python-crontab
+python-masscan==1.0.0
+    # via -r requirements.in
 python-monkey-business==1.0.0
     # via django-nested-admin
 python-resize-image==1.1.19

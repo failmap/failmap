@@ -75,6 +75,7 @@ def standard_calculation(
     return {
         "type": scan.type,
         "explanation": explanation,
+        "evidence": scan.evidence,
         "since": scan.rating_determined_on.isoformat(),
         "last_scan": scan.last_scan_moment.isoformat(),
         "high": high,

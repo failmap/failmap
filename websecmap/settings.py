@@ -1006,6 +1006,32 @@ CONSTANCE_CONFIG = {
     "SECURITY_TXT_REDIRECT_URL": ("", "The url where security.txt resides", str),
     "SECURITY_TXT_CONTENT": ("", "The content of the security.txt file, located at .well-known/security.txt", str),
     # todo: add config for enabled languages...
+    "BANNERGRAB_IPV4_LISTEN_IP": (
+        "192.168.178.200",
+        "IPv4 address that can listen to packets returned by "
+        "responding hosts. "
+        "See: Banner checking @ https://github.com/robertdavidgraham/masscan ",
+        str,
+    ),
+    "BANNERGRAB_IPV6_LISTEN_IP": (
+        "",
+        "IPv6 address that can listen to packets returned by responding hosts. "
+        "See: Banner checking @ https://github.com/robertdavidgraham/masscan ",
+        str,
+    ),
+    "BANNERGRAB_GENERIC_BANNERS": (
+        '["apache", "nginx"]',
+        "A valid json list, with lowercase items that represent generic "
+        "banners without too much revealing server info.",
+        str,
+    ),
+    "BANNERGRAB_DAYS_TO_OUTDATED_METRIC": (
+        7,
+        "The number of days that a metric has not been seen anymore "
+        "in subsequent scans. Make sure that the frequency of your scans "
+        "is higher than this number of days.",
+        int,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1157,6 +1183,15 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         (
             "Scanning preferences",
             ("SCAN_AT_ALL", "SCANNER_NAMESERVERS"),
+        ),
+        (
+            "Banner Grabbing",
+            (
+                "BANNERGRAB_IPV4_LISTEN_IP",
+                "BANNERGRAB_IPV6_LISTEN_IP",
+                "BANNERGRAB_GENERIC_BANNERS",
+                "BANNERGRAB_DAYS_TO_OUTDATED_METRIC",
+            ),
         ),
         (
             "Plus",

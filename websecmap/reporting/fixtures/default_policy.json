@@ -14398,5 +14398,77 @@
     "explanation": "",
     "annotation": ""
   }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1055,
+  "fields": {
+    "total_issues": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "bannergrab",
+    "conclusion": "service_identity_likely_version_found",
+    "explanation": "service_identity_likely_version_found",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1056,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 1,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "bannergrab",
+    "conclusion": "service_identity_some_identity_found",
+    "explanation": "service_identity_some_identity_found",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1057,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "bannergrab",
+    "conclusion": "service_identity_nothing_found",
+    "explanation": "service_identity_nothing_found",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1058,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "bannergrab",
+    "conclusion": "service_identity_not_seen_in_a_while",
+    "explanation": "service_identity_not_seen_in_a_while",
+    "annotation": ""
+  }
 }
 ]

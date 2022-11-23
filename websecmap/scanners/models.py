@@ -119,7 +119,7 @@ class Endpoint(models.Model):
 
         endpoint = Endpoint()
         try:
-            endpoint.url = Url.objects.filter(url=url_id).first()
+            endpoint.url = Url.objects.filter(id=url_id).first()
         except ObjectDoesNotExist:
             endpoint.url = ""
         endpoint.port = port
@@ -270,6 +270,8 @@ class UrlIp(models.Model):
         "IPv4: 127.000.000.001 = 127.0.0.1",
     )
 
+    is_v4 = models.BooleanField(default=True)
+
     rdns_name = models.CharField(
         max_length=255,
         help_text="The reverse name can be a server name, containing a provider or anything else."
@@ -279,7 +281,7 @@ class UrlIp(models.Model):
 
     discovered_on = models.DateTimeField(blank=True, null=True)
 
-    is_unused = models.IntegerField(
+    is_unused = models.BooleanField(
         default=False,
         help_text="If the address was used in the past, but not anymore."
         "It's possible that the same address is more than once "
@@ -292,7 +294,10 @@ class UrlIp(models.Model):
     is_unused_reason = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.ip} {self.discovered_on.date()}"
+        if self.discovered_on:
+            return f"{self.ip} {self.discovered_on.date()}"
+
+        return f"{self.ip} @???"
 
     class Meta:
         verbose_name = _("urlip")

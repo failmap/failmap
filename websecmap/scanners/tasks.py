@@ -26,6 +26,8 @@ from websecmap.scanners.scanner import (
     verify_unresolvable,
     dns_clean_wildcards,
     screenshot,
+    resolve_ip,
+    bannergrab,
 )
 
 log = logging.getLogger(__name__)
@@ -53,6 +55,8 @@ __scanners__ = [
     autoexplain_no_https_microsoft,
     autoexplain_trust_microsoft,
     autoexplain_no_https_possible,
+    resolve_ip,
+    bannergrab,
 ]
 
 __others__ = [proxy, plannedscan]

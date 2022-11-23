@@ -2572,6 +2572,26 @@
   }
 },
 {
+  "model": "scanners.scantype",
+  "pk": 145,
+  "fields": {
+    "name": "bannergrab",
+    "description": "Identifies possible software versions, which can be quickly searched for vulnerabilities.",
+    "include_in_report": true,
+    "show_in_frontend": true,
+    "display_order": 50,
+    "second_opinion_links": [
+      3
+    ],
+    "documentation_links": [
+      18
+    ],
+    "category": [
+      3
+    ]
+  }
+},
+{
   "model": "scanners.scantypesecondopinionlink",
   "pk": 2,
   "fields": {
@@ -2784,6 +2804,15 @@
   "fields": {
     "url": "https://en.wikipedia.org/wiki/Security.txt",
     "provider": "security_txt_wikipedia",
+    "friendly_name": "Wikipedia"
+  }
+},
+{
+  "model": "scanners.scantypedocumentationlink",
+  "pk": 18,
+  "fields": {
+    "url": "https://en.wikipedia.org/wiki/Banner_grabbing",
+    "provider": "banner_grabbing_wikipedia",
     "friendly_name": "Wikipedia"
   }
 },
@@ -3346,6 +3375,28 @@
       115,
       116,
       128
+    ]
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 28,
+  "fields": {
+    "name": "bannergrab",
+    "python_name": "bannergrab",
+    "description": "Grabs banners using masscan. Comes with additional mandatory settings. Scan is a direct action from the scheduler.",
+    "to": 0,
+    "enabled": true,
+    "rate_limit": 1000000,
+    "needs_results_from": null,
+    "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
+      1
+    ],
+    "creates_scan_types": [
+      145
     ]
   }
 },

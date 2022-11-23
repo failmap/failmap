@@ -19,7 +19,7 @@ def compose_task(**kwargs) -> Task:
         log.error("No urls found.")
         return group()
 
-    tasks = recreate_url_reports(urls)
+    tasks = recreate_url_reports([url.id for url in urls])
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")

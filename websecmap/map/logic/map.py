@@ -233,6 +233,8 @@ def get_map_data(
     # unfortunately numbered results are used. There is no decent solution for sqlite and the column to dict
     # translation is somewhat hairy. A rawquery would probably be better if possible.
 
+    # log.error(reports)
+
     for i in rows:
 
         # Here we're going to do something stupid: to rebuild the high, medium, low classifcation based on scan_types
@@ -272,6 +274,7 @@ def get_map_data(
                             endpoint_rating["type"] in desired_endpoint_scans
                             and endpoint_rating.get("comply_or_explain_valid_at_time_of_report", False) is False
                         ):
+                            # what happens when the data from test_plan_outdated_scans shows up here?...
                             high += endpoint_rating["high"]
                             medium += endpoint_rating["medium"]
                             low += endpoint_rating["low"]

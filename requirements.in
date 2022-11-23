@@ -164,3 +164,6 @@ django-filter
 argh
 
 pytest-is-running
+
+# banner grabbing
+python-masscan

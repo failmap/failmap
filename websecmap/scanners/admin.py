@@ -70,7 +70,10 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def visit(inst):
         if not inst:
             return "- no url, how?"
-        url = f"{inst.protocol}://{inst.url.url}:{inst.port}/"
+        if inst.url is None:
+            url = f"{inst.protocol}://???:{inst.port}/"
+        else:
+            url = f"{inst.protocol}://{inst.url.url}:{inst.port}/"
         return format_html(f"<a href='{url}' target='_blank'>Visit</a>")
 
     inlines = [EndpointGenericScanInline]
@@ -112,6 +115,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "endpoint",
         "type",
         "rating",
+        "evidence",
         "last_scan_moment",
         "rating_determined_on",
         "comply_or_explain_is_explained",

@@ -191,6 +191,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy, default_scan_met
                         "scan_type": "tls_qualys_encryption_quality",
                         "since": "2020-02-05T00:00:00+00:00",
                         "type": "tls_qualys_encryption_quality",
+                        "evidence": "0",
                     }
                 ],
                 "v4": True,
@@ -288,6 +289,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy, default_scan_met
                         "scan_type": "tls_qualys_encryption_quality",
                         "since": "2020-02-07T00:00:00+00:00",
                         "type": "tls_qualys_encryption_quality",
+                        "evidence": "0",
                     }
                 ],
                 "v4": True,

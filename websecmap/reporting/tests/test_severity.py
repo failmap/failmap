@@ -30,6 +30,7 @@ def test_internet_nl_standard_calculation(db, default_policy):
         "not_testable": 0,
         "not_applicable": 0,
         "error_in_test": 0,
+        "evidence": 0,
     }
 
     scan.explanation = '{"translation": "test"}'
@@ -39,6 +40,7 @@ def test_internet_nl_standard_calculation(db, default_policy):
     assert value == {
         "translation": "test",
         "test_result": "failed",
+        "evidence": "my_evidence",
         "technical_details": "my_evidence",
         "type": "internet_nl_web_https_tls_clientreneg",
         "explanation": "",
@@ -52,6 +54,7 @@ def test_internet_nl_standard_calculation(db, default_policy):
         "not_applicable": 0,
         "error_in_test": 0,
     }
+
 
     # special case for internet.nl scores:
     scan.type = "internet_nl_mail_dashboard_overall_score"
@@ -70,6 +73,7 @@ def test_internet_nl_standard_calculation(db, default_policy):
         "explanation": "42 https://internet.nl/123123/scan/somethingsomethingsomethingdarkside",
         "since": now.isoformat(),
         "last_scan": now.isoformat(),
+        "evidence": "https://internet.nl/123123/scan/somethingsomethingsomethingdarkside",
         "high": 1,
         "medium": 0,
         "low": 0,
