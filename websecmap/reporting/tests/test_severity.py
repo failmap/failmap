@@ -55,7 +55,6 @@ def test_internet_nl_standard_calculation(db, default_policy):
         "error_in_test": 0,
     }
 
-
     # special case for internet.nl scores:
     scan.type = "internet_nl_mail_dashboard_overall_score"
     # scan.explanation = "testing no crashes on non json data and overriding this value"
