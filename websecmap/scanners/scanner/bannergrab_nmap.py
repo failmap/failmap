@@ -80,6 +80,12 @@ def grab(is_v4: bool = True):
             store_results(host, nm[host])
 
 
+def reduce_protcol(protocol):
+    mapping = {"http-proxy": "http"}
+
+    return mapping.get(protocol, protocol)
+
+
 def store_results(host, scan_result):
     """
 
@@ -192,7 +198,7 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
       }
     }
     """
-    protocol = result["name"]
+    protocol = reduce_protcol(result["name"])
 
     with contextlib.suppress(ValueError):
         confidence = int(result["conf"])

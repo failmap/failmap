@@ -1,3 +1,5 @@
+import pytest
+
 from websecmap.scanners.scanner.banners.detect_version import (
     SERVICE_IDENTITY_LIKELY_VERSION_FOUND,
     SERVICE_IDENTITY_SOME_IDENTITY_FOUND,
@@ -5,23 +7,54 @@ from websecmap.scanners.scanner.banners.detect_version import (
     detect_a_likely_version,
     remove_ip_addresses,
     remove_ftp_command_numbers,
+    contains_version_number,
 )
 
 
-def test_detect_a_likely_version():
+@pytest.mark.override_config(BANNERGRAB_GENERIC_BANNERS='["Something Version 1.2.3"]')
+def test_detect_a_likely_version(db):
 
     found = SERVICE_IDENTITY_LIKELY_VERSION_FOUND
     maybe = SERVICE_IDENTITY_SOME_IDENTITY_FOUND
     none = SERVICE_IDENTITY_NO_BANNER_FOUND
 
-    assert detect_a_likely_version("SSH-2.0-OpenSSH_7.6p1 Ubuntu-4ubuntu0.5", protocol="http") == found
-    assert detect_a_likely_version("SSH-2.0-OpenSSH_7.6p1 Ubuntu-4ubuntu0.5", protocol="http") == found
-    assert detect_a_likely_version("SSH-2.0-OpenSSH_7.6p1 Ubuntu-4ubuntu0.5", protocol="http") == found
+    assert detect_a_likely_version("SSH-2.0-OpenSSH_7.6p1 Ubuntu-4ubuntu0.5", protocol="ssh") == found
+    assert detect_a_likely_version("SSH-2.0-OpenSSH_7.6p1 Ubuntu-4ubuntu0.5", protocol="ssh") == found
+    assert detect_a_likely_version("SSH-2.0-OpenSSH_7.6p1 Ubuntu-4ubuntu0.5", protocol="ssh") == found
 
     assert detect_a_likely_version("Microsoft-IIS/8.5", protocol="http") == maybe
     assert detect_a_likely_version("Micro", protocol="maybe") == maybe
 
     assert detect_a_likely_version("", protocol="maybe") == none
+
+    assert (
+        detect_a_likely_version(
+            "HTTP/1.0 408 Request Time-out\x0D\x0ACache-Control: no-cachex0AConnection: "
+            "close\x0D\x0AContent-Type: text/html\x0D\x0A\x0D\x0A<h tml><body><h1>408 "
+            "Request Time-out</h1>\x0AYour browser didn't send a c omplete request in time."
+            "\x0A</body></html>",
+            protocol="http",
+        )
+        == none
+    )
+
+    assert detect_a_likely_version("Something something 2.3", protocol="http") == found
+
+    assert detect_a_likely_version("Something something 2.3.4", protocol="http") == found
+
+    assert detect_a_likely_version("Something something version 2", protocol="http") == found
+
+    # excepted via the admin
+    assert detect_a_likely_version("Something Version 1.2.3", protocol="http") == found
+
+
+def test_contains_version_number():
+    assert contains_version_number("abc 1.2 asd") is True
+    assert contains_version_number("1.2") is True
+    assert contains_version_number("abc 1.2.3 asd") is True
+    assert contains_version_number("1.2.3") is True
+    assert contains_version_number("abc 1 asd") is False
+    assert contains_version_number("") is False
 
 
 def test_remove_ip_addresses():
