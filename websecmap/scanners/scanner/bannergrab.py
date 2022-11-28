@@ -124,13 +124,10 @@ Some examples:
 "nginx/1.14.2",
 "nginx/1.18.0 + Phusion Passenger(R) 6.0.12",
 """
-import json
-from json import JSONDecodeError
 
-import pytz
 
 from websecmap.app.constance import constance_cached_value
-from websecmap.scanners.models import UrlIp, EndpointGenericScan, Endpoint
+from websecmap.scanners.models import Endpoint, UrlIp
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 import logging
 
@@ -142,48 +139,14 @@ from websecmap.scanners.scanner.__init__ import (
     allowed_to_scan,
 )
 import masscan
-from datetime import datetime, timedelta
-import re
 
-SCANNER_NAME = "bannergrab"
+from websecmap.scanners.scanner.banners.detect_version import detect_a_likely_version
+from websecmap.scanners.scanner.banners.utils import clean_old_bannergrab_results, get_urls_by_ip
 
-SERVICE_IDENTITY_LIKELY_VERSION_FOUND = "service_identity_likely_version_found"  # high
-SERVICE_IDENTITY_SOME_IDENTITY_FOUND = "service_identity_some_identity_found"  # low
-
-# todo: support ips where all banners are missing, in that case add a service_identity_nothing_found.
-SERVICE_IDENTITY_NO_BANNER_FOUND = "service_identity_nothing_found"  # good
-SERVICE_IDENTITY_NOT_SEEN_IN_A_WHILE = "service_identity_not_seen_in_a_while"  # good
+SCANNER_NAME = "bannergrab_masscan"
 
 
 log = logging.getLogger(__name__)
-
-# use the official ports only, don't go for the weird ports just yet :)
-DEFAULT_FTP_PORTS = [21]
-DEFAULT_HTTP_PORTS = [443, 80, 8443, 8080, 8000]
-DEFAULT_IMAP4_PORTS = [993, 143]
-DEFAULT_POP3_PORTS = [110, 995]
-DEFAULT_SMTP_PORTS = [25, 587, 465, 3535]
-DEFAULT_SSH_PORTS = [22]
-DEFAULT_SMB_PORTS = [445]
-DEFAULT_TELNET_PORTS = [23, 992]  # 107?
-DEFAULT_RDP_PORTS = [3389]
-DEFAULT_VNC_PORTS = [5500]
-
-# todo: perhaps this should be a little more relaxed / split up into separate scans to avoid being blocked by a firewall
-STANDARD_PORTS = (
-    DEFAULT_FTP_PORTS
-    + DEFAULT_HTTP_PORTS
-    + DEFAULT_IMAP4_PORTS
-    + DEFAULT_POP3_PORTS
-    + DEFAULT_SMTP_PORTS
-    + DEFAULT_SSH_PORTS
-    + DEFAULT_SMB_PORTS
-    + DEFAULT_TELNET_PORTS
-    + DEFAULT_RDP_PORTS
-    + DEFAULT_VNC_PORTS
-)
-
-DEFAULT_SSL_PORTS = []  # not used, because of weird ports, and there is a lot of ssl
 
 
 def compose_scan_task(urls):
@@ -210,6 +173,8 @@ def grab_banners():
     grab_banners_ip_version(constance_cached_value("BANNERGRAB_IPV4_LISTEN_IP"), True)
     grab_banners_ip_version(constance_cached_value("BANNERGRAB_IPV6_LISTEN_IP"), False)
 
+    clean_old_bannergrab_results()
+
 
 def grab_banners_ip_version(listen_ip: str, is_v4: bool = True):
 
@@ -219,7 +184,7 @@ def grab_banners_ip_version(listen_ip: str, is_v4: bool = True):
 
     v4_targets = ",".join(UrlIp.objects.all().filter(is_unused=False, is_v4=is_v4).values_list("ip", flat=True))
     mas = masscan.PortScanner()
-    ports = ",".join(str(x) for x in STANDARD_PORTS)
+    ports = ",".join(str(x) for x in constance_cached_value("BANNERGRAB_STANDARD_PORTS").split(","))
     output = mas.scan(v4_targets, ports=ports, arguments=f"--banners --max-rate 100 --source-ip {listen_ip}")
     handle_masscan_output(output)
 
@@ -263,8 +228,6 @@ def handle_masscan_output(output):
                 service_name = row["service"]["name"]
                 process_result(ip, row["port"], service_name, service_banner)
 
-    clean_old_bannergrab_results()
-
 
 def process_result(ip, port, service_name, banner):
     # some cert info.
@@ -287,7 +250,6 @@ def process_result(ip, port, service_name, banner):
     # get the urls that have this IP. And are up to date etc...
     for url in get_urls_by_ip(ip):
         # you know the urls based ip.
-        log.error(url.url)
         endpoint = Endpoint.force_get(url_id=url.url.id, port=port, protocol=protocol, ip_version=6 if ":" in ip else 4)
 
         store_endpoint_scan_result(
@@ -302,146 +264,3 @@ def masscan_service_name_to_protocol(service_name):
         return "http"
 
     return service_name
-
-
-def get_urls_by_ip(ip):
-    return UrlIp.objects.all().filter(ip=ip).only("id", "url", "url__id")
-
-
-def clean_old_bannergrab_results():
-    #  connect the finding to the urls that have this IP, this can be a lot of urls
-    #  Things that have not seen for a while will be deleted. EndpointGenericScan of this type older than 7 days
-    # means that it has not been seen. All the other values are auto-update etc. The amount of days depends on how
-    # many times this scan is run. The data is not really stable. Probably is a lot blocks ands such. If it's blocked
-    # then so be it. Might not be blocked after a day or two...
-    old_scans = datetime.now(pytz.utc) - timedelta(days=constance_cached_value("BANNERGRAB_DAYS_TO_OUTDATED_METRIC"))
-    old_epgs = EndpointGenericScan.objects.all().filter(type=SCANNER_NAME, last_scan_moment__lte=old_scans)
-
-    # When there's new stuff it will show up automatically
-    for old_epg in old_epgs:
-        store_endpoint_scan_result(
-            scan_type=SCANNER_NAME,
-            endpoint_id=old_epg.endpoint.id,
-            rating=SERVICE_IDENTITY_NOT_SEEN_IN_A_WHILE,
-            evidence="",
-            message="",
-        )
-
-    # How do you know if the endpoint still exists? It will have no data attached to it when there is no
-    # issue, so that will not be shown. Not an issue.
-
-
-def detect_a_likely_version(banner: str, protocol: str):
-    """
-    This is a heuristic to see if a version can be detected in a string.
-
-    We prefer NO banner to be available. So if you have a banner, that means some kind of penalty.
-    So if you have 'apache' that is saying something: an attacker should have to guess (or header detect) if it's
-    apache/ngnix/iis/lotus domino webserver. We expect to see _NOTHING_ in the banner.
-
-    Versions are usually numbers. If you have some complex numbers in your banner, than it's likely to be a version.
-    """
-    conclusion = SERVICE_IDENTITY_NO_BANNER_FOUND
-
-    banner = str(clean_banner(banner, protocol))
-
-    if banner:
-        # any banner is not good. so:
-        conclusion = SERVICE_IDENTITY_SOME_IDENTITY_FOUND
-
-        if any(map(str.isdigit, banner)):
-            conclusion = SERVICE_IDENTITY_LIKELY_VERSION_FOUND
-
-            # add exceptions for "apache2" for example.
-            # todo: this should come from constance, there is a lot of movement in this list.
-            # it should not include products that are very old, as those are not supported and thus broken
-            generic_banners = [
-                "amazons3",
-                "apache",
-                "apache/2",
-                "iis7",
-                "layer7-api-gateway",
-                "microsoft-httpapi/2.0",
-                "microsoft-iis/7.0",
-                "microsoft-iis/8.5",
-                "microsoft-iis/10.0",
-                "nginx",
-                "parallels html5 client" "smtp2go",
-            ]
-
-            try:
-                extra_banners = json.loads(constance_cached_value("BANNERGRAB_GENERIC_BANNERS"))
-                generic_banners = generic_banners + extra_banners
-            except JSONDecodeError:
-                log.error("BANNERGRAB_GENERIC_BANNERS is not valid json. Make sure it's lower case and valid json.")
-
-            if banner in generic_banners:
-                conclusion = SERVICE_IDENTITY_SOME_IDENTITY_FOUND
-
-        if "version" in banner:
-            conclusion = SERVICE_IDENTITY_LIKELY_VERSION_FOUND
-
-    return conclusion
-
-
-def clean_banner(banner, protocol: str):
-    # destroys 509 info, but that is not the scope here
-    banner = banner.lower()
-
-    if protocol == "http":
-        banner = remove_junk_http_headers(banner)
-
-    if protocol == "ftp":
-        banner = remove_ftp_command_numbers(banner)
-
-    banner = remove_junk_data(banner)
-    # try not to mistake ip-addresses with a version number.
-    banner = remove_ip_addresses(banner)
-
-    return banner
-
-
-def remove_junk_http_headers(banner):
-    # Skip http responses. These might contain 'server' in the header,
-    # but thats usually also read on an alternative port
-
-    if banner.startswith("HTTP/1.0"):
-        return ""
-
-    if banner.startswith("HTTP/1.1"):
-        return ""
-
-    return banner
-
-
-def remove_ftp_command_numbers(banner):
-    # d	220 Microsoft FTP Service 234 AUTH command ok. Expecting TLS Negotiation.
-    banner = banner.replace("220", "")
-    banner = banner.replace("234", "")
-    return banner
-
-
-def remove_ip_addresses(banner):
-    # ipv4
-    banner = re.sub(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", "", banner)
-    # ipv6
-    banner = re.sub(
-        r"(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:"
-        r"[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:)"
-        r"{1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:)"
-        r"{1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|"
-        r"fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9])"
-        r"{0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1"
-        r"{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))",
-        "",
-        banner,
-    )
-
-    return banner
-
-
-def remove_junk_data(banner):
-    if "\u0000" in banner:
-        """"""
-
-    return banner

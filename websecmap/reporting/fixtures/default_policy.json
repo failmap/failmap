@@ -14470,5 +14470,185 @@
     "explanation": "service_identity_not_seen_in_a_while",
     "annotation": ""
   }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1059,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "ports",
+    "conclusion": "port_should_not_be_open",
+    "explanation": "",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1060,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 1,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "ports",
+    "conclusion": "port_could_not_be_found_anymore",
+    "explanation": "port_could_not_be_found_anymore",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1061,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "bannnergrab_product_name",
+    "conclusion": "product_name_neutral",
+    "explanation": "product_name_neutral",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1062,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "bannnergrab_product_name",
+    "conclusion": "product_name_empty",
+    "explanation": "product_name_empty",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1063,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "bannnergrab_product_version",
+    "conclusion": "product_version_neutral",
+    "explanation": "product_version_neutral",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1064,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "bannnergrab_product_version",
+    "conclusion": "product_version_empty",
+    "explanation": "product_version_empty",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1065,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "bannnergrab_product_info",
+    "conclusion": "product_info_neutral",
+    "explanation": "product_info_neutral",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1066,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "bannnergrab_product_info",
+    "conclusion": "product_info_empty",
+    "explanation": "product_info_empty",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1067,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "bannnergrab_product_cpe",
+    "conclusion": "product_cpe_neutral",
+    "explanation": "product_cpe_neutral",
+    "annotation": ""
+  }
+},
+{
+  "model": "reporting.scanpolicy",
+  "pk": 1068,
+  "fields": {
+    "total_issues": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "ok": 0,
+    "not_applicable": 0,
+    "not_testable": 0,
+    "error_in_test": 0,
+    "scan_type": "bannnergrab_product_cpe",
+    "conclusion": "product_cpe_empty",
+    "explanation": "product_cpe_empty",
+    "annotation": ""
+  }
 }
 ]

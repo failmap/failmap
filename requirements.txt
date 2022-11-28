@@ -220,6 +220,8 @@ python-masscan==1.0.0
     # via -r requirements.in
 python-monkey-business==1.0.0
     # via django-nested-admin
+python-nmap==0.7.1
+    # via -r requirements.in
 python-resize-image==1.1.19
     # via -r requirements.in
 pytz==2021.1

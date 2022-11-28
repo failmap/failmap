@@ -1032,6 +1032,24 @@ CONSTANCE_CONFIG = {
         "is higher than this number of days.",
         int,
     ),
+    "BANNERGRAB_STANDARD_PORTS": (
+        "80,443,22",
+        "Comma separated list of port numbers that should be checked in banner grabbing. The more numbers the lower"
+        ", the likelyhood of findings and the more false positives due to firewalls randomly returning ports and"
+        " useless information.",
+        str,
+    ),
+    "BANNERGRAB_PRODUCT_CONFIDENCE": (
+        10,
+        "When doing product identification, the confidence needs to be at least this to be added to the database.",
+        int,
+    ),
+    "PORTSCAN_SHOULD_BE_INTERNAL_PORTS": (
+        "8008,8443,8080",
+        "Comma separate list of port numbers that should not be exposed to the internet, that often contains management"
+        " stuff that should only be accessible on the local network (via vpn for example)",
+        str,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1191,7 +1209,13 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "BANNERGRAB_IPV6_LISTEN_IP",
                 "BANNERGRAB_GENERIC_BANNERS",
                 "BANNERGRAB_DAYS_TO_OUTDATED_METRIC",
+                "BANNERGRAB_STANDARD_PORTS",
+                "BANNERGRAB_PRODUCT_CONFIDENCE",
             ),
+        ),
+        (
+            "Portscanning",
+            ("PORTSCAN_SHOULD_BE_INTERNAL_PORTS",),
         ),
         (
             "Plus",

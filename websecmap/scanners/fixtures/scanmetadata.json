@@ -2592,6 +2592,106 @@
   }
 },
 {
+  "model": "scanners.scantype",
+  "pk": 149,
+  "fields": {
+    "name": "ports",
+    "description": "Marks configured ports as 'should not be open to the public'",
+    "include_in_report": true,
+    "show_in_frontend": true,
+    "display_order": 60,
+    "second_opinion_links": [
+      9
+    ],
+    "documentation_links": [
+      19
+    ],
+    "category": [
+      3
+    ]
+  }
+},
+{
+  "model": "scanners.scantype",
+  "pk": 150,
+  "fields": {
+    "name": "bannnergrab_product_name",
+    "description": "Discovered product name",
+    "include_in_report": false,
+    "show_in_frontend": false,
+    "display_order": 51,
+    "second_opinion_links": [
+      9
+    ],
+    "documentation_links": [
+      18
+    ],
+    "category": [
+      3
+    ]
+  }
+},
+{
+  "model": "scanners.scantype",
+  "pk": 151,
+  "fields": {
+    "name": "bannnergrab_product_version",
+    "description": "Discovered product version",
+    "include_in_report": false,
+    "show_in_frontend": false,
+    "display_order": 52,
+    "second_opinion_links": [
+      9
+    ],
+    "documentation_links": [
+      18
+    ],
+    "category": [
+      3
+    ]
+  }
+},
+{
+  "model": "scanners.scantype",
+  "pk": 152,
+  "fields": {
+    "name": "bannnergrab_product_cpe",
+    "description": "Discovered product cpe",
+    "include_in_report": false,
+    "show_in_frontend": false,
+    "display_order": 54,
+    "second_opinion_links": [
+      9
+    ],
+    "documentation_links": [
+      18
+    ],
+    "category": [
+      3
+    ]
+  }
+},
+{
+  "model": "scanners.scantype",
+  "pk": 153,
+  "fields": {
+    "name": "bannnergrab_product_info",
+    "description": "Discovered product nifo",
+    "include_in_report": false,
+    "show_in_frontend": false,
+    "display_order": 53,
+    "second_opinion_links": [
+      9
+    ],
+    "documentation_links": [
+      18
+    ],
+    "category": [
+      3
+    ]
+  }
+},
+{
   "model": "scanners.scantypesecondopinionlink",
   "pk": 2,
   "fields": {
@@ -2652,6 +2752,15 @@
     "url": "https://zonemaster.iis.se/",
     "provider": "zonemaster",
     "friendly_name": "Zonemaster"
+  }
+},
+{
+  "model": "scanners.scantypesecondopinionlink",
+  "pk": 9,
+  "fields": {
+    "url": "https://www.ipvoid.com/port-scan/",
+    "provider": "portscanner_ipvoid",
+    "friendly_name": "IPVoid"
   }
 },
 {
@@ -2813,6 +2922,15 @@
   "fields": {
     "url": "https://en.wikipedia.org/wiki/Banner_grabbing",
     "provider": "banner_grabbing_wikipedia",
+    "friendly_name": "Wikipedia"
+  }
+},
+{
+  "model": "scanners.scantypedocumentationlink",
+  "pk": 19,
+  "fields": {
+    "url": "https://en.wikipedia.org/wiki/Open_port",
+    "provider": "open_port_wikipedia",
     "friendly_name": "Wikipedia"
   }
 },
@@ -3383,8 +3501,8 @@
   "pk": 28,
   "fields": {
     "name": "bannergrab",
-    "python_name": "bannergrab",
-    "description": "Grabs banners using masscan. Comes with additional mandatory settings. Scan is a direct action from the scheduler.",
+    "python_name": "bannergrab_nmap",
+    "description": "Grabs banners using nmap. Comes with additional mandatory settings. Scan is a direct action from the scheduler.",
     "to": 0,
     "enabled": true,
     "rate_limit": 1000000,
@@ -3396,7 +3514,33 @@
       1
     ],
     "creates_scan_types": [
-      145
+      145,
+      150,
+      151,
+      153,
+      152
+    ]
+  }
+},
+{
+  "model": "scanners.scanner",
+  "pk": 29,
+  "fields": {
+    "name": "ports",
+    "python_name": "ports",
+    "description": "Marks configured ports as 'should not be open to the public'",
+    "to": 0,
+    "enabled": true,
+    "rate_limit": 500,
+    "needs_results_from": null,
+    "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
+      1
+    ],
+    "creates_scan_types": [
+      149
     ]
   }
 },

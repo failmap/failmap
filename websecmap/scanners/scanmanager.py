@@ -10,6 +10,13 @@ log = logging.getLogger(__package__)
 
 
 def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, message: str, evidence: str = ""):
+    log.debug(
+        "Storage requested for scan type %s, endpoint_id %s, rating: %s, message: %s",
+        scan_type,
+        endpoint_id,
+        rating,
+        message,
+    )
 
     # Check if the latest scan has the same rating or not:
     try:

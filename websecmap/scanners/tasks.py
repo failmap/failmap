@@ -28,6 +28,8 @@ from websecmap.scanners.scanner import (
     screenshot,
     resolve_ip,
     bannergrab,
+    ports,
+    bannergrab_nmap,
 )
 
 log = logging.getLogger(__name__)
@@ -57,6 +59,8 @@ __scanners__ = [
     autoexplain_no_https_possible,
     resolve_ip,
     bannergrab,
+    bannergrab_nmap,
+    ports,
 ]
 
 __others__ = [proxy, plannedscan]
