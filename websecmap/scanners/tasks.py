@@ -27,7 +27,7 @@ from websecmap.scanners.scanner import (
     dns_clean_wildcards,
     screenshot,
     resolve_ip,
-    bannergrab,
+    bannergrab_masscan,
     ports,
     bannergrab_nmap,
 )
@@ -58,7 +58,7 @@ __scanners__ = [
     autoexplain_trust_microsoft,
     autoexplain_no_https_possible,
     resolve_ip,
-    bannergrab,
+    bannergrab_masscan,
     bannergrab_nmap,
     ports,
 ]

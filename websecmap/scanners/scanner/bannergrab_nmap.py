@@ -7,7 +7,7 @@ they use fake banners, that's much more fun :)
 """
 
 import contextlib
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from websecmap.app.constance import constance_cached_value
 from websecmap.scanners.models import UrlIp, Endpoint, EndpointGenericScan
@@ -22,19 +22,16 @@ from websecmap.scanners.scanner.__init__ import (
     allowed_to_scan,
 )
 import nmap
+import random
 
 from websecmap.scanners.scanner.banners.detect_version import detect_a_likely_version, SERVICE_IDENTITY_NO_BANNER_FOUND
 from websecmap.scanners.scanner.banners.utils import get_urls_by_ip
-from websecmap.scanners.scanner.utils import in_chunks
+from websecmap.scanners.scanner.utils import in_chunks, CELERY_IP_VERSION_QUEUE_NAMES
 
-SCANNER_NAME = "bannergrab"
+SCANNER_NAME = "bannergrab_nmap"
 
 
 log = logging.getLogger(__name__)
-
-
-def compose_scan_task(urls):
-    return group([grab_banners.s()])
 
 
 def compose_manual_scan_task(
@@ -44,7 +41,7 @@ def compose_manual_scan_task(
     if not allowed_to_scan(SCANNER_NAME):
         return group()
 
-    return compose_scan_task(grab_banners.s())
+    return group(grab_tasks())
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
@@ -53,29 +50,88 @@ def grab_banners():
     if not allowed_to_scan(SCANNER_NAME):
         return
 
-    grab()
+    group(grab_tasks()).apply_async()
+
+    return
 
 
 def get_all_ip_addresses(is_v4=True):
-    return UrlIp.objects.all().filter(is_unused=False, is_v4=is_v4).values_list("ip", flat=True)
+    return list(UrlIp.objects.all().filter(is_unused=False, is_v4=is_v4).values_list("ip", flat=True))
 
 
-def grab(is_v4: bool = True):
-    ports = ",".join(str(x) for x in constance_cached_value("BANNERGRAB_STANDARD_PORTS").split(","))
-    nm = nmap.PortScanner()
-    # command is space separated
+def get_ips_to_be_scanned(is_v4) -> List[str]:
     ips = get_all_ip_addresses(is_v4)
+    # randomize the order to distribute load of scans
+    random.shuffle(ips)
+    return ips
 
-    # todo: randomize the addresses
+
+def get_ports_to_be_scanned() -> str:
+    return ",".join(str(x) for x in constance_cached_value("BANNERGRAB_STANDARD_PORTS").split(","))
+
+
+def grab_tasks():
+    hosts_per_scan = 100
+
+    ports = get_ports_to_be_scanned()
+    tasks = []
+
+    ipv4_ips = get_ips_to_be_scanned(is_v4=True)
+    ipv4_chunks = in_chunks(ipv4_ips, hosts_per_scan)
+    tasks += [
+        grab_task.si(chunk, ports).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[4]) | store_results_task.s()
+        for chunk in ipv4_chunks
+    ]
+
+    ipv6_ips = get_ips_to_be_scanned(is_v4=False)
+    ipv6_chunks = in_chunks(ipv6_ips, hosts_per_scan)
+    tasks += [
+        grab_task.si(chunk, ports).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[6]) | store_results_task.s()
+        for chunk in ipv6_chunks
+    ]
+
+    log.debug(f"Created {len(tasks)} bannergrab_nmap tasks.")
+
+    return tasks
+
+
+def start_scanner(ips, ports):
+    log.debug(f"Starting nmap scanner on {len(ips)} ips, on ports {ports}.")
+
+    # targets is space separated
+    # ports is comma separated
+    ip_argument = " ".join(ips)
+    nm = nmap.PortScanner()
+    nm.scan(ip_argument, ports, arguments="-sV -v6 --script=banner")
+    log.debug(nm.command_line())
+    log.debug(nm.scaninfo())
+    return nm
+
+
+@app.task(expires=EXPIRES_IN_ONE_DAY)
+def grab_task(ips, ports):
+    nm = start_scanner(ips, ports)
+    return {host: nm[host] for host in nm.all_hosts()}
+
+
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+def store_results_task(results):
+    # results are a dict of ip and results.
+    log.debug("Storing results of nmap scan task.")
+
+    for host, result in results.items():
+        store_results(host, result)
+
+
+def grab_manually(is_v4: bool = True):
+    # can be used for inspection from the command line
+    ips = get_ips_to_be_scanned(is_v4)
+    ports = get_ports_to_be_scanned()
 
     chunks = in_chunks(ips, 100)
+    # could reuse the nm object
     for chunk in chunks:
-        ip_chunk = " ".join(chunk)
-        nm.scan(ip_chunk, ports, arguments="-sV -v6 --script=banner")
-        log.debug(nm.command_line())
-        log.debug(nm.scaninfo())
-        print(nm)
-
+        nm = start_scanner(chunk, ports)
         for host in nm.all_hosts():
             store_results(host, nm[host])
 
@@ -87,6 +143,7 @@ def reduce_protcol(protocol):
 
 
 def store_results(host, scan_result):
+    log.debug("Store scan results for %s", host)
     """
 
     '185.71.61.127': {

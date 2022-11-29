@@ -5,7 +5,7 @@ import pytz
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import UrlIp, Endpoint, EndpointGenericScan
-from websecmap.scanners.scanner.bannergrab import (
+from websecmap.scanners.scanner.bannergrab_masscan import (
     handle_masscan_output,
     clean_old_bannergrab_results,
 )

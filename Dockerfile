@@ -80,6 +80,7 @@ RUN apk --no-cache add \
   perl-net-ip \
   perl-yaml \
   nmap \
+  nmap-scripts \
   # runtime dependencies for osmtogeojson
   nodejs \
   nodejs-npm
