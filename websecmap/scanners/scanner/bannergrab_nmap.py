@@ -19,10 +19,10 @@ from celery import Task, group
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.scanners import init_dict
 from websecmap.scanners.scanner.__init__ import (
-    allowed_to_scan, unique_and_random,
+    allowed_to_scan,
+    unique_and_random,
 )
 import nmap
-import random
 
 from websecmap.scanners.scanner.banners.detect_version import detect_a_likely_version, SERVICE_IDENTITY_NO_BANNER_FOUND
 from websecmap.scanners.scanner.banners.utils import get_urls_by_ip
