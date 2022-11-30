@@ -250,6 +250,10 @@ def discover_wildcard(url: str):
     return False
 
 
+def result_contains_canary(contents: List):
+    return any("does_not_exist_canary" in row["name"] for row in contents)
+
+
 @app.task(queue="storage")
 def dnsrecon_parse_report_contents(contents: List, url: Dict[str, Any]):
     """
@@ -259,6 +263,12 @@ def dnsrecon_parse_report_contents(contents: List, url: Dict[str, Any]):
         {'type': 'A', 'name': 'something.somthing.something.darkside.example.com', 'address': 'no_ip'}
     ]
     """
+    # If 'does_not_exist_canary' is returned as one of the subdomains, something went wrong in wildcard identification
+    # so in that case just forget the entire result...
+
+    if result_contains_canary(contents):
+        return []
+
     addedlist = []
     # https://stackoverflow.com/questions/11328940/check-if-list-item-contains-items-fro
     # strings: dkim etc
@@ -602,7 +612,15 @@ def get_popular_subdomains(country: str = "NL"):
     cursor = connection.cursor()
     cursor.execute(sql)
     rows = cursor.fetchall()
-    return sorted([row[0] for row in rows])
+
+    subdomains: List[str] = [row[0] for row in rows]
+
+    # add a nonsense subdomain that can be easily identified in the database in case something went wrong in
+    # subdomain detection. Basically when this subdomain appears all other subdomains are probably also invalid.
+    if subdomains:
+        subdomains.append("does_not_exist_canary")
+
+    return sorted(subdomains)
 
 
 def make_threeletter_wordlist():

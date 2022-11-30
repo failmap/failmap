@@ -32,7 +32,9 @@ def test_get_subdomains(db):
         u.organization.add(o)
         u.save()
 
-    assert get_popular_subdomains("NL") == ["example", "first", "second", "test"]
+    assert sorted(get_popular_subdomains("NL")) == sorted(
+        ["example", "first", "second", "test", "does_not_exist_canary"]
+    )
     assert get_popular_subdomains("DE") == []
 
     # make sure that the task does not crash, and that it's not empty
