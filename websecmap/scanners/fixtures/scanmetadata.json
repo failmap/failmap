@@ -2615,7 +2615,7 @@
   "model": "scanners.scantype",
   "pk": 150,
   "fields": {
-    "name": "bannnergrab_product_name",
+    "name": "bannergrab_product_name",
     "description": "Discovered product name",
     "include_in_report": false,
     "show_in_frontend": false,
@@ -2635,7 +2635,7 @@
   "model": "scanners.scantype",
   "pk": 151,
   "fields": {
-    "name": "bannnergrab_product_version",
+    "name": "bannergrab_product_version",
     "description": "Discovered product version",
     "include_in_report": false,
     "show_in_frontend": false,
@@ -2655,7 +2655,7 @@
   "model": "scanners.scantype",
   "pk": 152,
   "fields": {
-    "name": "bannnergrab_product_cpe",
+    "name": "bannergrab_product_cpe",
     "description": "Discovered product cpe",
     "include_in_report": false,
     "show_in_frontend": false,
@@ -2675,8 +2675,8 @@
   "model": "scanners.scantype",
   "pk": 153,
   "fields": {
-    "name": "bannnergrab_product_info",
-    "description": "Discovered product nifo",
+    "name": "bannergrab_product_info",
+    "description": "Discovered product info",
     "include_in_report": false,
     "show_in_frontend": false,
     "display_order": 53,

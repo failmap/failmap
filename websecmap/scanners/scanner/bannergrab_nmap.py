@@ -19,7 +19,7 @@ from celery import Task, group
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.scanners import init_dict
 from websecmap.scanners.scanner.__init__ import (
-    allowed_to_scan,
+    allowed_to_scan, unique_and_random,
 )
 import nmap
 import random
@@ -62,8 +62,7 @@ def get_all_ip_addresses(is_v4=True):
 def get_ips_to_be_scanned(is_v4) -> List[str]:
     ips = get_all_ip_addresses(is_v4)
     # randomize the order to distribute load of scans
-    random.shuffle(ips)
-    return ips
+    return unique_and_random(ips)
 
 
 def get_ports_to_be_scanned() -> str:
@@ -127,7 +126,7 @@ def grab_manually(is_v4: bool = True):
     # can be used for inspection from the command line
     ips = get_ips_to_be_scanned(is_v4)
     ports = get_ports_to_be_scanned()
-
+    log.debug(f"Going to scan {len(ips)} ips in batches of 100.")
     chunks = in_chunks(ips, 100)
     # could reuse the nm object
     for chunk in chunks:
@@ -288,40 +287,40 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
             )
 
         # only store an empty result if the information has gone.
-        if not product and endpoint_has_scans("bannnergrab_product_name", endpoint.id) or product:
+        if not product and endpoint_has_scans("bannergrab_product_name", endpoint.id) or product:
             rating = "product_name_neutral" if product else "product_name_empty"
             store_endpoint_scan_result(
-                scan_type="bannnergrab_product_name",
+                scan_type="bannergrab_product_name",
                 endpoint_id=endpoint.id,
                 rating=rating,
                 evidence=product,
                 message=product,
             )
 
-        if not version and endpoint_has_scans("bannnergrab_product_version", endpoint.id) or version:
+        if not version and endpoint_has_scans("bannergrab_product_version", endpoint.id) or version:
             rating = "product_version_neutral" if product else "product_version_empty"
             store_endpoint_scan_result(
-                scan_type="bannnergrab_product_version",
+                scan_type="bannergrab_product_version",
                 endpoint_id=endpoint.id,
                 rating=rating,
                 evidence=version,
                 message=version,
             )
 
-        if not extrainfo and endpoint_has_scans("bannnergrab_product_info", endpoint.id) or extrainfo:
+        if not extrainfo and endpoint_has_scans("bannergrab_product_info", endpoint.id) or extrainfo:
             rating = "product_info_neutral" if product else "product_info_empty"
             store_endpoint_scan_result(
-                scan_type="bannnergrab_product_info",
+                scan_type="bannergrab_product_info",
                 endpoint_id=endpoint.id,
                 rating=rating,
                 evidence=extrainfo,
                 message=extrainfo,
             )
 
-        if not cpe and endpoint_has_scans("bannnergrab_product_cpe", endpoint.id) or cpe:
+        if not cpe and endpoint_has_scans("bannergrab_product_cpe", endpoint.id) or cpe:
             rating = "product_cpe_neutral" if product else "product_cpe_empty"
             store_endpoint_scan_result(
-                scan_type="bannnergrab_product_cpe", endpoint_id=endpoint.id, rating=rating, evidence=cpe, message=cpe
+                scan_type="bannergrab_product_cpe", endpoint_id=endpoint.id, rating=rating, evidence=cpe, message=cpe
             )
 
 
@@ -333,18 +332,18 @@ def clean_all_other_ports(host, do_not_clean_these_ports):
 
     scan_types = [
         "bannergrab",
-        "bannnergrab_product_name",
-        "bannnergrab_product_version",
-        "bannnergrab_product_info",
-        "bannnergrab_product_cpe",
+        "bannergrab_product_name",
+        "bannergrab_product_version",
+        "bannergrab_product_info",
+        "bannergrab_product_cpe",
     ]
 
     scan_type_to_empty = {
         "bannergrab": SERVICE_IDENTITY_NO_BANNER_FOUND,
-        "bannnergrab_product_name": "product_name_empty",
-        "bannnergrab_product_version": "product_version_empty",
-        "bannnergrab_product_info": "product_info_empty",
-        "bannnergrab_product_cpe": "product_cpe_empty",
+        "bannergrab_product_name": "product_name_empty",
+        "bannergrab_product_version": "product_version_empty",
+        "bannergrab_product_info": "product_info_empty",
+        "bannergrab_product_cpe": "product_cpe_empty",
     }
 
     for url in get_urls_by_ip(host):
