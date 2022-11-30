@@ -14519,7 +14519,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "bannnergrab_product_name",
+    "scan_type": "bannergrab_product_name",
     "conclusion": "product_name_neutral",
     "explanation": "product_name_neutral",
     "annotation": ""
@@ -14537,7 +14537,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "bannnergrab_product_name",
+    "scan_type": "bannergrab_product_name",
     "conclusion": "product_name_empty",
     "explanation": "product_name_empty",
     "annotation": ""
@@ -14555,7 +14555,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "bannnergrab_product_version",
+    "scan_type": "bannergrab_product_version",
     "conclusion": "product_version_neutral",
     "explanation": "product_version_neutral",
     "annotation": ""
@@ -14573,7 +14573,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "bannnergrab_product_version",
+    "scan_type": "bannergrab_product_version",
     "conclusion": "product_version_empty",
     "explanation": "product_version_empty",
     "annotation": ""
@@ -14591,7 +14591,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "bannnergrab_product_info",
+    "scan_type": "bannergrab_product_info",
     "conclusion": "product_info_neutral",
     "explanation": "product_info_neutral",
     "annotation": ""
@@ -14609,7 +14609,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "bannnergrab_product_info",
+    "scan_type": "bannergrab_product_info",
     "conclusion": "product_info_empty",
     "explanation": "product_info_empty",
     "annotation": ""
@@ -14627,7 +14627,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "bannnergrab_product_cpe",
+    "scan_type": "bannergrab_product_cpe",
     "conclusion": "product_cpe_neutral",
     "explanation": "product_cpe_neutral",
     "annotation": ""
@@ -14645,7 +14645,7 @@
     "not_applicable": 0,
     "not_testable": 0,
     "error_in_test": 0,
-    "scan_type": "bannnergrab_product_cpe",
+    "scan_type": "bannergrab_product_cpe",
     "conclusion": "product_cpe_empty",
     "explanation": "product_cpe_empty",
     "annotation": ""
