@@ -49,3 +49,5 @@ venv
 unbound
 websecmap/checks
 exportOO.xml
+.devenv*
+devenv.local.nix

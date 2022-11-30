@@ -50,9 +50,9 @@ Above screenshot: the administrative interface allows direct database access as 
 
 ## Installation and training videos
 
-This repository contains the front end application for Web Security Map: the map, scanners and administrative web interface. 
+This repository contains the front end application for Web Security Map: the map, scanners and administrative web interface.
 
-To run a full installation of this software, please use the below videos. 
+To run a full installation of this software, please use the below videos.
 
 For time indexes on these videos, visit: https://monitoryourgovernment.org/
 
@@ -84,40 +84,60 @@ Please follow these instructions to setup a development environment for Web Secu
 
 #### Install OS specific dependencies
 
-**macOS** via `brew`
+The project uses Nix and Devenv.sh to bootstrap an isolated and reproducable development environment. Please follow the instructions on https://devenv.sh/getting-started/ to install Nix and Devenv.sh. Below is a summary of setup commands for common OS environments:
+
+
+- **macOS**
 
 ```bash
-brew install git python3 direnv docker shellcheck mysql
+sh <(curl -L https://nixos.org/nix/install)
+nix-env -iA cachix -f https://cachix.org/api/v1/install
+cachix use devenv
+nix-env -if https://github.com/cachix/devenv/tarball/v0.4
 ```
 
-**Debian Linux** via `apt`
+- **Linux**
 
 ```bash
-apt-get install -y git python3 direnv docker.io shellcheck libmariadb-dev
+sh <(curl -L https://nixos.org/nix/install) --daemon
+nix-env -iA cachix -f https://cachix.org/api/v1/install
+cachix use devenv
+nix-env -if https://github.com/cachix/devenv/tarball/v0.4
 ```
 
-**Redhat/CentOS Linux** via `yum`
+- **Windows (WSL2)**
 
 ```bash
-yum install -y epel-release
-yum install -y git python3 direnv docker ShellCheck mysql-devel
+sh <(curl -L https://nixos.org/nix/install) --no-daemon
+nix-env -iA cachix -f https://cachix.org/api/v1/install
+cachix use devenv
+nix-env -if https://github.com/cachix/devenv/tarball/v0.4
 ```
 
-Or download and install each package separately:
+#### Cloning source
 
-- [make](https://www.gnu.org/software/make/) (required, pre-installed on most systems)
-- [git](https://git-scm.com/downloads) (required, download and install)
-- [python3](https://www.python.org/downloads/) (required, download and install, 3.6 or higher)
-- [direnv](https://direnv.net/) (recommended, download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
-- [Docker](https://docs.docker.com/engine/installation/) (recommended, follow instructions to install.)
-- [ShellCheck](https://github.com/koalaman/shellcheck#installing) (recommended, follow instructions to install
-
-#### Generic install steps
-
-In a directory of your choosing, download the software and enter the directory:
+In a directory of your choosing, download the project source and enter the directory:
 
 ```bash
 git clone --recursive https://gitlab.com/internet-cleanup-foundation/web-security-map/ && cd web-security-map/
+```
+
+#### Direnv (optional, recommended)
+
+To automatically enter the development shell when entering the project directory install and enable Direnv: https://direnv.net
+
+Allow this project's `.envrc` file to be automatically loaded when entering the project directory:
+
+```bash
+direnv allow
+```
+
+#### Building, testing and running the project
+
+Active the Devenv shell (not needed with Direnv):
+
+```bash
+devenv shell
 ```
 
 Running `make` once to create a development Virtualenv and setup the App and its dependencies. Running `make` without arguments by default also runs basic checks and tests to verify project code quality.
@@ -129,12 +149,11 @@ make
 After completing successfully Web Security Map development server is available to run:
 
 ```bash
-make run
+devenv up
 ```
 
 Now visit the [map website](http://127.0.0.1:8000/) and/or the
 [admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
-
 
 To fill up the empty installation with some data, use the data included with the following commands:
 
