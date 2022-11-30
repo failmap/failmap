@@ -11,7 +11,7 @@ import pytest
 log = logging.getLogger(__name__)
 
 TIMEOUT = timedelta(seconds=int(os.environ.get("SYSTEM_TEST_TIMEOUT", 60)))
-INTERVAL = timedelta(seconds=5)
+INTERVAL = timedelta(seconds=1)
 
 
 @pytest.fixture(scope="session")
@@ -22,14 +22,14 @@ def websecmap(docker_ip, docker_services):
 
         def get_admin(self, path):
             with urllib.request.urlopen(self.admin_url + path) as f:
-                return f, f.read().decode("utf-8")
+                return f, f.read()
 
         def get_frontend(self, path, return_errors=False):
             try:
                 with urllib.request.urlopen(self.frontend_url + path) as f:
-                    return f, f.read().decode("utf-8")
+                    return f, f.read()
             except urllib.error.HTTPError as e:
-                return e
+                return e, None
 
     return Websecmap()
 
@@ -57,11 +57,11 @@ def docker_services(pytestconfig, docker_ip):
     docker_compose_project_name = "pytest{}".format(os.getpid())
 
     def docker_compose(args, background=False):
-        command = 'docker-compose --no-ansi -f "{}" -p "{}" {}'.format(
+        command = 'docker-compose --no-ansi --file "{}" --project-name "{}" {}'.format(
             docker_compose_file, docker_compose_project_name, args
         )
         log.info("Running command: %s", command)
-        env = dict(os.environ, ALLOWED_HOSTS=docker_ip)
+        env = dict(os.environ, ALLOWED_HOSTS=",".join([docker_ip, "localhost"]))
         if background:
             return subprocess.Popen(command, env=env, shell=True)
         else:
@@ -76,7 +76,7 @@ def docker_services(pytestconfig, docker_ip):
     for _ in range(int(TIMEOUT.seconds / INTERVAL.seconds)):
         try:
             # verify admin is http responsive and stop waiting
-            urllib.request.urlopen(url)
+            urllib.request.urlopen(url, timeout=INTERVAL.seconds)
             print("admin instance is ready for testing")
             break
         except BaseException as e:

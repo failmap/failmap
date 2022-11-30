@@ -1,98 +1,81 @@
-# base build on small footprint image
-FROM alpine:3.12 as build
+# create Python virtualenv with Python dependencies
+FROM python:3.8 AS virtualenv
 
-RUN apk --no-cache add \
-  build-base \
-  zlib-dev \
-  jpeg-dev \
-  libffi-dev \
-  libressl-dev \
-  mariadb-dev \
-  postgresql-dev \
-  linux-headers \
-  # build dependencies for dnscheck perl module
+RUN python3 -mvenv /pyenv
+ENV VIRTUAL_ENV = /pyenv
+ENV PATH=/pyenv/bin:$PATH
+ENV CRYPTOGRAPHY_DONT_BUILD_RUST 1
+
+COPY requirements-deploy.txt /source/
+RUN --mount=type=cache,target=/root/.cache pip install --quiet --requirement /source/requirements-deploy.txt
+COPY requirements.txt /source/
+RUN --mount=type=cache,target=/root/.cache pip install --quiet --requirement /source/requirements.txt
+
+# copy dependencies that are not in pypi or otherwise not available with ease
+COPY ./vendor/ /source/vendor/
+
+# copy and install websecmap source last, as this changes most often, this improves docker cache
+COPY pyproject.toml README.md /source/
+COPY tools/ /source/tools/
+COPY websecmap/ /source/websecmap/
+WORKDIR /source
+
+RUN pip install --editable . --no-deps
+
+FROM python:3.8 AS dnscheck
+
+RUN apt-get update && apt-get install -yqq \
   perl \
-  perl-utils \
-  perl-file-sharedir-install \
-  make \
-  # required to install osmtogeojson module
-  nodejs \
-  nodejs-npm \
-  libxml2-dev \
-  libxslt-dev \
-  python3-dev \
-  git
+  libfile-sharedir-install-perl
 
 # install dnscheck
 COPY vendor/dnscheck /vendor/dnscheck
 COPY tools/docker-install-dnscheck.sh /tools/docker-install-dnscheck.sh
 RUN tools/docker-install-dnscheck.sh
+COPY tools/dnssec.pl /tools/dnssec.pl
+
+FROM python:3.8 AS osmtogeojson
+
+RUN apt-get update && apt-get install -yqq \
+  nodejs \
+  npm
 
 # install osmtogeojson
 RUN npm install --global osmtogeojson
 
-# this warning most often just leads to false positives
-ENV PIP_DISABLE_PIP_VERSION_CHECK 1
-RUN python3 -mvenv /pyenv
-ENV VIRTUAL_ENV /pyenv
-ENV PATH $VIRTUAL_ENV/bin:$PATH
-ENV CRYPTOGRAPHY_DONT_BUILD_RUST 1
-
-COPY requirements.txt requirements-deploy.txt requirements.in requirements-deploy.in /source/
-RUN pip install --upgrade pip
-RUN pip install -qr /source/requirements.txt -r /source/requirements-deploy.txt
-
 # restart with a clean image
-FROM alpine:3.12
+FROM python:3.8 AS release
 
 USER root
 
-# mailcap includes mimetypes required by uwsgi
-RUN apk --no-cache add \
-  zlib\
-  libjpeg \
-  libffi \
-  libressl \
-  libxml2 \
-  libxslt \
-  mariadb-connector-c \
-  postgresql-libs \
-  postgresql-client \
-  sqlite \
-  mailcap \
-  python3 \
-  # runtime dependencies for dnscheck perl module
-  perl \
-  perl-config-any \
-  perl-date-format \
-  perl-dbi \
-  perl-file-sharedir \
-  perl-net-dns \
-  perl-net-dns-sec \
-  perl-net-ip \
-  perl-config-any \
-  perl-dbi \
-  perl-file-sharedir \
-  perl-list-moreutils \
-  perl-module-pluggable \
-  perl-net-dns \
-  perl-net-dns-sec \
-  perl-net-ip \
-  perl-yaml \
+RUN apt-get update && apt-get install -yqq \
   nmap \
-  nmap-scripts \
-  # runtime dependencies for osmtogeojson
+  # osmtogeojson dependencies
   nodejs \
-  nodejs-npm
-  # cryptography / cffi
-  # https://cryptography.io/en/latest/installation/#building-cryptography-on-linux
-  # todo: remove packages after install?
-  # gcc \
-  # musl-dev \
-  # python3-dev \
-  # libffi-dev \
-  # libressl-dev
-  # missing mysql? mariadb-dev \
+  # dnscheck dependencies, from engine/debian/control file
+  perl \
+  libcrypt-openssl-random-perl \
+  libdbd-mysql-perl \
+  libdbi-perl \
+  libdigest-bubblebabble-perl \
+  libdigest-sha-perl \
+  libio-socket-inet6-perl \
+  libmail-rfc822-address-perl \
+  libmime-base32-perl \
+  libmime-lite-perl \
+  libnet-dns-perl \
+  libnet-dns-sec-perl \
+  libnet-ip-perl \
+  libsocket6-perl \
+  libtext-template-perl \
+  libtimedate-perl \
+  libyaml-libyaml-perl \
+  libconfig-any-perl \
+  libfile-sharedir-perl \
+  liblist-moreutils-perl \
+  libyaml-perl \
+  libjson-xs-perl \
+  && rm -rf /var/lib/apt/lists/*
 
 ENV VIRTUAL_ENV = /pyenv
 ENV PATH=/pyenv/bin:$PATH
@@ -103,31 +86,20 @@ RUN ln -s /pyenv/bin/uwsgi /usr/local/bin/
 RUN ln -s /pyenv/bin/celery /usr/local/bin/
 RUN ln -s /pyenv/bin/dnssec.pl /usr/local/bin/
 
-# install build application
-COPY --from=build /pyenv /pyenv
-COPY --from=build /source /source
-
 # copy artifacts from dnscheck build
-COPY --from=build /usr/local/share/perl5 /usr/local/share/perl5
-COPY --from=build /usr/local/bin/dnscheck /usr/local/bin/dnscheck
+COPY --from=dnscheck /usr/local/share/perl /usr/local/share/perl
 
 # copy artifacts from osmtogeojson install
-COPY --from=build /usr/lib/node_modules/osmtogeojson /usr/lib/node_modules/osmtogeojson
-RUN ln -s /usr/lib/node_modules/osmtogeojson/osmtogeojson /usr/local/bin/
-
+COPY --from=osmtogeojson /usr/local/lib/node_modules/osmtogeojson /usr/local/lib/node_modules/osmtogeojson
+RUN ln -s /usr/local/lib/node_modules/osmtogeojson/osmtogeojson /usr/local/bin/
 COPY /tools/dnssec.pl /usr/local/bin/dnssec.pl
+
+# install the Python App
+COPY --from=virtualenv /pyenv /pyenv
+COPY --from=virtualenv /source /source
 
 # copy dependencies that are not in pypi or otherwise not available with ease
 COPY ./vendor/ /source/vendor/
-
-# copy and install websecmap source last, as this changes most often, this improves docker cache
-COPY setup.py README.md /source/
-COPY tools/ /source/tools/
-COPY websecmap/ /source/websecmap/
-WORKDIR /source
-
-# "requirements already satisfied" :)
-RUN pip install -e .
 
 WORKDIR /
 
@@ -147,6 +119,14 @@ RUN /pyenv/bin/websecmap collectstatic
 
 EXPOSE 8000
 
+HEALTHCHECK CMD curl --silent --fail http://localhost:8000/ || exit 1
+
 ENTRYPOINT [ "/usr/local/bin/websecmap" ]
 
 CMD [ "help" ]
+
+FROM release AS selftest
+
+RUN websecmap
+RUN dnssec.pl 2>&1 | grep usage:
+RUN osmtogeojson /source/websecmap/map/tests/openstreetmap/AL_county.osm

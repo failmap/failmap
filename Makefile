@@ -16,7 +16,7 @@ VIRTUAL_ENV ?= ${CACHEDIR}/virtualenvs/$(notdir ${PWD})
 
 # variables for environment
 bin = ${VIRTUAL_ENV}/bin
-env = env PATH=${bin}:$$PATH
+env = PATH=${bin}:$$PATH
 
 # shortcuts for common used binaries
 python = ${bin}/python
@@ -150,8 +150,9 @@ test_integration: ${app}
 		${env} pytest -vv -ra -k 'integration_celery or integration_scanners' ${testargs}
 
 test_system:
+	@if [ -z "$IMAGE" ];then echo "Must provide Docker image variable IMAGE, to test against!"; exit 1; fi
 	# run system tests
-	${env} pytest -vv --setup-show tests/system ${testargs}
+	pytest --verbose tests/system ${testargs}
 
 test_datasets: ${app}
 	${env} /bin/sh -ec "find websecmap -path '*/fixtures/*.json' -print0 | \

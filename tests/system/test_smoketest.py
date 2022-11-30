@@ -5,21 +5,32 @@ def test_admin_frontpage(websecmap):
     """Admin frontpage should be available."""
     response, data = websecmap.get_admin("/")
     assert response.status == 200
-    assert "MSPAIN" in data, "Page did not render complete!"
+    assert "MSPAIN" in data.decode("utf-8"), "Page did not render complete!"
 
 
 def test_admin_login_page(websecmap):
     """Admin login should be available."""
-    assert websecmap.get_admin("/admin/login/?next=/admin/")[0].status == 200
+    response, data = websecmap.get_admin("/admin/login/?next=/admin/")
+    assert response.status == 200
 
 
 def test_frontend(websecmap):
     """Frontend frontpage should be available."""
     response, data = websecmap.get_frontend("/")
     assert response.status == 200
-    assert "MSPAIN" in data, "Page did not render complete!"
+    assert "MSPAIN" in data.decode("utf-8"), "Page did not render complete!"
+
+
+def test_static_content(websecmap):
+    """Static files should be returned."""
+    response, data = websecmap.get_admin("/static/images/fail_logo.png")
+    assert response.status == 200
+
+    response, data = websecmap.get_frontend("/static/images/fail_logo.png")
+    assert response.status == 200
 
 
 def test_frontend_no_admin_url(websecmap):
     """Frontend frontpage should not serve admin urls."""
-    assert websecmap.get_frontend("/admin/login/?next=/admin/").code == 404
+    response, data = websecmap.get_frontend("/admin/login/?next=/admin/")
+    assert response.code == 404
