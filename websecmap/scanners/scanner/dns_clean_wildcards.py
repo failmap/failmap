@@ -4,6 +4,11 @@ Wildcard domains and services result in non-trusted certificates and a lot of un
 This feature retrieves all wildcard domains from the database and will attempt to discover if the wildcard
 site content matches a domain of that address. If that's the case, the url is marked as dead due to it going
 to the same stuff as a regular wildcard page.
+
+select computed_domain, computed_suffix, count(*) amount from url where is_dead = 0 group by computed_domain,
+    computed_suffix  order by amount desc LIMIT 100;
+
+    websecmap scan dns_clean_wildcards --url=... -v3
 """
 import logging
 import random

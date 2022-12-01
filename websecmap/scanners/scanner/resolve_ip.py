@@ -68,7 +68,7 @@ def refresh_ips():
 
 
 def clean_ips(url: Url, is_v4: bool):
-    url_ips = UrlIp.objects.all().filter(url=url, is_v4=is_v4)
+    url_ips = UrlIp.objects.all().filter(url=url, is_v4=is_v4, is_unused=False)
     for url_ip in url_ips:
         unuse_url_ip(url_ip, "no ip found anymore")
 

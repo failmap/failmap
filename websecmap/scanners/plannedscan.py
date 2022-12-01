@@ -43,7 +43,7 @@ def store_progress():
     # Also send it to statsd for nicer metrics:
     for row in progress:
         activity = Activity(row["activity"]).label
-        scanner = metadata["scanners_by_id"].get(row["scanner"], {"name": "unknown"})["name"]
+        scanner = metadata["scanners_by_id"].get(row["scanner"], {"python_name": "unknown"})["python_name"]
         state = State(row["state"]).label
 
         statsd.gauge("scan_progress", row["amount"], tags={"state": state, "scanner": scanner, "activity": activity})
