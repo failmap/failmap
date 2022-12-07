@@ -1050,6 +1050,36 @@ CONSTANCE_CONFIG = {
         " stuff that should only be accessible on the local network (via vpn for example)",
         str,
     ),
+    "SHOW_SNOW": (
+        False,
+        "To show snow on the website, useful for cold days and christmas :)",
+        bool,
+    ),
+    "SOCIALS_SHOW_REPORT": (
+        False,
+        "Show a social media sharing box on the report page with report information.",
+        bool,
+    ),
+    "SOCIALS_SHOW_MAP": (
+        False,
+        "Show a social media sharing box on the report page with report information.",
+        bool,
+    ),
+    "SOCIALS_SHOW_CHARTS": (
+        False,
+        "Show a social media sharing box on the report page with report information.",
+        bool,
+    ),
+    "SOCIALS_SHOW_STATISTICS": (
+        False,
+        "Show a social media sharing box on the report page with report information.",
+        bool,
+    ),
+    "SOCIALS_SHOW_MULTI_MAP": (
+        False,
+        "Show a social media sharing box on the report page with report information.",
+        bool,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1098,6 +1128,16 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "RESPONSIBLE_ORGANIZATION_LINKEDIN",
                 "RESPONSIBLE_ORGANIZATION_WHATSAPP",
                 "RESPONSIBLE_ORGANIZATION_PHONE",
+            ),
+        ),
+        (
+            "Social Media Sharing",
+            (
+                "SOCIALS_SHOW_REPORT",
+                "SOCIALS_SHOW_MAP",
+                "SOCIALS_SHOW_CHARTS",
+                "SOCIALS_SHOW_STATISTICS",
+                "SOCIALS_SHOW_MULTI_MAP",
             ),
         ),
         (
@@ -1235,6 +1275,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "RELEVANT_FOR_UI_MEDIUM",
                 "RELEVANT_FOR_UI_LOW",
                 "RELEVANT_FOR_UI_GOOD",
+                "SHOW_SNOW",
             ),
         ),
         ("security.txt", ("SECURITY_TXT_IS_REDIRECTED", "SECURITY_TXT_REDIRECT_URL", "SECURITY_TXT_CONTENT")),
