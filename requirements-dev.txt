@@ -24,7 +24,7 @@ babel==2.11.0
     #   sphinx
 backcall==0.2.0
     # via ipython
-bandit==1.7.0
+bandit==1.7.4
     # via -r requirements-dev.in
 black==22.10.0
     # via -r requirements-dev.in
@@ -110,7 +110,7 @@ markupsafe==2.0.1
     # via jinja2
 matplotlib-inline==0.1.2
     # via ipython
-mccabe==0.6.1
+mccabe==0.7.0
     # via
     #   pylama
     #   pylint
@@ -147,13 +147,13 @@ py==1.11.0
     #   -c requirements.txt
     #   -r requirements-dev.in
     #   pytest
-pycodestyle==2.7.0
+pycodestyle==2.10.0
     # via pylama
 pydocstyle==6.1.1
     # via pylama
 pydotplus==2.0.2
     # via -r requirements-dev.in
-pyflakes==2.3.1
+pyflakes==3.0.1
     # via
     #   autoflake
     #   pylama
@@ -161,7 +161,7 @@ pygments==2.9.0
     # via
     #   ipython
     #   sphinx
-pylama==7.7.1
+pylama==8.4.1
     # via -r requirements-dev.in
 pylint==2.14.5
     # via
@@ -223,7 +223,6 @@ responses==0.13.3
 six==1.16.0
     # via
     #   -c requirements.txt
-    #   bandit
     #   livereload
     #   python-dateutil
     #   requests-mock

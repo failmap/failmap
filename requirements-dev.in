@@ -13,7 +13,8 @@
 
 black
 autoflake
-pylama
+# min version to support pyproject.toml
+pylama>=8.4.0
 coverage
 pytest
 pytest-cov
@@ -28,7 +29,8 @@ django-debug-toolbar
 django-debug-toolbar-request-history
 pytest-mock
 requests_mock
-bandit
+# min version to support pyproject.toml
+bandit>=1.7.1
 pylint
 pylint-django
 

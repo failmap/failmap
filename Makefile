@@ -16,7 +16,6 @@ VIRTUAL_ENV ?= ${CACHEDIR}/virtualenvs/$(notdir ${PWD})
 
 # variables for environment
 bin = ${VIRTUAL_ENV}/bin
-env = PATH=${bin}:$$PATH
 
 # shortcuts for common used binaries
 python = ${bin}/python
@@ -32,7 +31,7 @@ app = ${bin}/${app_name}
 
 ifeq (${MAKECMDGOALS},)
 $(info Virtualenv path: ${VIRTUAL_ENV})
-$(info Run App: ${env} ${app})
+$(info Run App: websecmap)
 $(info )
 $(info Run `make help` for available commands or use tab-completion.)
 $(info )
@@ -63,80 +62,71 @@ setup: ${app}	## setup development environment and application
 # install application and all its (python) dependencies
 ${app}: ${VIRTUAL_ENV}/.requirements.installed | ${pip}
 	# install project and its dependencies
-	${python} setup.py develop --no-deps
+	${pip} install --no-deps --editable .
 	@test -f $@ && touch $@  # update timestamp, do not create empty file
 
 test: .make.test	## run test suite
 .make.test: ${pysrc} ${app}
 	# run testsuite
-	# #7040: -k no longer matches against the names of the directories outside the test session root.
-	# #7122: Expressions given to the -m and -k options are no longer evaluated using Python’s eval().
-	# The format supports or, and, not, parenthesis and general identifiers to match against.
-	# Python constants, keywords or other operators are no longer evaluated differently.
-	DJANGO_SETTINGS_MODULE=${app_name}.settings ${env} coverage run --include '${app_name}/*' --omit '*migrations*' \
-		-m pytest -vv -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
-	# generate coverage
-	${env} coverage report
-	# and pretty html
-	${env} coverage html
+	coverage run \
+		-m pytest --verbose -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
+    # generate coverage report
+	coverage report | grep TOTAL
+	# generate pretty html coverage `htmlcov/index.html`
+	coverage html
 	# ensure no model updates are commited without migrations
-	${env} ${app} makemigrations --check
+	${app} makemigrations --check
 	@touch $@  # update timestamp
 
 check: .make.check.py .make.check.sh  ## code quality checks
 .make.check.py: ${pysrc} ${app}
 	# check code quality
-	${env} pylama ${pysrcdirs} --skip "**/migrations/*"
+	pylama .
 	# check formatting
-	${env} black --line-length 120 --check ${pysrcdirs}
+	black --check .
 	@touch $@  # update timestamp
 
 .make.check.sh: ${shsrc}
 	# shell script checks (if installed)
-	if command -v shellcheck &>/dev/null;then ${env} shellcheck --version; ${env} shellcheck ${shsrc}; fi
+	if command -v shellcheck &>/dev/null;then shellcheck --version; shellcheck ${shsrc}; fi
 	@touch $@  # update timestamp
 
 autofix fix: .make.fix  ## automatic fix of trivial code quality issues
 .make.fix: ${pysrc} ${app}
 	# remove unused imports
-	${env} autoflake -ri --remove-all-unused-imports ${pysrcdirs}
+	autoflake .
 	# autoformat code
-	# -q is used because a few files cannot be formatted with black, and will raise errors
-	${env} black --line-length 120 -q ${pysrcdirs}
-	# replaced by black: fix trivial pep8 style issues
-	# replaced by black: ${env} autopep8 -ri ${pysrcdirs}
-	# replaced by black: sort imports
-	# replaced by black: ${env} isort -rc ${pysrcdirs}
+	black .
 	# do a check after autofixing to show remaining problems
 	${MAKE} check
 	@touch $@  # update timestamp
 
 run: ${app}  ## run complete application stack (frontend, worker, broker)
 	# start server (this can take a while)
-	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} devserver
+	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${app} devserver
 
-audit:
-	${python} -m bandit -c bandit.yaml -r websecmap
+audit: ${app}
+	${python} -m bandit --configfile pyproject.toml --recursive websecmap
 
 run_no_backend: ${app}  ## run application stack without broker/worker
 	# start server (this can take a while)
-	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} devserver --no-backend
+	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${app} devserver --no-backend
 
 run-frontend: ${app}  ## only run frontend component
-	DEBUG=1 DJANGO_SETTINGS_MODULE=${app_name}.settings NETWORK_SUPPORTS_IPV6=1 ${env} ${app} runserver
+	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${app} runserver
 
 run-nonlocal-frontend: ${app}  ## only run frontend component
-	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} runserver 0.0.0.0:8000
+	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${app} runserver 0.0.0.0:8000
 
 app: ${app}  ## perform arbitrary app commands
     # make app cmd="help"
     # make app cmd="report -y municipality"
     # make app cmd="makemigrations"
     # make app cmd="migrate"
-	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} ${cmd}
+	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${app} ${cmd}
 
 run-worker: ${app}  ## only run worker component
-	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} celery worker -ldebug
+	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${app} celery worker -ldebug
 
 run-broker:  ## only run broker
 	docker run --rm --name=redis -p 6379:6379 redis
@@ -144,13 +134,13 @@ run-broker:  ## only run broker
 testcase: ${app}
 	# run specific testcase
 	# example: make testcase case=test_openstreetmaps
-	DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 ${env} pytest -W ignore::django.utils.deprecation.RemovedInDjango40Warning -vvv --log-cli-level=10 -k ${case}
+	DB_NAME=test.sqlite3 pytest -W ignore::django.utils.deprecation.RemovedInDjango40Warning -vvv --log-cli-level=10 -k ${case}
 
 test_integration: ${app}
 	# run integration tests
 	# see docs at make test why the -k option is so explicit (no globbing anymore).
-	${env} DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 \
-		${env} pytest -vv -ra -k 'integration_celery or integration_scanners' ${testargs}
+	DB_NAME=test.sqlite3 \
+		pytest -vv -ra -k 'integration_celery or integration_scanners' ${testargs}
 
 test_system:
 	@if [ -z "$IMAGE" ];then echo "Must provide Docker image variable IMAGE, to test against!"; exit 1; fi
@@ -158,12 +148,12 @@ test_system:
 	pytest --verbose tests/system ${testargs}
 
 test_datasets: ${app}
-	${env} /bin/sh -ec "find websecmap -path '*/fixtures/*.json' -print0 | \
+	/bin/sh -ec "find websecmap -path '*/fixtures/*.json' -print0 | \
 		xargs -0n1 basename -s .yaml | uniq | \
 		xargs -n1 ${app} test_dataset"
 
 test_deterministic: | ${VIRTUAL_ENV}
-	${env} /bin/bash tools/compare_differences.sh HEAD HEAD tools/show_ratings.sh testdata
+	/bin/bash tools/compare_differences.sh HEAD HEAD tools/show_ratings.sh testdata
 
 test_mysql:
 	docker run --name mysql -d --rm -p 3306:3306 \
@@ -204,15 +194,18 @@ clean_virtualenv:  ## cleanup virtualenv and installed app/dependencies
 mrproper: clean clean_virtualenv ## thorough cleanup, also removes virtualenv
 
 ${VIRTUAL_ENV}/.requirements.installed: requirements.txt requirements-dev.txt| ${pip-sync}
-	${env} ${pip-sync} $^
+	${pip-sync} $^
 	@touch $@  # update timestamp
 
 requirements = requirements.txt requirements-dev.txt requirements-deploy.txt
 requirements: ${requirements}
 
 # perform 'pip freeze' on first class requirements in .in files.
-${requirements}: %.txt: %.in | ${pip-compile}
-	${env} ${pip-compile} ${pip_compile_args} --output-file $@ $<
+requirements.txt: requirements.in | ${pip-compile}
+	${pip-compile} ${pip_compile_args} --output-file $@ $<
+
+requirements-dev.txt: requirements-dev.in requirements.in | ${pip-compile}
+	${pip-compile} ${pip_compile_args} --output-file $@ $<
 
 pip-sync:
 	# synchronizes the .venv with the state of requirements.txt
@@ -231,14 +224,14 @@ _commit_update: requirements.txt
 ${pip-compile} ${pip-sync}: | ${pip}
 	# importlib 5 has issues with AttributeError: 'EntryPoints' object has no attribute 'get' in python 3.7
 	# the changelog says they have removed some shims.
-	${env} ${pip} install --quiet pip-tools "importlib-metadata<5"
+	${pip} install --quiet pip-tools "importlib-metadata<5"
 
 ${python} ${pip}:
 	@if ! command -v ${base_python} &>/dev/null;then \
 		echo "Python 3 is not available. Please refer to installation instructions in README.md"; \
 	fi
 	# create virtualenv
-	${env} python3 -mvenv ${VIRTUAL_ENV}
+	python3 -mvenv ${VIRTUAL_ENV}
 
 # utility
 help:           ## Show this help.
@@ -262,7 +255,7 @@ help:           ## Show this help.
 check-commit: fix test
 
 lint:  ${pysrc} ${app} ## Do basic linting
-	DJANGO_SETTINGS_MODULE=${app_name}.settings ${env} pylint ${pysrcdirs}
+	pylint ${pysrcdirs}
 
 isort:  ${pysrc} ${app}
-	${env} isort -rc ${pysrcdirs}
+	isort -rc ${pysrcdirs}
