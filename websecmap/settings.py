@@ -1062,22 +1062,22 @@ CONSTANCE_CONFIG = {
     ),
     "SOCIALS_SHOW_MAP": (
         False,
-        "Show a social media sharing box on the report page with report information.",
+        "Show a social media sharing box on the map page with map information.",
         bool,
     ),
     "SOCIALS_SHOW_CHARTS": (
         False,
-        "Show a social media sharing box on the report page with report information.",
+        "Show a social media sharing box on the charts page with chart information.",
         bool,
     ),
     "SOCIALS_SHOW_STATISTICS": (
         False,
-        "Show a social media sharing box on the report page with report information.",
+        "Show a social media sharing box on the statistics page with statistics information.",
         bool,
     ),
     "SOCIALS_SHOW_MULTI_MAP": (
         False,
-        "Show a social media sharing box on the report page with report information.",
+        "Show a social media sharing box on the multi-map page with multi-map information.",
         bool,
     ),
 }
