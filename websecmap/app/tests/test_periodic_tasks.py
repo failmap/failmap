@@ -15,7 +15,6 @@ def test_periodic_tasks(db):
     """
 
     verify_periodic_tasks_from_fixture("periodic_tasks.json")
-    verify_periodic_tasks_from_fixture("development_periodic_tasks.json")
 
 
 def verify_periodic_tasks_from_fixture(fixture):

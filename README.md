@@ -140,7 +140,7 @@ To fill up the empty installation with some data, use the data included with the
 
 ```bash
 websecmap load_dataset development_user
-websecmap load_dataset development_periodic_tasks
+websecmap load_dataset periodic_tasks
 websecmap load_dataset development_scandata
 websecmap report
 ```
