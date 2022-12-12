@@ -24,6 +24,9 @@ pip = ${bin}/pip
 pip-compile = ${bin}/pip-compile
 pip-sync = ${bin}/pip-sync
 
+# python binary used to create virtual environment
+base_python ?= python3.11
+
 # application binary
 app = ${bin}/${app_name}
 
@@ -231,7 +234,7 @@ ${pip-compile} ${pip-sync}: | ${pip}
 	${env} ${pip} install --quiet pip-tools "importlib-metadata<5"
 
 ${python} ${pip}:
-	@if ! command -v python3 &>/dev/null;then \
+	@if ! command -v ${base_python} &>/dev/null;then \
 		echo "Python 3 is not available. Please refer to installation instructions in README.md"; \
 	fi
 	# create virtualenv

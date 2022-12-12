@@ -48,3 +48,6 @@ pydotplus
 watchdog
 
 ipython
+
+# python 3.11 compat
+py>=1.11.0

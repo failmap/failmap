@@ -1,5 +1,5 @@
 # create Python virtualenv with Python dependencies
-FROM python:3.8 AS virtualenv
+FROM python:3.11 AS virtualenv
 
 RUN python3 -mvenv /pyenv
 ENV VIRTUAL_ENV = /pyenv
@@ -22,7 +22,7 @@ WORKDIR /source
 
 RUN pip install --editable . --no-deps
 
-FROM python:3.8 AS dnscheck
+FROM python:3.11 AS dnscheck
 
 RUN apt-get update && apt-get install -yqq \
   perl \
@@ -34,7 +34,7 @@ COPY tools/docker-install-dnscheck.sh /tools/docker-install-dnscheck.sh
 RUN tools/docker-install-dnscheck.sh
 COPY tools/dnssec.pl /tools/dnssec.pl
 
-FROM python:3.8 AS osmtogeojson
+FROM python:3.11 AS osmtogeojson
 
 RUN apt-get update && apt-get install -yqq \
   nodejs \
@@ -44,7 +44,7 @@ RUN apt-get update && apt-get install -yqq \
 RUN npm install --global osmtogeojson
 
 # restart with a clean image
-FROM python:3.8 AS release
+FROM python:3.11 AS release
 
 USER root
 

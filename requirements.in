@@ -31,7 +31,8 @@ django<4
 # Jet admin interface with several Django 3 fixes. Breaks the tab container + select2 lists. But it's better than
 # nothing. Jet has not been maintained, even though it's been great, and alternatives are like 20 euro a month.
 # This means we'll probably move to the (simpler) grapelli interface.
-django-3-jet == 1.0.8
+# Now updated for Django 4/Python 3.11
+django-4-jet == 1.0.9
 django-countries
 django-leaflet
 jsonfield
@@ -47,7 +48,7 @@ pytz
 # task processing framework
 django-celery-beat
 # limit to version 4 as 5 has conflicting requirements with available flower atm.
-celery[redis,gevent]<5
+celery[redis,gevent]
 flower
 celery-statsd
 
@@ -96,8 +97,7 @@ urllib3
 # needed for mapping reasons.
 simplejson
 
-# orjson is much faster, so lets use that.
-orjson<3.8
+orjson
 
 # autoexplain
 pyopenssl
@@ -168,3 +168,6 @@ pytest-is-running
 # banner grabbing
 python-masscan
 python-nmap
+
+# python 3.11 compat
+py>=1.11.0

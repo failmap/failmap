@@ -6,6 +6,11 @@
   # - template: Container-Scanning.gitlab-ci.yml
   # - template: SAST.gitlab-ci.yml
 
+variables:
+  CI_IMAGE: websecmap/ci:py311
+  DOCKER_CI_IMAGE: websecmap/ci:docker-git
+  DOCKER_SERVICE_VERSION: 20.10.16-dind
+
 stages:
   - test_build
   - staging
@@ -15,7 +20,7 @@ stages:
 test: &test_template
   stage: test_build
 
-  image: websecmap/ci:latest
+  image: $CI_IMAGE
 
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
@@ -27,7 +32,7 @@ test: &test_template
     key: "$CI_JOB_NAME"
 
   script:
-    - PATH=$HOME/.cache/virtualenvs/web-security-map/bin:$PATH make
+    - PATH=$HOME/.cache/virtualenvs/web-security-map/bin:$PATH DJANGO_SETTINGS_MODULE=websecmap.settings make
 
   retry: 1
 
@@ -111,7 +116,7 @@ integration:
     C_FORCE_ROOT: 1
 
   script:
-    - PATH=$HOME/.cache/virtualenvs/web-security-map/bin:$PATH make test_integration
+    - PATH=$HOME/.cache/virtualenvs/web-security-map/bin:$PATH DJANGO_SETTINGS_MODULE=websecmap.settings make test_integration
 
 dataset:
   <<: *test_template
@@ -137,12 +142,12 @@ build:
   stage: test_build
 
   services:
-    - docker:20.10.16-dind
+    - docker:$DOCKER_SERVICE_VERSION
 
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
 
-  image: websecmap/ci:docker-git
+  image: $DOCKER_CI_IMAGE
 
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
@@ -174,9 +179,9 @@ image_test:
     GIT_SUBMODULE_STRATEGY: recursive
 
   services:
-    - docker:20.10.16-dind
+    - docker:$DOCKER_SERVICE_VERSION
 
-  image: websecmap/ci:docker-git
+  image: $DOCKER_CI_IMAGE
 
   script:
     - python -c 'import websecmap;print(websecmap.__version__)' > version
@@ -195,9 +200,9 @@ image_test:
 test_system:
   stage: staging
 
-  image: websecmap/ci:docker-git
+  image: $DOCKER_CI_IMAGE
   services:
-    - docker:20.10.16-dind
+    - docker:$DOCKER_SERVICE_VERSION
 
   variables:
     SYSTEM_TEST_TIMEOUT: 120
@@ -218,9 +223,9 @@ test_system:
 staging:
   stage: staging
 
-  image: websecmap/ci:docker-git
+  image: $DOCKER_CI_IMAGE
   services:
-    - docker:20.10.16-dind
+    - docker:$DOCKER_SERVICE_VERSION
 
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
@@ -247,9 +252,9 @@ staging:
 production:
   stage: production
 
-  image: websecmap/ci:docker-git
+  image: $DOCKER_CI_IMAGE
   services:
-    - docker:20.10.16-dind
+    - docker:$DOCKER_SERVICE_VERSION
 
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
