@@ -147,7 +147,7 @@ build:
   image: websecmap/ci:docker-git
 
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
 
   script:
     # store current version as artifact to copy into docker container
@@ -217,7 +217,7 @@ test_system:
     IMAGE: websecmap/websecmap:build
 
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
 
   script:
     - time make test_system
@@ -233,7 +233,7 @@ staging:
   - docker:19.03.5-dind
 
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
 
   script:
     # store current version as artifact to copy into docker container
@@ -264,7 +264,7 @@ production:
   - docker:19.03.5-dind
 
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
 
   script:
     - export tag=$(git describe --exact-match --tags --abbrev=0)
