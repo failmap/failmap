@@ -1,3 +1,22 @@
+[project]
+requires-python = ">=3.11"
+dynamic = ["version"]
+name = "websecmap"
+readme = "README.md"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["websecmap"]  # alternatively: `exclude = ["additional*"]`
+namespaces = false
+
+[tool.setuptools.dynamic]
+version = {attr = "websecmap.VERSION"}
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies = {dev = {file = ["requirements-dev.txt"]},deploy = {file = ["requirements-deploy.in"]}}
+
+[project.scripts]
+websecmap = "websecmap.manage:main"
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]

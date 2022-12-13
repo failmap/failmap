@@ -154,7 +154,7 @@ build:
 
   script:
     # store current version as artifact to copy into docker container
-    - python -c 'import websecmap;print(websecmap.__version__)' > version
+    - tools/version.sh > version
     - export tag=$(cat version|tr + _)
 
     # pull potential existing image from registry built in merge request pipeline
@@ -184,7 +184,7 @@ image_test:
   image: $DOCKER_CI_IMAGE
 
   script:
-    - python -c 'import websecmap;print(websecmap.__version__)' > version
+    - tools/version.sh > version
     - export tag=$(cat version|tr + _)
 
     # build docker image to test building
@@ -212,7 +212,7 @@ test_system:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
 
   script:
-    - python -c 'import websecmap;print(websecmap.__version__)' > version
+    - tools/version.sh > version
     - export tag=$(cat version|tr + _)
 
     - IMAGE=websecmap/websecmap:$tag time make test_system
@@ -231,7 +231,7 @@ staging:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
 
   script:
-    - python -c 'import websecmap;print(websecmap.__version__)' > version
+    - tools/version.sh > version
     - export tag=$(cat version|tr + _)
 
     # here is where I would put my staging integration tests, if I had one!!!

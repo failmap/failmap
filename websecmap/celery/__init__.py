@@ -10,6 +10,7 @@ import celery_statsd
 import flower.utils.broker
 from celery import Celery, Task
 from django.conf import settings
+import websecmap.signals  # noqa
 
 from websecmap.celery.worker import QUEUES_MATCHING_ROLES
 
