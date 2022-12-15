@@ -43,10 +43,10 @@ pysrcdirs = ${app_name}/ tests/
 pysrc = $(shell find ${pysrcdirs} -name \*.py)
 shsrc = $(shell find * ! -path vendor\* -name \*.sh)
 
-.PHONY: test check setup run fix autofix clean mrproper test_integration
+.PHONY: test check check_migrations setup run fix autofix clean mrproper test_integration
 
 # default action to run
-all: check test setup
+all: setup test coverage check
 
 # setup entire dev environment
 setup: ${app}	## setup development environment and application
@@ -65,25 +65,29 @@ ${app}: ${VIRTUAL_ENV}/.requirements.installed | ${pip}
 	${pip} install --no-deps --editable .
 	@test -f $@ && touch $@  # update timestamp, do not create empty file
 
-test: .make.test	## run test suite
-.make.test: ${pysrc} ${app}
-	# run testsuite
-	coverage run \
-		-m pytest --verbose -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
-    # generate coverage report
-	coverage report | grep TOTAL
+# run tests with coverage, and generate coverage report
+coverage: enable_coverage=coverage run -m
+coverage: test
 	# generate pretty html coverage `htmlcov/index.html`
 	coverage html
-	# ensure no model updates are commited without migrations
-	${app} makemigrations --check
-	@touch $@  # update timestamp
+	# generate coverage report
+	coverage report
 
-check: .make.check.py .make.check.sh  ## code quality checks
+test: ${pysrc} ${app} ## run test suite
+	# run testsuite
+	${enable_coverage} pytest --verbose -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
+
+check: .make.check.py .make.check.migrations .make.check.sh  ## code quality checks
 .make.check.py: ${pysrc} ${app}
 	# check code quality
 	pylama .
 	# check formatting
 	black --check .
+	@touch $@  # update timestamp
+
+.make.check.migrations: ${pysrc} ${app}
+	# ensure no model updates are commited without migrations
+	${app} makemigrations --check
 	@touch $@  # update timestamp
 
 .make.check.sh: ${shsrc}

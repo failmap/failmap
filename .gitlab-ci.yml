@@ -1,10 +1,10 @@
 # Gitlabs new early alpha security features, see https://gitlab.com/help/user/application_security/index.md
 # Disabled to reduce build times.
 # include:
-  # - template: License-Scanning.gitlab-ci.yml
-  # - template: Dependency-Scanning.gitlab-ci.yml
-  # - template: Container-Scanning.gitlab-ci.yml
-  # - template: SAST.gitlab-ci.yml
+# - template: License-Scanning.gitlab-ci.yml
+# - template: Dependency-Scanning.gitlab-ci.yml
+# - template: Container-Scanning.gitlab-ci.yml
+# - template: SAST.gitlab-ci.yml
 
 variables:
   CI_IMAGE: websecmap/ci:py311
@@ -16,31 +16,48 @@ stages:
   - staging
   - production
 
-# functional testing
-test: &test_template
+.test_template: &test_template
   stage: test_build
 
   image: $CI_IMAGE
 
-  variables:
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
-    PIP_DISABLE_PIP_VERSION_CHECK: 1
   cache:
     paths:
       - ".pip-cache"
-      - "~/.cache"
-    key: "$CI_JOB_NAME"
+    key: pip-cache
+
+  before_script:
+    - export PIP_CACHE_DIR="$CI_PROJECT_DIR/.pip-cache"
+    - export PIP_DISABLE_PIP_VERSION_CHECK=1
+    - time make setup
 
   script:
-    - PATH=$HOME/.cache/virtualenvs/web-security-map/bin:$PATH DJANGO_SETTINGS_MODULE=websecmap.settings make
+    - export PATH=$HOME/.cache/virtualenvs/web-security-map/bin:$PATH
+    - export DJANGO_SETTINGS_MODULE=websecmap.settings
+    # run desired make target
+    - time make $MAKE_TARGETS
 
   retry: 1
+
+# functional testing
+test:
+  <<: *test_template
+  variables:
+    MAKE_TARGETS: test
+
+# check code quality
+check:
+  <<: *test_template
+  variables:
+    MAKE_TARGETS: check
 
 # functional testing using mysql database instead of sqlite
 test_mysql: &test_mysql_template
   <<: *test_template
+
   services:
     - mysql:5.6
+
   variables:
     # configuration for docker mysql service
     MYSQL_ROOT_PASSWORD: failmap
@@ -51,16 +68,17 @@ test_mysql: &test_mysql_template
     # so they don't need to be passed explicitly
     DJANGO_DATABASE: production
     DB_USER: root
-    # make poetry install mysql dependencies
-    poetry_args: --extras=deploy
-  retry: 1
+    # only run tests, not code quality tests, as they are not affected by database
+    MAKE_TARGETS: test
 
 # functional testing using postgres database instead of sqlite
 test_postgres: &test_postgres_template
   <<: *test_template
+
   services:
     # current version in debian jessie
     - postgres:9.5
+
   variables:
     # configuration for docker postgres service
     POSTGRES_DB: failmap
@@ -71,9 +89,8 @@ test_postgres: &test_postgres_template
     DJANGO_DATABASE: production
     DB_ENGINE: postgresql_psycopg2
     DB_HOST: postgres
-    # make poetry install postgres dependencies
-    poetry_args: --extras=deploy
-  retry: 1
+    # only run tests, not code quality tests, as they are not affected by database
+    MAKE_TARGETS: test
 
 # Disabled due to build failures on a weird error:
 # ALTER TABLE `scanners_endpointgenericscan` ADD COLUMN `evidence` varchar(9001) DEFAULT '0' NOT NULL
@@ -98,8 +115,6 @@ test_postgres: &test_postgres_template
 #     DJANGO_DATABASE: production
 #     DB_HOST: mariadb
 #     DB_USER: root
-#     # make poetry install mysql dependencies
-#     poetry_args: --extras=deploy
 #   retry: 1
 
 # integration tests
@@ -114,93 +129,106 @@ integration:
     BROKER: redis://redis:6379/0
     # required to run celery worker under docker 'root' user
     C_FORCE_ROOT: 1
-
-  script:
-    - PATH=$HOME/.cache/virtualenvs/web-security-map/bin:$PATH DJANGO_SETTINGS_MODULE=websecmap.settings make test_integration
+    MAKE_TARGETS: test_integration
 
 dataset:
   <<: *test_template
-  script:
-    - make test_datasets
+  variables:
+    MAKE_TARGETS: test_datasets
 
 dataset_mysql:
   <<: *test_mysql_template
-  script:
-    - make test_datasets
+  variables:
+    MAKE_TARGETS: test_datasets
   # run long tests only on master
   only: [master]
 
 dataset_postgres:
   <<: *test_postgres_template
-  script:
-    - make test_datasets
+  variables:
+    MAKE_TARGETS: test_datasets
   # run long tests only on master
   only: [master]
+
+# test building image & run image smoketest
+image_test:
+  stage: test_build
+
+  image: $DOCKER_CI_IMAGE
+
+  services:
+    - docker:$DOCKER_SERVICE_VERSION
+
+  variables:
+    SYSTEM_TEST_TIMEOUT: "120"
+    GIT_SUBMODULE_STRATEGY: recursive
+
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+
+  script:
+    - tools/version.sh > version
+    - tag=$(cat version|tr + _)
+
+    - IMAGE=$CI_REGISTRY/internet-cleanup-foundation/web-security-map:$tag
+    # push additional image keyed on the merge request ID, so a next build in this merge request can use cache
+    - MR_CACHE_IMAGE=$CI_REGISTRY/internet-cleanup-foundation/web-security-map:mr-${CI_MERGE_REQUEST_IID}
+    # pull cache from the last build 'production' version
+    - MASTER_CACHE_IMAGE=$CI_REGISTRY/internet-cleanup-foundation/web-security-map:latest
+
+    # already pull external images for test_system while building app image
+    - IMAGE=$IMAGE docker-compose --file tests/docker-compose.yml pull --quiet broker database &
+
+    # build docker image to test building, using cache from previous builds, creating new cache metadata in image and pushing image to cache
+    - DOCKER_BUILDKIT=1 time docker buildx build --cache-from $IMAGE --cache-from $MR_CACHE_IMAGE --cache-from $MASTER_CACHE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --target release --tag $IMAGE --tag $MR_CACHE_IMAGE --push .
+
+    # run system tests against image
+    - IMAGE=$IMAGE time make test_system
+
+  # run on merge request to determine if build will not break on master
+  except: [master]
+  retry: 1
 
 # create distributable release
 build:
   stage: test_build
+
+  image: $DOCKER_CI_IMAGE
 
   services:
     - docker:$DOCKER_SERVICE_VERSION
 
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
-
-  image: $DOCKER_CI_IMAGE
+    CACHE_IMAGE: $CI_REGISTRY/internet-cleanup-foundation/web-security-map:latest
 
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
+    - echo "$DOCKER_REGISTRY_PASSWORD" | docker login --username "$DOCKER_REGISTRY_USER" --password-stdin
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
   script:
     # store current version as artifact to copy into docker container
     - tools/version.sh > version
-    - export tag=$(cat version|tr + _)
+    - tag=$(cat version|tr + _)
 
-    # pull potential existing image from registry built in merge request pipeline
-    - docker pull websecmap/websecmap:$tag || exit 0
+    - IMAGE=websecmap/websecmap:$tag
+    - CACHE_IMAGE=$CI_REGISTRY/internet-cleanup-foundation/web-security-map:$tag
+    - MASTER_CACHE_IMAGE=$CI_REGISTRY/internet-cleanup-foundation/web-security-map:latest
 
-    # build docker image and push to registry
-    - DOCKER_BUILDKIT=1 docker build --target release . --tag websecmap/websecmap:$tag
-    - docker push websecmap/websecmap:$tag
+    # build and push docker image for publishing, using cache from previous builds, creating new cache metadata in image
+    - DOCKER_BUILDKIT=1 docker buildx build --cache-from $CACHE_IMAGE --cache-from $MASTER_CACHE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --target release --tag $IMAGE --tag $CACHE_IMAGE --tag $MASTER_CACHE_IMAGE --push .
 
   only:
     - master
     - tags
   retry: 1
 
-# test building image & run image smoketest
-image_test:
-  stage: test_build
-
-  variables:
-    PIP_DISABLE_PIP_VERSION_CHECK: 1
-    SYSTEM_TEST_TIMEOUT: "120"
-    GIT_SUBMODULE_STRATEGY: recursive
-
-  services:
-    - docker:$DOCKER_SERVICE_VERSION
-
-  image: $DOCKER_CI_IMAGE
-
-  script:
-    - tools/version.sh > version
-    - export tag=$(cat version|tr + _)
-
-    # build docker image to test building
-    - DOCKER_BUILDKIT=1 time docker build --target release . --tag websecmap/websecmap:$tag
-
-    # run system tests against image
-    - IMAGE=websecmap/websecmap:$tag time make test_system
-
-  # run on merge request to determine if build will not break on master
-  except: [master]
-  retry: 1
 
 test_system:
   stage: staging
 
   image: $DOCKER_CI_IMAGE
+
   services:
     - docker:$DOCKER_SERVICE_VERSION
 
@@ -209,11 +237,11 @@ test_system:
     PIP_DISABLE_PIP_VERSION_CHECK: 1
 
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
+    - echo "$DOCKER_REGISTRY_PASSWORD" | docker login --username "$DOCKER_REGISTRY_USER" --password-stdin
 
   script:
     - tools/version.sh > version
-    - export tag=$(cat version|tr + _)
+    - tag=$(cat version|tr + _)
 
     - IMAGE=websecmap/websecmap:$tag time make test_system
 
@@ -224,49 +252,55 @@ staging:
   stage: staging
 
   image: $DOCKER_CI_IMAGE
+
   services:
     - docker:$DOCKER_SERVICE_VERSION
 
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
+    - echo "$DOCKER_REGISTRY_PASSWORD" | docker login --username "$DOCKER_REGISTRY_USER" --password-stdin
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
   script:
     - tools/version.sh > version
-    - export tag=$(cat version|tr + _)
+    - tag=$(cat version|tr + _)
 
     # here is where I would put my staging integration tests, if I had one!!!
     # # pull latest version and tag as staging
-    # - docker pull websecmap/websecmap:$tag
     # - docker tag websecmap/websecmap:$tag websecmap/websecmap:staging
     # # promote to staging after tests have succeeded
     # - docker push websecmap/websecmap:staging
 
     # until there is a CD staging environment
-    # promote build image to production
-    - docker tag websecmap/websecmap:$tag websecmap/websecmap:latest
-    - docker push websecmap/websecmap:latest
+    # promote build image to staging (tag latest) by creating new manifest
+    - docker manifest create websecmap/websecmap:latest websecmap/websecmap:$tag
+    - docker manifest push websecmap/websecmap:latest
+
+    # also cache the latest build on gitlab registry
+    - docker manifest $CI_REGISTRY/internet-cleanup-foundation/web-security-map:latest $CI_REGISTRY/internet-cleanup-foundation/web-security-map:$tag
+    - docker manifest push $CI_REGISTRY/internet-cleanup-foundation/web-security-map:latest
 
   only: [master]
   retry: 1
 
-production:
-  stage: production
-
-  image: $DOCKER_CI_IMAGE
-  services:
-    - docker:$DOCKER_SERVICE_VERSION
-
-  before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
-
-  script:
-    - export tag=$(git describe --exact-match --tags --abbrev=0)
-    # build docker image and push to registry
-    - docker pull websecmap/websecmap:$tag
-    - docker tag websecmap/websecmap:$tag websecmap/websecmap:latest
-    - docker push websecmap/websecmap:latest
-
-    # insert deploy magic here
-
-  only: [tags]
-  retry: 1
+# to be used when staging environment is automated
+# production:
+#   stage: production
+#
+#   image: $DOCKER_CI_IMAGE
+#   services:
+#     - docker:$DOCKER_SERVICE_VERSION
+#
+#   before_script:
+#     - echo "$DOCKER_REGISTRY_PASSWORD" | docker login --username "$DOCKER_REGISTRY_USER" --password-stdin
+#
+#   script:
+#     - tag=$(git describe --exact-match --tags --abbrev=0)
+#     # build docker image and push to registry
+#     - docker pull websecmap/websecmap:$tag
+#     - docker tag websecmap/websecmap:$tag websecmap/websecmap:latest
+#     - docker push websecmap/websecmap:latest
+#
+#     # insert deploy magic here
+#
+#   only: [tags]
+#   retry: 1
