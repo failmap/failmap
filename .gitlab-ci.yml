@@ -21,17 +21,26 @@ stages:
   image: $CI_IMAGE
 
   cache:
-    paths:
-      - ".pip-cache"
-    key: pip-cache
+    # cache pip cache to make installs quicker
+    - paths:
+        - ".pip-cache"
+      key: pip-cache
+    # cache virtualenv because it does not change when requirements files don't change
+    - paths:
+        - ".virtualenv"
+      key:
+        files:
+          - requirements.txt
+          - requirements-dev.txt
 
   before_script:
+    - export VIRTUAL_ENV="$CI_PROJECT_DIR/.virtualenv"
     - export PIP_CACHE_DIR="$CI_PROJECT_DIR/.pip-cache"
     - export PIP_DISABLE_PIP_VERSION_CHECK=1
     - time make setup
 
   script:
-    - export PATH=$HOME/.cache/virtualenvs/web-security-map/bin:$PATH
+    - export PATH=$VIRTUAL_ENV/bin:$PATH
     - export DJANGO_SETTINGS_MODULE=websecmap.settings
     # run desired make target
     - time make $MAKE_TARGETS

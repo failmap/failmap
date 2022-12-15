@@ -25,7 +25,7 @@ norecursedirs = ["*fixtures*", "*locale*", "*migrations*", "*static*"]
 
 [tool.black]
 line-length = 120
-exclude = "vendor/|docs/"
+exclude = "vendor/|docs/|\\..+/"
 
 [tool.coverage.run]
 include = ["websecmap/*"]
@@ -50,7 +50,7 @@ max-line-length = 120
 # https://github.com/hhatto/autopep8/issues/372
 # E203 black does [1 : 2] and pylama wants: [1:2]
 ignore = "E252,W605,E203"
-skip = "*/migrations/*,vendor/*,docs/*,build/*"
+skip = "*/migrations/*,vendor/*,docs/*,build/*,.*/*"
 linters = "pycodestyle,pyflakes"
 
 [tool.pylama.linter.pycodestyle]

@@ -77,23 +77,20 @@ test: ${pysrc} ${app} ## run test suite
 	# run testsuite
 	${enable_coverage} pytest --verbose -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
 
-check: .make.check.py .make.check.migrations .make.check.sh  ## code quality checks
-.make.check.py: ${pysrc} ${app}
+check: check_py check_migrations check_sh  ## code quality checks
+check_py: ${pysrc} ${app}
 	# check code quality
 	pylama .
 	# check formatting
 	black --check .
-	@touch $@  # update timestamp
 
-.make.check.migrations: ${pysrc} ${app}
+check_migrations: ${pysrc} ${app}
 	# ensure no model updates are commited without migrations
 	${app} makemigrations --check
-	@touch $@  # update timestamp
 
-.make.check.sh: ${shsrc}
+check_sh: ${shsrc}
 	# shell script checks (if installed)
 	if command -v shellcheck &>/dev/null;then shellcheck --version; shellcheck ${shsrc}; fi
-	@touch $@  # update timestamp
 
 autofix fix: .make.fix  ## automatic fix of trivial code quality issues
 .make.fix: ${pysrc} ${app}
