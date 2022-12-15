@@ -13,7 +13,6 @@ variables:
 
 stages:
   - test_build
-  - staging
   - production
 
 .test_template: &test_template
@@ -189,8 +188,8 @@ image_test:
   except: [master]
   retry: 1
 
-# create distributable release
-build:
+# create & test distributable release
+build_test:
   stage: test_build
 
   image: $DOCKER_CI_IMAGE
@@ -218,34 +217,12 @@ build:
     # build and push docker image for publishing, using cache from previous builds, creating new cache metadata in image
     - DOCKER_BUILDKIT=1 docker buildx build --cache-from $CACHE_IMAGE --cache-from $MASTER_CACHE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --target release --tag $IMAGE --tag $CACHE_IMAGE --tag $MASTER_CACHE_IMAGE --push .
 
+    # run system tests against image
+    - IMAGE=$IMAGE time make test_system
+
   only:
     - master
     - tags
-  retry: 1
-
-# test newly build image before promoting to production
-test_system:
-  stage: staging
-
-  image: $DOCKER_CI_IMAGE
-
-  services:
-    - docker:$DOCKER_SERVICE_VERSION
-
-  variables:
-    SYSTEM_TEST_TIMEOUT: 120
-    PIP_DISABLE_PIP_VERSION_CHECK: 1
-
-  before_script:
-    - echo "$DOCKER_REGISTRY_PASSWORD" | docker login --username "$DOCKER_REGISTRY_USER" --password-stdin
-
-  script:
-    - tools/version.sh > version
-    - tag=$(cat version|tr + _)
-
-    - IMAGE=websecmap/websecmap:$tag time make test_system
-
-  only: [master]
   retry: 1
 
 # after all tests have passed, publish newly build image on Docker Hub
@@ -253,6 +230,9 @@ publish:
   stage: production
 
   image: $DOCKER_CI_IMAGE
+
+  services:
+    - docker:$DOCKER_SERVICE_VERSION
 
   before_script:
     - echo "$DOCKER_REGISTRY_PASSWORD" | docker login --username "$DOCKER_REGISTRY_USER" --password-stdin
