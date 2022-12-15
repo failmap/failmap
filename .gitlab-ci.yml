@@ -264,6 +264,11 @@ staging:
     - tools/version.sh > version
     - tag=$(cat version|tr + _)
 
+    - IMAGE=websecmap/websecmap:latest
+    - BUILD_IMAGE=websecmap/websecmap:$tag
+    - CACHE_IMAGE=$CI_REGISTRY/internet-cleanup-foundation/web-security-map:$tag
+    - MASTER_CACHE_IMAGE=$CI_REGISTRY/internet-cleanup-foundation/web-security-map:latest
+
     # here is where I would put my staging integration tests, if I had one!!!
     # # pull latest version and tag as staging
     # - docker tag websecmap/websecmap:$tag websecmap/websecmap:staging
@@ -272,12 +277,12 @@ staging:
 
     # until there is a CD staging environment
     # promote build image to staging (tag latest) by creating new manifest
-    - docker manifest create websecmap/websecmap:latest websecmap/websecmap:$tag
-    - docker manifest push websecmap/websecmap:latest
+    - docker manifest create $IMAGE $BUILD_IMAGE
+    - docker manifest push $IMAGE
 
     # also cache the latest build on gitlab registry
-    - docker manifest $CI_REGISTRY/internet-cleanup-foundation/web-security-map:latest $CI_REGISTRY/internet-cleanup-foundation/web-security-map:$tag
-    - docker manifest push $CI_REGISTRY/internet-cleanup-foundation/web-security-map:latest
+    - docker manifest create $MASTER_CACHE_IMAGE $CACHE_IMAGE
+    - docker manifest push $MASTER_CACHE_IMAGE
 
   only: [master]
   retry: 1
