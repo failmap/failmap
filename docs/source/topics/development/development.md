@@ -137,3 +137,9 @@ Version pinning in `.in` files should be kept to a minimum and if it is required
 To have `pip-compile` check for new versions of all dependencies within the version boundaries of `.in` files run: `make update_requirements`
 
 Both the `.in` and the `.txt` files should be commited to Git. The `.txt` files are used during installation to ensure dependencies are predictable accross environments.
+
+Individual packages (and their dependencies) can be upgrading without upgrading all other Python packages using the following commands (for each respective requirements files):
+
+    make upgrade_package package=package_name
+    make upgrade_dev_package package=package_name
+    make upgrade_deploy_package package=package_name

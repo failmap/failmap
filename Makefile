@@ -214,6 +214,18 @@ pip-sync:
 update_requirements: pip_compile_args=--upgrade
 update_requirements: _mark_outdated requirements.txt requirements-dev.txt requirements-deploy.txt _commit_update
 
+upgrade_package: | ${pip-compile} ## upgrade a single Python package in requirements.txt
+	@if [ -z "${package}"];then echo "Usage: make upgrade_package package=package-name"; exit 1; fi
+	${pip-compile} requirements.in --upgrade-package ${package}
+
+upgrade_dev_package: | ${pip-compile} ## upgrade a single Python package in requirments-dev.txt
+	@if [ -z "${package}"];then echo "Usage: make upgrade_dev_package package=package-name"; exit 1; fi
+	${pip-compile} requirements-dev.in --upgrade-package ${package}
+
+upgrade_deploy_package: | ${pip-compile} ## upgrade a single Python package in requirements-deploy.txt
+	@if [ -z "${package}"];then echo "Usage: make upgrade_deploy_package package=package-name"; exit 1; fi
+	${pip-compile} requirements-deploy.in --upgrade-package ${package}
+
 _mark_outdated:
 	touch requirements*.in
 
@@ -231,7 +243,7 @@ ${python} ${pip}:
 		echo "Python 3 is not available. Please refer to installation instructions in README.md"; \
 	fi
 	# create virtualenv
-	python3 -mvenv ${VIRTUAL_ENV}
+	${base_python} -mvenv ${VIRTUAL_ENV}
 
 # utility
 help:           ## Show this help.
