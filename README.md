@@ -2,10 +2,9 @@
 
 [![Code Climate](https://codeclimate.com/github/failmap/failmap/badges/gpa.svg)](https://codeclimate.com/github/failmap/failmap)
 [![pipeline status](https://gitlab.com/internet-cleanup-foundation/web-security-map/badges/master/pipeline.svg)](https://gitlab.com/internet-cleanup-foundation/web-security-map/commits/master)
-[![Test Coverage](https://codeclimate.com/github/failmap/failmap/badges/coverage.svg)](https://codeclimate.com/github/internet-cleanup-foundation/web-security-map/coverage)
 [![Badges](https://img.shields.io/badge/badges-6-yellowgreen.svg)](https://shields.io)
 [![Cyberveiligheid](https://img.shields.io/badge/Cyberveiligheid-97%25-yellow.svg)](https://eurocyber.nl)
-[![Join the chat at https://gitter.im/internet-cleanup-foundation/Lobby](https://badges.gitter.im/internet-cleanup-foundation/Lobby.svg)](https://gitter.im/internet-cleanup-foundation/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Discord](https://img.shields.io/discord/1052513455875301397)](https://discord.gg/5KXBzRK3XY)
 
 ## Why Web Security Map
 Use Web Security Map to create a tangible view on how well security and privacy practices are applied.
@@ -64,9 +63,7 @@ For time indexes on these videos, visit: https://monitoryourgovernment.org/
 
 For all server and deployment related topics, visit: https://gitlab.com/internet-cleanup-foundation/server/
 
-
 The source repository you're watching right now will only get you a development setup.
-
 
 ## Getting started
 
@@ -85,7 +82,6 @@ Please follow these instructions to setup a development environment for Web Secu
 #### Install OS specific dependencies
 
 The project uses Nix and Devenv.sh to bootstrap an isolated and reproducable development environment. Please follow the instructions on https://devenv.sh/getting-started/ to install Nix and Devenv.sh. Below is a summary of setup commands for common OS environments:
-
 
 - **macOS**
 

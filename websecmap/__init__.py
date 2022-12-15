@@ -1,5 +1,6 @@
 from pkg_resources import get_distribution, DistributionNotFound
 
+
 try:
     # try to get version number from installation metadata
     VERSION = get_distribution(__name__.split(".", 1)[0]).version
