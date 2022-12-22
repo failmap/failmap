@@ -30,6 +30,7 @@ from websecmap.map.logic.wikidata import (
 )
 from websecmap.map.models import AdministrativeRegion
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType
+from osm2geojson import xml2geojson
 
 log = logging.getLogger(__package__)
 
@@ -200,11 +201,6 @@ def store_import_message(country, organization_type, message):
 # @transaction.atomic
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def update_coordinates(countries: List[str] = None, organization_types: List[str] = None, when=None):
-
-    if not osmtogeojson_available():
-        raise FileNotFoundError(
-            "osmtogeojson was not found. Please install it and make sure python can access it. Cannot continue."
-        )
 
     for country in sorted(countries):
         for organization_type in sorted(organization_types):
@@ -481,13 +477,15 @@ def add_official_websites(organization, wikidata_code):
 
     website = get_property_from_code(wikidata_code, OFFICIAL_WEBSITE)
 
-    if website:
-        # they don't need to resolve
-        extract = tldextract.extract(website)
-        if extract.subdomain:
-            organization.add_url(f"{extract.subdomain}.{extract.domain}.{extract.suffix}")
-        organization.add_url(f"{extract.domain}.{extract.suffix}")
-        log.debug("Added URL %s. If it contained 'www', also without 'www'.", website)
+    if not website:
+        return
+
+    # they don't need to resolve
+    extract = tldextract.extract(website)
+    if extract.subdomain:
+        organization.add_url(f"{extract.subdomain}.{extract.domain}.{extract.suffix}")
+    organization.add_url(f"{extract.domain}.{extract.suffix}")
+    log.debug("Added URL %s. If it contained 'www', also without 'www'.", website)
 
 
 def get_data_from_wambachers_zipfile(filename):
@@ -570,9 +568,7 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
 
     # show a nice progress bar when downloading
     with open(filename, "wb") as file_handle:
-        i = 0
-        for block in response.iter_content(chunk_size=1024):
-            i += 1
+        for i, block in enumerate(response.iter_content(chunk_size=1024), start=1):
             print_progress_bar(i, 100000, "Wambacher OSM data")
             if block:
                 file_handle.write(block)
@@ -832,12 +828,15 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
     filename = create_evil_filename([country, organization_type, str(timezone.now().date())], "osm")
     filename = settings.TOOLS["openstreetmap"]["output_dir"] + filename
 
+    if os.path.exists(filename):
+        os.unlink(filename)
+
     # if the file has been downloaded recently, don't do that again.
     four_hours_ago = time.time() - 14400
-    if os.path.isfile(filename + ".polygons") and four_hours_ago < os.path.getmtime(filename):
+    if os.path.isfile(filename) and four_hours_ago < os.path.getmtime(filename):
         log.debug("Already downloaded a coordinate file in the past four hours. Using that one.")
         log.debug("%s.polygons", filename)
-        return json.load(open(filename + ".polygons", encoding="utf-8"))
+        return osm_to_geojson(filename)
 
     """
         The overpass query interface can be found here: https://overpass-turbo.eu/
@@ -872,7 +871,7 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
 
     response.raise_for_status()
 
-    with open(filename, "wb", encoding="utf-8") as file_handle:
+    with open(filename, "wb") as file_handle:
         # total_length = int(response.headers.get('content-length'))
         # we don't get a content length from the api. So, "just" do something to show some progress...
         # {'Date': 'Tue, 20 Mar 2018 09:58:11 GMT', 'Server': 'Apache/2.4.18 (Ubuntu)', 'Vary': 'Accept-Encoding',
@@ -893,32 +892,10 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
 
 def osm_to_geojson(filename):
     log.info("Converting OSM file to polygons. This also can take a while...")
-    try:
-        with open(filename + ".polygons", "w", encoding="utf-8") as outfile:
-            subprocess.call(["osmtogeojson", filename], stdout=outfile)
-    except subprocess.CalledProcessError:
-        log.exception("Error while converting to polygons.")
-    except OSError:
-        log.exception("osmtogeojson tool not found.")
 
-    return json.load(open(filename + ".polygons", encoding="utf-8"))
-
-
-def osmtogeojson_available():
-    # todo: this check should be performed on startup?
-    try:
-        # todo: node --max_old_space_size=4000, for larger imprts... we don't even call node... :(
-        subprocess.check_output(
-            ["osmtogeojson", "tesfile.osm"],
-            stderr=subprocess.STDOUT,
-        )
-    except CalledProcessError as my_exception:
-        if "no such file or directory, open 'tesfile.osm'" in str(my_exception.output):
-            return True
-
-        return False
-    except FileNotFoundError:
-        return False
+    with open(filename, "rb") as handle:
+        data: bytes = handle.read()
+    return xml2geojson(data.decode("utf-8"))
 
 
 def download_geojson_data(link: str) -> Dict[str, Any]:

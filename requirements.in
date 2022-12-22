@@ -171,3 +171,6 @@ python-nmap
 
 # python 3.11 compat
 py>=1.11.0
+
+# convert OSM to geojson data
+osm2geojson
