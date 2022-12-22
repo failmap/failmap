@@ -3,11 +3,9 @@ import json
 import logging
 import os.path
 import re
-import subprocess
 import time
 from datetime import datetime
 from io import BytesIO
-from subprocess import CalledProcessError
 from typing import Dict, List, Any
 
 import pytz
