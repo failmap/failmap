@@ -75,7 +75,9 @@ coverage: test
 
 test: ${pysrc} ${app} ## run test suite
 	# run testsuite
-	${enable_coverage} pytest --durations=0 --verbose -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
+	# -n comes from pytest-xdist, no longer name possible. Docs: https://pytest-xdist.readthedocs.io/en/latest/distribution.html
+	# -n auto comes with celery errors and also eats up more time to spin up workers than it takes to test.
+	${enable_coverage} pytest -n 4 --verbose -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
 
 check: check_py check_migrations check_sh  ## code quality checks
 check_py: ${pysrc} ${app}
