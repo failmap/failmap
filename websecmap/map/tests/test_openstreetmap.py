@@ -76,7 +76,6 @@ def prepare_database():
     )
 
 
-# todo: for tests we need osmtogeojson, how to enforce?
 @pytest.mark.skip(reason="Map download changed")
 def test_openstreetmaps(db, monkeypatch):
     """

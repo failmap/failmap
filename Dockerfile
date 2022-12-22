@@ -34,14 +34,6 @@ COPY tools/docker-install-dnscheck.sh /tools/docker-install-dnscheck.sh
 RUN tools/docker-install-dnscheck.sh
 COPY tools/dnssec.pl /tools/dnssec.pl
 
-FROM python:3.11 AS osmtogeojson
-
-RUN apt-get update && apt-get install -yqq \
-  nodejs \
-  npm
-
-# install osmtogeojson
-RUN npm install --global osmtogeojson
 
 # restart with a clean image
 FROM python:3.11 AS release
@@ -50,8 +42,7 @@ USER root
 
 RUN apt-get update && apt-get install -yqq \
   nmap \
-  # osmtogeojson dependencies
-  nodejs \
+  nmap-scripts \
   # dnscheck dependencies, from engine/debian/control file
   perl \
   libcrypt-openssl-random-perl \
@@ -89,9 +80,7 @@ RUN ln -s /pyenv/bin/dnssec.pl /usr/local/bin/
 # copy artifacts from dnscheck build
 COPY --from=dnscheck /usr/local/share/perl /usr/local/share/perl
 
-# copy artifacts from osmtogeojson install
-COPY --from=osmtogeojson /usr/local/lib/node_modules/osmtogeojson /usr/local/lib/node_modules/osmtogeojson
-RUN ln -s /usr/local/lib/node_modules/osmtogeojson/osmtogeojson /usr/local/bin/
+# copy artifacts from dnssec install
 COPY /tools/dnssec.pl /usr/local/bin/dnssec.pl
 
 # install the Python App
@@ -129,4 +118,3 @@ FROM release AS selftest
 
 RUN websecmap
 RUN dnssec.pl 2>&1 | grep usage:
-RUN osmtogeojson /source/websecmap/map/tests/openstreetmap/AL_county.osm

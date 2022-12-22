@@ -24,7 +24,7 @@ Join: chat.websecuritymap.org
 Web Security Map depends on tons of services and open source projects.
 
 *   Polygons, map data: [Openstreetmap](https://www.openstreetmap.org),
-[QGIS](http://www.qgis.org/), [MapBox](https://www.mapbox.com/), osmtogeojson (+node)
+[QGIS](http://www.qgis.org/)
 
 *   TLS Ratings: [Qualys SSL labs](https://www.ssllabs.com/ssltest/)
 

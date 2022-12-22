@@ -43,9 +43,6 @@ easiest way to have updated mapping data from all around the world that
 requires a lesser amount of special steps. (the data is always there,
 from everywhere =)
 
-There are converters that reduce OSM to GeoJSON (but don't reduce
-complexity afaik):
-1. https://tyrasd.github.io/osmtogeojson/
 
 ### Using Overpass:
 http://overpass-turbo.eu/
@@ -88,8 +85,6 @@ Would overpass be able to do this?
 ### Running Dutch municipality merge of 2018
 Get the latest dataset from the server, get it to your dev environment.
 
-This requires the node package [osmtogeojson](https://github.com/tyrasd/osmtogeojson) which does an awesome job at
-polygon detection and is being well maintained. There is no python alternative.
 
 ```
 # DEVELOPMENT ONLY: websecmap create_dataset -o -> dataset_12mar2018.json
