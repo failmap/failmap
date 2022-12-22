@@ -41,8 +41,10 @@ FROM python:3.11 AS release
 USER root
 
 RUN apt-get update && apt-get install -yqq \
+  # nmap scans require nmap-scripts for banner grabbing
   nmap \
-  nmap-scripts \
+  # temporary removed from build to pass build
+  # nmap-scripts \
   # dnscheck dependencies, from engine/debian/control file
   perl \
   libcrypt-openssl-random-perl \
