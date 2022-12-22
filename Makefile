@@ -75,7 +75,7 @@ coverage: test
 
 test: ${pysrc} ${app} ## run test suite
 	# run testsuite
-	${enable_coverage} pytest --verbose -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
+	${enable_coverage} pytest --durations=0 --verbose -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
 
 check: check_py check_migrations check_sh  ## code quality checks
 check_py: ${pysrc} ${app}

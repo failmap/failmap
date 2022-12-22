@@ -22,7 +22,7 @@ def test_get_rows(caplog):
     # Test the 'sheet' itself is not returned, only rows
     # Should skip junk rows
     assert data[0] == ["http://www.rijksoverheid.nl", "Rijksoverheid", "AZ", "DPC", "Online Advies"]
-    assert len(data) > 1000
+    assert len(data) > 200
 
 
 def test_match_and_place_row(db, caplog):
@@ -51,7 +51,7 @@ def test_import_websiteregister(db):
     error, success = import_websiteregister(location)
 
     assert error[0] == "www.rijksoverheid.nl"
-    assert len(error) > 1000
+    assert len(error) > 200
     assert len(success) == 0
 
     new_organization = Organization()
@@ -62,10 +62,10 @@ def test_import_websiteregister(db):
 
     # www.rijksoverheid.nl has now been added
     assert error[0] == "www.nederlandwereldwijd.nl"
-    assert len(error) > 1000
+    assert len(error) > 200
 
     # There are multiple sites managed by DPC/AZ, so multple successes
-    assert len(success) == 12
+    assert len(success) == 5
     assert success[0] == "www.rijksoverheid.nl"
 
 
