@@ -1,9 +1,11 @@
 import json
 import re
 from json import JSONDecodeError
+from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 
 from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
+from websecmap.scanners.models import EndpointGenericScan
 
 SERVICE_IDENTITY_LIKELY_VERSION_FOUND = "service_identity_likely_version_found"  # high
 SERVICE_IDENTITY_SOME_IDENTITY_FOUND = "service_identity_some_identity_found"  # low
@@ -11,6 +13,7 @@ SERVICE_IDENTITY_SOME_IDENTITY_FOUND = "service_identity_some_identity_found"  #
 # todo: support ips where all banners are missing, in that case add a service_identity_nothing_found.
 SERVICE_IDENTITY_NO_BANNER_FOUND = "service_identity_nothing_found"  # good
 SERVICE_IDENTITY_NOT_SEEN_IN_A_WHILE = "service_identity_not_seen_in_a_while"  # good
+
 
 """
 Some examples:
@@ -119,13 +122,40 @@ def contains_version_number(banner):
         log.debug("Detected version: %s", matches)
         return True
 
-    # A little less certainty:
+    # A little less certain:
     matches = re.search(r"(\d+\.\d+)", banner)
     if matches:
         log.debug("Detected version: %s", matches)
         return True
 
     return False
+
+
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+def re_evaluate_bannergrab_versions():
+    # Walk over all latest scans with version information. Then re-run the detect_version command and save the
+
+    changes = 0
+
+    scans = (
+        EndpointGenericScan.objects.all()
+        .filter(type="bannergrab", is_the_latest_scan=True)
+        .only("rating", "id", "evidence", "endpoint__protocol")
+    )
+
+    for scan in scans:
+        conclusion = detect_a_likely_version(scan.evidence, scan.endpoint.protocol)
+        if conclusion == scan.rating:
+            log.debug("Scan has still the same conclusion for version %s: %s", scan.evidence, conclusion)
+            continue
+
+        changes += 1
+        log.debug("Scan has a new conclusion for version %s: %s", scan.evidence, conclusion)
+        scan.rating = conclusion
+        scan.save(update_fields="conclusion")
+
+    log.debug("Changed %s version conclusions", changes)
+    return changes
 
 
 def detect_a_likely_version(banner: str, protocol: str):
@@ -143,62 +173,61 @@ def detect_a_likely_version(banner: str, protocol: str):
 
     banner = str(clean_banner(banner, protocol))
 
-    if banner:
-        # any banner is not good. so:
-        conclusion = SERVICE_IDENTITY_SOME_IDENTITY_FOUND
+    if not banner:
+        return conclusion
 
-        if contains_version_number(banner):
-            conclusion = SERVICE_IDENTITY_LIKELY_VERSION_FOUND
+    if "version" in banner:
+        return SERVICE_IDENTITY_LIKELY_VERSION_FOUND
 
-            # add exceptions for "apache2" for example.
-            # todo: this should come from constance, there is a lot of movement in this list.
-            # it should not include products that are very old, as those are not supported and thus broken
-            generic_banners = [
-                "amazons3",
-                "apache",
-                "apache/2",
-                "iis7",
-                "layer7-api-gateway",
-                "microsoft-httpapi/2.0",
-                "microsoft-iis/7.0",
-                "microsoft-iis/8.5",
-                "microsoft-iis/10.0",
-                "nginx",
-                "parallels html5 client" "smtp2go",
-                "SSH-2.0-Platform.sh",
-            ]
+    if banner in excepted_banners() + get_dynamic_excepted_banners():
+        return SERVICE_IDENTITY_SOME_IDENTITY_FOUND
 
-            try:
-                extra_banners = json.loads(constance_cached_value("BANNERGRAB_GENERIC_BANNERS"))
-                generic_banners = generic_banners + extra_banners
-            except JSONDecodeError:
-                log.error("BANNERGRAB_GENERIC_BANNERS is not valid json. Make sure it's lower case and valid json.")
+    if contains_version_number(banner):
+        return SERVICE_IDENTITY_LIKELY_VERSION_FOUND
 
-            if banner in generic_banners:
-                conclusion = SERVICE_IDENTITY_SOME_IDENTITY_FOUND
+    return SERVICE_IDENTITY_SOME_IDENTITY_FOUND
 
-        if "version" in banner:
-            conclusion = SERVICE_IDENTITY_LIKELY_VERSION_FOUND
 
-    return conclusion
+def excepted_banners():
+    return [
+        "amazons3",
+        "apache",
+        "apache/2",
+        "iis7",
+        "layer7-api-gateway",
+        "microsoft-httpapi/2.0",
+        "microsoft-iis/7.0",
+        "microsoft-iis/8.5",
+        "microsoft-iis/10.0",
+        "nginx",
+        "parallels html5 client" "smtp2go",
+        "SSH-2.0-Platform.sh",
+    ]
+
+
+def get_dynamic_excepted_banners():
+    try:
+        return json.loads(constance_cached_value("BANNERGRAB_GENERIC_BANNERS"))
+    except JSONDecodeError:
+        log.error("BANNERGRAB_GENERIC_BANNERS is not valid json. Make sure it's lower case and valid json.")
+        return []
 
 
 def clean_banner(banner, protocol: str):
     # destroys 509 info, but that is not the scope here
-    banner = banner.lower()
+    banner = banner.lower().strip()
 
-    if protocol == "http":
-        banner = remove_junk_http_headers(banner)
-
-    if protocol == "ftp":
-        banner = remove_ftp_command_numbers(banner)
-
-    if protocol == "smtp":
-        remove_smtp_command_numbers(banner)
+    if cleaner := PROTOCOL_CLEANERS.get(protocol, None):
+        banner = cleaner(banner)
 
     banner = remove_junk_data(banner)
+
     # try not to mistake ip-addresses with a version number.
     banner = remove_ip_addresses(banner)
+
+    # very long texts are *usually* not a banner
+    if len(banner) > 2000:
+        banner = ""
 
     return banner
 
@@ -207,16 +236,7 @@ def remove_junk_http_headers(banner):
     # Skip http responses. These might contain 'server' in the header,
     # but thats usually also read on an alternative port
 
-    if banner.startswith("http/1.0"):
-        return ""
-
-    if banner.startswith("http/1.1"):
-        return ""
-
-    if banner.startswith("http/1.2"):
-        return ""
-
-    if banner.startswith("http/1.3"):
+    if banner.startswith("http/"):
         return ""
 
     return banner
@@ -259,3 +279,10 @@ def remove_junk_data(banner):
         """"""
 
     return banner
+
+
+PROTOCOL_CLEANERS = {
+    "ftp": remove_ftp_command_numbers,
+    "http": remove_junk_http_headers,
+    "smtp": remove_smtp_command_numbers,
+}

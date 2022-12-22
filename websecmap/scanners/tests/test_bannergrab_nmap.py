@@ -5,6 +5,7 @@ import pytz
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import UrlIp, EndpointGenericScan
 from websecmap.scanners.scanner.bannergrab_nmap import store_results
+from websecmap.scanners.scanner.banners.detect_version import re_evaluate_bannergrab_versions
 
 
 def test_store_nmap_results(db):
@@ -146,3 +147,6 @@ def test_store_nmap_results(db):
     }
     store_results("127.0.0.1", results)
     assert EndpointGenericScan.objects.all().count() == 19
+
+    # This should change exactly nothing.
+    assert re_evaluate_bannergrab_versions() == 0
