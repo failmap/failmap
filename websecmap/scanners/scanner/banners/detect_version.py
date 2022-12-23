@@ -158,7 +158,7 @@ def re_evaluate_bannergrab_versions():
         changes += 1
         log.debug("Scan has a new conclusion for version %s: %s", scan.evidence, conclusion)
         scan.rating = conclusion
-        scan.save(update_fields=["conclusion", "evidence"])
+        scan.save(update_fields=["rating", "evidence"])
 
     log.debug("Changed %s version conclusions", changes)
     return changes

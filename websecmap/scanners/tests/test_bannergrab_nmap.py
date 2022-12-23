@@ -7,17 +7,18 @@ from websecmap.scanners.models import UrlIp, EndpointGenericScan
 from websecmap.scanners.scanner.bannergrab_nmap import store_results
 from websecmap.scanners.scanner.banners.detect_version import re_evaluate_bannergrab_versions
 
+generic_data = {
+    "hostnames": [
+        {"name": "basisbeveiliging.nl", "type": "user"},
+        {"name": "basisbevprod01.cobytes.io", "type": "PTR"},
+    ],
+    "addresses": {"ipv4": "185.71.61.127"},
+    "vendor": {},
+    "status": {"state": "up", "reason": "syn-ack"},
+}
+
 
 def test_store_nmap_results(db):
-    generic_data = {
-        "hostnames": [
-            {"name": "basisbeveiliging.nl", "type": "user"},
-            {"name": "basisbevprod01.cobytes.io", "type": "PTR"},
-        ],
-        "addresses": {"ipv4": "185.71.61.127"},
-        "vendor": {},
-        "status": {"state": "up", "reason": "syn-ack"},
-    }
 
     results = {
         **generic_data,
@@ -148,5 +149,40 @@ def test_store_nmap_results(db):
     store_results("127.0.0.1", results)
     assert EndpointGenericScan.objects.all().count() == 19
 
+
+def test_re_evaluate_bannergrab_versions(db):
+
+    url = Url.objects.create(url="basisbeveiliging.nl")
+    UrlIp.objects.create(url=url, ip="127.0.0.1", is_v4=True, discovered_on=datetime.now(pytz.utc))
+
     # This should change exactly nothing.
     assert re_evaluate_bannergrab_versions() == 0
+
+    # Add an empty result, then upgrade it
+    results = {
+        **generic_data,
+        **{
+            "tcp": {
+                22: {
+                    "state": "open",
+                    "reason": "syn-ack",
+                    "name": "ssh",
+                    "product": "",
+                    "version": "",
+                    "extrainfo": "",
+                    "conf": "10",
+                    "cpe": "",
+                    "script": {"banner": "apache"},
+                },
+            }
+        },
+    }
+    store_results("127.0.0.1", results)
+
+    assert EndpointGenericScan.objects.count() == 1
+
+    # Now make sure it _does_ change something
+    epgs = EndpointGenericScan.objects.all().filter(rating="service_identity_some_identity_found").first()
+    epgs.evidence = "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5"
+    epgs.save()
+    assert re_evaluate_bannergrab_versions() == 1
