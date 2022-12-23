@@ -8,6 +8,7 @@ from websecmap.scanners.scanner.banners.detect_version import (
     remove_ip_addresses,
     remove_ftp_command_numbers,
     contains_version_number,
+    clean_banner,
 )
 
 
@@ -68,3 +69,11 @@ def test_remove_ftp_command_numbers():
         remove_ftp_command_numbers("220 Microsoft FTP Service 234 AUTH command ok. Expecting TLS Negotiation.")
         == " Microsoft FTP Service  AUTH command ok. Expecting TLS Negotiation."
     )
+
+
+def test_clean_banner():
+    assert clean_banner("SSH-2.0-OpenSSH_7.6p1", "ssh") == "ssh-2.0-openssh_7.6p1"
+    assert clean_banner("Apache", "http") == "apache"
+    assert clean_banner("Apache", "https") == "apache"
+    assert clean_banner("Apache", "tcpwrapped") == "apache"
+    assert clean_banner("Apache 196.168.2.2", "tcpwrapped") == "apache"

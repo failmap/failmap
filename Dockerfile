@@ -43,8 +43,7 @@ USER root
 RUN apt-get update && apt-get install -yqq \
   # nmap scans require nmap-scripts for banner grabbing
   nmap \
-  # temporary removed from build to pass build
-  # nmap-scripts \
+  nmap-common \
   # dnscheck dependencies, from engine/debian/control file
   perl \
   libcrypt-openssl-random-perl \

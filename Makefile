@@ -75,7 +75,6 @@ coverage: test
 
 test: ${pysrc} ${app} ## run test suite
 	# run testsuite
-	# -n comes from pytest-xdist, no longer name possible. Docs: https://pytest-xdist.readthedocs.io/en/latest/distribution.html
 	${enable_coverage} pytest --verbose -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
 
 test-parallel: ${pysrc} ${app} ## run test suite
@@ -85,6 +84,8 @@ test-parallel: ${pysrc} ${app} ## run test suite
 	# -n auto comes with celery errors and also eats up more time to spin up workers than it takes to test.
 	${enable_coverage} pytest -n 4 --verbose -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
 
+# all quality assurance commands before pushing new code
+qa: autofix test
 
 check: check_py check_migrations check_sh  ## code quality checks
 check_py: ${pysrc} ${app}

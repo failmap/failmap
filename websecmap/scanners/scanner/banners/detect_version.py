@@ -176,7 +176,7 @@ def detect_a_likely_version(banner: str, protocol: str):
     """
 
     # remove possible confidential data such as ip addresses, and remove garbage such as http responses
-    banner = str(clean_banner(banner, protocol))
+    banner = clean_banner(banner, protocol)
 
     if not banner:
         return SERVICE_IDENTITY_NO_BANNER_FOUND
@@ -205,8 +205,10 @@ def excepted_banners():
         "microsoft-iis/8.5",
         "microsoft-iis/10.0",
         "nginx",
-        "parallels html5 client" "smtp2go",
-        "SSH-2.0-Platform.sh",
+        "parallels html5 client",
+        "smtp2go",
+        "ssh-2.0-platform.sh",
+        "ssh-2.0-sshreverseproxy",
     ]
 
 
@@ -234,7 +236,7 @@ def clean_banner(banner, protocol: str) -> str:
     if len(banner) > 2000:
         banner = ""
 
-    return str(banner)
+    return str(banner).strip()
 
 
 def remove_junk_http_headers(banner):
@@ -291,5 +293,7 @@ PROTOCOL_CLEANERS = {
     "ftp": remove_ftp_command_numbers,
     "http": remove_junk_http_headers,
     "https": remove_junk_http_headers,
+    # looks like http traffic
+    "tcpwrapped": remove_junk_http_headers,
     "smtp": remove_smtp_command_numbers,
 }
