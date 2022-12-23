@@ -29,7 +29,7 @@ class ResetUserWidgetConfiguration(Dashboard):
                 obj, _ = UserDashboardModule.objects.get_or_create(
                     title=module.title,
                     app_label=self.app_label,
-                    user=user.pk,
+                    user=user,
                     module=module.fullname(),
                     column=column,
                     order=order,
