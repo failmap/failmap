@@ -330,15 +330,17 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
         log.debug("Organization %s exists in country %s and type %s, skipping.", name, country, organization_type)
         return
 
+    layer = OrganizationType.objects.all().filter(name=organization_type).first()
     new_organization = Organization(
         name=name,
-        type=OrganizationType.objects.all().filter(name=organization_type).first(),
+        type=layer,
         country=country,
         created_on=when if when else datetime.now(pytz.utc),
         wikidata=wikidata_code,
         wikipedia=wikipedia_code,
     )
     new_organization.save()  # has to be done in a separate call. can't append .save() to the organization object.
+    new_organization.layers.add(layer)
     log.info("Saved new organization: %s", new_organization)
 
     new_coordinate = Coordinate(

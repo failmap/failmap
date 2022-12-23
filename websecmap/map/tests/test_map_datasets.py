@@ -40,6 +40,7 @@ def test_map_datasets(db):
     organization, created = Organization.objects.all().get_or_create(
         name="test", type=organization_type, country="NL", created_on=timezone.now(), is_dead=False
     )
+    organization.layers.add(organization_type)
 
     url, created = Url.objects.all().get_or_create(
         url="test.nl", created_on=timezone.now(), is_dead=False, not_resolvable=False

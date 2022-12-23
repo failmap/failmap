@@ -126,6 +126,8 @@ def merge(
 
     new_organization.save()
 
+    new_organization.layers.add(new_organization.type)
+
     for source_organizations_name in source_organizations_names:
         log.info("Trying to add %s to the merge with %s.", source_organizations_name, new_organization)
 

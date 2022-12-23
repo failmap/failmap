@@ -121,6 +121,8 @@ def add_organization(data):
     new_organization.created_on = timezone.now()
     new_organization.save()
 
+    new_organization.layers.add(new_organization.type)
+
     # Add a point to it:
     attach_coordinate(organization=new_organization, latitude=data["latitude"], longitude=data["longitude"])
 

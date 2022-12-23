@@ -308,16 +308,18 @@ def validate_flat_organization(flat_organization: Dict):
 
 
 def add_flat_organization(flat_organization: Dict) -> Organization:
+    layer = OrganizationType.objects.all().filter(name=flat_organization.get("layer", "")).first()
     o = Organization(
         **{
             "name": flat_organization["name"],
             "internal_notes": flat_organization.get("address", ""),
-            "type": OrganizationType.objects.all().filter(name=flat_organization.get("layer", "")).first(),
+            "type": layer,
             "country": flat_organization["country"],
             "surrogate_id": flat_organization["surrogate_id"],
         }
     )
     o.save()
+    o.layers.add(layer)
 
     if flat_organization["coordinate_area"] == [0, 0] and flat_organization["coordinate_type"] == "Point":
         flat_organization["coordinate_area"] = retrieve_geocode(

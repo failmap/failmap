@@ -41,6 +41,8 @@ class Organization(models.Model):
 
     type = models.ForeignKey(OrganizationType, on_delete=models.PROTECT, default=1)
 
+    layers = models.ManyToManyField(OrganizationType, related_name="organization_on_layer")
+
     name = models.CharField(max_length=250, db_index=True)
 
     computed_name_slug = models.SlugField(

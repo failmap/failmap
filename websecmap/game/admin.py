@@ -787,13 +787,15 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             # this might revive some old organizations, so domain knowledge is required.
             # In this case the organization already exists with the same name, type and alive.
             # this means we don't need to add a new one, or with new coordinates.
+            layer = OrganizationType.objects.get(name=osm.organization_type_name)
             already_exists = (
                 Organization.objects.all()
                 .filter(
                     name=osm.organization_name,
                     country=osm.organization_country,
                     is_dead=False,
-                    type=OrganizationType.objects.get(name=osm.organization_type_name),
+                    type=layer,
+                    layers__in=layer
                 )
                 .first()
             )
@@ -814,6 +816,7 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 created_on=timezone.now(),
             )
             new_org.save()
+            new_org.layers.add(new_org.type)
             log.debug("Saved new organization.")
 
             # of course it has a new coordinate
