@@ -72,7 +72,8 @@ def test_store_nmap_results(db):
     # ssh/22: product, version, extrainfo, banner, cpe
     # http/80: product, cpe
     # http:/443: product + cpe
-    assert EndpointGenericScan.objects.all().count() == 9
+    # reconstructing a banner from porduct and version when there is no banner. So nginx and nginx.
+    assert EndpointGenericScan.objects.all().count() == 11
 
     # let's remove two ports, this should be cleaned up
     results = {
@@ -96,13 +97,13 @@ def test_store_nmap_results(db):
     store_results("127.0.0.1", results)
 
     # the cleaning consists out of the existing 9 results. And the four results from 80 and 443 scrubbed.
-    assert EndpointGenericScan.objects.all().count() == 13  # 9 + 4
+    assert EndpointGenericScan.objects.all().count() == 17  # 9 + 4
 
     # nothing changes if we add the same results again
     store_results("127.0.0.1", results)
     store_results("127.0.0.1", results)
     store_results("127.0.0.1", results)
-    assert EndpointGenericScan.objects.all().count() == 13  # 9 + 4
+    assert EndpointGenericScan.objects.all().count() == 17  # 9 + 4
 
     # let's change a cpe, product, version, extraninfo and banner on 443: this will add these 5 new values:
     results = {
@@ -124,7 +125,7 @@ def test_store_nmap_results(db):
         },
     }
     store_results("127.0.0.1", results)
-    assert EndpointGenericScan.objects.all().count() == 18  # 13 existing + 5 new ones
+    assert EndpointGenericScan.objects.all().count() == 22  # 13 existing + 5 new ones
 
     # let's remove a cpe on 443: this will add 1 record with the new cpe value (empty)
     # empty is only added if there was a result in the past.
@@ -147,7 +148,7 @@ def test_store_nmap_results(db):
         },
     }
     store_results("127.0.0.1", results)
-    assert EndpointGenericScan.objects.all().count() == 19
+    assert EndpointGenericScan.objects.all().count() == 23
 
 
 def test_re_evaluate_bannergrab_versions(db):

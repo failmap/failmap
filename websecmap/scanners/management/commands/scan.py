@@ -13,6 +13,7 @@ from websecmap.scanners.scanner import (
     screenshot,
     security_headers,
     tls_qualys,
+    bannergrab_nmap,
 )
 
 log = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ scanners = {
     "screenshot": screenshot,
     "internet_nl_v2_web": internet_nl_v2_web,
     "dns_clean_wildcards": dns_clean_wildcards,
+    "bannergrab_nmap": bannergrab_nmap,
 }
 
 

@@ -209,6 +209,8 @@ def excepted_banners():
         "smtp2go",
         "ssh-2.0-platform.sh",
         "ssh-2.0-sshreverseproxy",
+        # props to alkmaar municipality :)
+        "alk",
     ]
 
 
@@ -284,7 +286,10 @@ def remove_ip_addresses(banner):
 
 def remove_junk_data(banner):
     if "\u0000" in banner:
-        """"""
+        banner = ""
+
+    if banner == "<empty>":
+        banner = ""
 
     return banner
 

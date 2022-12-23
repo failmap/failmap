@@ -33,7 +33,7 @@ from websecmap.scanners.scanner.banners.utils import get_urls_by_ip
 from websecmap.scanners.scanner.utils import in_chunks, CELERY_IP_VERSION_QUEUE_NAMES
 
 SCANNER_NAME = "bannergrab_nmap"
-
+IPS_PER_SCAN = 100
 
 log = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ def get_ports_to_be_scanned() -> str:
 
 
 def grab_tasks():
-    hosts_per_scan = 100
+    hosts_per_scan = IPS_PER_SCAN
 
     ports = get_ports_to_be_scanned()
     tasks = []
@@ -105,14 +105,18 @@ def start_scanner(ips, ports):
     # ports is comma separated
     ip_argument = " ".join(ips)
     nm = nmap.PortScanner()
-    nm.scan(ip_argument, ports, arguments="-sV -v6 --script=banner")
+    # -sV: Probe open ports to determine service/version info
+    # -v: Increase verbosity level (use -vv or more for greater effect)
+    # --script banner: https://nmap.org/nsedoc/scripts/banner.html
+    # "If you are on a decent broadband or ethernet connection, I would recommend always using -T4" = aggressive
+    nm.scan(ip_argument, ports, arguments="-sV --host-timeout=5m -T aggressive --script=banner")
     log.debug(nm.command_line())
     log.debug(nm.scaninfo())
     return nm
 
 
 @app.task(expires=EXPIRES_IN_ONE_DAY)
-def grab_task(ips, ports):
+def grab_task(ips: List[str], ports: str):
     nm = start_scanner(ips, ports)
     return {host: nm[host] for host in nm.all_hosts()}
 
@@ -130,8 +134,8 @@ def grab_manually(is_v4: bool = True):
     # can be used for inspection from the command line
     ips = get_ips_to_be_scanned(is_v4)
     ports = get_ports_to_be_scanned()
-    log.debug(f"Going to scan {len(ips)} ips in batches of 100.")
-    chunks = in_chunks(ips, 100)
+    log.debug(f"Going to scan {len(ips)} ips in batches of {IPS_PER_SCAN}.")
+    chunks = in_chunks(ips, IPS_PER_SCAN)
     # could reuse the nm object
     for chunk in chunks:
         nm = start_scanner(chunk, ports)
@@ -239,6 +243,26 @@ def store_results(host, scan_result):
     clean_all_other_ports(host, do_not_clean_these_ports)
 
 
+def get_banner_from_result(result) -> str:
+    if "script" not in result:
+        return ""
+
+    # SSH banners
+    banner = result["script"].get("banner", "")
+
+    # HTTP server headers are in another output
+    if not banner:
+        banner = result["script"].get("http-server-header", "")
+
+    # extra banners here...
+
+    return banner
+
+
+def ip_version(ip: str) -> int:
+    return 6 if ":" in ip else 4
+
+
 def process_result(ip: str, port: int, result: Dict[Any, Any]):
     log.debug("processing nmap scan result on %s:%s results: %s", ip, port, result)
 
@@ -266,24 +290,24 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
     minimum_confidence = constance_cached_value("BANNERGRAB_PRODUCT_CONFIDENCE")
     log.debug("Confidence found: %s, minimum confidence needed: %s", confidence, minimum_confidence)
 
-    product = result["product"] if confidence >= minimum_confidence else ""
-    version = result["version"] if confidence >= minimum_confidence else ""
-    extrainfo = result["extrainfo"] if confidence >= minimum_confidence else ""
-    cpe = result["cpe"] if confidence >= minimum_confidence else ""
+    product, version, extrainfo, cpe, banner = "", "", "", "", ""
+    if confidence >= minimum_confidence:
+        product = result["product"]
+        version = result["version"]
+        extrainfo = result["extrainfo"]
+        cpe = result["cpe"]
 
-    banner = ""
-    if "script" in result and "banner" in result["script"]:
-        banner = result["script"]["banner"]
+    # get the banner from scripts, if there is no banner make one from the things that nmap is confident about
+    banner = get_banner_from_result(result)
+    if not banner and product:
+        banner = f"{product} {version}" if version else product
 
     banner = clean_banner(banner, result.get("name", "http"))
     conclusion = detect_a_likely_version(banner, result.get("name", "http"))
 
-    # get the urls that have this IP. And are up to date etc...
     for url in get_urls_by_ip(ip):
-        # you know the urls based ip.
-
         # todo: when are endpoints on random ports deleted? Or should we just remove old scan data for this scanner?
-        endpoint = Endpoint.force_get(url_id=url.url.id, port=port, protocol=protocol, ip_version=6 if ":" in ip else 4)
+        endpoint = Endpoint.force_get(url_id=url.url.id, port=port, protocol=protocol, ip_version=ip_version(ip))
 
         # clean the banner if there was one in the past. Adds a banner if there is a new one / something has changed.
         if not banner and endpoint_has_scans("bannergrab", endpoint.id) or banner:
@@ -291,42 +315,27 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
                 scan_type="bannergrab", endpoint_id=endpoint.id, rating=conclusion, evidence=banner, message=banner
             )
 
-        # only store an empty result if the information has gone.
-        if not product and endpoint_has_scans("bannergrab_product_name", endpoint.id) or product:
-            rating = "product_name_neutral" if product else "product_name_empty"
-            store_endpoint_scan_result(
-                scan_type="bannergrab_product_name",
-                endpoint_id=endpoint.id,
-                rating=rating,
-                evidence=product,
-                message=product,
-            )
+        store_cpe_data(endpoint, "product_name", product)
+        store_cpe_data(endpoint, "product_version", version)
+        store_cpe_data(endpoint, "product_info", extrainfo)
+        store_cpe_data(endpoint, "product_cpe", cpe)
 
-        if not version and endpoint_has_scans("bannergrab_product_version", endpoint.id) or version:
-            rating = "product_version_neutral" if product else "product_version_empty"
-            store_endpoint_scan_result(
-                scan_type="bannergrab_product_version",
-                endpoint_id=endpoint.id,
-                rating=rating,
-                evidence=version,
-                message=version,
-            )
 
-        if not extrainfo and endpoint_has_scans("bannergrab_product_info", endpoint.id) or extrainfo:
-            rating = "product_info_neutral" if product else "product_info_empty"
-            store_endpoint_scan_result(
-                scan_type="bannergrab_product_info",
-                endpoint_id=endpoint.id,
-                rating=rating,
-                evidence=extrainfo,
-                message=extrainfo,
-            )
-
-        if not cpe and endpoint_has_scans("bannergrab_product_cpe", endpoint.id) or cpe:
-            rating = "product_cpe_neutral" if product else "product_cpe_empty"
-            store_endpoint_scan_result(
-                scan_type="bannergrab_product_cpe", endpoint_id=endpoint.id, rating=rating, evidence=cpe, message=cpe
-            )
+def store_cpe_data(
+    endpoint,
+    data_item_name: str = "product_name",
+    data_value: str = "",
+):
+    # only store an empty result if the information has gone.
+    if not data_value and endpoint_has_scans(f"bannergrab_{data_item_name}", endpoint.id) or data_value:
+        rating = f"{data_item_name}_neutral" if data_value else f"{data_item_name}_empty"
+        store_endpoint_scan_result(
+            scan_type=f"bannergrab_{data_item_name}",
+            endpoint_id=endpoint.id,
+            rating=rating,
+            evidence=data_value,
+            message=data_value,
+        )
 
 
 def clean_all_other_ports(host, do_not_clean_these_ports):
