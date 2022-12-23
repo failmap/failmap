@@ -195,18 +195,27 @@ def detect_a_likely_version(banner: str, protocol: str):
 
 def excepted_banners():
     return [
+        # large service providers
         "amazons3",
+        "awselb/2.0",
+        # proxies
+        "layer7-api-gateway",
+        # open source webservers
         "apache",
         "apache/2",
-        "iis7",
-        "layer7-api-gateway",
+        "nginx",
+        # microsoft, but not iis6.
+        "microsoft httpapi httpd 2.0",
         "microsoft-httpapi/2.0",
         "microsoft-iis/7.0",
         "microsoft-iis/8.5",
         "microsoft-iis/10.0",
-        "nginx",
+        "iis7",
+        # popular products
+        "haproxy http proxy 1.3.1 or later",
         "parallels html5 client",
         "smtp2go",
+        # ssh
         "ssh-2.0-platform.sh",
         "ssh-2.0-sshreverseproxy",
         # props to alkmaar municipality :)
@@ -287,6 +296,8 @@ def remove_ip_addresses(banner):
 def remove_junk_data(banner):
     if "\u0000" in banner:
         banner = ""
+
+    banner = banner.replace("<empty>", "").strip()
 
     if banner == "<empty>":
         banner = ""

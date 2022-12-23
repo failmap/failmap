@@ -282,7 +282,7 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
       }
     }
     """
-    protocol = reduce_protcol(result["name"])
+    protocol = reduce_protcol(result.get("name", "http"))
 
     with contextlib.suppress(ValueError):
         confidence = int(result["conf"])
@@ -302,8 +302,8 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
     if not banner and product:
         banner = f"{product} {version}" if version else product
 
-    banner = clean_banner(banner, result.get("name", "http"))
-    conclusion = detect_a_likely_version(banner, result.get("name", "http"))
+    banner = clean_banner(banner, protocol)
+    conclusion = detect_a_likely_version(banner, protocol)
 
     for url in get_urls_by_ip(ip):
         # todo: when are endpoints on random ports deleted? Or should we just remove old scan data for this scanner?

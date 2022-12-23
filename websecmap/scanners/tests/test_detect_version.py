@@ -77,3 +77,4 @@ def test_clean_banner():
     assert clean_banner("Apache", "https") == "apache"
     assert clean_banner("Apache", "tcpwrapped") == "apache"
     assert clean_banner("Apache 196.168.2.2", "tcpwrapped") == "apache"
+    assert clean_banner("http/1.0 408 request time-out\x0d\x0acache-control: no-cache", "http") == ""
