@@ -32,7 +32,7 @@ django<4
 # nothing. Jet has not been maintained, even though it's been great, and alternatives are like 20 euro a month.
 # This means we'll probably move to the (simpler) grapelli interface.
 # Now updated for Django 4/Python 3.11
-django-4-jet == 1.0.9
+django-jet-reboot
 django-countries
 django-leaflet
 jsonfield
