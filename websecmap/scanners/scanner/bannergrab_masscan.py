@@ -47,7 +47,7 @@ from websecmap.scanners.scanner.__init__ import (
 )
 import masscan
 
-from websecmap.scanners.scanner.banners.detect_version import detect_a_likely_version
+from websecmap.scanners.scanner.banners.detect_version import detect_a_likely_version, clean_banner
 from websecmap.scanners.scanner.banners.utils import clean_old_bannergrab_results, get_urls_by_ip
 
 SCANNER_NAME = "bannergrab_masscan"
@@ -150,6 +150,7 @@ def process_result(ip, port, service_name, banner):
     if service_name in ["title"]:
         return
 
+    banner = clean_banner(banner, "http")
     conclusion = detect_a_likely_version(banner, "http")
 
     protocol = masscan_service_name_to_protocol(service_name)

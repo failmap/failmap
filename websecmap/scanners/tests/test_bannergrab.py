@@ -103,13 +103,13 @@ def test_handle_masscan_output(db, current_path):
     # assert epgs.rating == SERVICE_IDENTITY_SOME_IDENTITY_FOUND
 
     epgs = EndpointGenericScan.objects.all().last()
-    assert epgs.evidence == "Apache/2.4.25 (Debian)"
+    assert epgs.evidence == "apache/2.4.25 (debian)"
     assert epgs.rating == SERVICE_IDENTITY_LIKELY_VERSION_FOUND
 
     # clean old banners, nothing happens now because all results are new:
     clean_old_bannergrab_results()
     epgs = EndpointGenericScan.objects.all().last()
-    assert epgs.evidence == "Apache/2.4.25 (Debian)"
+    assert epgs.evidence == "apache/2.4.25 (debian)"
     assert epgs.rating == SERVICE_IDENTITY_LIKELY_VERSION_FOUND
 
     # make it an old result:

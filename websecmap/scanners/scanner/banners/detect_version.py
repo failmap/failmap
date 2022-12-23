@@ -144,7 +144,13 @@ def re_evaluate_bannergrab_versions():
     )
 
     for scan in scans:
+        # remove possible confidential data such as ip addresses, and remove garbage such as http responses
+        # Rules might have been changed on re-evaluation. This editing is destructive.
+        banner = clean_banner(scan.evidence, scan.endpoint.protocol)
+        scan.evidence = banner
+
         conclusion = detect_a_likely_version(scan.evidence, scan.endpoint.protocol)
+
         if conclusion == scan.rating:
             log.debug("Scan has still the same conclusion for version %s: %s", scan.evidence, conclusion)
             continue
@@ -152,7 +158,7 @@ def re_evaluate_bannergrab_versions():
         changes += 1
         log.debug("Scan has a new conclusion for version %s: %s", scan.evidence, conclusion)
         scan.rating = conclusion
-        scan.save(update_fields="conclusion")
+        scan.save(update_fields=["conclusion", "evidence"])
 
     log.debug("Changed %s version conclusions", changes)
     return changes
@@ -169,12 +175,11 @@ def detect_a_likely_version(banner: str, protocol: str):
     Versions are usually numbers. If you have some complex numbers in your banner, than it's likely to be a version.
     """
 
-    conclusion = SERVICE_IDENTITY_NO_BANNER_FOUND
-
+    # remove possible confidential data such as ip addresses, and remove garbage such as http responses
     banner = str(clean_banner(banner, protocol))
 
     if not banner:
-        return conclusion
+        return SERVICE_IDENTITY_NO_BANNER_FOUND
 
     if "version" in banner:
         return SERVICE_IDENTITY_LIKELY_VERSION_FOUND
@@ -213,7 +218,7 @@ def get_dynamic_excepted_banners():
         return []
 
 
-def clean_banner(banner, protocol: str):
+def clean_banner(banner, protocol: str) -> str:
     # destroys 509 info, but that is not the scope here
     banner = banner.lower().strip()
 
@@ -229,7 +234,7 @@ def clean_banner(banner, protocol: str):
     if len(banner) > 2000:
         banner = ""
 
-    return banner
+    return str(banner)
 
 
 def remove_junk_http_headers(banner):
@@ -256,6 +261,7 @@ def remove_smtp_command_numbers(banner):
 
 
 def remove_ip_addresses(banner):
+    # Do not give a hint that there ever WAS an IP address, as that can be scraped by others afterwards still,..
     # ipv4
     banner = re.sub(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", "", banner)
     # ipv6
@@ -284,5 +290,6 @@ def remove_junk_data(banner):
 PROTOCOL_CLEANERS = {
     "ftp": remove_ftp_command_numbers,
     "http": remove_junk_http_headers,
+    "https": remove_junk_http_headers,
     "smtp": remove_smtp_command_numbers,
 }

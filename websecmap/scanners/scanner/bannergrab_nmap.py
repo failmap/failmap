@@ -24,7 +24,11 @@ from websecmap.scanners.scanner.__init__ import (
 )
 import nmap
 
-from websecmap.scanners.scanner.banners.detect_version import detect_a_likely_version, SERVICE_IDENTITY_NO_BANNER_FOUND
+from websecmap.scanners.scanner.banners.detect_version import (
+    detect_a_likely_version,
+    SERVICE_IDENTITY_NO_BANNER_FOUND,
+    clean_banner,
+)
 from websecmap.scanners.scanner.banners.utils import get_urls_by_ip
 from websecmap.scanners.scanner.utils import in_chunks, CELERY_IP_VERSION_QUEUE_NAMES
 
@@ -271,6 +275,7 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
     if "script" in result and "banner" in result["script"]:
         banner = result["script"]["banner"]
 
+    banner = clean_banner(banner, result.get("name", "http"))
     conclusion = detect_a_likely_version(banner, result.get("name", "http"))
 
     # get the urls that have this IP. And are up to date etc...
