@@ -144,24 +144,31 @@ def re_evaluate_bannergrab_versions():
     )
 
     for scan in scans:
-        # remove possible confidential data such as ip addresses, and remove garbage such as http responses
-        # Rules might have been changed on re-evaluation. This editing is destructive.
-        banner = clean_banner(scan.evidence, scan.endpoint.protocol)
-        scan.evidence = banner
-
-        conclusion = detect_a_likely_version(scan.evidence, scan.endpoint.protocol)
-
-        if conclusion == scan.rating:
-            log.debug("Scan has still the same conclusion for version %s: %s", scan.evidence, conclusion)
-            continue
-
-        changes += 1
-        log.debug("Scan has a new conclusion for version %s: %s", scan.evidence, conclusion)
-        scan.rating = conclusion
-        scan.save(update_fields=["rating", "evidence"])
+        changed = clean_and_detect(scan)
+        if changed:
+            changes += 1
 
     log.debug("Changed %s version conclusions", changes)
     return changes
+
+
+def clean_and_detect(scan: EndpointGenericScan) -> int:
+    # remove possible confidential data such as ip addresses, and remove garbage such as http responses
+    # Rules might have been changed on re-evaluation. This editing is destructive.
+    banner = clean_banner(scan.evidence, scan.endpoint.protocol)
+    scan.evidence = banner
+
+    conclusion = detect_a_likely_version(scan.evidence, scan.endpoint.protocol)
+
+    if conclusion == scan.rating:
+        log.debug("Scan has still the same conclusion for version %s: %s", scan.evidence, conclusion)
+        return False
+
+    log.debug("Scan has a new conclusion for version %s: %s", scan.evidence, conclusion)
+    scan.rating = conclusion
+    scan.save(update_fields=["rating", "evidence"])
+
+    return True
 
 
 def detect_a_likely_version(banner: str, protocol: str):

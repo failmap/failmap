@@ -11,6 +11,7 @@ from websecmap.scanners import models
 from websecmap.scanners.models import State
 from websecmap.scanners.proxy import check_proxy
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import progress_running_scan, recover_and_retry
+from websecmap.scanners.scanner.banners.detect_version import clean_and_detect
 
 
 class EndpointGenericScanInline(CompactInline):
@@ -181,6 +182,24 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return format_html("<a href='./{}/change/#/tab/module_1/'>Explain</a>", instance.pk)
 
     readonly_fields = ["last_scan_moment"]
+
+    actions = []
+
+    def reevaluate_version(self, request, queryset):
+
+        changed = 0
+        for item in queryset:
+            if item.type != "bannergrab":
+                continue
+
+            change = clean_and_detect(item)
+            if change:
+                changed += 1
+
+        self.message_user(request, f"Updated {queryset.count()} scans, changed {changed} scans.")
+
+    reevaluate_version.short_description = "🔁  Re-evaluate bannergrab version data"
+    actions.append("reevaluate_version")
 
 
 @admin.register(models.UrlGenericScan)
