@@ -346,7 +346,8 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
     # We've removed conditional scans in scannerss, as more scan data is better.
     # you can cohose not to display or report it. Below used to be conditional scans.
 
-    generic_check_using_csp_fallback(endpoint_id, headers, "X-XSS-Protection")
+    # x-xss is deprecated
+    # generic_check_using_csp_fallback(endpoint_id, headers, "X-XSS-Protection")
     generic_check_using_csp_fallback(endpoint_id, headers, "X-Frame-Options")
     generic_check(endpoint_id, headers, "X-Content-Type-Options")
 
@@ -381,10 +382,11 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
         elif "Strict-Transport-Security" in headers:
             log.debug("Has Strict-Transport-Security")
             store_endpoint_scan_result(
-                "http_security_header_strict_transport_security",
-                endpoint_id,
-                "present",
-                headers["Strict-Transport-Security"],
+                scan_type="http_security_header_strict_transport_security",
+                endpoint_id=endpoint_id,
+                rating="present",
+                message=headers["Strict-Transport-Security"],
+                evidence=headers["Strict-Transport-Security"],
             )
         else:
             log.debug("Has no Strict-Transport-Security, yet offers no insecure http service.")
@@ -405,7 +407,13 @@ def generic_check(endpoint_id: int, headers, header):
 
     if header in headers.keys():
         log.debug("Has %s", header)
-        store_endpoint_scan_result(scan_type, endpoint_id, "present", headers[header])
+        store_endpoint_scan_result(
+            scan_type=scan_type,
+            endpoint_id=endpoint_id,
+            rating="present",
+            message=headers[header],
+            evidence=headers[header],
+        )
     else:
         log.debug("Has no %s", header)
         store_endpoint_scan_result(scan_type, endpoint_id, "missing", f"Security Header not present: {header}")
@@ -417,7 +425,13 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
     # this is case insensitive
     if header in headers.keys():
         log.debug("Has %s", header)
-        store_endpoint_scan_result(scan_type, endpoint_id, "present", headers[header])
+        store_endpoint_scan_result(
+            scan_type=scan_type,
+            endpoint_id=endpoint_id,
+            rating="present",
+            message=headers[header],
+            evidence=headers[header],
+        )
     else:
         # CSP fallback:
         log.debug("CSP fallback used for %s", header)
