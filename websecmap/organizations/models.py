@@ -4,6 +4,7 @@
 import hashlib
 import logging
 from datetime import datetime, timedelta
+from typing import Optional
 
 import pytz
 import tldextract
@@ -388,7 +389,7 @@ class Url(models.Model):
         return False
 
     @transaction.atomic
-    def add_subdomain(self, subdomain, internal_notes: str = ""):
+    def add_subdomain(self, subdomain, internal_notes: str = "") -> Optional["Url"]:
         # import here to prevent circular/cyclic imports, this module imports Url.
         from websecmap.scanners.scanner.http import resolves  # pylint: disable=import-outside-toplevel
 

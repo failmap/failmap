@@ -5,6 +5,7 @@ import re
 import string
 import tempfile
 from datetime import datetime
+from time import sleep
 from typing import Any, Dict, List
 
 import pytz
@@ -14,6 +15,7 @@ from django.db import connection
 from django.db.models import Q
 from dnsrecon.__main__ import brute_domain, ds_zone_walk
 from dnsrecon.lib.dnshelper import DnsHelper
+from requests import RequestException
 
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 from websecmap.map.logic.map_defaults import get_country
@@ -424,11 +426,19 @@ def certificate_transparency_scan(url: str):
     :return:
     """
 
+    # dumb rate limiting
+    sleep(10)
+
     # https://crt.sh/?q=%25.zutphen.nl
     crt_sh_url = f"https://crt.sh/?q=%25.{url}"
     pattern = r"[^\s%>]*\." + url.replace(".", r"\.")
 
-    response = requests.get(crt_sh_url, timeout=(30, 30), allow_redirects=False)
+    try:
+        response = requests.get(crt_sh_url, timeout=(300, 300), allow_redirects=False)
+    except RequestException as e:
+        log.error("crt.sh request failed: %s", e)
+        return []
+
     matches = re.findall(pattern, response.text)
 
     subdomains = []
@@ -458,7 +468,7 @@ def certificate_transparency_scan(url: str):
 
 
 @app.task(queue="storage")
-def store_certificate_transparency_results(subdomains: List[str], url_id) -> List[str]:
+def store_certificate_transparency_results(subdomains: List[str], url_id: int) -> List[str]:
     if not subdomains:
         return []
 
@@ -466,11 +476,10 @@ def store_certificate_transparency_results(subdomains: List[str], url_id) -> Lis
     if not db_url:
         return []
 
-    addedlist = []
+    addedlist: List[str] = []
     for subdomain in subdomains:
-        added = db_url.add_subdomain(subdomain)
-        if added:
-            addedlist.append(added)
+        if added := db_url.add_subdomain(subdomain):
+            addedlist.append(added.url)
 
     return addedlist
 
