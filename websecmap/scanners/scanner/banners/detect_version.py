@@ -205,6 +205,11 @@ def excepted_banners():
         # large service providers
         "amazons3",
         "awselb/2.0",
+        "awselb/2.0 nginx",
+        "awselb/2.0 frontify",
+        "awselb/2.0 fwe",
+        "awselb/2.0 gunicorn",
+        "apache awselb/2.0",
         # proxies
         "layer7-api-gateway",
         # open source webservers
@@ -214,19 +219,33 @@ def excepted_banners():
         # microsoft, but not iis6.
         "microsoft httpapi httpd 2.0",
         "microsoft-httpapi/2.0",
+        "<empty> microsoft-httpapi/2.0",
         "microsoft-iis/7.0",
+        "microsoft-iis/7.5",
         "microsoft-iis/8.5",
         "microsoft-iis/10.0",
+        "microsoft iis httpd 10.0",
+        "microsoft-httpapi/2.0 microsoft-iis/10.0",
+        "- microsoft-httpapi/2.0",
         "iis7",
+        "apache microsoft-httpapi/2.0",
+        "apache microsoft-iis/10.0",
+        "apache microsoft-iis/8.5",
         # popular products
         "haproxy http proxy 1.3.1 or later",
         "parallels html5 client",
         "smtp2go",
+        "nameweb.biz forwarding server 1.1",
+        "ud forwarding 3.1",
         # ssh
         "ssh-2.0-platform.sh",
         "ssh-2.0-sshreverseproxy",
         # props to alkmaar municipality :)
         "alk",
+        # Hollandsch Glorie
+        "kpn awselb/",
+        # SIP (modern stuff only)
+        "rtc/7.0",
     ]
 
 
