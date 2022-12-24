@@ -11,7 +11,7 @@ from websecmap.scanners import models
 from websecmap.scanners.models import State
 from websecmap.scanners.proxy import check_proxy
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import progress_running_scan, recover_and_retry
-from websecmap.scanners.scanner.banners.detect_version import clean_and_detect
+from websecmap.scanners.scanner.banners.detect_version import clean_and_detect, add_excepted_banner_to_config
 
 
 class EndpointGenericScanInline(CompactInline):
@@ -200,6 +200,17 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     reevaluate_version.short_description = "🔁  Re-evaluate bannergrab version data"
     actions.append("reevaluate_version")
+
+    def add_version_exception(self, request, queryset):
+
+        for item in queryset:
+            if item.type != "bannergrab":
+                continue
+
+            add_excepted_banner_to_config(item.evidence)
+
+    add_version_exception.short_description = "Add banner to excepted banners"
+    actions.append("add_version_exception")
 
 
 @admin.register(models.UrlGenericScan)

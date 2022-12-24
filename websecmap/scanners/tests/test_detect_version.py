@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from websecmap.scanners.scanner.banners.detect_version import (
@@ -9,6 +11,7 @@ from websecmap.scanners.scanner.banners.detect_version import (
     remove_ftp_command_numbers,
     contains_version_number,
     clean_banner,
+    add_excepted_banner_to_config,
 )
 
 
@@ -78,3 +81,21 @@ def test_clean_banner():
     assert clean_banner("Apache", "tcpwrapped") == "apache"
     assert clean_banner("Apache 196.168.2.2", "tcpwrapped") == "apache"
     assert clean_banner("http/1.0 408 request time-out\x0d\x0acache-control: no-cache", "http") == ""
+
+
+def test_add_excepted_banner_to_config(db):
+    from constance import config
+
+    assert config.BANNERGRAB_GENERIC_BANNERS == '["apache", "nginx"]'
+
+    add_excepted_banner_to_config("test")
+    assert sorted(json.loads(config.BANNERGRAB_GENERIC_BANNERS)) == sorted(["apache", "nginx", "test"])
+
+    add_excepted_banner_to_config("belgie")
+    assert sorted(json.loads(config.BANNERGRAB_GENERIC_BANNERS)) == sorted(["apache", "nginx", "test", "belgie"])
+
+    add_excepted_banner_to_config("brussel")
+
+    assert sorted(json.loads(config.BANNERGRAB_GENERIC_BANNERS)) == sorted(
+        ["apache", "nginx", "test", "belgie", "brussel"]
+    )

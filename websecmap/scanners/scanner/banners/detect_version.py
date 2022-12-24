@@ -3,6 +3,8 @@ import re
 from json import JSONDecodeError
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
 
+from constance import config
+
 from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
 from websecmap.scanners.models import EndpointGenericScan
@@ -110,6 +112,18 @@ Some examples:
 "nginx/1.14.2",
 "nginx/1.18.0 + Phusion Passenger(R) 6.0.12",
 """
+
+
+def add_excepted_banner_to_config(banner):
+    current_value = config.BANNERGRAB_GENERIC_BANNERS
+    data = json.loads(current_value)
+
+    if not data:
+        data = [banner]
+    elif banner not in data:
+        data.append(banner)
+
+    config.BANNERGRAB_GENERIC_BANNERS = json.dumps(data)
 
 
 def contains_version_number(banner):
