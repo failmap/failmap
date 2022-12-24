@@ -30,7 +30,7 @@ from websecmap.scanners.scanner.banners.detect_version import (
     clean_banner,
 )
 from websecmap.scanners.scanner.banners.utils import get_urls_by_ip
-from websecmap.scanners.scanner.utils import in_chunks, CELERY_IP_VERSION_QUEUE_NAMES
+from websecmap.scanners.scanner.utils import in_chunks
 
 SCANNER_NAME = "bannergrab_nmap"
 IPS_PER_SCAN = 100
@@ -81,17 +81,11 @@ def grab_tasks():
 
     ipv4_ips = get_ips_to_be_scanned(is_v4=True)
     ipv4_chunks = in_chunks(ipv4_ips, hosts_per_scan)
-    tasks += [
-        grab_task.si(chunk, ports).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[4]) | store_results_task.s()
-        for chunk in ipv4_chunks
-    ]
+    tasks += [grab_task.si(chunk, ports) | store_results_task.s() for chunk in ipv4_chunks]
 
     ipv6_ips = get_ips_to_be_scanned(is_v4=False)
     ipv6_chunks = in_chunks(ipv6_ips, hosts_per_scan)
-    tasks += [
-        grab_task.si(chunk, ports).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[6]) | store_results_task.s()
-        for chunk in ipv6_chunks
-    ]
+    tasks += [grab_task.si(chunk, ports) | store_results_task.s() for chunk in ipv6_chunks]
 
     log.debug(f"Created {len(tasks)} bannergrab_nmap tasks.")
 
@@ -115,7 +109,7 @@ def start_scanner(ips, ports):
     return nm
 
 
-@app.task(expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="bannergrab", expires=EXPIRES_IN_ONE_DAY)
 def grab_task(ips: List[str], ports: str):
     nm = start_scanner(ips, ports)
     return {host: nm[host] for host in nm.all_hosts()}

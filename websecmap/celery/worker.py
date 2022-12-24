@@ -24,7 +24,7 @@ ROLES_REQUIRING_ANY_NETWORK = [
     "internet",  # the queue scanner accepts 4and6, 4 or 6 - so ANY network scan :)
 ]
 
-ROLES_REQUIRING_IPV4_AND_IPV6 = ["default", "all_internet"]
+ROLES_REQUIRING_IPV4_AND_IPV6 = ["default", "all_internet", "bannergrab"]
 
 # list of all roles that require IPv6 networking
 ROLES_REQUIRING_IPV6 = [
@@ -151,6 +151,9 @@ QUEUES_MATCHING_ROLES = {
     ],
     "followupscan": [
         Queue("followupscan"),
+    ],
+    "bannergrab": [
+        Queue("bannergrab"),
     ],
 }
 
