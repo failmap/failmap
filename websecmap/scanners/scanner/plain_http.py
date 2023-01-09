@@ -11,11 +11,16 @@ import logging
 from celery import group
 
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
-from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
+from websecmap.scanners.scanner.__init__ import allowed_to_scan
+from websecmap.scanners.scanner.filter import (
+    generic_plan_scan,
+    apply_organzation_or_endpoint_filter_before_url_filter,
+    merge_urls_filter,
+    merge_organizations_filter,
+)
 from websecmap.scanners.scanner.http import (
     can_connect,
     connect_result,
@@ -35,44 +40,18 @@ SAVED_BY_THE_BELL = "Redirects to a secure site, while a secure counterpart on t
 NO_HTTPS_AT_ALL = "Site does not redirect to secure url, and has no secure alternative on a standard port."
 
 
-def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
-    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    if organizations_filter:
-        organizations = Organization.objects.filter(is_dead=False, **organizations_filter).only("id")
-        urls = Url.objects.filter(
-            q_configurations_to_scan(),
-            organization__in=organizations,
-            is_dead=False,
-            not_resolvable=False,
-            endpoint__protocol="http",
-            endpoint__port=80,
-            **urls_filter,
-        ).only("id", "url")
-        log.info("Creating scan task %s urls for %s organizations.", len(urls), len(organizations))
-    else:
-        urls = Url.objects.filter(
-            q_configurations_to_scan(),
-            is_dead=False,
-            not_resolvable=False,
-            # Has to have at least an http endpoint, otherwise scanning doesn't make sense.
-            endpoint__protocol="http",
-            endpoint__port=80,
-            **urls_filter,
-        ).only("id", "url")
-        log.info("Creating scan plain http task %s urls.", len(urls))
-
-    return unique_and_random(urls)
+SCANNER_NAME = "plain_http"
+STANDARD_ORGANIZATION_FILTER = {"is_dead": False}
+STANDARD_URL_FILTER = {"is_dead": False, "not_resolvable": False, "endpoint__protocol": "http", "endpoint__port": 80}
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
-    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    if not allowed_to_scan("plain_http"):
-        return group()
-
-    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    plannedscan.request(activity="scan", scanner="plain_http", urls=urls)
-    return group()
+def plan_scan(**kwargs):
+    kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
+    # only if the organization is filtered... otherwise the organization filter is always triggered by the default.
+    if kwargs.get("organizations_filter", {}):
+        kwargs = merge_organizations_filter(STANDARD_ORGANIZATION_FILTER, **kwargs)
+    generic_plan_scan(SCANNER_NAME, "scan", apply_organzation_or_endpoint_filter_before_url_filter, **kwargs)
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
@@ -89,7 +68,11 @@ def compose_manual_scan_task(
     if not allowed_to_scan("plain_http"):
         return group()  # An empty group fits this callable's signature and does not impede celery.
 
-    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
+    # only if the organization is filtered... otherwise the organization filter is always triggered by the default.
+    if kwargs.get("organizations_filter", {}):
+        kwargs = merge_organizations_filter(STANDARD_ORGANIZATION_FILTER, **kwargs)
+    urls = apply_organzation_or_endpoint_filter_before_url_filter(**kwargs)
     return compose_scan_task(urls)
 
 

@@ -82,7 +82,6 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
 
     # apply filter to organizations (or if no filter, all organizations)
     # apply filter to urls in organizations (or if no filter, all urls)
-    organizations = []
     if organizations_filter:
         organizations = Organization.objects.filter(**organizations_filter).only("id")
         urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)

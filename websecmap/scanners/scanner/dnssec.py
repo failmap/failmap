@@ -25,14 +25,12 @@ from typing import List
 
 from celery import group
 from django.conf import settings
-from django.db.models import Q
 
 from websecmap.celery import ParentFailed, app, EXPIRES_IN_ONE_DAY
-from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import init_dict, plannedscan
-from websecmap.scanners.models import Endpoint
+from websecmap.scanners import plannedscan
 from websecmap.scanners.scanmanager import store_url_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
+from websecmap.scanners.scanner.__init__ import allowed_to_scan
+from websecmap.scanners.scanner.filter import filter_top_level_domains, generic_plan_scan
 
 log = logging.getLogger(__name__)
 
@@ -44,63 +42,27 @@ RETRY_DELAY = 10
 # can also be a datetime.
 EXPIRES = 3600  # one hour is more then enough
 
-
-def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
-    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    # DNSSEC only works on top level urls
-    urls_filter = dict(urls_filter, **{"computed_subdomain": ""})
-
-    # gather urls from organizations
-    if organizations_filter:
-        organizations = Organization.objects.filter(**organizations_filter).only("id")
-        urls = Url.objects.filter(
-            q_configurations_to_scan(),
-            Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
-            organization__in=organizations,
-            **urls_filter,
-        ).only("id", "url")
-    elif endpoints_filter:
-        # and now retrieve urls from endpoints
-        endpoints = Endpoint.objects.filter(**endpoints_filter).only("id")
-        urls = Url.objects.filter(
-            q_configurations_to_scan(),
-            Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
-            endpoint__in=endpoints,
-            **urls_filter,
-        ).only("id", "url")
-    else:
-        # now urls directly
-        urls = Url.objects.filter(
-            q_configurations_to_scan(), Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""), **urls_filter
-        ).only("id", "url")
-
-    # Optimize: only required values, unique and randomized
-    urls = unique_and_random(urls)
-    return urls
+SCANNER_NAME = "dnssec"
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
-    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    log.info("Creating DNSSEC scan task for %s urls.", len(urls))
-    plannedscan.request(activity="scan", scanner="dnssec", urls=urls)
+def plan_scan(**kwargs):
+    generic_plan_scan(SCANNER_NAME, "scan", filter_top_level_domains, **kwargs)
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="dnssec", amount=kwargs.get("amount", 25))
+    urls = plannedscan.pickup(activity="scan", scanner=SCANNER_NAME, amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
 
 
 def compose_manual_scan_task(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ):
-    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    if not allowed_to_scan("dnssec"):
+    if not allowed_to_scan(SCANNER_NAME):
         return group()
 
-    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    urls = filter_top_level_domains(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     return compose_scan_task(urls)
 
 
@@ -117,7 +79,7 @@ def compose_scan_task(urls) -> group:
     # Sending entire objects is possible. How signatures (.s and .si) work is documented:
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     return group(
-        scan_dnssec.si(url.url) | store_dnssec.s(url.pk) | plannedscan.finish.si("scan", "dnssec", url.pk)
+        scan_dnssec.si(url.url) | store_dnssec.s(url.pk) | plannedscan.finish.si("scan", SCANNER_NAME, url.pk)
         for url in urls
     )
 
@@ -147,7 +109,7 @@ def store_dnssec(result: List[str], url_id: int):
             "info": "DNSSEC seems to be implemented sufficiently.",
         }
 
-        store_url_scan_result("dnssec", url_id, level, messages[level], evidence=",\n".join(result))
+        store_url_scan_result(SCANNER_NAME, url_id, level, messages[level], evidence=",\n".join(result))
 
     # return something informative
     return {"status": "success", "result": level}

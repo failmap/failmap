@@ -41,15 +41,20 @@ from requests import HTTPError, ReadTimeout, Request, Session, Timeout
 from requests.exceptions import ChunkedEncodingError, ConnectTimeout, ContentDecodingError, SSLError
 
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
-from websecmap.organizations.models import Organization, Url
+from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, UrlIp
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.__init__ import (
     allowed_to_discover_endpoints,
-    endpoint_filters,
-    q_configurations_to_scan,
     unique_and_random,
+)
+from websecmap.scanners.scanner.filter import (
+    generic_plan_scan,
+    filter_endpoints_only,
+    merge_endpoints_filter,
+    apply_organzation_or_endpoint_filter_before_url_filter,
+    merge_urls_filter,
 )
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 from requests_toolbelt.adapters import host_header_ssl
@@ -89,40 +94,21 @@ of the same stuff is re-discovered.
 """
 READ_TIMEOUT = 30
 
-
-def filter_discover(organizations_filter: dict = None, urls_filter: dict = None, **kwargs):
-    # ignore administratively dead domains by default.
-    organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
-    urls_filter = urls_filter or {"is_dead": False}
-
-    if organizations_filter:
-        organizations = Organization.objects.filter(**organizations_filter).only("id")
-        log.info("Organization filter applied with %s organizations.", len(organizations))
-
-        urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter).only(
-            "id", "url"
-        )
-
-    else:
-        urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter).only("id", "url")
-
-    # make sure all urls are unique (some are shared between organizations, or a custom query might dupe them)
-    urls = unique_and_random(urls)
-    log.info("Discovering HTTP endpoints for %s urls.", len(urls))
-
-    return urls
+SCANNER_NAME = "http"
+STANDARD_ENDPOINT_FILTER = {"protocol__in": ["https", "http"], "is_dead": False}
+STANDARD_URL_FILTER = {"is_dead": False}
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, **kwargs):
-    organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
-    if not allowed_to_discover_endpoints("http"):
-        return group()
+def plan_discover(**kwargs):
+    kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
+    generic_plan_scan(SCANNER_NAME, "discover", apply_organzation_or_endpoint_filter_before_url_filter, **kwargs)
 
-    urls = filter_discover(organizations_filter, urls_filter, **kwargs)
-    plannedscan.request(activity="discover", scanner="http", urls=urls)
 
-    return urls
+@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+def plan_verify(**kwargs):
+    kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
+    generic_plan_scan(SCANNER_NAME, "verify", filter_endpoints_only, **kwargs)
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
@@ -143,7 +129,8 @@ def compose_manual_discover_task(organizations_filter: dict = None, urls_filter:
     if not allowed_to_discover_endpoints("http"):
         return group()
 
-    urls = filter_discover(organizations_filter, urls_filter, **kwargs)
+    kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
+    urls = apply_organzation_or_endpoint_filter_before_url_filter(**kwargs)
     return compose_discover_task(urls)
 
 
@@ -170,32 +157,6 @@ def compose_discover_task(urls: List[Url]):
     return group(tasks)
 
 
-def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
-    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    # todo: do we need a generic resurrect task and also check for , 'is_dead': False here?
-    # otherwise we'll be verifying things that existed ages ago and probably will never return. Which makes this
-    # scan also extremely slow. - The description says we should.
-    default_filter = {"protocol__in": ["https", "http"], "is_dead": False}
-    endpoints_filter = {**endpoints_filter, **default_filter}
-    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level="endpoint"), **endpoints_filter)
-    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
-    endpoints = endpoints.only("id", "url__id", "ip_version", "port", "protocol")
-
-    endpoints = unique_and_random(endpoints)
-    return unique_and_random([endpoint.url for endpoint in endpoints])
-
-
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
-    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    if not allowed_to_discover_endpoints("http"):
-        return group()
-
-    urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    plannedscan.request(activity="verify", scanner="http", urls=urls)
-    return group()
-
-
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
 def compose_planned_verify_task(**kwargs):
     urls = plannedscan.pickup(activity="verify", scanner="http", amount=kwargs.get("amount", 25))
@@ -205,7 +166,6 @@ def compose_planned_verify_task(**kwargs):
 def compose_manual_verify_task(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
-    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     """Verifies existing https and http endpoints. Is pretty quick, as it will not stumble upon non-existing services
     as much.
     """
@@ -213,7 +173,8 @@ def compose_manual_verify_task(
     if not allowed_to_discover_endpoints("http"):
         return group()
 
-    urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
+    urls = filter_endpoints_only(**kwargs)
     return compose_verify_task(urls)
 
 
