@@ -27,3 +27,12 @@ def test_nuke_url(db):
 
     nuke_url(domain="arnhem")
     assert Url.objects.all().count() == 1
+
+    # nuke multiple at the same time
+    Url.objects.create(url="test.basisbeveiliging.nl")
+    Url.objects.create(url="test2.basisbeveiliging.nl")
+    Url.objects.create(url="test3.basisbeveiliging.nl")
+    assert Url.objects.all().count() == 4
+
+    nuke_url(domain="basisbeveiliging")
+    assert Url.objects.all().count() == 1
