@@ -81,6 +81,7 @@ def test_clean_banner():
     assert clean_banner("Apache", "tcpwrapped") == "apache"
     assert clean_banner("Apache 196.168.2.2", "tcpwrapped") == "apache"
     assert clean_banner("http/1.0 408 request time-out\x0d\x0acache-control: no-cache", "http") == ""
+    assert clean_banner("ssh-2.0-mod_sftp\x0d\x0a\x00\x00\x01\x94\x04\x14\x1c\x9e`\xaew", "http") == ""
 
 
 def test_add_excepted_banner_to_config(db):

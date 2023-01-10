@@ -337,6 +337,10 @@ def remove_junk_data(banner):
     if "\u0000" in banner:
         banner = ""
 
+    # ssh-2.0-mod_sftp\x0d\x0a\x00\x00\x01\x94\x04\x14o\x1e\xe8#\xdcz >\x877$\x1a\xf0\x
+    if "\x00\x00" in banner:
+        banner = ""
+
     banner = banner.replace("<empty>", "").strip()
 
     if banner == "<empty>":
