@@ -26,6 +26,7 @@ from websecmap.scanners.scanner.http import get_ips
 
 # Include DNSRecon code from an external dependency. This is cloned recursively and placed outside the django app.
 from websecmap.scanners.scanner.utils import get_random_nameserver
+from websecmap.scanners.timeout import timeout
 
 log = logging.getLogger(__package__)
 
@@ -500,6 +501,16 @@ def nsec_scan(url: str):
     :param urls:
     :return:
     """
+    try:
+        # some DNS servers have infinite responses and loops when zone walking, do not get caught up in this...
+        return nsec_scan_work(url)
+    except TimeoutError:
+        log.error("Timeout when nsec zone walking domain.", extra={"url": url})
+        return []
+
+
+@timeout(120, "Took too long to nsec zone walk, possibly an infinite loop.")
+def nsec_scan_work(url: str):
     resolver = DnsHelper(url, [get_random_nameserver()], 3)
     return ds_zone_walk(resolver, url, 3)
 
