@@ -25,5 +25,5 @@ def _import_agentschappen(dataset):
 
     assert OrganizationType.objects.filter(name="agentschappen").count() == 1
     assert Organization.objects.all().count() == 29
-    assert Url.objects.all().count() == 30
+    assert Url.objects.all().count() == 58
     assert Coordinate.objects.all().count() == 29

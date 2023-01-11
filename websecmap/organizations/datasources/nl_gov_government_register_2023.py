@@ -118,7 +118,11 @@ def extract_geojson_from_row(row):
 
 def extract_sites_from_row(row):
     urls, _ = retrieve_possible_urls_from_unfiltered_input(row.get("Internetpagina's", ""))
-    return urls
+
+    # also add the non-www address to the list:
+    urls_without_www = [url.replace("www.", "") for url in urls if url.startswith("www.")]
+
+    return urls_without_www + urls
 
 
 def extract_name_from_row(row):
