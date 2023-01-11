@@ -34,7 +34,8 @@ def get_improvements(country, organization_type, days_back, duration: int = 7, a
         INNER JOIN url ON reporting_urlreport.url_id = url.id
         INNER JOIN url_organization on url.id = url_organization.url_id
         INNER JOIN organization ON url_organization.organization_id = organization.id
-        WHERE organization.type_id = '{get_organization_type(organization_type)}'
+        INNER JOIN organization_layers as layers ON (layers.organization_id = organization.id)
+        WHERE layers.organizationtype_id = '{get_organization_type(organization_type)}'
         AND organization.country = '{get_country(country)}'
             """
 
@@ -54,7 +55,8 @@ def get_improvements(country, organization_type, days_back, duration: int = 7, a
         INNER JOIN url ON reporting_urlreport.url_id = url.id
         INNER JOIN url_organization on url.id = url_organization.url_id
         INNER JOIN organization ON url_organization.organization_id = organization.id
-        WHERE organization.type_id = '{get_organization_type(organization_type)}'
+        INNER JOIN organization_layers as layers ON (layers.organization_id = organization.id)
+        WHERE layers.organizationtype_id = '{get_organization_type(organization_type)}'
         AND organization.country = '{get_country(country)}'
             """
 

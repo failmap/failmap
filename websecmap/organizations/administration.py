@@ -14,6 +14,7 @@ def insert_or_update_organization(
     geojson_data: Union[List[Any], Dict[Any, Any]],
     geojson_type: str = "Point",
     alternative_names: List[str] = None,
+    country: str = "NL"
 ) -> Organization:
     # This can create an organization or update an existing one with new domains. Domains and data are never deleted
     # for now. If that would be the case: older domains might not be monitored while the government is still responsible
@@ -22,12 +23,13 @@ def insert_or_update_organization(
     if alternative_names is None:
         alternative_names = []
 
-    organization = find_organization_by_names_and_layer([name] + alternative_names, layer)
+    organization = find_organization_by_names_and_layer([name] + alternative_names, layer, country)
 
     # add new websites if this already exists.
     if not organization:
         log.debug("Creating new organization: %s", name)
-        organization = Organization.objects.create(name=name, type=layer, created_on=timezone.now())
+        organization = Organization.objects.create(name=name, type=layer, created_on=timezone.now(), country=country)
+        organization.layers.add(layer)
 
     coordinate = Coordinate.objects.all().filter(organization=organization, is_dead=False).first()
 
@@ -49,9 +51,12 @@ def insert_or_update_organization(
     return organization
 
 
-def find_organization_by_names_and_layer(names: List[str], layer: OrganizationType) -> Optional[Organization]:
+def find_organization_by_names_and_layer(
+    names: List[str], layer: OrganizationType, country: str
+) -> Optional[Organization]:
     for name in names:
-        if organization := Organization.objects.all().filter(name__iexact=name, type=layer).first():
+        # type=layer,
+        if organization := Organization.objects.all().filter(name__iexact=name, layers=layer, country=country).first():
             return organization
     return None
 

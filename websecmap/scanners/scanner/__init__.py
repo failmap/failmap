@@ -116,13 +116,13 @@ def q_configurations_to_scan(level: str = "url"):
 
     if level == "organization":
         for configuration in configurations:
-            qs.add(Q(type=configuration["organization_type"], country=configuration["country"]), Q.OR)
+            qs.add(Q(layers=configuration["organization_type"], country=configuration["country"]), Q.OR)
 
     if level == "url":
         for configuration in configurations:
             qs.add(
                 Q(
-                    organization__type=configuration["organization_type"],
+                    organization__layers=configuration["organization_type"],
                     organization__country=configuration["country"],
                 ),
                 Q.OR,
@@ -132,7 +132,7 @@ def q_configurations_to_scan(level: str = "url"):
         for configuration in configurations:
             qs.add(
                 Q(
-                    url__organization__type=configuration["organization_type"],
+                    url__organization__layers=configuration["organization_type"],
                     url__organization__country=configuration["country"],
                 ),
                 Q.OR,
@@ -158,13 +158,13 @@ def q_configurations_to_report(level: str = "url"):
 
     if level == "organization":
         for configuration in configurations:
-            qs.add(Q(type=configuration["organization_type"], country=configuration["country"]), Q.OR)
+            qs.add(Q(layers=configuration["organization_type"], country=configuration["country"]), Q.OR)
 
     if level == "url":
         for configuration in configurations:
             qs.add(
                 Q(
-                    organization__type=configuration["organization_type"],
+                    organization__layers=configuration["organization_type"],
                     organization__country=configuration["country"],
                 ),
                 Q.OR,
@@ -188,13 +188,13 @@ def q_configurations_to_display(level: str = "url"):
 
     if level == "organization":
         for configuration in configurations:
-            qs.add(Q(type=configuration["organization_type"], country=configuration["country"]), Q.OR)
+            qs.add(Q(layers=configuration["organization_type"], country=configuration["country"]), Q.OR)
 
     if level == "url":
         for configuration in configurations:
             qs.add(
                 Q(
-                    organization__type=configuration["organization_type"],
+                    organization__layers=configuration["organization_type"],
                     organization__country=configuration["country"],
                 ),
                 Q.OR,

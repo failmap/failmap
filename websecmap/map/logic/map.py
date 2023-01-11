@@ -157,17 +157,18 @@ def get_map_data(
 
           (SELECT stacked_organization.id as stacked_organization_id
           FROM organization stacked_organization
+          INNER JOIN organization_layers as layers4 ON (layers4.organization_id = stacked_organization.id)
           WHERE (
             stacked_organization.created_on <= '{when}'
             AND stacked_organization.is_dead = 0
-            AND stacked_organization.type_id={my_organization_type}
             AND stacked_organization.country='{my_country}'
+            AND layers4.organizationtype_id = '{my_organization_type}'
             )
           OR (
           '{when}' BETWEEN stacked_organization.created_on AND stacked_organization.is_dead_since
             AND stacked_organization.is_dead = 1
-            AND stacked_organization.type_id={my_organization_type}
             AND stacked_organization.country='{my_country}'
+            AND layers4.organizationtype_id = '{my_organization_type}'
           )) as organization_stack
           ON organization_stack.stacked_organization_id = map_organizationreport.organization_id
 
@@ -179,22 +180,23 @@ def get_map_data(
         INNER JOIN
 
 
-          (SELECT MAX(stacked_coordinate.id) as stacked_coordinate_id, area, geoJsonType, organization_id
+          (SELECT MAX(stacked_coordinate.id) as stacked_coordinate_id, area, geoJsonType, stacked_coordinate.organization_id
           FROM coordinate stacked_coordinate
           INNER JOIN organization filter_organization
             ON (stacked_coordinate.organization_id = filter_organization.id)
+          INNER JOIN organization_layers as layers3 ON (layers3.organization_id = filter_organization.id)
           WHERE (
             stacked_coordinate.created_on <= '{when}'
             AND stacked_coordinate.is_dead = 0
             AND filter_organization.country='{my_country}'
-            AND filter_organization.type_id={my_organization_type}
+            AND layers3.organizationtype_id = '{my_organization_type}'
             )
           OR
             ('{when}' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
             AND stacked_coordinate.is_dead = 1
             AND filter_organization.country='{my_country}'
-            AND filter_organization.type_id={my_organization_type}
-            ) GROUP BY area, organization_id
+            AND layers3.organizationtype_id = '{my_organization_type}'
+            ) GROUP BY area, stacked_coordinate.organization_id
           ) as coordinate_stack
           ON coordinate_stack.organization_id = map_organizationreport.organization_id
 
@@ -206,15 +208,18 @@ def get_map_data(
           FROM map_organizationreport
           INNER JOIN organization filter_organization2
             ON (filter_organization2.id = map_organizationreport.organization_id)
+          INNER JOIN organization_layers as layers2 ON (layers2.organization_id = filter_organization2.id)
           WHERE at_when <= '{when}'
           AND filter_organization2.country='{my_country}'
-          AND filter_organization2.type_id={my_organization_type}
-          GROUP BY organization_id
+          AND layers2.organizationtype_id = '{my_organization_type}'
+          GROUP BY map_organizationreport.organization_id
           ) as stacked_organizationrating
           ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
 
-
-        WHERE organization.type_id = '{my_organization_type}' AND organization.country= '{my_country}'
+        INNER JOIN organization_layers as layers ON (layers.organization_id = organization.id)
+        
+        WHERE layers.organizationtype_id = '{my_organization_type}' AND organization.country= '{my_country}'
+        
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY map_organizationreport.at_when ASC
         """
@@ -222,11 +227,7 @@ def get_map_data(
     cursor.execute(sql)
     rows = cursor.fetchall()
 
-    needed_reports = []
-    for i in rows:
-        # prevent sequence item 0: expected str instance, int found
-        needed_reports.append(str(i[6]))
-
+    needed_reports = [str(i[6]) for i in rows]
     reports = get_reports_by_ids(needed_reports)
 
     # todo: http://www.gadzmo.com/python/using-pythons-dictcursor-in-mysql-to-return-a-dict-with-keys/

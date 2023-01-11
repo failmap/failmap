@@ -241,17 +241,18 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
 
                       (SELECT stacked_organization.id as stacked_organization_id
                       FROM organization stacked_organization
+                      INNER JOIN organization_layers as layers4 ON (layers4.organization_id = stacked_organization.id)
                       WHERE (
                         stacked_organization.created_on <= '%(when)s'
                         AND stacked_organization.is_dead = 0
-                        AND stacked_organization.type_id=%(OrganizationTypeId)s
                         AND stacked_organization.country='%(country)s'
+                        AND layers4.organizationtype_id = %(OrganizationTypeId)s
                         )
                       OR (
                       '%(when)s' BETWEEN stacked_organization.created_on AND stacked_organization.is_dead_since
                         AND stacked_organization.is_dead = 1
-                        AND stacked_organization.type_id=%(OrganizationTypeId)s
                         AND stacked_organization.country='%(country)s'
+                        AND layers4.organizationtype_id = %(OrganizationTypeId)s
                       )) as organization_stack
                       ON organization_stack.stacked_organization_id = map_organizationreport.organization_id
 
@@ -264,22 +265,23 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
 
 
 
-                      (SELECT MAX(stacked_coordinate.id) as stacked_coordinate_id, area, geoJsonType, organization_id
+                      (SELECT MAX(stacked_coordinate.id) as stacked_coordinate_id, area, geoJsonType, stacked_coordinate.organization_id
                       FROM coordinate stacked_coordinate
                       INNER JOIN organization filter_organization
                         ON (stacked_coordinate.organization_id = filter_organization.id)
+                      INNER JOIN organization_layers as layers3 ON (layers3.organization_id = filter_organization.id)
                       WHERE (
                         stacked_coordinate.created_on <= '%(when)s'
                         AND stacked_coordinate.is_dead = 0
                         AND filter_organization.country='%(country)s'
-                        AND filter_organization.type_id=%(OrganizationTypeId)s
+                        AND layers3.organizationtype_id=%(OrganizationTypeId)s
                         )
                       OR
                         ('%(when)s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
                         AND stacked_coordinate.is_dead = 1
                         AND filter_organization.country='%(country)s'
-                        AND filter_organization.type_id=%(OrganizationTypeId)s
-                        ) GROUP BY calculated_area_hash, organization_id
+                        AND layers3.organizationtype_id=%(OrganizationTypeId)s
+                        ) GROUP BY calculated_area_hash, stacked_coordinate.organization_id
                       ) as coordinate_stack
                       ON coordinate_stack.organization_id = map_organizationreport.organization_id
 
@@ -291,14 +293,17 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                       FROM map_organizationreport
                       INNER JOIN organization filter_organization2
                         ON (filter_organization2.id = map_organizationreport.organization_id)
+                      INNER JOIN organization_layers as layers2 ON (layers2.organization_id = filter_organization2.id)
                       WHERE at_when <= '%(when)s'
                       AND filter_organization2.country='%(country)s'
-                      AND filter_organization2.type_id=%(OrganizationTypeId)s
-                      GROUP BY organization_id
+                      AND layers2.organizationtype_id=%(OrganizationTypeId)s
+                      GROUP BY map_organizationreport.organization_id
                       ) as stacked_organizationrating
                       ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
 
-                    WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
+                    INNER JOIN organization_layers as layers ON (layers.organization_id = organization.id)
+                    
+                    WHERE layers.organizationtype_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
                     GROUP BY coordinate_stack.area, organization.name
                     ORDER BY map_organizationreport.at_when ASC
                     """ % {
@@ -557,14 +562,16 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                     FROM map_organizationreport or2
                     INNER JOIN organization as filter_organization
                     ON (filter_organization.id = or2.organization_id)
+                    INNER JOIN organization_layers as layers ON (layers.organization_id = filter_organization.id)
                     WHERE
                         at_when <= '%(when)s'
                         AND filter_organization.country='%(country)s'
-                        AND filter_organization.type_id=%(OrganizationTypeId)s
-                   GROUP BY organization_id
+                        AND layers.organizationtype_id=%(OrganizationTypeId)s
+                   GROUP BY or2.organization_id
                 ) as stacked_organizationreport
                 ON stacked_organizationreport.id2 = map_organizationreport.id
                 INNER JOIN organization ON map_organizationreport.organization_id = organization.id
+                INNER JOIN organization_layers as layers1 ON (layers1.organization_id = organization.id)
                 WHERE
                     /* Only include organizations that are alive now... */
                     (('%(when)s' BETWEEN organization.created_on AND organization.is_dead_since
@@ -573,7 +580,7 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                     organization.created_on <= '%(when)s'
                     AND organization.is_dead = 0
                     ))
-                    AND organization.type_id = '%(OrganizationTypeId)s'
+                    AND layers1.organizationtype_id = '%(OrganizationTypeId)s'
                     AND organization.country = '%(country)s'
                     /* Remove organizations with zero urls, otherwise they would be good or bad automatically. */
                     AND total_urls > 0

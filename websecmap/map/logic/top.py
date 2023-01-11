@@ -27,6 +27,9 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", days
     """
     when = determine_when(days_back, at_date)
 
+    my_organization_type = get_organization_type(organization_type)
+    my_country = get_country(country)
+
     cursor = connection.cursor()
     sql = f"""
             SELECT
@@ -50,14 +53,17 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", days
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
+            INNER JOIN 
+              organization_layers as layers ON (layers.organization_id = organization.id)
             INNER JOIN
               (
                 SELECT MAX(or2.id) as id2 FROM map_organizationreport or2
                 INNER JOIN organization as org2 ON org2.id = or2.organization_id
+                INNER JOIN organization_layers as layers1 ON (layers1.organization_id = or2.organization_id)
                 WHERE at_when <= '{when}'
-                  AND org2.country = '{get_country(country)}'
-                  AND org2.type_id = '{get_organization_type(organization_type)}'
-                GROUP BY organization_id
+                  AND org2.country = '{my_country}'
+                  AND layers1.organizationtype_id = '{my_organization_type}'
+                GROUP BY or2.organization_id
               ) as stacked_organization_report
             ON stacked_organization_report.id2 = map_organizationreport.id
             WHERE
@@ -67,8 +73,8 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", days
                organization.created_on <= '{when}'
                AND organization.is_dead = 0
               ))
-              AND organization.type_id = '{get_organization_type(organization_type)}'
-              AND organization.country = '{get_country(country)}'
+              AND layers.organizationtype_id = '{my_organization_type}'
+              AND organization.country = '{my_country}'
               AND total_urls > 0
             GROUP BY organization.name
             HAVING high = 0 AND medium = 0
@@ -85,6 +91,9 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", day
 
     when = determine_when(days_back, at_date)
     cursor = connection.cursor()
+
+    my_organization_type = get_organization_type(organization_type)
+    my_country = get_country(country)
 
     sql = f"""
             SELECT
@@ -108,14 +117,17 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", day
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
+            INNER JOIN 
+              organization_layers as layers ON (layers.organization_id = organization.id)
             INNER JOIN
               (
                 SELECT MAX(or2.id) as id2 FROM map_organizationreport or2
                 INNER JOIN organization as org2 ON org2.id = or2.organization_id
+                INNER JOIN organization_layers as layers1 ON (layers1.organization_id = or2.organization_id)
                 WHERE at_when <= '{when}'
-                  AND org2.country = '{get_country(country)}'
-                  AND org2.type_id = '{get_organization_type(organization_type)}'
-                GROUP BY organization_id
+                  AND org2.country = '{my_country}'
+                  AND layers1.organizationtype_id = '{my_organization_type}'
+                GROUP BY or2.organization_id
               ) as stacked_organization_report
             ON stacked_organization_report.id2 = map_organizationreport.id
             WHERE
@@ -125,8 +137,8 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", day
                organization.created_on <= '{when}'
                AND organization.is_dead = 0
               ))
-              AND organization.type_id = '{get_organization_type(organization_type)}'
-              AND organization.country = '{get_country(country)}'
+              AND layers.organizationtype_id = '{my_organization_type}'
+              AND organization.country = '{my_country}'
               AND total_urls > 0
             GROUP BY organization.name
             HAVING high > 0 or medium > 0

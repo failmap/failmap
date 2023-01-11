@@ -693,7 +693,7 @@ def map_default(request, days_back: int = 0, displayed_issue: str = "all", at_da
 def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type: str = DEFAULT_LAYER):
     query = (
         Organization.objects.all()
-        .filter(country=get_country(country), type=get_organization_type(organization_type), is_dead=False)
+        .filter(country=get_country(country), layers=get_organization_type(organization_type), is_dead=False)
         .only("id", "name", "computed_name_slug")
     )
 

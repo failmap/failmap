@@ -97,7 +97,7 @@ def merge(
     # implies that name + country + organization_type is unique.
     try:
         original_target = Organization.objects.get(
-            name=target_organization_name, country=country, type=organization_type_object, is_dead=False
+            name=target_organization_name, country=country, layers=organization_type_object, is_dead=False
         )
         new_organization.twitter_handle = original_target.twitter_handle
 
@@ -133,7 +133,7 @@ def merge(
 
         try:
             source_organization = Organization.objects.get(
-                name=source_organizations_name, country=country, type=organization_type_object, is_dead=False
+                name=source_organizations_name, country=country, layers=organization_type_object, is_dead=False
             )
         except Organization.DoesNotExist as exc:
             # New organizations don't exist... so nothing to migrate.
@@ -212,7 +212,7 @@ def dissolve(
 
     organization_type_data = OrganizationType.objects.get(name=organization_type)
     dissolved_organization = Organization.objects.get(
-        name=dissolved_organization_name, country=country, type=organization_type_data, is_dead=False
+        name=dissolved_organization_name, country=country, layers=organization_type_data, is_dead=False
     )
     dissolved_organization.is_dead = True
     dissolved_organization.is_dead_since = when
@@ -226,7 +226,7 @@ def dissolve(
 
     for target_organization_name in target_organization_names:
         target_organization = Organization.objects.get(
-            name=target_organization_name, country=country, type=organization_type_data, is_dead=False
+            name=target_organization_name, country=country, layers=organization_type_data, is_dead=False
         )
 
         clone_target = deepcopy(target_organization)
@@ -261,7 +261,7 @@ def dissolve(
 def add_url_to_new_organization(country: str, organization_type: str, target_organization_name, url, when):
     otype = OrganizationType.objects.get(name=organization_type)
 
-    organization = Organization.objects.get(name=target_organization_name, country=country, type=otype, is_dead=False)
+    organization = Organization.objects.get(name=target_organization_name, country=country, layers=otype, is_dead=False)
 
     new_url = Url()
     new_url.url = url

@@ -17,6 +17,7 @@ def setup_some_data():
     Configuration.objects.create(country="NL", organization_type=ot, is_scanned=True)
 
     organization = Organization.objects.create(name="test", type=ot, created_on=timezone.now(), country="NL")
+    organization.layers.add(ot)
     url = Url.objects.create(url="google.com")
     url.organization.add(organization)
 

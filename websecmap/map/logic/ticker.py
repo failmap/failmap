@@ -43,15 +43,17 @@ def get_ticker_data(
                 SELECT MAX(or2.id) as id2
                 FROM map_organizationreport or2
                 INNER JOIN organization as filter_organization
+                INNER JOIN organization_layers as layers1 ON (layers1.organization_id = filter_organization.id)
                 ON (filter_organization.id = or2.organization_id)
                 WHERE
                     at_when <= '{when}'
                     AND filter_organization.country='{my_country}'
-                    AND filter_organization.type_id={my_organization_type}
+                    AND layers1.organizationtype_id={my_organization_type}
                GROUP BY organization_id
             ) as stacked_organizationreport
         ON stacked_organizationreport.id2 = map_organizationreport.id
         INNER JOIN organization ON map_organizationreport.organization_id = organization.id
+        INNER JOIN organization_layers as layers ON (layers.organization_id = organization.id)
         WHERE
         (('{when}' BETWEEN organization.created_on AND organization.is_dead_since
            AND organization.is_dead = 1
@@ -59,7 +61,7 @@ def get_ticker_data(
            organization.created_on <= '{when}'
            AND organization.is_dead = 0
         ))
-        AND organization.type_id = '{my_organization_type}'
+        AND layers.organizationtype_id = '{my_organization_type}'
         AND organization.country = '{my_country}'
         AND total_urls > 0
         """
@@ -86,15 +88,17 @@ def get_ticker_data(
                 SELECT MAX(or2.id) as id2
                 FROM map_organizationreport or2
                 INNER JOIN organization as filter_organization
+                INNER JOIN organization_layers as layers1 ON (layers1.organization_id = filter_organization.id)
                 ON (filter_organization.id = or2.organization_id)
                 WHERE
                     at_when <= '{when - timedelta(days=duration)}'
                     AND filter_organization.country='{my_country}'
-                    AND filter_organization.type_id={my_organization_type}
+                    AND layers1.organizationtype_id={my_organization_type}
                GROUP BY organization_id
             ) as stacked_organizationreport
         ON stacked_organizationreport.id2 = map_organizationreport.id
         INNER JOIN organization ON map_organizationreport.organization_id = organization.id
+        INNER JOIN organization_layers as layers ON (layers.organization_id = organization.id)
         WHERE
         (('{when - timedelta(days=duration)}' BETWEEN organization.created_on AND organization.is_dead_since
                AND organization.is_dead = 1
@@ -102,7 +106,7 @@ def get_ticker_data(
                organization.created_on <= '{when - timedelta(days=duration)}'
                AND organization.is_dead = 0
         ))
-        AND organization.type_id = '{my_organization_type}'
+        AND layers.organizationtype_id = '{my_organization_type}'
         AND organization.country = '{my_country}'
         AND total_urls > 0
         """

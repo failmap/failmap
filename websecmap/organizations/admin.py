@@ -291,6 +291,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     fields = (
         "name",
         "type",
+        "layers",
         "country",
         "internal_notes",
         "twitter_handle",
