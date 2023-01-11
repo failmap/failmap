@@ -290,6 +290,8 @@ class ConfigurationAdmin(
         "is_reported",
     )
 
+    save_as = True
+
     def save_model(self, request, obj, form, change):
         # allows to place a new item at the right position, moving certain items up.
         # if the display_order is zero, autoplace the item.

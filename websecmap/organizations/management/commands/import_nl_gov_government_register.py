@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from websecmap.organizations.datasources.nl_gov_government_register import download_and_import
+from websecmap.organizations.datasources.nl_gov_government_register_2023 import download_and_import
 
 log = logging.getLogger(__package__)
 

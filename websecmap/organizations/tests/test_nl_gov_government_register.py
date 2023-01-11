@@ -1,19 +1,28 @@
 from websecmap.organizations.datasources.nl_gov_government_register import (
-    import_register_overheidsorganisaties,
-    download_government_register_csvs,
+    import_dataset,
+    download,
     GOVERNMENT_REGISTER_FILES,
     GOVERNMENT_REGISTER_BASE_URL,
 )
+from websecmap.organizations.datasources.utils import save_succesful_download
 from websecmap.organizations.models import OrganizationType, Organization, Url, GenericFileDataset, Coordinate
 from websecmap.organizations.tests.test_nl_gov_websiteregister_rijksoverheid import binary
 
 
+def read_file(path):
+    with open(path, "rb") as f:
+        return f.read()
+
+
+# These test cases are kept because it tests the relocation of an organization as well
 def test_import_register_overheidsorganisaties(db):
     location = "websecmap/organizations/tests/nl_gov_government_register/Agentschappen.csv"
-
+    dataset = save_succesful_download(
+        origin="register_overheidsorganisaties", layer="agentschappen", data=read_file(location)
+    )
     # Doing this twice should not deliver extra data
-    _import_agentschappen(location)
-    _import_agentschappen(location)
+    _import_agentschappen(dataset)
+    _import_agentschappen(dataset)
 
     # todo: check order of lat/lon in database for area
     # Now load a file with the following changes:
@@ -26,7 +35,10 @@ def test_import_register_overheidsorganisaties(db):
 
     # todo: see if all the individual changes are reflected in the database
     location = "websecmap/organizations/tests/nl_gov_government_register/Agentschappen_Mutated.csv"
-    import_register_overheidsorganisaties(location, "agentschappen")
+    dataset = save_succesful_download(
+        origin="register_overheidsorganisaties", layer="agentschappen", data=read_file(location)
+    )
+    import_dataset(dataset)
 
     # the same
     assert OrganizationType.objects.filter(name="agentschappen").count() == 1
@@ -42,8 +54,8 @@ def test_import_register_overheidsorganisaties(db):
     assert Coordinate.objects.all().filter(is_dead=True).count() == 1
 
 
-def _import_agentschappen(location):
-    import_register_overheidsorganisaties(location, "agentschappen")
+def _import_agentschappen(dataset):
+    import_dataset(dataset)
 
     assert OrganizationType.objects.filter(name="agentschappen").count() == 1
     assert Organization.objects.all().count() == 28
@@ -55,12 +67,12 @@ def test_download_government_register_csvs(db, requests_mock, current_path):
 
     for file in GOVERNMENT_REGISTER_FILES:
         requests_mock.get(
-            f"{GOVERNMENT_REGISTER_BASE_URL}/{file}",
+            f"{GOVERNMENT_REGISTER_BASE_URL}/{file}.csv",
             content=binary(
                 f"{current_path}/websecmap/organizations/tests/nl_gov_government_register/Agentschappen.csv"
             ),
         )
 
-    download_government_register_csvs()
+    download()
 
-    assert GenericFileDataset.objects.all().count() == 20
+    assert GenericFileDataset.objects.all().count() == 17

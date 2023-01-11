@@ -25,8 +25,8 @@ from websecmap.organizations.datasources import dutch_government, excel
 from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid import (
     import_file as nl_gov_websiteregister_import_file,
 )
-from websecmap.organizations.datasources.nl_gov_government_register import (
-    import_file as nl_gov_government_register_import_file,
+from websecmap.organizations.datasources.nl_gov_government_register_2023 import (
+    import_dataset as nl_gov_government_register_import_file,
 )
 from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url, GenericFileDataset
 from websecmap.reporting.models import UrlReport
@@ -833,7 +833,7 @@ class GenericFileDatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     def import_government_register(self, request, queryset):
         for record in queryset:
-            nl_gov_government_register_import_file(record.id)
+            nl_gov_government_register_import_file(record)
 
     import_government_register.short_description = "+ Import NL Government Register"
 
