@@ -341,6 +341,9 @@ def remove_junk_data(banner):
     if "\x00\x00" in banner:
         banner = ""
 
+    if "\\x00\\x00" in banner:
+        banner = ""
+
     banner = banner.replace("<empty>", "").strip()
 
     if banner == "<empty>":
