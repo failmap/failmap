@@ -55,7 +55,3 @@ ipython
 # python 3.11 compat
 py>=1.11.0
 
-
-# run test in parallel
-pytest-xdist
-
