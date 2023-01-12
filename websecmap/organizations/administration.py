@@ -177,6 +177,26 @@ def merge_similar_organizations():
                 merge_organizations(existing_organization, organization)
 
 
+def force_merge_organizations(organizations: List[Organization], also_delete=False):
+    # Merge organizations from the admin interface, those who have different names (or slightly similar) into one.
+    # You are able to select a dozen organizations at a time and they will all be merged into the oldest one.
+    # Now you can search for "mijnen" to find:
+    # - Staatstoezicht op de Mijnen (SODM)
+    # - Staatstoezicht op de Mijnen (SodM)
+    # - Staatstoezicht op de Mijnen
+    # - etc...
+
+    sorted_organizations = sorted(organizations, key=lambda o: o.created_on)
+    oldest_organization = sorted_organizations[0]
+    other_organizations = sorted_organizations[1:]
+
+    for other_organization in other_organizations:
+        log.debug("Merging organization %s into %s.", other_organization.id, oldest_organization.id)
+        merge_organizations(org_from=other_organization, org_to=oldest_organization)
+        if also_delete:
+            other_organization.delete()
+
+
 def merge_organizations(org_from: Organization, org_to: Organization):
     # move urls
     for url in Url.objects.all().filter(organization=org_from):

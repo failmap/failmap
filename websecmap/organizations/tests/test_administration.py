@@ -1,7 +1,11 @@
 from datetime import timedelta
 from django.utils import timezone
 
-from websecmap.organizations.administration import merge_similar_organizations, merge_organizations
+from websecmap.organizations.administration import (
+    merge_similar_organizations,
+    merge_organizations,
+    force_merge_organizations,
+)
 from websecmap.organizations.models import AlternativeName, Organization, OrganizationType, Url
 
 
@@ -69,3 +73,21 @@ def test_merge_organizations(db):
 
     firstorg = Organization.objects.all().filter(is_dead=False).first()
     assert firstorg.twitter_handle == "@ietsanders123"
+
+
+def test_force_merge_organizations(db):
+    now = timezone.now()
+    org1 = Organization.objects.create(name="Test", country="NL", created_on=now)
+    org2 = Organization.objects.create(name="Test", country="NL", created_on=timezone.now())
+    org3 = Organization.objects.create(name="Test", country="NL", created_on=timezone.now())
+    org4 = Organization.objects.create(name="Test", country="NL", created_on=timezone.now())
+
+    # a record that does not merged, to make sure not the entire database is nuked
+    Organization.objects.create(name="Test", country="NL", created_on=timezone.now())
+    assert Organization.objects.all().filter(is_dead=False).count() == 5
+
+    force_merge_organizations([org1, org2, org3, org4])
+
+    assert Organization.objects.all().filter(is_dead=False).count() == 2
+    assert Organization.objects.all().filter(is_dead=True).count() == 3
+    assert Organization.objects.all().filter(is_dead=False).first().created_on == now

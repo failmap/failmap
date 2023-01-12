@@ -32,6 +32,7 @@ from websecmap.organizations.models import Coordinate, Dataset, Organization, Or
 from websecmap.reporting.models import UrlReport
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, UrlIp
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
+from websecmap.organizations.administration import force_merge_organizations
 
 log = logging.getLogger(__name__)
 
@@ -327,7 +328,21 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
             f"<a href='https://www.wikipedia.org/wiki/{inst.wikipedia}' target='_blank'>🔍 {inst.wikipedia}</a>"
         )
 
-    # preserve_filters = True
+    actions = []
+
+    def force_merge_organizations(self, request, queryset):
+        force_merge_organizations(list(queryset))
+        self.message_user(request, "Organizations Merged")
+
+    force_merge_organizations.short_description = "🔪  Force Merge organizations"
+    actions.append("force_merge_organizations")
+
+    def force_merge_and_delete_organizations(self, request, queryset):
+        force_merge_organizations(list(queryset), also_delete=True)
+        self.message_user(request, "Organizations Merged and deleted...")
+
+    force_merge_and_delete_organizations.short_description = "🔪🔪🔪  Force Merge AND DELETE organizations"
+    actions.append("force_merge_and_delete_organizations")
 
 
 # https://docs.djangoproject.com/en/2.0/ref/forms/validation/
