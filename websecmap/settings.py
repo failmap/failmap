@@ -76,8 +76,8 @@ INTERNAL_IPS = ["localhost", "127.0.0.1", "::1"]
 
 INSTALLED_APPS = [
     # needs to be before jet and admin to extend admin/base.html template
-    "dal",
-    "dal_select2",
+    # "dal",
+    # "dal_select2",
     "constance",
     "constance.backends.database",
     "websecmap.app",
@@ -99,7 +99,10 @@ INSTALLED_APPS = [
     "websecmap.scanners",
     "websecmap.reporting",
     "websecmap.map",
-    "websecmap.game",
+    # disable game as it has not been maintained for a while.
+    # the front-end needs to be re-written in a modern approach to make it work better
+    # removing this reduces the need for components like select2, crispy forms and similar
+    # "websecmap.game",
     "websecmap.api",
     "django_countries",
     "django.contrib.admindocs",
@@ -112,7 +115,7 @@ INSTALLED_APPS = [
     # Has been removed due to build errors (gdal) and little to no need to actually manually
     # edit coordinated via the admin interface.
     # 'djgeojson',
-    "crispy_forms",  # for the game
+    # "crispy_forms",  # for the game
     # django helpdesk requirements:
     # We don't use this yet, as it had issues during build.
     # 'django.contrib.sites',  # Required for determining domain url for use in emails
@@ -120,8 +123,8 @@ INSTALLED_APPS = [
     # 'bootstrapform',  # Required for nicer formatting of forms with the default templates
     # 'helpdesk',  # This is us!
     # 'mapwidgets', # we don't support gdal, as it's not in alpine stable yet.
-    "colorful",
-    "django_select2",
+    # "colorful",
+    # "django_select2",
     # others:
     # 'mapwidgets',  no gdal available yet, try again later
     # 'cachalot',  # query cache, is not faster.

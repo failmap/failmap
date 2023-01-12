@@ -112,20 +112,21 @@ wikidata
 django-nested-admin
 
 # game requirements
-django-crispy-forms
-django-autocomplete-light
+# django-crispy-forms
+# django-autocomplete-light
 # who speaks what where
-babel
+# babel
 
 django-admin-sortable2<2
 
 pyexcel-text
 # game team colors
 validators
-django-colorful
+# django-colorful
 
 # game, add multiple urls in one go.
-django-select2
+# django-select2
+# django-select2
 
 # ISO country code conversion
 iso3166
@@ -134,8 +135,8 @@ iso3166
 tenacity
 
 # game
-spectra
-markdown
+# spectra
+# markdown
 
 # geocoding organizations from python
 googlemaps
