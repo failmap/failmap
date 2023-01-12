@@ -145,7 +145,8 @@ run-broker:  ## only run broker
 testcase: ${app}
 	# run specific testcase
 	# example: make testcase case=test_openstreetmaps
-	DB_NAME=test.sqlite3 pytest -W ignore::django.utils.deprecation.RemovedInDjango40Warning -vvv --log-cli-level=10 -k ${case}
+    # -W ignore::django.utils.deprecation.RemovedInDjango40Warning
+	DB_NAME=test.sqlite3 pytest  -vvv --log-cli-level=10 -k ${case}
 
 test_integration: ${app}
 	# run integration tests

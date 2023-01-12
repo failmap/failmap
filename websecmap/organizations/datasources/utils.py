@@ -43,7 +43,7 @@ def save_failed_download(
     file_format="register_overheidsorganisaties", layer: str = "", origin: str = "", error: str = ""
 ):
     idataset = create_dataset(file_format, origin)
-    now = datetime.now().isoformat()
+    now = datetime.now(pytz.utc).isoformat()
     idataset.state = "failed_file_download"
     idataset.parser_info = json.dumps(
         {"origin": origin, "state": "failed_file_download", "exception": error, "layer": layer, "at_when": now}
@@ -60,7 +60,7 @@ def save_succesful_download(
     data: Any = "",
 ):
     idataset = create_dataset(file_format, origin)
-    now = datetime.now().isoformat()
+    now = datetime.now(pytz.utc).isoformat()
     idataset.file = SimpleUploadedFile(filename.format(now), data)
     idataset.state = "uploaded"
     idataset.parser_info = json.dumps({"origin": origin, "state": "uploaded", "layer": layer, "at_when": now})

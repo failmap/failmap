@@ -1,4 +1,7 @@
-default_app_config = "websecmap.scanners.apps.ScannersConfig"
+# RemovedInDjango41Warning: 'websecmap.scanners' defines default_app_config =
+# 'websecmap.scanners.apps.ScannersConfig'. Django now detects this configuration automatically.
+# You can remove default_app_config.
+# default_app_config = "websecmap.scanners.apps.ScannersConfig"
 
 
 def init_dict(*args):

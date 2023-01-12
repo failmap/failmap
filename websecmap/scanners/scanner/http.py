@@ -658,7 +658,7 @@ def endpoint_exists(url_id: int, port: int, protocol: str, ip_version: int) -> i
 def get_similar_dead_endpoint_in_last_n_days(
     url_id: int, port: int, protocol: str, ip_version: int, days: int = 30
 ) -> Endpoint:
-    days_ago = datetime.now() - timedelta(days=days)
+    days_ago = datetime.now(pytz.utc) - timedelta(days=days)
     return (
         Endpoint.objects.all()
         .filter(

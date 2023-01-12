@@ -162,15 +162,15 @@ def generate_certificate(failure_mode: str = ""):
         )
 
     if failure_mode == "future":
-        builder = builder.not_valid_before(datetime.datetime.today() + one_day)
-        builder = builder.not_valid_after(datetime.datetime.today() + (one_day * 30))
+        builder = builder.not_valid_before(datetime.datetime.now(pytz.utc) + one_day)
+        builder = builder.not_valid_after(datetime.datetime.now(pytz.utc) + (one_day * 30))
     elif failure_mode == "expired":
-        builder = builder.not_valid_before(datetime.datetime.today() - (one_day * 30))
-        builder = builder.not_valid_after(datetime.datetime.today() - one_day)
+        builder = builder.not_valid_before(datetime.datetime.now(pytz.utc) - (one_day * 30))
+        builder = builder.not_valid_after(datetime.datetime.now(pytz.utc) - one_day)
 
     else:
-        builder = builder.not_valid_before(datetime.datetime.today() - one_day)
-        builder = builder.not_valid_after(datetime.datetime.today() + (one_day * 30))
+        builder = builder.not_valid_before(datetime.datetime.now(pytz.utc) - one_day)
+        builder = builder.not_valid_after(datetime.datetime.now(pytz.utc) + (one_day * 30))
 
     builder = builder.serial_number(x509.random_serial_number())
     builder = builder.public_key(public_key)
@@ -189,8 +189,8 @@ def generate_specific_certificate(subject="", issuer=""):
     builder = x509.CertificateBuilder()
     builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, subject)]))
     builder = builder.issuer_name(x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, issuer)]))
-    builder = builder.not_valid_before(datetime.datetime.today() - one_day)
-    builder = builder.not_valid_after(datetime.datetime.today() + (one_day * 30))
+    builder = builder.not_valid_before(datetime.datetime.now(pytz.utc) - one_day)
+    builder = builder.not_valid_after(datetime.datetime.now(pytz.utc) + (one_day * 30))
     builder = builder.serial_number(x509.random_serial_number())
     builder = builder.public_key(public_key)
     builder = builder.add_extension(x509.SubjectAlternativeName([x509.DNSName("cryptography.io")]), critical=False)

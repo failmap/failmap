@@ -30,4 +30,7 @@ class Websecmap(AppConfig):
 
 
 # This statement might be obsoleted by newer versions of the django framework
-default_app_config = "websecmap.app.Websecmap"  # pylint: disable=invalid-name
+# RemovedInDjango41Warning: 'websecmap.scanners' defines default_app_config =
+# 'websecmap.scanners.apps.ScannersConfig'. Django now detects this configuration automatically.
+# You can remove default_app_config.
+# default_app_config = "websecmap.app.Websecmap"  # pylint: disable=invalid-name

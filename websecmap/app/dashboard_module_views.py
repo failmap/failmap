@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path
 from django.http import JsonResponse
 from jet.dashboard import dashboard
 
@@ -13,6 +13,6 @@ def task_processing_status(request):
 
 dashboard.urls.register_urls(
     [
-        url(r"^task_processing_status/", task_processing_status, name="task-processing-status"),
+        re_path(r"^task_processing_status/", task_processing_status, name="task-processing-status"),
     ]
 )

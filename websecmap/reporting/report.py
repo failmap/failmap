@@ -205,7 +205,7 @@ def significant_moments(urls: List[Url] = None, reported_scan_types: List[str] =
 
     # make sure you don't save the scan for today at the end of the day (which would make it visible only at the end
     # of the day). Just make it "now" so you can immediately see the results.
-    if moments[-1] == latest_moment_of_datetime(datetime.now()):
+    if moments[-1] == latest_moment_of_datetime(datetime.now(pytz.utc)):
         moments[-1] = datetime.now(pytz.utc)
 
     # log.debug("Moments found: %s", len(moments))
@@ -827,7 +827,7 @@ def save_url_report(url: Url, date: datetime, calculation, is_the_newest=False):
 
     # save it as NOW if it's done today, else on the last moment on the same day.
     # So the url ratings immediately are shown, even if the day is not over.
-    if date == datetime.now().date():
+    if date == datetime.now(pytz.utc).date():
         url_report.at_when = datetime.now(pytz.utc)
     else:
         url_report.at_when = datetime(

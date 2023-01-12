@@ -202,7 +202,7 @@ def save_screenshot(response: Dict[str, Union[str, bool, int]], endpoint_id: int
         # actual saving of the image to disk
         i = deserialize_image_to_image(response["screenshot"])
         size = 640, 360  # widescreen
-        i.thumbnail(size, Image.ANTIALIAS)
+        i.thumbnail(size, Image.Resampling.LANCZOS)
         i.save(filename, "PNG")
         log.debug("Image saved as: %s.", filename)
 

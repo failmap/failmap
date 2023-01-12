@@ -25,8 +25,9 @@ pytest-responses
 pytest-logging
 django-coverage
 django-extensions
-django-debug-toolbar
-django-debug-toolbar-request-history
+# debug toolbar has not been used in years, so don't carry it.
+# django-debug-toolbar
+# django-debug-toolbar-request-history
 pytest-mock
 requests_mock
 # min version to support pyproject.toml

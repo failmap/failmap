@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pytz
 from freezegun import freeze_time
 
 from websecmap.app.models import Job
@@ -12,7 +13,7 @@ def test_clean_application_caches_and_logs(db):
     with freeze_time("2020-01-01"):
 
         my_job = Job()
-        my_job.created_on = datetime.now()
+        my_job.created_on = datetime.now(pytz.utc)
         my_job.save()
 
         assert Job.objects.all().count() == 1

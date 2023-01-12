@@ -24,7 +24,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy, default_scan_met
     e2 = create_endpoint(u, 6, "https", 443)
 
     # e2 died on the 20th of january:
-    e2.is_dead_since = datetime(2020, 1, 20)
+    e2.is_dead_since = datetime(2020, 1, 20, tzinfo=pytz.utc)
     e2.is_dead = True
     e2.save()
 
@@ -33,42 +33,42 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy, default_scan_met
     epgs1 = EndpointGenericScan()
     epgs1.endpoint = e1
     epgs1.rating = "F"
-    epgs1.last_scan_moment = datetime(2020, 1, 5)
+    epgs1.last_scan_moment = datetime(2020, 1, 5, tzinfo=pytz.utc)
     epgs1.type = "tls_qualys_encryption_quality"
-    epgs1.rating_determined_on = datetime(2020, 1, 5)
+    epgs1.rating_determined_on = datetime(2020, 1, 5, tzinfo=pytz.utc)
     epgs1.save()
 
     epgs2 = EndpointGenericScan()
     epgs2.endpoint = e1
     epgs2.rating = "A"
-    epgs2.last_scan_moment = datetime(2020, 2, 5)
+    epgs2.last_scan_moment = datetime(2020, 2, 5, tzinfo=pytz.utc)
     epgs2.type = "tls_qualys_encryption_quality"
-    epgs2.rating_determined_on = datetime(2020, 2, 5)
+    epgs2.rating_determined_on = datetime(2020, 2, 5, tzinfo=pytz.utc)
     epgs2.save()
 
     epgs3 = EndpointGenericScan()
     epgs3.endpoint = e2
     epgs3.rating = "F"
-    epgs3.last_scan_moment = datetime(2020, 1, 6)
+    epgs3.last_scan_moment = datetime(2020, 1, 6, tzinfo=pytz.utc)
     epgs3.type = "tls_qualys_encryption_quality"
-    epgs3.rating_determined_on = datetime(2020, 1, 6)
+    epgs3.rating_determined_on = datetime(2020, 1, 6, tzinfo=pytz.utc)
     epgs3.save()
 
     epgs4 = EndpointGenericScan()
     epgs4.endpoint = e2
     epgs4.rating = "A"
-    epgs4.last_scan_moment = datetime(2020, 2, 6)
+    epgs4.last_scan_moment = datetime(2020, 2, 6, tzinfo=pytz.utc)
     epgs4.type = "tls_qualys_encryption_quality"
-    epgs4.rating_determined_on = datetime(2020, 2, 6)
+    epgs4.rating_determined_on = datetime(2020, 2, 6, tzinfo=pytz.utc)
     epgs4.save()
 
     # extra action, to see if this is picked up, while the previous one is ignored.
     epgs5 = EndpointGenericScan()
     epgs5.endpoint = e1
     epgs5.rating = "A+"
-    epgs5.last_scan_moment = datetime(2020, 2, 7)
+    epgs5.last_scan_moment = datetime(2020, 2, 7, tzinfo=pytz.utc)
     epgs5.type = "tls_qualys_encryption_quality"
-    epgs5.rating_determined_on = datetime(2020, 2, 7)
+    epgs5.rating_determined_on = datetime(2020, 2, 7, tzinfo=pytz.utc)
     epgs5.save()
 
     assert EndpointGenericScan.objects.count() == 5

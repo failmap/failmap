@@ -506,31 +506,6 @@ if not DEBUG:
         "django_statsd.patches.db",
     ]
 
-# enable some features during debug
-if DEBUG:
-    # We expect the debug toolbar always to be available in debug environments.
-    import debug_toolbar
-
-    INSTALLED_APPS.insert(0, "debug_toolbar")
-
-    # The order of MIDDLEWARE is important. You should include the Debug Toolbar middleware as early as possible
-    # in the list. However, it must come after any other middleware that encodes the response’s content,
-    # such as GZipMiddleware.
-    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
-
-    import debug_toolbar.settings
-
-    DEBUG_TOOLBAR_PANELS = (
-        [
-            "ddt_request_history.panels.request_history.RequestHistoryPanel",
-        ]
-        + debug_toolbar.settings.PANELS_DEFAULTS
-        + [
-            "django_statsd.panel.StatsdPanel",
-        ]
-    )
-    # send statsd metrics to debug_toolbar
-    STATSD_CLIENT = "django_statsd.clients.toolbar"
 
 # if sentry DSN is provided register raven to emit events on exceptions
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
@@ -973,9 +948,9 @@ CONSTANCE_CONFIG = {
         str,
     ),
     "WEBSITEREGISTER_SPREADSHEET_FILE_PATTERN_ON_PAGE": (
-        "binaries\/communicatierijk\/documenten\/publicaties"
-        "\/2016\/05\/26\/websiteregister\/websiteregister-"
-        "rijksoverheid-2...-..-..\.ods",
+        r"binaries\/communicatierijk\/documenten\/publicaties"
+        r"\/2016\/05\/26\/websiteregister\/websiteregister-"
+        r"rijksoverheid-2...-..-..\.ods",
         "A way to recognize the ods file for download on that page.",
         str,
     ),

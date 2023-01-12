@@ -3,6 +3,7 @@ import ssl
 from datetime import datetime, timedelta
 from typing import List
 
+import pytz
 from celery import group
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -248,11 +249,11 @@ def certificate_matches_microsoft_exception_policy(
         log.debug("Could not retrieve certificate for %s.", url)
         return False
 
-    if certificate.not_valid_before > datetime.now():
+    if certificate.not_valid_before.astimezone(pytz.utc) > datetime.now(pytz.utc):
         log.debug("Certificate for %s is not valid before %s. Not trusted.", url, certificate.not_valid_before)
         return False
 
-    if datetime.now() > certificate.not_valid_after:
+    if datetime.now(pytz.utc) > certificate.not_valid_after.astimezone(pytz.utc):
         log.debug("Certificate for %s has expired  %s. Not trusted.", url, certificate.not_valid_after)
         return False
 

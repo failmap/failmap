@@ -111,15 +111,6 @@ if settings.ADMIN or settings.INTERACTIVE:
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
 
-    try:
-        import debug_toolbar
-
-        urlpatterns = [
-            re_path(r"^__debug__/", include(debug_toolbar.urls)),
-        ] + urlpatterns
-    except ImportError:
-        pass
-
 
 # debugging
 # urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]

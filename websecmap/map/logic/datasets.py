@@ -1,4 +1,5 @@
 import pyexcel as p
+import pytz
 from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
@@ -14,7 +15,7 @@ def create_filename(set_name, country: str = "NL", organization_type="municipali
     else:
         organization_type_name = organization_type_name.get("name")
 
-    filename = f"{country}_{organization_type_name}_{set_name}_{timezone.datetime.now().date()}"
+    filename = f"{country}_{organization_type_name}_{set_name}_{timezone.datetime.now(pytz.utc).date()}"
     return filename
 
 

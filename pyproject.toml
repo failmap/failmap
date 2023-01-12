@@ -21,7 +21,7 @@ websecmap = "websecmap.manage:main"
 minversion = "6.0"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 testpaths = ["tests","websecmap"]
-norecursedirs = ["*fixtures*", "*locale*", "*migrations*", "*static*"]
+norecursedirs = ["*fixtures*", "*locale*", "*migrations*", "*static*", "*uploads*", "resources", "*templates*", "*.devenv*", "*.pytest_cache*", "*htmlcov*", "*tools*", "*vendor*"]
 
 [tool.black]
 line-length = 120

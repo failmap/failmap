@@ -1,5 +1,5 @@
 import logging
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import pytz
 from deepdiff import DeepDiff
@@ -19,10 +19,10 @@ def test_deduplicate_all_endpoints_sequentially(db):
 
     # a set of duplicates:
     duplicate_properties = {"protocol": "https", "port": 443, "ip_version": 4, "is_dead": False, "url": u}
-    target_ep = Endpoint.objects.create(**{**duplicate_properties, **{"discovered_on": date(2021, 7, 1)}})
-    Endpoint.objects.create(**{**duplicate_properties, **{"discovered_on": date(2021, 7, 2)}})
-    e1 = Endpoint.objects.create(**{**duplicate_properties, **{"discovered_on": date(2021, 7, 3)}})
-    e2 = Endpoint.objects.create(**{**duplicate_properties, **{"discovered_on": date(2021, 7, 4)}})
+    target_ep = Endpoint.objects.create(**{**duplicate_properties, **{"discovered_on": datetime(2021, 7, 1, tzinfo=pytz.utc)}})
+    Endpoint.objects.create(**{**duplicate_properties, **{"discovered_on": datetime(2021, 7, 2, tzinfo=pytz.utc)}})
+    e1 = Endpoint.objects.create(**{**duplicate_properties, **{"discovered_on": datetime(2021, 7, 3, tzinfo=pytz.utc)}})
+    e2 = Endpoint.objects.create(**{**duplicate_properties, **{"discovered_on": datetime(2021, 7, 4, tzinfo=pytz.utc)}})
 
     # add some decoy records that should not be removed. They have to be added later as removal goes towards the past.
     Endpoint.objects.create(protocol="https", port=443, ip_version=6, is_dead=False, url=u)
@@ -33,20 +33,20 @@ def test_deduplicate_all_endpoints_sequentially(db):
     # The newest is dead, that state should be transferred all the way back to the oldest endpoint.
     # 9
     Endpoint.objects.create(
-        protocol="https", port=443, ip_version=4, is_dead=True, url=u, discovered_on=date(2021, 7, 5)
+        protocol="https", port=443, ip_version=4, is_dead=True, url=u, discovered_on=datetime(2021, 7, 5, tzinfo=pytz.utc)
     )
 
     # a very, very old endpoint will not be merged as its outside of the 60 days *n-days* window.:
     # 10
     non_deleted = Endpoint.objects.create(
-        protocol="https", port=443, ip_version=4, is_dead=False, url=u, discovered_on=date(2019, 7, 5)
+        protocol="https", port=443, ip_version=4, is_dead=False, url=u, discovered_on=datetime(2019, 7, 5, tzinfo=pytz.utc)
     )
     log.info(f"Non deleted endpoint has id: {non_deleted.id}")
 
     # a ver very NEW endpoint will also not be deleted
     # 11
     Endpoint.objects.create(
-        protocol="https", port=443, ip_version=4, is_dead=False, url=u, discovered_on=date(2023, 7, 5)
+        protocol="https", port=443, ip_version=4, is_dead=False, url=u, discovered_on=datetime(2023, 7, 5, tzinfo=pytz.utc)
     )
 
     EndpointGenericScan.objects.create(endpoint=e1, rating_determined_on=timezone.now())
@@ -153,7 +153,7 @@ def test_deduplicate_all_endpoints_sequentially(db):
 
 def _setup_endpoint_test():
     u1 = Url.objects.create(url="basisbeveiliging.nl")
-    pr = {"protocol": "http", "port": 1, "ip_version": 4, "is_dead": True, "url": u1, "discovered_on": date(2021, 7, 3)}
+    pr = {"protocol": "http", "port": 1, "ip_version": 4, "is_dead": True, "url": u1, "discovered_on": datetime(2021, 7, 3, tzinfo=pytz.utc)}
     e1 = Endpoint.objects.create(**pr)
     manager = EndpointGenericScan.objects
 
@@ -262,8 +262,8 @@ def test_deduplicate_all_scans_sequentially_with_noise(db):
 
     u1 = Url.objects.create(url="basisbeveiliging.nl")
     u2 = Url.objects.create(url="example.com")
-    p1 = {"protocol": "http", "port": 1, "ip_version": 4, "is_dead": True, "url": u1, "discovered_on": date(2021, 7, 3)}
-    p2 = {"protocol": "http", "port": 1, "ip_version": 4, "is_dead": True, "url": u2, "discovered_on": date(2021, 7, 3)}
+    p1 = {"protocol": "http", "port": 1, "ip_version": 4, "is_dead": True, "url": u1, "discovered_on": datetime(2021, 7, 3, tzinfo=pytz.utc)}
+    p2 = {"protocol": "http", "port": 1, "ip_version": 4, "is_dead": True, "url": u2, "discovered_on": datetime(2021, 7, 3, tzinfo=pytz.utc)}
     e1 = Endpoint.objects.create(**p1)
     e2 = Endpoint.objects.create(**p1)
     e3 = Endpoint.objects.create(**p1)
