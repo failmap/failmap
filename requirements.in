@@ -163,8 +163,6 @@ django-filter
 # watchmedo
 argh
 
-pytest-is-running
-
 # banner grabbing
 python-masscan
 python-nmap
