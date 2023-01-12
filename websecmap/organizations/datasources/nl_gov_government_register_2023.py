@@ -14,6 +14,7 @@ from websecmap.organizations.administration import (
     get_or_create_layer,
     add_urls_to_organization,
     retrieve_possible_urls_from_unfiltered_input,
+    insert_or_update_geojson_on_organization,
 )
 
 GOVERNMENT_REGISTER_FILES = [
@@ -101,7 +102,8 @@ def import_records(records: Any, layer: OrganizationType):
         if not sites or not geojson_data[0]:
             continue
 
-        organization = insert_or_update_organization(name=organization_name, layer=layer, geojson_data=geojson_data)
+        organization = insert_or_update_organization(name=organization_name, layer=layer, country="NL")
+        insert_or_update_geojson_on_organization(organization=organization, geojson_data=geojson_data)
         add_urls_to_organization(organization, sites)
 
 

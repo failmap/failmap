@@ -11,8 +11,6 @@ import tldextract
 def insert_or_update_organization(
     name: str,
     layer: OrganizationType,
-    geojson_data: Union[List[Any], Dict[Any, Any]],
-    geojson_type: str = "Point",
     alternative_names: List[str] = None,
     country: str = "NL",
 ) -> Organization:
@@ -23,7 +21,7 @@ def insert_or_update_organization(
     if alternative_names is None:
         alternative_names = []
 
-    organization = find_organization_by_names_and_layer([name] + alternative_names, layer, country)
+    organization = find_organization_by_names_and_layer_and_country([name] + alternative_names, layer, country)
 
     # add new websites if this already exists.
     if not organization:
@@ -31,33 +29,50 @@ def insert_or_update_organization(
         organization = Organization.objects.create(name=name, type=layer, created_on=timezone.now(), country=country)
         organization.layers.add(layer)
 
+    return organization
+
+
+def insert_or_update_geojson_on_organization(
+    organization: Organization, geojson_data: Union[List[Any], Dict[Any, Any]], geojson_type: str = "Point"
+) -> Coordinate:
     coordinate = Coordinate.objects.all().filter(organization=organization, is_dead=False).first()
 
     # data is the same, updating is useless...
     if coordinate and coordinate.area == geojson_data:
-        return organization
+        return coordinate
 
     if coordinate:
         coordinate.is_dead = True
         coordinate.save()
 
-    Coordinate.objects.create(
+    coordinate = Coordinate.objects.create(
         organization=organization,
         is_dead=False,
         geojsontype=geojson_type,
         area=geojson_data,
     )
 
-    return organization
+    return coordinate
 
 
-def find_organization_by_names_and_layer(
+def find_organization_by_names_and_layer_and_country(
     names: List[str], layer: OrganizationType, country: str
 ) -> Optional[Organization]:
     for name in names:
-        # type=layer,
-        if organization := Organization.objects.all().filter(name__iexact=name, layers=layer, country=country).first():
+        if (
+            organization := Organization.objects.all()
+            .filter(name__iexact=name, layers=layer, country=country, is_dead=False)
+            .first()
+        ):
             return organization
+
+        if (
+            organization := Organization.objects.all()
+            .filter(alternative_names__name__iexact=name, layers=layer, country=country, is_dead=False)
+            .first()
+        ):
+            return organization
+
     return None
 
 

@@ -36,6 +36,10 @@ def validate_twitter(value):
         raise ValidationError("Twitter handle needs to start with an @ symbol.")
 
 
+class AlternativeName(models.Model):
+    name = models.CharField(max_length=250)
+
+
 class Organization(models.Model):
     country = CountryField(db_index=True)
 
@@ -44,6 +48,11 @@ class Organization(models.Model):
     layers = models.ManyToManyField(OrganizationType, related_name="organization_on_layer")
 
     name = models.CharField(max_length=250, db_index=True)
+
+    # different data sources use different names for the same organization. Using a list of alternative names
+    # makes it easy find the same organization between imports. Implementing this as a relation, it will also
+    # help answer the question: who uses these names which can be convenient for debugging.
+    alternative_names = models.ManyToManyField(AlternativeName)
 
     computed_name_slug = models.SlugField(
         max_length=250,
