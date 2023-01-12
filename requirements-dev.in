@@ -24,7 +24,7 @@ pytest-responses
 # output logging when test fails
 pytest-logging
 django-coverage
-django-extensions
+
 # debug toolbar has not been used in years, so don't carry it.
 # django-debug-toolbar
 # django-debug-toolbar-request-history

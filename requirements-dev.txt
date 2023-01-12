@@ -8,10 +8,6 @@ alabaster==0.7.12
     # via sphinx
 appnope==0.1.2
     # via ipython
-asgiref==3.5.2
-    # via
-    #   -c requirements.txt
-    #   django
 astroid==2.11.7
     # via pylint
 attrs==21.2.0
@@ -56,13 +52,7 @@ decorator==5.1.1
     #   ipython
 dill==0.3.5.1
     # via pylint
-django==3.2.16
-    # via
-    #   -c requirements.txt
-    #   django-extensions
 django-coverage==1.2.4
-    # via -r requirements-dev.in
-django-extensions==3.1.3
     # via -r requirements-dev.in
 docutils==0.16
     # via
@@ -195,7 +185,6 @@ pytz==2022.6
     # via
     #   -c requirements.txt
     #   babel
-    #   django
 pyyaml==6.0
     # via
     #   -c requirements.txt
@@ -211,7 +200,7 @@ requests==2.28.1
     #   sphinx
 requests-mock==1.9.3
     # via -r requirements-dev.in
-responses==0.13.3
+responses==0.22.0
     # via pytest-responses
 six==1.16.0
     # via
@@ -219,7 +208,6 @@ six==1.16.0
     #   livereload
     #   python-dateutil
     #   requests-mock
-    #   responses
 smmap==4.0.0
     # via gitdb
 snowballstemmer==2.1.0
@@ -248,16 +236,13 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-sqlparse==0.4.3
-    # via
-    #   -c requirements.txt
-    #   django
 stevedore==3.3.0
     # via bandit
 toml==0.10.2
     # via
     #   pytest
     #   pytest-cov
+    #   responses
 tomlkit==0.11.4
     # via pylint
 tornado==6.2
@@ -268,6 +253,8 @@ traitlets==5.0.5
     # via
     #   ipython
     #   matplotlib-inline
+types-toml==0.10.8.1
+    # via responses
 urllib3==1.26.13
     # via
     #   -c requirements.txt
