@@ -24,7 +24,6 @@ pytest-responses
 # output logging when test fails
 pytest-logging
 django-coverage
-
 # debug toolbar has not been used in years, so don't carry it.
 # django-debug-toolbar
 # django-debug-toolbar-request-history
@@ -45,7 +44,6 @@ sphinx_rtd_theme
 httmock
 freezegun
 colorama
-pydotplus
 
 # used to restart celery worker on file changes
 watchdog

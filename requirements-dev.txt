@@ -134,8 +134,6 @@ pycodestyle==2.10.0
     # via pylama
 pydocstyle==6.1.1
     # via pylama
-pydotplus==2.0.2
-    # via -r requirements-dev.in
 pyflakes==3.0.1
     # via
     #   autoflake
@@ -156,9 +154,7 @@ pylint-django==2.5.3
 pylint-plugin-utils==0.7
     # via pylint-django
 pyparsing==2.4.7
-    # via
-    #   packaging
-    #   pydotplus
+    # via packaging
 pytest==6.2.4
     # via
     #   -r requirements-dev.in
