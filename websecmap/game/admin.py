@@ -795,7 +795,7 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                     country=osm.organization_country,
                     is_dead=False,
                     type=layer,
-                    layers__in=layer
+                    layers__in=layer,
                 )
                 .first()
             )

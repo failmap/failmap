@@ -14,7 +14,7 @@ def insert_or_update_organization(
     geojson_data: Union[List[Any], Dict[Any, Any]],
     geojson_type: str = "Point",
     alternative_names: List[str] = None,
-    country: str = "NL"
+    country: str = "NL",
 ) -> Organization:
     # This can create an organization or update an existing one with new domains. Domains and data are never deleted
     # for now. If that would be the case: older domains might not be monitored while the government is still responsible

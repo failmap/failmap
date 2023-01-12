@@ -53,7 +53,7 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", days
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
-            INNER JOIN 
+            INNER JOIN
               organization_layers as layers ON (layers.organization_id = organization.id)
             INNER JOIN
               (
@@ -117,7 +117,7 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", day
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
-            INNER JOIN 
+            INNER JOIN
               organization_layers as layers ON (layers.organization_id = organization.id)
             INNER JOIN
               (

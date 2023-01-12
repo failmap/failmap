@@ -265,7 +265,8 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
 
 
 
-                      (SELECT MAX(stacked_coordinate.id) as stacked_coordinate_id, area, geoJsonType, stacked_coordinate.organization_id
+                      (SELECT MAX(stacked_coordinate.id) as stacked_coordinate_id, area, geoJsonType,
+                         stacked_coordinate.organization_id
                       FROM coordinate stacked_coordinate
                       INNER JOIN organization filter_organization
                         ON (stacked_coordinate.organization_id = filter_organization.id)
@@ -302,7 +303,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                       ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
 
                     INNER JOIN organization_layers as layers ON (layers.organization_id = organization.id)
-                    
+
                     WHERE layers.organizationtype_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
                     GROUP BY coordinate_stack.area, organization.name
                     ORDER BY map_organizationreport.at_when ASC

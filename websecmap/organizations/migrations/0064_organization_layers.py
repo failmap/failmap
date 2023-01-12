@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0063_genericfiledataset_parser_info'),
+        ("organizations", "0063_genericfiledataset_parser_info"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organization',
-            name='layers',
-            field=models.ManyToManyField(related_name='organization_on_layer', to='organizations.OrganizationType'),
+            model_name="organization",
+            name="layers",
+            field=models.ManyToManyField(related_name="organization_on_layer", to="organizations.OrganizationType"),
         ),
     ]

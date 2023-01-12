@@ -180,7 +180,8 @@ def get_map_data(
         INNER JOIN
 
 
-          (SELECT MAX(stacked_coordinate.id) as stacked_coordinate_id, area, geoJsonType, stacked_coordinate.organization_id
+          (SELECT MAX(stacked_coordinate.id) as stacked_coordinate_id, area, geoJsonType,
+            stacked_coordinate.organization_id
           FROM coordinate stacked_coordinate
           INNER JOIN organization filter_organization
             ON (stacked_coordinate.organization_id = filter_organization.id)
@@ -217,9 +218,9 @@ def get_map_data(
           ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
 
         INNER JOIN organization_layers as layers ON (layers.organization_id = organization.id)
-        
+
         WHERE layers.organizationtype_id = '{my_organization_type}' AND organization.country= '{my_country}'
-        
+
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY map_organizationreport.at_when ASC
         """
