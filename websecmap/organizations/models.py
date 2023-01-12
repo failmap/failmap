@@ -54,6 +54,10 @@ class Organization(models.Model):
     # help answer the question: who uses these names which can be convenient for debugging.
     alternative_names = models.ManyToManyField(AlternativeName)
 
+    written_address = models.CharField(
+        max_length=250, help_text="The written address that can be used for geocoding.", blank=True
+    )
+
     computed_name_slug = models.SlugField(
         max_length=250,
         help_text="Computed value, a slug translation of the organization name, which can be used in urls.",
@@ -61,7 +65,7 @@ class Organization(models.Model):
     )
 
     internal_notes = models.TextField(
-        max_length=2500,
+        max_length=1500,
         help_text="These notes can contain information on WHY this organization was added. Can be handy if it's not "
         "straightforward. This helps with answering questions why the organization was added lateron. "
         "These notes will not be published, but are also not secret.",
@@ -137,6 +141,10 @@ class Organization(models.Model):
             return f"✝ {self.name}, {self.country}/{type_label} ({self.created_on.strftime('%b %Y')})"
 
         return f"{self.name}, {self.country}/{type_label} ({self.created_on.strftime('%b %Y')})"
+
+    @property
+    def names(self):
+        return [self.name] + list(self.alternative_names.all().values_list("name", flat=True))
 
     def add_url(self, url: str):
 

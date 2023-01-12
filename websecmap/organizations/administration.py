@@ -4,7 +4,7 @@ from typing import List, Any, Dict, Optional, Union, Tuple
 from django.utils import timezone
 
 from websecmap.app import log
-from websecmap.organizations.models import Organization, OrganizationType, Coordinate
+from websecmap.organizations.models import Organization, OrganizationType, Coordinate, Url, AlternativeName
 import tldextract
 
 
@@ -20,6 +20,10 @@ def insert_or_update_organization(
 
     if alternative_names is None:
         alternative_names = []
+
+    # some sources have spaces in their names
+    name = name.strip()
+    alternative_names = [x.strip() for x in alternative_names]
 
     organization = find_organization_by_names_and_layer_and_country([name] + alternative_names, layer, country)
 
@@ -56,21 +60,33 @@ def insert_or_update_geojson_on_organization(
 
 
 def find_organization_by_names_and_layer_and_country(
-    names: List[str], layer: OrganizationType, country: str
+    names: List[str], layer: OrganizationType = None, country: str = "NL", excluding: List[Organization] = None
 ) -> Optional[Organization]:
+    if excluding is None:
+        excluding = []
+
     for name in names:
-        if (
-            organization := Organization.objects.all()
-            .filter(name__iexact=name, layers=layer, country=country, is_dead=False)
-            .first()
-        ):
+        org_query = Organization.objects.all().filter(is_dead=False)
+
+        if excluding:
+            org_query = org_query.exclude(id__in=[x.id for x in excluding])
+
+        if country:
+            org_query = org_query.filter(country=country)
+
+        if layer:
+            org_query = org_query.filter(layers=layer)
+
+        # try normal name:
+        normal_name_query = org_query
+        normal_name_query = normal_name_query.filter(name__iexact=name)
+        if organization := normal_name_query.first():
             return organization
 
-        if (
-            organization := Organization.objects.all()
-            .filter(alternative_names__name__iexact=name, layers=layer, country=country, is_dead=False)
-            .first()
-        ):
+        # try alternative name:
+        alternative_name_query = org_query
+        alternative_name_query = alternative_name_query.filter(alternative_names__name__iexact=name)
+        if organization := alternative_name_query.first():
             return organization
 
     return None
@@ -133,3 +149,72 @@ def retrieve_possible_urls_from_unfiltered_input(unfiltered_input: str) -> Tuple
 
     # make sure the list is in alphabetical order, which is nice for testability.
     return sorted(has_tld), duplicates_removed
+
+
+def merge_similar_organizations():
+    # Merges organizations that have the same name over different layers. Makes sure that the oldest organization
+    # stays and the newest one is just dissolved. Make sure that the urls from the new organizations are also
+    # moved if they are missing in the old one.  # except when it's rijksoverheid.nl
+
+    handled_organizations = []
+    for organization in Organization.objects.all().filter(is_dead=False).order_by("id"):
+        handled_organizations.append(organization)
+        log.debug("Merging organization %s, id: %s", organization, organization.id)
+        for name in organization.names:
+
+            # we don't care about the layer, it might be any layer: that is the point of merging
+            while existing_organization := find_organization_by_names_and_layer_and_country(
+                names=[name], country=organization.country, excluding=handled_organizations
+            ):
+                # make sure it never re-surfaces, even if the organization is skipped / not merged.
+                handled_organizations.append(existing_organization)
+
+                if existing_organization.created_on < organization.created_on:
+                    log.debug("- SKIPPING, existing organization is older and should thus not be merged (weird)")
+                    continue
+
+                log.debug("- Found duplicate organization: %s, %s", existing_organization, existing_organization.id)
+                merge_organizations(existing_organization, organization)
+
+
+def merge_organizations(org_from: Organization, org_to: Organization):
+    # move urls
+    for url in Url.objects.all().filter(organization=org_from):
+        log.debug("- - Transferring url %s", url)
+        url.organization.add(org_to)
+
+    # move alternative names
+    for alt_name in org_from.alternative_names.all():
+        log.debug("- - Transferring alt name %s", alt_name)
+        org_to.alternative_names.add(alt_name)
+
+    if org_from.name != org_to.name:
+        log.debug("- - Names differ, setting name from source to alt name in target")
+        org_to.alternative_names.add(AlternativeName.objects.create(name=org_from.name))
+
+    # move layers
+    for layer in org_from.layers.all():
+        log.debug("- - Transferring layer %s", layer)
+        org_to.layers.add(layer)
+
+    # also move the organization type to layer if that didn't happen yet:
+    if org_from.type:
+        org_to.layers.add(org_from.type)
+
+    # we don't merge the coordinates, as they should be correct in import.
+
+    # move fields if not empty:
+    fields = ["internal_notes", "twitter_handle", "wikidata", "wikipedia", "surrogate_id", "written_address"]
+    for field in fields:
+        value = getattr(org_from, field)
+        if value and not getattr(org_to, field):
+            log.debug("- - Moving field data from field %s with value %s", field, value)
+            setattr(org_to, field, value)
+
+    org_to.save()
+
+    # delete existing organization as it is a duplicate
+    org_from.is_dead = True
+    org_from.is_dead_reason = "Was a duplicate of an older organization."
+    org_from.is_dead_since = timezone.now()
+    org_from.save()
