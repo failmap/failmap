@@ -80,8 +80,9 @@ def download_websiteregister_spreadsheet() -> int:
         try:
             response = requests.get(download_link)
             idataset.file = SimpleUploadedFile(f"websiteregister_rijksoverheid_{now}.ods", response.content)
-            idataset.origin = f"Automatic download from Websiteregister Rijksoverheid, on" \
-                              f" {datetime.now(pytz.utc).isoformat()}."
+            idataset.origin = (
+                f"Automatic download from Websiteregister Rijksoverheid, on" f" {datetime.now(pytz.utc).isoformat()}."
+            )
             idataset.state = "uploaded"
         except RequestException as exc:
             idataset.origin = f"Failed download from Websiteregister Rijksoverheid, on {now}. Exception: {str(exc)}."
