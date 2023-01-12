@@ -11,10 +11,13 @@
 # make sure there are no version conflicts with requirements.txt
 -c requirements.txt
 
+### linting
 black
 autoflake
 # min version to support pyproject.toml
 pylama>=8.4.0
+
+### testing
 coverage
 pytest
 pytest-cov
@@ -24,23 +27,22 @@ pytest-responses
 # output logging when test fails
 pytest-logging
 django-coverage
-# debug toolbar has not been used in years, so don't carry it.
-# django-debug-toolbar
-# django-debug-toolbar-request-history
 pytest-mock
 requests_mock
+
+### QA
 # min version to support pyproject.toml
 bandit>=1.7.1
 pylint
 pylint-django
 
-# docs / readthedocs.io
+### docs / readthedocs.io
 sphinx
 sphinx-autobuild
 recommonmark
 sphinx_rtd_theme
 
-# tests (of scanners)
+### tests (of scanners)
 httmock
 freezegun
 colorama
@@ -48,8 +50,8 @@ colorama
 # used to restart celery worker on file changes
 watchdog
 
+### development
 ipython
 
 # python 3.11 compat
 py>=1.11.0
-
