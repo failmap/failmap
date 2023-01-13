@@ -11,6 +11,7 @@ from django.contrib import admin, messages
 from django.contrib.admin import StackedInline
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
@@ -336,14 +337,30 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
             f"<a href='https://www.wikipedia.org/wiki/{inst.wikipedia}' target='_blank'>🔍 {inst.wikipedia}</a>"
         )
 
-    def n_altnames(self, inst):
+    @staticmethod
+    def n_altnames(inst):
         return inst.alternative_names.count()
 
-    def number_of_urls(self, inst):
+    @staticmethod
+    def number_of_urls(inst):
         return Url.objects.all().filter(organization=inst.id).count()
 
-    def first_few_urls(self, inst):
-        return [url.url for url in Url.objects.all().filter(organization=inst.id)[:4]]
+    @staticmethod
+    def first_few_urls(inst):
+        # the top level shines most light on what domains are used, the rest will be subdomains.
+        domains = [
+            url.url
+            for url in Url.objects.all().filter(
+                Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""), organization=inst.id
+            )[:6]
+        ]
+
+        # okay, no domains? then perhaps try all domains as they might only be subdomains. These can be longer so
+        # a shorter list is returned
+        if not len(domains):
+            domains = [url.url for url in Url.objects.all().filter(organization=inst.id)[:4]]
+
+        return domains
 
     def layers_(self, inst):
         return [layer.name for layer in inst.layers.all()]
@@ -363,6 +380,17 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
     force_merge_and_delete_organizations.short_description = "🔪🔪🔪  Force Merge AND DELETE organizations"
     actions.append("force_merge_and_delete_organizations")
+
+    def revive_organization(self, request, queryset):
+        for organization in queryset:
+            organization.is_dead = False
+            organization.is_dead_since = None
+            organization.is_dead_reason = None
+            organization.save()
+        self.message_user(request, "Organization revived")
+
+    revive_organization.short_description = "🐝  Revive Organizations"
+    actions.append("revive_organization")
 
 
 # https://docs.djangoproject.com/en/2.0/ref/forms/validation/
