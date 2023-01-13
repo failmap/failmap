@@ -1,7 +1,6 @@
 import csv
 import re
-from typing import Any
-
+from typing import Any, Dict, List
 
 from django.utils.text import slugify
 
@@ -40,6 +39,13 @@ GOVERNMENT_REGISTER_FILES = [
     "Rechtspraak",
 ]
 
+# These urls are used virtually everywhere. But only one organization is ultimately responsible for such domains.
+# So just strip them if we find em...
+REDUNDANT_URLS = [
+    # Only Dienst Publiek & Communicatie
+    'rijksoverheid.nl',
+    'www.rijksoverheid.nl',
+]
 
 GOVERNMENT_REGISTER_BASE_URL = "https://organisaties.overheid.nl/export"
 
@@ -118,13 +124,24 @@ def extract_geojson_from_row(row):
     return [matches[0][0], matches[0][1]] if matches else ["", ""]
 
 
+def remove_redundant_urls(urls: List[str]) -> List[str]:
+
+    for redundant in REDUNDANT_URLS:
+        urls.remove(redundant)
+
+    return urls
+
+
 def extract_sites_from_row(row):
     urls, _ = retrieve_possible_urls_from_unfiltered_input(row.get("Internetpagina's", ""))
 
     # also add the non-www address to the list:
-    urls_without_www = [url.replace("www.", "") for url in urls if url.startswith("www.")]
+    urls_without_www: List[str] = [url.replace("www.", "") for url in urls if url.startswith("www.")]
 
-    return urls_without_www + urls
+    # remove useless urls that are basically added everywhere as a placeholder:
+    all_urls = urls_without_www + urls
+
+    return remove_redundant_urls(all_urls)
 
 
 def extract_name_from_row(row):

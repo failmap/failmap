@@ -55,7 +55,7 @@ class Organization(models.Model):
     # different data sources use different names for the same organization. Using a list of alternative names
     # makes it easy find the same organization between imports. Implementing this as a relation, it will also
     # help answer the question: who uses these names which can be convenient for debugging.
-    alternative_names = models.ManyToManyField(AlternativeName)
+    alternative_names = models.ManyToManyField(AlternativeName, blank=True)
 
     written_address = models.CharField(
         max_length=250, help_text="The written address that can be used for geocoding.", blank=True
