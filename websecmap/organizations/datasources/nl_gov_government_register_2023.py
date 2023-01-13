@@ -121,7 +121,7 @@ def extract_geojson_from_row(row):
     # : DR, centroideLatitude: 53.00479338, centroideLongitude: 6.76022075, centr
 
     matches = re.findall(r"centroideLatitude: ([0-9\.]*), centroideLongitude: ([0-9\.]*), cent", data)
-    return [matches[0][0], matches[0][1]] if matches else ["", ""]
+    return [matches[0][1], matches[0][0]] if matches else ["", ""]
 
 
 def remove_redundant_urls(urls: List[str]) -> List[str]:

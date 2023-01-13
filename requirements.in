@@ -122,7 +122,7 @@ django-admin-sortable2<2
 pyexcel-text
 # game team colors
 validators
-# django-colorful
+django-colorful
 
 # game, add multiple urls in one go.
 # django-select2
@@ -136,7 +136,7 @@ tenacity
 
 # game
 # spectra
-# markdown
+markdown
 
 # geocoding organizations from python
 googlemaps

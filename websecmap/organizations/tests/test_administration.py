@@ -6,7 +6,7 @@ from websecmap.organizations.administration import (
     merge_organizations,
     force_merge_organizations,
 )
-from websecmap.organizations.models import AlternativeName, Organization, OrganizationType, Url
+from websecmap.organizations.models import AlternativeName, Organization, OrganizationType, Url, Coordinate
 
 
 def test_merge_similar_organizations(db):
@@ -37,7 +37,6 @@ def test_merge_similar_organizations(db):
 
 
 def test_merge_organizations(db):
-
     ot_test = OrganizationType.objects.create(name="test")
     ot_appel = OrganizationType.objects.create(name="appel")
 
@@ -59,6 +58,11 @@ def test_merge_organizations(db):
     url = Url.objects.create(url="example.nl")
     url.organization.add(new_org)
 
+    # The new org has the newer coordinate, this will become the coordinate of organization.
+    # so 5/50 will be deleted and 4/40 will be active for old org.
+    Coordinate.objects.create(area=["5", "50"], geojsontype="Point", organization=old_org)
+    Coordinate.objects.create(area=["4", "40"], geojsontype="Point", organization=new_org)
+
     merge_organizations(org_from=new_org, org_to=old_org)
 
     # this should result in the old org having:
@@ -73,6 +77,11 @@ def test_merge_organizations(db):
 
     firstorg = Organization.objects.all().filter(is_dead=False).first()
     assert firstorg.twitter_handle == "@ietsanders123"
+
+    assert Coordinate.objects.all().filter(is_dead=False).count() == 1
+    assert Coordinate.objects.all().filter(is_dead=True).first().organization == old_org
+    assert Coordinate.objects.all().filter(is_dead=False).first().organization == old_org
+    assert Coordinate.objects.all().filter(is_dead=False).first().area == ["4", "40"]
 
 
 def test_force_merge_organizations(db):

@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     "websecmap.scanners",
     "websecmap.reporting",
     "websecmap.map",
+    "websecmap.game",
     # disable game as it has not been maintained for a while.
     # the front-end needs to be re-written in a modern approach to make it work better
     # removing this reduces the need for components like select2, crispy forms and similar

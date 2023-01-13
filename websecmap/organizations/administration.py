@@ -4,6 +4,7 @@ from typing import List, Any, Dict, Optional, Union, Tuple
 from django.utils import timezone
 
 from websecmap.app import log
+from websecmap.game.models import OrganizationSubmission
 from websecmap.organizations.models import Organization, OrganizationType, Coordinate, Url, AlternativeName
 import tldextract
 
@@ -222,6 +223,20 @@ def merge_organizations(org_from: Organization, org_to: Organization):
         org_to.layers.add(org_from.type)
 
     # we don't merge the coordinates, as they should be correct in import.
+    # even if the constraint is cascade, this will just restrict sometimes. Nice bugs :)
+    # assume the newest coordinates are the best coordinates.
+    Coordinate.objects.all().filter(organization=org_from).update(organization=org_to)
+
+    # just kill them all and then revive the latest
+    coordinates = Coordinate.objects.all().filter(organization=org_to)
+    for coordinate in coordinates:
+        coordinate.kill()
+
+    if newest_coordinates := Coordinate.objects.all().filter(organization=org_to).last():
+        newest_coordinates.revive()
+
+    # Also move all game submissions, which is a bit easier...
+    OrganizationSubmission.objects.all().filter(organization_in_system=org_from).update(organization_in_system=org_to)
 
     # move fields if not empty:
     fields = ["internal_notes", "twitter_handle", "wikidata", "wikipedia", "surrogate_id", "written_address"]

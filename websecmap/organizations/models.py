@@ -226,6 +226,18 @@ class Coordinate(models.Model):
     is_dead_since = models.DateTimeField(blank=True, null=True, db_index=True)
     is_dead_reason = models.CharField(max_length=255, blank=True, null=True)
 
+    def kill(self):
+        self.is_dead = True
+        self.is_dead_since = datetime.now(pytz.utc)
+        self.is_dead_reason = "Killed manually"
+        self.save()
+
+    def revive(self):
+        self.is_dead = False
+        self.is_dead_since = None
+        self.is_dead_reason = None
+        self.save()
+
     def save(self, *args, **kwarg):
         # handle computed values
         self.calculated_area_hash = hashlib.md5(str(self.area).encode("utf-8")).hexdigest()
