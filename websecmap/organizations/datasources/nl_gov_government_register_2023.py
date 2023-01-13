@@ -113,7 +113,7 @@ def import_records(records: Any, layer: OrganizationType):
         add_urls_to_organization(organization, sites)
 
 
-def extract_geojson_from_row(row):
+def extract_geojson_from_row(row) -> List[float]:
     data = row[
         "Adressen (type, toelichting, straat, huisnummer, toevoeging, postbus, postcode, plaats, regio, "
         "provincieAfkorting, land, centroideLatitude, centroideLongitude, centroideRdx, centroideRdy)"
@@ -121,7 +121,7 @@ def extract_geojson_from_row(row):
     # : DR, centroideLatitude: 53.00479338, centroideLongitude: 6.76022075, centr
 
     matches = re.findall(r"centroideLatitude: ([0-9\.]*), centroideLongitude: ([0-9\.]*), cent", data)
-    return [matches[0][1], matches[0][0]] if matches else ["", ""]
+    return [float(matches[0][1]), float(matches[0][0])] if matches else [0, 0]
 
 
 def remove_redundant_urls(urls: List[str]) -> List[str]:

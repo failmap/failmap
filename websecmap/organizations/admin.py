@@ -343,7 +343,16 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
     @staticmethod
     def number_of_urls(inst):
-        return Url.objects.all().filter(organization=inst.id).count()
+        count = Url.objects.all().filter(organization=inst.id).count()
+        return (
+            format_html(
+                f"{count}<br>" f"<a href='/admin/organizations/url/?q={inst.name}' target='_blank'>Filter: 🔍</a>"
+            )
+            if count
+            else ""
+        )
+
+        # return Url.objects.all().filter(organization=inst.id).count()
 
     @staticmethod
     def first_few_urls(inst):
@@ -524,12 +533,14 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     list_display = (
         "url",
-        "sub",
-        "domain",
-        "tld",
+        "in_organizations",
+        "endpoints",
+        # "sub",
+        # "domain",
+        # "tld",
         "visit",
-        "onboarded",
-        "onboarding_stage",
+        # "onboarded",
+        # "onboarding_stage",
         "uses_dns_wildcard",
         "dead_for",
         "unresolvable_for",
@@ -599,6 +610,18 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     readonly_fields = ["created_on", "onboarded_on"]
 
     @staticmethod
+    def in_organizations(obj):
+        return obj.organization.all().count()
+        # return (
+        #     format_html(
+        #         f"{count}<br>"
+        #         f"<a href='/admin/organizations/organization/?q={obj.url}' target='_blank'>Filter: 🔍</a>"
+        #     )
+        #     if count
+        #     else ""
+        # )
+
+    @staticmethod
     def domain(obj):
         return obj.computed_domain
 
@@ -615,21 +638,26 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     # https://docs.djangoproject.com/en/2.1/ref/contrib/admin/
     # list_select_related = ('endpoint_set', )
 
-    def visit(self, obj: Url):
+    @staticmethod
+    def endpoints(obj):
+        count = obj.endpoint_set.count()
+        return (
+            format_html(f"{count}<br>" f"<a href='/admin/scanners/endpoint/?q={obj.url}' target='_blank'>Filter: 🔍</a>")
+            if count
+            else ""
+        )
+
+    @staticmethod
+    def visit(obj: Url):
         if not obj.endpoint_set.count():
             return ""
 
-        string = format_html(
-            f"{obj.endpoint_set.count()} <a href='/admin/scanners/endpoint/?q={obj.url}' target='_blank'>🔍</a>"
+        string = "".join(
+            f"<a href='{endpoint.protocol}://{obj.url}:{endpoint.port}' target='_blank'>"
+            f"{endpoint.protocol}/{endpoint.port}</a><br />"
+            for endpoint in obj.endpoint_set.all()
+            if endpoint.is_dead is False
         )
-
-        for endpoint in obj.endpoint_set.all():
-
-            if endpoint.is_dead is False:
-                string += (
-                    f" - <a href='{endpoint.protocol}://{obj.url}:{endpoint.port}' target='_blank'>"
-                    f"{endpoint.protocol}/{endpoint.port}</a>"
-                )
         return format_html(string)
 
     @staticmethod
