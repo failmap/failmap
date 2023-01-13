@@ -29,7 +29,15 @@ from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid im
 from websecmap.organizations.datasources.nl_gov_government_register_2023 import (
     import_dataset as nl_gov_government_register_import_file,
 )
-from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url, GenericFileDataset
+from websecmap.organizations.models import (
+    Coordinate,
+    Dataset,
+    Organization,
+    OrganizationType,
+    Url,
+    GenericFileDataset,
+    AlternativeName,
+)
 from websecmap.reporting.models import UrlReport
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, UrlIp
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
@@ -63,6 +71,16 @@ class OrganizationAdminInline(CompactInline):
     show_change_link = False
     can_delete = False
     readonly_fields = [f.name for f in Organization._meta.fields if f.name != "id"]
+
+    exclude = []
+
+
+class OrganizationAdminViaInline(CompactInline):
+    model = Organization.alternative_names.through
+    extra = 0
+    show_change_link = False
+    can_delete = False
+    # readonly_fields = [f.name for f in Organization.alternative_names.through._meta.fields if f.name != "id"]
 
     exclude = []
 
@@ -737,6 +755,16 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     fields = ("name",)
 
     inlines = [OrganizationAdminInline]
+
+
+@admin.register(AlternativeName)
+class AlternativeNameAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+    list_filter = ("name",)
+    fields = ("name",)
+
+    inlines = [OrganizationAdminViaInline]
 
 
 @admin.register(Coordinate)

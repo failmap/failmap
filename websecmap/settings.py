@@ -1373,6 +1373,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "organizations.organization", "label": "Organizations"},
             {"name": "organizations.url", "label": "Urls"},
             {"name": "organizations.organizationtype"},
+            {"name": "organizations.alternativename"},
         ],
     },
     {
