@@ -1,5 +1,6 @@
 from websecmap.organizations.datasources.nl_gov_government_register_2023 import (
     import_dataset,
+    remove_redundant_urls,
 )
 from websecmap.organizations.datasources.utils import save_succesful_download
 from websecmap.organizations.models import OrganizationType, Organization, Url, Coordinate
@@ -24,6 +25,15 @@ def _import_agentschappen(dataset):
     import_dataset(dataset)
 
     assert OrganizationType.objects.filter(name="agentschappen").count() == 1
-    assert Organization.objects.all().count() == 29
-    assert Url.objects.all().count() == 58
-    assert Coordinate.objects.all().count() == 29
+    assert Organization.objects.all().count() == 28
+    assert Url.objects.all().count() == 56
+    assert Coordinate.objects.all().count() == 28
+
+
+def test_remove_redundant_urls():
+    assert remove_redundant_urls(["basisbeveiliging.nl", "rijksoverheid.nl", "example.nl"]) == [
+        "basisbeveiliging.nl",
+        "example.nl",
+    ]
+    assert remove_redundant_urls(["www.rijksoverheid.nl", "rijksoverheid.nl"]) == []
+    assert remove_redundant_urls(["basisbeveiliging.nl", "example.nl"]) == ["basisbeveiliging.nl", "example.nl"]

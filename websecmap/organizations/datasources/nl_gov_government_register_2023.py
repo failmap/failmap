@@ -1,6 +1,6 @@
 import csv
 import re
-from typing import Any, Dict, List
+from typing import Any, List
 
 from django.utils.text import slugify
 
@@ -43,8 +43,8 @@ GOVERNMENT_REGISTER_FILES = [
 # So just strip them if we find em...
 REDUNDANT_URLS = [
     # Only Dienst Publiek & Communicatie
-    'rijksoverheid.nl',
-    'www.rijksoverheid.nl',
+    "rijksoverheid.nl",
+    "www.rijksoverheid.nl",
 ]
 
 GOVERNMENT_REGISTER_BASE_URL = "https://organisaties.overheid.nl/export"
@@ -127,7 +127,8 @@ def extract_geojson_from_row(row):
 def remove_redundant_urls(urls: List[str]) -> List[str]:
 
     for redundant in REDUNDANT_URLS:
-        urls.remove(redundant)
+        if redundant in urls:
+            urls.remove(redundant)
 
     return urls
 
