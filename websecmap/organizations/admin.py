@@ -8,6 +8,7 @@ import pytz
 import tldextract
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin import StackedInline
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -41,11 +42,11 @@ log = logging.getLogger(__name__)
 # 2: cannot auto-complete these with django-jet it seems, so an enormous amount of data
 # it might be solved using an explicit relation?
 # perhaps ask the django jet forum
-class UrlAdminInline(CompactInline):
+class UrlAdminInline(StackedInline):
     model = Url.organization.through
     extra = 0
     show_change_link = False
-    can_delete = False
+    can_delete = True
     # 'is_dead',
     # For now not trying to fix the "through" relationship errors for getting fields from the URL object.
     # <class 'failmap.organizations.admin.UrlAdminInline'>: (admin.E035) The value of 'readonly_fields[1]' is not
