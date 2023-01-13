@@ -19,7 +19,6 @@ from jet.admin import CompactInline
 from websecmap import types
 from websecmap.app.models import Job
 from websecmap.celery import EXPIRES_IN_ONE_DAY, app
-from websecmap.map.models import OrganizationReport
 from websecmap.organizations import datasources
 from websecmap.organizations.datasources import dutch_government, excel
 from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid import (
@@ -157,13 +156,14 @@ class CoordinateAdminInline(CompactInline):
     extra = 0
 
 
-class OrganizationRatingAdminInline(CompactInline):
-    model = OrganizationReport
-    extra = 0
-    # with dozens of forms, the field limit is easily exceeded.
-    readonly_fields = [f.name for f in OrganizationReport._meta.fields]
-    can_delete = False
-    ordering = ["-at_when"]
+# It eats too much data, and viewing this can be done elsewhere...
+# class OrganizationRatingAdminInlineOrganizationRatingAdminInline(CompactInline):
+#     model = OrganizationReport
+#     extra = 0
+#     # with dozens of forms, the field limit is easily exceeded.
+#     readonly_fields = [f.name for f in OrganizationReport._meta.fields]
+#     can_delete = False
+#     ordering = ["-at_when"]
 
 
 class UrlRatingAdminInline(CompactInline):
@@ -307,7 +307,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
         "is_dead_reason",
     )
 
-    inlines = [CoordinateAdminInline, UrlAdminInline, OrganizationRatingAdminInline]  #
+    inlines = [CoordinateAdminInline, UrlAdminInline]  #
 
     @staticmethod
     def name_details(inst):
