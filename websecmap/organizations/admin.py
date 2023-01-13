@@ -277,17 +277,21 @@ class ActionMixin:
 @admin.register(Organization)
 class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = (
+        "id",
         "name_details",
-        "computed_name_slug",
-        "type",
+        "n_altnames",
+        "layers_",
         "country",
-        "wikidata_",
-        "wikipedia_",
+        "number_of_urls",
+        "first_few_urls",
         "created_on",
         "is_dead",
+        "wikidata_",
+        "wikipedia_",
+        "twitter_handle",
     )
     search_fields = ["name", "country", "type__name"]
-    list_filter = ["type__name", "country", "created_on", "is_dead", "is_dead_since"][::-1]
+    list_filter = ["country", "created_on", "is_dead", "is_dead_since", "layers__name"][::-1]
 
     fields = (
         "name",
@@ -330,6 +334,18 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
         return format_html(
             f"<a href='https://www.wikipedia.org/wiki/{inst.wikipedia}' target='_blank'>🔍 {inst.wikipedia}</a>"
         )
+
+    def n_altnames(self, inst):
+        return inst.alternative_names.count()
+
+    def number_of_urls(self, inst):
+        return Url.objects.all().filter(organization=inst.id).count()
+
+    def first_few_urls(self, inst):
+        return [url.url for url in Url.objects.all().filter(organization=inst.id)[:4]]
+
+    def layers_(self, inst):
+        return [layer.name for layer in inst.layers.all()]
 
     actions = []
 
