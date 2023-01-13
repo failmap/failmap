@@ -39,6 +39,9 @@ def validate_twitter(value):
 class AlternativeName(models.Model):
     name = models.CharField(max_length=250)
 
+    def __str__(self):
+        return f"(alt: {self.name})"
+
 
 class Organization(models.Model):
     country = CountryField(db_index=True)
