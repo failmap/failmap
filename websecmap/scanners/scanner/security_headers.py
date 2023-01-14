@@ -506,7 +506,9 @@ def get_headers(uri_url: str, host: str) -> Union[Dict, bool]:
             verify=False,  # nosec TLS does not have to be valid in this test, only headers do.
             headers=create_standard_request_headers(host),
         )
-        response.raise_for_status()
+
+        # do not raise for status, the error pages should also set headers correctly.
+        # response.raise_for_status()
     except requests.RequestException as my_exception:
         log.debug("Could not request headers, exception: %s", my_exception)
         return False
