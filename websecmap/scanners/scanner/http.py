@@ -37,8 +37,8 @@ import requests
 import urllib3
 from celery import Task, group
 from django.conf import settings
-from requests import HTTPError, ReadTimeout, Request, Session, Timeout
-from requests.exceptions import ChunkedEncodingError, ConnectTimeout, ContentDecodingError, SSLError
+from requests import HTTPError, Request, Session
+from requests.exceptions import ChunkedEncodingError, ContentDecodingError, SSLError
 
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 from websecmap.organizations.models import Url
@@ -83,7 +83,7 @@ to slightly larger than a multiple of 3, which is the default TCP packet retrans
 1 second is surely too short, it results in a lot of false positives, especially when scanning a lot of sites.
 Make it very long, like 20 seconds, to make sure not too much stuff gets rediscovered
 """
-CONNECT_TIMEOUT = 30
+CONNECT_TIMEOUT = 5
 
 """
 Once your client has connected to the server and sent the HTTP request, the read timeout is the number of seconds the
@@ -92,7 +92,7 @@ between bytes sent from the server. In 99.9% of cases, this is the time before t
 7 seconds is way too short, make it 30 so the server has all the time in the world to respond. Otherwise too much
 of the same stuff is re-discovered.
 """
-READ_TIMEOUT = 30
+READ_TIMEOUT = 15
 
 SCANNER_NAME = "http"
 STANDARD_ENDPOINT_FILTER = {"protocol__in": ["https", "http"], "is_dead": False}
@@ -348,180 +348,123 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
 
     The algorithm is very simple: if there is a http status code, or "a response" there is an
     http(s) server. Some servers don't return a status code, others have problems with tls.
-    So you need either build something extremely robust, or make an easy assumption that there
-    could be a website there. Given the ports we scan, the probabilty of a website is extremely
-    high.
 
-    We don't scan for the obsoleted S-HTTP protocol, only for http and https.
+    It's possible to have a TLS site on port 80 and a non-TLS site on port 443.
 
-    It's possible to have a TLS site on port 80 and a non-TLS site on port 443. We've seen those.
-
-    This function does not store all ports it couldn't contact. Would we do that, the amount
-    of endpoints that are not resolvable explodes. There is not really value in storing the
-    non-resolvable urls, as you need to re-scan everything an a while anyway.
-    If we would store this, it would be url * ports endpoints. Now it's roughly urls * 1.8.
-
-    TLS does not have to be succesful. We also store https sites where HTTPS completely or
-    partially fails. As long as there is a "sort of" response we just assume there is a
-    website there. Other TLS scanners can check what's wrong with the connection. Perhaps
-    this leads to some false positives or to some other wrong data.
-    The big question is: would some https sites only respond IF the right protocol (SSL 1) or
-    something like that is spoken to them? Do we need a "special" TLS implementation on our server?
+    As long as there is a "sort of" response we just assume there is a website there.
     """
 
-    # You can see what queue / routing info is used. So options(queue works and overrides the default 4and6 queue)
-    # log.info(self.request['delivery_info']['routing_key'])
-
-    if ip_version == 4:
-        ip_address = get_ipv4(url)
-        uri = f"{protocol}://{ip_address}:{port}"
-    else:
-        ip_address = get_ipv6(url)
-        uri = f"{protocol}://[{ip_address}]:{port}"
-
-    if not ip_address:
-        # todo: possibly add more information, what resolver and such. Above methods should use specified resolvers
-        #  not system resolvers.
+    uri = build_uri_from_components(protocol, url, port, ip_version)
+    if not uri:
         return connection_answer(False, f"ipv{ip_version}_resolve_error")
 
-    log.debug("Attempting connect on: %s: host: %s IP: %s", uri, url, ip_address)
+    log.debug("Attempting connect on: %s: host: %s", uri, url)
+    answer, exc = http_call_handling_exceptions(request_via_ip, **{"uri": uri, "url": url})
+    if answer in ["content_found_with_encoding_issues", "no_content_but_error_indicates_server"]:
+        return connection_answer(True, exc)
 
+    # instead of trying on no_content_and_server_indicates_error, always retry this way
+    # why? because there might be timeouts via approach 1 that don't occur via approach 2.
+    answer, exc = http_call_handling_exceptions(
+        request_via_hostname, **{"protocol": protocol, "url": url, "port": port}
+    )
+    if answer in ["content_found_with_encoding_issues", "no_content_but_error_indicates_server"]:
+        return connection_answer(True, exc)
+
+    return connection_answer(False, exc)
+
+
+def http_call_handling_exceptions(callable, **args):
     try:
-        """
-        30 seconds network timeout, 30 seconds timeout for server response.
-        If we get a redirect, it means there is a server. Don't follow.
-
-        Any status code is enough to verify that there is an endpoint.
-        Some servers don't return a status code, that will trigger an exception (AttributeError)
-
-        Some servers redirect to itself (or any host you throw at it):
-
-        ipv4 = socket.gethostbyname("demo3.data.amsterdam.nl")
-
-        r = requests.get("http://185.3.211.120:80", timeout=(30, 30), allow_redirects=False,
-            headers={'Host': "demo3.data.amsterdam.nl"})
-        r.headers
-        {'Content-length': '0', 'Location': 'https://demo3.data.amsterdam.nl/', 'Connection': 'close'}
-
-        We don't follow redirects, because we only want to know if there is something we can connect to.
-        This can lead to interesting behavior: the browser times out.
-
-        https://stackoverflow.com/questions/43156023/what-is-http-host-header#43156094
-
-        # Certificate did not match expected hostname: 85.119.104.84.
-        Certificate: {'subject': ((('commonName', 'webdiensten.drechtsteden.nl'),),)
-        """
-
-        s = requests.Session()
-        s.mount("https://", host_header_ssl.HostHeaderSSLAdapter())
-
-        my_request = s.get(
-            uri,
-            timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
-            allow_redirects=False,  # redirect = connection
-            verify=False,  # nosec any tls = connection
-            headers={
-                "Host": url,
-                "User-Agent": get_random_user_agent(),
-                # some headers to make this look like a browser request, some domains otherwise just
-                # refuse to serve:
-                "Accept": "text/html,application/xhtml+xml,application/xml;q",
-                "Accept-Language": "en-US,en;q=0.5",
-                "Accept-Encoding": "gzip, deflate, br",
-                "DNT": "1",
-                "Connection": "keep-alive",
-                "Upgrade-Insecure-Requests": "1",
-                "Pragma": "no-cache",
-                "Cache-Control": "no-cache",
-                # """
-                # Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
-                # Accept-Language: en-US,en;q=0.5
-                # Accept-Encoding: gzip, deflate, br
-                # DNT: 1
-                # Connection: keep-alive
-                # Cookie: __Host-Xsrf-Legacy-Portal=jPSty7jGg5CZZlRE7wAlX7YRFkF...
-                # Upgrade-Insecure-Requests: 1
-                # Sec-Fetch-Dest: document
-                # Sec-Fetch-Mode: navigate
-                # Sec-Fetch-Site: none
-                # Sec-Fetch-User: ?1
-                # Pragma: no-cache
-                # Cache-Control: no-cache
-                # TE: trailers
-                # """
-            },
-        )
-        if my_request.status_code:
-            log.debug("%s: Host: %s Status: %s", uri, url, my_request.status_code)
-            return connection_answer(True, None)
-
-        log.debug("No status code. %s ", url)
-        # probably never reached, exception thrown when no status code is present
-        return connection_answer(True, "no_http_status_code")
-    except (ConnectTimeout, Timeout, ReadTimeout) as my_exception:
-        log.debug("ConnectTimeout, Timeout, ReadTimeout")
-        log.debug(my_exception)
-        return connection_answer(False, my_exception)
+        return callable(**args)
     except (ChunkedEncodingError, ContentDecodingError) as my_exception:
-        log.debug("ChunkedEncodingError, ContentDecodingError")
-        log.debug(my_exception)
         # There is a connection and you can get something back. But it doesn't decode properly.
         # For example InvalidChunkLength(got length b'<!DOCTYPE html>\\n', 0 bytes read)",
-        return connection_answer(True, my_exception)
-    except (ConnectionRefusedError, ConnectionError, HTTPError, SSLError, requests.RequestException) as my_exception:
-        log.debug("ConnectionRefusedError, ConnectionError, HTTPError, SSLError, ConnectionResetError")
-        log.debug(my_exception)
-        strerror = str(my_exception.args)  # Cast whatever we get back to a string. Instead of trace.
-        has_acceptable_error = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
-        if has_acceptable_error:
-            log.debug("There is a server, but could not communicate directly: %s", strerror)
-            return connection_answer(True, my_exception)
+        return "content_found_with_encoding_issues", str(my_exception)
+    except (ConnectionError, HTTPError, SSLError, requests.RequestException) as my_exception:
+        if has_acceptable_error(str(my_exception.args)):
+            return "no_content_but_error_indicates_server", str(my_exception)
 
-        # No acceptable answer? Try a normal connection:
-        # This might be due to the fact that a firewall is blocking direct requests to the IP with a different
-        # host. Seen this in edienstenburgerzaken.purmerend.nl, which is annoying. So we're going to try
-        # to connect again, but then with the normal host, without IP. Note that this requires that the
-        # correct queue is used to connect to the network. This might not work on your development machine
-        # as it might connect over the wrong network
-        # Basically perform the same checks on the url directly, with a more extensive request that can be debugged
-        try:
-            log.debug("Trying again with a matching url and host header -> No connection to IP with a host header.")
-            uri = f"{protocol}://{url}:{port}"
-            req = Request("GET", uri, headers={"Host": url, "User-Agent": get_random_user_agent()})
-            my_session = Session()
-            prepped = my_session.prepare_request(req)
-            my_session.send(
-                prepped,
-                verify=False,
-                timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
-                allow_redirects=False,
-            )
-            return connection_answer(True, "found_with_hostname")
-        except (ConnectionRefusedError, HTTPError) as sub_ex:
-            log.debug("ConnectionRefusedError, HTTPError")
-            log.debug(my_exception)
-            # Same handling as above.
-            strerror = str(sub_ex.args)
-            has_acceptable_error = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
-            if has_acceptable_error:
-                log.debug("There is a server, but could not communicate directly: %s", strerror)
-                return connection_answer(True, sub_ex)
+        # this has to be retried using get_via_hostname.
+        return "no_content_and_server_indicates_error", str(my_exception)
+    # Whatever timeouts and other junk that might play up...
+    except BaseException as my_exception:  # pylint: disable=broad-except
+        return "generic_exception", str(my_exception)
 
-            return connection_answer(False, sub_ex)
-        except (Timeout, ReadTimeout) as sub_ex:
-            log.debug("Timeout, ReadTimeout")
-            log.debug(my_exception)
-            return connection_answer(False, sub_ex)
-        except Exception as sub_ex:  # pylint: disable=broad-except
-            log.debug("Exception 2")
-            log.debug(my_exception)
-            return connection_answer(False, sub_ex)
 
-    # The rest :)
-    except Exception as my_exception:  # pylint: disable=broad-except
-        log.debug("Exception 1")
-        log.debug(my_exception)
-        return connection_answer(False, my_exception)
+def request_via_ip(uri, url):
+    # https://stackoverflow.com/questions/43156023/what-is-http-host-header#43156094
+    s = requests.Session()
+    s.mount("https://", host_header_ssl.HostHeaderSSLAdapter())
+    response = s.get(
+        uri,
+        timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
+        allow_redirects=False,  # redirect = connection
+        verify=False,  # nosec any tls = connection
+        headers=create_standard_request_headers(url),
+    )
+
+    if response.status_code:
+        return connection_answer(True, "found_with_ip")
+    return connection_answer(True, "no_http_status_code")
+
+
+def request_via_hostname(protocol, url, port):
+    # No acceptable answer? Try a normal connection:
+    # This might be due to the fact that a firewall is blocking direct requests to the IP with a different
+    # host. Seen this in edienstenburgerzaken.purmerend.nl, which is annoying. So we're going to try
+    # to connect again, but then with the normal host, without IP. Note that this requires that the
+    # correct queue is used to connect to the network. This might not work on your development machine
+    # as it might connect over the wrong network
+    # Basically perform the same checks on the url directly, with a more extensive request that can be debugged
+    req = Request("GET", f"{protocol}://{url}:{port}", headers=create_standard_request_headers(url))
+    my_session = Session()
+    prepped = my_session.prepare_request(req)
+    response = my_session.send(
+        prepped,
+        verify=False,
+        timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
+        allow_redirects=False,
+    )
+
+    if response.status_code:
+        return connection_answer(True, "found_with_hostname")
+    return connection_answer(True, "no_http_status_code")
+
+
+def build_uri_from_components(protocol: str, url: str, port: int, ip_version: int) -> Optional[str]:
+    if ip_version == 4:
+        ip_address = get_ipv4(url)
+        return f"{protocol}://{ip_address}:{port}" if ip_address else None
+    else:
+        ip_address = get_ipv6(url)
+        # note the brackets in ipv6 addresses!
+        return f"{protocol}://[{ip_address}]:{port}" if ip_address else None
+
+
+def create_standard_request_headers(url: str) -> Dict[str, str]:
+    return {
+        "Host": url,
+        "User-Agent": get_random_user_agent(),
+        # some headers to make this look like a browser request, some domains otherwise just
+        # refuse to serve:
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate, br",
+        "DNT": "1",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache",
+    }
+
+
+def has_acceptable_error(strerror: str) -> bool:
+    log.debug(strerror)
+    acceptable = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
+    if acceptable:
+        log.debug("Acceptable error. There is a server, but could not communicate directly: %s", strerror)
+    return acceptable
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)

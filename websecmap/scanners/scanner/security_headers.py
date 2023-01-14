@@ -63,11 +63,12 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
-from websecmap.scanners.scanner.http import get_random_user_agent
+from websecmap.scanners.scanner.http import create_standard_request_headers
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 
 log = logging.getLogger(__name__)
 
+HEADER_RETRIEVAL_TIMEOUT = 20
 
 SECURITY_HEADER_SCAN_TYPES = [
     "http_security_header_strict_transport_security",
@@ -150,7 +151,9 @@ def compose_scan_task(urls):
 
     return group(
         [
-            get_headers.si(endpoint.uri_url()).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
+            get_headers.si(endpoint.uri_url(), endpoint.host()).set(
+                queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version]
+            )
             | analyze_headers.s(endpoint.pk)
             | plannedscan.finish.si("scan", "security_headers", endpoint.url.pk)
             for endpoint in endpoints
@@ -456,26 +459,7 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
 
 
 @app.task(expires=EXPIRES_IN_ONE_DAY)
-def get_headers(uri_uri: str) -> Union[Dict, bool]:
-    try:
-        response = get_headers_request(uri_uri)
-        # Object of type CaseInsensitiveDict is not JSON serializable.
-        return dict(response)
-
-    except requests.RequestException as my_exception:
-        # This is completely expected and happens all the time
-        log.debug("Could not request headers, exception: %s", my_exception)
-    except BaseException as exc:  # noqa  # pylint: disable=broad-except
-        # Something weird is going on, we want to know this.
-        log.exception("After retries still could not get headers: %s", exc)
-        # If this task still fails after maximum retries the last
-        # error will be passed as result to the next task.
-        # Exceptions do not serialize.
-
-    return False
-
-
-def get_headers_request(uri_url: str) -> CaseInsensitiveDict:
+def get_headers(uri_url: str, host: str) -> Union[Dict, bool]:
     """
     Issue #94:
     TL;DR: The fix is to follow all redirects.
@@ -505,18 +489,30 @@ def get_headers_request(uri_url: str) -> CaseInsensitiveDict:
 
     :return: requests.response
     """
-
     log.debug("Getting headers for %s", uri_url)
 
+    # Not passing exceptions between functions.
     # ignore wrong certificates, those are handled in a different scan.
     # 10 seconds for network delay, 10 seconds for the site to respond.
-    response = requests.get(
-        uri_url,
-        timeout=(30, 30),
-        allow_redirects=True,
-        verify=False,  # nosec TLS does not have to be valid in this test, only headers do.
-        headers={"User-Agent": get_random_user_agent()},
-    )
+    # WHEN: Failed to parse headers (url=https://gvo.schiedam.nl:443/): [MissingHeaderBodySeparatorDefect()],
+    #   unparsed data: 'Access-Control-Allow-Origin : https://gvo. <-- notice space before colon
+    # THEN: urllib3.exceptions.HeaderParsingError still waits the full timeout, even though headers have been received.
+    #   a read timeout occurs.
+    try:
+        response = requests.get(
+            uri_url,
+            timeout=HEADER_RETRIEVAL_TIMEOUT,
+            allow_redirects=True,
+            verify=False,  # nosec TLS does not have to be valid in this test, only headers do.
+            headers=create_standard_request_headers(host),
+        )
+        response.raise_for_status()
+    except requests.RequestException as my_exception:
+        log.debug("Could not request headers, exception: %s", my_exception)
+        return False
+    except BaseException as exc:
+        log.exception("After retries still could not get headers: %s", exc)
+        return False
 
     # redirects are followed, this gives an indication on how many redirects are followed, and what url the
     # headers are taken from:
@@ -534,4 +530,4 @@ def get_headers_request(uri_url: str) -> CaseInsensitiveDict:
 
     for header in response.headers:
         log.debug("Received header: %s", header)
-    return response.headers
+    return dict(response.headers)

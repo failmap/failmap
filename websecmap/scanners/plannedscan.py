@@ -315,7 +315,7 @@ def finish_multiple(activity: str, scanner: str, urls: List[int]):
 
 
 def retrieve_endpoints_from_urls(
-    urls: List[int],
+    urls: List[Url],
     protocols: List[str] = None,
     ports: List[int] = None,
     ip_versions: List[int] = None,
@@ -346,7 +346,7 @@ def retrieve_endpoints_from_urls(
     # endpoints could be deleted, removed, dead, whatever, in that case the planned scan has to be
     # deleted as well. We have to know what urls are not in the set we requested, so those urls can
     # be removed from the planned scans.
-    urls_without_endpoints = list(set(urls) - {ep.url.id for ep in endpoints})
+    urls_without_endpoints = list({url.id for url in urls} - {ep.url.id for ep in endpoints})
 
     return endpoints, urls_without_endpoints
 

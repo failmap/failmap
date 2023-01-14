@@ -96,6 +96,9 @@ class Endpoint(models.Model):
 
         return f"{protocol}://{self.url.url}"
 
+    def host(self):
+        return self.url.url
+
     # when testing for ipv4 or ipv6, an endpoint is mutually exclusive.
     def is_ipv4(self):
         return self.ip_version == 4

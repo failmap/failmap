@@ -258,7 +258,7 @@ def test_retrieve_endpoints_from_urls(db):
     u2 = Url.objects.create(url="example.nl")
     e1 = Endpoint.objects.create(url=u1, protocol="http", port="443")
 
-    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls([u1.id, u2.id], protocols=["http", "https"])
+    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls([u1, u2], protocols=["http", "https"])
 
     assert endpoints == [e1]
     assert urls_without_endpoints == [u2.id]
