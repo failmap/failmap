@@ -109,7 +109,7 @@ RUN /pyenv/bin/websecmap collectstatic
 
 EXPOSE 8000
 
-# Todo: add working healthcheck
+# Todo: add working healthcheck, should be depending on role of the worker what healthy means.
 # All containers report as being unhealthy. Localhost:8000 is not running anything. Nor is 80.
 # HEALTHCHECK CMD curl --silent --fail http://localhost:8000/ || exit 1
 

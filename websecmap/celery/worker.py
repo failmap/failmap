@@ -28,11 +28,13 @@ ROLES_REQUIRING_IPV4_AND_IPV6 = ["default", "all_internet", "bannergrab"]
 
 # list of all roles that require IPv6 networking
 ROLES_REQUIRING_IPV6 = [
+    "alt_v6_internet",
     "v6_internet",
     "default_ipv6",
 ]
 
 ROLES_REQUIRING_IPV4 = [
+    "alt_v4_internet",
     "v4_internet",
     "default_ipv4",
     "qualys",  # only supports ipv4(!)
@@ -103,6 +105,16 @@ QUEUES_MATCHING_ROLES = {
         Queue("isolated"),
     ],
     "v6_internet": [
+        Queue("internet"),
+        Queue("ipv6"),
+        Queue("isolated"),
+    ],
+    "alt_v4_internet": [
+        Queue("internet"),
+        Queue("ipv4"),
+        Queue("isolated"),
+    ],
+    "alt_v6_internet": [
         Queue("internet"),
         Queue("ipv6"),
         Queue("isolated"),
