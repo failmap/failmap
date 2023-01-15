@@ -256,7 +256,7 @@ requests-toolbelt==0.10.1
     # via -r requirements.in
 retry==0.9.2
     # via -r requirements.in
-sentry-sdk==1.11.1
+sentry-sdk==0.20.2
     # via -r requirements.in
 shapely==2.0.0
     # via osm2geojson
@@ -293,7 +293,7 @@ typing-extensions==4.4.0
     # via django-countries
 tzdata==2022.7
     # via django-celery-beat
-urllib3==1.26.13
+urllib3==1.26.11
     # via
     #   -r requirements.in
     #   requests

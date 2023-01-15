@@ -154,7 +154,7 @@ def merge(
             # Would otherwise retrieve multiple coordinates.
             coordinate.is_dead = True
             coordinate.is_dead_since = when
-            coordinate.is_dead_reason = f"Merged with {new_organization}"
+            coordinate.is_dead_reason = f"Merged with {new_organization}"[:255]
 
         # Should we make copies of all urls? And for what? Or should we state somewhere when an URL was owned
         # by an organization? Like n-n with extra information from when that is valid? That would result in
@@ -180,7 +180,7 @@ def merge(
 
         source_organization.is_dead = True
         source_organization.is_dead_since = when
-        source_organization.is_dead_reason = f"Merged into {new_organization} on {when}."
+        source_organization.is_dead_reason = f"Merged into {new_organization} on {when}."[:255]
         source_organization.save()
 
     # raise NotImplemented
@@ -216,7 +216,7 @@ def dissolve(
     )
     dissolved_organization.is_dead = True
     dissolved_organization.is_dead_since = when
-    dissolved_organization.is_dead_reason = f"Disolved into other organizations ({target_organization_names})"
+    dissolved_organization.is_dead_reason = f"Disolved into other organizations ({target_organization_names})"[:255]
     dissolved_organization.save()
 
     # the urls of this organization are shared to it's targets :) ENJOY! :)

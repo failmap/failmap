@@ -412,7 +412,7 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
     for old_coord in old_coordinate:
         old_coord.is_dead = True
         old_coord.is_dead_since = when if when else datetime.now(pytz.utc)
-        old_coord.is_dead_reason = message
+        old_coord.is_dead_reason = message[:255]
         old_coord.save()
 
     # Update the wikipedia references, given we have them now.
