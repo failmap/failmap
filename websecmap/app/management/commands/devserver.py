@@ -59,7 +59,7 @@ def start_borker(uuid):
         ).split(":", maxsplit=1)[-1]
 
     time.sleep(1)  # small delay to prevent first warning
-    port = int(get_container_port())
+    port = int(get_container_port().strip().split(":")[-1])
 
     return borker_process, port
 
@@ -76,10 +76,15 @@ def start_worker(broker_port, silent=True):
     )
 
     # watchdog = 'tools/autoreload.sh'
-    worker_command = (
-        f"websecmap celery worker --loglevel=info --pool=gevent --concurrency=1 "
-        f"--broker redis://localhost:{broker_port}/0".split()
-    )
+    worker_command = [
+        "websecmap",
+        "celery",
+        f"--broker=redis://localhost:{broker_port}/0",
+        "worker",
+        "--loglevel=info",
+        "--pool=gevent",
+        "--concurrency=1",
+    ]
 
     worker_process = subprocess.Popen(watchdog + worker_command, stdout=sys.stdout.buffer, stderr=sys.stderr.buffer)
 
