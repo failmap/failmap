@@ -16,6 +16,7 @@ import socket
 from constance import config
 from kombu import Queue
 from retry import retry
+from sentry_sdk import set_tag
 
 log = logging.getLogger(__name__)
 
@@ -176,6 +177,8 @@ def worker_configuration():
     role = os.environ.get("WORKER_ROLE", "default")
 
     log.info("Configuring worker for role: %s", role)
+
+    set_tag("worker_role", role)
 
     # configure which queues should be consumed depending on assigned role for this worker
     # fall back to storage if the queue is not defined above, to prevent crashes
