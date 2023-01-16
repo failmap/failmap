@@ -5,6 +5,7 @@ from typing import List
 from websecmap.app.constance import constance_cached_value
 
 CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
+CELERY_IP_ALT_VERSION_QUEUE_NAMES = {4: "alt_ipv4", 6: "alt_ipv6"}
 
 
 # Cloudflare: 1.0.0.1, 1.1.1.1

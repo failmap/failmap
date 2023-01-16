@@ -726,6 +726,7 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
         calculate_ipv6_views_mail(scan_data)
     elif scan_type == "web":
         scan_data = calculate_forum_standaardisatie_views_web(scan_data)
+        scan_data = calculate_custom_websecmap_results(scan_data, domain)
         calculate_ipv6_views_web(scan_data)
     store_test_results(endpoint.pk, scan_data["results"]["calculated_results"])
 
@@ -824,6 +825,7 @@ def calculate_forum_standaardisatie_views_web(scan_data):
     # These values are published in the forum standaardisatie magazine.
 
     custom_api_field_results = scan_data["results"]["custom"]
+    tests = scan_data["results"]["tests"]
 
     # DNSSEC
     add_calculation(
@@ -838,10 +840,10 @@ def calculate_forum_standaardisatie_views_web(scan_data):
     # TLS_NCSC
     # v2: web_https_tls_* 10 and web_https_cert_* 4, not including: web_https_http_available
     # #205 -> if starttls_failed failed, then dane test is not performed.
-    if "web_https_http_available" in scan_data["results"]["tests"]:
-        if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
+    if "web_https_http_available" in tests:
+        if tests["web_https_http_available"]["status"] == "failed":
             add_instant_calculation(scan_data, "web_legacy_tls_ncsc_web", "failed")
-        elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
+        elif tests["web_https_http_available"]["status"] == "error":
             add_instant_calculation(scan_data, "web_legacy_tls_ncsc_web", "error")
         else:
             add_calculation(
@@ -866,10 +868,10 @@ def calculate_forum_standaardisatie_views_web(scan_data):
             )
 
     # HTTPS Redirect
-    if "web_https_http_available" in scan_data["results"]["tests"]:
-        if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
+    if "web_https_http_available" in tests:
+        if tests["web_https_http_available"]["status"] == "failed":
             add_instant_calculation(scan_data, "web_legacy_https_enforced", "failed")
-        elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
+        elif tests["web_https_http_available"]["status"] == "error":
             add_instant_calculation(scan_data, "web_legacy_https_enforced", "error")
         else:
             add_calculation(
@@ -877,10 +879,10 @@ def calculate_forum_standaardisatie_views_web(scan_data):
             )
 
     # HSTS
-    if "web_https_http_available" in scan_data["results"]["tests"]:
-        if scan_data["results"]["tests"]["web_https_http_available"]["status"] == "failed":
+    if "web_https_http_available" in tests:
+        if tests["web_https_http_available"]["status"] == "failed":
             add_instant_calculation(scan_data, "web_legacy_hsts", "failed")
-        elif scan_data["results"]["tests"]["web_https_http_available"]["status"] == "error":
+        elif tests["web_https_http_available"]["status"] == "error":
             add_instant_calculation(scan_data, "web_legacy_hsts", "error")
         else:
             add_calculation(scan_data=scan_data, new_key="web_legacy_hsts", required_values=["web_https_http_hsts"])
@@ -915,9 +917,10 @@ def calculate_forum_standaardisatie_views_web(scan_data):
         add_instant_calculation(scan_data, "web_legacy_tls_1_3", "not_testable")
 
     # add custom field for the ipv6 test, so this can be labelled individually
-    add_instant_calculation(
-        scan_data, "web_legacy_category_ipv6", scan_data["results"]["categories"]["web_ipv6"]["status"]
-    )
+    if "web_ipv6" in scan_data["results"]["categories"]:
+        add_instant_calculation(
+            scan_data, "web_legacy_category_ipv6", scan_data["results"]["categories"]["web_ipv6"]["status"]
+        )
 
     # 236, add category conclusion for forum standaardisatie
     add_calculation(
@@ -940,6 +943,45 @@ def calculate_forum_standaardisatie_views_web(scan_data):
     return scan_data
 
 
+def is_subdomain(domain: str):
+    # domain: example.com
+    # subdomain: www.example.com
+    return domain.count(".") > 1
+
+
+def calculate_custom_websecmap_results(scan_data, domain: str):
+    # re-assess the security txt result. Missing securitytxt on a subdomain is not as problemantic as a security
+    # researcher will just try the domain itself. Of course, when a researcher does not *know* the domains is a
+    # subdomain because they work based on IP, it will be challenging. So basically a securitytxt is needed everywhere.
+
+    # It can be the following:
+    # - passed
+    # - missing_on_domain
+    # - missing_on_subdomain
+
+    tests = scan_data["results"]["tests"]
+
+    if "web_appsecpriv_securitytxt" not in tests:
+        log.debug("Missing web_appsecpriv_securitytxt in tests, cannot upgrade result")
+        return scan_data
+
+    # Copy the exact metric from internet.nl, including all technical data and such, so that does not get lost
+    scan_data["results"]["calculated_results"]["wsm_web_appsecpriv_securitytxt"] = tests["web_appsecpriv_securitytxt"]
+    new_security_txt = scan_data["results"]["calculated_results"]["wsm_web_appsecpriv_securitytxt"]
+
+    if tests["web_appsecpriv_securitytxt"]["status"] not in ["failed", "warning"]:
+        return scan_data
+
+    if is_subdomain(domain):
+        new_security_txt["status"] = "missing_on_subdomain"
+        new_security_txt["verdict"] = "missing_on_subdomain"
+    else:
+        new_security_txt["status"] = "missing_on_domain"
+        new_security_txt["verdict"] = "missing_on_domain"
+
+    return scan_data
+
+
 def calculate_ipv6_views_web(scan_data):
     """
     Amalgamation of ipv6 siphoned into several metrics:
@@ -958,18 +1000,23 @@ def calculate_ipv6_views_web(scan_data):
     When something is IPv6 ready, it cannot be IPv6 proof: there is only one grade possible.
     """
 
+    tests = scan_data["results"]["tests"]
+
     # output
     web_ipv6: str = "incompatible"  # ready, proof, incompatible
     web_ipv6_ready: bool = False  # boolean metric for green, so the map can only show green
     web_ipv6_proof: bool = False  # boolean metric for orange, so the map can only show orange
     web_ipv6_incompatible: bool = False  # boolean metric for red, so the map can only show red
 
+    if "web_ipv6_ns_address" not in tests:
+        return
+
     # simplify the calculation here, so you don't have to test out the entire scan_data object:
-    ns_address = scan_data["results"]["tests"]["web_ipv6_ns_address"]["status"]
-    ns_reach = scan_data["results"]["tests"]["web_ipv6_ns_reach"]["status"]
-    ws_address = scan_data["results"]["tests"]["web_ipv6_ws_address"]["status"]
-    ws_reach = scan_data["results"]["tests"]["web_ipv6_ws_reach"]["status"]
-    ws_similar = scan_data["results"]["tests"]["web_ipv6_ws_similar"]["status"]
+    ns_address = tests["web_ipv6_ns_address"]["status"]
+    ns_reach = tests["web_ipv6_ns_reach"]["status"]
+    ws_address = tests["web_ipv6_ws_address"]["status"]
+    ws_reach = tests["web_ipv6_ws_reach"]["status"]
+    ws_similar = tests["web_ipv6_ws_similar"]["status"]
 
     # Calculations:
 
@@ -1029,11 +1076,17 @@ def calculate_ipv6_views_mail(scan_data):
 
     When something is IPv6 ready, it cannot be IPv6 proof: there is only one grade possible.
     """
+
+    tests = scan_data["results"]["tests"]
+
     # output
     mail_ipv6: str = "incompatible"  # ready, proof, incompatible
     mail_ipv6_ready: bool = False  # boolean metric for green, so the map can only show green
     mail_ipv6_proof: bool = False  # boolean metric for orange, so the map can only show orange
     mail_ipv6_incompatible: bool = False  # boolean metric for red, so the map can only show red
+
+    if "mail_ipv6_ns_address" not in tests:
+        return
 
     # simplify the calculation here, so you don't have to test out the entire scan_data object:
     ns_address = scan_data["results"]["tests"]["mail_ipv6_ns_address"]["status"]
@@ -1117,7 +1170,7 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     #  if some mailservers not testable_ -> good_not_tested is relevant?
     if custom_api_field_results["mail_servers_testable_status"] == "no_mx":
         add_instant_calculation(scan_data, "mail_legacy_start_tls", "no_mx")
-        # todo: add new field to repor
+        # todo: add new field to report
     elif custom_api_field_results["mail_servers_testable_status"] == "unreachable":
         add_instant_calculation(scan_data, "mail_legacy_start_tls", "unreachable")
     elif custom_api_field_results["mail_servers_testable_status"] == "untestable":

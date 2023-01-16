@@ -18,6 +18,8 @@ from websecmap.scanners.scanner.internet_nl_v2_websecmap import (
     progress_running_scan,
     reuse_last_fields_and_set_them_to_error,
     update_state,
+    is_subdomain,
+    store_domain_scan_results,
 )
 
 log = logging.getLogger("websecmap")
@@ -489,7 +491,7 @@ def test_internet_nl_store_testresults(db):
     create_url_reports(url2)
 
     # is there a series of imports?
-    assert EndpointGenericScan.objects.all().count() == 116
+    assert EndpointGenericScan.objects.all().count() == 118
 
     # debug: check new field names:
     # log.error(list(EndpointGenericScan.objects.all().values_list('type', flat=True)))
@@ -848,7 +850,7 @@ def test_internet_nl_store_testresults(db):
     # + 4 for 1x ipv6 mail results
     # = 163
     # + rpki fields = 182
-    assert EndpointGenericScan.objects.all().count() == 182
+    assert EndpointGenericScan.objects.all().count() == 184
 
     create_url_reports(url1)
 
@@ -995,3 +997,67 @@ def test_legacy_calculations():
     assert lowest_value_in_results(data, ["web_https_http_available"]) == "error"
 
     assert data["results"]["calculated_results"]["web_legacy_tls_available"]["status"] == "error"
+
+
+def test_is_subdomain():
+    assert is_subdomain("www.example.nl") is True
+    assert is_subdomain("example.nl") is False
+
+
+def create_scan_data(result):
+
+    return {
+        "status": "ok",
+        "report": {"url": "https://dev.batch.internet.nl/site/internet.nl/120932/"},
+        "scoring": {"percentage": 100},
+        "results": {
+            "categories": {"web_appsecpriv": {"verdict": "passed", "status": "passed"}},
+            "tests": {"web_appsecpriv_securitytxt": {"status": result, "verdict": "good"}},
+            "custom": {"tls_1_3_support": "yes"},
+        },
+    }
+
+
+def test_internet_nl_security_txt_websecmap_subdomains(db):
+    Endpoint.objects.create(url=Url.objects.create(url="internet.nl"), protocol="https", port="443")
+    Endpoint.objects.create(url=Url.objects.create(url="www.internet.nl"), protocol="https", port="443")
+
+    scan_data = create_scan_data("passed")
+
+    store_domain_scan_results(scan_data=scan_data, domain="internet.nl", scan_type="web", endpoint_protocol="https")
+
+    db_contents = [x.type for x in EndpointGenericScan.objects.all()]
+
+    assert "internet_nl_web_appsecpriv_securitytxt" in db_contents
+    assert "internet_nl_wsm_web_appsecpriv_securitytxt" in db_contents
+
+    # the category, security txt scan and the websecmap judge
+    first_security_scan = (
+        EndpointGenericScan.objects.all().filter(type="internet_nl_web_appsecpriv_securitytxt").first()
+    )
+    assert first_security_scan.rating == "passed"
+
+    wsm_security_scan = (
+        EndpointGenericScan.objects.all().filter(type="internet_nl_wsm_web_appsecpriv_securitytxt").first()
+    )
+    assert wsm_security_scan.rating == "passed"
+
+    # make it fail on domain and subdomain, check the rating is different
+    store_and_process(create_scan_data("warning"), "internet.nl", "missing_on_domain")
+    store_and_process(create_scan_data("warning"), "www.internet.nl", "missing_on_subdomain")
+
+
+def store_and_process(scan_data, domain: str, expected: str):
+    store_domain_scan_results(
+        scan_data=scan_data,
+        domain=domain,
+        scan_type="web",
+        endpoint_protocol="https",
+    )
+
+    result = (
+        EndpointGenericScan.objects.all()
+        .filter(type="internet_nl_wsm_web_appsecpriv_securitytxt", endpoint__url__url=domain, is_the_latest_scan=True)
+        .first()
+    )
+    assert result.rating == expected

@@ -111,12 +111,12 @@ QUEUES_MATCHING_ROLES = {
     ],
     "alt_v4_internet": [
         Queue("internet"),
-        Queue("ipv4"),
+        Queue("alt_ipv4"),
         Queue("isolated"),
     ],
     "alt_v6_internet": [
         Queue("internet"),
-        Queue("ipv6"),
+        Queue("alt_ipv6"),
         Queue("isolated"),
     ],
     "storage": [
