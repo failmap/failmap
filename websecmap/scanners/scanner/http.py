@@ -129,7 +129,7 @@ def compose_manual_discover_task(organizations_filter: dict = None, urls_filter:
     if not allowed_to_discover_endpoints("http"):
         return group()
 
-    kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
+    kwargs = merge_urls_filter(STANDARD_URL_FILTER, urls_filter=urls_filter)
     urls = apply_organzation_or_endpoint_filter_before_url_filter(**kwargs)
     return compose_discover_task(urls)
 

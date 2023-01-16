@@ -68,7 +68,7 @@ def compose_manual_scan_task(
     if not allowed_to_scan("plain_http"):
         return group()  # An empty group fits this callable's signature and does not impede celery.
 
-    kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
+    kwargs = merge_urls_filter(STANDARD_URL_FILTER, urls_filter=urls_filter)
     # only if the organization is filtered... otherwise the organization filter is always triggered by the default.
     if kwargs.get("organizations_filter", {}):
         kwargs = merge_organizations_filter(STANDARD_ORGANIZATION_FILTER, **kwargs)
