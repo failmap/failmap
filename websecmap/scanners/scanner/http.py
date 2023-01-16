@@ -73,6 +73,13 @@ PORT_TO_PROTOCOL = {80: "http", 8008: "http", 8080: "http", 443: "https", 8443: 
 
 PREFERRED_PORT_ORDER = [443, 80, 8443, 8080, 8008]
 
+CONTENT_FOUND_WITH_ENCODING_ISSUES = "content_found_with_encoding_issues"
+NO_CONTENT_BUT_ERROR_INDICATES_SERVER = "no_content_but_error_indicates_server"
+NO_CONTENT_AND_SERVER_INDICATES_ERROR = "no_content_and_server_indicates_error"
+GENERIC_EXCEPTION = "generic_exception"
+FOUND_WITH_IP = "found_with_ip"
+NO_HTTP_STATUS_CODE = "no_http_status_code"
+FOUND_WITH_HOSTNAME = "found_with_hostname"
 """
 http://2.python-requests.org/en/master/user/advanced/?highlight=timeout%3D#timeouts
 
@@ -360,7 +367,7 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
 
     log.debug("Attempting connect on: %s: host: %s", uri, url)
     answer, exc = http_call_handling_exceptions(request_via_ip, **{"uri": uri, "url": url})
-    if answer in ["content_found_with_encoding_issues", "no_content_but_error_indicates_server"]:
+    if answer in [CONTENT_FOUND_WITH_ENCODING_ISSUES, NO_CONTENT_BUT_ERROR_INDICATES_SERVER]:
         return connection_answer(True, exc)
 
     # instead of trying on no_content_and_server_indicates_error, always retry this way
@@ -368,7 +375,7 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
     answer, exc = http_call_handling_exceptions(
         request_via_hostname, **{"protocol": protocol, "url": url, "port": port}
     )
-    if answer in ["content_found_with_encoding_issues", "no_content_but_error_indicates_server"]:
+    if answer in [CONTENT_FOUND_WITH_ENCODING_ISSUES, NO_CONTENT_BUT_ERROR_INDICATES_SERVER]:
         return connection_answer(True, exc)
 
     return connection_answer(False, exc)
@@ -380,16 +387,16 @@ def http_call_handling_exceptions(callable, **args):
     except (ChunkedEncodingError, ContentDecodingError) as my_exception:
         # There is a connection and you can get something back. But it doesn't decode properly.
         # For example InvalidChunkLength(got length b'<!DOCTYPE html>\\n', 0 bytes read)",
-        return "content_found_with_encoding_issues", str(my_exception)
+        return CONTENT_FOUND_WITH_ENCODING_ISSUES, str(my_exception)
     except (ConnectionError, HTTPError, SSLError, requests.RequestException) as my_exception:
         if has_acceptable_error(str(my_exception.args)):
-            return "no_content_but_error_indicates_server", str(my_exception)
+            return NO_CONTENT_BUT_ERROR_INDICATES_SERVER, str(my_exception)
 
         # this has to be retried using get_via_hostname.
-        return "no_content_and_server_indicates_error", str(my_exception)
+        return NO_CONTENT_AND_SERVER_INDICATES_ERROR, str(my_exception)
     # Whatever timeouts and other junk that might play up...
     except BaseException as my_exception:  # pylint: disable=broad-except
-        return "generic_exception", str(my_exception)
+        return GENERIC_EXCEPTION, str(my_exception)
 
 
 def request_via_ip(uri, url):
@@ -405,8 +412,8 @@ def request_via_ip(uri, url):
     )
 
     if response.status_code:
-        return connection_answer(True, "found_with_ip")
-    return connection_answer(True, "no_http_status_code")
+        return connection_answer(True, FOUND_WITH_IP)
+    return connection_answer(True, NO_HTTP_STATUS_CODE)
 
 
 def request_via_hostname(protocol, url, port):
@@ -428,8 +435,8 @@ def request_via_hostname(protocol, url, port):
     )
 
     if response.status_code:
-        return connection_answer(True, "found_with_hostname")
-    return connection_answer(True, "no_http_status_code")
+        return connection_answer(True, FOUND_WITH_HOSTNAME)
+    return connection_answer(True, NO_HTTP_STATUS_CODE)
 
 
 def build_uri_from_components(protocol: str, url: str, port: int, ip_version: int) -> Optional[str]:
