@@ -20,6 +20,9 @@ COPY tools/ /source/tools/
 COPY websecmap/ /source/websecmap/
 WORKDIR /source
 
+ARG VERSION=0.0.0+dev0
+RUN echo "VERSION='$VERSION'" >> /source/websecmap/__version__.py
+
 RUN pip install --editable . --no-deps
 
 FROM python:3.11 AS dnscheck

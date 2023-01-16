@@ -188,7 +188,7 @@ image_test:
     - IMAGE=$IMAGE docker-compose --file tests/docker-compose.yml pull --quiet broker database &
 
     # build docker image to test building, using cache from previous builds, creating new cache metadata in image and pushing image to cache
-    - DOCKER_BUILDKIT=1 time docker buildx build --cache-from $IMAGE --cache-from $MR_CACHE_IMAGE --cache-from $MASTER_CACHE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --target release --tag $IMAGE --tag $MR_CACHE_IMAGE --push .
+    - DOCKER_BUILDKIT=1 time docker buildx build --cache-from $IMAGE --cache-from $MR_CACHE_IMAGE --cache-from $MASTER_CACHE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg VERSION=$(cat version) --target release --tag $IMAGE --tag $MR_CACHE_IMAGE --push .
 
     # run system tests against image
     - IMAGE=$IMAGE time make test_system
@@ -224,7 +224,7 @@ build_test:
     - MASTER_CACHE_IMAGE=$CI_REGISTRY/internet-cleanup-foundation/web-security-map:latest
 
     # build and push docker image for publishing, using cache from previous builds, creating new cache metadata in image
-    - DOCKER_BUILDKIT=1 docker buildx build --cache-from $CACHE_IMAGE --cache-from $MASTER_CACHE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --target release --tag $IMAGE --tag $CACHE_IMAGE --tag $MASTER_CACHE_IMAGE --push .
+    - DOCKER_BUILDKIT=1 docker buildx build --cache-from $CACHE_IMAGE --cache-from $MASTER_CACHE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg VERSION=$(cat version) --target release --tag $IMAGE --tag $CACHE_IMAGE --tag $MASTER_CACHE_IMAGE --push .
 
     # run system tests against image
     - IMAGE=$IMAGE time make test_system
