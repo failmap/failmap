@@ -80,6 +80,7 @@ GENERIC_EXCEPTION = "generic_exception"
 FOUND_WITH_IP = "found_with_ip"
 NO_HTTP_STATUS_CODE = "no_http_status_code"
 FOUND_WITH_HOSTNAME = "found_with_hostname"
+
 """
 http://2.python-requests.org/en/master/user/advanced/?highlight=timeout%3D#timeouts
 
@@ -403,7 +404,12 @@ def request_via_ip(uri, url):
     # https://stackoverflow.com/questions/43156023/what-is-http-host-header#43156094
     s = requests.Session()
     s.mount("https://", host_header_ssl.HostHeaderSSLAdapter())
-    response = s.get(
+    # Use HEAD request to only fetch headers which improves performance.
+    # Some servers (eg: https://gvo.schiedam.nl/) cause a read timeout when
+    # using GET request as the connection is waiting on more data after the
+    # body is transmitted. There is no clue yet to why. Using HEAD also mitigates
+    # this issues.
+    response = s.head(
         uri,
         timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
         allow_redirects=False,  # redirect = connection
