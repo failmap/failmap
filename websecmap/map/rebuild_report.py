@@ -55,7 +55,7 @@ def compose_task(
         tasks.append(group(recreate_url_reports(url_ids)) | recreate_organization_reports.si([organization.pk]))
 
     if not tasks:
-        log.error("Could not rebuild reports, filters resulted in no tasks created.")
+        log.warning("Could not rebuild reports, filters resulted in no tasks created.")
         log.debug("Organization filter: %s", organizations_filter)
         log.debug("Url filter: %s", urls_filter)
         log.debug("urls to display: %s", q_configurations_to_report())

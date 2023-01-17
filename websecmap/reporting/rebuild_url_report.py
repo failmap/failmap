@@ -16,13 +16,13 @@ def compose_task(**kwargs) -> Task:
     urls = Url.objects.filter(q_configurations_to_report())
     urls = add_model_filter(urls, **kwargs)
     if not urls:
-        log.error("No urls found.")
+        log.warning("No urls found.")
         return group()
 
     tasks = recreate_url_reports([url.id for url in urls])
 
     if not tasks:
-        log.error("Could not rebuild reports, filters resulted in no tasks created.")
+        log.warning("Could not rebuild reports, filters resulted in no tasks created.")
         log.debug("Url filter: %s", kwargs)
         return group()
 
