@@ -94,9 +94,10 @@ def recreate_url_report(url_id):
             # This situation should not result into a 'should not happen' error where reports become stale until
             # there are enough new findings to warrant a new report. Instead it should rewrite history by removing
             # all existing reports of this url and writing all new ones.
-            log.error(
+            log.warning(
                 "There are more url reports than relevant moments in time for this url. "
-                "Rewriting history for this url.",
+                "This occurs when historical changes in the database are made. "
+                "If this keeps happening for the same url, something is wrong.",
                 extra={"url_id": url_id},
             )
 
