@@ -352,7 +352,7 @@ def test_plan_follow_up_scan(db, default_scan_metadata, default_policy):
     assert PlannedScan.objects.all().count() == 2
 
     planned = PlannedScan.objects.all().last()
-    assert planned.scanner.python_name == "plain_http"
+    assert planned.scanner.python_name == "autoexplain_no_https_possible"
     assert planned.url.url == "pki.example.nl"
 
     scan(epgs.id)

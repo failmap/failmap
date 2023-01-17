@@ -537,8 +537,6 @@ def plan_follow_up_scans(**kwargs):
 
     # Instead of this here is a slow and dumb implementation, which works when run every ten minutes or so
 
-    metadata = get_backend_scanmetadata()
-
     for follow_up_scan in FollowUpScan.objects.all().prefetch_related(
         Prefetch("run_follow_up_on_any_of_these_policies", to_attr="otherpolicies")
     ):
@@ -555,24 +553,25 @@ def plan_follow_up_scans(**kwargs):
 
             for scan_matching_policy in scans_matching_policy:
                 # Request all activities from this scanner
-                scanner = metadata["scan_types_to_scanner"].get(policy.scan_type, None)
+                # scanner = metadata["scan_types_to_scanner"].get(policy.scan_type, None)
+                follow_up_scanner = follow_up_scan.follow_up_scanner
 
-                if not scanner:
+                if not follow_up_scanner:
                     log.warning(
                         "Could not find a scanner matching scan type %s, cannot add follow up scan.", policy.scan_type
                     )
                     continue
 
-                for activity in scanner["plannable_activities"]:
+                for activity in follow_up_scanner.plannable_activities.all():
                     log.info(
                         "- Planning activity %s with scanner %s, for url %s",
-                        activity,
-                        scanner["python_name"],
+                        activity.name,
+                        follow_up_scanner.python_name,
                         scan_matching_policy.endpoint.url,
                     )
                     request(
-                        scanner=scanner["python_name"],
-                        activity=activity,
+                        scanner=follow_up_scanner.python_name,
+                        activity=activity.name,
                         urls=[scan_matching_policy.endpoint.url],
                         origin=f"Follow up from {policy}"[:255],
                     )
