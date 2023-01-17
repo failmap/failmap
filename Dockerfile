@@ -104,6 +104,8 @@ ENV UWSGI_MODULE websecmap.wsgi
 ENV UWSGI_STATIC_MAP /static=/srv/websecmap/static
 # set proxy and browser caching for static files to 1 month
 ENV UWSGI_STATIC_EXPIRES /* 2678400
+# disable exception message when client interrupts request, (OSError: write error)
+ENV UWSGI_DISABLE_WRITE_EXCEPTION false
 ENV TOOLS_DIR /usr/local/bin/
 ENV VENDOR_DIR /source/vendor/
 
