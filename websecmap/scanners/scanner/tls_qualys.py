@@ -385,7 +385,8 @@ def qualys_scan_thread(proxy: Dict[str, Any], url: str):
             # continue
 
         # Store debug data in database (this task has no direct DB access due to scanners queue).
-        scratch.apply_async([url, data])
+        # Not needed anymore, works as nintended.
+        # scratch.apply_async([url, data])
         # Always log to console. Don't ask the database (constance) if this should happen.
         report_to_console(url, data)
 
