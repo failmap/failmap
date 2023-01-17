@@ -212,6 +212,9 @@ requirements.txt: requirements.in | ${pip-compile}
 requirements-dev.txt: requirements-dev.in requirements.in | ${pip-compile}
 	${pip-compile} ${pip_compile_args} --output-file $@ $<
 
+requirements-deploy.txt: requirements-deploy.in requirements.in | ${pip-compile}
+	${pip-compile} ${pip_compile_args} --output-file $@ $<
+
 pip-sync:
 	# synchronizes the .venv with the state of requirements.txt
 	python3 -m piptools sync requirements.txt requirements-dev.txt
