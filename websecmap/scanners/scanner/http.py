@@ -638,7 +638,7 @@ def kill_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
     for endpoint in eps:
         endpoint.is_dead = True
         endpoint.is_dead_since = datetime.now(pytz.utc)
-        endpoint.is_dead_reason = f"Not found in HTTP Scanner anymore ({origin})."
+        endpoint.is_dead_reason = f"Not found in HTTP Scanner anymore ({origin})."[:255]
         endpoint.save()
 
 
