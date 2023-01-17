@@ -46,10 +46,10 @@ certifi
 pytz
 
 # task processing framework
-django-celery-beat
+django-celery-beat<2.2,>2
 # limit to version 4 as 5 has conflicting requirements with available flower atm.
-celery[redis,gevent]
-flower
+celery[redis,gevent]<5
+flower<1
 celery-statsd
 
 # Feature usage statistics

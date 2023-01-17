@@ -7,7 +7,7 @@
 # - template: SAST.gitlab-ci.yml
 
 variables:
-  CI_IMAGE: python:3.11
+  CI_IMAGE: python:3.10
   DOCKER_CI_IMAGE: websecmap/ci:docker-git
   DOCKER_SERVICE_VERSION: 20.10.16-dind
 

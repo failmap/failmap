@@ -1,5 +1,5 @@
 # create Python virtualenv with Python dependencies
-FROM python:3.11 AS virtualenv
+FROM python:3.10 AS virtualenv
 
 RUN python3 -mvenv /pyenv
 ENV VIRTUAL_ENV = /pyenv
@@ -25,7 +25,7 @@ RUN echo "VERSION='$VERSION'" >> /source/websecmap/__version__.py
 
 RUN pip install --editable . --no-deps
 
-FROM python:3.11 AS dnscheck
+FROM python:3.10 AS dnscheck
 
 RUN apt-get update && apt-get install -yqq \
   perl \
@@ -39,7 +39,7 @@ COPY tools/dnssec.pl /tools/dnssec.pl
 
 
 # restart with a clean image
-FROM python:3.11 AS release
+FROM python:3.10 AS release
 
 USER root
 

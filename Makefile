@@ -24,7 +24,7 @@ pip-compile = ${bin}/pip-compile
 pip-sync = ${bin}/pip-sync
 
 # python binary used to create virtual environment
-base_python ?= python3.11
+base_python ?= python3.10
 
 # application binary
 app = ${bin}/${app_name}
