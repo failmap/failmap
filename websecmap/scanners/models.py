@@ -828,6 +828,9 @@ class PlannedScan(models.Model):
         null=True,
     )
 
+    # some metadata where the scan is originating from, mainly to see follow-up scans
+    origin = models.CharField(max_length=255, blank=True, null=True)
+
     finished_at_when = models.DateTimeField(null=True, help_text="when finished, timeout, error", blank=True)
 
     # add joined index over scanner, activity, state, so queries are faster:

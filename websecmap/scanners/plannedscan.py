@@ -226,7 +226,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     return urls
 
 
-def request(activity: str, scanner: str, urls: List[int]):
+def request(activity: str, scanner: str, urls: List[int], origin: str = ""):
     # should it be deduplicated? i mean: if there already is a specific planned scan, it doesn't
     # need to be created again: that would just be more work. Think so, otherwise the finish and start will
     # mix for different scans. So we can't do bulk inserts, but we can do better state logging
@@ -252,6 +252,7 @@ def request(activity: str, scanner: str, urls: List[int]):
         planned_scan.url = url
         planned_scan.state = State["requested"].value
         planned_scan.last_state_change_at = now
+        planned_scan.origin = origin
         # To use the index on requested_at_when times are reduced to whole hours.
         # This is sane enough to allow tons of scans per day still, but the creation
         # of status reports is much faster. Still gives an idea of how many scans are made.
@@ -528,24 +529,11 @@ def plan_follow_up_scans(**kwargs):
     # request a scan for the matches
     # scanner_python_name, url_that_has_been_scanned, scan_types, conclusions_received
 
-    """Something like this:
-    select * FROM scanners_endpointgenericscan as epgs
-    INNER JOIN reporting_scanpolicy policy ON (epgs.rating = policy.conclusion AND epgs.type = policy.scan_type)
-    INNER JOIN scanners_followupscan_run_follow_up_on_any_of_these_policies as policy_limitation ON
-    (policy.id = policy_limitation.scanpolicy_id)
-    INNER JOIN scanners_followupscan ON (scanners_followupscan.id = policy_limitation.followupscan_id)
-    INNER JOIN scanners_scanner as scanner ON (scanner.id = scanners_followupscan.follow_up_scanner_id)
-    INNER JOIN scanners_endpoint ON (scanners_endpoint.id  = epgs.endpoint_id)
-    INNER JOIN url ON (url.id = scanners_endpoint.url_id)
-    WHERE epgs.rating_determined_on > '2022-09-21 00:00:00.000000'
-    -- scanner.python_name, url.url
-    """
-
     amount_of_minutes_of_scan_history = 20
     if kwargs.get("in_the_last_N_minutes"):
         amount_of_minutes_of_scan_history = int(kwargs.get("amount_of_minutes_of_scan_history"))
 
-    log.debug("Adding follow up scans to results from the last %s minutes.", amount_of_minutes_of_scan_history)
+    log.info("Adding follow up scans to results from the last %s minutes.", amount_of_minutes_of_scan_history)
 
     # Instead of this here is a slow and dumb implementation, which works when run every ten minutes or so
 
@@ -557,7 +545,7 @@ def plan_follow_up_scans(**kwargs):
         # are there scans in the last 10 minutes that match this policy:
         for policy in follow_up_scan.otherpolicies:
 
-            log.debug("Checking if there are follow ups for %s, %s", policy.scan_type, policy.conclusion)
+            log.info("Checking if there are follow ups for %s, %s", policy.scan_type, policy.conclusion)
 
             scans_matching_policy = EndpointGenericScan.objects.all().filter(
                 type=policy.scan_type,
@@ -576,10 +564,15 @@ def plan_follow_up_scans(**kwargs):
                     continue
 
                 for activity in scanner["plannable_activities"]:
-                    log.debug(
+                    log.info(
                         "- Planning activity %s with scanner %s, for url %s",
                         activity,
                         scanner["python_name"],
                         scan_matching_policy.endpoint.url,
                     )
-                    request(scanner=scanner["python_name"], activity=activity, urls=[scan_matching_policy.endpoint.url])
+                    request(
+                        scanner=scanner["python_name"],
+                        activity=activity,
+                        urls=[scan_matching_policy.endpoint.url],
+                        origin=f"Follow up from {policy}"[:255],
+                    )
