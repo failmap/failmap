@@ -201,11 +201,12 @@ def test_plan_scans(db, default_scan_metadata):
         # to test what happens on endpoints that already have scans:
         reset()
 
-        # with very recent scans no new scans will be created:
+        # outdated: with very recent scans no new scans will be created:
+        # scans will be created, only the planning in the schedule is in the lead of when a scan happens
         create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", timezone.now())
         create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", timezone.now())
         plan_scan()
-        assert calculate_progress() == []
+        assert calculate_progress() == [{"activity": 3, "amount": 1, "scanner": 22, "state": 1}]
 
         # this does not delete endpoints...
         EndpointGenericScan.objects.all().delete()

@@ -154,9 +154,9 @@ def plan_scan(urls_filter: dict = None, **kwargs):
     # todo: parameterize using settings in constance.
     parameter_sets = [
         {"exclude_urls_scanned_in_the_last_n_days": 7, "quality_levels": ["A", "A+", "A-", "trusted"]},
-        # removed as the task is scheduled to perform any N days. Also works better for follow up scans on
+        # set to 0 as the task is scheduled to perform any N days. Also works better for follow up scans on
         # when there is a negative result.
-        # {"exclude_urls_scanned_in_the_last_n_days": 3, "quality_levels": ["F", "C", "B", "not trusted"]},
+        {"exclude_urls_scanned_in_the_last_n_days": 0, "quality_levels": ["F", "C", "B", "not trusted"]},
     ]
 
     for parameter_set in parameter_sets:

@@ -16,6 +16,7 @@ from celery import Task, group
 from constance import config
 from django.db import transaction
 
+from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, InternetNLV2Scan, InternetNLV2StateLog
@@ -719,16 +720,38 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
 
     # prepare for calculated results
     scan_data["results"]["calculated_results"] = {}
-    if scan_type == "mail":
-        calculate_ipv6_views_mail(scan_data)
-    elif scan_type == "mail_dashboard":
-        scan_data = calculate_forum_standaardisatie_views_mail(scan_data)
-        calculate_ipv6_views_mail(scan_data)
-    elif scan_type == "web":
-        scan_data = calculate_forum_standaardisatie_views_web(scan_data)
-        scan_data = calculate_custom_websecmap_results(scan_data, domain)
-        calculate_ipv6_views_web(scan_data)
+    scan_data = add_calculated_values(scan_data, scan_type, domain)
     store_test_results(endpoint.pk, scan_data["results"]["calculated_results"])
+
+
+def add_calculated_values(scan_data, scan_type: str, domain: str):
+    # These settings save millions of records
+
+    if scan_type not in ["mail", "web", "mail_dashboard"]:
+        return scan_data
+
+    if scan_type == "mail":
+        if constance_cached_value("INTERNET_NL_ADD_CALCULATED_RESULTS_VNG_V6"):
+            calculate_ipv6_views_mail(scan_data)
+
+    elif scan_type == "mail_dashboard":
+        if constance_cached_value("INTERNET_NL_ADD_CALCULATED_RESULTS_FORUM_STANDAARDISATIE"):
+            scan_data = calculate_forum_standaardisatie_views_mail(scan_data)
+
+        if constance_cached_value("INTERNET_NL_ADD_CALCULATED_RESULTS_VNG_V6"):
+            calculate_ipv6_views_mail(scan_data)
+
+    elif scan_type == "web":
+        if constance_cached_value("INTERNET_NL_ADD_CALCULATED_RESULTS_FORUM_STANDAARDISATIE"):
+            scan_data = calculate_forum_standaardisatie_views_web(scan_data)
+
+        if constance_cached_value("INTERNET_NL_ADD_CALCULATED_RESULTS_WEBSECMAP"):
+            scan_data = calculate_custom_websecmap_results(scan_data, domain)
+
+        if constance_cached_value("INTERNET_NL_ADD_CALCULATED_RESULTS_VNG_V6"):
+            calculate_ipv6_views_web(scan_data)
+
+    return scan_data
 
 
 def store_test_results(endpoint_id, test_results):

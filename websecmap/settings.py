@@ -1059,6 +1059,22 @@ CONSTANCE_CONFIG = {
         "Show a social media sharing box on the multi-map page with multi-map information.",
         bool,
     ),
+    # enable all by default, easier for tests
+    "INTERNET_NL_ADD_CALCULATED_RESULTS_WEBSECMAP": (
+        True,
+        "Add calculated results for web security map.",
+        bool,
+    ),
+    "INTERNET_NL_ADD_CALCULATED_RESULTS_FORUM_STANDAARDISATIE": (
+        True,
+        "Add calculated results for forum standaardisatie, the internet.nl dashboard.",
+        bool,
+    ),
+    "INTERNET_NL_ADD_CALCULATED_RESULTS_VNG_V6": (
+        True,
+        "Add calculated results for VNG, obsoleted IPv6 derived conclusions.",
+        bool,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1269,7 +1285,15 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         ),
         (
             "Internet.nl Scans",
-            ("INTERNET_NL_API_USERNAME", "INTERNET_NL_API_PASSWORD", "INTERNET_NL_API_URL", "INTERNET_NL_MAXIMUM_URLS"),
+            (
+                "INTERNET_NL_API_USERNAME",
+                "INTERNET_NL_API_PASSWORD",
+                "INTERNET_NL_API_URL",
+                "INTERNET_NL_MAXIMUM_URLS",
+                "INTERNET_NL_ADD_CALCULATED_RESULTS_WEBSECMAP",
+                "INTERNET_NL_ADD_CALCULATED_RESULTS_FORUM_STANDAARDISATIE",
+                "INTERNET_NL_ADD_CALCULATED_RESULTS_VNG_V6",
+            ),
         ),
         ("Screenshot service options", ("SCREENSHOT_API_URL_V4", "SCREENSHOT_API_URL_V6")),
         (
