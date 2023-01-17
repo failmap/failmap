@@ -828,7 +828,7 @@ class PlannedScan(models.Model):
         null=True,
     )
 
-    finished_at_when = models.DateTimeField(null=True, help_text="when finished, timeout, error")
+    finished_at_when = models.DateTimeField(null=True, help_text="when finished, timeout, error", blank=True)
 
     # add joined index over scanner, activity, state, so queries are faster:
     # see: https://docs.djangoproject.com/en/3.0/ref/models/options/#indexes
