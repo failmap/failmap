@@ -266,6 +266,10 @@ def certificate_matches_microsoft_exception_policy(
     else:
         microsoft_service = subdomain
 
+    # for non-microsoft services that are called with this scanner
+    if not microsoft_service:
+        return False
+
     # check if the issuer matches
     # <Name(C=US,ST=Washington,L=Redmond,O=Microsoft Corporation,OU=Microsoft IT,CN=Microsoft IT TLS CA 5)>
     _names = certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
