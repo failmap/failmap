@@ -6,6 +6,11 @@ class CustomRemoteUserMiddleware(RemoteUserMiddleware):
 
     def process_request(self, request):
         super().process_request(request)
+
+        # skip for unauthenticated requests
+        if request.user.is_anonymous:
+            return
+
         # add staff permissions to newly created remote users
         if not request.user.is_superuser:
             request.user.is_staff = True
