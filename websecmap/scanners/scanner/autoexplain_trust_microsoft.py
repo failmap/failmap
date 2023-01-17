@@ -295,7 +295,8 @@ def autoexplain_trust_microsoft_and_include_their_webserver_headers(a_scan):
     # protocol is used. DNS can only switch on addresses and ip-versions. But not protocol and port.
     http_endpoint = Endpoint.objects.all().filter(
         # We don't care about what port is applied here.
-        protocol="http",
+        # Headers are found on http and https...
+        protocol__in=["http", "https"],
         ip_version=a_scan.endpoint.ip_version,
         url=a_scan.endpoint.url,
         is_dead=False,
