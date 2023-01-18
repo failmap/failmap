@@ -43,6 +43,7 @@ ROLES_REQUIRING_IPV4 = [
 
 ROLES_REQUIRING_NO_NETWORK = [
     "storage",
+    "kickoff",
     "calculator",
     "claim_proxy",
     "reporting",
@@ -75,6 +76,7 @@ QUEUES_MATCHING_ROLES = {
         Queue("discover_subdomains"),
         Queue("known_subdomains"),
         Queue("screenshot"),
+        Queue("kickoff"),
     ],
     # queuemonitor shows the currently running queues on the dashboard. It will not do anything else. It subscribes
     # to all queues. This does not have a worker (and doesn't need one).
@@ -120,10 +122,16 @@ QUEUES_MATCHING_ROLES = {
         Queue("alt_ipv6"),
         Queue("isolated"),
     ],
+    # Queue used at the end of a task to store the results
     "storage": [
         Queue("storage"),
         # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might block the worker.
         # Given there is only one storage worker, blocking it doesn't help it's work.
+    ],
+    # this is where tasks are started: scans are planned and added to the rest to the worker.
+    # storage is used for storing after you're done
+    "kickoff": [
+        Queue("kickoff"),
     ],
     "reporting": [
         Queue("reporting"),
