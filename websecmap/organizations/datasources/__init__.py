@@ -337,6 +337,7 @@ def save_organization(organization, organization_type):
         failmap_organization.internal_notes = organization["dataset"]
         failmap_organization.created_on = datetime.now(pytz.utc)
         failmap_organization.save(update_fields=["created_on"])
+        failmap_organization.layers.add(organization_type)
 
     return failmap_organization
 

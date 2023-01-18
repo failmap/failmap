@@ -183,11 +183,14 @@ def match_and_place_row(row: List[str]) -> Dict[str, str]:
 
     domain = row[0].replace("http://", "").replace("https://", "")
 
-    # todo: also import the 'non-www' version i guess...
-
     # There should only be one that is currently 'alive'. No there can be more, as there can be multiple maps
     # where this organization is used (and the n-n relation has not yet been implemented).
     organizations = Organization.objects.all().filter(name__icontains=organization_key, is_dead=False)
+    if not organizations:
+        organizations = Organization.objects.all().filter(
+            alternative_names__name__icontains=organization_key, is_dead=False
+        )
+
     if not organizations:
         log.error(
             "Could not find an organization name with key %s, could not place domains %s.", organization_key, domain

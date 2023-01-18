@@ -8,7 +8,7 @@ from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid im
     download_websiteregister_spreadsheet,
     find_current_websiteregister_download_link,
 )
-from websecmap.organizations.models import Url, Organization, GenericFileDataset
+from websecmap.organizations.models import Url, Organization, GenericFileDataset, AlternativeName
 
 location = "websecmap/organizations/tests/nl_gov_rijkswebsiteregister/websiteregister-rijksoverheid-2022-07-28.ods"
 
@@ -34,6 +34,7 @@ def test_match_and_place_row(db, caplog):
     new_organization = Organization()
     new_organization.name = "Dienst Publiek en Communicatie (DPC/AZ)"
     new_organization.save()
+    new_organization.alternative_names.add(AlternativeName.objects.create(name="(TODO/AZ)"))
 
     # This will add www. and the non-wee-wee-wee version of the domain
     match_and_place_row(["http://www.rijksoverheid.nl", "Rijksoverheid", "AZ", "DPC", "Online Advies"])
@@ -42,8 +43,10 @@ def test_match_and_place_row(db, caplog):
     # The same row should not add more urls when importing another time.
     match_and_place_row(["http://www.rijksoverheid.nl", "Rijksoverheid", "AZ", "DPC", "Online Advies"])
     match_and_place_row(["http://www.rijksoverheid.nl", "Rijksoverheid", "AZ", "DPC", "Online Advies"])
-    match_and_place_row(["http://www.rijksoverheid.nl", "Rijksoverheid", "AZ", "DPC", "Online Advies"])
-    assert Url.objects.all().count() == 2
+
+    # adds the domain to an alternative name
+    match_and_place_row(["http://basisbeveiliging.nl", "Rijksoverheid", "AZ", "TODO", "Online Advies"])
+    assert Url.objects.all().count() == 3
 
 
 def test_import_websiteregister(db):

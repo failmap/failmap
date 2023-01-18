@@ -375,12 +375,17 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     @staticmethod
     def first_few_urls(inst):
         # the top level shines most light on what domains are used, the rest will be subdomains.
-        domains = [
-            url.url
-            for url in Url.objects.all().filter(
-                Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""), organization=inst.id
-            )[:6]
-        ]
+        # just get ALL top level domains, this makes it easy to see if the organization also has weird domains
+        domains = list(
+            sorted(
+                [
+                    url.url
+                    for url in Url.objects.all().filter(
+                        Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""), organization=inst.id
+                    )
+                ]
+            )
+        )
 
         # okay, no domains? then perhaps try all domains as they might only be subdomains. These can be longer so
         # a shorter list is returned
