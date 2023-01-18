@@ -2,7 +2,13 @@ from freezegun import freeze_time
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint
-from websecmap.scanners.scanner.http import connection_answer, get_random_user_agent, save_endpoint, kill_endpoint
+from websecmap.scanners.scanner.http import (
+    connection_answer,
+    get_random_user_agent,
+    save_endpoint,
+    kill_endpoint,
+    can_connect,
+)
 
 
 def test_connection_answer():
@@ -69,3 +75,22 @@ def test_save_endpoint(db):
         assert Endpoint.objects.all().filter(is_dead=False).count() == 1
 
         assert Endpoint.objects.all().filter().count() == 2
+
+
+def test_can_connect(requests_mock, mocker):
+    mocker.patch("websecmap.scanners.scanner.http.get_ipv4", return_value="127.0.0.1")
+    mocker.patch("websecmap.scanners.scanner.http.get_ipv6", return_value="[::1]")
+
+    # test request without positive response, some xception
+    assert can_connect("https", "1.example.com", 443, 4) == {
+        "result": False,
+        "error": "No mock address: HEAD https://1.example.com:443/",
+    }
+
+    # test request via hostname:
+    requests_mock.head("https://1.example.com:443/", text="200", status_code=200)
+    assert can_connect("https", "1.example.com", 443, 4) == {"result": True, "error": "found_with_hostname"}
+
+    # test request via ip4:
+    requests_mock.head("https://127.0.0.1:443/", text="200", status_code=200)
+    assert can_connect("https", "1.example.com", 443, 4) == {"result": True, "error": "found_with_ip"}

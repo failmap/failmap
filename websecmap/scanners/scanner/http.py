@@ -30,14 +30,14 @@ import random
 import socket
 from datetime import datetime, timedelta
 from ipaddress import AddressValueError
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Tuple
 
 import pytz
 import requests
 import urllib3
 from celery import Task, group
 from django.conf import settings
-from requests import HTTPError, Request, Session
+from requests import HTTPError
 from requests.exceptions import ChunkedEncodingError, ContentDecodingError, SSLError
 
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
@@ -362,34 +362,50 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
     As long as there is a "sort of" response we just assume there is a website there.
     """
 
+    ok_answers = [
+        CONTENT_FOUND_WITH_ENCODING_ISSUES,
+        NO_CONTENT_BUT_ERROR_INDICATES_SERVER,
+        FOUND_WITH_HOSTNAME,
+        FOUND_WITH_IP,
+        NO_HTTP_STATUS_CODE,
+    ]
+
     uri = build_uri_from_components(protocol, url, port, ip_version)
     if not uri:
         return connection_answer(False, f"ipv{ip_version}_resolve_error")
 
-    log.debug("Attempting connect on: %s: host: %s", uri, url)
-    answer, exc = http_call_handling_exceptions(request_via_ip, **{"uri": uri, "url": url})
-    if answer in [CONTENT_FOUND_WITH_ENCODING_ISSUES, NO_CONTENT_BUT_ERROR_INDICATES_SERVER]:
-        return connection_answer(True, exc)
+    log.debug("Attempting connect via ip on: %s", uri)
+    answer, message = http_call_handling_exceptions(request_via_ip, **{"uri": uri, "url": url})
+    log.debug(f"- Answer: {answer}, exc: {message}")
+    if message in ok_answers:
+        return connection_answer(True, message)
 
     # instead of trying on no_content_and_server_indicates_error, always retry this way
     # why? because there might be timeouts via approach 1 that don't occur via approach 2.
-    answer, exc = http_call_handling_exceptions(
+    log.debug("Attempting connect via name on: %s:", url)
+    answer, message = http_call_handling_exceptions(
         request_via_hostname, **{"protocol": protocol, "url": url, "port": port}
     )
-    if answer in [CONTENT_FOUND_WITH_ENCODING_ISSUES, NO_CONTENT_BUT_ERROR_INDICATES_SERVER]:
-        return connection_answer(True, exc)
+    log.debug(f"- Answer: {answer}, exc: {message}")
+    if message in ok_answers:
+        return connection_answer(True, message)
 
-    return connection_answer(False, exc)
+    log.debug("No http connection possible")
+    return connection_answer(False, message)
 
 
-def http_call_handling_exceptions(callable, **args):
+def http_call_handling_exceptions(callable, **args) -> Tuple[str, str]:
     try:
-        return callable(**args)
+        log.debug(f"Calling {callable.__name__} with args: {args}")
+        answer = callable(**args)
+        return answer["result"], answer["error"]
     except (ChunkedEncodingError, ContentDecodingError) as my_exception:
+        log.debug(f"- Exception: {my_exception}")
         # There is a connection and you can get something back. But it doesn't decode properly.
         # For example InvalidChunkLength(got length b'<!DOCTYPE html>\\n', 0 bytes read)",
         return CONTENT_FOUND_WITH_ENCODING_ISSUES, str(my_exception)
     except (ConnectionError, HTTPError, SSLError, requests.RequestException) as my_exception:
+        log.debug(f"- Exception: {my_exception}")
         if has_acceptable_error(str(my_exception.args)):
             return NO_CONTENT_BUT_ERROR_INDICATES_SERVER, str(my_exception)
 
@@ -397,10 +413,11 @@ def http_call_handling_exceptions(callable, **args):
         return NO_CONTENT_AND_SERVER_INDICATES_ERROR, str(my_exception)
     # Whatever timeouts and other junk that might play up...
     except BaseException as my_exception:  # pylint: disable=broad-except
+        log.debug(f"- Exception: {my_exception}")
         return GENERIC_EXCEPTION, str(my_exception)
 
 
-def request_via_ip(uri, url):
+def request_via_ip(uri, url) -> Dict[str, str]:
     # https://stackoverflow.com/questions/43156023/what-is-http-host-header#43156094
     s = requests.Session()
     s.mount("https://", host_header_ssl.HostHeaderSSLAdapter())
@@ -417,12 +434,14 @@ def request_via_ip(uri, url):
         headers=create_standard_request_headers(url),
     )
 
+    log.debug("Response: %s", response)
+
     if response.status_code:
         return connection_answer(True, FOUND_WITH_IP)
     return connection_answer(True, NO_HTTP_STATUS_CODE)
 
 
-def request_via_hostname(protocol, url, port):
+def request_via_hostname(protocol, url, port) -> Dict[str, str]:
     # No acceptable answer? Try a normal connection:
     # This might be due to the fact that a firewall is blocking direct requests to the IP with a different
     # host. Seen this in edienstenburgerzaken.purmerend.nl, which is annoying. So we're going to try
@@ -430,15 +449,16 @@ def request_via_hostname(protocol, url, port):
     # correct queue is used to connect to the network. This might not work on your development machine
     # as it might connect over the wrong network
     # Basically perform the same checks on the url directly, with a more extensive request that can be debugged
-    req = Request("GET", f"{protocol}://{url}:{port}", headers=create_standard_request_headers(url))
-    my_session = Session()
-    prepped = my_session.prepare_request(req)
-    response = my_session.send(
-        prepped,
+    full_url = f"{protocol}://{url}:{port}"
+    response = requests.head(
+        full_url,
+        headers=create_standard_request_headers(url),
         verify=False,
         timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
         allow_redirects=False,
     )
+
+    log.debug("Response: %s", response)
 
     if response.status_code:
         return connection_answer(True, FOUND_WITH_HOSTNAME)
