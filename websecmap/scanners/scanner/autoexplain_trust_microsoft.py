@@ -267,7 +267,7 @@ def certificate_matches_microsoft_exception_policy(
         microsoft_service = subdomain
 
     # for non-microsoft services that are called with this scanner
-    if not microsoft_service:
+    if microsoft_service not in applicable_subdomains:
         return False
 
     # check if the issuer matches
