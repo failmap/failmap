@@ -39,7 +39,7 @@ make run_no_backend
 
 """
 
-DEVELOPMENT_FIXTURES = "development_user,development_scandata,periodic_tasks,testdata"
+DEVELOPMENT_FIXTURES = "development_user,development_scandata,periodic_tasks,testdata,default_policy,scanmetadata"
 
 
 def start_borker(uuid):
