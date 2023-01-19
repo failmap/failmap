@@ -28,7 +28,7 @@ query = EndpointGenericScan.objects.all().filter(
 )
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_scan():
     # Only check this on the latest scans, do not alter existing explanations
     scans = query.filter(
@@ -60,7 +60,7 @@ def compose_scan_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def scan(scan_id):
     # todo: break scan into smaller pieces to not interrupt the storage queue
 

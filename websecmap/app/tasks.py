@@ -10,7 +10,7 @@ from websecmap.api.models import SIDNUpload
 from websecmap.celery import app, EXPIRES_IN_ONE_DAY
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def clean_application_caches_and_logs(retention_days: int = 30):
     """
     Why no truncation and optimization:

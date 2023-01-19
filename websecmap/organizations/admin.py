@@ -935,7 +935,7 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     preserve_filters = True
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def dataset_import_finished(dataset_id):
     dataset = Dataset.objects.all().filter(id=dataset_id).first()
     if not dataset:

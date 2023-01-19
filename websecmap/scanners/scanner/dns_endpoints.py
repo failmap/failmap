@@ -104,14 +104,14 @@ def compose_new_verify_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     plannedscan.request(activity="discover", scanner="dns_endpoints", urls=urls)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
@@ -165,7 +165,7 @@ def compose_verify_task(
 
 
 @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
-def has_soa(url: str):
+def has_soa(url: str) -> bool:
     """
     The SOA records is the primary check for internet.nl mail. If there is a SOA
     record, you can run a mail scan. It's unclear at the time of writing why this is.

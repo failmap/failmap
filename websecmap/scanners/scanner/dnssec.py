@@ -45,7 +45,7 @@ EXPIRES = 3600  # one hour is more then enough
 SCANNER_NAME = "dnssec"
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_scan(**kwargs):
     generic_plan_scan(SCANNER_NAME, "scan", filter_top_level_domains, **kwargs)
 
@@ -84,7 +84,7 @@ def compose_scan_task(urls) -> group:
     )
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def store_dnssec(result: List[str], url_id: int):
 
     # if scan task failed, ignore the result (exception) and report failed status

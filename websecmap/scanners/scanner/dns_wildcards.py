@@ -25,7 +25,7 @@ def compose_planned_discover_task(**kwargs):
     return compose_discover_task(urls)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
@@ -58,7 +58,7 @@ def compose_manual_discover_task(
     return compose_discover_task(urls)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def store_wildcard(result: bool, url_id: int):
     try:
         url = Url.objects.all().get(id=url_id)

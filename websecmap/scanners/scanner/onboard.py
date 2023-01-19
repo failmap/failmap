@@ -161,7 +161,7 @@ def forward_onboarding_status(url):
     url.save()
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def finish_onboarding(url):
     log.info("Finishing onboarding of %s", url)
     url.onboarded = True
@@ -169,10 +169,9 @@ def finish_onboarding(url):
     url.onboarding_stage = "onboarded"
     url.onboarding_stage_set_on = datetime.now(pytz.utc)
     url.save(update_fields=["onboarded_on", "onboarded", "onboarding_stage", "onboarding_stage_set_on"])
-    return True
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def update_stage(urls: List[Url], stage=""):
 
     for url in urls:
@@ -180,5 +179,3 @@ def update_stage(urls: List[Url], stage=""):
         url.onboarding_stage = stage
         url.onboarding_stage_set_on = datetime.now(pytz.utc)
         url.save(update_fields=["onboarding_stage", "onboarding_stage_set_on"])
-
-    return True

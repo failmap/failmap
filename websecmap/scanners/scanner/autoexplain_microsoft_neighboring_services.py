@@ -21,7 +21,7 @@ query = EndpointGenericScan.objects.all().filter(
 )
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_scan():
     scans = query.filter(endpoint__url__in=get_relevant_microsoft_domains_from_database())
     urls = [endpoint_generic_scan.endpoint.url for endpoint_generic_scan in scans]
@@ -47,7 +47,7 @@ def compose_scan_task(urls):
     )
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def scan(scan_id: int):
     """
     explain_headers_for_explained_microsoft_trusted_tls_certificates

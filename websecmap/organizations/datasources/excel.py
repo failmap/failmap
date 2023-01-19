@@ -97,7 +97,7 @@ def validate_record(record):
         raise ValueError("Countrycode is not a valid 3166 country code.")
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def import_datasets(**dataset):
     generic_dataset_import(
         dataset=dataset, parser_function=parse_data, download_function=download_http_get_no_credentials

@@ -57,7 +57,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     """
@@ -133,7 +133,7 @@ def compose_manual_scan_task(
     return compose_scan_task(urls)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def store(result, endpoint_id):
     """
 

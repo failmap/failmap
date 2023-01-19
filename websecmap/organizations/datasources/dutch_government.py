@@ -109,7 +109,7 @@ def emulate_get(xml, element, namespaces):
         return ""
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def import_datasets(**dataset):
     generic_dataset_import(
         dataset=dataset, parser_function=parse_data, download_function=download_http_get_no_credentials

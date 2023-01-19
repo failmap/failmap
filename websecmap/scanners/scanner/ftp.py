@@ -47,19 +47,19 @@ SCANNER_NAME = "ftp"
 STANDARD_ENDPOINT_FILTER = {"protocol": "ftp", "is_dead": False}
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_scan(**kwargs):
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
     generic_plan_scan(SCANNER_NAME, "scan", filter_endpoints_only, **kwargs)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_verify(**kwargs):
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
     generic_plan_scan(SCANNER_NAME, "verify", filter_endpoints_only, **kwargs)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_discover(**kwargs):
     generic_plan_scan(SCANNER_NAME, "discover", filter_urls_only, **kwargs)
 
@@ -178,7 +178,7 @@ def compose_verify_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def store(result: dict, endpoint_id: int):
     """
 
@@ -398,7 +398,7 @@ def discover(url: str, port: int):
     return connected
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
     """
 

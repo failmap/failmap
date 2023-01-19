@@ -27,7 +27,7 @@ from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 log = logging.getLogger(__name__)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def store_progress():
     """
     Runs every N minutes (periodic task) and stores the latest calculated progress in the db.
@@ -118,13 +118,13 @@ def reset():
     PlannedScan.objects.all().delete()
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def force_retry():
     # just retry everything that is picked up now:
     PlannedScan.objects.all().filter(state=State["picked_up"].value).update(state=State["requested"].value)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def retry():
     """
     When something is picked up, but not finished in a day, just retry. Something went wrong.
@@ -276,7 +276,7 @@ def already_requested(activity: str, scanner: int, url_id: int):
     )
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def finish(activity: str, scanner: str, url_id: int):
     metadata = get_backend_scanmetadata()
     scanner = metadata["scanners_by_python_name"].get(scanner, None)
@@ -309,7 +309,7 @@ def set_scan_state(activity: str, scanner_id: int, url_id: int, state="finished"
         log.debug("No planned scan found for %s. Ignored.", url_id)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def finish_multiple(activity: str, scanner: str, urls: List[int]):
     for url in urls:
         finish(activity, scanner, url)
@@ -367,7 +367,7 @@ def websecmap_list_outdated():
     return list_outdated(metadata["published_scan_types"])
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def list_outdated(published_scan_types):
     metadata = get_backend_scanmetadata()
 
@@ -424,7 +424,7 @@ def deduplicate_plan(planned_items):
     return clean_plan
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_outdated_scans(published_scan_types):
     metadata = get_backend_scanmetadata()
 
@@ -505,7 +505,7 @@ def plan_outdated_scans(published_scan_types):
 
 
 # todo: the storage queue might be too busy for this... should become a new queue...
-@app.task(queue="followupscan", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="followupscan", ignore_result=True)
 def plan_follow_up_scans(**kwargs):
     """
     Based on the conclusion a new scan is scheduled. We'll receive a ton of conclusions because a scanner can

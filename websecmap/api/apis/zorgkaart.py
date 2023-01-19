@@ -268,7 +268,7 @@ def translate(orglist):
     return outlist
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def scrape():
     """
     Retrieves list of organisations (applying the filter in
@@ -279,7 +279,6 @@ def scrape():
     wsmlist = translate(orglist)
     organization_and_url_import(wsmlist)
     log.info(f"Zorgkaart scrape updated organisations. Current organisation count: {len(orglist)}")
-    return
 
 
 def validate_flat_organization(flat_organization: Dict):

@@ -97,7 +97,7 @@ def claim_proxy(tracing_label="") -> Dict[str, Any]:
         sleep(60)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def release_proxy(proxy: Dict[str, Any], tracing_label=""):
     """As the claim proxy queue is ALWAYS filled, you cannot insert release proxy commands there..."""
     log.debug("Releasing proxy %s claimed for %s et al...", proxy["id"], tracing_label)
@@ -110,7 +110,7 @@ def release_proxy(proxy: Dict[str, Any], tracing_label=""):
     db_proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def check_all_proxies():
     # celery doesn't work with asyncio. But it does work with threadpools.
 
@@ -299,7 +299,7 @@ def check_proxy(proxy: Dict[str, Any]):
     return True
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def store_check_result(
     proxy: Dict[str, Any],
     check_result,

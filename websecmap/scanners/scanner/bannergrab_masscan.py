@@ -70,7 +70,7 @@ def compose_manual_scan_task(
     return compose_scan_task(grab_banners.s())
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def grab_banners():
 
     if not allowed_to_scan(SCANNER_NAME):

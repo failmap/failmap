@@ -39,7 +39,7 @@ query = EndpointGenericScan.objects.all().filter(
 )
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_scan():
     urls = [scan.endpoint.url for scan in query]
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
@@ -219,7 +219,7 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates:
     return True
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def store_bot_explaination_if_needed(needed: bool, scan_id: int):
     scan = EndpointGenericScan.objects.all().filter(pk=scan_id).first()
     if not scan:

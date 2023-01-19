@@ -26,7 +26,7 @@ query = EndpointGenericScan.objects.all().filter(
 excepted_subdomains = ["pki", "crl"]
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_scan():
     scans = query.filter(
         endpoint__url__computed_subdomain__in=excepted_subdomains, comply_or_explain_is_explained=False
@@ -54,7 +54,7 @@ def compose_scan_task(urls):
     )
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def scan(scan_id: int):
 
     a_scan = EndpointGenericScan.objects.all().filter(id=scan_id).first()

@@ -66,7 +66,7 @@ def remove_last_dot(my_text):
     return my_text[0 : len(my_text) - 1] if my_text[len(my_text) - 1 : len(my_text)] == "." else my_text
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def sidn_domain_upload(user_id: int, csv_data: str):
     """
     Moved to reporting due to more room for delays on that queue.

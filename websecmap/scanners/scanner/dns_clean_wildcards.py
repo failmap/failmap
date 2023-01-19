@@ -50,7 +50,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     return urls
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
@@ -186,7 +186,7 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
     return identical
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def store(url_ids: List[int]):
     for url_id in url_ids:
         url = Url.objects.all().filter(pk=url_id).first()

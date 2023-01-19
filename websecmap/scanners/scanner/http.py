@@ -107,13 +107,13 @@ STANDARD_ENDPOINT_FILTER = {"protocol__in": ["https", "http"], "is_dead": False}
 STANDARD_URL_FILTER = {"is_dead": False}
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_discover(**kwargs):
     kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
     generic_plan_scan(SCANNER_NAME, "discover", apply_organzation_or_endpoint_filter_before_url_filter, **kwargs)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_verify(**kwargs):
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
     generic_plan_scan(SCANNER_NAME, "verify", filter_endpoints_only, **kwargs)
@@ -597,7 +597,7 @@ def revive_similar_endpoint(similar, origin):
     return
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def kill_url_task(ips, url: Url):
     # only kill if there are no ips.
     if any(ips):

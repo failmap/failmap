@@ -45,7 +45,7 @@ STANDARD_ORGANIZATION_FILTER = {"is_dead": False}
 STANDARD_URL_FILTER = {"is_dead": False, "not_resolvable": False, "endpoint__protocol": "http", "endpoint__port": 80}
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_scan(**kwargs):
     kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
     # only if the organization is filtered... otherwise the organization filter is always triggered by the default.
@@ -154,7 +154,7 @@ def get_endpoints_with_missing_encryption(url):
     return complete_endpoints, incomplete_endpoints
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def well_done(endpoint_id):
 
     if endpoint_has_scans("plain_http", endpoint_id):
@@ -213,7 +213,7 @@ def scan(ip_version: int, url: str):
     return resolves, can_connect_result, redirects_to_safety_result
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def store(results, endpoint_id):
 
     resolves, can_connect_result, redirects_to_safety_result = results

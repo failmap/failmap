@@ -111,7 +111,7 @@ def get_region(country: str = "NL", organization_type: str = "municipality"):
 # You also cannot see progress...
 # better to validate that the region doesn't exist and then add it...
 # @transaction.atomic
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def import_from_scratch(countries: List[str] = None, organization_types: List[str] = None, when=None):
     """
     Run this when you have nothing on the organization type in that country. It will help bootstrapping a
@@ -183,7 +183,7 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
     log.info("Import finished.")
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def store_import_message(country, organization_type, message):
     # Note, that AdministrativeRegion is written to an old copy of this object in the task chain
     # after import is performed. Therefore explicitly set the update field, so not to lose other data.
@@ -197,7 +197,7 @@ def store_import_message(country, organization_type, message):
 
 
 # @transaction.atomic
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def update_coordinates(countries: List[str] = None, organization_types: List[str] = None, when=None):
 
     for country in sorted(countries):

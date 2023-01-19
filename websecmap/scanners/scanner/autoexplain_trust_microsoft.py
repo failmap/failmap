@@ -135,7 +135,7 @@ query = EndpointGenericScan.objects.all().filter(
 )
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_scan():
     # todo: no url.is_dead = False?
     scans = query.filter(
@@ -177,7 +177,7 @@ def compose_scan_task(urls):
 
 
 # todo: this needs to be split out onto several workers, now it can hinder the storage queue.
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def scan(scan_id):
     epgs = EndpointGenericScan.objects.all().filter(id=scan_id).first()
     if not epgs:

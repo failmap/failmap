@@ -92,7 +92,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_scan_new(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("tls_qualys"):
@@ -103,7 +103,7 @@ def plan_scan_new(organizations_filter: dict = None, urls_filter: dict = None, e
     return group()
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def plan_scan(urls_filter: dict = None, **kwargs):
     urls_filter = init_dict(urls_filter)
     """
@@ -449,7 +449,7 @@ def qualys_scan_thread(proxy: Dict[str, Any], url: str):
         sleep(error_waiting_time)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def process_qualys_result(data, url: str):
     """Receive the JSON response from Qualys API, processes this result and stores it in database."""
 
@@ -638,7 +638,7 @@ def save_scan(url: str, data: Any):
     return
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def scratch(domain, data):
     log.debug("Scratching data for %s", domain)
     scratchpad = TlsQualysScratchpad()

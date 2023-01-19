@@ -48,15 +48,13 @@ def compose_manual_scan_task(
     return group(grab_tasks())
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def grab_banners():
 
     if not allowed_to_scan(SCANNER_NAME):
         return
 
     group(grab_tasks()).apply_async()
-
-    return
 
 
 def get_all_ip_addresses(is_v4=True):
@@ -115,7 +113,7 @@ def grab_task(ips: List[str], ports: str):
     return {host: nm[host] for host in nm.all_hosts()}
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage", ignore_result=True)
 def store_results_task(results):
     # results are a dict of ip and results.
     log.debug("Storing results of nmap scan task.")
