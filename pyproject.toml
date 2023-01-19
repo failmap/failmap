@@ -74,5 +74,6 @@ targets = "websecmap"
 
 [tool.autoflake]
 recursive = true
+in-place = true
 remove-all-unused-imports = true
 exclude = "*/migrations/*,vendor/*,docs/*,build/*"
