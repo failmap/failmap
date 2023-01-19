@@ -11,7 +11,7 @@ from django.db import models
 from django.utils import timezone
 from jsonfield import JSONField
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 
 log = logging.getLogger(__name__)
 
@@ -96,7 +96,7 @@ class Job(models.Model):
         return job
 
     @staticmethod
-    @app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+    @app.task(queue="storage")
     def store_result(result, job_id=None):
         """Celery task to store result of wrapped task after it has completed."""
         job = Job.objects.get(id=job_id)
@@ -115,7 +115,7 @@ class Job(models.Model):
         return self.name
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def create_function_job(function: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
@@ -140,7 +140,7 @@ def create_function_job(function: str, **kwargs) -> int:
     return job.id
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def create_job(task_module: str, **kwargs) -> int:
     # will be deleted after all scanners have migrated to the manual / planned approach
     module = importlib.import_module(task_module)
@@ -149,7 +149,7 @@ def create_job(task_module: str, **kwargs) -> int:
     return job.id
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def create_discover_job(task_module: str, **kwargs) -> int:
     # will be deleted after all scanners have migrated to the manual / planned approach
     module = importlib.import_module(task_module)
@@ -158,7 +158,7 @@ def create_discover_job(task_module: str, **kwargs) -> int:
     return job.id
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def create_verify_job(task_module: str, **kwargs) -> int:
     # will be deleted after all scanners have migrated to the manual / planned approach
     module = importlib.import_module(task_module)
@@ -167,7 +167,7 @@ def create_verify_job(task_module: str, **kwargs) -> int:
     return job.id
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def create_scan_job(task_module: str, **kwargs) -> int:
     # will be deleted after all scanners have migrated to the manual / planned approach
     module = importlib.import_module(task_module)
@@ -176,7 +176,7 @@ def create_scan_job(task_module: str, **kwargs) -> int:
     return job.id
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def create_planned_scan_job(task_module: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
@@ -190,7 +190,7 @@ def create_planned_scan_job(task_module: str, **kwargs) -> int:
     return job.id
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def create_planned_discover_job(task_module: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
@@ -204,7 +204,7 @@ def create_planned_discover_job(task_module: str, **kwargs) -> int:
     return job.id
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def create_planned_verify_job(task_module: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
@@ -218,7 +218,7 @@ def create_planned_verify_job(task_module: str, **kwargs) -> int:
     return job.id
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def create_manual_scan_job(task_module: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
@@ -232,7 +232,7 @@ def create_manual_scan_job(task_module: str, **kwargs) -> int:
     return job.id
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def create_manual_discover_job(task_module: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 
@@ -246,7 +246,7 @@ def create_manual_discover_job(task_module: str, **kwargs) -> int:
     return job.id
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def create_manual_verify_job(task_module: str, **kwargs) -> int:
     """Helper to allow Jobs to be created using Celery Beat.
 

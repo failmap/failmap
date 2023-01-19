@@ -1,7 +1,7 @@
 import json
 import re
 from json import JSONDecodeError
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 
 from constance import config
 
@@ -145,7 +145,7 @@ def contains_version_number(banner):
     return False
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def re_evaluate_bannergrab_versions():
     # Walk over all latest scans with version information. Then re-run the detect_version command and save the
 

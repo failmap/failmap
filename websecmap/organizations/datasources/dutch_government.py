@@ -12,7 +12,7 @@ https://almanak-redactie.overheid.nl/archive/
 import logging
 import xml.etree.ElementTree as ET
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.organizations.datasources import download_http_get_no_credentials, generic_dataset_import, read_data
 
 log = logging.getLogger(__package__)

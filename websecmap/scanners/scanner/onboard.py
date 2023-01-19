@@ -6,7 +6,7 @@ import pytz
 from celery import group
 from django.utils import timezone
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, Task, app
+from websecmap.celery import Task, app
 from websecmap.map.report import update_report_tasks
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict

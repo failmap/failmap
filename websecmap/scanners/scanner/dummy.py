@@ -11,7 +11,7 @@ import time
 from celery import Task, group
 from django.conf import settings
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
@@ -103,7 +103,7 @@ def compose_scan_task(urls):
     return task
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
     if not allowed_to_scan("dummy"):
         log.warning("Dummy scanner is not allowed to scan.")

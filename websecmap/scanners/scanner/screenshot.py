@@ -32,7 +32,7 @@ from django.conf import settings
 from django.db.models import Q
 from PIL import Image, UnidentifiedImageError
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, Screenshot
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
@@ -72,7 +72,7 @@ def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpo
     plannedscan.request(activity="scan", scanner="screenshot", urls=urls)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="screenshot", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -123,7 +123,7 @@ def compose_scan_task(urls):
 
 
 # We expect the screenshot tool to hang at non responsive urls.
-@app.task(queue="screenshot", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="screenshot")
 def make_screenshot(service: str, endpoint_url: str):
     try:
         return make_screenshot_with_browserless(service, endpoint_url)
@@ -186,7 +186,7 @@ def create_dir_if_not_exists(directory: str):
         os.makedirs(directory, exist_ok=True)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def save_screenshot(response: Dict[str, Union[str, bool, int]], endpoint_id: int):
     if not response["success"]:
         log.debug("Could not get screenshot on endpoint %s, returned %s ", endpoint_id, response)

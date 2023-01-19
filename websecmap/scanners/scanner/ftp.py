@@ -13,7 +13,7 @@ from ftplib import FTP, error_perm, error_proto, error_reply, error_temp  # nose
 from celery import Task, group
 from django.utils import timezone
 
-from websecmap.celery import ParentFailed, app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
@@ -64,7 +64,7 @@ def plan_discover(**kwargs):
     generic_plan_scan(SCANNER_NAME, "discover", filter_urls_only, **kwargs)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="ftp", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -111,7 +111,7 @@ def compose_scan_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="ftp", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
@@ -144,7 +144,7 @@ def compose_discover_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_verify_task(**kwargs):
     urls = plannedscan.pickup(activity="verify", scanner="ftp", amount=kwargs.get("amount", 25))
     return compose_verify_task(urls)

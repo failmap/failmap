@@ -12,7 +12,7 @@ import logging
 
 from celery import Task, group
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict
 from websecmap.scanners.scanner.__init__ import (
@@ -38,7 +38,7 @@ def compose_manual_scan_task(
     return compose_scan_task(refresh_ips.s())
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def refresh_ips():
     # find ip-addresses from all domains currently used. This is currently not in the database.
     # this takes a larger amount of dns queries.

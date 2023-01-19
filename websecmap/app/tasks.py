@@ -7,7 +7,7 @@ from websecmap.app.models import create_job, Job  # noqa  # pylint: disable=unus
 from websecmap.organizations.models import Dataset
 from websecmap.scanners.models import TlsQualysScratchpad, PlannedScan, PlannedScanStatistic, InternetNLV2Scan
 from websecmap.api.models import SIDNUpload
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import app
 
 
 @app.task(queue="storage", ignore_result=True)

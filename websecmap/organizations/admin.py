@@ -20,7 +20,7 @@ from jet.admin import CompactInline
 
 from websecmap import types
 from websecmap.app.models import Job
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.organizations import datasources
 from websecmap.organizations.datasources import dutch_government, excel
 from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid import (

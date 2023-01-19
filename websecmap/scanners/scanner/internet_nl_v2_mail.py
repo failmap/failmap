@@ -10,7 +10,7 @@ import logging
 
 from celery import Task, group
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.scanner.__init__ import (
@@ -39,7 +39,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     return urls
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="internet_nl_mail", amount=kwargs.get("amount", 500))
     return compose_scan_task(urls)

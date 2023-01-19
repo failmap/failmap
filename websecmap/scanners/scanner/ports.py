@@ -19,7 +19,7 @@ from websecmap.scanners.scanmanager import store_endpoint_scan_result
 import logging
 
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.scanners.scanner.__init__ import (
     allowed_to_scan,
 )
@@ -34,7 +34,7 @@ PORTS_IS_CLOSED = "port_could_not_be_found_anymore"
 log = logging.getLogger(__name__)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def mark_unusual_ports():
     if not allowed_to_scan(SCANNER_NAME):
         log.warning("Scanner %s is requested but not enabled.", SCANNER_NAME)

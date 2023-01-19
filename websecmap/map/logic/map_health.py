@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Tuple
 import dateutil.parser
 import pytz
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.map.map_configs import filter_map_configs, retrieve
 from websecmap.map.models import Configuration, MapHealthReport, OrganizationReport
@@ -28,7 +28,7 @@ This grade gets stored inside a model related to a certain map, so the metric ca
 """
 
 
-@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="reporting")
 def update_map_health_reports(
     published_scan_types, days: int = 366, countries: List = None, organization_types: List = None
 ):

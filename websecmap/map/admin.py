@@ -13,7 +13,7 @@ from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
 from websecmap.app.models import Job
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.map import models
 from websecmap.map.logic.openstreetmap import import_from_scratch, update_coordinates
 from websecmap.map.models import HighLevelStatistic, MapDataCache, VulnerabilityStatistic

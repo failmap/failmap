@@ -16,7 +16,7 @@ import logging
 
 from celery import Task, group
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.scanners import init_dict
 from websecmap.scanners.scanner.__init__ import (
     allowed_to_scan,
@@ -107,7 +107,7 @@ def start_scanner(ips, ports):
     return nm
 
 
-@app.task(queue="bannergrab", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="bannergrab")
 def grab_task(ips: List[str], ports: str):
     nm = start_scanner(ips, ports)
     return {host: nm[host] for host in nm.all_hosts()}

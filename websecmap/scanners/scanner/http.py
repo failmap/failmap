@@ -40,7 +40,7 @@ from django.conf import settings
 from requests import HTTPError
 from requests.exceptions import ChunkedEncodingError, ContentDecodingError, SSLError
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, UrlIp
@@ -119,7 +119,7 @@ def plan_verify(**kwargs):
     generic_plan_scan(SCANNER_NAME, "verify", filter_endpoints_only, **kwargs)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="http", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
@@ -165,7 +165,7 @@ def compose_discover_task(urls: List[Url]):
     return group(tasks)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_verify_task(**kwargs):
     urls = plannedscan.pickup(activity="verify", scanner="http", amount=kwargs.get("amount", 25))
     return compose_verify_task(urls)
@@ -214,7 +214,7 @@ def compose_verify_task(urls):
     return tasks
 
 
-@app.task(queue="4and6", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="4and6")
 def get_ips(url: str):
     ipv4 = get_ipv4(url) if settings.NETWORK_SUPPORTS_IPV4 else ""
     ipv6 = get_ipv6(url) if settings.NETWORK_SUPPORTS_IPV6 else ""
@@ -349,7 +349,7 @@ ACCEPTABLE_CONNECTION_ERRORS = [
 ]
 
 
-@app.task(queue="4and6", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="4and6")
 def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str, str]:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
@@ -500,7 +500,7 @@ def has_acceptable_error(strerror: str) -> bool:
     return acceptable
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def connect_result(result: Dict[str, str], protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
     if result["result"]:
         save_endpoint(protocol, url_id, port, ip_version, f"ok/{origin}/{result['error']}")
@@ -509,7 +509,7 @@ def connect_result(result: Dict[str, str], protocol: str, url_id: int, port: int
     return True
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def connect_result_simple(result: bool, protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
     # no tracing of what went wrong where, will probably be superseeded with connect_result for tracing purposes
     if result:

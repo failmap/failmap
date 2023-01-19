@@ -11,7 +11,7 @@ from django.utils import timezone
 from OpenSSL import SSL
 from OpenSSL.crypto import FILETYPE_PEM, dump_certificate, load_certificate
 from OpenSSL.SSL import Error as SSLError
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
@@ -45,7 +45,7 @@ def plan_scan():
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner=SCANNER, amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -81,7 +81,7 @@ methods = [
 ]
 
 
-@app.task(expires=EXPIRES_IN_ONE_DAY)
+@app.task()
 def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
     chain = []
     for method, method_name in methods:
@@ -162,7 +162,7 @@ def deserialize_cert_chain(certificates: List[str]) -> List[OpenSSL.crypto.X509]
     return [load_certificate(FILETYPE_PEM, b64decode(certificate)) for certificate in certificates]
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates: List[str]) -> bool:
     # todo: there are more untrusted certificates from the dutch state.
     # Example: https://secure-t.sittard-geleen.nl

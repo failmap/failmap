@@ -1,6 +1,6 @@
 from celery import group
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import EndpointGenericScan
 from websecmap.scanners.scanner import finish_those_that_wont_be_scanned, unique_and_random
@@ -28,7 +28,7 @@ def plan_scan():
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner=SCANNER, amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)

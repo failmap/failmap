@@ -21,7 +21,7 @@ import requests
 import tldextract
 from celery import Task, group
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.scanner import q_configurations_to_scan, unique_and_random, url_filters
@@ -57,7 +57,7 @@ def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpo
     plannedscan.request(activity="scan", scanner="dns_clean_wildcards", urls=urls)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="dns_clean_wildcards", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -151,7 +151,7 @@ def random_string(length: int = 16):
     return "".join(random.choice(string.ascii_lowercase) for _ in range(length))
 
 
-@app.task(queue="all_internet", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="all_internet")
 def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
 
     if not discover_wildcard(wildcard_url):

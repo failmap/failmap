@@ -45,7 +45,7 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from iso3166 import countries_by_alpha2
 from requests.auth import HTTPBasicAuth
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 
 log = logging.getLogger(__package__)

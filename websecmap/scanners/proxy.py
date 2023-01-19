@@ -13,7 +13,7 @@ from requests.exceptions import ConnectTimeout, ProxyError, SSLError
 from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fixed
 from urllib3.exceptions import ProtocolError
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.scanners.models import ScanProxy
 
 PROXY_NETWORK_TIMEOUT = 30
@@ -22,7 +22,7 @@ PROXY_SERVER_TIMEOUT = 30
 log = logging.getLogger(__name__)
 
 
-@app.task(queue="claim_proxy", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="claim_proxy")
 def claim_proxy(tracing_label="") -> Dict[str, Any]:
     """A proxy should first be claimed and then checked. If not, several scans might use the same proxy and thus
     crash.
@@ -154,7 +154,7 @@ def release_claim_after_timeout(proxy: Dict[str, Any]):
         db_proxy.save(update_fields=["currently_used_in_tls_qualys_scan"])
 
 
-@app.task(queue="internet", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="internet")
 def check_proxy(proxy: Dict[str, Any]):
     # todo: service_provider_status should stop after a certain amount of requests.
     # Note that you MUST USE HTTPS proxies for HTTPS traffic! Otherwise your normal IP is used.

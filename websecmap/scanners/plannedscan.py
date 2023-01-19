@@ -8,7 +8,7 @@ from django.db import connection
 from django.db.models import Prefetch
 from statshog.defaults.django import statsd
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.map.logic.map_health import get_outdated_ratings
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.organizations.models import Organization, Url
@@ -352,7 +352,7 @@ def retrieve_endpoints_from_urls(
     return endpoints, urls_without_endpoints
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def websecmap_plan_outdated_scans():
     # one without parameters
     metadata = get_backend_scanmetadata()
@@ -360,7 +360,7 @@ def websecmap_plan_outdated_scans():
     return plan_outdated_scans(metadata["published_scan_types"])
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def websecmap_list_outdated():
     # one without parameters
     metadata = get_backend_scanmetadata()

@@ -14,8 +14,6 @@ import websecmap.signals  # noqa
 
 from websecmap.celery.worker import QUEUES_MATCHING_ROLES
 
-EXPIRES_IN_ONE_DAY = 86400
-
 log = logging.getLogger(__package__)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "websecmap.settings")

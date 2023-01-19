@@ -7,7 +7,7 @@ from typing import List, Union
 import pytz
 from django.db.models import Q
 
-from websecmap.celery import Task, app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import Task, app
 from websecmap.organizations.models import Url, Organization
 from websecmap.reporting.models import UrlReport, ScanPolicy
 from websecmap.reporting.severity import get_severity
@@ -26,14 +26,14 @@ This code doesn't understand anything else than urls.
 """
 
 
-@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="reporting")
 def recreate_url_reports(urls: List[int]) -> List[Task]:
     """Remove the rating of one url and rebuild anew (not anymore)."""
     # to save many hours of computing and tons of IO, try a smarter approach on creating and saving reports.
     return [(recreate_url_report.si(url_id)) for url_id in urls]
 
 
-@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="reporting")
 def recreate_url_report(url_id):
     """
     This used to rebuild all reports every night. This works fine until there are a lot of urls and a lot of

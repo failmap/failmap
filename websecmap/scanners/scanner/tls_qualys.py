@@ -32,7 +32,7 @@ from celery import Task, group
 from django.utils import timezone
 from tenacity import RetryError, before_log, retry, wait_fixed
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
@@ -239,7 +239,7 @@ def compose_manual_scan_task(organizations_filter: dict = None, urls_filter: dic
     return compose_scan_task(urls)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs) -> Task:
     # If you run this every 10 minutes, there will be little problems with 'toctou' problems, claiming
     # a proxy is free, while it has been claimed by other results of this method (in the call before).
@@ -315,7 +315,7 @@ def compose_scan_task(urls: List[Url]) -> Task:
 # 12 / hour = 1 every 5 minutes. In 30 minutes 6 scans will run at the same time. We used to have 10.
 # 20 / hour = 1 every 3 minutes. In 30 minutes 10 scans will run at the same time.
 # 30 / hours = 1 every 2 minutes. In 30 minutes 15 scans will run at the same time.
-@app.task(queue="qualys", acks_late=True, expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="qualys", acks_late=True)
 def qualys_scan_bulk(proxy: Dict[str, Any], urls: List[str]):
 
     log.debug("Initiating bulk scan")

@@ -19,7 +19,7 @@ from iso3166 import countries
 from rdp import rdp
 
 from websecmap.app.progressbar import print_progress_bar
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import app
 from websecmap.map.logic.wikidata import (
     ISO3316_2_COUNTRY_CODE,
     ISO3316_2_COUNTY_SUBDIVISION_CODE,

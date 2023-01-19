@@ -26,7 +26,7 @@ from typing import List
 from celery import group
 from django.conf import settings
 
-from websecmap.celery import ParentFailed, app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import ParentFailed, app
 from websecmap.scanners import plannedscan
 from websecmap.scanners.scanmanager import store_url_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan
@@ -50,7 +50,7 @@ def plan_scan(**kwargs):
     generic_plan_scan(SCANNER_NAME, "scan", filter_top_level_domains, **kwargs)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner=SCANNER_NAME, amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)

@@ -10,7 +10,7 @@ import logging
 
 from celery import group
 
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
@@ -54,7 +54,7 @@ def plan_scan(**kwargs):
     generic_plan_scan(SCANNER_NAME, "scan", apply_organzation_or_endpoint_filter_before_url_filter, **kwargs)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="plain_http", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -106,7 +106,7 @@ def compose_scan_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def get_endpoints_with_missing_encryption(url):
     """
     Finds a list of endpoints that are missing an encrypted counterpart. Takes in account ip_version.
@@ -162,7 +162,7 @@ def well_done(endpoint_id):
 
 
 # Task is written to work both on v4 and v6, but the network conf of the machine differs.
-@app.task(expires=EXPIRES_IN_ONE_DAY)
+@app.task()
 def scan(ip_version: int, url: str):
     """
     Using an incomplete endpoint

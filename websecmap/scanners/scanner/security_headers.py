@@ -56,7 +56,7 @@ import requests
 from celery import Task, group
 from requests.structures import CaseInsensitiveDict
 
-from websecmap.celery import app, EXPIRES_IN_ONE_DAY
+from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
@@ -120,7 +120,7 @@ def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpo
     plannedscan.request(activity="scan", scanner="security_headers", urls=urls)
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="security_headers", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -215,7 +215,7 @@ def discover_service_type(headers: CaseInsensitiveDict = None):
     return "non_http_response"
 
 
-@app.task(queue="storage", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="storage")
 def analyze_headers(headers: Dict, endpoint_id):
     # todo: remove code paths, and make a more clear case per header type. That's easier to understand edge cases.
     # todo: Content-Security-Policy, Referrer-Policy
@@ -458,7 +458,7 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
             )
 
 
-@app.task(expires=EXPIRES_IN_ONE_DAY)
+@app.task()
 def get_headers(uri_url: str, host: str) -> Union[Dict, bool]:
     """
     Issue #94:

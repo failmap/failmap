@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 
 from websecmap.api.models import SIDNUpload
-from websecmap.celery import EXPIRES_IN_ONE_DAY, app
+from websecmap.celery import app
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import Url
@@ -99,7 +99,7 @@ def sidn_domain_upload(user_id: int, csv_data: str):
     upload.save()
 
 
-@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="reporting")
 def sidn_process_upload(amount: int = 25):
     # Moved to reporting due to more room for delays on that queue.
     uploads = SIDNUpload.objects.all().filter(state__in=["processing", "new"])[0:amount]
@@ -112,7 +112,7 @@ def sidn_process_upload(amount: int = 25):
         sidn_handle_domain_upload.apply_async([upload.id])
 
 
-@app.task(queue="reporting", expires=EXPIRES_IN_ONE_DAY)
+@app.task(queue="reporting")
 def sidn_handle_domain_upload(upload_id: int):
     log.debug(f"Processing sidn data from {upload_id}")
 
