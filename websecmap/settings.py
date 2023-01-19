@@ -1379,18 +1379,18 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     {
         "label": _("🎛️ Configuration"),
         "items": [
-            {"name": "constance.config", "label": "Site & Scanning Configuration"},
-            {"name": "map.configuration", "label": "Displayed Countries / Areas"},
-            {"name": "map.landingpage", "label": "Landing Pages / Redirects"},
-            {"name": "django_celery_beat.periodictask", "label": "Scheduled Scans & Tasks"},
-            {"name": "reporting.scanpolicy", "label": "Scoring Policy"},
+            {"name": "constance.config", "label": "🎛️ Site & Scanning Configuration"},
+            {"name": "map.configuration", "label": "🗺️ Displayed Countries / Areas"},
+            {"name": "map.landingpage", "label": "➡️ Landing Pages / Redirects"},
+            {"name": "django_celery_beat.periodictask", "label": "⏰ Scheduled Scans & Tasks"},
+            {"name": "reporting.scanpolicy", "label": "🈴 Scan Scoring Policy"},
             {"name": "scanners.scanproxy", "label": "TLS Scan Proxies"},
         ],
     },
     {
         "label": _("💽 Import New Data"),
         "items": [
-            {"name": "map.administrativeregion", "label": _("Open Street Map & Wikidata")},
+            {"name": "map.administrativeregion", "label": _("🗺️ Open Street Map & Wikidata")},
             {"name": "organizations.dataset", "label": "Spreadsheet Import"},
             {"name": "organizations.genericfiledataset", "label": "File Imports"},
         ],
@@ -1398,27 +1398,19 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     {
         "label": _("🌍 Core Data"),
         "items": [
-            {"name": "organizations.organization", "label": "Organizations"},
-            {"name": "organizations.url", "label": "Urls"},
-            {"name": "organizations.organizationtype"},
+            {"name": "organizations.organization", "label": "🏢 Organizations"},
             {"name": "organizations.alternativename"},
-        ],
-    },
-    {
-        "label": _("🤖 Generated Map Data"),
-        "items": [
-            {"name": "organizations.coordinate", "label": "Imported Map Coordinates"},
-            {"name": "map.mapdatacache", "label": "Map Data Cache"},
-            {"name": "map.vulnerabilitystatistic", "label": "Vulnerability Statistics"},
-            {"name": "map.highlevelstatistic", "label": "Organization statistics"},
+            {"name": "organizations.url", "label": "🖥️ Urls"},
+            {"name": "organizations.organizationtype", "label": "🗾 Layers"},
+            {"name": "organizations.coordinate", "label": "📍 Imported Map Coordinates"},
         ],
     },
     {
         "label": _("🔬 Generated Scans"),
         "items": [
-            {"name": "scanners.plannedscan", "label": "Planned Scans"},
+            {"name": "scanners.plannedscan", "label": "📅 Planned Scans"},
             {"name": "scanners.plannedscanstatistic", "label": "Planned Scans Stats"},
-            {"name": "scanners.endpoint", "label": "Endpoints"},
+            {"name": "scanners.endpoint", "label": "🔌 Endpoints"},
             {"name": "scanners.endpointgenericscan", "label": "Endpoint Scans & Explanations"},
             {
                 "label": "- By Last Scan Moment (newest)",
@@ -1438,21 +1430,13 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         ],
     },
     {
-        "label": _("📊 Generated Reports"),
-        "items": [
-            {"name": "reporting.urlreport"},
-            {"name": "map.organizationreport"},
-            {"name": "map.maphealthreport"},
-        ],
-    },
-    {
         "label": _("Scanners"),
         "items": [
-            {"name": "scanners.scanner", "label": "Scanners"},
+            {"name": "scanners.scanner", "label": "🥼 Scanners"},
             {"name": "scanners.scantype", "label": "Scan Types"},
             {"name": "scanners.scantypesecondopinionlink", "label": "Second Opinion Links"},
-            {"name": "scanners.scantypedocumentationlink", "label": "Documentation Links"},
-            {"name": "scanners.scantypecategory", "label": "Scan Type Categories"},
+            {"name": "scanners.scantypedocumentationlink", "label": "📚 Documentation Links"},
+            {"name": "scanners.scantypecategory", "label": "👩‍🏫 Scan Type Categories"},
             {"name": "scanners.scanneractivity", "label": "Scanner Activities"},
             {"name": "scanners.followupscan", "label": "Follow Up Scans"},
         ],
@@ -1464,32 +1448,49 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         ],
     },
     {
-        "label": _("🐞 Debug"),
+        "label": _("🤖 Generated Map Data"),
         "items": [
-            {"name": "app.job", "label": "Performed scheduled tasks"},
-            {"name": "scanners.tlsqualysscratchpad", "label": "Qualys Scans Debug"},
-            {"name": "scanners.endpointgenericscanscratchpad", "label": "Endpoint Scans Debug"},
+            {"name": "map.mapdatacache", "label": "Map Data Cache"},
+            {"name": "map.vulnerabilitystatistic", "label": "📉 Vulnerability Statistics"},
+            {"name": "map.highlevelstatistic", "label": "📈 Organization statistics"},
         ],
     },
     {
-        "label": _("👾️ The Game (beta)"),
+        "label": _("📊 Generated Reports"),
         "items": [
-            {"name": "game.contest"},
-            {"name": "game.team"},
-            {"name": "game.organizationsubmission"},
-            {
-                "label": _("New organizations"),
-                "url": "/admin/game/organizationsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-5",
-                "url_blank": False,
-            },
-            {"name": "game.urlsubmission"},
-            {
-                "label": _("New urls"),
-                "url": "/admin/game/urlsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-6.2.3",
-                "url_blank": False,
-            },
+            {"name": "reporting.urlreport"},
+            {"name": "map.organizationreport"},
+            {"name": "map.maphealthreport"},
         ],
     },
+    # {
+    #     "label": _("🐞 Debug"),
+    #     "items": [
+    #         {"name": "app.job", "label": "Performed scheduled tasks"},
+    #         {"name": "scanners.tlsqualysscratchpad", "label": "Qualys Scans Debug"},
+    #         {"name": "scanners.endpointgenericscanscratchpad", "label": "Endpoint Scans Debug"},
+    #     ],
+    # },
+    # {
+    #     "label": _("👾️ The Game (beta)"),
+    #     "items": [
+    #         {"name": "game.contest"},
+    #         {"name": "game.team"},
+    #         {"name": "game.organizationsubmission"},
+    #         {
+    #             "label": _("New organizations"),
+    #             "url": "/admin/game/organizationsubmission/?has_been_accepted__exact=0
+    #             &has_been_rejected__exact=0&o=-5",
+    #             "url_blank": False,
+    #         },
+    #         {"name": "game.urlsubmission"},
+    #         {
+    #             "label": _("New urls"),
+    #             "url": "/admin/game/urlsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-6.2.3",
+    #             "url_blank": False,
+    #         },
+    #     ],
+    # },
 ]
 
 JET_SIDE_MENU_COMPACT = True
