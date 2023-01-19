@@ -28,7 +28,7 @@ query = EndpointGenericScan.objects.all().filter(
 )
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def plan_scan():
     # Only check this on the latest scans, do not alter existing explanations
     scans = query.filter(
@@ -41,7 +41,7 @@ def plan_scan():
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner=SCANNER, amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)

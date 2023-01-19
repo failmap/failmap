@@ -9,14 +9,14 @@ from websecmap.scanners.scanner import subdomains
 log = logging.getLogger(__package__)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_verify(organizations_filter, urls_filter, **kwargs)
     plannedscan.request(activity="verify", scanner="verify_unresolvable", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_verify_task(**kwargs):
     urls = plannedscan.pickup(activity="verify", scanner="verify_unresolvable", amount=kwargs.get("amount", 25))
     return compose_verify_task(urls)

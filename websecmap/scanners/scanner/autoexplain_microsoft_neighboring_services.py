@@ -21,14 +21,14 @@ query = EndpointGenericScan.objects.all().filter(
 )
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def plan_scan():
     scans = query.filter(endpoint__url__in=get_relevant_microsoft_domains_from_database())
     urls = [endpoint_generic_scan.endpoint.url for endpoint_generic_scan in scans]
     plannedscan.request(activity="scan", scanner=SCANNER, urls=unique_and_random(urls))
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner=SCANNER, amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)

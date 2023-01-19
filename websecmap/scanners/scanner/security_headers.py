@@ -110,7 +110,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("security_headers"):
@@ -120,7 +120,7 @@ def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpo
     plannedscan.request(activity="scan", scanner="security_headers", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="security_headers", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)

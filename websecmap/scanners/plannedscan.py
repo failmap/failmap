@@ -124,7 +124,7 @@ def force_retry():
     PlannedScan.objects.all().filter(state=State["picked_up"].value).update(state=State["requested"].value)
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def retry():
     """
     When something is picked up, but not finished in a day, just retry. Something went wrong.
@@ -352,7 +352,7 @@ def retrieve_endpoints_from_urls(
     return endpoints, urls_without_endpoints
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def websecmap_plan_outdated_scans():
     # one without parameters
     metadata = get_backend_scanmetadata()
@@ -424,7 +424,7 @@ def deduplicate_plan(planned_items):
     return clean_plan
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def plan_outdated_scans(published_scan_types):
     metadata = get_backend_scanmetadata()
 

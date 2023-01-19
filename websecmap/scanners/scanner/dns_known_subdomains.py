@@ -32,13 +32,13 @@ def filter_discover(
     return unique_and_random(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="dns_known_subdomains", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_discover_urls("dns_known_subdomains"):

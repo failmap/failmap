@@ -39,13 +39,13 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     return urls
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="internet_nl_mail", amount=kwargs.get("amount", 500))
     return compose_scan_task(urls)
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("internet_nl_mail"):

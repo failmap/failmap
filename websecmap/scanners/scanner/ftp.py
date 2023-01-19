@@ -47,24 +47,24 @@ SCANNER_NAME = "ftp"
 STANDARD_ENDPOINT_FILTER = {"protocol": "ftp", "is_dead": False}
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def plan_scan(**kwargs):
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
     generic_plan_scan(SCANNER_NAME, "scan", filter_endpoints_only, **kwargs)
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def plan_verify(**kwargs):
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
     generic_plan_scan(SCANNER_NAME, "verify", filter_endpoints_only, **kwargs)
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def plan_discover(**kwargs):
     generic_plan_scan(SCANNER_NAME, "discover", filter_urls_only, **kwargs)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_scan_task(**kwargs):
     urls = plannedscan.pickup(activity="scan", scanner="ftp", amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
@@ -111,7 +111,7 @@ def compose_scan_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="ftp", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
@@ -144,7 +144,7 @@ def compose_discover_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_verify_task(**kwargs):
     urls = plannedscan.pickup(activity="verify", scanner="ftp", amount=kwargs.get("amount", 25))
     return compose_verify_task(urls)

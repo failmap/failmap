@@ -52,14 +52,14 @@ def url_by_filters(organizations_filter: dict = None, urls_filter: dict = None) 
     return urls
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
     urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
     plannedscan.request(activity="discover", scanner="subdomains", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="subdomains", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
@@ -96,7 +96,7 @@ def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, e
     return unique_and_random(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
@@ -104,7 +104,7 @@ def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, end
     plannedscan.request(activity="verify", scanner="subdomains", urls=urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_verify_task(**kwargs):
     urls = plannedscan.pickup(activity="verify", scanner="subdomains", amount=kwargs.get("amount", 25))
     return compose_verify_task(urls)

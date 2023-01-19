@@ -107,19 +107,19 @@ STANDARD_ENDPOINT_FILTER = {"protocol__in": ["https", "http"], "is_dead": False}
 STANDARD_URL_FILTER = {"is_dead": False}
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def plan_discover(**kwargs):
     kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
     generic_plan_scan(SCANNER_NAME, "discover", apply_organzation_or_endpoint_filter_before_url_filter, **kwargs)
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def plan_verify(**kwargs):
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
     generic_plan_scan(SCANNER_NAME, "verify", filter_endpoints_only, **kwargs)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_discover_task(**kwargs):
     urls = plannedscan.pickup(activity="discover", scanner="http", amount=kwargs.get("amount", 25))
     return compose_discover_task(urls)
@@ -165,7 +165,7 @@ def compose_discover_task(urls: List[Url]):
     return group(tasks)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_verify_task(**kwargs):
     urls = plannedscan.pickup(activity="verify", scanner="http", amount=kwargs.get("amount", 25))
     return compose_verify_task(urls)

@@ -92,7 +92,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def plan_scan_new(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("tls_qualys"):
@@ -103,7 +103,7 @@ def plan_scan_new(organizations_filter: dict = None, urls_filter: dict = None, e
     return group()
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="kickoff", ignore_result=True)
 def plan_scan(urls_filter: dict = None, **kwargs):
     urls_filter = init_dict(urls_filter)
     """
@@ -239,7 +239,7 @@ def compose_manual_scan_task(organizations_filter: dict = None, urls_filter: dic
     return compose_scan_task(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def compose_planned_scan_task(**kwargs) -> Task:
     # If you run this every 10 minutes, there will be little problems with 'toctou' problems, claiming
     # a proxy is free, while it has been claimed by other results of this method (in the call before).
