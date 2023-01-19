@@ -306,6 +306,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
         "first_few_urls",
         "created_on",
         "is_dead",
+        "number_of_coordinates",
         "wikidata_",
         "wikipedia_",
         "twitter_handle",
@@ -363,14 +364,21 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     def number_of_urls(inst):
         count = Url.objects.all().filter(organization=inst.id).count()
         return (
-            format_html(
-                f"{count}<br>" f"<a href='/admin/organizations/url/?q={inst.name}' target='_blank'>Filter: 🔍</a>"
-            )
+            format_html(f"{count}<br><a href='/admin/organizations/url/?q={inst.name}' target='_blank'>Filter: 🔍</a>")
             if count
             else ""
         )
 
-        # return Url.objects.all().filter(organization=inst.id).count()
+    @staticmethod
+    def number_of_coordinates(inst):
+        count = Coordinate.objects.all().filter(organization=inst.id, is_dead=False).count()
+        return (
+            format_html(
+                f"{count}<br><a href='/admin/organizations/coordinate/?q={inst.name}' target='_blank'>Filter: 🔍</a>"
+            )
+            if count
+            else ""
+        )
 
     @staticmethod
     def first_few_urls(inst):
