@@ -16,6 +16,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 import os
+import sys
 
 # required until fixed: https://github.com/jazzband/django-constance/issues/263
 from collections import OrderedDict
@@ -44,6 +45,8 @@ APPLICATION_MODE = os.environ.get("APPLICATION_MODE", "admin")
 
 ADMIN = bool(APPLICATION_MODE == "admin")
 INTERACTIVE = bool(APPLICATION_MODE == "interactive")
+
+IS_WORKER = "worker" in sys.argv and "celery" in sys.argv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -367,7 +370,8 @@ LOGGING = {
         },
         # We expect to be able to debug websecmap all of the time.
         "websecmap": {
-            "handlers": ["console"],
+            # prevent duplicate logging on workers as celery already adds a handler
+            "handlers": ["console"] if IS_WORKER else None,
             "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
         },
         # disable verbose task logging (ie: "received task...", "...succeeded in...")
