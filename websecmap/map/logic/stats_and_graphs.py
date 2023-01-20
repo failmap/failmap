@@ -1,10 +1,8 @@
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta, date
+from datetime import date, timedelta
 from typing import Dict, List
 
-import pytz
-from dateutil.relativedelta import relativedelta
 from django.db.models import Q
 from django.utils import timezone
 
@@ -119,64 +117,6 @@ def get_organization_vulnerability_timeline_via_name(
         return []
 
     return get_organization_vulnerability_timeline(organization.id, duration)
-
-
-def stats_determine_when(stat, days_back=0):
-    if stat in ["now", "earliest"]:
-        when = datetime.now(pytz.utc)
-    else:
-        value, unit, _ = stat.split()
-        when = datetime.now(pytz.utc) - relativedelta(**{unit: int(value)})
-
-    # take into account the starting point
-    # eg: now = 1 march, starting point: 1 january. Difference is N days. Subtract N from when.
-    if days_back:
-        when = when - relativedelta(days=int(days_back))
-
-    # optimize: always give back the time 00:00:00, so the query result can be cached as the same query is
-    # performed every time.
-    my_dt = datetime(year=when.year, month=when.month, day=when.day, hour=0, minute=0, second=0, tzinfo=pytz.utc)
-    # log.debug("%s: %s (%s weeks back)" % (stat, dt, days_back))
-    return my_dt
-
-
-def get_stats_outdated(country, organization_type, days_back):
-    """
-    Stats are calculated using websecmap calculate_high_level_statistics
-
-    :param country:
-    :param organization_type:
-    :param days_back:
-    :return:
-    """
-
-    timeframes = {
-        "now": 0,
-        "7 days ago": 0,
-        "2 weeks ago": 0,
-        "3 weeks ago": 0,
-        "1 months ago": 0,
-        "2 months ago": 0,
-        "3 months ago": 0,
-    }
-
-    reports = {}
-    for stat in timeframes:
-        when = stats_determine_when(stat, days_back).date()
-
-        # seven queryies, but __never__ a missing result.
-        stats = (
-            HighLevelStatistic.objects.all()
-            .filter(country=country, organization_type=get_organization_type(organization_type), at_when__lte=when)
-            .order_by("-at_when")
-            .first()
-        )
-
-        # no stats before a certain date, or database empty.
-        if stats:
-            reports[stat] = stats.report
-
-    return reports
 
 
 def get_stats(country, organization_type, days_back, duration: int = 365, at_date: date = None):

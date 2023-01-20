@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 import iso3166
 import pytz
@@ -163,12 +163,19 @@ def get_when(days_back: int) -> datetime:
     return datetime.now(pytz.utc) - relativedelta(days=int(days_back))
 
 
-def determine_when(days_back: int = 0, at_date: date = None) -> date:
+def determine_when(days_back: int = 0, at_date: date = None) -> datetime:
     # Possible to go back some days from now.
     # Possible to specify a specific date
     # Possible to specify a number of days back from a specific date
     some_date = at_date or datetime.now(pytz.utc).date()
-    return some_date - relativedelta(days=days_back)
+
+    # Use the max time of that day. Because if you want to see a report of January 20th, you dont want to see
+    # the report of things less than january 20th 00:00, but less then january 20th 23:59:59
+    # so here we'll just add 1 day and subtract 1 microsecond to get the last possible moment for a day
+    some_date_with_time = datetime(year=some_date.year, month=some_date.month, day=some_date.day)
+    some_date_with_time = some_date_with_time + timedelta(days=1) - timedelta(microseconds=1)
+
+    return some_date_with_time - relativedelta(days=days_back)
 
 
 def get_initial_countries():

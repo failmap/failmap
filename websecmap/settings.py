@@ -1404,7 +1404,6 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     {
         "label": _("Generated Metrics"),
         "items": [
-
             {"name": "scanners.endpointgenericscan", "label": "🔬 Endpoint Metrics"},
             {
                 "label": "🔬 - By Last Scan Moment (newest)",
@@ -1419,7 +1418,6 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             },
             {"name": "scanners.urlgenericscan", "label": "🔬 URL Metrics"},
             {"name": "scanners.internetnlv2scan", "label": "📨 Internet.nl Scans"},
-
             {"name": "scanners.screenshot", "label": "📸 Screenshots"},
         ],
     },
@@ -1445,7 +1443,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "scanners.plannedscan", "label": "📅 Planned Scans"},
             {"name": "reporting.urlreport", "label": "📑 Url Reports"},
             {"name": "map.organizationreport", "label": "📑 Organization Reports"},
-            {"name": "map.maphealthreport",  "label": "📑 Map Health Reports"},
+            {"name": "map.maphealthreport", "label": "📑 Map Health Reports"},
             {"name": "scanners.internetnlv2statelog", "label": "📨 Internet.nl API V2 Scan Log"},
         ],
     },
