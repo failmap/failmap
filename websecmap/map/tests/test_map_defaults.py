@@ -6,7 +6,10 @@ from websecmap.map.logic.map_defaults import determine_when
 
 def test_determine_when():
 
-    with freeze_time("2021-02-03"):
+    with freeze_time("2021-02-03 13:37:42"):
+
+        # make sure freeze time supports time
+        assert datetime.now().hour == 13
 
         # at today means at any moment today, so the maximum amount of time in this day will be returned
         assert determine_when(days_back=0, at_date=None) == datetime(2021, 2, 3, 23, 59, 59, 999999)
