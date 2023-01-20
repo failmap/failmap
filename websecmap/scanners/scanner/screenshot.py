@@ -41,6 +41,9 @@ from websecmap.scanners.timeout import timeout
 
 log = logging.getLogger(__package__)
 
+SCANNER_NAME = "screenshot"
+SCANNER_ACTION = "scan"
+
 
 def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
@@ -69,12 +72,12 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
 def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    plannedscan.request(activity="scan", scanner="screenshot", urls=urls)
+    plannedscan.request(activity=SCANNER_ACTION, scanner=SCANNER_NAME, urls=urls)
 
 
 @app.task(queue="kickoff")
 def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="screenshot", amount=kwargs.get("amount", 25))
+    urls = plannedscan.pickup(activity=SCANNER_ACTION, scanner=SCANNER_NAME, amount=kwargs.get("amount", 25))
     return compose_scan_task(urls)
 
 
@@ -95,7 +98,7 @@ def compose_scan_task(urls):
 
     # remove urls that don't have the relevant endpoints anymore
     for url_id in urls_without_endpoints:
-        plannedscan.finish("scan", "screenshot", url_id)
+        plannedscan.finish("scan", SCANNER_NAME, url_id)
 
     # prevent constance from looking up the value constantly:
     v4_service = config.SCREENSHOT_API_URL_V4
@@ -107,13 +110,18 @@ def compose_scan_task(urls):
     tasks = []
     if v4_service:
         tasks += [
-            make_screenshot.si(v4_service, endpoint.uri_url()) | save_screenshot.s(endpoint.id)
+            make_screenshot.si(v4_service, endpoint.uri_url())
+            | save_screenshot.s(endpoint.id)
+            | plannedscan.finish.si(SCANNER_ACTION, SCANNER_NAME, endpoint.url.pk)
             for endpoint in endpoints
             if endpoint.ip_version == 4
         ]
     if v6_service:
         tasks += [
             make_screenshot.si(v6_service, endpoint.uri_url()) | save_screenshot.s(endpoint.id)
+            # might finish it twice, but that's better than not finishing it at al.
+            # and we want to finish asap, not after all scans are made...
+            | plannedscan.finish.si(SCANNER_ACTION, SCANNER_NAME, endpoint.url.pk)
             for endpoint in endpoints
             # For v6 you may also scan dns_a_aaaa to see if there is a site at the v6 address.
             if endpoint.ip_version in [6, 0]
