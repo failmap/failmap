@@ -1371,96 +1371,88 @@ CRISPY_TEMPLATE_PACK = "bootstrap3"
 
 JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     {
-        "label": _("👤 User"),
-        "items": [
-            {"name": "auth.user"},
-        ],
-    },
-    {
-        "label": _("🎛️ Configuration"),
+        "label": _("Configuration"),
         "items": [
             {"name": "constance.config", "label": "🎛️ Site & Scanning Configuration"},
-            {"name": "map.configuration", "label": "🗺️ Displayed Countries / Areas"},
+            {"name": "map.configuration", "label": "🌍 Displayed Countries / Areas"},
             {"name": "map.landingpage", "label": "➡️ Landing Pages / Redirects"},
             {"name": "django_celery_beat.periodictask", "label": "⏰ Scheduled Scans & Tasks"},
             {"name": "reporting.scanpolicy", "label": "🈴 Scan Scoring Policy"},
-            {"name": "scanners.scanproxy", "label": "TLS Scan Proxies"},
+            {"name": "scanners.scanproxy", "label": "🧉 TLS Scan Proxies"},
+            {"name": "auth.user", "label": "👤 Users"},
         ],
     },
     {
-        "label": _("💽 Import New Data"),
+        "label": _("Import Data"),
         "items": [
             {"name": "map.administrativeregion", "label": _("🗺️ Open Street Map & Wikidata")},
-            {"name": "organizations.dataset", "label": "Spreadsheet Import"},
-            {"name": "organizations.genericfiledataset", "label": "File Imports"},
+            {"name": "organizations.dataset", "label": "💾 Spreadsheet Import"},
+            {"name": "organizations.genericfiledataset", "label": "💽 File Imports"},
         ],
     },
     {
-        "label": _("🌍 Core Data"),
+        "label": _("Core Data"),
         "items": [
             {"name": "organizations.organization", "label": "🏢 Organizations"},
-            {"name": "organizations.alternativename"},
+            {"name": "organizations.alternativename", "label": "🏢 - Alt Names"},
             {"name": "organizations.url", "label": "🖥️ Urls"},
-            {"name": "organizations.organizationtype", "label": "🗾 Layers"},
-            {"name": "organizations.coordinate", "label": "📍 Imported Map Coordinates"},
+            {"name": "scanners.endpoint", "label": "🔌 Endpoints"},
+            {"name": "organizations.coordinate", "label": "📍 Map Geodata"},
+            {"name": "organizations.organizationtype", "label": "🗾 Map Layers"},
         ],
     },
     {
-        "label": _("🔬 Generated Scans"),
+        "label": _("Generated Metrics"),
         "items": [
-            {"name": "scanners.plannedscan", "label": "📅 Planned Scans"},
-            {"name": "scanners.plannedscanstatistic", "label": "Planned Scans Stats"},
-            {"name": "scanners.endpoint", "label": "🔌 Endpoints"},
-            {"name": "scanners.endpointgenericscan", "label": "Endpoint Scans & Explanations"},
+
+            {"name": "scanners.endpointgenericscan", "label": "🔬 Endpoint Metrics"},
             {
-                "label": "- By Last Scan Moment (newest)",
+                "label": "🔬 - By Last Scan Moment (newest)",
                 "url": "/admin/scanners/endpointgenericscan/?o=-5.-6",
                 "url_blank": False,
             },
             {
-                "label": "- Possibly outdated scans",
+                "label": "🔬 - Possibly outdated scans",
                 "url": "/admin/scanners/endpointgenericscan/"
                 "?endpoint__is_dead__exact=0&endpoint__url__is_dead__exact=0&is_the_latest_scan__exact=1&o=5.-6",
                 "url_blank": False,
             },
-            {"name": "scanners.urlgenericscan", "label": "URL Scans"},
-            {"name": "scanners.internetnlv2scan", "label": "Internet.nl API V2 Scan Tasks"},
-            {"name": "scanners.internetnlv2statelog", "label": "Internet.nl API V2 Scan Log"},
-            {"name": "scanners.screenshot", "label": "Screenshots"},
+            {"name": "scanners.urlgenericscan", "label": "🔬 URL Metrics"},
+            {"name": "scanners.internetnlv2scan", "label": "📨 Internet.nl Scans"},
+
+            {"name": "scanners.screenshot", "label": "📸 Screenshots"},
         ],
     },
     {
-        "label": _("Scanners"),
+        "label": _("Scanner Configuration"),
         "items": [
             {"name": "scanners.scanner", "label": "🥼 Scanners"},
-            {"name": "scanners.scantype", "label": "Scan Types"},
-            {"name": "scanners.scantypesecondopinionlink", "label": "Second Opinion Links"},
+            {"name": "scanners.scantype", "label": "🔬 Scan Types"},
+            {"name": "scanners.scantypesecondopinionlink", "label": "📚 Second Opinion Links"},
             {"name": "scanners.scantypedocumentationlink", "label": "📚 Documentation Links"},
             {"name": "scanners.scantypecategory", "label": "👩‍🏫 Scan Type Categories"},
-            {"name": "scanners.scanneractivity", "label": "Scanner Activities"},
-            {"name": "scanners.followupscan", "label": "Follow Up Scans"},
+            {"name": "scanners.scanneractivity", "label": "🚴 Scanner Activities"},
+            {"name": "scanners.followupscan", "label": "⏭️ Follow Up Scans"},
         ],
     },
     {
-        "label": _("🐒 API"),
+        "label": _("Generated Data"),
         "items": [
-            {"name": "api.sidnupload"},
-        ],
-    },
-    {
-        "label": _("🤖 Generated Map Data"),
-        "items": [
-            {"name": "map.mapdatacache", "label": "Map Data Cache"},
+            {"name": "map.mapdatacache", "label": "🤖 Map Data Cache"},
             {"name": "map.vulnerabilitystatistic", "label": "📉 Vulnerability Statistics"},
             {"name": "map.highlevelstatistic", "label": "📈 Organization statistics"},
+            {"name": "scanners.plannedscanstatistic", "label": "📊 Planned Scans Stats"},
+            {"name": "scanners.plannedscan", "label": "📅 Planned Scans"},
+            {"name": "reporting.urlreport", "label": "📑 Url Reports"},
+            {"name": "map.organizationreport", "label": "📑 Organization Reports"},
+            {"name": "map.maphealthreport",  "label": "📑 Map Health Reports"},
+            {"name": "scanners.internetnlv2statelog", "label": "📨 Internet.nl API V2 Scan Log"},
         ],
     },
     {
-        "label": _("📊 Generated Reports"),
+        "label": _("API"),
         "items": [
-            {"name": "reporting.urlreport"},
-            {"name": "map.organizationreport"},
-            {"name": "map.maphealthreport"},
+            {"name": "api.sidnupload", "label": "🐒 SIDN Upload"},
         ],
     },
     # {
