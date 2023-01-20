@@ -9,6 +9,19 @@ from django.conf import settings
 log = logging.getLogger(__name__)
 
 
+def force_console_logging():
+    debug_log = logging.getLogger("websecmap")
+    formatter = logging.Formatter(
+        "%(asctime)s\t%(levelname)-8s - %(filename)-20s:%(lineno)-4s - %(funcName)20s() - %(message)s"
+    )
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(formatter)
+    stream_handler.setLevel(logging.DEBUG)
+    debug_log.addHandler(stream_handler)
+    debug_log.setLevel(logging.DEBUG)
+    return debug_log
+
+
 class Websecmap(AppConfig):
     name = "websecmap.app"
     verbose_name = "Web Security Map"

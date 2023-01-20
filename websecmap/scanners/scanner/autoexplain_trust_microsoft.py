@@ -32,6 +32,15 @@ applicable_subdomains = {
         "p.manage.microsoft.com",
         "i.manage.microsoft.com",
         "a.manage.microsoft.com",
+        "EU03.manage.microsoft.com",
+        "EU02.manage.microsoft.com",
+        "EU01.manage.microsoft.com",
+        "EU00.manage.microsoft.com",
+        # assuming there is an US variant
+        "US03.manage.microsoft.com",
+        "US02.manage.microsoft.com",
+        "US01.manage.microsoft.com",
+        "US00.manage.microsoft.com",
     ],
     "enterpriseregistration": ["*.enterpriseregistration.windows.net", "enterpriseregistration.windows.net"],
     "webmail": [
@@ -268,6 +277,14 @@ def certificate_matches_microsoft_exception_policy(
 
     # for non-microsoft services that are called with this scanner
     if microsoft_service not in applicable_subdomains:
+        log.debug("Subdomain is not applicable for comply or explain %s.", microsoft_service)
+        return False
+
+    # check if the common name or alt name of the certificate matches the subdomain
+    _names = certificate.issuer.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)
+    names = [name.value for name in _names]
+    if trusted_organization not in names:
+        log.error("Certificate for %s not handed out by %s but by %s. Not trusted.", url, trusted_organization, names)
         return False
 
     # check if the issuer matches
@@ -275,20 +292,16 @@ def certificate_matches_microsoft_exception_policy(
     _names = certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
     names = [name.value for name in _names]
     if names[0] not in applicable_subdomains[microsoft_service]:
-        log.debug(
+        # if ms changed the names, we want to know.
+        # this will create a list of certs we don't care about that piggy back on the same subdomain while forging the
+        # certificate name. Slim chance though... This will change every so often.
+        log.error(
             "Certificate for %s not in accepted names, value: %s. %s not in %s. Not trusted.",
             url,
             names,
             names[0],
             applicable_subdomains[microsoft_service],
         )
-        return False
-
-    # check if the common name or alt name of the certificate matches the subdomain
-    _names = certificate.issuer.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)
-    names = [name.value for name in _names]
-    if trusted_organization not in names:
-        log.debug("Certificate for %s not handed out by %s but by %s. Not trusted.", url, trusted_organization, names)
         return False
 
     return True
