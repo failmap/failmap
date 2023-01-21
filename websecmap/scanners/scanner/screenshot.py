@@ -22,7 +22,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 from io import BytesIO
-from typing import Dict, Union
+from typing import Dict, Union, Any
 
 import pytz
 import requests
@@ -132,14 +132,12 @@ def compose_scan_task(urls):
 
 # We expect the screenshot tool to hang at non responsive urls.
 @app.task(queue="screenshot")
-def make_screenshot(service: str, endpoint_url: str):
+def make_screenshot(service: str, endpoint_url: str) -> Dict[str, Any]:
     try:
         return make_screenshot_with_browserless(service, endpoint_url)
-    except (ConnectionError, TimeoutError) as my_exception:
-        log.debug("Error while making screenshot on %s", endpoint_url)
-        return my_exception
-    except Exception as my_exception:  # pylint: disable=broad-except
-        return my_exception
+    except TimeoutError:
+        # took too long to make the screenshot, this is business as usual
+        return {"success": False}
 
 
 @timeout(30, "Took too long to make screenshot.")
@@ -171,6 +169,20 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
             "screenshot_service": screenshot_service,
         }
     except requests.RequestException as exc:
+        # cannot find service, etc, connection errors, timeouts etc...
+        # while business as usual, log it for a while to see what happens
+        log.exception(exc)
+        return {
+            "screenshot": "",
+            "status_code": 0,
+            "success": False,
+            "error_message": str(exc),
+            "url": url,
+            "screenshot_service": screenshot_service,
+        }
+    except Exception as exc:  # pylint: disable=broad-except
+        # something weird that is not a standard network error.
+        log.exception(exc)
         return {
             "screenshot": "",
             "status_code": 0,
