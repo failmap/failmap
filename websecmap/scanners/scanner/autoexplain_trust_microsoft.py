@@ -41,6 +41,12 @@ applicable_subdomains = {
         "US02.manage.microsoft.com",
         "US01.manage.microsoft.com",
         "US00.manage.microsoft.com",
+        # but its this one:
+        "NA04.manage.microsoft.com",
+        "NA03.manage.microsoft.com",
+        "NA02.manage.microsoft.com",
+        "NA01.manage.microsoft.com",
+        "NA00.manage.microsoft.com",
     ],
     "enterpriseregistration": ["*.enterpriseregistration.windows.net", "enterpriseregistration.windows.net"],
     "webmail": [
@@ -67,6 +73,8 @@ applicable_subdomains = {
         "mail.services.live.com",
         "hotmail.com",
         "*.hotmail.com",
+        "portal.office.com",
+        "*.msappproxy.net",
     ],
     "msoid": [
         "*.accesscontrol.windows.net",
