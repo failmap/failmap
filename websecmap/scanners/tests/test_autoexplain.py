@@ -18,6 +18,7 @@ from websecmap.scanners.scanner import (
     autoexplain_no_https_microsoft,
     autoexplain_trust_microsoft,
 )
+from websecmap.scanners.scanner.autoexplain_trust_microsoft import any_in_list_match
 
 log = logging.getLogger("websecmap")
 
@@ -281,3 +282,15 @@ def test_autoexplain_including_headers(db, monkeypatch):
     autoexplain_microsoft_neighboring_services.scan(egs.id)
     egs = EndpointGenericScan.objects.get(id=header_scan_new.id)
     egs.comply_or_explain_is_explained = True
+
+
+def test_any_in_list_match():
+
+    assert any_in_list_match(["a"], ["b"]) is False
+    assert any_in_list_match(["a", "b", "c"], ["d"]) is False
+    assert any_in_list_match(["a", "b", "c"], []) is False
+    assert any_in_list_match([], ["a", "b", "c"]) is False
+    assert any_in_list_match(["a"], ["a", "b", "c"]) is True
+    assert any_in_list_match(["b"], ["a", "b", "c"]) is True
+    assert any_in_list_match(["c"], ["a", "b", "c"]) is True
+    assert any_in_list_match(["a", "b", "c"], ["a", "b", "c"]) is True

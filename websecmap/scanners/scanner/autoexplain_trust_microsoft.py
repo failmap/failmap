@@ -142,6 +142,17 @@ applicable_subdomains = {
     ],
 }
 
+
+# Is this just every CA ever? or is it a subset?
+MS_TRUSTED_CERT_VENDORS = [
+    "Microsoft Corporation",
+    "Sectigo Limited",
+    "DigiCert Inc",
+    "Let's Encrypt",
+    "QuoVadis Limited",
+    # There are also empty items, not trusting those, which could mean self-signed but without a name?
+]
+
 query = EndpointGenericScan.objects.all().filter(
     type="tls_qualys_certificate_trusted",
     is_the_latest_scan=True,
@@ -291,7 +302,7 @@ def certificate_matches_microsoft_exception_policy(
     # check if the common name or alt name of the certificate matches the subdomain
     _names = certificate.issuer.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)
     names = [name.value for name in _names]
-    if trusted_organization not in names:
+    if not any_in_list_match(MS_TRUSTED_CERT_VENDORS + [trusted_organization], names):
         log.error("Certificate for %s not handed out by %s but by %s. Not trusted.", url, trusted_organization, names)
         return False
 
@@ -313,6 +324,10 @@ def certificate_matches_microsoft_exception_policy(
         return False
 
     return True
+
+
+def any_in_list_match(list1: List[str], list2: List[str]) -> bool:
+    return any(item in list2 for item in list1)
 
 
 def autoexplain_trust_microsoft_and_include_their_webserver_headers(a_scan):

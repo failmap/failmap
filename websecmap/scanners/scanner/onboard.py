@@ -126,13 +126,13 @@ def reset_expired_onboards():
 
 
 stages = [
-    {'name': '', 'active': False},
-    {'name': 'endpoint_discovery', 'active': True, 'plan_scans_with': [...]},  # plan scans with scanner... or compose?
-    {'name': 'endpoint_finished', 'active': False},
-    {'name': 'scans_running', 'active': True},
-    {'name': 'scans_finished', 'active': False},
-    {'name': 'crawling', 'active': True},
-    {'name': 'onboarded', 'active': False},
+    {"name": "", "active": False},
+    {"name": "endpoint_discovery", "active": True, "plan_scans_with": [...]},  # plan scans with scanner... or compose?
+    {"name": "endpoint_finished", "active": False},
+    {"name": "scans_running", "active": True},
+    {"name": "scans_finished", "active": False},
+    {"name": "crawling", "active": True},
+    {"name": "onboarded", "active": False},
 ]
 
 
@@ -146,8 +146,9 @@ def backward(stage: str, stages: List[Dict[str, str]]) -> Dict[str, Any]:
 
 def forward(stage: str, stages: List[Dict[str, str]]) -> Dict[str, Any]:
     index = next((i for i, item in enumerate(stages) if item["name"] == stage), None)
-    if not index or index >= len(stages)-2:
-        return stages[len(stages)-1]
+
+    if index is None or index >= len(stages) - 1:
+        return stages[len(stages) - 1]
 
     return stages[index + 1]
 
