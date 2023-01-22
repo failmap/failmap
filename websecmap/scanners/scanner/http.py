@@ -426,11 +426,12 @@ def request_via_ip(uri, url) -> Dict[str, str]:
     # using GET request as the connection is waiting on more data after the
     # body is transmitted. There is no clue yet to why. Using HEAD also mitigates
     # this issues.
-    response = s.head(
+    response = s.get(
         uri,
         timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
         allow_redirects=False,  # redirect = connection
         verify=False,  # nosec any tls = connection
+        stream=True,  # don't read the message body unless it is required
         headers=create_standard_request_headers(url),
     )
 
@@ -450,12 +451,13 @@ def request_via_hostname(protocol, url, port) -> Dict[str, str]:
     # as it might connect over the wrong network
     # Basically perform the same checks on the url directly, with a more extensive request that can be debugged
     full_url = f"{protocol}://{url}:{port}"
-    response = requests.head(
+    response = requests.get(
         full_url,
-        headers=create_standard_request_headers(url),
-        verify=False,
         timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
         allow_redirects=False,
+        verify=False,
+        stream=True,  # don't read the message body unless it is required
+        headers=create_standard_request_headers(url),
     )
 
     log.debug("Response: %s", response)

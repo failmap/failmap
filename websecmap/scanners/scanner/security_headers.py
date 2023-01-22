@@ -520,6 +520,7 @@ def get_headers_timed(uri_url: str, host: str) -> Union[Dict, bool]:
             timeout=HEADER_RETRIEVAL_TIMEOUT,
             allow_redirects=True,
             verify=False,  # nosec TLS does not have to be valid in this test, only headers do.
+            stream=True,  # don't read the message body unless it is required
             headers=create_standard_request_headers(host),
         )
 

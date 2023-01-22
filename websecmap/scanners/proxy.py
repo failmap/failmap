@@ -181,6 +181,7 @@ def check_proxy(proxy: Dict[str, Any]):
                 "Accept-Language": "en-US,en;q=0.5",
                 "DNT": "1",
             },
+            stream=True,  # don't read the message body unless it is required
         )
 
     # Storage is handled async, because you might not be on the machine that is able to save data.

@@ -84,13 +84,13 @@ def test_can_connect(requests_mock, mocker):
     # test request without positive response, some xception
     assert can_connect("https", "1.example.com", 443, 4) == {
         "result": False,
-        "error": "No mock address: HEAD https://1.example.com:443/",
+        "error": "No mock address: GET https://1.example.com:443/",
     }
 
     # test request via hostname:
-    requests_mock.head("https://1.example.com:443/", text="200", status_code=200)
+    requests_mock.get("https://1.example.com:443/", text="200", status_code=200)
     assert can_connect("https", "1.example.com", 443, 4) == {"result": True, "error": "found_with_hostname"}
 
     # test request via ip4:
-    requests_mock.head("https://127.0.0.1:443/", text="200", status_code=200)
+    requests_mock.get("https://127.0.0.1:443/", text="200", status_code=200)
     assert can_connect("https", "1.example.com", 443, 4) == {"result": True, "error": "found_with_ip"}
