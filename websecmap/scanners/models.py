@@ -845,3 +845,13 @@ class PlannedScanError(models.Model):
     planned_scan = models.ForeignKey(PlannedScan, on_delete=models.CASCADE)
 
     debug_information = models.CharField(max_length=512)
+
+
+class PlannedScanLog(models.Model):
+    # Logs all changes to planned scans, so you can see what has been picked up/finished and whatnot
+    # This log is in plain text and meant for easy human consumption. It's not your referential record fest
+    # It is meant to be a simple "what happened then" log, not one where you need to filter back on what scanner etc.
+
+    # This also logs changes on scans that have not been requested, but that might have finished etc.
+    at_when = models.DateTimeField(auto_now_add=True)
+    line = models.CharField(max_length=255)

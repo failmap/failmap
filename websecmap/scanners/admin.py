@@ -510,6 +510,14 @@ class PlannedScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append("set_state_finished")
 
 
+@admin.register(models.PlannedScanLog)
+class PlannedScanLogAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_filter = ["at_when"]
+    list_display = ["id", "at_when", "line"]
+    fields = ["id", "at_when", "line"]
+    readonly_fields = ["id", "at_when", "line"]
+
+
 @admin.register(models.PlannedScanStatistic)
 class PlannedScanStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ("at_when", "data")

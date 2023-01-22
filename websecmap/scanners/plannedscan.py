@@ -21,6 +21,7 @@ from websecmap.scanners.models import (
     Scanner,
     FollowUpScan,
     EndpointGenericScan,
+    PlannedScanLog,
 )
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
@@ -206,6 +207,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
         scan.state = State["picked_up"].value
         scan.last_state_change_at = datetime.now(pytz.utc)
         scan.save()
+        log_planned_scan_action(activity=activity, scanner=scanner, url=scan.url, state="picked_up")
 
     urls = []
     for scan in scans:
@@ -220,6 +222,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
             # Delete this scan as the url id cannot be found, so it cannot be finished.
             log.error("Deleting a scan without an url. The scan will be deleted.", extra={"scan_id": scan.id})
             scan.delete()
+            log_planned_scan_action(activity=activity, scanner=scanner, url=scan.url, state="scan_deleted_no_url")
 
     log.debug("Picked up %s to %s with %s.", len(urls), activity, scanner)
     statsd.incr("scan_planned", len(urls), tags={"state": "pickup", "scanner": scanner, "activity": activity})
@@ -260,7 +263,16 @@ def request(activity: str, scanner: str, urls: List[int], origin: str = ""):
         discard = timedelta(minutes=now.minute % 10, seconds=now.second, microseconds=now.microsecond)
         planned_scan.requested_at_when = now - discard
         planned_scan.save()
+        log_planned_scan_action(activity=activity, scanner=scanner, url=url, state="requested", origin=origin)
         statsd.incr("scan_planned", tags={"state": "request", "scanner": scanner, "activity": activity})
+
+
+def log_planned_scan_action(activity: str, scanner: str, url: int, state: str = "", origin: str = ""):
+    log_item = PlannedScanLog()
+    log_item.line = (
+        f"Url: {url}, " f"Scanner: {activity}, " f"Activity: {scanner}, " f"State: {state}, " f"Origin: {origin}"
+    )[:255]
+    log_item.save()
 
 
 def already_requested(activity: str, scanner: int, url_id: int):
@@ -281,9 +293,11 @@ def finish(activity: str, scanner: str, url_id: int):
     metadata = get_backend_scanmetadata()
     scanner = metadata["scanners_by_python_name"].get(scanner, None)
     if not scanner:
+        log_planned_scan_action(activity=activity, scanner=scanner, url=url_id, state="finished (ignored)")
         log.debug(f"Scanner {scanner} was not found, ignoring.")
 
     set_scan_state(activity, scanner["id"], url_id, "finished")
+    log_planned_scan_action(activity=activity, scanner=scanner, url=url_id, state="finished")
     statsd.incr("scan_planned", tags={"state": "finished", "scanner": scanner, "activity": activity})
 
 

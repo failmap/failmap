@@ -1437,6 +1437,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         "label": _("Generated Data"),
         "items": [
             {"name": "scanners.plannedscan", "label": "📅 Planned Scans"},
+            {"name": "scanners.plannedscanlog", "label": "📅 Planned Scan Log"},
             {"name": "scanners.internetnlv2statelog", "label": "📨 Internet.nl API V2 Scan Log"},
             {"name": "map.mapdatacache", "label": "🤖 Map Data Cache"},
             {"name": "map.vulnerabilitystatistic", "label": "📉 Vulnerability Statistics"},
