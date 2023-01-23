@@ -17,6 +17,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 import os
 import sys
+import re
 
 # required until fixed: https://github.com/jazzband/django-constance/issues/263
 from collections import OrderedDict
@@ -438,6 +439,8 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_EVENT_SERIALIZER = "json"
 
 CELERY_BROKER_URL = os.environ.get("BROKER", "redis://localhost:6379/0")
+# use separate redis DB for results to improve performance of queue statistics
+CELERY_RESULT_BACKEND = os.environ.get("RESULT_BACKEND", re.sub("/0$", "/1", CELERY_BROKER_URL))
 CELERY_ENABLE_UTC = True
 
 # Any data transfered with pickle needs to be over tls... you can inject arbitrary objects with
