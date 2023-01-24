@@ -1082,6 +1082,11 @@ CONSTANCE_CONFIG = {
         "Add calculated results for VNG, obsoleted IPv6 derived conclusions.",
         bool,
     ),
+    "INTERNET_NL_WEB_ONLY_TOP_LEVEL": (
+        True,
+        "Do not send in subdomains. To reduce the number of tests while still getting an impression on a broader scope",
+        bool,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1300,6 +1305,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "INTERNET_NL_ADD_CALCULATED_RESULTS_WEBSECMAP",
                 "INTERNET_NL_ADD_CALCULATED_RESULTS_FORUM_STANDAARDISATIE",
                 "INTERNET_NL_ADD_CALCULATED_RESULTS_VNG_V6",
+                "INTERNET_NL_WEB_ONLY_TOP_LEVEL",
             ),
         ),
         ("Screenshot service options", ("SCREENSHOT_API_URL_V4", "SCREENSHOT_API_URL_V6")),

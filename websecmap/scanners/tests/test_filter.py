@@ -9,6 +9,7 @@ from websecmap.scanners.scanner.ftp import plan_scan as ftp_plan_scan
 from websecmap.scanners.scanner.http import plan_discover as http_plan_discover
 from websecmap.scanners.scanner.http import plan_verify as http_plan_verify
 from websecmap.scanners.scanner.plain_http import plan_scan as plain_http_plan_scan
+from websecmap.scanners.scanner.internet_nl_v2_web import filter_scan as internet_nl_v2_web_filter_scan
 
 
 @pytest.fixture()
@@ -130,3 +131,49 @@ def test_filter_plain_http(db, default_scan_metadata, setup_some_data):
 
     plain_http_plan_scan(organizations_filter={"name": "test"})
     assert PlannedScan.objects.count() == 1
+
+
+@pytest.fixture()
+def setup_test_internet_nl_v2_web_filter_scan(db, default_scan_metadata):
+    ot = OrganizationType.objects.create(name="test")
+    Configuration.objects.create(country="NL", organization_type=ot, is_scanned=True)
+
+    organization = Organization.objects.create(name="test", type=ot, created_on=timezone.now(), country="NL")
+    organization.layers.add(ot)
+
+    url1 = Url.objects.create(url="google.com", is_dead=False, not_resolvable=False)
+    url1.organization.add(organization)
+    Endpoint.objects.create(url=url1, discovered_on=timezone.now(), port=80, protocol="dns_a_aaaa", ip_version=4)
+
+    # dead or non-resolving urls should not be retrieved:
+    url1 = Url.objects.create(url="deadurl.com", is_dead=True, not_resolvable=False)
+    url1.organization.add(organization)
+    url1 = Url.objects.create(url="nonresolvable.com", is_dead=False, not_resolvable=True)
+    url1.organization.add(organization)
+
+    url2 = Url.objects.create(url="subdomain.google.com", is_dead=False, not_resolvable=False)
+    url2.organization.add(organization)
+    Endpoint.objects.create(url=url2, discovered_on=timezone.now(), port=80, protocol="http", ip_version=6)
+    Endpoint.objects.create(url=url2, discovered_on=timezone.now(), port=80, protocol="dns_a_aaaa", ip_version=6)
+
+    # add some data that should not be retreived in either case:
+    organization2 = Organization.objects.create(
+        name="test 2", type=ot, created_on=timezone.now(), country="NL", is_dead=True
+    )
+    organization2.layers.add(ot)
+    url3 = Url.objects.create(url="connected_to_dead_organization.com", is_dead=False, not_resolvable=False)
+    url3.organization.add(organization)
+
+
+@pytest.mark.override_config(INTERNET_NL_WEB_ONLY_TOP_LEVEL=False)
+def test_internet_nl_v2_web_filter_scan_web_enabled(setup_test_internet_nl_v2_web_filter_scan):
+    # switching override config in a testcase is not possible it seems. So test split up between cases.
+    urls = internet_nl_v2_web_filter_scan()
+    assert sorted([u.url for u in urls]) == sorted(["google.com", "subdomain.google.com"])
+
+
+@pytest.mark.override_config(INTERNET_NL_WEB_ONLY_TOP_LEVEL=True)
+def test_internet_nl_v2_web_filter_scan_web_disabled(setup_test_internet_nl_v2_web_filter_scan):
+    urls = internet_nl_v2_web_filter_scan()
+    assert len(urls) == 1
+    assert urls[0].url == "google.com"

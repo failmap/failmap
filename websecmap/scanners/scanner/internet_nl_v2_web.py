@@ -20,6 +20,7 @@ from websecmap.scanners.scanner.__init__ import (
     url_filters,
 )
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import initialize_scan
+from constance import config
 
 log = logging.getLogger(__name__)
 
@@ -32,6 +33,10 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
 
     endpoints_filter = {"is_dead": False, "protocol": "dns_a_aaaa"}
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
+
+    if config.INTERNET_NL_WEB_ONLY_TOP_LEVEL:
+        urls = urls.filter(computed_subdomain="")
+
     urls = urls.only("url")
 
     urls = unique_and_random(urls)
