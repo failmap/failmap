@@ -269,9 +269,7 @@ def request(activity: str, scanner: str, urls: List[int], origin: str = ""):
 
 def log_planned_scan_action(activity: str, scanner: str, url: int, state: str = "", origin: str = ""):
     log_item = PlannedScanLog()
-    log_item.line = (
-        f"Url: {url}, " f"Scanner: {activity}, " f"Activity: {scanner}, " f"State: {state}, " f"Origin: {origin}"
-    )[:255]
+    log_item.line = (f"Url: {url}, Activity: {activity}, Scanner: {scanner}, State: {state}, Origin: {origin}")[:255]
     log_item.save()
 
 
@@ -291,17 +289,17 @@ def already_requested(activity: str, scanner: int, url_id: int):
 @app.task(queue="storage", ignore_result=True)
 def finish(activity: str, scanner: str, url_id: int):
     metadata = get_backend_scanmetadata()
-    scanner = metadata["scanners_by_python_name"].get(scanner, None)
-    if not scanner:
-        log_planned_scan_action(activity=activity, scanner=scanner, url=url_id, state="finished (ignored)")
-        log.debug(f"Scanner {scanner} was not found, ignoring.")
+    py_scanner = metadata["scanners_by_python_name"].get(scanner, None)
+    if not py_scanner:
+        log_planned_scan_action(activity=activity, scanner=scanner, url=url_id, state="finished (no scanner)")
+        log.debug(f"Scanner {py_scanner} was not found, ignoring.")
+        return
 
-    set_scan_state(activity, scanner["id"], url_id, "finished")
-    log_planned_scan_action(activity=activity, scanner=scanner, url=url_id, state="finished")
+    set_scan_state(activity, py_scanner["id"], url_id, "finished", scanner_name=scanner)
     statsd.incr("scan_planned", tags={"state": "finished", "scanner": scanner, "activity": activity})
 
 
-def set_scan_state(activity: str, scanner_id: int, url_id: int, state="finished"):
+def set_scan_state(activity: str, scanner_id: int, url_id: int, state="finished", scanner_name=""):
     oldest_scan = (
         PlannedScan.objects.all()
         .filter(
@@ -317,10 +315,12 @@ def set_scan_state(activity: str, scanner_id: int, url_id: int, state="finished"
         oldest_scan.last_state_change_at = datetime.now(pytz.utc)
         oldest_scan.finished_at_when = datetime.now(pytz.utc)
         oldest_scan.save()
+        log_planned_scan_action(activity=activity, scanner=scanner_name, url=url_id, state="finished")
 
         log.debug("Altered planned scan state for %s. Changing it to %s with %s.", url_id, activity, scanner_id)
     else:
         log.debug("No planned scan found for %s. Ignored.", url_id)
+        log_planned_scan_action(activity=activity, scanner=scanner_name, url=url_id, state="finished (unplanned)")
 
 
 @app.task(queue="storage", ignore_result=True)

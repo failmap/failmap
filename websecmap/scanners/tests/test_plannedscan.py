@@ -15,6 +15,7 @@ from websecmap.scanners.models import (
     State,
     Scanner,
     FollowUpScan,
+    PlannedScanLog,
 )
 from websecmap.scanners.plannedscan import (
     calculate_progress,
@@ -161,6 +162,11 @@ def test_plannedscan(db, default_scan_metadata):
     assert get_latest_progress() == calculate_progress()
     assert PlannedScanStatistic.objects.count() == 3
     assert old_progress != get_latest_progress()
+
+    # See if there are loglines:
+    loglines = PlannedScanLog.objects.all()
+    assert len(loglines) == 8
+    assert loglines[0].line == "Url: example.com, Activity: scan, Scanner: tls_qualys, State: requested, Origin: "
 
 
 def test_plan_scans(db, default_scan_metadata):

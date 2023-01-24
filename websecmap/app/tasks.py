@@ -5,7 +5,13 @@ import pytz
 
 from websecmap.app.models import create_job, Job  # noqa  # pylint: disable=unused-import
 from websecmap.organizations.models import Dataset
-from websecmap.scanners.models import TlsQualysScratchpad, PlannedScan, PlannedScanStatistic, InternetNLV2Scan
+from websecmap.scanners.models import (
+    TlsQualysScratchpad,
+    PlannedScan,
+    PlannedScanStatistic,
+    InternetNLV2Scan,
+    PlannedScanLog,
+)
 from websecmap.api.models import SIDNUpload
 from websecmap.celery import app
 
@@ -37,6 +43,10 @@ def clean_application_caches_and_logs(retention_days: int = 30):
         {
             "model": PlannedScan,
             "time_column": "requested_at_when",
+        },
+        {
+            "model": PlannedScanLog,
+            "time_column": "at_when",
         },
         {
             "model": PlannedScanStatistic,
