@@ -1,39 +1,11 @@
 import logging
 
 from websecmap.app.management.commands._private import ScannerTaskCommand
-from websecmap.scanners.scanner import (
-    dns_clean_wildcards,
-    dnssec,
-    dummy,
-    ftp,
-    internet_nl_v2_mail,
-    internet_nl_v2_web,
-    onboard,
-    plain_http,
-    screenshot,
-    security_headers,
-    tls_qualys,
-    bannergrab_nmap,
-    web_privacy,
-)
+from websecmap.scanners import tasks
 
 log = logging.getLogger(__name__)
 
-scanners = {
-    "onboard": onboard,
-    "dummy": dummy,
-    "dnssec": dnssec,
-    "security_headers": security_headers,
-    "plain_http": plain_http,
-    "tls_qualys": tls_qualys,
-    "ftp": ftp,
-    "internet_nl_v2_mail": internet_nl_v2_mail,
-    "screenshot": screenshot,
-    "internet_nl_v2_web": internet_nl_v2_web,
-    "dns_clean_wildcards": dns_clean_wildcards,
-    "bannergrab_nmap": bannergrab_nmap,
-    "web_privacy": web_privacy,
-}
+scanners = {x.__name__.split(".")[-1]: x for x in tasks.__scanners__ if hasattr(x, "compose_manual_scan_task")}
 
 
 class Command(ScannerTaskCommand):
