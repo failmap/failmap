@@ -1088,12 +1088,12 @@ CONSTANCE_CONFIG = {
         bool,
     ),
     "WEB_PRIVACY_DATABASE_LOCATION": (
-        "crawl-data.sqlite",
+        os.environ.get("WEB_PRIVACY_DATABASE_LOCATION", "crawl-data.sqlite"),
         "Location where openwpm stores their glorious browsing data.",
         str,
     ),
     "WEB_PRIVACY_SERVER": (
-        "http://localhost:31337",
+        os.environ.get("WEB_PRIVACY_SERVER", "http://localhost:31337"),
         "Where to talk to the openwpm container.",
         str,
     ),

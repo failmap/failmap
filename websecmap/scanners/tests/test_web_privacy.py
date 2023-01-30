@@ -42,7 +42,7 @@ def test_get_tracker_info():
     }
 
 
-def test_get_all_third_party_requests(current_path, db):
+def test_get_all_third_party_requests(settings, current_path, db):
     db_location = f"{current_path}/websecmap/scanners/tests/web_privacy/crawl-data.sqlite"
 
     with override_config(WEB_PRIVACY_DATABASE_LOCATION=db_location):
