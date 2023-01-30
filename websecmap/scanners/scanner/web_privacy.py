@@ -197,7 +197,7 @@ def store(endpoint_id: int):
     )
 
     # happens a lot, due to easiest path of development / culture
-    web_third_party_rating = WEB_PRIVACY_THIRD_PARTY_FOUND if known_trackers else WEB_PRIVACY_THIRD_PARTY_OK
+    web_third_party_rating = WEB_PRIVACY_THIRD_PARTY_FOUND if third_party_requests else WEB_PRIVACY_THIRD_PARTY_OK
     store_endpoint_scan_result(
         WEB_PRIVACY_THIRD_PARTY_REQUESTS,
         endpoint_id,
