@@ -105,7 +105,7 @@ def scan_and_store(url_ids: List[int]):
         store(ep.id)
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="openwpm", ignore_result=True)
 def scan(url_ids: List[int]):
     # Just scan, and separate storing the results to the store method. This allows for individual tasks to be run
 

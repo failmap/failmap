@@ -39,6 +39,7 @@ ROLES_REQUIRING_IPV4 = [
     "v4_internet",
     "default_ipv4",
     "qualys",  # only supports ipv4(!)
+    "openwpm",
 ]
 
 ROLES_REQUIRING_NO_NETWORK = [
@@ -175,6 +176,9 @@ QUEUES_MATCHING_ROLES = {
     ],
     "bannergrab": [
         Queue("bannergrab"),
+    ],
+    "openwpm": [
+        Queue("openwpm"),
     ],
 }
 
