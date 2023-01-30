@@ -1087,6 +1087,16 @@ CONSTANCE_CONFIG = {
         "Do not send in subdomains. To reduce the number of tests while still getting an impression on a broader scope",
         bool,
     ),
+    "WEB_PRIVACY_DATABASE_LOCATION": (
+        "crawl-data.sqlite",
+        "Location where openwpm stores their glorious browsing data.",
+        str,
+    ),
+    "WEB_PRIVACY_SERVER": (
+        "http://localhost:31337",
+        "Where to talk to the openwpm container.",
+        str,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1263,6 +1273,10 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         (
             "Portscanning",
             ("PORTSCAN_SHOULD_BE_INTERNAL_PORTS",),
+        ),
+        (
+            "Web Privacy",
+            ("WEB_PRIVACY_DATABASE_LOCATION", "WEB_PRIVACY_SERVER"),
         ),
         (
             "Plus",
