@@ -1,10 +1,11 @@
 import json
+import os
 from typing import List, Dict
 
 from websecmap.reporting import time_cache
 
 
-PRIVACY_DISCONNECTME_ENTITIES_FILE = "websecmap/scanners/scanner/web_privacy_resources/disconnectme/services.json"
+PRIVACY_DISCONNECTME_ENTITIES_FILE = f"{os.path.abspath(os.path.dirname(__file__))}/disconnectme/services.json"
 
 
 def get_known_trackers_from_urls(urls: List[str]):
