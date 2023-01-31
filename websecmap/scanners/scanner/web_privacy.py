@@ -263,7 +263,9 @@ def import_scan_result_database_async():
 
         # filter to the set we want to tailor for.
         protocol = "https" if "https" in top_level_url else "http"
-        endpoint = Endpoint.objects.all().filter(url=url, protocol=protocol, ip_version=4, port=443).first()
+        endpoint = (
+            Endpoint.objects.all().filter(url=url, protocol=protocol, ip_version=4, port=443, is_dead=False).first()
+        )
         if not endpoint:
             log.debug("- No endpoint found for: %s://%s on port 443, ipv4", protocol, domain)
             continue
