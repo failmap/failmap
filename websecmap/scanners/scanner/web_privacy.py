@@ -100,13 +100,13 @@ def scan_and_store(url_ids: List[int]):
     | plannedscan.finish.si("scan", SCANNER_NAME, url.pk)
     """
     # get the endpoints that can be scanned:
-    endpoints_to_scan = scan(url_ids)
-    for ep in endpoints_to_scan:
-        store(ep.id)
+    endpoints_to_scan_ids = scan(url_ids)
+    for ep_id in endpoints_to_scan_ids:
+        store(ep_id)
 
 
 @app.task(queue="openwpm", ignore_result=True)
-def scan(url_ids: List[int]):
+def scan(url_ids: List[int]) -> List[int]:
     # Just scan, and separate storing the results to the store method. This allows for individual tasks to be run
 
     # get the endpoints that can be scanned:
@@ -116,29 +116,28 @@ def scan(url_ids: List[int]):
             endpoints_to_scan.append(eps[0])
 
     fqdn_urls = [f"{ep.protocol}://{ep.url.url}/" for ep in endpoints_to_scan]
-    # "http://localhost:31337"
     requests.post(constance_cached_value("WEB_PRIVACY_SERVER"), json={"sites": fqdn_urls}).json()
-    return endpoints_to_scan
+    return [ep.id for ep in endpoints_to_scan]
 
 
-def check_administration(url_id):
+def check_administration(url_id: int) -> List[Endpoint]:
     # administration:
     url = Url.objects.filter(pk=url_id, is_dead=False, not_resolvable=False).first()
     if not url:
         log.debug("Privacy scan could not start, url not found in database or not alive/resolvable.")
         plannedscan.finish("scan", SCANNER_NAME, url_id)
-        return False
+        return []
 
     eps, urls_without_eps = retrieve_endpoints_from_urls(urls=[url], protocols=["https"], ports=[443], ip_versions=[4])
     if urls_without_eps:
         log.debug("Privacy scan could not start, no endpoints that match our criteria exist.")
         plannedscan.finish("scan", SCANNER_NAME, url_id)
-        return False
+        return []
 
     return eps
 
 
-def latest_visit_id(url: str):
+def latest_visit_id(url: str) -> Dict[str, int]:
     # todo: we should look at the http_redirects table as well
     log.debug("Looking at the latest visit for: %s", url)
     # latest_visit_id url expects a slash on the end, include a protocol...
@@ -156,7 +155,7 @@ def latest_visit_id(url: str):
 
 
 @app.task(queue="storage", ignore_result=True)
-def store(endpoint_id: int):
+def store(endpoint_id: int) -> None:
     """
     https://openwpm.readthedocs.io/en/latest/Schema-Documentation.html
 
