@@ -227,7 +227,9 @@ def get_top_level_domains_from_database():
 
     db = NinetiesDatabase()
     # Only get stuff from the last 7 days.
-    return db.rows(sql, [timezone.now() - timedelta(days=7), timezone.now()])
+    # Sqlite does not understand dates, but since it's iso you can sort of filter "per day". Therefore we add 1 day
+    # so the stuff from "today" is retrieved. (everything less than tomorrow.
+    return db.rows(sql, [timezone.now() - timedelta(days=7), timezone.now() + timedelta(days=1)])
 
 
 @app.task(queue="storage", ignore_result=True)
@@ -311,7 +313,7 @@ class NinetiesDatabase:
         if not db_location:
             db_location = constance_cached_value("WEB_PRIVACY_DATABASE_LOCATION")
 
-        self.conn = sqlite3.connect(db_location)
+        self.conn = sqlite3.connect(db_location, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 
         def dict_factory(cursor, row):
             fields = [column[0] for column in cursor.description]
