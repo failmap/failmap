@@ -6,10 +6,6 @@ https://openwpm.readthedocs.io/en/latest/Schema-Documentation.html
 Thanks to:
 - https://codeberg.org/dataskydd.net/
 - https://github.com/PrivacyScore/privacyscanner/tree/whotracksme/privacyscanner/scanmodules
-
-docker build -f Dockerfile -t openwpm . --platform linux/amd64
-mkdir -p docker-volume && docker run -v $PWD/docker-volume:/opt/OpenWPM/datadir --shm-size=2g -it openwpm bash
-
 """
 from datetime import timedelta
 from typing import List, Dict, Any, Tuple
@@ -306,13 +302,13 @@ class NinetiesDatabase:
     def __init__(self, db_location: str = None):
         # make it easier for testing
         if not db_location:
-            self.conn = sqlite3.connect(constance_cached_value("WEB_PRIVACY_DATABASE_LOCATION"))
-        else:
-            self.conn = sqlite3.connect(db_location)
+            db_location = constance_cached_value("WEB_PRIVACY_DATABASE_LOCATION")
+
+        self.conn = sqlite3.connect(db_location)
 
         def dict_factory(cursor, row):
             fields = [column[0] for column in cursor.description]
-            return {key: value for key, value in zip(fields, row)}
+            return dict(zip(fields, row))
 
         self.conn.row_factory = dict_factory
 
@@ -320,11 +316,7 @@ class NinetiesDatabase:
         cur = self.conn.cursor()
         cur.execute(query, params)
 
-        data = cur.fetchone()
-        if data is None:
-            return None
-
-        return data
+        return cur.fetchone()
 
     def rows(self, query: str, params: List[Any]) -> List[Dict[str, Any]]:
         cur = self.conn.cursor()
