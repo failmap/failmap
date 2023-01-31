@@ -207,7 +207,8 @@ def store(endpoint_id: int) -> None:
         evidence="\n".join(third_party_requests),
     )
 
-    plannedscan.finish.si("scan", SCANNER_NAME, endpoint.url.id)
+    # Don't finish a scan here, as this might be an older result from an older scan on the same endpoint etc.
+    # plannedscan.finish.si("scan", SCANNER_NAME, endpoint.url.id)
 
 
 def get_top_level_domains_from_database():
