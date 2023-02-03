@@ -182,7 +182,7 @@ class Coordinate(models.Model):
     # Note that points are stored in lng, lat format
     # https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
     area = JSONField(
-        max_length=10000,
+        max_length=14000,
         blank=True,
         help_text="GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to "
         "reduce the amount of data to transfer. Editing both this and the edit_area, this will take "
@@ -203,7 +203,7 @@ class Coordinate(models.Model):
     )
 
     edit_area = JSONField(
-        max_length=10000,
+        max_length=14000,
         null=True,
         blank=True,
         help_text="The results of this field are saved in the area and geojsontype. It's possible to edit the area"
