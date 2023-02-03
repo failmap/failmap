@@ -7,18 +7,27 @@ import jsonfield.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0068_alter_organization_alternative_names'),
+        ("organizations", "0068_alter_organization_alternative_names"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='coordinate',
-            name='area',
-            field=jsonfield.fields.JSONField(blank=True, help_text='GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to reduce the amount of data to transfer. Editing both this and the edit_area, this will take preference.', max_length=14000),
+            model_name="coordinate",
+            name="area",
+            field=jsonfield.fields.JSONField(
+                blank=True,
+                help_text="GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to reduce the amount of data to transfer. Editing both this and the edit_area, this will take preference.",
+                max_length=14000,
+            ),
         ),
         migrations.AlterField(
-            model_name='coordinate',
-            name='edit_area',
-            field=jsonfield.fields.JSONField(blank=True, help_text="The results of this field are saved in the area and geojsontype. It's possible to edit the area field directly, which overwrites this field. Changing both the manual option takes preference.", max_length=14000, null=True),
+            model_name="coordinate",
+            name="edit_area",
+            field=jsonfield.fields.JSONField(
+                blank=True,
+                help_text="The results of this field are saved in the area and geojsontype. It's possible to edit the area field directly, which overwrites this field. Changing both the manual option takes preference.",
+                max_length=14000,
+                null=True,
+            ),
         ),
     ]
