@@ -5,7 +5,6 @@ import pytz
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from websecmap.map.logic.openstreetmap import update_coordinates
 from websecmap.organizations.adminstrative_transformations import add_url_to_new_organization, merge, dissolve
 from websecmap.organizations.models import Organization
 
@@ -28,14 +27,15 @@ class Command(BaseCommand):
 @transaction.atomic
 def merge_nl_municipalities_2023():
 
-    if not Organization.objects.all().filter(name="Voorne aan Zee").exists():
+    new = "Gemeente Voorne aan Zee"
+    if not Organization.objects.all().filter(name=new).exists():
         print("gemeenten Brielle, Hellevoetsluis en Westvoorne: samenvoeging tot een nieuwe gemeente Voorne aan Zee.")
         merge(
             source_organizations_names=["Gemeente Brielle", "Gemeente Hellevoetsluis", "Gemeente Westvoorne"],
-            target_organization_name="Gemeente Voorne aan Zee",
+            target_organization_name=new,
             **opts
         )
-        add_url_to_new_organization("NL", "municipality", "Voorne aan Zee", "voorneaanzee.nl", merge_date)
+        add_url_to_new_organization("NL", "municipality", new, "voorneaanzee.nl", merge_date)
 
     dissolve(
         dissolved_organization_name="Gemeente Weesp",
@@ -44,5 +44,3 @@ def merge_nl_municipalities_2023():
         organization_type="municipality",
         country="NL",
     )
-
-    update_coordinates(countries=["NL"], organization_types=["municipality"], when=merge_date)
