@@ -101,7 +101,8 @@ def start_scanner(ips, ports):
     # -v: Increase verbosity level (use -vv or more for greater effect)
     # --script banner: https://nmap.org/nsedoc/scripts/banner.html
     # "If you are on a decent broadband or ethernet connection, I would recommend always using -T4" = aggressive
-    nm.scan(ip_argument, ports, arguments="-sV --host-timeout=5m -T aggressive --script=banner")
+    # T4 results in tcpwrapped responses too much it seems, so slow down and go to T3 instead of T4.
+    nm.scan(ip_argument, ports, arguments="-sV --host-timeout=5m -T3 --script=banner")
     log.debug(nm.command_line())
     log.debug(nm.scaninfo())
     return nm
@@ -275,6 +276,13 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
     }
     """
     protocol = reduce_protcol(result.get("name", "http"))
+
+    if protocol in ["tcpwrapped"]:
+        # tcpwrapped happens when a server drops a connection. In this case it is not clear what
+        # protocol is answering in the standard port. Do not store this as a separate protocol result.
+        # Tcpwrapped means there will be no data returned and no banner...
+        # If this happens too much the intensity of scans needs to be reduced.
+        return
 
     with contextlib.suppress(ValueError):
         confidence = int(result["conf"])
