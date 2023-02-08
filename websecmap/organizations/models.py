@@ -518,7 +518,11 @@ class Url(models.Model):
                 "IP Addresses are not valid at this moment."
             )
 
-        existing_url = Url.objects.all().filter(url=url, is_dead=False).first()
+        # it does not matter if the url is dead or not: if it is in the database, do not add it again.
+        # We don't do url lifecycles, they are either alive or dead. Who owns them when is a different story.
+        # when we set an url as dead, it will stay in the database in order to make sure it is not added via
+        # another datasource again.
+        existing_url = Url.objects.all().filter(url=url).first()
         if not existing_url:
             new_url = Url(url=url)
             new_url.created_on = datetime.now(pytz.utc)
