@@ -69,6 +69,7 @@ STANDARD_HTTP_PORTS = [80, 8008, 8080]
 STANDARD_HTTPS_PORTS = [443, 8443]
 
 # make sure ALL the ports in preferred port order map to a protocol
+# running tls over non standard ports makes more sense...
 PORT_TO_PROTOCOL = {80: "http", 8008: "http", 8080: "http", 443: "https", 8443: "https"}
 
 PREFERRED_PORT_ORDER = [443, 80, 8443, 8080, 8008]

@@ -97,18 +97,32 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     # We only perform an IN query, and need nothing of these urls except the ID:
     urls = urls.only("id")
 
-    # select endpoints to scan based on filters
-    endpoints = Endpoint.objects.filter(
+    # select endpoints to scan based on filters.
+    # use the right protocols, don't visit http://example.nl:443 for example, even though there might be
+    # a site there with a 'you issued a http request to an https site'.
+    https_endpoints = Endpoint.objects.filter(
         # apply filter to endpoints (or if no filter, all endpoints)
         url__in=urls,
         **endpoints_filter,
         # also apply mandatory filters to only select valid endpoints for this action
         is_dead=False,
-        protocol__in=["http", "https"],
+        protocol="https",
+        port__in=[443, 8443],
+    ).only("id", "port", "protocol", "ip_version", "url__id", "url__url")
+
+    http_endpoints = Endpoint.objects.filter(
+        # apply filter to endpoints (or if no filter, all endpoints)
+        url__in=urls,
+        **endpoints_filter,
+        # also apply mandatory filters to only select valid endpoints for this action
+        is_dead=False,
+        protocol="http",
+        # officially http, would guess it is https most of the time anyway. Let's determine it instead assume.
+        port__in=[80, 8080, 8008],
     ).only("id", "port", "protocol", "ip_version", "url__id", "url__url")
 
     # unique endpoints only
-    endpoints = unique_and_random(endpoints)
+    endpoints = unique_and_random(https_endpoints) + unique_and_random(http_endpoints)
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 

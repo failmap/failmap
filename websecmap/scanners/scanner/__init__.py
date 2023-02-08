@@ -1,7 +1,7 @@
 # Generic functions for scanners
 import logging
 import random
-from typing import List
+from typing import List, Any
 
 from constance import config
 from django.db.models import Q
@@ -247,7 +247,7 @@ def chunks2(my_list, chunk_size):
         yield my_list[i : i + chunk_size]
 
 
-def unique_and_random(items: List):
+def unique_and_random(items: List) -> List[Any]:
     items = list(set(items))
     random.shuffle(items)
     return items
