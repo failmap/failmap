@@ -156,12 +156,22 @@ def compose_manual_scan_task(
 
 
 def compose_scan_task(urls):
-    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
-    endpoints = unique_and_random(endpoints)
-    log.debug("Scanning security headers on %s endpoints, %s urls", len(endpoints), len(urls))
+    https_endpoints, https_urls_without_endpoints = retrieve_endpoints_from_urls(
+        urls, protocols=["https"], ports=[443, 8443]
+    )
+    https_endpoints = unique_and_random(https_endpoints)
+
+    http_endpoints, http_urls_without_endpoints = retrieve_endpoints_from_urls(
+        urls, protocols=["http"], ports=[80, 8080, 8008]
+    )
+    http_endpoints = unique_and_random(http_endpoints)
+
+    all_endpoints = http_endpoints + https_endpoints
+
+    log.debug("Scanning security headers on %s endpoints, %s urls", len(all_endpoints), len(urls))
 
     # remove urls that don't have the relevant endpoints anymore
-    for url_id in urls_without_endpoints:
+    for url_id in https_urls_without_endpoints + http_urls_without_endpoints:
         log.debug("Finishing scan on %s because there are no valid endpoints anymore.", url_id)
         plannedscan.finish("scan", "security_headers", url_id)
 
@@ -172,7 +182,7 @@ def compose_scan_task(urls):
             )
             | analyze_headers.s(endpoint.pk)
             | plannedscan.finish.si("scan", "security_headers", endpoint.url.pk)
-            for endpoint in endpoints
+            for endpoint in all_endpoints
         ]
     )
 
