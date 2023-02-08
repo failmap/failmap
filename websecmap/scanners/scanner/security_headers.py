@@ -347,6 +347,18 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
     X-Content-Type-Options is not affected.
     """
 
+    # A complex mess, we're not requiring it, but at least we can grade it low or ok if need be.
+    generic_check(endpoint_id, headers, "Content-Security-Policy")
+
+    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy
+    # This is based on an allowlist. Secure defaults?
+    generic_check(endpoint_id, headers, "Permissions-Policy")
+
+    # default since 2020 = strict-origin-when-cross-origin, which leaks data.
+    # The privacy friendly default should be same-origin or no-referrer. So this should be set to a privacy
+    # friendly level.
+    generic_check(endpoint_id, headers, "Referrer-Policy")
+
     # We've removed conditional scans in scannerss, as more scan data is better.
     # you can cohose not to display or report it. Below used to be conditional scans.
 
@@ -404,23 +416,25 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
     return {"status": "success"}
 
 
+def header_to_scan_type(header_name: str) -> str:
+    return f"http_security_header_{header_name.lower().replace('-', '_')}"
+
+
 def generic_check(endpoint_id: int, headers, header):
     # this is case insensitive
 
-    scan_type = f"http_security_header_{header.lower().replace('-', '_')}"
+    scan_type = header_to_scan_type(header)
 
     if header in headers.keys():
-        log.debug("Has %s", header)
         store_endpoint_scan_result(
             scan_type=scan_type,
             endpoint_id=endpoint_id,
             rating="present",
-            message=headers[header],
+            message="present",
             evidence=headers[header],
         )
     else:
-        log.debug("Has no %s", header)
-        store_endpoint_scan_result(scan_type, endpoint_id, "missing", f"Security Header not present: {header}")
+        store_endpoint_scan_result(scan_type, endpoint_id, "missing", "missing")
 
 
 def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
@@ -521,7 +535,9 @@ def get_headers_timed(uri_url: str, host: str) -> Union[Dict, bool]:
             allow_redirects=True,
             verify=False,  # nosec TLS does not have to be valid in this test, only headers do.
             stream=True,  # don't read the message body unless it is required
-            headers=create_standard_request_headers(host),
+            # Redirects are allowed, so don't set the host header because that is set between requests
+            # and a redirected server will not understand that response.
+            headers=create_standard_request_headers(),
         )
 
         # do not raise for status, the error pages should also set headers correctly.

@@ -432,6 +432,7 @@ def request_via_ip(uri, url) -> Dict[str, str]:
         allow_redirects=False,  # redirect = connection
         verify=False,  # nosec any tls = connection
         stream=True,  # don't read the message body unless it is required
+        # no redirect, so setting the host is ok
         headers=create_standard_request_headers(url),
     )
 
@@ -457,6 +458,7 @@ def request_via_hostname(protocol, url, port) -> Dict[str, str]:
         allow_redirects=False,
         verify=False,
         stream=True,  # don't read the message body unless it is required
+        # no redirect, so setting the host is ok
         headers=create_standard_request_headers(url),
     )
 
@@ -477,9 +479,8 @@ def build_uri_from_components(protocol: str, url: str, port: int, ip_version: in
         return f"{protocol}://[{ip_address}]:{port}" if ip_address else None
 
 
-def create_standard_request_headers(url: str) -> Dict[str, str]:
-    return {
-        "Host": url,
+def create_standard_request_headers(url: str = "") -> Dict[str, str]:
+    data = {
         "User-Agent": get_random_user_agent(),
         # some headers to make this look like a browser request, some domains otherwise just
         # refuse to serve:
@@ -492,6 +493,13 @@ def create_standard_request_headers(url: str) -> Dict[str, str]:
         "Pragma": "no-cache",
         "Cache-Control": "no-cache",
     }
+
+    # Following redirects with host set will cause issues. The host will be set to the redirect and
+    # the receiver will say that it's wrong. So only set the host if there is no redirect.
+    if url:
+        data["Host"] = url
+
+    return data
 
 
 def has_acceptable_error(strerror: str) -> bool:

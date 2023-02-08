@@ -1,8 +1,16 @@
 """Integration tests of scanner commands."""
 
 import json
+from datetime import datetime
 
+import pytz
 from django.core.management import call_command
+
+from websecmap.organizations.models import Url
+from websecmap.scanners.models import Endpoint, EndpointGenericScan
+from websecmap.scanners.scanner.security_headers import analyze_website_headers
+from requests.structures import CaseInsensitiveDict
+
 
 SECURITY_HEADERS = {
     "X-XSS-Protection": "1",
@@ -50,3 +58,52 @@ def test_security_headers_failure(responses, db, faaloniae, default_scan_metadat
     result = json.loads(call_command("scan", "security_headers", "-v3", "-o", TEST_ORGANIZATION))
     print(result)
     assert result[0] is None
+
+
+def test_analyze_website_headers(db):
+    u = Url.objects.create(url="basisbeveiliging.nl")
+    ep = Endpoint.objects.create(
+        **{
+            "protocol": "https",
+            "port": 443,
+            "ip_version": 4,
+            "is_dead": False,
+            "url": u,
+            "discovered_on": datetime(2021, 7, 1, tzinfo=pytz.utc),
+        }
+    )
+
+    analyze_website_headers(ep.id, u.id, "https", {})
+    analyze_website_headers(ep.id, u.id, "https", {})
+    analyze_website_headers(ep.id, u.id, "https", {})
+    # all six headers missing
+    assert EndpointGenericScan.objects.all().count() == 6
+
+    headers = CaseInsensitiveDict(
+        {
+            "Content-Length": "2976",
+            "Content-Type": "text/html; charset=utf-8",
+            "Date": "Wed, 08 Feb 2023 14:24:00 GMT",
+            "Access-Control-Expose-Headers": "Request-Context",
+            "Cache-Control": "private",
+            "Content-Encoding": "gzip",
+            "Vary": "Accept-Encoding",
+            "P3P": 'CP="CAO COR CURa ADMa DEVa OUR IND ONL COM DEM PRE"',
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",
+            "ReFeRrer-Policy": "no-referrer-when-downgrade",
+            "CoNteNt-Security-Policy": "default-src * data: 'unsafe-inline' 'unsafe-hashes' 'unsafe-eval'",
+            "STRICT-Transport-Security": "max-age=63072000; includeSubDomains;",
+            "permissions-Policy": "camera=(self), fullscreen=(self), usb=*",
+        }
+    )
+    analyze_website_headers(ep.id, u.id, "https", headers)
+    analyze_website_headers(ep.id, u.id, "https", headers)
+    analyze_website_headers(ep.id, u.id, "https", headers)
+
+    # all six present :)
+    assert EndpointGenericScan.objects.all().count() == 12
+
+    # all six gone again:
+    analyze_website_headers(ep.id, u.id, "https", {})
+    assert EndpointGenericScan.objects.all().count() == 18
