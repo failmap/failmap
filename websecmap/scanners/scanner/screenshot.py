@@ -114,7 +114,7 @@ def compose_scan_task(urls):
             | save_screenshot.s(endpoint.id)
             | plannedscan.finish.si(SCANNER_ACTION, SCANNER_NAME, endpoint.url.pk)
             for endpoint in endpoints
-            if endpoint.ip_version == 4
+            if endpoint.ip_version in [4, 0]
         ]
     if v6_service:
         tasks += [
@@ -124,7 +124,7 @@ def compose_scan_task(urls):
             | plannedscan.finish.si(SCANNER_ACTION, SCANNER_NAME, endpoint.url.pk)
             for endpoint in endpoints
             # For v6 you may also scan dns_a_aaaa to see if there is a site at the v6 address.
-            if endpoint.ip_version in [6, 0]
+            if endpoint.ip_version in [6]
         ]
 
     return group(tasks)
