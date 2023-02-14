@@ -24,7 +24,7 @@ class Command(BaseCommand):
         with transaction.atomic():
 
             # prevent running this twice:
-            if Organization.objects.all().filter(name="Eemsdelta").exists():
+            if Organization.objects.all().filter(name="Gemeente Eemsdelta").exists():
                 raise EnvironmentError("Eemsdelta already exists, this migration was probably run already.")
 
             merge_date = datetime(year=2021, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
@@ -33,12 +33,13 @@ class Command(BaseCommand):
             De gemeenten Appingedam, Delfzijl en Loppersum: samenvoeging tot een nieuwe gemeente Eemsdelta.[24]
             """
             merge(
-                source_organizations_names=["Appingedam", "Delfzijl", "Loppersum"],
-                target_organization_name="Eemsdelta",
+                source_organizations_names=["Gemeente Appingedam", "Gemeente Delfzijl", "Gemeente Loppersum"],
+                target_organization_name="Gemeente Eemsdelta",
                 when=merge_date,
                 organization_type="municipality",
                 country="NL",
             )
+            add_url_to_new_organization("NL", "municipality", "Gemeente Eemsdelta", "eemsdelta.nl", merge_date)
 
             """
             Opheffing van de gemeente Haaren en opdeling over de gemeenten Boxtel, Oisterwijk, Vught en Tilburg.[25]
@@ -59,9 +60,6 @@ class Command(BaseCommand):
 
             # Create new reports that point to these new coordinates.
             rebuild_reports(["Eemsdelta", "Boxtel", "Oisterwijk", "Vucht", "Tilburg"])
-
-            # Add the urls for the new organizations, will be onboarded automatically.
-            add_url_to_new_organization("NL", "municipality", "Eemsdelta", "eemsdelta.nl", merge_date)
 
 
 def rebuild_reports(organizations: List[str]):

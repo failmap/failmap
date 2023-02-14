@@ -474,10 +474,14 @@ class PlannedScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "finished_at_when",
         "origin",
     )
-    search_fields = ("url__url", "activity", "scanner", "state")
+    search_fields = ("url__url",)
     list_filter = ["activity", "scanner", "state", "last_state_change_at", "requested_at_when", "finished_at_when"][
         ::-1
     ]
+
+    # url makes the edit page slow as it is not loaded async.
+    readonly_fields = ["url"]
+
     fields = (
         "url",
         "activity",

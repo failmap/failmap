@@ -98,7 +98,7 @@ def compose_scan_task(urls):
 
     # remove urls that don't have the relevant endpoints anymore
     for url_id in urls_without_endpoints:
-        plannedscan.finish("scan", SCANNER_NAME, url_id)
+        plannedscan.finish(SCANNER_ACTION, SCANNER_NAME, url_id)
 
     # prevent constance from looking up the value constantly:
     v4_service = config.SCREENSHOT_API_URL_V4
