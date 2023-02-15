@@ -41,6 +41,12 @@ COPY tools/docker-install-dnscheck.sh /tools/docker-install-dnscheck.sh
 RUN tools/docker-install-dnscheck.sh
 COPY tools/dnssec.pl /tools/dnssec.pl
 
+FROM golang:${GOLANG_VERSION} AS nuclei
+
+# import variable
+ARG NUCLEI_VERSION
+
+RUN go install -v "github.com/projectdiscovery/nuclei/v2/cmd/nuclei@v${NUCLEI_VERSION}"
 
 # restart with a clean image
 FROM python:${PYTHON_VERSION} AS release
@@ -74,6 +80,10 @@ RUN apt-get update && apt-get install -yqq \
   liblist-moreutils-perl \
   libyaml-perl \
   libjson-xs-perl \
+  # nuclei dependencies
+  chromium \
+  ca-certificates \
+  dnsutils \
   && rm -rf /var/lib/apt/lists/*
 
 ENV VIRTUAL_ENV = /pyenv
@@ -84,6 +94,10 @@ RUN ln -s /pyenv/bin/websecmap /usr/local/bin/
 RUN ln -s /pyenv/bin/uwsgi /usr/local/bin/
 RUN ln -s /pyenv/bin/celery /usr/local/bin/
 RUN ln -s /pyenv/bin/dnssec.pl /usr/local/bin/
+
+COPY --from=nuclei /go/bin/nuclei /usr/local/bin/nuclei
+
+RUN /usr/local/bin/nuclei --update-templates
 
 # copy artifacts from dnscheck build
 COPY --from=dnscheck /usr/local/share/perl /usr/local/share/perl
@@ -130,3 +144,4 @@ FROM release AS selftest
 
 RUN websecmap
 RUN dnssec.pl 2>&1 | grep usage:
+RUN nuclei --help
