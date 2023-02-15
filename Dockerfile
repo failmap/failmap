@@ -97,7 +97,9 @@ RUN ln -s /pyenv/bin/dnssec.pl /usr/local/bin/
 
 COPY --from=nuclei /go/bin/nuclei /usr/local/bin/nuclei
 
-RUN /usr/local/bin/nuclei --update-templates
+USER nobody:nogroup
+RUN /usr/local/bin/nuclei -config-directory /tmp -update-template-dir /tmp -update-templates
+USER root
 
 # copy artifacts from dnscheck build
 COPY --from=dnscheck /usr/local/share/perl /usr/local/share/perl
@@ -132,6 +134,8 @@ RUN /pyenv/bin/websecmap collectstatic
 
 EXPOSE 8000
 
+USER nobody:nogroup
+
 # Todo: add working healthcheck, should be depending on role of the worker what healthy means.
 # All containers report as being unhealthy. Localhost:8000 is not running anything. Nor is 80.
 # HEALTHCHECK CMD curl --silent --fail http://localhost:8000/ || exit 1
@@ -142,6 +146,8 @@ CMD [ "help" ]
 
 FROM release AS selftest
 
+USER nobody:nogroup
+
 RUN websecmap
 RUN dnssec.pl 2>&1 | grep usage:
-RUN nuclei --help
+RUN nuclei -config-directory /tmp -disable-update-check
