@@ -1,5 +1,10 @@
+ARG PYTHON_VERSION=3.10
+ARG NUCLEI_VERSION=2.8.9
+ARG GOLANG_VERSION=1.20
+ARG VERSION=0.0.0+dev0
+
 # create Python virtualenv with Python dependencies
-FROM python:3.10 AS virtualenv
+FROM python:${PYTHON_VERSION} AS virtualenv
 
 RUN python3 -mvenv /pyenv
 ENV VIRTUAL_ENV = /pyenv
@@ -20,12 +25,11 @@ COPY tools/ /source/tools/
 COPY websecmap/ /source/websecmap/
 WORKDIR /source
 
-ARG VERSION=0.0.0+dev0
 RUN echo "VERSION='$VERSION'" >> /source/websecmap/__version__.py
 
 RUN pip install --editable . --no-deps
 
-FROM python:3.10 AS dnscheck
+FROM python:${PYTHON_VERSION} AS dnscheck
 
 RUN apt-get update && apt-get install -yqq \
   perl \
@@ -39,7 +43,7 @@ COPY tools/dnssec.pl /tools/dnssec.pl
 
 
 # restart with a clean image
-FROM python:3.10 AS release
+FROM python:${PYTHON_VERSION} AS release
 
 USER root
 
