@@ -157,7 +157,10 @@ def scan(urls: List[str]) -> bin:
         "-silent",
         # shared config dir:
         "-config-directory",
-        "/tmp",
+        "/tmp/nuclei",
+        # follow docker image layout
+        "-update-template-dir",
+        "/tmp/nuclei-templates",
         # do not scan redundant stuff that we already get elsewhere
         "-exclude-id",
         ",".join(set(REDUNDANT_TEMPLATES + disabled_templates)),
