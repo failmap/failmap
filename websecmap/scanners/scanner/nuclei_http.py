@@ -155,6 +155,9 @@ def scan(urls: List[str]) -> bin:
         "-disable-update-check",
         # no need to see a header
         "-silent",
+        # shared config dir:
+        "-config-directory",
+        "/tmp",
         # do not scan redundant stuff that we already get elsewhere
         "-exclude-id",
         ",".join(set(REDUNDANT_TEMPLATES + disabled_templates)),
