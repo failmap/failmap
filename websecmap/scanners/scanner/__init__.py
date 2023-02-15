@@ -1,17 +1,28 @@
 # Generic functions for scanners
+import json
 import logging
 import random
+from json import JSONDecodeError
 from typing import List, Any
 
 from constance import config
 from django.db.models import Q
 
+from websecmap.app.constance import constance_cached_value
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, Scanner
 
 log = logging.getLogger(__name__)
+
+
+def constance_json_value(constance_variable_name):
+    try:
+        return json.loads(constance_cached_value(constance_variable_name))
+    except JSONDecodeError:
+        log.error("Could not parse the cached value for %s, is this valid JSON?", constance_variable_name)
+        return []
 
 
 def add_model_filter(queryset, **kwargs):

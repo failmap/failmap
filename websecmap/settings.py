@@ -372,7 +372,8 @@ LOGGING = {
         # We expect to be able to debug websecmap all of the time.
         "websecmap": {
             # prevent duplicate logging on workers as celery already adds a handler
-            "handlers": ["console"] if IS_WORKER else None,
+            # -> please use another approach, having app logging in non-worker context is important
+            "handlers": ["console"],  # if IS_WORKER else None,
             "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
         },
         # disable verbose task logging (ie: "received task...", "...succeeded in...")
@@ -1097,6 +1098,11 @@ CONSTANCE_CONFIG = {
         "Where to talk to the openwpm container.",
         str,
     ),
+    "NUCLEI_HTTP_DISABLED_TEMPLATES": (
+        '["security-txt", "robots-txt"]',
+        "A valid json list, with template-ids from nuclei that should not be run. See nuclei template repo.",
+        str,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1269,6 +1275,10 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "BANNERGRAB_STANDARD_PORTS",
                 "BANNERGRAB_PRODUCT_CONFIDENCE",
             ),
+        ),
+        (
+            "Nuclei HTTP Scanning",
+            ("NUCLEI_HTTP_DISABLED_TEMPLATES",),
         ),
         (
             "Portscanning",

@@ -162,6 +162,10 @@ class GenericTaskCommand(TaskCommand):
         )
 
         self.mutual_group.add_argument(
+            "-p", "--partially_matched_url_address", nargs="*", help="Perform scans on these urls (default is all)."
+        )
+
+        self.mutual_group.add_argument(
             "-y", "--organization_type", nargs="*", help="Perform scans on these organization types (default is all)."
         )
 
@@ -195,6 +199,11 @@ class GenericTaskCommand(TaskCommand):
         if options["country"]:
             # create a case-insensitive filter to match organizations by name
             organizations_filter = {"country__in": options["country"]}
+
+        if options["partially_matched_url_address"]:
+            # create a case-insensitive filter to match organizations by name
+            text = "".join(options["partially_matched_url_address"])
+            urls_filter = {"url__icontains": text}
 
         log.debug(
             "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s",
@@ -239,6 +248,10 @@ class ScannerTaskCommand(TaskCommand):
             "-c", "--country", nargs="*", help="Perform scans on these countries (default is all)."
         )
 
+        self.mutual_group.add_argument(
+            "-p", "--partially_matched_url_address", nargs="*", help="Perform scans on these urls (default is all)."
+        )
+
     def compose(self, *args, **options):
         """Compose set of tasks based on provided arguments."""
 
@@ -265,6 +278,11 @@ class ScannerTaskCommand(TaskCommand):
         if options["country"]:
             # create a case-insensitive filter to match organizations by name
             organizations_filter = {"country__in": options["country"]}
+
+        if options["partially_matched_url_address"]:
+            # create a case-insensitive filter to match organizations by name
+            text = "".join(options["partially_matched_url_address"])
+            urls_filter = {"url__icontains": text}
 
         log.debug(
             "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s",
