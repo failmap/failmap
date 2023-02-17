@@ -25,6 +25,9 @@ COPY tools/ /source/tools/
 COPY websecmap/ /source/websecmap/
 WORKDIR /source
 
+# import variable
+ARG VERSION
+
 RUN echo "VERSION='$VERSION'" >> /source/websecmap/__version__.py
 
 RUN pip install --editable . --no-deps
@@ -148,6 +151,6 @@ FROM release AS selftest
 
 USER nobody:nogroup
 
-RUN websecmap
+RUN websecmap --version | grep -E '[0-9]+\.[0-9]+\.[0-9]+'
 RUN dnssec.pl 2>&1 | grep usage:
 RUN nuclei -config-directory /tmp/nuclei -disable-update-check
