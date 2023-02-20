@@ -101,6 +101,7 @@ RUN ln -s /pyenv/bin/dnssec.pl /usr/local/bin/
 COPY --from=nuclei /go/bin/nuclei /usr/local/bin/nuclei
 
 USER nobody:nogroup
+RUN mkdir /tmp/nuclei /tmp/nuclei-templates
 RUN /usr/local/bin/nuclei -config-directory /tmp/nuclei -update-template-dir /tmp/nuclei-templates -update-templates
 USER root
 
