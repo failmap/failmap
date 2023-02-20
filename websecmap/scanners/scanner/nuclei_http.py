@@ -155,12 +155,6 @@ def scan(urls: List[str]) -> bin:
         "-disable-update-check",
         # no need to see a header
         "-silent",
-        # shared config dir:
-        "-config-directory",
-        "/tmp/nuclei",
-        # follow docker image layout
-        "-update-template-dir",
-        "/tmp/nuclei-templates",
         # do not scan redundant stuff that we already get elsewhere
         "-exclude-id",
         ",".join(set(REDUNDANT_TEMPLATES + disabled_templates)),
@@ -171,7 +165,7 @@ def scan(urls: List[str]) -> bin:
 
     log.debug("Starting nuclei scan with command: %s", command)
 
-    nuc = subprocess.Popen(command, stdout=subprocess.PIPE)
+    nuc = subprocess.Popen(command, stdout=subprocess.PIPE, env={"HOME": "/opt/nuclei"})
     output = nuc.communicate()
 
     # Data is returned in jsonl format, binary

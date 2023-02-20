@@ -100,9 +100,9 @@ RUN ln -s /pyenv/bin/dnssec.pl /usr/local/bin/
 
 COPY --from=nuclei /go/bin/nuclei /usr/local/bin/nuclei
 
+RUN install -o nobody -g nogroup -d /opt/nuclei
 USER nobody:nogroup
-RUN mkdir /tmp/nuclei /tmp/nuclei-templates
-RUN /usr/local/bin/nuclei -config-directory /tmp/nuclei -update-template-dir /tmp/nuclei-templates -update-templates
+RUN HOME=/opt/nuclei /usr/local/bin/nuclei -update-templates
 USER root
 
 # copy artifacts from dnscheck build
@@ -154,4 +154,4 @@ USER nobody:nogroup
 
 RUN websecmap --version | grep -E '[0-9]+\.[0-9]+\.[0-9]+'
 RUN dnssec.pl 2>&1 | grep usage:
-RUN nuclei -config-directory /tmp/nuclei -disable-update-check
+RUN HOME=/opt/nuclei nuclei -disable-update-check
