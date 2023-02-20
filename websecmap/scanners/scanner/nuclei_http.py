@@ -12,6 +12,7 @@ from websecmap.scanners.models import EndpointGenericScan, Endpoint
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner import allowed_to_scan, constance_json_value
 from websecmap.scanners.scanner.filter import merge_endpoints_filter, generic_plan_scan, filter_endpoints_only
+from websecmap.scanners.support import kwargs_to_params
 
 """
 DONE: Reduce amount of request, remove redundant scans of other tools (or remove other tools)
@@ -29,6 +30,7 @@ TODO: Add uncover integration to get free data from apis: this has a few challen
  of these venture backed (most cases) companies that might pivot or go bankrupt in a few years even while their service
  is excellent now.
 TODO: Remove even more useless templates and make results more easily understandandable / valuable.
+TODO: Add sub-scanners based on this scanner with just a set of templates, to lower the amount of requests.
 """
 
 
@@ -81,7 +83,7 @@ def plan_scan(**kwargs) -> None:
 def compose_planned_scan_task(**kwargs) -> group:
     # 25 matches the bulk size of nuclei
     urls = plannedscan.pickup(activity=SCANNER_ACTION, scanner=SCANNER_NAME, amount=kwargs.get("amount", 25))
-    return compose_scan_task(urls)
+    return compose_scan_task(urls, kwargs)
 
 
 def compose_manual_scan_task(
@@ -97,7 +99,7 @@ def compose_manual_scan_task(
     return compose_scan_task(urls[:10])
 
 
-def compose_scan_task(urls: List[Url]) -> group:
+def compose_scan_task(urls: List[Url], scanner_keyword_arguments: Dict[str, Any] = None) -> group:
     # make a mapping between endpoint_ids and urls that are being scanned...
     relevant_endpoints = Endpoint.objects.all().filter(url__in=urls, **STANDARD_ENDPOINT_FILTER)
 
@@ -111,7 +113,7 @@ def compose_scan_task(urls: List[Url]) -> group:
     log.debug("Scanning the following hosts: %s", hosts)
 
     return group(
-        scan.s(hosts)
+        scan.s(hosts, scanner_keyword_arguments)
         | store.s(host_to_endpoint_mapping)
         | group(
             plannedscan.finish.si(SCANNER_ACTION, SCANNER_NAME, mapping["url"]) for mapping in host_to_endpoint_mapping
@@ -123,7 +125,7 @@ def compose_scan_task(urls: List[Url]) -> group:
 
 
 @app.task(queue="ipv4")
-def scan(urls: List[str]) -> bin:
+def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None) -> bin:
     # This reduces the standard number of requests from ±1000 to ±700.
     # There will be 2000 templates instead of 4000.
 
@@ -135,26 +137,12 @@ def scan(urls: List[str]) -> bin:
         "/usr/local/bin/nuclei",
         # Work with json lines
         "-json",
-        # Do not store critical vulnerabilities before they are encrypted
-        "-exclude-severity",
-        "high",
-        "-exclude-severity",
-        "critical",
-        "-exclude-severity",
-        "medium",
-        # we don't have to be fast, if we do a LOT of scans at the same time in different tasks
-        # Default is 9000 requests per minute (150/s). With 25 hosts in bulk size that would mean 6/second.
-        # Let's lower this a bit to be more friendly.
-        "-rate-limit",
-        "25",
-        # Only perform http scans here, don't go digging inside other services and such (perhaps a mutuation of this
-        # scanner can do this)
-        "-type",
-        "http",
-        # we are in control of updates:
-        "-disable-update-check",
-        # no need to see a header
-        "-silent",
+    ]
+
+    if scanner_keyword_arguments:
+        command += kwargs_to_params(scanner_keyword_arguments, prefix="-")
+
+    command += [
         # do not scan redundant stuff that we already get elsewhere
         "-exclude-id",
         ",".join(set(REDUNDANT_TEMPLATES + disabled_templates)),
@@ -172,7 +160,7 @@ def scan(urls: List[str]) -> bin:
     return output[0]
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def store(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[str, Dict[str, int]]) -> None:
     raw_nuclei_records = convert_nuclei_data_to_json(raw_nuclei_data)
     results_per_host = split_nuclei_records_per_host(raw_nuclei_records)
@@ -298,6 +286,7 @@ def process_nuclei_record(n_record: Dict[str, Any]) -> Dict[str, Any]:
     ],
     """
     reduced_evidence = {
+        # This is so much data, and nobody needs this... so please...
         "curl-command": n_record.get("curl-command", ""),
         "extracted-results": n_record.get("extracted-results", []),
         "matched-at": n_record.get("matched-at", ""),

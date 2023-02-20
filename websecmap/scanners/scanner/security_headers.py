@@ -77,6 +77,9 @@ SECURITY_HEADER_SCAN_TYPES = [
     "http_security_header_x_content_type_options",
     "http_security_header_x_frame_options",
     "http_security_header_x_xss_protection",
+    "http_security_header_content_security_policy",
+    "http_security_header_permissions_policy",
+    "http_security_header_referrer_policy",
 ]
 
 
