@@ -1,7 +1,6 @@
 ARG PYTHON_VERSION=3.10
 ARG NUCLEI_VERSION=2.8.9
 ARG GOLANG_VERSION=1.20
-ARG VERSION=0.0.0+dev0
 
 # create Python virtualenv with Python dependencies
 FROM python:${PYTHON_VERSION} AS virtualenv
@@ -24,11 +23,6 @@ COPY pyproject.toml README.md /source/
 COPY tools/ /source/tools/
 COPY websecmap/ /source/websecmap/
 WORKDIR /source
-
-# import variable
-ARG VERSION
-
-RUN echo "VERSION='$VERSION'" >> /source/websecmap/__version__.py
 
 RUN pip install --editable . --no-deps
 
@@ -135,6 +129,9 @@ ENV VENDOR_DIR /source/vendor/
 
 # collect all static files form all django applications into static files directory
 RUN /pyenv/bin/websecmap collectstatic
+
+ARG VERSION=0.0.0-dev0
+RUN echo "VERSION='$VERSION'" >> /source/websecmap/__version__.py
 
 EXPOSE 8000
 
