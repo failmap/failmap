@@ -1,6 +1,6 @@
 import json
 import subprocess
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 
 from celery import group
 
@@ -194,8 +194,9 @@ def prepare_nuclei_results_for_storage(raw_nuclei_records: bin) -> Dict[str, Any
     return combine_processed_nuclei_records(processed_nuclei_records)
 
 
-def convert_nuclei_data_to_json(data: bin) -> List[Dict[str, Any]]:
-    decoded = data.decode("utf-8").replace("\n", ",")
+def convert_nuclei_data_to_json(data: Union[bytes, str]) -> List[Dict[str, Any]]:
+    decoded = data.decode("utf-8") if isinstance(data, bytes) else data
+    decoded = decoded.replace("\n", ",")
     # remove last comma
     decoded = f"{decoded[:-1]}"
     # add to a list
@@ -287,7 +288,7 @@ def process_nuclei_record(n_record: Dict[str, Any]) -> Dict[str, Any]:
     """
     reduced_evidence = {
         # This is so much data, and nobody needs this... so please...
-        "curl-command": n_record.get("curl-command", ""),
+        # "curl-command": n_record.get("curl-command", ""),
         "extracted-results": n_record.get("extracted-results", []),
         "matched-at": n_record.get("matched-at", ""),
     }

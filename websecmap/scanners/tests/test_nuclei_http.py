@@ -40,15 +40,31 @@ three_example_nuclei_tests = data = (
     b"03cscript\\u003ealert(1)\\u003c/script\\u003e' -H 'Content-Type: application/x-www-form-urlencoded' -H 'Hos"
     b"t: basisbeveiliging.nl' -H 'User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like G"
     b'ecko) Chrome/41.0.2225.0 Safari/537.36\' \'https://basisbeveiliging.nl/\'","matcher-status":true,"matched-line"'
+    b':null}\n{"template":"technologies/waf-detect.yaml","template-url":"https://github.com/projectdiscovery/nucl'
+    b'ei-templates/blob/master/technologies/waf-detect.yaml","template-id":"waf-detect","template-path":"'
+    b'nuclei-templates/technologies/waf-detect.yaml","info":{"name":"WAF Detection","author":["dwisiswant0","lu4nx"'
+    b'],"tags":["waf","tech","misc"],"description":"A web application firewall was detected.","reference":["https://g'
+    b'ithub.com/ekultek/whatwaf"],"severity":"info","classification":{"cve-id":null,"cwe-id":["cwe-200"]}},"matcher-n'
+    b'ame":"nginxgeneric","type":"http","host":"https://basisbeveiliging2.nl","matched-at":"https://basisbeveiliging2.n'
+    b'l/","ip":"185.71.61.127","timestamp":"2023-02-15T10:16:27.639418Z","curl-command":"curl -X \'POST\' -d \'_=\\u0'
+    b"03cscript\\u003ealert(1)\\u003c/script\\u003e' -H 'Content-Type: application/x-www-form-urlencoded' -H 'Hos"
+    b"t: basisbeveiliging2.nl' -H 'User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like G"
+    b'ecko) Chrome/41.0.2225.0 Safari/537.36\' \'https://basisbeveiliging2.nl/\'","matcher-status":true,"matched-line"'
     b":null}\n"
 )
 
 
 def test_nuclei_store(db, current_path):
-    url = Url.objects.create(**{"url": "basisbeveiliging.nl"})
-    end = Endpoint.objects.create(**{"url": url, "protocol": "https", "port": 443, "ip_version": 4})
+    url1 = Url.objects.create(**{"url": "basisbeveiliging.nl"})
+    end1 = Endpoint.objects.create(**{"url": url1, "protocol": "https", "port": 443, "ip_version": 4})
 
-    host_to_endpoint_mapping = {"https://basisbeveiliging.nl": {"endpoint": end.id, "url": url.id}}
+    url2 = Url.objects.create(**{"url": "basisbeveiliging2.nl"})
+    end2 = Endpoint.objects.create(**{"url": url2, "protocol": "https", "port": 443, "ip_version": 4})
+
+    host_to_endpoint_mapping = {
+        "https://basisbeveiliging.nl": {"endpoint": end1.id, "url": url1.id},
+        "https://basisbeveiliging2.nl": {"endpoint": end2.id, "url": url2.id},
+    }
 
     # no results should be no issue
     store(b"", host_to_endpoint_mapping)
@@ -56,16 +72,17 @@ def test_nuclei_store(db, current_path):
 
     # all categorized into the technologies area.
     store(three_example_nuclei_tests, host_to_endpoint_mapping)
-    assert EndpointGenericScan.objects.count() == 1
+    assert EndpointGenericScan.objects.count() == 2
 
 
 def test_split_metrics_per_host():
     raw_nuclei_records = convert_nuclei_data_to_json(three_example_nuclei_tests)
     result = split_nuclei_records_per_host(raw_nuclei_records)
     assert len(result["https://basisbeveiliging.nl"]) == 3
+    assert len(result["https://basisbeveiliging2.nl"]) == 1
 
     for x, y in result.items():
-        assert len(y) == 3
+        assert len(y) in [3, 1]
 
 
 def test_convert_nuclei_data_to_json():
@@ -156,18 +173,48 @@ def test_convert_nuclei_data_to_json():
             "timestamp": "2023-02-15T10:16:27.639418Z",
             "type": "http",
         },
+        {
+            "curl-command": "curl -X 'POST' -d '_=<script>alert(1)</script>' -H "
+            "'Content-Type: application/x-www-form-urlencoded' -H 'Host: "
+            "basisbeveiliging2.nl' -H 'User-Agent: Mozilla/5.0 (Windows "
+            "NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/41.0.2225.0 Safari/537.36' "
+            "'https://basisbeveiliging2.nl/'",
+            "host": "https://basisbeveiliging2.nl",
+            "info": {
+                "author": ["dwisiswant0", "lu4nx"],
+                "classification": {"cve-id": None, "cwe-id": ["cwe-200"]},
+                "description": "A web application firewall was detected.",
+                "name": "WAF Detection",
+                "reference": ["https://github.com/ekultek/whatwaf"],
+                "severity": "info",
+                "tags": ["waf", "tech", "misc"],
+            },
+            "ip": "185.71.61.127",
+            "matched-at": "https://basisbeveiliging2.nl/",
+            "matched-line": None,
+            "matcher-name": "nginxgeneric",
+            "matcher-status": True,
+            "template": "technologies/waf-detect.yaml",
+            "template-id": "waf-detect",
+            "template-path": "nuclei-templates/technologies/waf-detect.yaml",
+            "template-url": "https://github.com/projectdiscovery/nuclei-templates/blob/master/"
+            "technologies/waf-detect.yaml",
+            "timestamp": "2023-02-15T10:16:27.639418Z",
+            "type": "http",
+        },
     ]
 
 
 def test_process_nuclei_record():
     processed = process_nuclei_record(
         {
-            "curl-command": "curl -X 'POST' -d '_=<script>alert(1)</script>' -H "
-            "'Content-Type: application/x-www-form-urlencoded' -H 'Host: "
-            "basisbeveiliging.nl' -H 'User-Agent: Mozilla/5.0 (Windows "
-            "NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/41.0.2225.0 Safari/537.36' "
-            "'https://basisbeveiliging.nl/'",
+            # "curl-command": "curl -X 'POST' -d '_=<script>alert(1)</script>' -H "
+            # "'Content-Type: application/x-www-form-urlencoded' -H 'Host: "
+            # "basisbeveiliging.nl' -H 'User-Agent: Mozilla/5.0 (Windows "
+            # "NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) "
+            # "Chrome/41.0.2225.0 Safari/537.36' "
+            # "'https://basisbeveiliging.nl/'",
             "host": "https://basisbeveiliging.nl",
             "info": {
                 "author": ["dwisiswant0", "lu4nx"],
@@ -196,14 +243,14 @@ def test_process_nuclei_record():
     assert processed == {
         "category": "technologies",
         "evidence": {
-            "curl-command": "curl -X 'POST' -d '_=<script>alert(1)</script>' "
-            "-H 'Content-Type: "
-            "application/x-www-form-urlencoded' -H 'Host: "
-            "basisbeveiliging.nl' -H 'User-Agent: "
-            "Mozilla/5.0 (Windows NT 6.3; WOW64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/41.0.2225.0 Safari/537.36' "
-            "'https://basisbeveiliging.nl/'",
+            # "curl-command": "curl -X 'POST' -d '_=<script>alert(1)</script>' "
+            # "-H 'Content-Type: "
+            # "application/x-www-form-urlencoded' -H 'Host: "
+            # "basisbeveiliging.nl' -H 'User-Agent: "
+            # "Mozilla/5.0 (Windows NT 6.3; WOW64) "
+            # "AppleWebKit/537.36 (KHTML, like Gecko) "
+            # "Chrome/41.0.2225.0 Safari/537.36' "
+            # "'https://basisbeveiliging.nl/'",
             "extracted-results": [],
             "matched-at": "https://basisbeveiliging.nl/",
         },
@@ -214,11 +261,11 @@ def test_process_nuclei_record():
 
     processed = process_nuclei_record(
         {
-            "curl-command": "curl -X 'GET' -d '' -H 'Accept: */*' -H 'Accept-Language: "
-            "en' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X "
-            "10_8_3) AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/54.0.2866.71 Safari/537.36' "
-            "'https://basisbeveiliging.nl'",
+            # "curl-command": "curl -X 'GET' -d '' -H 'Accept: */*' -H 'Accept-Language: "
+            # "en' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X "
+            # "10_8_3) AppleWebKit/537.36 (KHTML, like Gecko) "
+            # "Chrome/54.0.2866.71 Safari/537.36' "
+            # "'https://basisbeveiliging.nl'",
             "host": "https://basisbeveiliging.nl",
             "info": {
                 "author": ["hakluke"],
@@ -245,12 +292,12 @@ def test_process_nuclei_record():
     assert processed == {
         "category": "technologies",
         "evidence": {
-            "curl-command": "curl -X 'GET' -d '' -H 'Accept: */*' -H "
-            "'Accept-Language: en' -H 'User-Agent: "
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/54.0.2866.71 Safari/537.36' "
-            "'https://basisbeveiliging.nl'",
+            # "curl-command": "curl -X 'GET' -d '' -H 'Accept: */*' -H "
+            # "'Accept-Language: en' -H 'User-Agent: "
+            # "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) "
+            # "AppleWebKit/537.36 (KHTML, like Gecko) "
+            # "Chrome/54.0.2866.71 Safari/537.36' "
+            # "'https://basisbeveiliging.nl'",
             "extracted-results": [],
             "matched-at": "https://basisbeveiliging.nl",
         },
@@ -261,7 +308,7 @@ def test_process_nuclei_record():
 
     assert process_nuclei_record({}) == {
         "category": "unknown",
-        "evidence": {"curl-command": "", "extracted-results": [], "matched-at": ""},
+        "evidence": {"extracted-results": [], "matched-at": ""},
         "finding-name": "nuclei_unknown",
         "name": "unknown",
         "severity": "unknown",
@@ -285,22 +332,22 @@ def test_categorize_nuclei_record():
         "findings": [
             {
                 "evidence": {
-                    "curl-command": "curl -X 'GET' "
-                    "-d '' -H "
-                    "'Accept: */*' "
-                    "-H "
-                    "'Accept-Language: "
-                    "en' -H "
-                    "'User-Agent: "
-                    "Mozilla/5.0 "
-                    "(Windows NT "
-                    "6.1; WOW64) "
-                    "AppleWebKit/537.36 "
-                    "(KHTML, like "
-                    "Gecko) "
-                    "Chrome/36.0.1985.67 "
-                    "Safari/537.36' "
-                    "'https://www.example.com'",
+                    # "curl-command": "curl -X 'GET' "
+                    # "-d '' -H "
+                    # "'Accept: */*' "
+                    # "-H "
+                    # "'Accept-Language: "
+                    # "en' -H "
+                    # "'User-Agent: "
+                    # "Mozilla/5.0 "
+                    # "(Windows NT "
+                    # "6.1; WOW64) "
+                    # "AppleWebKit/537.36 "
+                    # "(KHTML, like "
+                    # "Gecko) "
+                    # "Chrome/36.0.1985.67 "
+                    # "Safari/537.36' "
+                    # "'https://www.example.com'",
                     "extracted-results": [],
                     "matched-at": "https://www.example.com",
                 },
@@ -309,23 +356,23 @@ def test_categorize_nuclei_record():
             },
             {
                 "evidence": {
-                    "curl-command": "curl -X 'GET' "
-                    "-d '' -H "
-                    "'Accept: */*' "
-                    "-H "
-                    "'Accept-Language: "
-                    "en' -H "
-                    "'User-Agent: "
-                    "Mozilla/5.0 "
-                    "(Windows NT "
-                    "10.0; Win64; "
-                    "x64) "
-                    "AppleWebKit/537.36 "
-                    "(KHTML, like "
-                    "Gecko) "
-                    "Chrome/70.0.3538.77 "
-                    "Safari/537.36' "
-                    "'https://www.example.com/phpmyadmin/'",
+                    # "curl-command": "curl -X 'GET' "
+                    # "-d '' -H "
+                    # "'Accept: */*' "
+                    # "-H "
+                    # "'Accept-Language: "
+                    # "en' -H "
+                    # "'User-Agent: "
+                    # "Mozilla/5.0 "
+                    # "(Windows NT "
+                    # "10.0; Win64; "
+                    # "x64) "
+                    # "AppleWebKit/537.36 "
+                    # "(KHTML, like "
+                    # "Gecko) "
+                    # "Chrome/70.0.3538.77 "
+                    # "Safari/537.36' "
+                    # "'https://www.example.com/phpmyadmin/'",
                     "extracted-results": ["4.9.0.1"],
                     "matched-at": "https://www.example.com/phpmyadmin/",
                 },
