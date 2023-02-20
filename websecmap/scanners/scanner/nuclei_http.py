@@ -132,7 +132,7 @@ def scan(urls: List[str]) -> bin:
     # probably call a container instead of running this directly?
     # the string[] documentation is vague.
     command = [
-        "nuclei",
+        "/usr/local/bin/nuclei",
         # Work with json lines
         "-json",
         # Do not store critical vulnerabilities before they are encrypted
@@ -165,7 +165,7 @@ def scan(urls: List[str]) -> bin:
 
     log.debug("Starting nuclei scan with command: %s", command)
 
-    nuc = subprocess.Popen(command, stdout=subprocess.PIPE, env={"HOME": "/opt/nuclei"})
+    nuc = subprocess.Popen(command, stdout=subprocess.PIPE, env={"HOME": "/opt/nuclei"}, cwd="/tmp")
     output = nuc.communicate()
 
     # Data is returned in jsonl format, binary
