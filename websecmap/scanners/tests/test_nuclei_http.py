@@ -1,7 +1,7 @@
 from django.utils import timezone
 
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import Endpoint, EndpointGenericScan
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, PlannedScan, Scanner
 from websecmap.scanners.scanner.nuclei_http import (
     store,
     convert_nuclei_data_to_json,
@@ -10,6 +10,9 @@ from websecmap.scanners.scanner.nuclei_http import (
     get_higher_severity,
     neutralize_missing_metrics,
     split_nuclei_records_per_host,
+    get_templates_from_scan_results,
+    plan_verify,
+    compose_planned_verify_task,
 )
 
 three_example_nuclei_tests = data = (
@@ -257,6 +260,7 @@ def test_process_nuclei_record():
         "finding-name": "nuclei_waf_detect_nginxgeneric",
         "name": "WAF Detection",
         "severity": "info",
+        "template-id": "waf-detect",
     }
 
     processed = process_nuclei_record(
@@ -304,6 +308,7 @@ def test_process_nuclei_record():
         "finding-name": "nuclei_tech_detect_nginx",
         "name": "Wappalyzer Technology Detection",
         "severity": "info",
+        "template-id": "tech-detect",
     }
 
     assert process_nuclei_record({}) == {
@@ -312,6 +317,7 @@ def test_process_nuclei_record():
         "finding-name": "nuclei_unknown",
         "name": "unknown",
         "severity": "unknown",
+        "template-id": "unknown",
     }
 
 
@@ -353,6 +359,7 @@ def test_categorize_nuclei_record():
                 },
                 "finding-name": "nuclei_drupal_login",
                 "name": "Drupal Login Panel - Detect",
+                "template-id": "drupal-login",
             },
             {
                 "evidence": {
@@ -378,6 +385,7 @@ def test_categorize_nuclei_record():
                 },
                 "finding-name": "nuclei_phpmyadmin_panel",
                 "name": "phpMyAdmin Panel - Detect",
+                "template-id": "phpmyadmin-panel",
             },
         ],
         "highest-severity": "info",
@@ -414,3 +422,44 @@ def test_neutralize_missing_metrics(db):
 
     # Check that they are really clean:
     assert EndpointGenericScan.objects.get(type="nuclei_exposed_panels", is_the_latest_scan=True).rating == "clean"
+
+
+CITRIX_SCAN_RESULTS = """[
+    {"name": "Citrix VPN Panel - Detect", "finding-name": "nuclei_citrix_vpn_detect",
+     "template-id": "citrix-vpn-panel",
+     "evidence": {"extracted-results": [], "matched-at": "https:///vpn/index.html"}},
+    {"name": "NetScaler AAA Login Panel - Detect", "finding-name": "nuclei_netscaler_aaa_login",
+     "template-id": "netscaler-aaa-login-panel",
+     "evidence": {"extracted-results": [],
+                  "matched-at": "https:///LogonPoint/tmindex.html"}}]"""
+
+
+def test_get_templates_from_scan_results():
+    assert get_templates_from_scan_results(CITRIX_SCAN_RESULTS) == ["citrix-vpn-panel", "netscaler-aaa-login-panel"]
+
+    assert get_templates_from_scan_results("""[]""") == []
+
+
+def test_plan_verify(db):
+    Scanner.objects.create(**{"name": "nuclei_http", "python_name": "nuclei_http"})
+
+    plan_verify()
+    assert PlannedScan.objects.count() == 0
+
+    url = Url.objects.create(**{"url": "example.com"})
+    endpoint = Endpoint.objects.create(**{"url": url, "protocol": "http", "port": 443})
+    EndpointGenericScan.objects.create(
+        type="nuclei_exposed_panels",
+        rating="info",
+        evidence=CITRIX_SCAN_RESULTS,
+        endpoint=endpoint,
+        is_the_latest_scan=True,
+        rating_determined_on=timezone.now(),
+    )
+
+    plan_verify()
+
+    assert PlannedScan.objects.count() == 1
+
+    verify_task = compose_planned_verify_task()
+    assert verify_task is not None

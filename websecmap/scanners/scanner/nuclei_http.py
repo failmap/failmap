@@ -10,7 +10,7 @@ from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan, init_dict
 from websecmap.scanners.models import EndpointGenericScan, Endpoint
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner import allowed_to_scan, constance_json_value
+from websecmap.scanners.scanner import allowed_to_scan, constance_json_value, unique_and_random
 from websecmap.scanners.scanner.filter import merge_endpoints_filter, generic_plan_scan, filter_endpoints_only
 from websecmap.scanners.support import kwargs_to_params
 
@@ -74,9 +74,26 @@ STANDARD_ENDPOINT_FILTER = {
 # todo: move below code into abstraction:
 @app.task(queue="kickoff", ignore_result=True)
 def plan_scan(**kwargs) -> None:
-    # todo: only domains, no subdomains at first.
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
     generic_plan_scan(SCANNER_NAME, SCANNER_ACTION, filter_endpoints_only, **kwargs)
+
+
+@app.task(queue="kickoff", ignore_result=True)
+def plan_verify() -> None:
+    scans = (
+        EndpointGenericScan.objects.all()
+        .filter(
+            type__startswith="nuclei",
+            is_the_latest_scan=True,
+            endpoint__url__not_resolvable=False,
+            endpoint__url__is_dead=False,
+            endpoint__is_dead=False,
+        )
+        .select_related("endpoint", "endpoint__url")
+        .only("endpoint__url")
+    )
+    urls = unique_and_random([scan.endpoint.url for scan in scans])
+    plannedscan.request(activity="verify", scanner=SCANNER_NAME, urls=urls)
 
 
 @app.task(queue="kickoff")
@@ -84,6 +101,13 @@ def compose_planned_scan_task(**kwargs) -> group:
     # 25 matches the bulk size of nuclei
     urls = plannedscan.pickup(activity=SCANNER_ACTION, scanner=SCANNER_NAME, amount=kwargs.get("amount", 25))
     return compose_scan_task(urls, kwargs)
+
+
+@app.task(queue="kickoff")
+def compose_planned_verify_task(**kwargs) -> group:
+    # 25 matches the bulk size of nuclei
+    urls = plannedscan.pickup(activity="verify", scanner=SCANNER_NAME, amount=kwargs.get("amount", 25))
+    return compose_verify_task(urls)
 
 
 def compose_manual_scan_task(
@@ -119,6 +143,74 @@ def compose_scan_task(urls: List[Url], scanner_keyword_arguments: Dict[str, Any]
             plannedscan.finish.si(SCANNER_ACTION, SCANNER_NAME, mapping["url"]) for mapping in host_to_endpoint_mapping
         )
     )
+
+
+def compose_verify_task(urls: List[Url]):
+    # re-scan an endpoint only using the templates used in the results. This saves a few hundred requests every time.
+    # The templates are named explicitly in the results.
+    current_scans = (
+        EndpointGenericScan.objects.all()
+        .filter(
+            type__startswith="nuclei",
+            is_the_latest_scan=True,
+            endpoint__url__not_resolvable=False,
+            endpoint__url__is_dead=False,
+            endpoint__is_dead=False,
+            endpoint__url__url__in=urls,
+        )
+        .select_related("endpoint", "endpoint__url")
+        .only(
+            "evidence",
+            "endpoint__url__url",
+            "endpoint__id",
+            "endpoint__url__id",
+            "endpoint__port",
+            "endpoint__protocol",
+            "endpoint__ip_version",
+        )
+    )
+    if not current_scans:
+        return group()
+
+    tasks = []
+    for current_scan in current_scans:
+        endpoint_id = current_scan.endpoint.id
+        url_id = current_scan.endpoint.url.id
+        uri_url = current_scan.endpoint.uri_url()
+
+        template_ids = get_templates_from_scan_results(current_scan.evidence)
+        if not template_ids:
+            tasks.append(plannedscan.finish.si("verify", SCANNER_NAME, url_id))
+            continue
+
+        params = {"args": [{"name": "template-id", "type": "list-to-duplicate-arguments", "value": [template_ids]}]}
+        tasks.append(
+            scan.s([uri_url], params)
+            | store.s({uri_url: {"endpoint": endpoint_id, "url": url_id}})
+            | plannedscan.finish.si("verify", SCANNER_NAME, url_id)
+        )
+
+    return group(tasks)
+
+
+def get_templates_from_scan_results(processed_nuclei_data):
+    try:
+        json_data = json.loads(processed_nuclei_data)
+    except json.decoder.JSONDecodeError as e:
+        log.debug("Nuclei data not parseable, %s", e)
+        return []
+
+    if len(json_data) == 0:
+        log.debug("No nuclei records found")
+        return []
+
+    templates = []
+    for result in json_data:
+        possible_result = result.get("template-id", "unknown")
+        if possible_result not in REDUNDANT_TEMPLATES + ["unknown"]:
+            templates.append(possible_result)
+
+    return templates
 
 
 # todo: move above code into abstraction:
@@ -170,7 +262,14 @@ def store(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[str, Dict[str, in
 
         endpoint_id = host_to_endpoint_mapping[host]["endpoint"]
         for category_name, data in combined_metrics.items():
-            store_endpoint_scan_result(category_name, endpoint_id, data["highest-severity"], "", str(data["findings"]))
+            store_endpoint_scan_result(
+                category_name,
+                endpoint_id,
+                data["highest-severity"],
+                "",
+                # Has to be readable by the verify scanner
+                json.dumps(data["findings"]),
+            )
 
         # and clean up the stuff that has been solved completely:
         current_categories_of_metrics = list(combined_metrics.keys())
@@ -295,6 +394,8 @@ def process_nuclei_record(n_record: Dict[str, Any]) -> Dict[str, Any]:
 
     return {
         "category": category,
+        # for verify scans, this saves re-running everything again...
+        "template-id": n_record.get("template-id", "unknown"),
         "name": name,
         "severity": severity,
         "finding-name": finding_name,
