@@ -1,7 +1,6 @@
 from datetime import timedelta
 from typing import Any, Dict, Union
 
-from django.db.models import Count, Q
 from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
@@ -17,7 +16,7 @@ def get_recent_explains(country, organization_type):
     :return:
     """
 
-    return get_all_explains(country, organization_type, limit=50)
+    return get_all_explains(country, organization_type, limit=500)
 
 
 def get_all_explains(country, organization_type, limit=0):
@@ -31,34 +30,20 @@ def get_all_explains(country, organization_type, limit=0):
     # the organizations will be matched later.
     # https://stackoverflow.com/questions/30752268/how-to-filter-objects-for-count-annotation-in-django
 
-    # we're currently not taking into account what endpoint, URL's and organizations are alive at a certain point.
-    # in that sense we're not taking history in account... Only what is relevant _NOW_
-    # This should change, adding some nice complex Q conditions for checking a certain date.
-    # something like: & (  Q(url__organization__is_dead=False, created_on__lte=some_date)
-    #                    | Q(is_dead=True,  created_on__lte=some_date, is_dead_since__gte=some_date)
-    #
-    #                 & (  Q(is_dead=False, created_on__lte=some_date)
-    #                    | Q(is_dead=True,  created_on__lte=some_date, is_dead_since__gte=some_date)
+    # instead of complex query logic, just use the data in the database straight up, and accept duplicates.
+    # otherwise there will be all kinds of subqueries and such which is very very very slow...
     ugss = (
         UrlGenericScan.objects.all()
         .filter(
             comply_or_explain_is_explained=True,
             is_the_latest_scan=True,
+            url__organization__is_dead=False,
+            url__organization__country=country,
+            url__organization__type_id=organization_type,
+            url__is_dead=False,
+            url__not_resolvable=False,
         )
-        .annotate(
-            n_urls=Count(
-                "url",
-                filter=Q(
-                    url__organization__is_dead=False,
-                    url__organization__country=country,
-                    url__organization__type_id=organization_type,
-                    url__is_dead=False,
-                    url__not_resolvable=False,
-                ),
-            )
-        )
-        .filter(n_urls=1)
-        .order_by("-comply_or_explain_explained_on")[0:limit]
+        .order_by("-comply_or_explain_explained_on")[:limit]
     )
 
     egss = (
@@ -66,31 +51,18 @@ def get_all_explains(country, organization_type, limit=0):
         .filter(
             comply_or_explain_is_explained=True,
             is_the_latest_scan=True,
+            endpoint__is_dead=False,
+            endpoint__url__not_resolvable=False,
+            endpoint__url__is_dead=False,
+            endpoint__url__organization__is_dead=False,
+            endpoint__url__organization__country=country,
+            endpoint__url__organization__type_id=organization_type,
         )
-        .annotate(
-            n_urls=Count(
-                "endpoint",
-                filter=Q(
-                    endpoint__is_dead=False,
-                    endpoint__url__not_resolvable=False,
-                    endpoint__url__is_dead=False,
-                    endpoint__url__organization__is_dead=False,
-                    endpoint__url__organization__country=country,
-                    endpoint__url__organization__type_id=organization_type,
-                ),
-            )
-        )
-        .filter(n_urls__gte=1)
-        .order_by("-comply_or_explain_explained_on")[0:limit]
+        .order_by("-comply_or_explain_explained_on")[:limit]
     )
 
-    explains = []
-
-    for scan in ugss:
-        explains.append(get_explanation("url", scan))
-
-    for scan in egss:
-        explains.append(get_explanation("endpoint", scan))
+    explains = [get_explanation("url", scan) for scan in ugss]
+    explains.extend(get_explanation("endpoint", scan) for scan in egss)
 
     # sorting
     explains = sorted(explains, key=lambda k: (k["explained_on"]), reverse=True)
@@ -120,12 +92,9 @@ def get_explanation(url_or_endpoint, scan):
 
     if url_or_endpoint == "endpoint":
         this_explain["organizations"] = list(scan.endpoint.url.organization.all().values("id", "name"))
-        this_explain["subject"] = str("%s - %s/%s - IPv%s") % (
-            scan.endpoint.url,
-            scan.endpoint.protocol,
-            scan.endpoint.port,
-            scan.endpoint.ip_version,
-        )
+        this_explain[
+            "subject"
+        ] = f"{scan.endpoint.url} - {scan.endpoint.protocol}/{scan.endpoint.port} - IPv{scan.endpoint.ip_version}"
 
     return this_explain
 
@@ -164,7 +133,7 @@ def explain(scan_id: int, scan_type: str, explanation: str, explained_by: str, d
     scan.comply_or_explain_is_explained = True
     scan.comply_or_explain_explained_by = explained_by
     scan.comply_or_explain_explained_on = timezone.now()
-    scan.comply_or_explain_explanation_valid_until = timezone.now() + timedelta(days=int(duration))
+    scan.comply_or_explain_explanation_valid_until = timezone.now() + timedelta(days=duration)
     scan.comply_or_explain_explanation = explanation
     scan.comply_or_explain_case_handled_by = "Logged in user..."
     scan.save()
