@@ -16,7 +16,7 @@ from django.views.decorators.cache import cache_page
 
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
-from websecmap.app.constance import get_bulk_values, get_all_values
+from websecmap.app.constance import get_bulk_values, get_all_values, constance_cached_value
 from websecmap.map.logic import datasets
 from websecmap.map.logic.admin import (
     add_organization,
@@ -31,6 +31,7 @@ from websecmap.map.logic.datasets import create_filename
 from websecmap.map.logic.explain import explain, get_all_explains, get_recent_explains, remove_explanation
 from websecmap.map.logic.improvements import get_improvements
 from websecmap.map.logic.latest import get_all_latest_scans
+from websecmap.map.logic.login_plaza import login_plaza_data
 from websecmap.map.logic.map import get_map_data
 from websecmap.map.logic.map_defaults import (
     DEFAULT_COUNTRY,
@@ -880,3 +881,23 @@ def planned_scan_progress(request):
 
 def map_health(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER):
     return JsonResponse(get_lastest_map_health_data(country, organization_type), encoder=JSEncoder, safe=False)
+
+
+@cache_page(ONE_HOUR)
+def login_plaza(
+    request,
+    country: str = DEFAULT_COUNTRY,
+    organization_type: str = DEFAULT_LAYER,
+):
+    if not (country and organization_type):
+        return JsonResponse([], encoder=JSEncoder, safe=False)
+
+    if not constance_cached_value("SHOW_LOGIN_PLAZA"):
+        return JsonResponse([], encoder=JSEncoder, safe=False)
+
+    return json_response(
+        login_plaza_data(
+            country=country,
+            layer=organization_type,
+        )
+    )

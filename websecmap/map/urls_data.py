@@ -17,6 +17,7 @@ ovt = "organization_vulnerability_timeline"
 vg = "vulnerability_graphs"
 ot = "organization_types"
 uoo = "updates_on_organization"
+lp = "login_plaza"
 
 ovtvn = v.organization_vulnerability_timeline_via_name
 
@@ -53,6 +54,7 @@ urlpatterns = [
     path("stats/what_to_improve/<c:country>/<slug:organization_type>/<str:issue_type>/", v.v_what_to_improve),
     path("short_and_simple_stats/<w:days_back>/", v.get_short_and_simple_stats_),
     path("short_and_simple_stats/<ymd:at_date>/", v.get_short_and_simple_stats_),
+    path(f"{lp}/<c:country>/<slug:organization_type>/", v.login_plaza),
     path(f"{vg}/<c:country>/<slug:organization_type>/<w:days_back>/", v.vulnerability_graphs),
     path(f"{vg}/<c:country>/<slug:organization_type>/<ymd:at_date>/", v.vulnerability_graphs),
     path(f"{vg}/<c:country>/<slug:organization_type>/<w:days_back>/<int:duration>/", v.vulnerability_graphs),

@@ -1103,6 +1103,11 @@ CONSTANCE_CONFIG = {
         "A valid json list, with template-ids from nuclei that should not be run. See nuclei template repo.",
         str,
     ),
+    "SHOW_LOGIN_PLAZA": (
+        False,
+        "Show login portals on a dedicated page",
+        bool,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1238,6 +1243,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_STATS_CHANGES",
                 "SHOW_SCAN_SCHEDULE",
                 "SHOW_DONATION",
+                "SHOW_LOGIN_PLAZA",
             ),
         ),
         (
