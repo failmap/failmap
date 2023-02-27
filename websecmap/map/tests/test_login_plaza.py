@@ -45,10 +45,13 @@ def test_login_plaza_data(db):
 
         # retrieve a typical response based on the single metrics we have in the db.
         data = login_plaza_data("NL", "municipality")
+
+        # id's change per database test, dont reset them:
+        del data[0]["organization_id"]
+
         assert data == [
             {
                 "organization_name": "test",
-                "organization_id": 1,
                 "url_url": "test.nl",
                 "subdomain": "",
                 "domain": "test.nl",
