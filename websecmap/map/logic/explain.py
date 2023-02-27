@@ -87,7 +87,7 @@ def get_explanation(url_or_endpoint, scan):
     }
 
     if url_or_endpoint == "url":
-        this_explain["organizations"] = scan.url.organization.name
+        this_explain["organizations"] = list(scan.url.organization.all().values("id", "name"))
         this_explain["subject"] = str(scan.url.url)
 
     if url_or_endpoint == "endpoint":
