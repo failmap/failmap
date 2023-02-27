@@ -372,6 +372,7 @@ def config_content():
         "google_maps_api_key": configuration["GOOGLE_MAPS_API_KEY"],
         "grading_policy": configuration["GRADING_POLICY"],
         "app": {
+            "menu": configuration["MENU"],
             "custom_css": configuration["CUSTOM_CSS"],
             "logo_image": configuration["LOGO_IMAGE"],
             "favicon": configuration["FAVICON"],

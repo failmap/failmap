@@ -16,7 +16,7 @@ def get_recent_explains(country, organization_type):
     :return:
     """
 
-    return get_all_explains(country, organization_type, limit=500)
+    return get_all_explains(country, organization_type, limit=1000)
 
 
 def get_all_explains(country, organization_type, limit=0):

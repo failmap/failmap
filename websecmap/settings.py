@@ -1113,6 +1113,12 @@ CONSTANCE_CONFIG = {
         "Allow to see old reports and old map data",
         bool,
     ),
+    "MENU": (
+        "single",
+        "Show 'single' or 'dual' menu bar. Single is used when very few features are enabled. Dual is when you have "
+        "enabled basically everything.",
+        str,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1313,6 +1319,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             (
                 "CUSTOM_CSS",
                 "LOGO_IMAGE",
+                "MENU",
                 "FAVICON",
                 "RELEVANT_FOR_UI_HIGH",
                 "RELEVANT_FOR_UI_MEDIUM",
