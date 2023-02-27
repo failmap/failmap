@@ -118,7 +118,7 @@ def parse_internetnl_nl_explanation_data(scan: EndpointGenericScan) -> Dict[str,
 def get_severity(scan: Union[EndpointGenericScan, UrlGenericScan]) -> Dict[str, Any]:
     metadata = get_backend_scanmetadata()
 
-    scanner = metadata["scan_types_to_scanner"].get(scan.type, {"name": "dummy"})
+    scanner = metadata["scan_types_to_scanner"].get(scan.type, {"name": "dummy", "python_name": "dummy"})
 
     if scanner["python_name"] in ["internet_nl_mail", "internet_nl_web"]:
         calculation = internet_nl(scan)
