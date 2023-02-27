@@ -269,6 +269,8 @@ def config_content():
             "send_in_new_domains": configuration["SHOW_SEND_IN_NEW_DOMAINS"],
             "incorrect_finding": configuration["SHOW_INCORRECT_FINDING"],
             "snow": configuration["SHOW_SNOW"],
+            "login_plaza": configuration["SHOW_LOGIN_PLAZA"],
+            "time_machine": configuration["SHOW_TIME_MACHINE"],
             "socials": {
                 "report": configuration["SOCIALS_SHOW_REPORT"],
                 "map": configuration["SOCIALS_SHOW_MAP"],

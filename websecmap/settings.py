@@ -1108,6 +1108,11 @@ CONSTANCE_CONFIG = {
         "Show login portals on a dedicated page",
         bool,
     ),
+    "SHOW_TIME_MACHINE": (
+        False,
+        "Allow to see old reports and old map data",
+        bool,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1244,6 +1249,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_SCAN_SCHEDULE",
                 "SHOW_DONATION",
                 "SHOW_LOGIN_PLAZA",
+                "SHOW_TIME_MACHINE",
             ),
         ),
         (

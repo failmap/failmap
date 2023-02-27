@@ -47,8 +47,8 @@ def test_login_plaza_data(db):
         data = login_plaza_data("NL", "municipality")
         assert data == [
             {
-                'organization_name': 'test',
-                'organization_id': 1,
+                "organization_name": "test",
+                "organization_id": 1,
                 "url_url": "test.nl",
                 "subdomain": "",
                 "domain": "test.nl",
