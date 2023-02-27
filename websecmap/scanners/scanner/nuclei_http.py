@@ -23,14 +23,15 @@ DONE: Bundle findings into several categories. Using individual metrics will ove
 DONE: Neutralize findings from previous scan that are not mentioned in this scan
 DONE: Scan multiple domains at the same time
 DONE: Reduce the speed of scans and increase the amount of scans at the same time
+DONE: Add optimized verification
 TODO: Support custom templates in WSM loaded from database config
 TODO: Add uncover integration to get free data from apis: this has a few challenges such as the frequency of updates of
  this data: if that is not updated very frequently we have a problem. My guess is that this data is NOT updated often
  so you will have to buy the products of these companies. Can't blame em. Also at that point you're depending on one
  of these venture backed (most cases) companies that might pivot or go bankrupt in a few years even while their service
  is excellent now.
-TODO: Remove even more useless templates and make results more easily understandandable / valuable.
-TODO: Add sub-scanners based on this scanner with just a set of templates, to lower the amount of requests.
+DONE: Remove even more useless templates and make results more easily understandandable / valuable.
+DONE: Add sub-scanners based on this scanner with just a set of templates, to lower the amount of requests.
 """
 
 
@@ -110,6 +111,14 @@ def compose_planned_verify_task(**kwargs) -> group:
     return compose_verify_task(urls)
 
 
+def compose_manual_verify_task(
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
+) -> group:
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
+    urls = filter_endpoints_only(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    return compose_verify_task(urls)
+
+
 def compose_manual_scan_task(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> group:
@@ -145,7 +154,7 @@ def compose_scan_task(urls: List[Url], scanner_keyword_arguments: Dict[str, Any]
     )
 
 
-def compose_verify_task(urls: List[Url]):
+def compose_verify_task(urls: List[Url]) -> group:
     # re-scan an endpoint only using the templates used in the results. This saves a few hundred requests every time.
     # The templates are named explicitly in the results.
     current_scans = (
@@ -183,7 +192,7 @@ def compose_verify_task(urls: List[Url]):
             tasks.append(plannedscan.finish.si("verify", SCANNER_NAME, url_id))
             continue
 
-        params = {"args": [{"name": "template-id", "type": "list-to-duplicate-arguments", "value": [template_ids]}]}
+        params = {"args": [{"name": "template-id", "type": "list-to-duplicate-arguments", "value": template_ids}]}
         tasks.append(
             scan.s([uri_url], params)
             | store.s({uri_url: {"endpoint": endpoint_id, "url": url_id}})
@@ -193,11 +202,12 @@ def compose_verify_task(urls: List[Url]):
     return group(tasks)
 
 
-def get_templates_from_scan_results(processed_nuclei_data):
+def get_templates_from_scan_results(processed_nuclei_data) -> List[str]:
     try:
         json_data = json.loads(processed_nuclei_data)
     except json.decoder.JSONDecodeError as e:
         log.debug("Nuclei data not parseable, %s", e)
+        log.debug("Nuclei data: %s", processed_nuclei_data)
         return []
 
     if len(json_data) == 0:
@@ -243,7 +253,7 @@ def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None) -> b
     for url in urls:
         command += ["-u", url]
 
-    log.debug("Starting nuclei scan with command: %s", command)
+    log.debug("Starting nuclei scan with command: %s", " ".join(command))
 
     nuc = subprocess.Popen(command, stdout=subprocess.PIPE, env={"HOME": "/opt/nuclei"}, cwd="/tmp")
     output = nuc.communicate()

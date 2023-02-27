@@ -1,7 +1,7 @@
 import logging
 
 from websecmap.app.management.commands._private import VerifyTaskCommand
-from websecmap.scanners.scanner import dns_endpoints, ftp, http, subdomains, verify_unresolvable
+from websecmap.scanners.scanner import dns_endpoints, ftp, http, subdomains, verify_unresolvable, nuclei_http
 
 log = logging.getLogger(__name__)
 
@@ -12,6 +12,7 @@ scanners = {
     "subdomains": subdomains,
     "dns_endpoints": dns_endpoints,
     "verify_unresolvable": verify_unresolvable,
+    "nuclei_http": nuclei_http,
 }
 
 

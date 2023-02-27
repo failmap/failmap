@@ -440,7 +440,7 @@ def test_get_templates_from_scan_results():
     assert get_templates_from_scan_results("""[]""") == []
 
 
-def test_plan_verify(db):
+def test_nuclei_plan_verify(db, default_scan_metadata):
     Scanner.objects.create(**{"name": "nuclei_http", "python_name": "nuclei_http"})
 
     plan_verify()

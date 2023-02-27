@@ -3545,6 +3545,28 @@
   }
 },
 {
+  "model": "scanners.scanner",
+  "pk": 30,
+  "fields": {
+    "name": "nuclei_http",
+    "python_name": "nuclei_http",
+    "description": "",
+    "to": 0,
+    "enabled": true,
+    "rate_limit": 100,
+    "needs_results_from": null,
+    "plannable_activities": [
+      1
+    ],
+    "enabled_activities": [
+      1
+    ],
+    "creates_scan_types": [
+
+    ]
+  }
+},
+{
   "model": "scanners.followupscan",
   "pk": 1,
   "fields": {
