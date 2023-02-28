@@ -1,4 +1,4 @@
-import json
+from datetime import datetime
 
 from django.utils import timezone
 from freezegun import freeze_time
@@ -9,7 +9,6 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 
 def test_login_plaza_data(db):
-
     with freeze_time("2022-01-24"):
         # no data, no crashes
         data = login_plaza_data("NL", "municipality")
@@ -32,7 +31,7 @@ def test_login_plaza_data(db):
 
         endpoint = Endpoint.objects.create(url=url, port=443, protocol="https")
 
-        evidence = """[{"template":"technologies/wordpress/plugins/tinymce-advanced.yaml","template-url":"https://github.com/projectdiscovery/nuclei-templates/blob/master/technologies/wordpress/plugins/tinymce-advanced.yaml","template-id":"wordpress-tinymce-advanced","template-path":"/Users/stitch/nuclei-templates/technologies/wordpress/plugins/tinymce-advanced.yaml","info":{"name":"Advanced Editor Tools (previously TinyMCE Advanced) Detection","author":["ricardomaia"],"tags":["tech","wordpress","wp-plugin","top-100","top-200"],"reference":["https://wordpress.org/plugins/tinymce-advanced/"],"severity":"info","metadata":{"plugin_namespace":"tinymce-advanced","wpscan":"https://wpscan.com/plugin/tinymce-advanced"}},"matcher-name":"outdated_version","type":"http","host":"https://elgerjonker.nl","matched-at":"https://elgerjonker.nl/wp-content/plugins/tinymce-advanced/readme.txt","extracted-results":["4.6.7"],"meta":{"last_version":"5.6.0"},"ip":"149.210.204.105","timestamp":"2023-02-27T11:33:16.019022+01:00","curl-command":"curl -X 'GET' -d '' -H 'Accept: */*' -H 'Accept-Language: en' -H 'User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.67 Safari/537.36' 'https://elgerjonker.nl/wp-content/plugins/tinymce-advanced/readme.txt'","matcher-status":true,"matched-line":null}]"""  # noqa
+        evidence = """[ { "name": "Citrix ADC Gateway Login Panel - Detect", "finding-name": "nuclei_citrix_adc_gateway_panel", "evidence": { "extracted-results": [], "matched-at": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html" } }, { "name": "NetScaler AAA Login Panel - Detect", "finding-name": "nuclei_netscaler_aaa_login", "evidence": { "extracted-results": [], "matched-at": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html" } } ]"""  # noqa
 
         EndpointGenericScan.objects.create(
             endpoint=endpoint,
@@ -48,15 +47,29 @@ def test_login_plaza_data(db):
 
         # id's change per database test, dont reset them:
         del data[0]["organization_id"]
+        del data[1]["organization_id"]
 
         assert data == [
             {
-                "organization_name": "test",
-                "url_url": "test.nl",
-                "subdomain": "",
                 "domain": "test.nl",
-                "last_scan_moment": now,
-                "rating_determined_on": now,
-                "portals": json.loads(evidence),
-            }
+                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "organization_name": "test",
+                "portal_extracted": [],
+                "portal_name": "Citrix ADC Gateway Login Panel",
+                "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html",
+                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "subdomain": "",
+                "url_url": "test.nl",
+            },
+            {
+                "domain": "test.nl",
+                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "organization_name": "test",
+                "portal_extracted": [],
+                "portal_name": "NetScaler AAA Login Panel",
+                "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html",
+                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "subdomain": "",
+                "url_url": "test.nl",
+            },
         ]

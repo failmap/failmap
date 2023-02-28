@@ -36,7 +36,7 @@ def login_plaza_data(country: str = None, layer: str = None):
         if not portals:
             continue
 
-        dicts = [
+        dicts.extend(
             {
                 "organization_name": scan.endpoint.url.organization.first().name,
                 "organization_id": scan.endpoint.url.organization.first().id,
@@ -45,8 +45,10 @@ def login_plaza_data(country: str = None, layer: str = None):
                 "domain": f"{scan.endpoint.url.computed_domain}.{scan.endpoint.url.computed_suffix}",
                 "last_scan_moment": scan.last_scan_moment,
                 "rating_determined_on": scan.rating_determined_on,
-                "portals": portals,
+                "portal_name": portal.get("name", "").replace(" - Detect", ""),
+                "portal_url": portal.get("evidence", {}).get("matched-at", ""),
+                "portal_extracted": portal.get("evidence", {}).get("extracted-results", ""),
             }
-        ]
-
+            for portal in portals
+        )
     return dicts
