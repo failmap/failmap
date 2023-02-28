@@ -1119,6 +1119,11 @@ CONSTANCE_CONFIG = {
         "enabled basically everything.",
         str,
     ),
+    "SHOW_HISTORIC_COMPARISON_REPORTS": (
+        False,
+        "Show monthly or yearly comparison reports per layer, also known as press reports.",
+        bool,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1256,6 +1261,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_DONATION",
                 "SHOW_LOGIN_PLAZA",
                 "SHOW_TIME_MACHINE",
+                "SHOW_HISTORIC_COMPARISON_REPORTS",
             ),
         ),
         (

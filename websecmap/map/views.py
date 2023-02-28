@@ -271,6 +271,7 @@ def config_content():
             "snow": configuration["SHOW_SNOW"],
             "login_plaza": configuration["SHOW_LOGIN_PLAZA"],
             "time_machine": configuration["SHOW_TIME_MACHINE"],
+            "historic_comparison_reports": configuration["SHOW_HISTORIC_COMPARISON_REPORTS"],
             "socials": {
                 "report": configuration["SOCIALS_SHOW_REPORT"],
                 "map": configuration["SOCIALS_SHOW_MAP"],
