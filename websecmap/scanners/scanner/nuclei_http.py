@@ -149,7 +149,8 @@ def compose_scan_task(urls: List[Url], scanner_keyword_arguments: Dict[str, Any]
         scan.s(hosts, scanner_keyword_arguments)
         | store.s(host_to_endpoint_mapping)
         | group(
-            plannedscan.finish.si(SCANNER_ACTION, SCANNER_NAME, mapping["url"]) for mapping in host_to_endpoint_mapping
+            plannedscan.finish.si(SCANNER_ACTION, SCANNER_NAME, mapping["url"])
+            for url, mapping in host_to_endpoint_mapping.items()
         )
     )
 
