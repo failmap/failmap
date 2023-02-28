@@ -21,9 +21,11 @@ def login_plaza_data(country: str = None, layer: str = None):
         endpoint__url__not_resolvable=False,
         endpoint__url__organization__country=my_country,
         endpoint__url__organization__type=my_layer,
-    )[:500]
+    )[:1000]
 
     dicts = []
+    # don't include the same url over and over again...
+    list_of_urls = []
 
     for scan in scans:
         log.debug(scan)
@@ -36,19 +38,26 @@ def login_plaza_data(country: str = None, layer: str = None):
         if not portals:
             continue
 
-        dicts.extend(
-            {
-                "organization_name": scan.endpoint.url.organization.first().name,
-                "organization_id": scan.endpoint.url.organization.first().id,
-                "url_url": scan.endpoint.url.url,
-                "subdomain": scan.endpoint.url.computed_subdomain,
-                "domain": f"{scan.endpoint.url.computed_domain}.{scan.endpoint.url.computed_suffix}",
-                "last_scan_moment": scan.last_scan_moment,
-                "rating_determined_on": scan.rating_determined_on,
-                "portal_name": portal.get("name", "").replace(" - Detect", ""),
-                "portal_url": portal.get("evidence", {}).get("matched-at", ""),
-                "portal_extracted": portal.get("evidence", {}).get("extracted-results", ""),
-            }
-            for portal in portals
-        )
+        for portal in portals:
+            portal_url = portal.get("evidence", {}).get("matched-at", "")
+
+            if portal_url in list_of_urls:
+                continue
+
+            list_of_urls.append(portal_url)
+
+            dicts.append(
+                {
+                    "organization_name": scan.endpoint.url.organization.first().name,
+                    "organization_id": scan.endpoint.url.organization.first().id,
+                    "url_url": scan.endpoint.url.url,
+                    "subdomain": scan.endpoint.url.computed_subdomain,
+                    "domain": f"{scan.endpoint.url.computed_domain}.{scan.endpoint.url.computed_suffix}",
+                    "last_scan_moment": scan.last_scan_moment,
+                    "rating_determined_on": scan.rating_determined_on,
+                    "portal_name": portal.get("name", "").replace(" - Detect", ""),
+                    "portal_url": portal_url,
+                    "portal_extracted": portal.get("evidence", {}).get("extracted-results", ""),
+                }
+            )
     return dicts
