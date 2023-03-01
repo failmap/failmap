@@ -21,7 +21,7 @@ def login_plaza_data(country: str = None, layer: str = None):
         endpoint__url__not_resolvable=False,
         endpoint__url__organization__country=my_country,
         endpoint__url__organization__type=my_layer,
-    )[:1000]
+    )[:2000]
 
     dicts = []
     # don't include the same url over and over again...
@@ -58,6 +58,8 @@ def login_plaza_data(country: str = None, layer: str = None):
                     "portal_name": portal.get("name", "").replace(" - Detect", ""),
                     "portal_url": portal_url,
                     "portal_extracted": portal.get("evidence", {}).get("extracted-results", ""),
+                    # make it easier to make uniques in the frontend
+                    "scan_id": scan.id,
                 }
             )
     return dicts

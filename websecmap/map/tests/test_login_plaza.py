@@ -48,6 +48,8 @@ def test_login_plaza_data(db):
         # id's change per database test, dont reset them:
         del data[0]["organization_id"]
         del data[1]["organization_id"]
+        del data[0]["scan_id"]
+        del data[1]["scan_id"]
 
         assert data == [
             {
