@@ -38,7 +38,7 @@ def test_map_datasets(db):
     organization_type, created = OrganizationType.objects.all().get_or_create(name="municipality")
 
     organization, created = Organization.objects.all().get_or_create(
-        name="test", type=organization_type, country="NL", created_on=timezone.now(), is_dead=False
+        name="test", country="NL", created_on=timezone.now(), is_dead=False
     )
     organization.layers.add(organization_type)
 
@@ -70,7 +70,9 @@ def test_map_datasets(db):
     # The return is a string(!)
     book = export_urls_only("NL", "municipality")
 
-    # there is a filename
-    assert book["data"][1, 1] == "test.nl"
-    assert book["data"][2, 1] == "test2.nl"
-    assert book["data"][3, 1] == "test3.nl"
+    # there is a filename, the order does not matter...
+    assert book["data"][1, 1] in ["test.nl", "test2.nl", "test3.nl"]
+    assert book["data"][2, 1] in ["test.nl", "test2.nl", "test3.nl"]
+    assert book["data"][3, 1] in ["test.nl", "test2.nl", "test3.nl"]
+
+    assert book["data"][1, 1] != book["data"][2, 1] != book["data"][3, 1]
