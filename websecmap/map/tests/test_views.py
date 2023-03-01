@@ -27,6 +27,8 @@ def setup():
     url.save()
     org = Organization(**{"name": "Texel", "country": "NL", "type": ott})
     org.save()
+    org.layers.add(ott)
+
     org.add_url("example.com")
     endp = Endpoint(**{"url": url})
     endp.save()

@@ -195,7 +195,7 @@ def what_to_improve_ugs(country: str, organization_type: str, issue_type: str, p
         url__is_dead=False,
         url__not_resolvable=False,
         url__organization__country=country,
-        url__organization__type=organization_type,
+        url__organization__layers=organization_type,
     )[0:500]
 
     dicts = [
@@ -227,7 +227,7 @@ def what_to_improve_epgs(country: str, organization_type: str, issue_type: str, 
         endpoint__url__is_dead=False,
         endpoint__url__not_resolvable=False,
         endpoint__url__organization__country=country,
-        endpoint__url__organization__type=organization_type,
+        endpoint__url__organization__layers=organization_type,
     )[0:500]
 
     dicts = [

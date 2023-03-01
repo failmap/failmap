@@ -54,7 +54,7 @@ def export_urls_only(country: str = "NL", organization_type="municipality"):
             not_resolvable=False,
             organization__is_dead=False,
             organization__country=get_country(country),
-            organization__type=get_organization_type(organization_type),
+            organization__layers=get_organization_type(organization_type),
         )
         .values_list(
             "id", "url", "not_resolvable", "is_dead", "computed_subdomain", "computed_domain", "computed_suffix"

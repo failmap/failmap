@@ -522,7 +522,7 @@ def get_subdomains(countries: List, organization_types: List = None):
         urls = urls.filter(organization__country__in=countries)
 
     if organization_types:
-        urls = urls.filter(organization__type__name__in=organization_types)
+        urls = urls.filter(organization__layers__name__in=organization_types)
 
     # make sure no queryset is returned
     return list(urls.values_list("computed_subdomain", flat=True).distinct().order_by("computed_subdomain"))

@@ -39,7 +39,7 @@ def get_all_latest_scans(country, organization_type):
                         endpoint__url__is_dead=False,
                         endpoint__url__organization__is_dead=False,
                         endpoint__url__organization__country=filtered_country,
-                        endpoint__url__organization__type_id=filtered_organization_type,
+                        endpoint__url__organization__layers_id=filtered_organization_type,
                     ),
                 )
             )
@@ -82,7 +82,7 @@ def get_all_latest_scans(country, organization_type):
                     filter=Q(
                         url__organization__is_dead=False,
                         url__organization__country=filtered_country,
-                        url__organization__type_id=filtered_organization_type,
+                        url__organization__layers_id=filtered_organization_type,
                         url__is_dead=False,
                         url__not_resolvable=False,
                     ),

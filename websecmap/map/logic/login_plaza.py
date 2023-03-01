@@ -20,7 +20,7 @@ def login_plaza_data(country: str = None, layer: str = None):
         endpoint__url__is_dead=False,
         endpoint__url__not_resolvable=False,
         endpoint__url__organization__country=my_country,
-        endpoint__url__organization__type=my_layer,
+        endpoint__url__organization__layers=my_layer,
     )[:2000]
 
     dicts = []

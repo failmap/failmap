@@ -205,7 +205,7 @@ def get_2ndlevel_domains(country, layer):
         .filter(
             Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
             organization__country=get_country(country),
-            organization__type=get_organization_type(layer),
+            organization__layers=get_organization_type(layer),
         )
         .values_list("url", flat=True)
     )
