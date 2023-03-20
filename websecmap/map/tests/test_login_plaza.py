@@ -3,9 +3,18 @@ from datetime import datetime
 from django.utils import timezone
 from freezegun import freeze_time
 
-from websecmap.map.logic.login_plaza import login_plaza_data
+from websecmap.map.logic.login_plaza import login_plaza_data, get_nuclei_product_mapping
 from websecmap.organizations.models import OrganizationType, Organization, Url
-from websecmap.scanners.models import Endpoint, EndpointGenericScan
+from websecmap.scanners.models import (
+    Endpoint,
+    EndpointGenericScan,
+    ProductVendor,
+    ProductGoal,
+    ScannerFinding,
+    ProductRelationship,
+    Product,
+    ProductHierarchy,
+)
 
 
 def test_login_plaza_data(db):
@@ -31,7 +40,7 @@ def test_login_plaza_data(db):
 
         endpoint = Endpoint.objects.create(url=url, port=443, protocol="https")
 
-        evidence = """[ { "name": "Citrix ADC Gateway Login Panel - Detect", "finding-name": "nuclei_citrix_adc_gateway_panel", "evidence": { "extracted-results": [], "matched-at": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html" } }, { "name": "NetScaler AAA Login Panel - Detect", "finding-name": "nuclei_netscaler_aaa_login", "evidence": { "extracted-results": [], "matched-at": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html" } } ]"""  # noqa
+        evidence = """[ { "name": "Citrix ADC Gateway Login Panel - Detect", "finding-name": "nuclei_citrix_adc_gateway_panel", "evidence": { "extracted-results": ["13.37"], "matched-at": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html" } }, { "name": "NetScaler AAA Login Panel - Detect", "finding-name": "nuclei_netscaler_aaa_login", "evidence": { "extracted-results": [], "matched-at": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html" } } ]"""  # noqa
 
         EndpointGenericScan.objects.create(
             endpoint=endpoint,
@@ -51,17 +60,19 @@ def test_login_plaza_data(db):
         del data[0]["scan_id"]
         del data[1]["scan_id"]
 
+        # there is no tech in the database yet, so you don't see any technology
         assert data == [
             {
                 "domain": "test.nl",
                 "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
                 "organization_name": "test",
-                "portal_extracted": [],
+                "portal_extracted": ["13.37"],
                 "portal_name": "Citrix ADC Gateway Login Panel",
                 "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html",
                 "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
                 "subdomain": "",
                 "url_url": "test.nl",
+                "tech": [],
             },
             {
                 "domain": "test.nl",
@@ -73,5 +84,185 @@ def test_login_plaza_data(db):
                 "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
                 "subdomain": "",
                 "url_url": "test.nl",
+                "tech": [],
             },
         ]
+
+        create_test_product_data()
+        data = login_plaza_data("NL", "municipality")
+
+        # id's change per database test, dont reset them:
+        del data[0]["organization_id"]
+        del data[1]["organization_id"]
+        del data[0]["scan_id"]
+        del data[1]["scan_id"]
+
+        # there is no tech in the database yet, so you don't see any technology
+        assert data == [
+            {
+                "domain": "test.nl",
+                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "organization_name": "test",
+                "portal_extracted": ["13.37"],
+                "portal_name": "Citrix ADC Gateway Login Panel",
+                "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html",
+                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "subdomain": "",
+                "url_url": "test.nl",
+                "tech": [
+                    {
+                        "common_execution_context": "Server",
+                        "cve_details_link": "",
+                        "goal": "Yolo-ing",
+                        "intended_use_case_description": "something",
+                        "is_open_source": True,
+                        "name": "phpmyadmin",
+                        "name_slug": "",
+                        "tags": ["tag 1", "tag 2"],
+                        "vendor": "Yolo Company",
+                        "version": "13.37",
+                    },
+                    {
+                        "common_execution_context": "Server",
+                        "cve_details_link": "",
+                        "goal": "Yolo-ing",
+                        "intended_use_case_description": "something",
+                        "is_open_source": True,
+                        "name": "php",
+                        "name_slug": "",
+                        "tags": ["tag 3", "tag 4"],
+                        "vendor": "Yolo Company",
+                        "version": "unknown",
+                    },
+                ],
+            },
+            {
+                "domain": "test.nl",
+                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "organization_name": "test",
+                "portal_extracted": [],
+                "portal_name": "NetScaler AAA Login Panel",
+                "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html",
+                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "subdomain": "",
+                "url_url": "test.nl",
+                # Same endpoint, so same technologies.
+                "tech": [
+                    {
+                        "common_execution_context": "Server",
+                        "cve_details_link": "",
+                        "goal": "Yolo-ing",
+                        "intended_use_case_description": "something",
+                        "is_open_source": True,
+                        "name": "phpmyadmin",
+                        "name_slug": "",
+                        "tags": ["tag 1", "tag 2"],
+                        "vendor": "Yolo Company",
+                        "version": "13.37",
+                    },
+                    {
+                        "common_execution_context": "Server",
+                        "cve_details_link": "",
+                        "goal": "Yolo-ing",
+                        "intended_use_case_description": "something",
+                        "is_open_source": True,
+                        "name": "php",
+                        "name_slug": "",
+                        "tags": ["tag 3", "tag 4"],
+                        "vendor": "Yolo Company",
+                        "version": "unknown",
+                    },
+                ],
+            },
+        ]
+
+
+def create_test_product_data():
+    # now let's add some products like it's phpmyadmin, add some nested products and other vendors.
+    # this would return a list of technologies that are used
+    vendor = ProductVendor.objects.create(name="Yolo Company")
+    goal = ProductGoal.objects.create(name="Yolo-ing")
+    finding_1 = ScannerFinding.objects.create(name="nuclei_citrix_adc_gateway_panel")
+    finding_2 = ScannerFinding.objects.create(name="nuclei_netscaler_aaa_login")
+    relationship = ProductRelationship.objects.create(name="something something something darkside")
+
+    # add some random product, for the citrix panel
+    product = Product.objects.create(
+        name="phpmyadmin",
+        vendor=vendor,
+        goal=goal,
+        intended_use_case_description="something",
+        is_open_source=True,
+        common_execution_environment="Server",
+        is_irrelevant=False,
+    )
+    product.tags.add("tag 1")
+    product.tags.add("tag 2")
+
+    product.scanner_finding_name_mapping.add(finding_1)
+
+    # add another random product, for the netscaler
+    product2 = Product.objects.create(
+        name="php",
+        vendor=vendor,
+        goal=goal,
+        intended_use_case_description="something",
+        is_open_source=True,
+        common_execution_environment="Server",
+        is_irrelevant=False,
+    )
+    product2.tags.add("tag 3")
+    product2.tags.add("tag 4")
+
+    product2.scanner_finding_name_mapping.add(finding_2)
+
+    # also test that the relationship is created. So the citrix will also get the thing for the netscaler
+    ProductHierarchy.objects.create(product=product, related_product=product2, relationship=relationship)
+
+
+def test_get_nuclei_product_mapping(db):
+    create_test_product_data()
+    mapping = get_nuclei_product_mapping()
+
+    assert mapping == {
+        "nuclei_citrix_adc_gateway_panel": [
+            {
+                "common_execution_context": "Server",
+                "cve_details_link": "",
+                "goal": "Yolo-ing",
+                "intended_use_case_description": "something",
+                "is_open_source": True,
+                "name": "phpmyadmin",
+                "name_slug": "",
+                "tags": ["tag 1", "tag 2"],
+                "vendor": "Yolo Company",
+                "version": "unknown",
+            },
+            {
+                "common_execution_context": "Server",
+                "cve_details_link": "",
+                "goal": "Yolo-ing",
+                "intended_use_case_description": "something",
+                "is_open_source": True,
+                "name": "php",
+                "name_slug": "",
+                "tags": ["tag 3", "tag 4"],
+                "vendor": "Yolo Company",
+                "version": "unknown",
+            },
+        ],
+        "nuclei_netscaler_aaa_login": [
+            {
+                "common_execution_context": "Server",
+                "cve_details_link": "",
+                "goal": "Yolo-ing",
+                "intended_use_case_description": "something",
+                "is_open_source": True,
+                "name": "php",
+                "name_slug": "",
+                "tags": ["tag 3", "tag 4"],
+                "vendor": "Yolo Company",
+                "version": "unknown",
+            }
+        ],
+    }

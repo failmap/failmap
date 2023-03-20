@@ -1,7 +1,7 @@
 from django.utils import timezone
 
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, PlannedScan, Scanner
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, PlannedScan, Scanner, ScannerFinding
 from websecmap.scanners.scanner.nuclei_http import (
     store,
     convert_nuclei_data_to_json,
@@ -13,6 +13,7 @@ from websecmap.scanners.scanner.nuclei_http import (
     get_templates_from_scan_results,
     plan_verify,
     compose_planned_verify_task,
+    extract_findings_to_scanner_findings,
 )
 
 three_example_nuclei_tests = data = (
@@ -463,3 +464,21 @@ def test_nuclei_plan_verify(db, default_scan_metadata):
 
     verify_task = compose_planned_verify_task()
     assert verify_task is not None
+
+
+def test_extract_findings_to_scanner_findings(db, default_scan_metadata):
+
+    url = Url.objects.create(**{"url": "example.com"})
+    endpoint = Endpoint.objects.create(**{"url": url, "protocol": "http", "port": 443})
+    EndpointGenericScan.objects.create(
+        type="nuclei_exposed_panels",
+        rating="info",
+        evidence=CITRIX_SCAN_RESULTS,
+        endpoint=endpoint,
+        is_the_latest_scan=True,
+        rating_determined_on=timezone.now(),
+    )
+
+    extract_findings_to_scanner_findings()
+
+    assert ScannerFinding.objects.all().count() == 2

@@ -8,7 +8,7 @@ from jet.filters import RelatedFieldAjaxListFilter
 
 from websecmap.map.admin import ordering_actions
 from websecmap.scanners import models
-from websecmap.scanners.models import State
+from websecmap.scanners.models import State, Product, ProductHierarchy
 from websecmap.scanners.proxy import check_proxy
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import progress_running_scan, recover_and_retry
 from websecmap.scanners.scanner.banners.detect_version import clean_and_detect, add_excepted_banner_to_config
@@ -685,3 +685,93 @@ class FollowUpScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 for p in obj.run_follow_up_on_any_of_these_policies.all()
             ]
         )
+
+
+@admin.register(models.Product)
+class ProductAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("tags")
+
+    search_fields = ("name", "vendor__name")
+    list_display = (
+        "id",
+        "name",
+        "cve_details_link",
+        "in_findings",
+        "relations",
+        # metadata
+        "is_open_source",
+        "common_execution_environment",
+        "tag_list",
+        "vendor",
+        "goal",
+    )
+
+    def tag_list(self, obj):
+        return ", ".join(o.name for o in obj.tags.all())
+
+    @staticmethod
+    def in_findings(obj):
+        return obj.scanner_finding_name_mapping.all().count()
+
+    def relations(self, obj):
+        return list(ProductHierarchy.objects.all().filter(product=obj))
+
+
+@admin.register(models.ProductVendor)
+class ProductVendorAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    search_fields = ("name",)
+
+    list_display = ("id", "name", "uses")
+
+    @staticmethod
+    def uses(obj):
+        return Product.objects.all().filter(vendor=obj).count()
+
+
+@admin.register(models.ProductRelationship)
+class ProductRelationshipAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    search_fields = ("name",)
+
+    list_display = ("id", "name", "uses")
+
+    @staticmethod
+    def uses(obj):
+        return ProductHierarchy.objects.all().filter(relationship=obj).count()
+
+
+@admin.register(models.ProductGoal)
+class ProductGoalAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    search_fields = ("name",)
+
+    list_display = ("id", "name", "uses")
+
+    @staticmethod
+    def uses(obj):
+        return Product.objects.all().filter(goal=obj).count()
+
+
+@admin.register(models.ProductHierarchy)
+class ProductHierarchyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    search_fields = ("product__name", "related_product__name", "relationship__name")
+
+    list_display = ("id", "product", "relationship", "related_product")
+
+
+@admin.register(models.ScannerFinding)
+class ScannerFindingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    search_fields = ("name",)
+    list_display = ("id", "name", "uses", "add_product", "products")
+
+    @staticmethod
+    def uses(obj):
+        return Product.objects.all().filter(scanner_finding_name_mapping=obj).count()
+
+    @staticmethod
+    def add_product(obj):
+
+        return mark_safe("<a href='/admin/scanners/product/add/'>add</a>")
+
+    @staticmethod
+    def products(obj):
+        return list(Product.objects.all().filter(scanner_finding_name_mapping=obj))

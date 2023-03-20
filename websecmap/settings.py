@@ -115,6 +115,7 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "proxy",
     "django_statsd",
+    "taggit",
     # needs GDAL_LIBRARY_PATH, used for ?
     # 'leaflet',
     # Has been removed due to build errors (gdal) and little to no need to actually manually
@@ -657,6 +658,16 @@ CONSTANCE_CONFIG = {
         "geocode thousands of addresses.",
         str,
     ),
+    "OPENAI_API_KEY": (
+        "sk-r...1Wg",
+        "This API helps with creating context around otherwise dry information",
+        str,
+    ),
+    "OPENAI_MODEL_NAME": (
+        "gpt-3.5-turbo",
+        "The model used to generate product context",
+        str,
+    ),
     "MAPBOX_ACCESS_TOKEN": (
         "pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw",
         "Mapbox provides the tiles shown on the map. This makes the map look like a map. Mapbox provides a number of"
@@ -1149,6 +1160,13 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             ),
         ),
         (
+            "ChatGPT / OpenAI used for product context",
+            (
+                "OPENAI_API_KEY",
+                "OPENAI_MODEL_NAME",
+            ),
+        ),
+        (
             "Project information: how you call this installation publicly",
             (
                 "PROJECT_NAME",
@@ -1489,6 +1507,17 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "scanners.scantypecategory", "label": "👩‍🏫 Scan Type Categories"},
             {"name": "scanners.scanneractivity", "label": "🚴 Scanner Activities"},
             {"name": "scanners.followupscan", "label": "⏭️ Follow Up Scans"},
+        ],
+    },
+    {
+        "label": _("Software Product Metadata"),
+        "items": [
+            {"name": "scanners.product", "label": "🥡 Product"},
+            {"name": "scanners.scannerfinding", "label": "🙋 Scanner Finding"},
+            {"name": "scanners.producthierarchy", "label": "👩‍🏫 Hierarchy"},
+            {"name": "scanners.productvendor", "label": "🏢 Vendor"},
+            {"name": "scanners.productgoal", "label": "🥅 Goal"},
+            {"name": "scanners.productrelationship", "label": "🧑‍🤝‍🧑 Relationship"},
         ],
     },
     {

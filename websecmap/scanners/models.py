@@ -4,11 +4,13 @@ from datetime import datetime, timedelta
 import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 
 from websecmap.organizations.models import Url
 from websecmap.reporting.models import ScanPolicy
+from taggit.managers import TaggableManager
 
 
 class Endpoint(models.Model):
@@ -855,3 +857,130 @@ class PlannedScanLog(models.Model):
     # This also logs changes on scans that have not been requested, but that might have finished etc.
     at_when = models.DateTimeField(auto_now_add=True)
     line = models.CharField(max_length=255)
+
+
+"""
+phpMyAdmin is written in PHP, which runs on Windows/Linux/MacOS, has the goal of Database Management.
+"""
+
+
+class ScannerFinding(models.Model):
+    name = models.CharField(max_length=200, blank=True, null=False)
+    slug = models.SlugField(max_length=200, blank=True)
+    nice_name = models.CharField(max_length=200, blank=True)
+    scanner = models.ForeignKey(Scanner, on_delete=models.CASCADE, null=True, blank=True)
+
+    def save(self, *args, **kwarg):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwarg)
+
+    def __str__(self):
+        return self.name
+
+
+class ProductGoal(models.Model):
+    # Operating System, Data Storage, Programming Language, Web Framework, Log Management, E-Mail, Database Management,
+    # Virtual Private Network, Telephony, Software Version Tracking, Web Shop, Online Collaboration, Online Meetings,
+    # Monitoring, Authentication, Knowledge Base (wiki), Typesetting, Commenting, Mail Campaigns etc
+    name = models.CharField(max_length=200, blank=True, null=False)
+    slug = models.SlugField(max_length=200, blank=True)
+
+    def save(self, *args, **kwarg):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwarg)
+
+    def __str__(self):
+        return self.name
+
+
+class ProductVendor(models.Model):
+    name = models.CharField(max_length=200, blank=True, null=False)
+    slug = models.SlugField(max_length=200, blank=True)
+
+    def save(self, *args, **kwarg):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwarg)
+
+    def __str__(self):
+        return self.name
+
+
+class Product(models.Model):
+    # Filled in by hand / a script
+    name = models.CharField(max_length=200, blank=True, null=False)
+    cve_details_link = models.CharField(max_length=200, blank=True, null=False)
+    scanner_finding_name_mapping = models.ManyToManyField(to=ScannerFinding, blank=True)
+
+    # Automatically filled in
+    vendor = models.ForeignKey(ProductVendor, blank=True, null=True, on_delete=models.CASCADE)
+    name_slug = models.SlugField(max_length=200, blank=True, null=False)
+    goal = models.ForeignKey(ProductGoal, blank=True, null=True, on_delete=models.CASCADE)
+    arbitrary_json_data = JSONField(blank=True, null=True)
+
+    intended_use_case_description = models.CharField(max_length=600, blank=True, null=True)
+    contextual_graph = models.CharField(max_length=2000, blank=True, null=True)
+    tags = TaggableManager(blank=True)
+
+    is_open_source = models.BooleanField(default=None, null=True, blank=True)
+
+    # Server, Browser, Both (for javascript i guess), or Unknown
+    common_execution_environment = models.CharField(max_length=20, blank=True, null=True)
+
+    # products / technologies that should not be returned because they never add a lot of value
+    # such as defaults and such.
+    is_irrelevant = models.BooleanField(default=False, null=True, blank=True)
+
+    def save(self, *args, **kwarg):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwarg)
+
+    @property
+    def verbose_name(self):
+        summary = ""
+
+        if self.vendor and self.vendor.name.lower() not in ["open source community", "unknown"]:
+            summary += f"{self.vendor} "
+
+        if self.name:
+            summary += f"{self.name} "
+
+        return summary.strip()
+
+    def __str__(self):
+        summary = ""
+        if self.vendor:
+            summary += f"{self.vendor} "
+
+        if self.name:
+            summary += f"'{self.name}' "
+
+        if self.goal:
+            summary += f" ({self.goal})"
+
+        return summary.strip()
+
+
+class ProductRelationship(models.Model):
+    # 'written in', 'runs on', 'plugin', 'stores data in', just to make complete sentences.
+    name = models.CharField(max_length=200, blank=True, null=False)
+    slug = models.SlugField(max_length=200, blank=True)
+
+    def save(self, *args, **kwarg):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwarg)
+
+    def __str__(self):
+        return self.name
+
+
+class ProductHierarchy(models.Model):
+    # Separate the hierarchy / network from the data itself, so it can be easily replaced / upgraded etc.
+    # It's also not important how fast it is given it's a long duration cached read and virtually nothing
+    # ever changes in the software world.
+    # The N to 1 relationships are the most interesting.
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product")
+    related_product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, related_name="related_to")
+    relationship = models.ForeignKey(ProductRelationship, on_delete=models.CASCADE, blank=True)
+
+    def __str__(self):
+        return f"{self.product} -> {self.relationship} -> {self.related_product}"

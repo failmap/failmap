@@ -8,7 +8,7 @@ from websecmap.app import log
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan, init_dict
-from websecmap.scanners.models import EndpointGenericScan, Endpoint
+from websecmap.scanners.models import EndpointGenericScan, Endpoint, ScannerFinding, Scanner
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner import allowed_to_scan, constance_json_value, unique_and_random
 from websecmap.scanners.scanner.filter import merge_endpoints_filter, generic_plan_scan, filter_endpoints_only
@@ -412,3 +412,39 @@ def process_nuclei_record(n_record: Dict[str, Any]) -> Dict[str, Any]:
         "finding-name": finding_name,
         "evidence": reduced_evidence,
     }
+
+
+def extract_findings_to_scanner_findings():
+    # Gets the finding-name and nice name and puts it in the ScannerFinding table.
+    # This is useful to create mappings between scanner findings and products.
+    # Many findings all point to the same product.
+    # Example data:
+    # [{"template-id": "waf-detect", "name": "WAF Detection", "finding-name": "nuclei_waf_detect_apachegeneric",
+    # "evidence": {"extracted-results": [], "matched-at": ""}}]
+    # And other example data:
+    # [{"template-id": "rstudio-detect", "name": "RStudio Panel - Detect", "finding-name": "nuclei_rstudio_detect",
+    # "evidence": {"extracted-results": [], "matched-at": ""}}]
+
+    scanner = Scanner.objects.all().filter(name="nuclei_http").first()
+    if not scanner:
+        log.warning("No nuclei_http scanner found, cannot extract findings.")
+        return
+
+    # do not attempt to re-insert something we already have
+    # this reduces many many queries into ±2k
+    found_findings_names = []
+
+    for epgs in EndpointGenericScan.objects.all().filter(type__startswith="nuclei_"):
+        try:
+            json_data = json.loads(epgs.evidence)
+        except json.decoder.JSONDecodeError:
+            json_data = {}
+        if not json_data:
+            continue
+        # it's a list of dicts
+        for row in json_data:
+            if row["finding-name"] in found_findings_names:
+                continue
+
+            found_findings_names.append(row["finding-name"])
+            ScannerFinding.objects.get_or_create(name=row["finding-name"], nice_name=row["name"], scanner=scanner)
