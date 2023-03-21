@@ -31,7 +31,7 @@ from websecmap.map.logic.datasets import create_filename
 from websecmap.map.logic.explain import explain, get_all_explains, get_recent_explains, remove_explanation
 from websecmap.map.logic.improvements import get_improvements
 from websecmap.map.logic.latest import get_all_latest_scans
-from websecmap.map.logic.login_plaza import login_plaza_data
+from websecmap.map.logic.login_plaza import login_plaza_data, get_products
 from websecmap.map.logic.map import get_map_data
 from websecmap.map.logic.map_defaults import (
     DEFAULT_COUNTRY,
@@ -905,3 +905,8 @@ def login_plaza(
             layer=organization_type,
         )
     )
+
+
+@cache_page(ONE_HOUR)
+def login_plaza_products(request):
+    return json_response(get_products())

@@ -55,6 +55,7 @@ urlpatterns = [
     path("short_and_simple_stats/<w:days_back>/", v.get_short_and_simple_stats_),
     path("short_and_simple_stats/<ymd:at_date>/", v.get_short_and_simple_stats_),
     path(f"{lp}/<c:country>/<slug:organization_type>/", v.login_plaza),
+    path(f"{lp}/products/", v.login_plaza_products),
     path(f"{vg}/<c:country>/<slug:organization_type>/<w:days_back>/", v.vulnerability_graphs),
     path(f"{vg}/<c:country>/<slug:organization_type>/<ymd:at_date>/", v.vulnerability_graphs),
     path(f"{vg}/<c:country>/<slug:organization_type>/<w:days_back>/<int:duration>/", v.vulnerability_graphs),

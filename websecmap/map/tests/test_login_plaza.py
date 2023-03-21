@@ -3,7 +3,7 @@ from datetime import datetime
 from django.utils import timezone
 from freezegun import freeze_time
 
-from websecmap.map.logic.login_plaza import login_plaza_data, get_nuclei_product_mapping
+from websecmap.map.logic.login_plaza import login_plaza_data, get_nuclei_product_mapping, get_products
 from websecmap.organizations.models import OrganizationType, Organization, Url
 from websecmap.scanners.models import (
     Endpoint,
@@ -15,166 +15,6 @@ from websecmap.scanners.models import (
     Product,
     ProductHierarchy,
 )
-
-
-def test_login_plaza_data(db):
-    with freeze_time("2022-01-24"):
-        # no data, no crashes
-        data = login_plaza_data("NL", "municipality")
-        assert data == []
-
-        # Prepare the data for a typical response
-        organization_type, created = OrganizationType.objects.all().get_or_create(name="municipality")
-        now = timezone.now()
-
-        organization = Organization.objects.all().create(
-            name="test", type=organization_type, country="NL", created_on=now, is_dead=False
-        )
-        organization.layers.add(organization_type)
-
-        url = Url.objects.all().create(url="test.nl", created_on=now, is_dead=False, not_resolvable=False)
-
-        # create the n-n connection between url and organization
-        url.organization.add(organization)
-        url.save()
-
-        endpoint = Endpoint.objects.create(url=url, port=443, protocol="https")
-
-        evidence = """[ { "name": "Citrix ADC Gateway Login Panel - Detect", "finding-name": "nuclei_citrix_adc_gateway_panel", "evidence": { "extracted-results": ["13.37"], "matched-at": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html" } }, { "name": "NetScaler AAA Login Panel - Detect", "finding-name": "nuclei_netscaler_aaa_login", "evidence": { "extracted-results": [], "matched-at": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html" } } ]"""  # noqa
-
-        EndpointGenericScan.objects.create(
-            endpoint=endpoint,
-            evidence=evidence,
-            type="nuclei_exposed_panels",
-            rating_determined_on=now,
-            is_the_latest_scan=True,
-            rating="info",
-        )
-
-        # retrieve a typical response based on the single metrics we have in the db.
-        data = login_plaza_data("NL", "municipality")
-
-        # id's change per database test, dont reset them:
-        del data[0]["organization_id"]
-        del data[1]["organization_id"]
-        del data[0]["scan_id"]
-        del data[1]["scan_id"]
-
-        # there is no tech in the database yet, so you don't see any technology
-        assert data == [
-            {
-                "domain": "test.nl",
-                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
-                "organization_name": "test",
-                "portal_extracted": ["13.37"],
-                "portal_name": "Citrix ADC Gateway Login Panel",
-                "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html",
-                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
-                "subdomain": "",
-                "url_url": "test.nl",
-                "tech": [],
-            },
-            {
-                "domain": "test.nl",
-                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
-                "organization_name": "test",
-                "portal_extracted": [],
-                "portal_name": "NetScaler AAA Login Panel",
-                "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html",
-                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
-                "subdomain": "",
-                "url_url": "test.nl",
-                "tech": [],
-            },
-        ]
-
-        create_test_product_data()
-        data = login_plaza_data("NL", "municipality")
-
-        # id's change per database test, dont reset them:
-        del data[0]["organization_id"]
-        del data[1]["organization_id"]
-        del data[0]["scan_id"]
-        del data[1]["scan_id"]
-
-        # there is no tech in the database yet, so you don't see any technology
-        assert data == [
-            {
-                "domain": "test.nl",
-                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
-                "organization_name": "test",
-                "portal_extracted": ["13.37"],
-                "portal_name": "Citrix ADC Gateway Login Panel",
-                "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html",
-                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
-                "subdomain": "",
-                "url_url": "test.nl",
-                "tech": [
-                    {
-                        "common_execution_context": "Server",
-                        "cve_details_link": "",
-                        "goal": "Yolo-ing",
-                        "intended_use_case_description": "something",
-                        "is_open_source": True,
-                        "name": "phpmyadmin",
-                        "name_slug": "",
-                        "tags": ["tag 1", "tag 2"],
-                        "vendor": "Yolo Company",
-                        "version": "13.37",
-                    },
-                    {
-                        "common_execution_context": "Server",
-                        "cve_details_link": "",
-                        "goal": "Yolo-ing",
-                        "intended_use_case_description": "something",
-                        "is_open_source": True,
-                        "name": "php",
-                        "name_slug": "",
-                        "tags": ["tag 3", "tag 4"],
-                        "vendor": "Yolo Company",
-                        "version": "unknown",
-                    },
-                ],
-            },
-            {
-                "domain": "test.nl",
-                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
-                "organization_name": "test",
-                "portal_extracted": [],
-                "portal_name": "NetScaler AAA Login Panel",
-                "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html",
-                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
-                "subdomain": "",
-                "url_url": "test.nl",
-                # Same endpoint, so same technologies.
-                "tech": [
-                    {
-                        "common_execution_context": "Server",
-                        "cve_details_link": "",
-                        "goal": "Yolo-ing",
-                        "intended_use_case_description": "something",
-                        "is_open_source": True,
-                        "name": "phpmyadmin",
-                        "name_slug": "",
-                        "tags": ["tag 1", "tag 2"],
-                        "vendor": "Yolo Company",
-                        "version": "13.37",
-                    },
-                    {
-                        "common_execution_context": "Server",
-                        "cve_details_link": "",
-                        "goal": "Yolo-ing",
-                        "intended_use_case_description": "something",
-                        "is_open_source": True,
-                        "name": "php",
-                        "name_slug": "",
-                        "tags": ["tag 3", "tag 4"],
-                        "vendor": "Yolo Company",
-                        "version": "unknown",
-                    },
-                ],
-            },
-        ]
 
 
 def create_test_product_data():
@@ -220,6 +60,178 @@ def create_test_product_data():
     ProductHierarchy.objects.create(product=product, related_product=product2, relationship=relationship)
 
 
+def test_login_plaza_data(db):
+    with freeze_time("2022-01-24"):
+        # no data, no crashes
+        data = login_plaza_data("NL", "municipality")
+        assert data == []
+
+        # Prepare the data for a typical response
+        organization_type, created = OrganizationType.objects.all().get_or_create(name="municipality")
+        now = timezone.now()
+        organization = Organization.objects.all().create(
+            name="test", type=organization_type, country="NL", created_on=now, is_dead=False
+        )
+        organization.layers.add(organization_type)
+        url = Url.objects.all().create(url="test.nl", created_on=now, is_dead=False, not_resolvable=False)
+        url.organization.add(organization)
+        url.save()
+        endpoint = Endpoint.objects.create(url=url, port=443, protocol="https")
+
+        evidence = """[ { "name": "Citrix ADC Gateway Login Panel - Detect", "finding-name": "nuclei_citrix_adc_gateway_panel", "evidence": { "extracted-results": ["13.37"], "matched-at": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html" } }, { "name": "NetScaler AAA Login Panel - Detect", "finding-name": "nuclei_netscaler_aaa_login", "evidence": { "extracted-results": [], "matched-at": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html" } } ]"""  # noqa
+
+        EndpointGenericScan.objects.create(
+            endpoint=endpoint,
+            evidence=evidence,
+            type="nuclei_exposed_panels",
+            rating_determined_on=now,
+            is_the_latest_scan=True,
+            rating="info",
+        )
+
+        # retrieve a typical response based on the single metrics we have in the db.
+        data = login_plaza_data("NL", "municipality")
+
+        # because reset sequences causes issues
+        data[0]["organization_id"] = 1
+        data[0]["scan_id"] = 1
+        data[1]["organization_id"] = 1
+        data[1]["scan_id"] = 1
+
+        # there is no tech in the database yet, so you don't see any technology
+        assert data == [
+            {
+                "organization_id": 1,
+                "scan_id": 1,
+                "domain": "test.nl",
+                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "organization_name": "test",
+                "portal_extracted": ["13.37"],
+                "portal_name": "Citrix ADC Gateway Login Panel",
+                "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html",
+                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "subdomain": "",
+                "url_url": "test.nl",
+                "tech": [],
+            },
+            {
+                "organization_id": 1,
+                "scan_id": 1,
+                "domain": "test.nl",
+                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "organization_name": "test",
+                "portal_extracted": [],
+                "portal_name": "NetScaler AAA Login Panel",
+                "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html",
+                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "subdomain": "",
+                "url_url": "test.nl",
+                "tech": [],
+            },
+        ]
+
+        create_test_product_data()
+        data = login_plaza_data("NL", "municipality")
+
+        # because reset sequences causes issues:
+        data[0]["organization_id"] = 1
+        data[0]["scan_id"] = 1
+        data[1]["organization_id"] = 1
+        data[1]["scan_id"] = 1
+        data[0]["tech"][0]["product"] = 1
+        data[0]["tech"][1]["product"] = 2
+        data[1]["tech"][0]["product"] = 1
+        data[1]["tech"][1]["product"] = 2
+
+        # there is no tech in the database yet, so you don't see any technology
+        assert data == [
+            {
+                "organization_id": 1,
+                "scan_id": 1,
+                "domain": "test.nl",
+                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "organization_name": "test",
+                "portal_extracted": ["13.37"],
+                "portal_name": "Citrix ADC Gateway Login Panel",
+                "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html",
+                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "subdomain": "",
+                "url_url": "test.nl",
+                "tech": [
+                    {
+                        "product": 1,
+                        "version": "13.37",
+                    },
+                    {
+                        "product": 2,
+                        "version": "unknown",
+                    },
+                ],
+            },
+            {
+                "organization_id": 1,
+                "scan_id": 1,
+                "domain": "test.nl",
+                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "organization_name": "test",
+                "portal_extracted": [],
+                "portal_name": "NetScaler AAA Login Panel",
+                "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html",
+                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "subdomain": "",
+                "url_url": "test.nl",
+                # Same endpoint, so same technologies.
+                "tech": [
+                    {
+                        "product": 1,
+                        "version": "13.37",
+                    },
+                    {
+                        "product": 2,
+                        "version": "unknown",
+                    },
+                ],
+            },
+        ]
+
+
+def test_get_products(db):
+    create_test_product_data()
+    products = get_products()
+
+    products["1"]["id"] = 1
+    products["2"]["id"] = 2
+    products["1"]["vendor"]["id"] = 1
+    products["2"]["vendor"]["id"] = 1
+
+    assert products == {
+        "1": {
+            "common_execution_context": "Server",
+            "cve_details_link": "",
+            "goal": "Yolo-ing",
+            "id": 1,
+            "intended_use_case_description": "something",
+            "is_open_source": True,
+            "name": "phpmyadmin",
+            "name_slug": "",
+            "tags": ["tag 1", "tag 2"],
+            "vendor": {"id": 1, "name": "Yolo Company", "slug": "yolo-company"},
+        },
+        "2": {
+            "common_execution_context": "Server",
+            "cve_details_link": "",
+            "goal": "Yolo-ing",
+            "id": 2,
+            "intended_use_case_description": "something",
+            "is_open_source": True,
+            "name": "php",
+            "name_slug": "",
+            "tags": ["tag 3", "tag 4"],
+            "vendor": {"id": 1, "name": "Yolo Company", "slug": "yolo-company"},
+        },
+    }
+
+
 def test_get_nuclei_product_mapping(db):
     create_test_product_data()
     mapping = get_nuclei_product_mapping()
@@ -227,41 +239,17 @@ def test_get_nuclei_product_mapping(db):
     assert mapping == {
         "nuclei_citrix_adc_gateway_panel": [
             {
-                "common_execution_context": "Server",
-                "cve_details_link": "",
-                "goal": "Yolo-ing",
-                "intended_use_case_description": "something",
-                "is_open_source": True,
-                "name": "phpmyadmin",
-                "name_slug": "",
-                "tags": ["tag 1", "tag 2"],
-                "vendor": "Yolo Company",
+                "product": 1,
                 "version": "unknown",
             },
             {
-                "common_execution_context": "Server",
-                "cve_details_link": "",
-                "goal": "Yolo-ing",
-                "intended_use_case_description": "something",
-                "is_open_source": True,
-                "name": "php",
-                "name_slug": "",
-                "tags": ["tag 3", "tag 4"],
-                "vendor": "Yolo Company",
+                "product": 2,
                 "version": "unknown",
             },
         ],
         "nuclei_netscaler_aaa_login": [
             {
-                "common_execution_context": "Server",
-                "cve_details_link": "",
-                "goal": "Yolo-ing",
-                "intended_use_case_description": "something",
-                "is_open_source": True,
-                "name": "php",
-                "name_slug": "",
-                "tags": ["tag 3", "tag 4"],
-                "vendor": "Yolo Company",
+                "product": 2,
                 "version": "unknown",
             }
         ],
