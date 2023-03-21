@@ -208,6 +208,7 @@ def test_get_products(db):
         "1": {
             "common_execution_context": "Server",
             "cve_details_link": "",
+            "open_cve_link": "",
             "goal": "Yolo-ing",
             "id": 1,
             "intended_use_case_description": "something",
@@ -220,6 +221,7 @@ def test_get_products(db):
         "2": {
             "common_execution_context": "Server",
             "cve_details_link": "",
+            "open_cve_link": "",
             "goal": "Yolo-ing",
             "id": 2,
             "intended_use_case_description": "something",

@@ -71,6 +71,7 @@ def product_to_dict(product: Product) -> Dict[str, Any]:
         "name_slug": product.name_slug,
         "vendor": model_to_dict(product.vendor) if product.vendor else {},
         "cve_details_link": product.cve_details_link,
+        "open_cve_link": product.open_cve_link,
         "is_open_source": product.is_open_source,
         "common_execution_context": product.common_execution_environment,
         "goal": product.goal.name if product.goal else "",
@@ -159,7 +160,7 @@ def login_plaza_data(country: str = None, layer: str = None):
     my_layer = get_organization_type(layer)
 
     scans = EndpointGenericScan.objects.all().filter(
-        type__in=["nuclei_exposed_panels"],
+        type="nuclei_exposed_panels",
         is_the_latest_scan=True,
         comply_or_explain_is_explained=False,
         rating__in=["info", "warning", "danger"],

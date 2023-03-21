@@ -909,6 +909,7 @@ class Product(models.Model):
     # Filled in by hand / a script
     name = models.CharField(max_length=200, blank=True, null=False)
     cve_details_link = models.CharField(max_length=200, blank=True, null=False)
+    open_cve_link = models.CharField(max_length=200, blank=True, null=False)
     scanner_finding_name_mapping = models.ManyToManyField(to=ScannerFinding, blank=True)
 
     # Automatically filled in
