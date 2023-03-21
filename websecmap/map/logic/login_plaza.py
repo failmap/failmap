@@ -99,6 +99,8 @@ def get_tech(endpoint_ids: List[int]) -> Dict[int, List[Dict[str, Any]]]:
 
     nuclei_product_mapping = get_nuclei_product_mapping()
 
+    # todo: this should be retrieved from an info level item from the report,
+    #  not created ad-hoc.
     egpss = EndpointGenericScan.objects.all().filter(
         endpoint__id__in=endpoint_ids,
         type__in=["nuclei_technologies", "nuclei_exposed_panels"],
@@ -169,9 +171,16 @@ def login_plaza_data(country: str = None, layer: str = None):
         endpoint__url__not_resolvable=False,
         endpoint__url__organization__country=my_country,
         endpoint__url__organization__layers=my_layer,
-    )[:MAX_RESULTS]
+    )
 
-    tech = get_tech(scans.values_list("endpoint_id", flat=True))
+    # can't use values_list because:
+    # "This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'"
+    endpoint_ids = set()
+    only_ids = scans
+    for only_id in only_ids:
+        endpoint_ids.add(only_id.endpoint.id)
+
+    tech = get_tech(list(endpoint_ids))
 
     dicts = []
     # don't include the same url over and over again...

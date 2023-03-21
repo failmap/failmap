@@ -199,10 +199,14 @@ def test_get_products(db):
     create_test_product_data()
     products = get_products()
 
-    products["1"]["id"] = 1
-    products["2"]["id"] = 2
-    products["1"]["vendor"]["id"] = 1
-    products["2"]["vendor"]["id"] = 1
+    keys = list(products.keys())
+    first_id = keys[0]
+    second_id = keys[1]
+
+    products[first_id]["id"] = 1
+    products[second_id]["id"] = 2
+    products[first_id]["vendor"]["id"] = 1
+    products[second_id]["vendor"]["id"] = 1
 
     assert products == {
         "1": {
