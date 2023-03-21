@@ -236,6 +236,10 @@ def test_get_nuclei_product_mapping(db):
     create_test_product_data()
     mapping = get_nuclei_product_mapping()
 
+    mapping["nuclei_citrix_adc_gateway_panel"][0]["product"] = 1
+    mapping["nuclei_citrix_adc_gateway_panel"][1]["product"] = 2
+    mapping["nuclei_netscaler_aaa_login"][0]["product"] = 2
+
     assert mapping == {
         "nuclei_citrix_adc_gateway_panel": [
             {
