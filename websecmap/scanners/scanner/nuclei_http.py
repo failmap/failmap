@@ -108,7 +108,7 @@ def compose_planned_scan_task(**kwargs) -> group:
 def compose_planned_verify_task(**kwargs) -> group:
     # 25 matches the bulk size of nuclei
     urls = plannedscan.pickup(activity="verify", scanner=SCANNER_NAME, amount=kwargs.get("amount", 25))
-    return compose_verify_task(urls)
+    return compose_verify_task(urls, kwargs)
 
 
 def compose_manual_verify_task(
@@ -155,7 +155,7 @@ def compose_scan_task(urls: List[Url], scanner_keyword_arguments: Dict[str, Any]
     )
 
 
-def compose_verify_task(urls: List[Url]) -> group:
+def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, Any] = None) -> group:
     # re-scan an endpoint only using the templates used in the results. This saves a few hundred requests every time.
     # The templates are named explicitly in the results.
     current_scans = (
@@ -193,7 +193,14 @@ def compose_verify_task(urls: List[Url]) -> group:
             tasks.append(plannedscan.finish.si("verify", SCANNER_NAME, url_id))
             continue
 
-        params = {"args": [{"name": "template-id", "type": "list-to-duplicate-arguments", "value": template_ids}]}
+        scan_these_templates = {"name": "template-id", "type": "list-to-duplicate-arguments", "value": template_ids}
+        # merge scanner params with the templates that need to be used for the rescan
+        if scanner_keyword_arguments and "args" in scanner_keyword_arguments:
+            scanner_keyword_arguments["args"].append(scan_these_templates)
+            params = scanner_keyword_arguments
+        else:
+            params = {"args": [scan_these_templates]}
+
         tasks.append(
             scan.s([uri_url], params)
             | store.s({uri_url: {"endpoint": endpoint_id, "url": url_id}})
@@ -283,8 +290,9 @@ def store(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[str, Dict[str, in
             )
 
         # and clean up the stuff that has been solved completely:
-        current_categories_of_metrics = list(combined_metrics.keys())
-        neutralize_missing_metrics(current_categories_of_metrics, endpoint_id)
+        # this currently adds noise. Things should just all be rescanned.
+        # current_categories_of_metrics = list(combined_metrics.keys())
+        # neutralize_missing_metrics(current_categories_of_metrics, endpoint_id)
 
 
 def split_nuclei_records_per_host(raw_nuclei_records) -> Dict[str, List[Dict[str, Any]]]:

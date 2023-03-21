@@ -80,6 +80,13 @@ def test_nuclei_store(db, current_path):
 
 
 def test_split_metrics_per_host():
+    # no records received:
+    raw_nuclei_records = convert_nuclei_data_to_json(b"")
+    assert len(raw_nuclei_records) == 0
+    result = split_nuclei_records_per_host(raw_nuclei_records)
+    assert len(result) == 0
+
+    # some records received:
     raw_nuclei_records = convert_nuclei_data_to_json(three_example_nuclei_tests)
     result = split_nuclei_records_per_host(raw_nuclei_records)
     assert len(result["https://basisbeveiliging.nl"]) == 3
