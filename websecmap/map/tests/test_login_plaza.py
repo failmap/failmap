@@ -209,7 +209,7 @@ def test_get_products(db):
     products[second_id]["vendor"]["id"] = 1
 
     assert products == {
-        "1": {
+        str(first_id): {
             "common_execution_context": "Server",
             "cve_details_link": "",
             "open_cve_link": "",
@@ -222,7 +222,7 @@ def test_get_products(db):
             "tags": ["tag 1", "tag 2"],
             "vendor": {"id": 1, "name": "Yolo Company", "slug": "yolo-company"},
         },
-        "2": {
+        str(second_id): {
             "common_execution_context": "Server",
             "cve_details_link": "",
             "open_cve_link": "",
