@@ -68,7 +68,7 @@ def product_to_dict(product: Product) -> Dict[str, Any]:
     return {
         "id": product.id,
         "name": product.name,
-        "name_slug": product.name_slug,
+        "slug": product.slug,
         "vendor": model_to_dict(product.vendor) if product.vendor else {},
         "cve_details_link": product.cve_details_link,
         "open_cve_link": product.open_cve_link,

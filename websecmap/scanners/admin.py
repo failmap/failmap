@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 from jet.filters import RelatedFieldAjaxListFilter
+import taggit
 
 from websecmap.map.admin import ordering_actions
 from websecmap.scanners import models
@@ -775,3 +776,14 @@ class ScannerFindingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     @staticmethod
     def products(obj):
         return list(Product.objects.all().filter(scanner_finding_name_mapping=obj))
+
+
+# Workaround to import and export tags without too much hassle.
+class TagProxy(taggit.models.Tag):
+    class Meta:
+        proxy = True
+
+
+@admin.register(TagProxy)
+class TagAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("id", "name", "slug")

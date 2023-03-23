@@ -913,8 +913,8 @@ class Product(models.Model):
     scanner_finding_name_mapping = models.ManyToManyField(to=ScannerFinding, blank=True)
 
     # Automatically filled in
+    slug = models.SlugField(max_length=200, blank=True, null=False)
     vendor = models.ForeignKey(ProductVendor, blank=True, null=True, on_delete=models.CASCADE)
-    name_slug = models.SlugField(max_length=200, blank=True, null=False)
     goal = models.ForeignKey(ProductGoal, blank=True, null=True, on_delete=models.CASCADE)
     arbitrary_json_data = JSONField(blank=True, null=True)
 
