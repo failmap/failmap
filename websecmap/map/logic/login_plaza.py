@@ -2,6 +2,8 @@ from collections import defaultdict
 from cachetools import cached, TTLCache
 from typing import Dict, Any, List
 
+import copy
+
 import simplejson as json
 from simplejson import JSONDecodeError
 
@@ -98,7 +100,7 @@ def get_tech_for_endpoints(endpoint_ids: List[int]) -> Dict[int, List[Dict[str, 
     nuclei_product_mapping = get_nuclei_product_mapping()
 
     # todo: this should be retrieved from an info level item from the report,
-    #  not created ad-hoc.
+    #  not created ad-hoc. -> this should be the method that saves the current state of the art to the report :)
     egpss = EndpointGenericScan.objects.all().filter(
         endpoint__id__in=endpoint_ids,
         type__in=["nuclei_technologies", "nuclei_exposed_panels"],
@@ -106,17 +108,23 @@ def get_tech_for_endpoints(endpoint_ids: List[int]) -> Dict[int, List[Dict[str, 
         comply_or_explain_is_explained=False,
     )[:MAX_RESULTS]
 
-    # It is normal that you'll get the same findings / mappings over and over.
-    technology_per_endpoint = defaultdict(list)
-
+    # First merge all found records per endpoint: as group_concat etc is missing. This makes it easier with
+    # working with various unique products per finding: when they are all in the same list we don't need to
+    # inter-check what we did etc.
+    # It is normal that you'll get the same findings / mappings over and over...
+    findings_per_endpoint = defaultdict(list)
     for epgs in egpss:
-        # [{"template-id": "wordpress-detect", "name": "WordPress D", "finding-name":
-        # "nuclei_wordpress_detect", "evidence": {"extracted-results": ["5.8.3"], "matched-at""}}]
-        nuclei_findings = load_json(epgs.evidence)
+        # todo: also add version information from nmap findings
+        if nuclei_findings_per_scan := load_json(epgs.evidence):
+            findings_per_endpoint[epgs.endpoint.id].extend(nuclei_findings_per_scan)
 
-        # add all possible technologies, uniquely
-        technology_per_endpoint[epgs.endpoint.id] = load_products_for_nuclei_findings(
-            nuclei_findings, nuclei_product_mapping
+    # now extract version information of all findings into the findings
+    technology_per_endpoint = defaultdict(list)
+    for endpoint_id, nuclei_findings in findings_per_endpoint.items():
+        # add all possible technologies, uniquely...
+        # every endpoint gets their own copy of this data as they will be mogrified with version info
+        technology_per_endpoint[endpoint_id] = copy.deepcopy(
+            load_products_for_nuclei_findings(nuclei_findings, nuclei_product_mapping)
         )
 
         # add version information to each of the nodes in the tree:
@@ -129,7 +137,7 @@ def get_tech_for_endpoints(endpoint_ids: List[int]) -> Dict[int, List[Dict[str, 
             products = nuclei_product_mapping[nuclei_finding.get("finding-name", "")]
             for product in products:
                 product = product["product"]
-                for product_tree in technology_per_endpoint[epgs.endpoint.id]:
+                for product_tree in technology_per_endpoint[endpoint_id]:
                     set_value_to_tech_in_tree(product_tree, product_id=product, property="version", value=version_info)
 
     return technology_per_endpoint
@@ -167,6 +175,15 @@ def load_json(data: str):
 def set_value_to_tech_in_tree(product_tree: Dict[Any, Any], product_id: int, property: str, value: Any):
 
     if property in product_tree and product_tree["product"] == product_id:
+        if product_tree[property] not in ["unknown", "", value]:
+            log.warning(
+                "Tyring to set %s to %s, but %s already set to %s. Conflicting findings?",
+                value,
+                property,
+                property,
+                product_tree[property],
+            )
+
         product_tree[property] = value
 
     if "related_products" not in product_tree:
@@ -208,10 +225,7 @@ def login_plaza_data(country: str = None, layer: str = None):
     for scan in scans:
         log.debug(scan)
 
-        try:
-            portals = json.loads(scan.evidence)
-        except JSONDecodeError:
-            portals = []
+        portals = load_json(scan.evidence)
 
         if not portals:
             continue
