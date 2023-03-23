@@ -19,13 +19,13 @@ def extract_version_from_nuclei_finding(nuclei_finding: dict) -> str:
     if not version:
         return ""
 
-    # use the version logic from nmap scanner here...
-    # replace cms / ['WordPress 6.1.1'] to wordpress / [6.1.1]
-    if "wordpress" in version[0].lower():
-        version[0] = version[0].replace("wordpress", "").strip()
-
-    if "nginx" in version[0].lower():
-        version[0] = version[0].replace("nginx/", "").strip()
+    words_to_remove = ["wordpress", "nginx/", "apache/", "apache"]
+    for word in words_to_remove:
+        # is the 'if' necessary?
+        # always be sure that the text to replace matches as it will be lowercase:
+        version[0] = version[0].lower()
+        if word in version[0]:
+            version[0] = version[0].replace(word, "").strip()
 
     return ", ".join(version)
 
