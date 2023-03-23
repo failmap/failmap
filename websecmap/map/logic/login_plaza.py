@@ -1,8 +1,8 @@
 from collections import defaultdict
+from cachetools import cached, TTLCache
 from typing import Dict, Any, List
 
 import simplejson as json
-from django.forms import model_to_dict
 from simplejson import JSONDecodeError
 
 from websecmap.app import log
@@ -30,10 +30,11 @@ def extract_version_from_nuclei_finding(nuclei_finding: dict) -> str:
     return ", ".join(version)
 
 
+# caches empty values as well...
+# @cached(cache=TTLCache(maxsize=1024, ttl=4 * 60 * 60))
 def get_nuclei_product_mapping() -> Dict[str, List[Dict[str, Any]]]:
     # maps scanner findings to all products related to them.
     # the finding name lists to a number of products and related products.
-    # todo: add time cache
 
     # product_prefetch = Prefetch("product",
     # queryset=Product.objects.filter(is_irrelevant=False), to_attr="product_set")
@@ -42,18 +43,13 @@ def get_nuclei_product_mapping() -> Dict[str, List[Dict[str, Any]]]:
     mapping = defaultdict(list)
     for scannerfinding in scannerfindings:
         for product in scannerfinding.product_set.all():
-            mapping[scannerfinding.name].append({"product": product.id, "version": "unknown"})
-
-            # todo: move this to a nested set tree or something that reduces this to one query.
-            # just assume two layers of nesting now. Probably a nested set tree or so.
-            # Is this just as much as a human would understand anyway?
-            # todo: add relation finding to product class, not here.
-            related_products = get_nested_products_in_an_inefficient_way(product)
-            for related_product in related_products:
-                mapping[scannerfinding.name].append({"product": related_product.id, "version": "unknown"})
-                related_related_products = get_nested_products_in_an_inefficient_way(related_product)
-                for related_related_product in related_related_products:
-                    mapping[scannerfinding.name].append({"product": related_related_product.id, "version": "unknown"})
+            mapping[scannerfinding.name].append(
+                {
+                    "product": product.id,
+                    "version": "unknown",
+                    "related_products": get_nested_products_in_an_inefficient_way(product.id),
+                }
+            )
 
     return mapping
 
@@ -61,36 +57,38 @@ def get_nuclei_product_mapping() -> Dict[str, List[Dict[str, Any]]]:
 def get_products():
     # This is loaded into the web app, this saves a lot of redundant data.
     # the client from here on only gets product-ids / tech-ids.
-    return {str(product.id): product_to_dict(product) for product in Product.objects.filter(is_irrelevant=False)}
+    return {str(product.id): product.as_dict() for product in Product.objects.filter(is_irrelevant=False)}
 
 
-def product_to_dict(product: Product) -> Dict[str, Any]:
-    return {
-        "id": product.id,
-        "name": product.name,
-        "slug": product.slug,
-        "vendor": model_to_dict(product.vendor) if product.vendor else {},
-        "cve_details_link": product.cve_details_link,
-        "open_cve_link": product.open_cve_link,
-        "is_open_source": product.is_open_source,
-        "common_execution_context": product.common_execution_environment,
-        "goal": product.goal.name if product.goal else "",
-        "tags": list(product.tags.all().values_list("name", flat=True)),
-        "intended_use_case_description": product.intended_use_case_description,
-    }
+@cached(cache=TTLCache(maxsize=1024, ttl=4 * 60 * 60))
+def get_nested_products_in_an_inefficient_way(product_id: int, max_depth: int = 3) -> list[dict[str, Any]]:
 
+    # prevent infinite circular references
+    max_depth -= 1
+    if max_depth < 1:
+        return []
 
-def get_nested_products_in_an_inefficient_way(product_id: Product) -> List[Product]:
-    return list(
-        Product.objects.filter(
-            id__in=ProductHierarchy.objects.all()
-            .filter(product=product_id, product__is_irrelevant=False)
-            .values_list("related_product", flat=True)
+    if max_depth > 10:
+        raise ValueError(
+            "We've set a recursion limit because of inefficient programming of hierarchical data "
+            "retrieval. Either you have a recursion in your product relations or you actually have"
+            " a depth > 10. If the last one is true, we salute you."
         )
-    )
+
+    # todo: move this to a nested set tree or something that reduces this to one query.
+    related = ProductHierarchy.objects.filter(product=product_id, product__is_irrelevant=False).order_by("relationship")
+    return [
+        {
+            "product": related.related_product.pk,
+            "version": "unknown",
+            "relationship": related.relationship.slug,
+            "related_products": get_nested_products_in_an_inefficient_way(related.related_product, max_depth),
+        }
+        for related in related
+    ]
 
 
-def get_tech(endpoint_ids: List[int]) -> Dict[int, List[Dict[str, Any]]]:
+def get_tech_for_endpoints(endpoint_ids: List[int]) -> Dict[int, List[Dict[str, Any]]]:
     # reduces the finding to a product and a vendor
     # this is used to find what dependencies the product has
     # and also to find a cvedetails link.
@@ -108,53 +106,74 @@ def get_tech(endpoint_ids: List[int]) -> Dict[int, List[Dict[str, Any]]]:
         comply_or_explain_is_explained=False,
     )[:MAX_RESULTS]
 
+    # It is normal that you'll get the same findings / mappings over and over.
     technology_per_endpoint = defaultdict(list)
 
     for epgs in egpss:
-        # do not add things twice to the list of technologies:
-        already_found_technology = []
-        already_found_technology_with_version_info = []
-        try:
-            nuclei_findings = json.loads(epgs.evidence)
-        except JSONDecodeError:
-            continue
+        # [{"template-id": "wordpress-detect", "name": "WordPress D", "finding-name":
+        # "nuclei_wordpress_detect", "evidence": {"extracted-results": ["5.8.3"], "matched-at""}}]
+        nuclei_findings = load_json(epgs.evidence)
 
-        # nuclei finding =
-        # {"template-id": "wordpress-detect", "name": "WordPress Detect", "finding-name":
-        # "nuclei_wordpress_detect", "evidence": {"extracted-results": ["5.8.3"], "matched-at""}},
+        # add all possible technologies, uniquely
+        technology_per_endpoint[epgs.endpoint.id] = load_products_for_nuclei_findings(
+            nuclei_findings, nuclei_product_mapping
+        )
+
+        # add version information to each of the nodes in the tree:
         for nuclei_finding in nuclei_findings:
             version_info = extract_version_from_nuclei_finding(nuclei_finding)
-            technologies = nuclei_product_mapping[nuclei_finding.get("finding-name", "")]
 
-            log.debug(f"Found {len(technologies)} technologies for {nuclei_finding.get('finding-name', '')}.")
+            if not version_info:
+                continue
 
-            # first tech is always the top of the tree. So add the version there:
-            if version_info and technologies:
-                technologies[0]["version"] = version_info
-
-            # each finding can contain multiple products, there might be duplicates per endpoint ofc
-            # especially with things like joomla and other client technologies.
-            for technology in technologies:
-                if technology["product"] in already_found_technology:
-                    # replace the current one if this one has a version and the other one doesnt:
-                    # so if this doesn't have a version, then go on.
-                    # Also if we already have a version, just continue
-                    if not version_info or technology["product"] in already_found_technology_with_version_info:
-                        continue
-
-                    # now we have added this tech in the past, but without version info. Add it.
-                    for tech_missing_version in technology_per_endpoint[epgs.endpoint.id]:
-                        if tech_missing_version["product"] == technology["product"]:
-                            tech_missing_version["version"] = version_info
-                            break
-
-                # optimize to include a version number if it is available.
-                if version_info:
-                    already_found_technology_with_version_info.append(technology["product"])
-                already_found_technology.append(technology["product"])
-                technology_per_endpoint[epgs.endpoint.id].append(technology)
+            products = nuclei_product_mapping[nuclei_finding.get("finding-name", "")]
+            for product in products:
+                product = product["product"]
+                for product_tree in technology_per_endpoint[epgs.endpoint.id]:
+                    set_value_to_tech_in_tree(product_tree, product_id=product, property="version", value=version_info)
 
     return technology_per_endpoint
+
+
+def load_products_for_nuclei_findings(
+    nuclei_findings: List[Dict[str, Any]], nuclei_product_mapping
+) -> List[Dict[str, Any]]:
+    prods = []
+
+    # do not add "drupal" three times if there are various findings for this
+    found_product_ids = set()
+
+    for nuclei_finding in nuclei_findings:
+        # apache-ubuntu page = two technologies: apache + ubuntu linux
+        # These will usually not really overlap, complex tree mutations is for another day
+        products = nuclei_product_mapping[nuclei_finding.get("finding-name", "")]
+        for product in products:
+            product_id = product["product"]
+            if product_id in found_product_ids:
+                continue
+            found_product_ids.add(product_id)
+            prods.append(product)
+
+    return prods
+
+
+def load_json(data: str):
+    try:
+        return json.loads(data)
+    except JSONDecodeError:
+        return []
+
+
+def set_value_to_tech_in_tree(product_tree: Dict[Any, Any], product_id: int, property: str, value: Any):
+
+    if property in product_tree and product_tree["product"] == product_id:
+        product_tree[property] = value
+
+    if "related_products" not in product_tree:
+        return
+
+    for related_product in product_tree["related_products"]:
+        set_value_to_tech_in_tree(related_product, product_id, property, value)
 
 
 def login_plaza_data(country: str = None, layer: str = None):
@@ -180,7 +199,7 @@ def login_plaza_data(country: str = None, layer: str = None):
     for only_id in only_ids:
         endpoint_ids.add(only_id.endpoint.id)
 
-    tech = get_tech(list(endpoint_ids))
+    tech = get_tech_for_endpoints(list(endpoint_ids))
 
     dicts = []
     # don't include the same url over and over again...

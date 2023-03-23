@@ -1,9 +1,17 @@
 from datetime import datetime
 
+import copy
+import pytest
 from django.utils import timezone
 from freezegun import freeze_time
 
-from websecmap.map.logic.login_plaza import login_plaza_data, get_nuclei_product_mapping, get_products
+from websecmap.map.logic.login_plaza import (
+    login_plaza_data,
+    get_nuclei_product_mapping,
+    get_products,
+    get_nested_products_in_an_inefficient_way,
+    set_value_to_tech_in_tree,
+)
 from websecmap.organizations.models import OrganizationType, Organization, Url
 from websecmap.scanners.models import (
     Endpoint,
@@ -160,12 +168,17 @@ def test_login_plaza_data(db):
                 "tech": [
                     {
                         "product": 1,
+                        "related_products": [
+                            {
+                                "product": 2,
+                                "related_products": [],
+                                "relationship": "something-something-something-darkside",
+                                "version": "unknown",
+                            }
+                        ],
                         "version": "13.37",
                     },
-                    {
-                        "product": 2,
-                        "version": "unknown",
-                    },
+                    {"product": 2, "related_products": [], "version": "unknown"},
                 ],
             },
             {
@@ -184,12 +197,17 @@ def test_login_plaza_data(db):
                 "tech": [
                     {
                         "product": 1,
+                        "related_products": [
+                            {
+                                "product": 2,
+                                "related_products": [],
+                                "relationship": "something-something-something-darkside",
+                                "version": "unknown",
+                            }
+                        ],
                         "version": "13.37",
                     },
-                    {
-                        "product": 2,
-                        "version": "unknown",
-                    },
+                    {"product": 2, "related_products": [], "version": "unknown"},
                 ],
             },
         ]
@@ -240,27 +258,134 @@ def test_get_products(db):
 
 def test_get_nuclei_product_mapping(db):
     create_test_product_data()
+
+    first_product = Product.objects.get(id=1)
+    nested = get_nested_products_in_an_inefficient_way(first_product)
+    nested[0]["product"] = 2
+    assert nested == [
+        {
+            "product": 2,
+            "relationship": "something-something-something-darkside",
+            "related_products": [],
+            "version": "unknown",
+        }
+    ]
+
     mapping = get_nuclei_product_mapping()
 
     mapping["nuclei_citrix_adc_gateway_panel"][0]["product"] = 1
-    mapping["nuclei_citrix_adc_gateway_panel"][1]["product"] = 2
+    mapping["nuclei_citrix_adc_gateway_panel"][0]["related_products"][0]["product"] = 2
     mapping["nuclei_netscaler_aaa_login"][0]["product"] = 2
 
     assert mapping == {
         "nuclei_citrix_adc_gateway_panel": [
             {
                 "product": 1,
+                "related_products": [
+                    {
+                        "product": 2,
+                        "related_products": [],
+                        "relationship": "something-something-something-darkside",
+                        "version": "unknown",
+                    }
+                ],
                 "version": "unknown",
-            },
-            {
-                "product": 2,
-                "version": "unknown",
-            },
+            }
         ],
-        "nuclei_netscaler_aaa_login": [
+        "nuclei_netscaler_aaa_login": [{"product": 2, "related_products": [], "version": "unknown"}],
+    }
+
+
+def test_prevent_circular_references(db):
+    create_test_product_data()
+
+    product = Product.objects.all().first()
+    relationship = ProductRelationship.objects.all().first()
+
+    # create circular reference:
+    ProductHierarchy.objects.create(product=product, related_product=product, relationship=relationship)
+
+    # retrieving the data should not give an error, it will just stop in depth
+    assert get_nested_products_in_an_inefficient_way(product)
+
+    with pytest.raises(ValueError):
+        get_nested_products_in_an_inefficient_way(product, 400)
+
+
+def test_set_value_to_tech_in_tree():
+    product_tree = {
+        "product": 1,
+        "version": "unknown",
+        "related_products": [
             {
                 "product": 2,
+                "relationship": "something",
                 "version": "unknown",
+                "related_products": [
+                    {
+                        "product": 3,
+                        "relationship": "something-something",
+                        "version": "unknown",
+                        "related_products": [
+                            {
+                                "product": 4,
+                                "relationship": "something-something-something-darkside",
+                                "version": "unknown",
+                                "related_products": [],
+                            },
+                            {
+                                "product": 5,
+                                "relationship": "something-something-something-more-darkside",
+                                "version": "unknown",
+                                "related_products": [],
+                            },
+                        ],
+                    }
+                ],
+            }
+        ],
+    }
+
+    # change nothing:
+    unaltered = copy.deepcopy(product_tree)
+    set_value_to_tech_in_tree(product_tree, product_id=100, property="version", value="1.2.3")
+    assert product_tree == unaltered
+
+    set_value_to_tech_in_tree(product_tree, product_id=1, property="version", value="1.2.3")
+    set_value_to_tech_in_tree(product_tree, product_id=2, property="version", value="2.3.4")
+    set_value_to_tech_in_tree(product_tree, product_id=3, property="version", value="3.2.1")
+    set_value_to_tech_in_tree(product_tree, product_id=4, property="version", value="4.3.2")
+    set_value_to_tech_in_tree(product_tree, product_id=5, property="version", value="5.4.3")
+
+    assert product_tree == {
+        "product": 1,
+        "version": "1.2.3",
+        "related_products": [
+            {
+                "product": 2,
+                "relationship": "something",
+                "version": "2.3.4",
+                "related_products": [
+                    {
+                        "product": 3,
+                        "relationship": "something-something",
+                        "version": "3.2.1",
+                        "related_products": [
+                            {
+                                "product": 4,
+                                "relationship": "something-something-something-darkside",
+                                "version": "4.3.2",
+                                "related_products": [],
+                            },
+                            {
+                                "product": 5,
+                                "relationship": "something-something-something-more-darkside",
+                                "version": "5.4.3",
+                                "related_products": [],
+                            },
+                        ],
+                    }
+                ],
             }
         ],
     }

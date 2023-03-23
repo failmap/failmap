@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.forms import model_to_dict
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
@@ -930,6 +931,21 @@ class Product(models.Model):
     # products / technologies that should not be returned because they never add a lot of value
     # such as defaults and such.
     is_irrelevant = models.BooleanField(default=False, null=True, blank=True)
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "slug": self.slug,
+            "vendor": model_to_dict(self.vendor) if self.vendor else {},
+            "cve_details_link": self.cve_details_link,
+            "open_cve_link": self.open_cve_link,
+            "is_open_source": self.is_open_source,
+            "common_execution_context": self.common_execution_environment,
+            "goal": self.goal.name if self.goal else "",
+            "tags": list(self.tags.all().values_list("name", flat=True)),
+            "intended_use_case_description": self.intended_use_case_description,
+        }
 
     def save(self, *args, **kwarg):
         self.slug = slugify(self.name)
