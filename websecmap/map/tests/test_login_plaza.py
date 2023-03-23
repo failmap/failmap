@@ -259,7 +259,7 @@ def test_get_products(db):
 def test_get_nuclei_product_mapping(db):
     create_test_product_data()
 
-    first_product = Product.objects.get(id=1)
+    first_product = Product.objects.all().first()
     nested = get_nested_products_in_an_inefficient_way(first_product)
     nested[0]["product"] = 2
     assert nested == [
