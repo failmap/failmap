@@ -11,6 +11,9 @@ from websecmap.map.logic.login_plaza import (
     get_products,
     get_nested_products_in_an_inefficient_way,
     set_value_to_tech_in_tree,
+    smash_tree,
+    smash_trees,
+    prioritize_tech,
 )
 from websecmap.organizations.models import OrganizationType, Organization, Url
 from websecmap.scanners.models import (
@@ -166,19 +169,8 @@ def test_login_plaza_data(db):
                 "subdomain": "",
                 "url_url": "test.nl",
                 "tech": [
-                    {
-                        "product": 1,
-                        "related_products": [
-                            {
-                                "product": 2,
-                                "related_products": [],
-                                "relationship": "something-something-something-darkside",
-                                "version": "unknown",
-                            }
-                        ],
-                        "version": "13.37",
-                    },
-                    {"product": 2, "related_products": [], "version": "unknown"},
+                    {"product": 1, "version": "13.37"},
+                    {"product": 2, "version": "unknown"},
                 ],
             },
             {
@@ -193,21 +185,10 @@ def test_login_plaza_data(db):
                 "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
                 "subdomain": "",
                 "url_url": "test.nl",
-                # Same endpoint, so same technologies.
+                # Same endpoint, so same technologies, but the product for this portal first.
                 "tech": [
-                    {
-                        "product": 1,
-                        "related_products": [
-                            {
-                                "product": 2,
-                                "related_products": [],
-                                "relationship": "something-something-something-darkside",
-                                "version": "unknown",
-                            }
-                        ],
-                        "version": "13.37",
-                    },
-                    {"product": 2, "related_products": [], "version": "unknown"},
+                    {"product": 1, "version": "unknown"},
+                    {"product": 2, "version": "13.37"},
                 ],
             },
         ]
@@ -312,42 +293,45 @@ def test_prevent_circular_references(db):
         get_nested_products_in_an_inefficient_way(product, 400)
 
 
+sample_product_tree = {
+    "product": 1,
+    "version": "unknown",
+    "related_products": [
+        {
+            "product": 2,
+            "relationship": "something",
+            "version": "unknown",
+            "related_products": [
+                {
+                    "product": 3,
+                    "relationship": "something-something",
+                    "version": "unknown",
+                    "related_products": [
+                        {
+                            "product": 4,
+                            "relationship": "something-something-something-darkside",
+                            "version": "unknown",
+                            "related_products": [],
+                        },
+                        {
+                            "product": 5,
+                            "relationship": "something-something-something-more-darkside",
+                            "version": "unknown",
+                            "related_products": [],
+                        },
+                    ],
+                }
+            ],
+        }
+    ],
+}
+
+
 def test_set_value_to_tech_in_tree():
-    product_tree = {
-        "product": 1,
-        "version": "unknown",
-        "related_products": [
-            {
-                "product": 2,
-                "relationship": "something",
-                "version": "unknown",
-                "related_products": [
-                    {
-                        "product": 3,
-                        "relationship": "something-something",
-                        "version": "unknown",
-                        "related_products": [
-                            {
-                                "product": 4,
-                                "relationship": "something-something-something-darkside",
-                                "version": "unknown",
-                                "related_products": [],
-                            },
-                            {
-                                "product": 5,
-                                "relationship": "something-something-something-more-darkside",
-                                "version": "unknown",
-                                "related_products": [],
-                            },
-                        ],
-                    }
-                ],
-            }
-        ],
-    }
+    product_tree = copy.deepcopy(sample_product_tree)
 
     # change nothing:
-    unaltered = copy.deepcopy(product_tree)
+    unaltered = copy.deepcopy(sample_product_tree)
     set_value_to_tech_in_tree(product_tree, product_id=100, property="version", value="1.2.3")
     assert product_tree == unaltered
 
@@ -389,3 +373,40 @@ def test_set_value_to_tech_in_tree():
             }
         ],
     }
+
+
+def test_smash_tree():
+    product_tree = copy.deepcopy(sample_product_tree)
+
+    assert smash_tree(product_tree) == [
+        {"product": 1, "version": "unknown"},
+        {"product": 2, "version": "unknown"},
+        {"product": 3, "version": "unknown"},
+        {"product": 4, "version": "unknown"},
+        {"product": 5, "version": "unknown"},
+    ]
+
+
+def test_smash_trees():
+    product_tree1 = copy.deepcopy(sample_product_tree)
+    product_tree2 = copy.deepcopy(sample_product_tree)
+
+    assert smash_trees([product_tree1, product_tree2]) == [
+        {"product": 1, "version": "unknown"},
+        {"product": 2, "version": "unknown"},
+        {"product": 3, "version": "unknown"},
+        {"product": 4, "version": "unknown"},
+        {"product": 5, "version": "unknown"},
+    ]
+
+
+def test_prioritize_tech():
+    assert [{1: 1}, {2: 2}] != [{2: 2}, {1: 1}]
+
+    list_of_techs = [{"product": 1, "version": "1.1.1"}, {"product": 2, "version": "2.2.2"}]
+
+    assert prioritize_tech(list_of_techs, 1) == list_of_techs
+
+    assert prioritize_tech(list_of_techs, 2) == [{"product": 2, "version": "2.2.2"}, {"product": 1, "version": "1.1.1"}]
+
+    assert prioritize_tech(list_of_techs, 2) != list_of_techs

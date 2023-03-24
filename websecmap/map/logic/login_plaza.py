@@ -193,6 +193,41 @@ def set_value_to_tech_in_tree(product_tree: Dict[Any, Any], product_id: int, pro
         set_value_to_tech_in_tree(related_product, product_id, property, value)
 
 
+def smash_trees(product_trees: List[Dict[Any, Any]]) -> List[Dict[str, Any]]:
+    techs = []
+    for tree in product_trees:
+        techs.extend(smash_tree(tree))
+
+    # now reduce the list to uniques
+    # https://stackoverflow.com/questions/11092511/list-of-unique-dictionaries
+    return list({v["product"]: v for v in techs}.values())
+
+
+def smash_tree(product_tree: Dict[Any, Any], technologies: List[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    # reduces the tree to a list of products
+    if not technologies:
+        technologies = []
+
+    technologies.append({"product": product_tree["product"], "version": product_tree["version"]})
+
+    if "related_products" in product_tree:
+        for related_product in product_tree["related_products"]:
+            smash_tree(related_product, technologies)
+
+    return technologies
+
+
+def prioritize_tech(list_of_techs: List[Dict[str, Any]], product_id) -> List[Dict[str, Any]]:
+    my_list_of_techs = copy.deepcopy(list_of_techs)
+    # pull product with product id to the front.
+    for tech in my_list_of_techs:
+        if tech["product"] == product_id:
+            my_list_of_techs.remove(tech)
+            my_list_of_techs.insert(0, tech)
+            break
+    return my_list_of_techs
+
+
 def login_plaza_data(country: str = None, layer: str = None):
     my_country = get_country(country)
     my_layer = get_organization_type(layer)
@@ -216,14 +251,18 @@ def login_plaza_data(country: str = None, layer: str = None):
     for only_id in only_ids:
         endpoint_ids.add(only_id.endpoint.id)
 
+    # now we have stuff for endpoint, but we need the correct first item for this panel.
     tech = get_tech_for_endpoints(list(endpoint_ids))
 
+    # todo: use cached product mapping
+    nuclei_product_mapping = get_nuclei_product_mapping()
+
     dicts = []
+
     # don't include the same url over and over again...
     list_of_urls = []
 
     for scan in scans:
-        log.debug(scan)
 
         portals = load_json(scan.evidence)
 
@@ -232,11 +271,24 @@ def login_plaza_data(country: str = None, layer: str = None):
 
         for portal in portals:
             portal_url = portal.get("evidence", {}).get("matched-at", "")
+            extracted = portal.get("evidence", {}).get("extracted-results", "")
+            finding_name = portal.get("finding-name", "")
 
             if portal_url in list_of_urls:
                 continue
 
             list_of_urls.append(portal_url)
+
+            # make this tech a list (as it used to be), and make sure the prime product is the first one.
+            matching_tech = smash_trees(tech.get(scan.endpoint.id, []))
+            # prioritized on the this portal finding.
+            try:
+                if prioritized_product := nuclei_product_mapping.get(finding_name, []):
+                    prioritized = prioritize_tech(matching_tech, prioritized_product[0]["product"])
+                else:
+                    prioritized = matching_tech
+            except KeyError:
+                prioritized = matching_tech
 
             dicts.append(
                 {
@@ -249,11 +301,11 @@ def login_plaza_data(country: str = None, layer: str = None):
                     "rating_determined_on": scan.rating_determined_on,
                     "portal_name": portal.get("name", "").replace(" - Detect", ""),
                     "portal_url": portal_url,
-                    "portal_extracted": portal.get("evidence", {}).get("extracted-results", ""),
+                    "portal_extracted": extracted,
                     # make it easier to make uniques in the frontend
                     "scan_id": scan.id,
                     # "endpoint_id": scan.endpoint.id,
-                    "tech": tech.get(scan.endpoint.id, []),
+                    "tech": prioritized,
                 }
             )
     return dicts

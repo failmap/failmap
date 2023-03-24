@@ -295,7 +295,9 @@ def chatgpt_get_product_intended_use_case_description(product_name: str) -> str:
 
 
 def chatgpt_get_product_contextual_graph(product_name: str) -> str:
-    return ask_question(f'Can you create a contextual graph of the software product "{product_name}"?')
+    return ask_question(
+        f"Can you create a ascii contextual graph of the " f'application of software product "{product_name}"?'
+    )
 
 
 def chatgpt_hello() -> str:
