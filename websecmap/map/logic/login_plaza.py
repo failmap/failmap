@@ -21,7 +21,11 @@ def extract_version_from_nuclei_finding(nuclei_finding: dict) -> str:
     if not version:
         return ""
 
-    words_to_remove = ["wordpress", "nginx/", "apache/", "apache"]
+    # useless version information.
+    if version[0] in ["2", "10.0"]:
+        return ""
+
+    words_to_remove = ["/", "wordpress", "nginx", "apache", "microsoft-iis", "serv-u", "openssl"]
     for word in words_to_remove:
         # is the 'if' necessary?
         # always be sure that the text to replace matches as it will be lowercase:
