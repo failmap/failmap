@@ -58,7 +58,7 @@ def enrich_product_vendor(product: Product):
     if semantically_empty(vendor):
         return
 
-    vendor, _ = ProductVendor.objects.get_or_create(name=vendor)
+    vendor, _ = ProductVendor.objects.get_or_create(name=vendor[:200])
     product.vendor = vendor
     product.save()
     log.debug("Enriched product %s with vendor %s", product.name, product.vendor.name)
@@ -72,7 +72,7 @@ def enrich_product_goal(product: Product):
     if semantically_empty(goal):
         return
 
-    goal, _ = ProductGoal.objects.get_or_create(name=goal)
+    goal, _ = ProductGoal.objects.get_or_create(name=goal[:200])
     product.goal = goal
     product.save()
     log.debug("Enriched product %s with goal %s", product.verbose_name, product.goal.name)
@@ -95,7 +95,7 @@ def enrich_product_programming_language(product: Product):
         )
         return
 
-    programming_language_product, _ = Product.objects.get_or_create(name=programming_language)
+    programming_language_product, _ = Product.objects.get_or_create(name=programming_language[:200])
     ProductHierarchy.objects.get_or_create(
         product=product, related_product=programming_language_product, relationship=relationship
     )
