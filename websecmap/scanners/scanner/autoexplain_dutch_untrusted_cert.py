@@ -10,7 +10,7 @@ from celery import Task, group
 from django.utils import timezone
 from OpenSSL import SSL
 from OpenSSL.crypto import FILETYPE_PEM, dump_certificate, load_certificate
-from OpenSSL.SSL import Error as SSLError
+from OpenSSL.SSL import Error
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
@@ -84,7 +84,6 @@ methods = [
 @app.task()
 def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
     chain = []
-
     log.debug("Attempting to retrieve SSL chert via %s different methods.", len(methods))
     for method, method_name in methods:
         log.debug("Attempting to retrieve SSL chert via SSL method %s.", method_name)
@@ -92,7 +91,6 @@ def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
         if chain:
             log.debug("Returning cert chain.")
             return chain
-
     log.debug("Could not retrieve cert chain via all available methods, returning nothing.")
     return chain
 
@@ -115,7 +113,6 @@ def get_cert_chain_call(url, port, ip_version, method, method_name):
             conn.setblocking(1)
             conn.do_handshake()
             conn.set_tlsext_host_name(url.encode())
-
             # Deal with WantReadError errors, probably not needed with setblocking
             # attempts = 300
             # attempt = 0
@@ -128,38 +125,32 @@ def get_cert_chain_call(url, port, ip_version, method, method_name):
             #         conn.bio_read(4096)
             #     else:
             #         break
-
             chain = conn.get_peer_cert_chain()
             conn.close()
             log.debug("Dutch Untrusted Cert: chain retrieved: %s, port, %s, ip_version, %s.", url, port, ip_version)
             return serialize_cert_chain(chain) if chain else []
-
     except ValueError as error:
         log.debug("Dutch Untrusted Cert:Value Error: on url %s, port, %s, ip_version, %s.", url, port, ip_version)
         log.debug(error)
         # SSLv2_METHOD and SSLv3_METHOD
         # ValueError("No such protocol")
         return []
-
-    except SSLError as error:
+    except Error as error:
         log.debug("Dutch Untrusted Cert: sslerror on url %s, port, %s, ip_version, %s.", url, port, ip_version)
-        log.debug(error)
+        log.exception(error)
         # OpenSSL.SSL.Error: [('SSL routines', 'ssl_choose_client_version', 'wrong ssl version')]
         return []
-
     except socket.gaierror as error:
         log.debug("Dutch Untrusted Cert: socket.gaierror: on url %s, port, %s, ip_version, %s.", url, port, ip_version)
         log.debug(error)
         # socket.gaierror: [Errno 8] nodename nor servname provided, or not known
         # basically not resolving. Given this scanner will not kill off anything that doesnt resolve...
         return []
-
     except socket.error as error:
         log.debug("Dutch Untrusted Cert: socket.error: on url %s, port, %s, ip_version, %s.", url, port, ip_version)
         log.debug(error)
         # timeout reached probably
         return []
-
     # get address info error (DNS issues) can be retried a few times.
     except Exception as my_exception:  # noqa  # pylint: disable=broad-except
         log.debug("Dutch Untrusted Cert: Generic Exception: url %s, port, %s, ip_version, %s.", url, port, ip_version)
