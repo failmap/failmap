@@ -125,28 +125,34 @@ def get_cert_chain_call(url, port, ip_version, method, method_name):
 
             chain = conn.get_peer_cert_chain()
             conn.close()
+            log.debug("Dutch Untrusted Cert: chain retrieved: %s, port, %s, ip_version, %s.", url, port, ip_version)
             return serialize_cert_chain(chain) if chain else []
 
     except ValueError:
+        log.debug("Dutch Untrusted Cert:Value Error: on url %s, port, %s, ip_version, %s.", url, port, ip_version)
         # SSLv2_METHOD and SSLv3_METHOD
         # ValueError("No such protocol")
         return []
 
     except SSLError:
+        log.debug("Dutch Untrusted Cert: on url %s, port, %s, ip_version, %s.", url, port, ip_version)
         # OpenSSL.SSL.Error: [('SSL routines', 'ssl_choose_client_version', 'wrong ssl version')]
         return []
 
     except socket.gaierror:
+        log.debug("Dutch Untrusted Cert: socket.gaierror: on url %s, port, %s, ip_version, %s.", url, port, ip_version)
         # socket.gaierror: [Errno 8] nodename nor servname provided, or not known
         # basically not resolving. Given this scanner will not kill off anything that doesnt resolve...
         return []
 
     except socket.error:
+        log.debug("Dutch Untrusted Cert: socket.error: on url %s, port, %s, ip_version, %s.", url, port, ip_version)
         # timeout reached probably
         return []
 
     # get address info error (DNS issues) can be retried a few times.
     except Exception as my_exception:  # noqa  # pylint: disable=broad-except
+        log.debug("Dutch Untrusted Cert: Generic Exception: url %s, port, %s, ip_version, %s.", url, port, ip_version)
         # Log these exceptions to see what happens.
         log.exception(my_exception, extra={"hostname": url, "port": port, "ip": ip_version, "method": method_name})
         # Name does not resolve, wantread errors etc etc etc... there is no great code out there and can't make it
@@ -168,11 +174,11 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates:
     # Example: https://secure-t.sittard-geleen.nl
     # https://www.pyopenssl.org/en/stable/api/crypto.html
     if not serialized_certificates:
-        log.debug("No certificates received.")
+        log.debug("Dutch Untrusted Cert: No certificates received.")
         return False
 
     if not isinstance(serialized_certificates, List):
-        log.debug("No certificates received (not even a list of items).")
+        log.debug("Dutch Untrusted Cert: No certificates received (not even a list of items).")
         return False
 
     certificates = deserialize_cert_chain(serialized_certificates)
@@ -180,7 +186,7 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates:
     last_cert: OpenSSL.crypto.X509 = certificates[-1]
 
     if not isinstance(last_cert, OpenSSL.crypto.X509):
-        log.debug("Not an x509 instance but a %s.", type(last_cert))
+        log.debug("Dutch Untrusted Cert: Not an x509 instance but a %s.", type(last_cert))
         return False
 
     expected_digest = b"C6:C1:BB:C7:1D:4F:30:C7:6D:4D:B3:AF:B5:D0:66:DE:49:9E:9A:2D"
@@ -190,32 +196,32 @@ def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates:
     expected_notafter = b"20281113230000Z"  # Date in UTC, not in dutch time :)
 
     if last_cert.get_notAfter() != expected_notafter:
-        log.debug("No cert match on expected expiration date.")
+        log.debug("Dutch Untrusted Cert: No cert match on expected expiration date.")
         return False
 
     if last_cert.digest("sha1") != expected_digest:
-        log.debug("No cert match on digest.")
+        log.debug("Dutch Untrusted Cert: No cert match on digest.")
         return False
 
     if last_cert.get_serial_number() != expected_serial:
-        log.debug("No cert match on serial.")
+        log.debug("Dutch Untrusted Cert: No cert match on serial.")
         return False
 
     issuer = "".join(
         f"/{name.decode():s}={value.decode():s}" for name, value in last_cert.get_issuer().get_components()
     )
     if issuer != expected_issuer:
-        log.debug("No cert match on issuer.")
+        log.debug("Dutch Untrusted Cert: No cert match on issuer.")
         return False
 
     subject = "".join(
         f"/{name.decode():s}={value.decode():s}" for name, value in last_cert.get_subject().get_components()
     )
     if subject != expected_subject:
-        log.debug("No cert match on subject.")
+        log.debug("Dutch Untrusted Cert: No cert match on subject.")
         return False
 
-    log.debug("Certificate match!")
+    log.debug("Dutch Untrusted Cert: Certificate match!")
     return True
 
 
@@ -225,5 +231,9 @@ def store_bot_explaination_if_needed(needed: bool, scan_id: int):
     if not scan:
         return
 
-    if needed:
-        add_bot_explanation(scan, EXPLANATION, datetime(2028, 11, 14, tzinfo=pytz.utc) - timezone.now())
+    if not needed:
+        log.debug("Dutch Untrusted Cert: Certificate on scan_id is NOT a dutch state trusted cert: %s.", scan_id)
+        return
+
+    log.debug("Dutch Untrusted Cert: Certificate on scan_id is a dutch state trusted cert: %s.", scan_id)
+    add_bot_explanation(scan, EXPLANATION, datetime(2028, 11, 14, tzinfo=pytz.utc) - timezone.now())
