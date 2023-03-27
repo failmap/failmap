@@ -84,10 +84,16 @@ methods = [
 @app.task()
 def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
     chain = []
+
+    log.debug("Attempting to retrieve SSL chert via %s different methods.", len(methods))
     for method, method_name in methods:
+        log.debug("Attempting to retrieve SSL chert via SSL method %s.", method_name)
         chain = get_cert_chain_call(url, port, ip_version, method, method_name)
         if chain:
+            log.debug("Returning cert chain.")
             return chain
+
+    log.debug("Could not retrieve cert chain via all available methods, returning nothing.")
     return chain
 
 
@@ -128,25 +134,29 @@ def get_cert_chain_call(url, port, ip_version, method, method_name):
             log.debug("Dutch Untrusted Cert: chain retrieved: %s, port, %s, ip_version, %s.", url, port, ip_version)
             return serialize_cert_chain(chain) if chain else []
 
-    except ValueError:
+    except ValueError as error:
         log.debug("Dutch Untrusted Cert:Value Error: on url %s, port, %s, ip_version, %s.", url, port, ip_version)
+        log.debug(error)
         # SSLv2_METHOD and SSLv3_METHOD
         # ValueError("No such protocol")
         return []
 
-    except SSLError:
-        log.debug("Dutch Untrusted Cert: on url %s, port, %s, ip_version, %s.", url, port, ip_version)
+    except SSLError as error:
+        log.debug("Dutch Untrusted Cert: sslerror on url %s, port, %s, ip_version, %s.", url, port, ip_version)
+        log.debug(error)
         # OpenSSL.SSL.Error: [('SSL routines', 'ssl_choose_client_version', 'wrong ssl version')]
         return []
 
-    except socket.gaierror:
+    except socket.gaierror as error:
         log.debug("Dutch Untrusted Cert: socket.gaierror: on url %s, port, %s, ip_version, %s.", url, port, ip_version)
+        log.debug(error)
         # socket.gaierror: [Errno 8] nodename nor servname provided, or not known
         # basically not resolving. Given this scanner will not kill off anything that doesnt resolve...
         return []
 
-    except socket.error:
+    except socket.error as error:
         log.debug("Dutch Untrusted Cert: socket.error: on url %s, port, %s, ip_version, %s.", url, port, ip_version)
+        log.debug(error)
         # timeout reached probably
         return []
 
