@@ -17,7 +17,6 @@ from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan
 from websecmap.scanners.scanner import finish_those_that_wont_be_scanned, unique_and_random
-from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 
 log = logging.getLogger(__package__)
 
@@ -56,8 +55,10 @@ def compose_scan_task(urls: List[Url]) -> Task:
     finish_those_that_wont_be_scanned(SCANNER, scans, urls)
 
     tasks = [
+        # placed on the storage worker because gevent messes with the ssl library and causes want
+        # readerrors. Using a prefork worker avoids this problem. Todo: move to a dedicated prefork worker.
         get_cert_chain.si(url=scan.endpoint.url.url, port=scan.endpoint.port, ip_version=scan.endpoint.ip_version).set(
-            queue=CELERY_IP_VERSION_QUEUE_NAMES[scan.endpoint.ip_version]
+            queue="storage"
         )
         | certificate_chain_ends_on_non_trusted_dutch_root_ca.s()
         | store_bot_explaination_if_needed.s(scan.pk)
