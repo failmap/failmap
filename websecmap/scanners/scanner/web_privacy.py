@@ -42,6 +42,8 @@ STANDARD_ENDPOINT_FILTER = {
     "protocol": "https",
     "is_dead": False,
     "url__computed_subdomain": "",
+    "url__is_dead": False,
+    "url__not_resolvable": False,
     "ip_version": 4,
     "port": 443,
 }
