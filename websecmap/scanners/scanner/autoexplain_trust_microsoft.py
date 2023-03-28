@@ -330,7 +330,7 @@ def any_in_list_match(list1: List[str], list2: List[str]) -> bool:
     return any(item in list2 for item in list1)
 
 
-def autoexplain_trust_microsoft_and_include_their_webserver_headers(a_scan):
+def autoexplain_trust_microsoft_and_include_their_webserver_headers(a_scan: EndpointGenericScan) -> None:
     # Find a neighboring http endpoint, also there the headers are not relevant as the same security
     # protocol is used. DNS can only switch on addresses and ip-versions. But not protocol and port.
     http_endpoint = Endpoint.objects.all().filter(
