@@ -39,15 +39,13 @@ def get_all_latest_scans(country, organization_type):
                         endpoint__url__is_dead=False,
                         endpoint__url__organization__is_dead=False,
                         endpoint__url__organization__country=filtered_country,
-                        endpoint__url__organization__layers_id=filtered_organization_type,
+                        endpoint__url__organization__layers=filtered_organization_type,
                     ),
                 )
             )
             .filter(n_urls__gte=1)
             .order_by("-rating_determined_on")[:6]
         )
-
-        print(scans.query)
 
         for scan in scans:
             calculation = get_severity(scan)
@@ -82,7 +80,7 @@ def get_all_latest_scans(country, organization_type):
                     filter=Q(
                         url__organization__is_dead=False,
                         url__organization__country=filtered_country,
-                        url__organization__layers_id=filtered_organization_type,
+                        url__organization__layers=filtered_organization_type,
                         url__is_dead=False,
                         url__not_resolvable=False,
                     ),
