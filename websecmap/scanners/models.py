@@ -456,7 +456,10 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
         db_index=True,  # mainly needed for responsive admin interface
     )
     explanation = models.CharField(
-        max_length=255, default=0, help_text="Short explanation from the scanner on how the rating came to be."
+        max_length=255,
+        default=0,
+        help_text="Short explanation from the scanner on how the rating came to be.",
+        blank=True,
     )
     evidence = models.CharField(
         max_length=9001,

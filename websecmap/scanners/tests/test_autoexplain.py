@@ -34,19 +34,21 @@ def test_certificate_chain_ends_on_non_trusted_dutch_root_ca(current_path):
     with open(f"{current_path}/websecmap/scanners/tests/autoexplain/valid_chain.json") as f:
         certificate_data = json.load(f)
     assert (
-        autoexplain_dutch_untrusted_cert.certificate_chain_ends_on_non_trusted_dutch_root_ca(certificate_data) is True
+        autoexplain_dutch_untrusted_cert.certificate_chain_contains_trusted_untrusted_certificate(certificate_data)
+        is True
     )
 
     # Fail to validate something that does not end in the root certificate
     with open(f"{current_path}/websecmap/scanners/tests/autoexplain/missing_root.json") as f:
         certificate_data = json.load(f)
     assert (
-        autoexplain_dutch_untrusted_cert.certificate_chain_ends_on_non_trusted_dutch_root_ca(certificate_data) is False
+        autoexplain_dutch_untrusted_cert.certificate_chain_contains_trusted_untrusted_certificate(certificate_data)
+        is False
     )
 
     # Supplying garbage causes no problems / crashes:
-    assert autoexplain_dutch_untrusted_cert.certificate_chain_ends_on_non_trusted_dutch_root_ca([]) is False
-    assert autoexplain_dutch_untrusted_cert.certificate_chain_ends_on_non_trusted_dutch_root_ca("asdasd") is False
+    assert autoexplain_dutch_untrusted_cert.certificate_chain_contains_trusted_untrusted_certificate([]) is False
+    assert autoexplain_dutch_untrusted_cert.certificate_chain_contains_trusted_untrusted_certificate("asdasd") is False
 
 
 def test_autoexplain_no_https_microsoft(db, mocker):

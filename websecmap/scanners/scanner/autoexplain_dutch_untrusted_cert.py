@@ -60,7 +60,7 @@ def compose_scan_task(urls: List[Url]) -> Task:
         get_cert_chain.si(url=scan.endpoint.url.url, port=scan.endpoint.port, ip_version=scan.endpoint.ip_version).set(
             queue="storage"
         )
-        | certificate_chain_ends_on_non_trusted_dutch_root_ca.s()
+        | certificate_chain_contains_trusted_untrusted_certificate.s()
         | store_bot_explaination_if_needed.s(scan.pk)
         | plannedscan.finish.si("scan", SCANNER, scan.endpoint.url.pk)
         for scan in scans
@@ -138,7 +138,7 @@ def get_cert_chain_call(url, port, ip_version, method, method_name):
         return []
     except Error as error:
         log.debug("Dutch Untrusted Cert: sslerror on url %s, port, %s, ip_version, %s.", url, port, ip_version)
-        log.exception(error)
+        log.debug(error)
         # OpenSSL.SSL.Error: [('SSL routines', 'ssl_choose_client_version', 'wrong ssl version')]
         return []
     except socket.gaierror as error:
@@ -171,60 +171,95 @@ def deserialize_cert_chain(certificates: List[str]) -> List[OpenSSL.crypto.X509]
 
 
 @app.task(queue="storage")
-def certificate_chain_ends_on_non_trusted_dutch_root_ca(serialized_certificates: List[str]) -> bool:
+def certificate_chain_contains_trusted_untrusted_certificate(serialized_certificates: List[str]) -> bool:
     # todo: there are more untrusted certificates from the dutch state.
     # Example: https://secure-t.sittard-geleen.nl
     # https://www.pyopenssl.org/en/stable/api/crypto.html
     if not serialized_certificates:
         log.debug("Dutch Untrusted Cert: No certificates received.")
         return False
-
     if not isinstance(serialized_certificates, List):
         log.debug("Dutch Untrusted Cert: No certificates received (not even a list of items).")
         return False
-
     certificates = deserialize_cert_chain(serialized_certificates)
-
-    last_cert: OpenSSL.crypto.X509 = certificates[-1]
-
-    if not isinstance(last_cert, OpenSSL.crypto.X509):
-        log.debug("Dutch Untrusted Cert: Not an x509 instance but a %s.", type(last_cert))
+    # # perhaps check on the common name of the first cert...
+    if len(certificates) == 1:
+        log.debug("Dutch Untrusted Cert: Only one certificate received, this cannot be a trusted cert.")
         return False
+    # how do we know this cert is the right cert exactly and not something that has been yolo-added to the chain?
+    checks = [cert_is_staat_der_nederlanden_root_ca_g1]
+    # is it enough to just add the raw cert data and not check on a deserialized cert?
+    for check in checks:
+        for cert in certificates:
+            if check(cert):
+                return True
+    return False
 
-    expected_digest = b"C6:C1:BB:C7:1D:4F:30:C7:6D:4D:B3:AF:B5:D0:66:DE:49:9E:9A:2D"
-    expected_serial = 10004001
-    expected_issuer = "/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Root CA - G1"
-    expected_subject = "/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Root CA - G1"
-    expected_notafter = b"20281113230000Z"  # Date in UTC, not in dutch time :)
 
-    if last_cert.get_notAfter() != expected_notafter:
-        log.debug("Dutch Untrusted Cert: No cert match on expected expiration date.")
+def cert_is_staat_der_nederlanden_root_ca_g1(certificate: OpenSSL.crypto.X509):
+    # we've seen the g1 cert after a kpn root cert... so this g1 thing can be anywhere in the chain.
+    # see: test-digikoppeling.eindhoven.nl
+    if not isinstance(certificate, OpenSSL.crypto.X509):
+        log.debug("Dutch Untrusted Cert: Not an x509 instance but a %s.", type(certificate))
         return False
-
-    if last_cert.digest("sha1") != expected_digest:
-        log.debug("Dutch Untrusted Cert: No cert match on digest.")
+    if not all(
+        [
+            cert_digest_match(certificate, b"C6:C1:BB:C7:1D:4F:30:C7:6D:4D:B3:AF:B5:D0:66:DE:49:9E:9A:2D"),
+            cert_serial_match(certificate, 10004001),
+            cert_issuer_match(
+                certificate, "/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Root CA - G1"
+            ),
+            cert_subject_match(
+                certificate, "/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Root CA - G1"
+            ),
+            cert_notafter_match(certificate, b"20281113230000Z"),
+        ]
+    ):
         return False
-
-    if last_cert.get_serial_number() != expected_serial:
-        log.debug("Dutch Untrusted Cert: No cert match on serial.")
-        return False
-
-    issuer = "".join(
-        f"/{name.decode():s}={value.decode():s}" for name, value in last_cert.get_issuer().get_components()
-    )
-    if issuer != expected_issuer:
-        log.debug("Dutch Untrusted Cert: No cert match on issuer.")
-        return False
-
-    subject = "".join(
-        f"/{name.decode():s}={value.decode():s}" for name, value in last_cert.get_subject().get_components()
-    )
-    if subject != expected_subject:
-        log.debug("Dutch Untrusted Cert: No cert match on subject.")
-        return False
-
     log.debug("Dutch Untrusted Cert: Certificate match!")
     return True
+
+
+def cert_notafter_match(certificate: OpenSSL.crypto.X509, expected_notafter: bytes) -> bool:
+    # Date in UTC, not in dutch time :)
+    if certificate.get_notAfter() == expected_notafter:
+        return True
+    log.debug("Dutch Untrusted Cert: No cert match on expected expiration date.")
+    return False
+
+
+def cert_digest_match(certificate: OpenSSL.crypto.X509, expected_digest: bytes) -> bool:
+    if certificate.digest("sha1") == expected_digest:
+        return True
+    log.debug("Dutch Untrusted Cert: No cert match on digest.")
+    return False
+
+
+def cert_serial_match(certificate: OpenSSL.crypto.X509, expected_serial: int) -> bool:
+    if certificate.get_serial_number() == expected_serial:
+        return True
+    log.debug("Dutch Untrusted Cert: No cert match on serial.")
+    return False
+
+
+def cert_issuer_match(certificate: OpenSSL.crypto.X509, expected_issuer: str) -> bool:
+    issuer = "".join(
+        f"/{name.decode():s}={value.decode():s}" for name, value in certificate.get_issuer().get_components()
+    )
+    if issuer == expected_issuer:
+        return True
+    log.debug("Dutch Untrusted Cert: No cert match on issuer.")
+    return False
+
+
+def cert_subject_match(certificate: OpenSSL.crypto.X509, expected_subject: str) -> bool:
+    subject = "".join(
+        f"/{name.decode():s}={value.decode():s}" for name, value in certificate.get_subject().get_components()
+    )
+    if subject == expected_subject:
+        return True
+    log.debug("Dutch Untrusted Cert: No cert match on subject.")
+    return False
 
 
 @app.task(queue="storage", ignore_result=True)
