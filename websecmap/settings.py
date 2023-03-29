@@ -1135,6 +1135,38 @@ CONSTANCE_CONFIG = {
         "Show monthly or yearly comparison reports per layer, also known as press reports.",
         bool,
     ),
+    "SHOW_RESPONSIBLE_DISCLOSURE_POLICY": (
+        False,
+        "Show links to the responsible disclosure policy in the app menu.",
+        bool,
+    ),
+    "RESPONSIBLE_DISCLOSURE_EMAIL_ADDRESS": (
+        "",
+        "E-Mail address used for receiving responsible disclosures.",
+        str,
+    ),
+    "RESPONSIBLE_DISCLOSURE_PGP_KEY": (
+        "",
+        "PGP Key that can be used to encrypt the body of the email for a responsible disclosure.",
+        str,
+    ),
+    "RESPONSIBLE_DISCLOSURE_SALSA_KEY": (
+        "",
+        "Public key that can be used to encrypt a file sent with the disclosure, in case PGP is not available.",
+        str,
+    ),
+    "SHOW_COMPLY_OR_EXPLAIN_GUIDELINES": (
+        False,
+        "Show links to the comply or explain guidelines",
+        bool,
+    ),
+    "SHOW_METRIC_PROGRESS": (
+        False,
+        "Adds a page to the organization where maps over time are shown",
+        bool,
+    ),
+    "SIDE_WIDE_SEARCH_TITLE_NL": ("Bekijk de basisbeveiliging van", "Heading of the site wide search search bar.", str),
+    "SIDE_WIDE_SEARCH_TITLE_EN": ("View the baseline security of", "Heading of the site wide search search bar.", str),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1233,6 +1265,15 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         ),
         ("Chat and support options (using gitter)", ("GITTER_CHAT_ENABLE", "GITTER_CHAT_CHANNEL")),
         (
+            "Responsible disclosure policy",
+            (
+                "SHOW_RESPONSIBLE_DISCLOSURE_POLICY",
+                "RESPONSIBLE_DISCLOSURE_EMAIL_ADDRESS",
+                "RESPONSIBLE_DISCLOSURE_PGP_KEY",
+                "RESPONSIBLE_DISCLOSURE_SALSA_KEY",
+            ),
+        ),
+        (
             "Comply or Explain",
             (
                 "SHOW_COMPLY_OR_EXPLAIN",
@@ -1280,6 +1321,8 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_LOGIN_PLAZA",
                 "SHOW_TIME_MACHINE",
                 "SHOW_HISTORIC_COMPARISON_REPORTS",
+                "SHOW_COMPLY_OR_EXPLAIN_GUIDELINES",
+                "SHOW_METRIC_PROGRESS",
             ),
         ),
         (
@@ -1289,6 +1332,8 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "INTRO_LEADER_HTML_EN",
                 "INTRO_TITLE_HTML_NL",
                 "INTRO_LEADER_HTML_NL",
+                "SIDE_WIDE_SEARCH_TITLE_NL",
+                "SIDE_WIDE_SEARCH_TITLE_EN",
             ),
         ),
         ("Footer", ("FOOTER_CONTENT_HTML_EN", "FOOTER_CONTENT_HTML_NL")),

@@ -272,6 +272,8 @@ def config_content():
             "login_plaza": configuration["SHOW_LOGIN_PLAZA"],
             "time_machine": configuration["SHOW_TIME_MACHINE"],
             "historic_comparison_reports": configuration["SHOW_HISTORIC_COMPARISON_REPORTS"],
+            "metric_progress": configuration["SHOW_METRIC_PROGRESS"],
+            "comply_or_explain_guidelines": configuration["SHOW_COMPLY_OR_EXPLAIN_GUIDELINES"],
             "socials": {
                 "report": configuration["SOCIALS_SHOW_REPORT"],
                 "map": configuration["SOCIALS_SHOW_MAP"],
@@ -303,11 +305,18 @@ def config_content():
             "twitter": configuration["PROJECT_TWITTER"],
             "facebook": configuration["PROJECT_FACEBOOK"],
         },
+        "responsible_disclosure_page": {
+            "show": configuration["SHOW_RESPONSIBLE_DISCLOSURE_POLICY"],
+            "email_address": configuration["RESPONSIBLE_DISCLOSURE_EMAIL_ADDRESS"],
+            "pgp_key": configuration["RESPONSIBLE_DISCLOSURE_PGP_KEY"],
+            "salsa_key": configuration["RESPONSIBLE_DISCLOSURE_SALSA_KEY"],
+        },
         "translations": {
             "en": {
                 "landing": {
                     "title": configuration["INTRO_TITLE_HTML_EN"],
                     "leader": configuration["INTRO_LEADER_HTML_EN"],
+                    "side_wide_search": configuration["SIDE_WIDE_SEARCH_TITLE_EN"],
                 },
                 "info": {
                     "title": configuration["INFO_TITLE_EN"],
@@ -331,6 +340,7 @@ def config_content():
                 "landing": {
                     "title": configuration["INTRO_TITLE_HTML_NL"],
                     "leader": configuration["INTRO_LEADER_HTML_NL"],
+                    "side_wide_search": configuration["SIDE_WIDE_SEARCH_TITLE_NL"],
                 },
                 "info": {
                     "title": configuration["INFO_TITLE_NL"],
