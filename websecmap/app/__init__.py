@@ -6,6 +6,10 @@ from collections import defaultdict
 from django.apps import AppConfig
 from django.conf import settings
 
+from websecmap.app.deferred_attribute import _DeferredAttribute_get
+
+__bogus__ = [_DeferredAttribute_get]
+
 log = logging.getLogger(__name__)
 
 

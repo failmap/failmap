@@ -49,7 +49,7 @@ def filter_top_level_domains(
         )
 
     # retrieve a minimal amount of data:
-    urls = urls.only("id")
+    urls = urls.only("id", "url")
 
     # Optimize: only required values, unique and randomized
     urls = unique_and_random(urls)
@@ -98,7 +98,7 @@ def apply_organzation_or_endpoint_filter_before_url_filter(
         urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter)
 
     # retrieve a minimal amount of data:
-    urls = urls.only("id")
+    urls = urls.only("id", "url")
 
     # make sure all urls are unique (some are shared between organizations, or a custom query might dupe them)
     urls = unique_and_random(urls)
