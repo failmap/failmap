@@ -917,12 +917,12 @@ CONSTANCE_CONFIG = {
     ),
     # Screenshots:
     "SCREENSHOT_API_URL_V4": (
-        "http://websecmap-screenshot:3000/screenshot/",
+        "http://websecmap-tool-screenshot:3000/screenshot/",
         "Use this service to create a screenshot over v4. Empty means no screenshots.",
         str,
     ),
     "SCREENSHOT_API_URL_V6": (
-        "http://websecmap-screenshot-v6:3000/screenshot/",
+        "http://websecmap-tool-screenshot-v6:3000/screenshot/",
         "Use this service to create a screenshot over v6. Empty means no screenshots",
         str,
     ),
