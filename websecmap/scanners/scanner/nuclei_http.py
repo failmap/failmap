@@ -422,6 +422,7 @@ def process_nuclei_record(n_record: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+@app.task(queue="storage", ignore_result=True)
 def extract_findings_to_scanner_findings():
     # Gets the finding-name and nice name and puts it in the ScannerFinding table.
     # This is useful to create mappings between scanner findings and products.
