@@ -697,6 +697,7 @@ class ProductAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = (
         "id",
         "name",
+        "is_irrelevant",
         "cve_details_link",
         "in_findings",
         "relations",
