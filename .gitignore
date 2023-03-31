@@ -16,8 +16,7 @@ websecmap/scanners/resources/wordlists/nonsense.txt
 build/
 code.json
 codeclimate.json
-static/
-!websecmap/*/static/
+/static/
 .direnv
 version
 vendor/Google Chrome.app/

@@ -201,7 +201,10 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            BASE_DIR + "/",
+            BASE_DIR + "/websecmap/app/templates",
+            BASE_DIR + "/websecmap/game/templates",
+            BASE_DIR + "/websecmap/map/templates",
+            BASE_DIR + "/websecmap/api/templates",
         ],
         "APP_DIRS": True,
         "OPTIONS": {
