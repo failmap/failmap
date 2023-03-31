@@ -65,6 +65,15 @@ class UrlAdminInline(StackedInline):
     exclude = []
 
 
+class OrgAltNameAdminInline(StackedInline):
+    model = Organization.alternative_names.through
+    extra = 0
+    show_change_link = False
+    can_delete = True
+
+    exclude = []
+
+
 class OrganizationAdminInline(CompactInline):
     model = Organization
     extra = 0
@@ -332,7 +341,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
         "is_dead_reason",
     )
 
-    inlines = [CoordinateAdminInline, UrlAdminInline]  #
+    inlines = [CoordinateAdminInline, UrlAdminInline, OrgAltNameAdminInline]  #
 
     @staticmethod
     def name_details(inst):
@@ -772,10 +781,22 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(AlternativeName)
 class AlternativeNameAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("name",)
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("tags")
+
+    list_display = ("name", "uses", "usages", "tag_list")
     search_fields = ("name",)
     list_filter = ("name",)
-    fields = ("name",)
+    fields = ("name", "description", "tags")
+
+    def tag_list(self, obj):
+        return ", ".join(o.name for o in obj.tags.all())
+
+    def uses(self, obj):
+        return Organization.objects.all().filter(alternative_names=obj).count()
+
+    def usages(self, obj):
+        return list(Organization.objects.all().filter(alternative_names=obj))
 
     inlines = [OrganizationAdminViaInline]
 

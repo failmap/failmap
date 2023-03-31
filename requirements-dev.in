@@ -55,3 +55,9 @@ ipython
 
 # python 3.11 compat
 py>=1.11.0
+
+# because the runserver does not auto reload, (perhaps because it's in a differen path):
+# you also need this diabolical thing: https://facebook.github.io/watchman/
+# (aka brew install watchman, watchman watch .)
+#
+pywatchman

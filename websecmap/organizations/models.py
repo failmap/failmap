@@ -4,7 +4,7 @@
 import hashlib
 import logging
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List
 
 import pytz
 import tldextract
@@ -15,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from jsonfield import JSONField
 from validators import domain
+from taggit.managers import TaggableManager
 
 log = logging.getLogger(__package__)
 
@@ -38,6 +39,8 @@ def validate_twitter(value):
 
 class AlternativeName(models.Model):
     name = models.CharField(max_length=250)
+    description = models.CharField(max_length=250, blank=True, null=True)
+    tags = TaggableManager(blank=True)
 
     def __str__(self):
         return f"(alt: {self.name})"
@@ -146,8 +149,12 @@ class Organization(models.Model):
         return f"{self.name}, {self.country}/{type_label} ({self.created_on.strftime('%b %Y')})"
 
     @property
-    def names(self):
+    def names(self) -> List[str]:
         return [self.name] + list(self.alternative_names.all().values_list("name", flat=True))
+
+    @property
+    def altnames(self) -> List[str]:
+        return list(self.alternative_names.all().values_list("name", flat=True))
 
     def add_url(self, url: str):
 

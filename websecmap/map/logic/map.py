@@ -8,6 +8,7 @@ from django.utils.text import slugify
 
 from websecmap.map.logic.map_defaults import REMARK, get_country, get_organization_type, determine_when
 from websecmap.map.models import MapDataCache
+from websecmap.organizations.models import Organization
 from websecmap.reporting.diskreport import retrieve_report
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
@@ -300,7 +301,9 @@ def get_map_data(
                 "organization_name": i[1],
                 "organization_name_lowercase": i[1].lower(),
                 "organization_slug": slugify(i[1]),
-                "additional_keywords": extract_domains(calculation),
+                # a subquery for altnames sucks, but its less complicated than altering the query above
+                # especially since group_concat works different in every database and thus will suck even harder...
+                "additional_keywords": f"{get_altnames(i[5])} {extract_domains(calculation)}",
                 "high": high,
                 "medium": medium,
                 "low": low,
@@ -362,7 +365,14 @@ def proper_coordinate(coordinate, geojsontype):
     return coordinate
 
 
-def extract_domains(calculation):
+def get_altnames(organization_id: int) -> str:
+    try:
+        return " ".join(Organization.objects.get(id=organization_id).altnames)
+    except Organization.DoesNotExist:
+        return ""
+
+
+def extract_domains(calculation) -> str:
     """
     Extracts a list of domains and subdomains from a calculation, which is then compressed to a simple version.
 
