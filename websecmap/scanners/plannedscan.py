@@ -589,3 +589,35 @@ def plan_follow_up_scans(**kwargs):
                         urls=[scan_matching_policy.endpoint.url],
                         origin=f"Follow up from {policy}"[:255],
                     )
+
+
+def generic_retry_watcher(scanner_name: str, activity: int, minutes: int = 30):
+    # Use this when the normal 48 hours is too long. Use this method until scanners / activities support their
+    # own retry mechanism. This is a workaround that should disappear.
+    # Since only one scan can be run at one time, a reboot of the software might mean that a currently running
+    # scan is terminated. The normal 'recovery' period is 48 hours, which is WAY too long. Instead of messing
+    # with the existing recovery architecture, this function measures tasks that have been running for too long and
+    # resets them to requested. At that moment the next scan can be picked up. Expecting a timeout of 30 minutes.
+    # which should be way than more than enough to finish a scan on a domain.
+
+    scan_too_old = datetime.now() - timedelta(minutes=minutes)
+
+    scanner = Scanner.objects.all().filter(python_name=scanner_name).first()
+    if not scanner:
+        log.error("Could not find a scanner named %s", scanner_name)
+        return
+
+    outdated_scans = PlannedScan.objects.filter(
+        scanner=scanner, activity=activity, state=State.picked_up, last_state_change_at__lte=scan_too_old
+    )
+
+    if not outdated_scans:
+        # happens a lot of times
+        log.debug("No outdated %s discovery scans found", scanner_name)
+        return
+
+    # we could do an update, but that has no logging, which can cause confusion
+    for outdated_scan in outdated_scans:
+        log.debug("Setting outdated amass discovery scan to requested: %s", outdated_scan.pk)
+        outdated_scan.state = State.requested
+        outdated_scan.save()

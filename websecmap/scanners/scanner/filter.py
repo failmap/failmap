@@ -53,6 +53,8 @@ def filter_top_level_domains(
 
     # Optimize: only required values, unique and randomized
     urls = unique_and_random(urls)
+
+    log.debug("Filtering top level domains resulten in %s urls", len(urls))
     return urls
 
 

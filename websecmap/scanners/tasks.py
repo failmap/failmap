@@ -32,6 +32,7 @@ from websecmap.scanners.scanner import (
     bannergrab_nmap,
     web_privacy,
     nuclei_http,
+    subdomains_amass,
 )
 
 log = logging.getLogger(__name__)
@@ -65,6 +66,7 @@ __scanners__ = [
     ports,
     web_privacy,
     nuclei_http,
+    subdomains_amass,
 ]
 
 __others__ = [proxy, plannedscan]

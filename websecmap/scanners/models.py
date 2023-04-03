@@ -993,6 +993,35 @@ class ProductRelationship(models.Model):
         return self.name
 
 
+class PortalPublishingReason(models.Model):
+    # backend_system, development_tool, sysadmin_tool, content_management_portal, remote_work
+    name = models.SlugField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+
+class ProductWithPortal(models.Model):
+    """
+    Some products have portals, these can be auto-filled here from scanner_finding_name_mapping.
+
+    Some portals are fine to show online, some are not. This table holds that specific information.
+
+    This table is separated from the normal product table as it's easy to mix up these fields with results
+    from other tech scans such as: this open port is from MySQL. That has their own meaning and results.
+    Also it's fine to have mySQL running (for example in xampp) but it should not be exposed.
+    """
+
+    # todo: this can be auto-filled from portal scans.
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    # fine for netscalers, work from home solutions? null = unknown.
+    login_portal_should_be_public = models.BooleanField(default=False, null=True, blank=True)
+    # backend_system, development_tool, sysadmin_tool, content_management_portal, remote_work. These fields
+    # will have to be translated but its not clear which options will exist in the future. Therefore its not an
+    # enum but a reference.
+    reasoning_for_public_or_not = models.ForeignKey(PortalPublishingReason, on_delete=models.CASCADE)
+
+
 class ProductHierarchy(models.Model):
     # Separate the hierarchy / network from the data itself, so it can be easily replaced / upgraded etc.
     # It's also not important how fast it is given it's a long duration cached read and virtually nothing
