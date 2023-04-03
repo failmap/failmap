@@ -1,6 +1,7 @@
 ARG PYTHON_VERSION=3.10
 ARG NUCLEI_VERSION=2.8.9
 ARG GOLANG_VERSION=1.20
+ARG AMASS_VERSION=3.23.1
 
 # create Python virtualenv with Python dependencies
 FROM python:${PYTHON_VERSION} AS virtualenv
@@ -44,6 +45,13 @@ FROM golang:${GOLANG_VERSION} AS nuclei
 ARG NUCLEI_VERSION
 
 RUN go install -v "github.com/projectdiscovery/nuclei/v2/cmd/nuclei@v${NUCLEI_VERSION}"
+
+FROM golang:${GOLANG_VERSION} AS amass
+
+# import variable
+ARG AMASS_VERSION
+
+RUN go install -v "github.com/owasp-amass/amass/v3/...@v${AMASS_VERSION}"
 
 # restart with a clean image
 FROM python:${PYTHON_VERSION} AS release
@@ -99,6 +107,8 @@ USER nobody:nogroup
 RUN HOME=/opt/nuclei /usr/local/bin/nuclei -update-templates
 USER root
 
+COPY --from=amass /go/bin/amass /usr/local/bin/amass
+
 # copy artifacts from dnscheck build
 COPY --from=dnscheck /usr/local/share/perl /usr/local/share/perl
 
@@ -152,3 +162,5 @@ USER nobody:nogroup
 RUN websecmap --version | grep -E '[0-9]+\.[0-9]+\.[0-9]+'
 RUN dnssec.pl 2>&1 | grep usage:
 RUN HOME=/opt/nuclei nuclei -disable-update-check
+ARG AMASS_VERSION
+RUN amass -version 2>&1 | grep ${AMASS_VERSION}
