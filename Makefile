@@ -279,3 +279,19 @@ lint:  ${pysrc} ${app} ## Do basic linting
 
 isort:  ${pysrc} ${app}
 	isort -rc ${pysrcdirs}
+
+DEFAULT_IMAGE=websecmap
+BUILD_TARGET=release
+
+docker-build:
+	docker build --target ${BUILD_TARGET} --cache-from registry.gitlab.com/internet-cleanup-foundation/web-security-map:latest --tag ${DEFAULT_IMAGE} .
+
+docker-shell:
+	docker run -ti --rm --entrypoint /bin/bash ${DEFAULT_IMAGE}
+
+COMPOSE_FILE=tests/docker-compose.yml
+COMPOSE_CMD=IMAGE=${DEFAULT_IMAGE} docker compose -f ${COMPOSE_FILE}
+
+docker-compose-up: service=backend
+docker-compose-up:
+	${COMPOSE_CMD} up ${service}
