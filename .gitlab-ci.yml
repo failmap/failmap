@@ -180,7 +180,7 @@ image_test:
 
     - IMAGE=$CI_REGISTRY/internet-cleanup-foundation/web-security-map:$tag
     # push additional image keyed on the merge request ID, so a next build in this merge request can use cache
-    - MR_CACHE_IMAGE=$CI_REGISTRY/internet-cleanup-foundation/web-security-map:mr-${CI_MERGE_REQUEST_IID}
+    - MR_CACHE_IMAGE=$CI_REGISTRY/internet-cleanup-foundation/web-security-map:mr-$CI_MERGE_REQUEST_ID
     # pull cache from the last build 'production' version
     - MASTER_CACHE_IMAGE=$CI_REGISTRY/internet-cleanup-foundation/web-security-map:latest
 
