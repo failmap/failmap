@@ -1714,6 +1714,9 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 # allow cookies to be sent as well, we have to, because there are logins and such.
 CORS_ALLOW_CREDENTIALS = True
 
+# required from django 4.0
+CSRF_TRUSTED_ORIGINS = ["http://localhost", "https://basisbeveiliging.nl", "https://*.basisbeveiliging.nl"]
+
 VENDOR_DIR = os.environ.get("VENDOR_DIR", os.path.abspath(os.path.dirname(__file__) + "/../vendor/") + "/")
 
 """
