@@ -292,6 +292,6 @@ docker-shell:
 COMPOSE_FILE=tests/docker-compose.yml
 COMPOSE_CMD=IMAGE=${DEFAULT_IMAGE} docker compose -f ${COMPOSE_FILE}
 
-docker-compose-up: service=backend
+docker-compose-up: service=
 docker-compose-up:
 	${COMPOSE_CMD} up ${service}

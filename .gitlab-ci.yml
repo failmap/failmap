@@ -65,7 +65,7 @@ test_mysql: &test_mysql_template
 
   services:
     # minimal version required for django 4.2 = 8.0
-    - mysql:8.0
+    - mysql:8
 
   variables:
     # configuration for docker mysql service
