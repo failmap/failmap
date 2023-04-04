@@ -156,10 +156,10 @@ class Organization(models.Model):
     def altnames(self) -> List[str]:
         return list(self.alternative_names.all().values_list("name", flat=True))
 
-    def add_url(self, url: str):
+    def add_url(self, url: str, origin: str = ""):
 
         # add url to database with validation etc:
-        url = Url.add(url)
+        url = Url.add(url, origin=origin)
 
         # then add it to the organization
         url.organization.add(self)
@@ -261,7 +261,7 @@ class Url(models.Model):
     organization = models.ManyToManyField(Organization, related_name="u_many_o_upgrade")
 
     url = models.CharField(
-        max_length=255, help_text="Lowercase url name. For example: mydomain.tld or subdomain.domain.tld"
+        max_length=255, help_text="The FQDN. Lowercase url name. For example: mydomain.tld or subdomain.domain.tld"
     )
 
     internal_notes = models.TextField(
@@ -364,6 +364,14 @@ class Url(models.Model):
 
     onboarded_on = models.DateTimeField(blank=True, null=True, help_text="The moment the onboard process finished.")
 
+    origin = models.CharField(
+        max_length=60,
+        default="",
+        blank=True,
+        null=True,
+        help_text="Information on what has added this url. For example: what scanner.",
+    )
+
     class Meta:
         managed = True
         db_table = "url"
@@ -430,7 +438,7 @@ class Url(models.Model):
         return False
 
     @transaction.atomic
-    def add_subdomain(self, subdomain, internal_notes: str = "") -> Optional["Url"]:
+    def add_subdomain(self, subdomain, origin: str = "") -> Optional["Url"]:
         # import here to prevent circular/cyclic imports, this module imports Url.
         from websecmap.scanners.scanner.http import resolves  # pylint: disable=import-outside-toplevel
 
@@ -465,8 +473,8 @@ class Url(models.Model):
             log.error(my_exception)
             return None
 
-        if internal_notes:
-            my_url.internal_notes = internal_notes
+        if origin:
+            my_url.origin = origin
             my_url.save()
 
         # A Url needs to have a value for field "id" before a many-to-many relationship can be used.
@@ -509,15 +517,13 @@ class Url(models.Model):
         return True
 
     @staticmethod
-    def add(url: str):
+    def add(url: str, origin: str = "") -> Optional["Url"]:
+        # origin: where the url came from, for example the name of the scanner.
 
         # Rebuild the url based on the information present:
         # Preventing idna issues, preventing ports, directories, usernames, passwords and other stuff in urls.
         extract = tldextract.extract(url)
-        if extract.subdomain:
-            url = f"{extract.subdomain}.{extract.domain}.{extract.suffix}"
-        else:
-            url = f"{extract.domain}.{extract.suffix}"
+        url = extract.fqdn
 
         if not Url.is_valid_url(url):
             raise ValueError(
@@ -533,6 +539,7 @@ class Url(models.Model):
         if not existing_url:
             new_url = Url(url=url)
             new_url.created_on = datetime.now(pytz.utc)
+            new_url.origin = origin
             new_url.save()
             return new_url
 

@@ -1,3 +1,5 @@
+from tldextract import tldextract
+
 import websecmap
 from websecmap.organizations.models import Url
 
@@ -12,13 +14,13 @@ def test_add_subdomain(db):
     u.url = "example.nl"
     u.save()
 
-    u.add_subdomain("my", internal_notes="Just a friendly test")
+    u.add_subdomain("my", origin="Just a friendly test")
     u.save()
 
     assert Url.objects.all().count() == 2
 
     new_url = Url.objects.all().get(url="my.example.nl")
-    assert new_url.internal_notes == "Just a friendly test"
+    assert new_url.origin == "Just a friendly test"
 
 
 def test_is_valid_url():
@@ -32,3 +34,12 @@ def test_is_valid_url():
     # Works for domains that are actual domains:
     assert Url.is_valid_url("google.com") is True
     assert Url.is_valid_url("аренда.орг") is True
+
+
+def test_tldextract():
+    # just to know that tldextract is sane:
+    extract = tldextract.extract("https://subdomein.basisbeveiliging.co.uk:443/some_page#anchor-13")
+    assert extract.fqdn == f"{extract.subdomain}.{extract.domain}.{extract.suffix}"
+
+    extract = tldextract.extract("https://basisbeveiliging.co.uk:443/some_page#anchor-13")
+    assert extract.fqdn == f"{extract.domain}.{extract.suffix}"

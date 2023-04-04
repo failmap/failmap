@@ -456,11 +456,7 @@ class MyUrlAdminForm(forms.ModelForm):
 
         # see if the url is complete, and remove the http(s):// and paths parts:
         result = tldextract.extract(url_string)
-
-        if result.subdomain:
-            clean_url_string = f"{result.subdomain}.{result.domain}.{result.suffix}"
-        else:
-            clean_url_string = f"{result.domain}.{result.suffix}"
+        clean_url_string = result.fqdn
 
         # also place the cleaned data back into the form, in case of errors.
         # this does not work this way it seems.
@@ -573,6 +569,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     list_display = (
         "url",
+        "origin",
         "in_organizations",
         "endpoints",
         # "sub",

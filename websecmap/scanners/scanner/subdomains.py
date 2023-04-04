@@ -77,7 +77,7 @@ def compose_discover_task(urls: List[Url]) -> Task:
         certificate_transparency_scan.si(url.url)
         | store_certificate_transparency_results.s(url.id)
         | nsec_scan.si(url.url)
-        | dnsrecon_parse_report_contents.s(url.as_dict())
+        | dnsrecon_parse_report_contents.s(url.as_dict(), "nsec scan")
         | plannedscan.finish.si("discover", "subdomains", url.pk)
         for url in urls
     )
@@ -258,7 +258,7 @@ def result_contains_canary(contents: List):
 
 
 @app.task(queue="storage")
-def dnsrecon_parse_report_contents(contents: List, url: Dict[str, Any]):
+def dnsrecon_parse_report_contents(contents: List, url: Dict[str, Any], origin: str = ""):
     """
     [
         {'type': 'A', 'name': 'basisbeveiliging.nl', 'address': '1.1.1.1'},
@@ -301,7 +301,7 @@ def dnsrecon_parse_report_contents(contents: List, url: Dict[str, Any]):
             if not db_url:
                 continue
 
-            added = db_url.add_subdomain(subdomain.lower())
+            added = db_url.add_subdomain(subdomain.lower(), origin=origin)
             if added:
                 addedlist.append(added.url)
 
@@ -479,7 +479,7 @@ def store_certificate_transparency_results(subdomains: List[str], url_id: int) -
 
     addedlist: List[str] = []
     for subdomain in subdomains:
-        if added := db_url.add_subdomain(subdomain):
+        if added := db_url.add_subdomain(subdomain, origin="certificate transparency"):
             addedlist.append(added.url)
 
     return addedlist

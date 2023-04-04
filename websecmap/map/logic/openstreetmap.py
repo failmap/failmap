@@ -483,8 +483,8 @@ def add_official_websites(organization, wikidata_code):
     # they don't need to resolve
     extract = tldextract.extract(website)
     if extract.subdomain:
-        organization.add_url(f"{extract.subdomain}.{extract.domain}.{extract.suffix}")
-    organization.add_url(f"{extract.domain}.{extract.suffix}")
+        organization.add_url(f"{extract.subdomain}.{extract.domain}.{extract.suffix}", origin="openstreetmap import")
+    organization.add_url(f"{extract.domain}.{extract.suffix}", origin="openstreetmap import")
     log.debug("Added URL %s. If it contained 'www', also without 'www'.", website)
 
 

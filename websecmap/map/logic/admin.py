@@ -181,7 +181,7 @@ def add_urls(organization_id, urls: str):
 
     organization = Organization.objects.all().filter(id=organization_id).first()
     for url in valid:
-        organization.add_url(url)
+        organization.add_url(url, origin="management gui")
 
     if not_valid:
         return operation_response(

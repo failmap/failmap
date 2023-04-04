@@ -15,7 +15,7 @@ def test_dnsrecon_parse_report_contents(db, mocker):
         {"type": "A", "name": "*.basisbeveiliging.nl", "address": "1.1.1.1"},
     ]
 
-    dnsrecon_parse_report_contents(contents, url.as_dict())
+    dnsrecon_parse_report_contents(contents, url.as_dict(), origin="test")
 
     # something.basisbeveilging.nl has been added
     assert Url.objects.all().count() == 2

@@ -178,7 +178,7 @@ def process_SIDN_row(row):
         return
 
     log.debug(f"Attempting to add {extracted.subdomain} as a subdomain of {second_level_domain}.")
-    return existing_second_level_url.add_subdomain(extracted.subdomain, "added via SIDN")
+    return existing_second_level_url.add_subdomain(extracted.subdomain, origin="added via SIDN")
 
 
 def get_map_configuration():

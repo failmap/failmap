@@ -93,10 +93,10 @@ def find_organization_by_names_and_layer_and_country(
     return None
 
 
-def add_urls_to_organization(organization: Organization, urls: List[str]):
+def add_urls_to_organization(organization: Organization, urls: List[str], origin: str = ""):
     log.debug("Adding sites to organization: %s, %s", organization, urls)
     for url in urls:
-        organization.add_url(url)
+        organization.add_url(url, origin=origin)
 
 
 def get_or_create_layer(name: str) -> OrganizationType:

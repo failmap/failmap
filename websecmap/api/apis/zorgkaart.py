@@ -394,10 +394,10 @@ def add_urls_to_organizations(organizations: List[Organization], urls: List[str]
 
             if extract.subdomain:
                 url = f"{extract.subdomain}.{extract.domain}.{extract.suffix}"
-                new_url = Url.add(url)
+                new_url = Url.add(url, origin="zorgkaart import")
                 new_url.organization.add(organization)
 
             if extract.domain:
                 url = f"{extract.domain}.{extract.suffix}"
-                new_url = Url.add(url)
+                new_url = Url.add(url, origin="zorgkaart import")
                 new_url.organization.add(organization)

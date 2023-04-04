@@ -42,10 +42,7 @@ def find_current_websiteregister_download_link() -> str:
         if not url:
             return ""
 
-        if domain.subdomain:
-            return f"https://{domain.subdomain}.{domain.domain}.{domain.suffix}/{url}"
-        else:
-            return f"https://{domain.domain}.{domain.suffix}/{url}"
+        return f"https://{domain.fqdn}/{url}"
 
     except RequestException as exc:
         log.error("Could not download data from %s. Or pattern did not match: %s", location, pat)
@@ -198,10 +195,10 @@ def match_and_place_row(row: List[str]) -> Dict[str, str]:
         return {"state": "error", "domain": domain, "key": organization_key}
 
     for organization in organizations:
-        organization.add_url(domain)
+        organization.add_url(domain, origin="import dutch websiteregister")
 
         if re.match(r"^www\.", domain):
             without_www = domain.replace("www.", "", 1)
-            organization.add_url(without_www)
+            organization.add_url(without_www, origin="import dutch websiteregister")
 
     return {"state": "success", "domain": domain, "key": organization_key}

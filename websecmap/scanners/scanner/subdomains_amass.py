@@ -355,4 +355,4 @@ def store(found_domains: List[str], store_to_model_id: Any) -> None:
     # now add this url to every organization that refers to it:
     for organization in all_organizations_with_this_url:
         for found_domain in found_domains:
-            organization.add_url(found_domain)
+            organization.add_url(found_domain, origin="amass")

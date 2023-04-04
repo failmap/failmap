@@ -110,7 +110,7 @@ def import_records(records: Any, layer: OrganizationType):
 
         organization = insert_or_update_organization(name=organization_name, layer=layer, country="NL")
         insert_or_update_geojson_on_organization(organization=organization, geojson_data=geojson_data)
-        add_urls_to_organization(organization, sites)
+        add_urls_to_organization(organization, sites, "government register import 2023")
 
 
 def extract_geojson_from_row(row) -> List[float]:

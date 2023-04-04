@@ -278,9 +278,7 @@ def import_scan_result_database_async():
 
 def extract_full_domain(long_uri: str) -> str:
     result = tldextract.extract(long_uri)
-    if result.subdomain:
-        return f"{result.subdomain}.{result.domain}.{result.suffix}"
-    return f"{result.domain}.{result.suffix}"
+    return result.fqdn
 
 
 def get_third_party_requests(visit_id: int, domain: str, domain_inc_subdomain: str) -> Tuple[List[str], List[str]]:
