@@ -17,6 +17,8 @@ def test_parse_whois_data(db):
     output = model_to_dict(whois)
     # make test case shorter:
     output["whois_record_data"] = ""
+    # remove sequential id's due to other testcases
+    output["url"] = 1
 
     assert output == {
         "abuse": "+31.263525555\n" "abuse@sidn.nl",
