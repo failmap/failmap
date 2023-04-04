@@ -267,8 +267,16 @@ def request(activity: str, scanner: str, urls: List[int], origin: str = ""):
 
 
 def log_planned_scan_action(activity: str, scanner: str, url: int, state: str = "", origin: str = ""):
+
+    if isinstance(url, Url):
+        # might be an n+1
+        url = url.url
+
+    if isinstance(scanner, Scanner):
+        scanner = scanner.id
+
     log_item = PlannedScanLog()
-    log_item.line = (f"Url: {url}, Activity: {activity}, Scanner: {scanner}, State: {state}, Origin: {origin}")[:255]
+    log_item.line = f"Url: {url}, Activity: {activity}, Scanner: {scanner}, State: {state}, Origin: {origin}"[:255]
     log_item.save()
 
 

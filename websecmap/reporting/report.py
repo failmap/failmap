@@ -39,7 +39,7 @@ def recreate_url_report(url_id):
     scan moments to address. It would rebuild 816088 rows on production each night while there are only
     60.000 urls. Only adding the latest report, if anything changed at all, will reduce 90% of the workload.
     """
-    url = Url.objects.all().filter(id=url_id).only("id", "url").first()
+    url = Url.objects.all().filter(id=url_id).only("id", "url", "is_dead", "not_resolvable").first()
     if not url:
         return
 
