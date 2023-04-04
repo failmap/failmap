@@ -57,7 +57,7 @@ def docker_services(pytestconfig, docker_ip):
     docker_compose_project_name = "pytest{}".format(os.getpid())
 
     def docker_compose(args, background=False):
-        command = 'docker-compose --no-ansi --file "{}" --project-name "{}" {}'.format(
+        command = 'docker-compose --ansi never --file "{}" --project-name "{}" {}'.format(
             docker_compose_file, docker_compose_project_name, args
         )
         log.info("Running command: %s", command)
