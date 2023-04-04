@@ -37,6 +37,7 @@ from websecmap.organizations.models import (
     Organization,
     OrganizationType,
     Url,
+    UrlWhois,
 )
 from websecmap.reporting.models import UrlReport
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, UrlIp
@@ -199,6 +200,15 @@ class UrlRatingAdminInline(CompactInline):
     extra = 0
     # with dozens of forms, the field limit is easily exceeded.
     readonly_fields = [f.name for f in UrlReport._meta.fields]
+    can_delete = False
+    ordering = ["-at_when"]
+
+
+class UrlWhoisInline(CompactInline):
+    model = UrlWhois
+    extra = 0
+    # with dozens of forms, the field limit is easily exceeded.
+    readonly_fields = [f.name for f in UrlWhois._meta.fields]
     can_delete = False
     ordering = ["-at_when"]
 
@@ -725,7 +735,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
             f"</span> <span style='color: yellow'>{urlreport.low}</span>"
         )
 
-    inlines = [UrlGenericScanAdminInline, EndpointAdminInline, UrlRatingAdminInline]
+    inlines = [UrlGenericScanAdminInline, EndpointAdminInline, UrlRatingAdminInline, UrlWhoisInline]
 
     actions = []
 
@@ -763,6 +773,11 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     timeline_debug.short_description = "🐞  Timeline"
     actions.append("timeline_debug")
+
+
+@admin.register(UrlWhois)
+class UrlWhoisAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("id", "url", "creation_date", "updated_date", "registrant", "at_when", "is_the_latest")
 
 
 @admin.register(OrganizationType)

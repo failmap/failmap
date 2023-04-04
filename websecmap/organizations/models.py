@@ -542,6 +542,31 @@ class Url(models.Model):
         return existing_url
 
 
+class UrlWhois(models.Model):
+    # contains whois records / info on domains, this helps with removing dropcatched domains.
+    # in the past we've seen domains that have been abandoned but where still in the official domain metadata lists
+    # of the government: thus a domain squatter used it to run ads and add tons of 'interesting' subdomains.
+    url = models.ForeignKey(Url, on_delete=models.CASCADE)
+    # create a new record when registration, creation_date, update_date
+    at_when = models.DateTimeField(blank=True, null=True, help_text="", auto_now_add=True)
+    updated_date = models.DateField(blank=True, null=True, help_text="")
+    is_the_latest = models.BooleanField(default=False, help_text="Is this the latest record for this url?")
+
+    # patterns are: registrar disappears, foreign address is used in reseller, new creationdate
+    # these fields are added here to make it easy to view in the admin interface
+    registrant = models.CharField(max_length=255, blank=True, null=True)
+    creation_date = models.DateField(blank=True, null=True, help_text="")
+    admin_contact = models.CharField(max_length=255, blank=True, null=True)
+    reseller = models.CharField(max_length=255, blank=True, null=True)
+    abuse = models.CharField(max_length=255, blank=True, null=True)
+
+    whois_record_data = models.TextField()
+    whois_record_type = models.CharField(max_length=10, blank=True, null=True, default="json")
+
+    def __str__(self):
+        return f"{self.updated_date} - {self.creation_date}"
+
+
 def seven_days_in_the_future():
     return datetime.now(timezone.utc) + timedelta(days=7)
 
