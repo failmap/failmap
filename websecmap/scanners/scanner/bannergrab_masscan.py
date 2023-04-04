@@ -33,21 +33,18 @@ http is by far the most interesting stuff, it's basically a mess
 """
 
 
-from websecmap.app.constance import constance_cached_value
-from websecmap.scanners.models import Endpoint, UrlIp
-from websecmap.scanners.scanmanager import store_endpoint_scan_result
 import logging
 
+import masscan
 from celery import Task, group
 
+from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.scanners import init_dict
-from websecmap.scanners.scanner.__init__ import (
-    allowed_to_scan,
-)
-import masscan
-
-from websecmap.scanners.scanner.banners.detect_version import detect_a_likely_version, clean_banner
+from websecmap.scanners.models import Endpoint, UrlIp
+from websecmap.scanners.scanmanager import store_endpoint_scan_result
+from websecmap.scanners.scanner.__init__ import allowed_to_scan
+from websecmap.scanners.scanner.banners.detect_version import clean_banner, detect_a_likely_version
 from websecmap.scanners.scanner.banners.utils import clean_old_bannergrab_results, get_urls_by_ip
 
 SCANNER_NAME = "bannergrab_masscan"

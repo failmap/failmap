@@ -6,15 +6,15 @@ from django.utils.text import slugify
 
 from websecmap.app import log
 from websecmap.celery import app
+from websecmap.organizations.administration import (
+    add_urls_to_organization,
+    get_or_create_layer,
+    insert_or_update_geojson_on_organization,
+    insert_or_update_organization,
+    retrieve_possible_urls_from_unfiltered_input,
+)
 from websecmap.organizations.datasources.utils import download_dataset_file, finish_import, load_parser_info
 from websecmap.organizations.models import GenericFileDataset, OrganizationType
-from websecmap.organizations.administration import (
-    insert_or_update_organization,
-    get_or_create_layer,
-    add_urls_to_organization,
-    retrieve_possible_urls_from_unfiltered_input,
-    insert_or_update_geojson_on_organization,
-)
 
 GOVERNMENT_REGISTER_FILES = [
     # "Gemeenten",

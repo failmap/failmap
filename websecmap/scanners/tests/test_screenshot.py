@@ -1,13 +1,15 @@
+import os
+
+from django.conf import settings
+
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners.models import Endpoint, Screenshot
 from websecmap.scanners.scanner.screenshot import (
-    make_screenshot_with_browserless,
-    save_screenshot,
     deserialize_image_to_image,
     determine_subdir,
+    make_screenshot_with_browserless,
+    save_screenshot,
 )
-from django.conf import settings
-import os
 
 
 def test_make_screenshot_with_browserless(requests_mock, db, current_path):

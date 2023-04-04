@@ -1,9 +1,8 @@
 import argparse
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from time import sleep
 
-import pytz
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -92,5 +91,5 @@ def revive(object_type, date, preview: bool = True):
         log.info("Reviving: %s", dead_object)
         dead_object.is_dead = False
         dead_object.is_dead_since = None
-        dead_object.is_dead_reason = f"Revived on {datetime.now(pytz.utc).date()}"
+        dead_object.is_dead_reason = f"Revived on {datetime.now(timezone.utc).date()}"
         dead_object.save(update_fields=["is_dead", "is_dead_since", "is_dead_reason"])

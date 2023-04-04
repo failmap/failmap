@@ -1,24 +1,24 @@
+from datetime import datetime, timezone
+
+from constance.test.pytest import override_config
 from deepdiff import DeepDiff
-from django.utils import timezone
 from freezegun import freeze_time
 
 from websecmap.app import log
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanner.web_privacy import (
-    get_third_party_requests,
     NinetiesDatabase,
-    latest_visit_id,
+    extract_full_domain,
+    get_third_party_requests,
     get_top_level_domains_from_database,
     import_scan_result_database_async,
-    extract_full_domain,
+    latest_visit_id,
     scan_and_store,
 )
-from constance.test.pytest import override_config
-
 from websecmap.scanners.scanner.web_privacy_resources.trackers import (
-    get_tracker_info_from_disconnectme,
     get_known_trackers_from_urls,
+    get_tracker_info_from_disconnectme,
 )
 
 
@@ -177,7 +177,9 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
         # not kicking off a scan, just continue by setting the response from WEB_PRIVACY_SERVER to {} instead of a wait
         requests_mock.post("http://localhost:31337/", json="{}")
         url = Url.objects.create(url="zutphen.nl")
-        Endpoint.objects.create(url=url, discovered_on=timezone.now(), port=443, protocol="https", ip_version=4)
+        Endpoint.objects.create(
+            url=url, discovered_on=datetime.now(timezone.utc), port=443, protocol="https", ip_version=4
+        )
         scan_and_store([url.id])
 
         assert EndpointGenericScan.objects.all().count() == 2
@@ -260,7 +262,9 @@ def test_import_scan_result_database_full(db, current_path):
             ]
             for domain in domains:
                 url = Url.objects.create(url=domain)
-                Endpoint.objects.create(url=url, discovered_on=timezone.now(), port=443, protocol="https", ip_version=4)
+                Endpoint.objects.create(
+                    url=url, discovered_on=datetime.now(timezone.utc), port=443, protocol="https", ip_version=4
+                )
 
             # every privacy scan ads two metrics now, given the get_top_level_domains will add the above domains
             # * 2 results

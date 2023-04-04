@@ -1,8 +1,7 @@
-import datetime
 import json
 import logging
+from datetime import datetime, timedelta, timezone
 
-import pytz
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -57,7 +56,7 @@ def test_autoexplain_no_https_microsoft(db, mocker):
     endpointscan, created = EndpointGenericScan.objects.all().get_or_create(
         endpoint=endpoint,
         rating="25",
-        rating_determined_on=datetime.datetime.now(pytz.utc),
+        rating_determined_on=datetime.now(timezone.utc),
         is_the_latest_scan=True,
         type="plain_http",
     )
@@ -105,7 +104,7 @@ def test_autoexplain_certificate(db):
     endpointscan, created = EndpointGenericScan.objects.all().get_or_create(
         endpoint=endpoint,
         rating="not trusted",
-        rating_determined_on=datetime.datetime.now(pytz.utc),
+        rating_determined_on=datetime.now(timezone.utc),
         is_the_latest_scan=True,
         type="tls_qualys_certificate_trusted",
     )
@@ -146,7 +145,7 @@ def test_autoexplain_certificate(db):
 def generate_certificate(failure_mode: str = ""):
     # Code taken from https://cryptography.io/en/latest/x509/reference/
 
-    one_day = datetime.timedelta(1, 0, 0)
+    one_day = timedelta(1, 0, 0)
     # weak key size, to make test faster
     private_key = rsa.generate_private_key(public_exponent=65537, key_size=512, backend=default_backend())
     public_key = private_key.public_key()
@@ -165,15 +164,15 @@ def generate_certificate(failure_mode: str = ""):
         )
 
     if failure_mode == "future":
-        builder = builder.not_valid_before(datetime.datetime.now(pytz.utc) + one_day)
-        builder = builder.not_valid_after(datetime.datetime.now(pytz.utc) + (one_day * 30))
+        builder = builder.not_valid_before(datetime.now(timezone.utc) + one_day)
+        builder = builder.not_valid_after(datetime.now(timezone.utc) + (one_day * 30))
     elif failure_mode == "expired":
-        builder = builder.not_valid_before(datetime.datetime.now(pytz.utc) - (one_day * 30))
-        builder = builder.not_valid_after(datetime.datetime.now(pytz.utc) - one_day)
+        builder = builder.not_valid_before(datetime.now(timezone.utc) - (one_day * 30))
+        builder = builder.not_valid_after(datetime.now(timezone.utc) - one_day)
 
     else:
-        builder = builder.not_valid_before(datetime.datetime.now(pytz.utc) - one_day)
-        builder = builder.not_valid_after(datetime.datetime.now(pytz.utc) + (one_day * 30))
+        builder = builder.not_valid_before(datetime.now(timezone.utc) - one_day)
+        builder = builder.not_valid_after(datetime.now(timezone.utc) + (one_day * 30))
 
     builder = builder.serial_number(x509.random_serial_number())
     builder = builder.public_key(public_key)
@@ -185,15 +184,15 @@ def generate_certificate(failure_mode: str = ""):
 
 
 def generate_specific_certificate(subject="", issuer=""):
-    one_day = datetime.timedelta(1, 0, 0)
+    one_day = timedelta(1, 0, 0)
     # weak key size, to make test faster
     private_key = rsa.generate_private_key(public_exponent=65537, key_size=512, backend=default_backend())
     public_key = private_key.public_key()
     builder = x509.CertificateBuilder()
     builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, subject)]))
     builder = builder.issuer_name(x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, issuer)]))
-    builder = builder.not_valid_before(datetime.datetime.now(pytz.utc) - one_day)
-    builder = builder.not_valid_after(datetime.datetime.now(pytz.utc) + (one_day * 30))
+    builder = builder.not_valid_before(datetime.now(timezone.utc) - one_day)
+    builder = builder.not_valid_after(datetime.now(timezone.utc) + (one_day * 30))
     builder = builder.serial_number(x509.random_serial_number())
     builder = builder.public_key(public_key)
     builder = builder.add_extension(x509.SubjectAlternativeName([x509.DNSName("cryptography.io")]), critical=False)
@@ -214,21 +213,21 @@ def test_autoexplain_including_headers(db, monkeypatch):
     endpointscan, created = EndpointGenericScan.objects.all().get_or_create(
         endpoint=endpoint,
         rating="not trusted",
-        rating_determined_on=datetime.datetime.now(pytz.utc),
+        rating_determined_on=datetime.now(timezone.utc),
         is_the_latest_scan=True,
         type="tls_qualys_certificate_trusted",
     )
     header_scan_new, created = EndpointGenericScan.objects.all().get_or_create(
         endpoint=endpoint,
         rating="not trusted",
-        rating_determined_on=datetime.datetime.now(pytz.utc),
+        rating_determined_on=datetime.now(timezone.utc),
         is_the_latest_scan=True,
         type="http_security_header_x_content_type_options",
     )
     header_scan_old, created = EndpointGenericScan.objects.all().get_or_create(
         endpoint=endpoint,
         rating="not trusted",
-        rating_determined_on=datetime.datetime.now(pytz.utc),
+        rating_determined_on=datetime.now(timezone.utc),
         is_the_latest_scan=False,
         type="http_security_header_x_content_type_options",
     )
@@ -238,7 +237,7 @@ def test_autoexplain_including_headers(db, monkeypatch):
     header_scan_http, created = EndpointGenericScan.objects.all().get_or_create(
         endpoint=endpoint,
         rating="not trusted",
-        rating_determined_on=datetime.datetime.now(pytz.utc),
+        rating_determined_on=datetime.now(timezone.utc),
         is_the_latest_scan=True,
         type="http_security_header_x_content_type_options",
     )
@@ -249,7 +248,7 @@ def test_autoexplain_including_headers(db, monkeypatch):
     unrelated_header_scan_http, created = EndpointGenericScan.objects.all().get_or_create(
         endpoint=endpoint,
         rating="not trusted",
-        rating_determined_on=datetime.datetime.now(pytz.utc),
+        rating_determined_on=datetime.now(timezone.utc),
         is_the_latest_scan=True,
         type="http_security_header_x_content_type_options",
     )

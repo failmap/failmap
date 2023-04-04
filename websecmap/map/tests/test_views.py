@@ -1,10 +1,8 @@
-from datetime import datetime
-
-import pytz
+from datetime import datetime, timezone
 
 from websecmap.map.logic.stats_and_graphs import what_to_improve
 from websecmap.map.views import config_content
-from websecmap.organizations.models import Url, OrganizationType, Organization
+from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.reporting.models import ScanPolicy
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 
@@ -16,7 +14,7 @@ def test_config(db, default_scan_metadata):
     assert conf["show"]["issues"]["http_security_header_x_xss_protection"] is True
 
 
-now = datetime.now(pytz.utc)
+now = datetime.now(timezone.utc)
 
 
 def setup():

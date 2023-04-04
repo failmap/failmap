@@ -1,6 +1,4 @@
-from datetime import timedelta, date
-
-from django.utils import timezone
+from datetime import date, datetime, timedelta, timezone
 
 from websecmap.map.logic.map_defaults import determine_when, get_country, get_organization_type
 from websecmap.reporting.models import UrlReport
@@ -145,7 +143,7 @@ def get_improvements(country, organization_type, days_back, duration: int = 7, a
 
         changes[scan_type] = {
             "old": {
-                "date": timezone.now() - timedelta(days=duration),
+                "date": datetime.now(timezone.utc) - timedelta(days=duration),
                 "high": old_measurement[scan_type].get("high", 0),
                 "medium": old_measurement[scan_type].get("medium", 0),
                 "low": old_measurement[scan_type].get("low", 0),

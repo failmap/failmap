@@ -1,7 +1,6 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
-import pytz
 from django.core.management.base import BaseCommand
 
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
@@ -40,7 +39,7 @@ def reflag_urlgenericscan(scan_type):
         FROM scanners_urlgenericscan
         INNER JOIN
             (SELECT MAX(id) as id2 FROM scanners_urlgenericscan egs2
-             WHERE last_scan_moment <= '{datetime.now(pytz.utc)}' and type = '{scan_type}' GROUP BY url_id
+             WHERE last_scan_moment <= '{datetime.now(timezone.utc)}' and type = '{scan_type}' GROUP BY url_id
              ) as x
         ON x.id2 = scanners_urlgenericscan.id
     """
@@ -61,7 +60,7 @@ def reflag_endpointgenericscan(scan_type):
         FROM scanners_endpointgenericscan
         INNER JOIN
             (SELECT MAX(id) as id2 FROM scanners_endpointgenericscan egs2
-             WHERE last_scan_moment <= '{datetime.now(pytz.utc)}' and type = '{scan_type}' GROUP BY endpoint_id
+             WHERE last_scan_moment <= '{datetime.now(timezone.utc)}' and type = '{scan_type}' GROUP BY endpoint_id
              ) as x
         ON x.id2 = scanners_endpointgenericscan.id
     """

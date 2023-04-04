@@ -1,8 +1,7 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
-import pytz
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -27,7 +26,9 @@ class Command(BaseCommand):
             if Organization.objects.all().filter(name="Gemeente Eemsdelta").exists():
                 raise EnvironmentError("Eemsdelta already exists, this migration was probably run already.")
 
-            merge_date = datetime(year=2021, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
+            merge_date = datetime(
+                year=2021, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+            )
 
             """
             De gemeenten Appingedam, Delfzijl en Loppersum: samenvoeging tot een nieuwe gemeente Eemsdelta.[24]

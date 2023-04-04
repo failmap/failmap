@@ -21,15 +21,13 @@ https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
 """
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from multiprocessing.pool import ThreadPool
 from time import sleep
 from typing import Any, Dict, List
 
-import pytz
 import requests
 from celery import Task, group
-from django.utils import timezone
 from tenacity import RetryError, before_log, retry, wait_fixed
 
 from websecmap.celery import app
@@ -169,7 +167,7 @@ def plan_scan(urls_filter: dict = None, **kwargs):
             endpoint__is_dead=False,
             endpoint__endpointgenericscan__is_the_latest_scan=True,
             # an exclude filter here will not work, as you will exclude so much...
-            endpoint__endpointgenericscan__last_scan_moment__lte=timezone.now()
+            endpoint__endpointgenericscan__last_scan_moment__lte=datetime.now(timezone.utc)
             - timedelta(days=parameter_set["exclude_urls_scanned_in_the_last_n_days"]),
             endpoint__endpointgenericscan__rating__in=parameter_set["quality_levels"],
             **urls_filter,
@@ -348,7 +346,7 @@ def qualys_scan_bulk(proxy: Dict[str, Any], urls: List[str]):
             except RetryError:
                 log.debug("Retry error. Could not connect to proxy anymore.")
                 store_check_result.apply_async(
-                    [proxy, "Retry error. Proxy died while scanning.", True, datetime.now(pytz.utc)]
+                    [proxy, "Retry error. Proxy died while scanning.", True, datetime.now(timezone.utc)]
                 )
 
         pool.close()

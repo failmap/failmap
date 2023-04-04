@@ -11,19 +11,14 @@ a management application.
 This script does not do portscanning, see bannergrab_nmap for that. It just marks ports as 'should not be open'.
 """
 
+import logging
 from typing import List
 
 from websecmap.app.constance import constance_cached_value
+from websecmap.celery import app
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-import logging
-
-
-from websecmap.celery import app
-from websecmap.scanners.scanner.__init__ import (
-    allowed_to_scan,
-)
-
+from websecmap.scanners.scanner.__init__ import allowed_to_scan
 
 SCANNER_NAME = "ports"
 

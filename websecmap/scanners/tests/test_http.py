@@ -3,11 +3,11 @@ from freezegun import freeze_time
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanner.http import (
+    can_connect,
     connection_answer,
     get_random_user_agent,
-    save_endpoint,
     kill_endpoint,
-    can_connect,
+    save_endpoint,
 )
 
 

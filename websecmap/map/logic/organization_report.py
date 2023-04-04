@@ -6,9 +6,9 @@ from django.utils.text import slugify
 from websecmap.map.logic.map_defaults import (
     DEFAULT_COUNTRY,
     DEFAULT_LAYER,
+    determine_when,
     get_country,
     get_organization_type,
-    determine_when,
 )
 from websecmap.organizations.models import Organization
 from websecmap.reporting.diskreport import retrieve_report

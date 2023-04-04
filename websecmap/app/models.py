@@ -1,14 +1,11 @@
-# coding=UTF-8
-# from __future__ import unicode_literals
-
 import importlib
 import logging
 import re
+from datetime import datetime, timezone
 
 import celery
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils import timezone
 from jsonfield import JSONField
 
 from websecmap.celery import app
@@ -104,7 +101,7 @@ class Job(models.Model):
             result = "-- task generated no result object --"
         job.result = result
         job.status = "completed"
-        job.finished_on = timezone.now()
+        job.finished_on = datetime.now(timezone.utc)
         try:
             job.save(update_fields=["result", "status", "finished_on"])
         except TypeError:

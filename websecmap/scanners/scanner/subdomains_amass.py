@@ -188,14 +188,14 @@ Usage: amass enum [options] -d DOMAIN
   -wm value
         "hashcat-style" wordlist masks for DNS brute forcing
 """
-from typing import Any, Dict, List
 import subprocess
 import tempfile
-from websecmap.celery import app
+from typing import Any, Dict, List
 
 from celery import group
 
 from websecmap.app import log
+from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Activity

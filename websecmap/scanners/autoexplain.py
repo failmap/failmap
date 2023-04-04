@@ -12,9 +12,7 @@ Local, non-vendor policies are not taken into account: they should standardize a
 """
 
 import logging
-from datetime import datetime, timedelta
-
-import pytz
+from datetime import datetime, timedelta, timezone
 
 from websecmap.scanners.models import EndpointGenericScan
 
@@ -26,8 +24,8 @@ def add_bot_explanation(scan: EndpointGenericScan, explanation: str, duration: t
     scan.comply_or_explain_case_handled_by = "WebSecMap Explanation Bot"
     scan.comply_or_explain_explained_by = "Websecmap Explanation Bot"
     scan.comply_or_explain_explanation = explanation
-    scan.comply_or_explain_explained_on = datetime.now(pytz.utc)
-    scan.comply_or_explain_explanation_valid_until = datetime.now(pytz.utc) + duration
+    scan.comply_or_explain_explained_on = datetime.now(timezone.utc)
+    scan.comply_or_explain_explanation_valid_until = datetime.now(timezone.utc) + duration
     scan.save()
 
 

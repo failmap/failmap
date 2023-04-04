@@ -1,6 +1,7 @@
-from datetime import datetime, date
+from datetime import date, datetime
 
 from freezegun import freeze_time
+
 from websecmap.map.logic.map_defaults import determine_when
 
 

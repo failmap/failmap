@@ -1,12 +1,12 @@
 import re
-from typing import List, Any, Dict, Optional, Union, Tuple
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from django.utils import timezone
+import tldextract
 
 from websecmap.app import log
 from websecmap.game.models import OrganizationSubmission
-from websecmap.organizations.models import Organization, OrganizationType, Coordinate, Url, AlternativeName
-import tldextract
+from websecmap.organizations.models import AlternativeName, Coordinate, Organization, OrganizationType, Url
 
 
 def insert_or_update_organization(
@@ -31,7 +31,9 @@ def insert_or_update_organization(
     # add new websites if this already exists.
     if not organization:
         log.debug("Creating new organization: %s", name)
-        organization = Organization.objects.create(name=name, type=layer, created_on=timezone.now(), country=country)
+        organization = Organization.objects.create(
+            name=name, type=layer, created_on=datetime.now(timezone.utc), country=country
+        )
         organization.layers.add(layer)
 
     return organization
@@ -251,5 +253,5 @@ def merge_organizations(org_from: Organization, org_to: Organization):
     # delete existing organization as it is a duplicate
     org_from.is_dead = True
     org_from.is_dead_reason = "Was a duplicate of an older organization."
-    org_from.is_dead_since = timezone.now()
+    org_from.is_dead_since = datetime.now(timezone.utc)
     org_from.save()

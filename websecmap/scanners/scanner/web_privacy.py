@@ -7,13 +7,13 @@ Thanks to:
 - https://codeberg.org/dataskydd.net/
 - https://github.com/PrivacyScore/privacyscanner/tree/whotracksme/privacyscanner/scanmodules
 """
-from datetime import timedelta
-from typing import List, Dict, Any, Tuple
+import sqlite3
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Tuple
 
 import requests
 import tldextract
 from celery import group
-from django.utils import timezone
 
 from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
@@ -23,15 +23,8 @@ from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import (
-    allowed_to_scan,
-)
-from websecmap.scanners.scanner.filter import (
-    generic_plan_scan,
-    filter_endpoints_only,
-    merge_endpoints_filter,
-)
-import sqlite3
+from websecmap.scanners.scanner.__init__ import allowed_to_scan
+from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
 from websecmap.scanners.scanner.web_privacy_resources.trackers import get_known_trackers_from_urls
 
 SCANNER_NAME = "web_privacy"
@@ -231,7 +224,9 @@ def get_top_level_domains_from_database():
     # Only get stuff from the last 7 days.
     # Sqlite does not understand dates, but since it's iso you can sort of filter "per day". Therefore we add 1 day
     # so the stuff from "today" is retrieved. (everything less than tomorrow.
-    return db.rows(sql, [timezone.now() - timedelta(days=7), timezone.now() + timedelta(days=1)])
+    return db.rows(
+        sql, [datetime.now(timezone.utc) - timedelta(days=7), datetime.now(timezone.utc) + timedelta(days=1)]
+    )
 
 
 @app.task(queue="storage", ignore_result=True)

@@ -8,10 +8,10 @@ Scans for missing AUTH TLS / AUTH SSL options in FTP servers.
 """
 
 import logging
+from datetime import datetime, timezone
 from ftplib import FTP, error_perm, error_proto, error_reply, error_temp  # nosec scanning for insecure ftp is the point
 
 from celery import Task, group
-from django.utils import timezone
 
 from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Url
@@ -19,14 +19,11 @@ from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import (
-    allowed_to_scan,
-    unique_and_random,
-)
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, unique_and_random
 from websecmap.scanners.scanner.filter import (
-    generic_plan_scan,
     filter_endpoints_only,
     filter_urls_only,
+    generic_plan_scan,
     merge_endpoints_filter,
 )
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
@@ -438,7 +435,7 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
 
         log.debug("New FTP server discovered on %s.", url)
         endpoint = Endpoint(
-            url=db_url, port=port, protocol=protocol, ip_version=ip_version, discovered_on=timezone.now()
+            url=db_url, port=port, protocol=protocol, ip_version=ip_version, discovered_on=datetime.now(timezone.utc)
         )
         endpoint.save()
         return
@@ -452,6 +449,6 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
         log.debug("Existing FTP server could not be found anymore on %s, removing.", url)
         endpoint.is_dead = True
         endpoint.is_dead_reason = "Could not connect"
-        endpoint.is_dead_since = timezone.now()
+        endpoint.is_dead_since = datetime.now(timezone.utc)
         endpoint.save()
         return

@@ -1,6 +1,5 @@
 import os
-
-from django.utils import timezone
+from datetime import datetime, timezone
 
 from websecmap.map.models import OrganizationReport
 from websecmap.reporting.diskreport import (
@@ -21,7 +20,7 @@ def test_report_syncing(db):
     organizationreport = OrganizationReport()
     organizationreport.calculation = stored_data
     organizationreport.organization = organization
-    organizationreport.at_when = timezone.now()
+    organizationreport.at_when = datetime.now(timezone.utc)
     organizationreport.save()
 
     # saves the report to disk and removes calculations from the database

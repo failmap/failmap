@@ -6,10 +6,8 @@ This file contains (or should) verbose explantion of why points are given.
 """
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Union
-
-import pytz
 
 from websecmap.reporting.models import ScanPolicy
 from websecmap.reporting.policy import conclusion_to_score
@@ -142,7 +140,7 @@ def get_severity(scan: Union[EndpointGenericScan, UrlGenericScan]) -> Dict[str, 
         calculation["comply_or_explain_explanation_valid_until"] = ""
 
     valid = scan.comply_or_explain_is_explained and (
-        scan.comply_or_explain_explanation_valid_until > datetime.now(pytz.utc)
+        scan.comply_or_explain_explanation_valid_until > datetime.now(timezone.utc)
     )
     calculation["comply_or_explain_valid_at_time_of_report"] = valid
 

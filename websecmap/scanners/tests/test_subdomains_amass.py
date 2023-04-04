@@ -1,12 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from freezegun import freeze_time
 
-from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.models import PlannedScan, Scanner, Activity, State
-from websecmap.scanners.scanner.nuclei_http import convert_nuclei_data_to_json
-from websecmap.scanners.scanner.subdomains_amass import discover, extract_urls_from_json, store, retry_watcher
 import websecmap
+from websecmap.organizations.models import Organization, Url
+from websecmap.scanners.models import Activity, PlannedScan, Scanner, State
+from websecmap.scanners.scanner.nuclei_http import convert_nuclei_data_to_json
+from websecmap.scanners.scanner.subdomains_amass import discover, extract_urls_from_json, retry_watcher, store
 
 
 def get_amass_response(*args):
@@ -127,8 +127,8 @@ def test_retry_watcher(db):
             activity=Activity.discover,
             state=State.picked_up,
             url=url,
-            requested_at_when=datetime(2020, 1, 1, 12),
-            last_state_change_at=datetime(2020, 1, 1, 12),
+            requested_at_when=datetime(2020, 1, 1, 12, tzinfo=timezone.utc),
+            last_state_change_at=datetime(2020, 1, 1, 12, tzinfo=timezone.utc),
         )
 
         retry_watcher()
@@ -142,8 +142,8 @@ def test_retry_watcher(db):
             activity=Activity.discover,
             state=State.picked_up,
             url=url,
-            requested_at_when=datetime(2020, 1, 1, 11),
-            last_state_change_at=datetime(2020, 1, 1, 11),
+            requested_at_when=datetime(2020, 1, 1, 11, tzinfo=timezone.utc),
+            last_state_change_at=datetime(2020, 1, 1, 11, tzinfo=timezone.utc),
         )
 
         retry_watcher()

@@ -2,10 +2,9 @@ import calendar
 import logging
 from collections import OrderedDict
 from copy import deepcopy
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import List, Tuple
 
-import pytz
 from celery import group
 from deepdiff import DeepDiff
 from django.db.models import Count
@@ -159,7 +158,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                     "applicable_urls": 0,
                 }
             }
-            when = datetime.now(pytz.utc) - timedelta(days=days_back)
+            when = datetime.now(timezone.utc) - timedelta(days=days_back)
             log.info("Days back:%s Date: %s", days_back, when)
 
             # delete this specific moment as it's going to be replaced, so it's not really noticable an update is
@@ -472,7 +471,7 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
 
     for map_configuration in map_configurations:
         for days_back in list(reversed(range(days))):
-            when = datetime.now(pytz.utc) - timedelta(days=days_back)
+            when = datetime.now(timezone.utc) - timedelta(days=days_back)
             for scan_type in scan_types:
 
                 # You can expect something to change each day. Therefore just store the map data each day.
@@ -523,7 +522,7 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                 days_back,
             )
 
-            when = datetime.now(pytz.utc) - timedelta(days=days_back)
+            when = datetime.now(timezone.utc) - timedelta(days=days_back)
 
             # prevent double high level stats
             HighLevelStatistic.objects.all().filter(
@@ -744,7 +743,7 @@ def create_organization_report_on_moment(organization: Organization, when: datet
     """
     # If there is no time slicing, then it's today.
     if not when:
-        when = datetime.now(pytz.utc)
+        when = datetime.now(timezone.utc)
 
     log.info("Creating report for %s on %s", organization, when)
 
@@ -905,7 +904,7 @@ def create_organization_reports_now(organizations: List[int]):
         if not organization:
             continue
 
-        now = datetime.now(pytz.utc)
+        now = datetime.now(timezone.utc)
         create_organization_report_on_moment(organization, now)
 
 
@@ -950,8 +949,8 @@ def reduce_to_save_data(moments: List[datetime]) -> List[datetime]:
 
     results = []
     # get the days in this year:
-    some_day_a_year_ago = datetime.now(pytz.utc) - timedelta(days=365)
-    some_day_a_two_years_ago = datetime.now(pytz.utc) - timedelta(days=730)
+    some_day_a_year_ago = datetime.now(timezone.utc) - timedelta(days=365)
+    some_day_a_two_years_ago = datetime.now(timezone.utc) - timedelta(days=730)
 
     to_reduce_to_days = [moment for moment in moments if moment > some_day_a_year_ago]
     # log.debug(f"To days: {to_reduce_to_days}")
@@ -982,8 +981,8 @@ def reduce_to_months(moments: List[datetime]) -> List[datetime]:
     # https://stackoverflow.com/questions/42950/how-to-get-the-last-day-of-the-month
     for moment in moments:
         (_, amount_of_days_in_month) = calendar.monthrange(moment.year, moment.month)
-        if datetime(moment.year, moment.month, amount_of_days_in_month, tzinfo=pytz.utc) not in reduced_datetimes:
-            reduced_datetimes.append(datetime(moment.year, moment.month, amount_of_days_in_month, tzinfo=pytz.utc))
+        if datetime(moment.year, moment.month, amount_of_days_in_month, tzinfo=timezone.utc) not in reduced_datetimes:
+            reduced_datetimes.append(datetime(moment.year, moment.month, amount_of_days_in_month, tzinfo=timezone.utc))
 
     return reduced_datetimes
 
@@ -1017,12 +1016,15 @@ def reduce_to_days(moments: List[datetime]) -> List[datetime]:
     reduced_datetimes: List[date] = list({moment.date() for moment in moments})
 
     return [
-        datetime(year=moment.year, month=moment.month, day=moment.day, tzinfo=pytz.utc) for moment in reduced_datetimes
+        datetime(year=moment.year, month=moment.month, day=moment.day, tzinfo=timezone.utc)
+        for moment in reduced_datetimes
     ]
 
 
 def set_dates_to_last_possible_moment(moments: List[datetime]) -> List[datetime]:
-    return [datetime(moment.year, moment.month, moment.day, 23, 59, 59, 999999, tzinfo=pytz.utc) for moment in moments]
+    return [
+        datetime(moment.year, moment.month, moment.day, 23, 59, 59, 999999, tzinfo=timezone.utc) for moment in moments
+    ]
 
 
 @app.task(queue="reporting")

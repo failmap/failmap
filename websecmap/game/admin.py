@@ -1,15 +1,13 @@
 import logging
 import re
 import urllib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from random import choice, choices, randint
 
-import pytz
 import tldextract
 from constance import config
 from django.contrib import admin
 from django.db import transaction
-from django.utils import timezone
 from django.utils.safestring import mark_safe
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
@@ -102,10 +100,10 @@ class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         # create a new contest
         contest = Contest()
         contest.target_country = "NL"
-        contest.from_moment = datetime.now(pytz.utc)
-        contest.until_moment = datetime.now(pytz.utc) + timedelta(days=3)
+        contest.from_moment = datetime.now(timezone.utc)
+        contest.until_moment = datetime.now(timezone.utc) + timedelta(days=3)
         contest.admin_user = generate_game_user()
-        contest.name = f"new_contest_{datetime.now(pytz.utc).date()}"
+        contest.name = f"new_contest_{datetime.now(timezone.utc).date()}"
         contest.save()
 
         # create a number of team members.
@@ -813,7 +811,7 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 country=osm.organization_country,
                 is_dead=False,
                 type=OrganizationType.objects.get(name=osm.organization_type_name),
-                created_on=timezone.now(),
+                created_on=datetime.now(timezone.utc),
             )
             new_org.save()
             new_org.layers.add(new_org.type)
@@ -825,7 +823,7 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 geojsontype="Point",
                 area=osm.organization_address_geocoded,
                 edit_area={"type": "Point", "coordinates": osm.organization_address_geocoded},
-                created_on=timezone.now(),
+                created_on=datetime.now(timezone.utc),
                 creation_metadata="Accepted organization submission",
             )
             new_coordinate.save()

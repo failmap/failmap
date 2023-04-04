@@ -1,9 +1,9 @@
 from websecmap.app.constance import get_all_values
 from websecmap.scanners.models import Scanner
 from websecmap.scanners.scanmetadata import (
+    get_backend_scanmetadata,
     get_scanners_for_backend,
     get_scanners_for_frontend,
-    get_backend_scanmetadata,
 )
 
 

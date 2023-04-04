@@ -1,17 +1,17 @@
+import taggit
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 from jet.filters import RelatedFieldAjaxListFilter
-import taggit
 
 from websecmap.map.admin import ordering_actions
 from websecmap.scanners import models
-from websecmap.scanners.models import State, Product, ProductHierarchy
+from websecmap.scanners.models import Product, ProductHierarchy, State
 from websecmap.scanners.proxy import check_proxy
+from websecmap.scanners.scanner.banners.detect_version import add_excepted_banner_to_config, clean_and_detect
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import progress_running_scan, recover_and_retry
-from websecmap.scanners.scanner.banners.detect_version import clean_and_detect, add_excepted_banner_to_config
 
 
 class EndpointGenericScanInline(CompactInline):

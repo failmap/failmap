@@ -1,7 +1,6 @@
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
-from django.utils import timezone
 from freezegun import freeze_time
 
 from websecmap.organizations.models import Organization, Url
@@ -10,23 +9,23 @@ from websecmap.scanners.models import (
     Activity,
     Endpoint,
     EndpointGenericScan,
-    PlannedScan,
-    PlannedScanStatistic,
-    State,
-    Scanner,
     FollowUpScan,
+    PlannedScan,
     PlannedScanLog,
+    PlannedScanStatistic,
+    Scanner,
+    State,
 )
 from websecmap.scanners.plannedscan import (
     calculate_progress,
     finish_multiple,
     get_latest_progress,
     pickup,
+    plan_follow_up_scans,
     request,
     reset,
     retrieve_endpoints_from_urls,
     store_progress,
-    plan_follow_up_scans,
 )
 from websecmap.scanners.scanner.autoexplain_no_https_possible import scan
 from websecmap.scanners.scanner.tls_qualys import plan_scan
@@ -209,8 +208,8 @@ def test_plan_scans(db, default_scan_metadata):
 
         # outdated: with very recent scans no new scans will be created:
         # scans will be created, only the planning in the schedule is in the lead of when a scan happens
-        create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", timezone.now())
-        create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", timezone.now())
+        create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", datetime.now(timezone.utc))
+        create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", datetime.now(timezone.utc))
         plan_scan()
         assert calculate_progress() == [{"activity": 3, "amount": 1, "scanner": 22, "state": 1}]
 
@@ -219,16 +218,16 @@ def test_plan_scans(db, default_scan_metadata):
 
         # test
         # with some older data, the scan for the bad endpoint will be requested
-        create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", timezone.now() - timedelta(days=100))
-        create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", timezone.now())
+        create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", datetime.now(timezone.utc) - timedelta(days=100))
+        create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", datetime.now(timezone.utc))
 
         # make sure the endpoint is created:
         first_egs = EndpointGenericScan.objects.last()
         assert first_egs.endpoint == e1
         assert EndpointGenericScan.objects.all().count() == 2
         egs = EndpointGenericScan.objects.all().filter(rating="F").first()
-        assert egs.rating_determined_on < timezone.now() - timedelta(days=4)
-        assert egs.last_scan_moment < timezone.now() - timedelta(days=4)
+        assert egs.rating_determined_on < datetime.now(timezone.utc) - timedelta(days=4)
+        assert egs.last_scan_moment < datetime.now(timezone.utc) - timedelta(days=4)
         assert egs.is_the_latest_scan is True
 
         plan_scan()
@@ -246,8 +245,8 @@ def test_plan_scans(db, default_scan_metadata):
 
         # test
         # with very old scans both scans will be requested
-        create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", timezone.now() - timedelta(days=6))
-        create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", timezone.now() - timedelta(days=100))
+        create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", datetime.now(timezone.utc) - timedelta(days=6))
+        create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", datetime.now(timezone.utc) - timedelta(days=100))
         plan_scan()
         assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 2
         assert calculate_progress() == [
@@ -275,7 +274,7 @@ def test_plan_follow_up_scan(db, default_scan_metadata, default_policy):
     """
     A follow up scan happens when one of the policies match with what is found.
     """
-    now = timezone.now()
+    now = datetime.now(timezone.utc)
     yesterday = now - timedelta(days=1)
 
     # Eg: make a follow up scan with a simple policy:

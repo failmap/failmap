@@ -1,15 +1,14 @@
 import logging
 from collections import defaultdict
 from copy import copy, deepcopy
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Union
 
-import pytz
 from django.db.models import Q
 
 from websecmap.celery import Task, app
-from websecmap.organizations.models import Url, Organization
-from websecmap.reporting.models import UrlReport, ScanPolicy
+from websecmap.organizations.models import Organization, Url
+from websecmap.reporting.models import ScanPolicy, UrlReport
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, ScanSubject, UrlGenericScan
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
@@ -17,7 +16,7 @@ from websecmap.scanners.scanner.utils import in_chunks
 
 log = logging.getLogger(__package__)
 
-START_DATE = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
+START_DATE = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=timezone.utc)
 
 """
 Warning: Make sure the output of a rebuild has ID's in chronological order.
@@ -206,8 +205,8 @@ def significant_moments(urls: List[Url] = None, reported_scan_types: List[str] =
 
     # make sure you don't save the scan for today at the end of the day (which would make it visible only at the end
     # of the day). Just make it "now" so you can immediately see the results.
-    if moments[-1] == latest_moment_of_datetime(datetime.now(pytz.utc)):
-        moments[-1] = datetime.now(pytz.utc)
+    if moments[-1] == latest_moment_of_datetime(datetime.now(timezone.utc)):
+        moments[-1] = datetime.now(timezone.utc)
 
     # log.debug("Moments found: %s", len(moments))
 
@@ -422,7 +421,7 @@ def create_timeline(url: Url):
 
 
 def latest_moment_of_datetime(datetime_: datetime):
-    return datetime_.replace(second=59, microsecond=999999, tzinfo=pytz.utc)
+    return datetime_.replace(second=59, microsecond=999999, tzinfo=timezone.utc)
 
 
 def create_url_reports(url: Url) -> List[UrlReport]:
@@ -828,8 +827,8 @@ def save_url_report(url: Url, date: datetime, calculation, is_the_newest=False):
 
     # save it as NOW if it's done today, else on the last moment on the same day.
     # So the url ratings immediately are shown, even if the day is not over.
-    if date == datetime.now(pytz.utc).date():
-        url_report.at_when = datetime.now(pytz.utc)
+    if date == datetime.now(timezone.utc).date():
+        url_report.at_when = datetime.now(timezone.utc)
     else:
         url_report.at_when = datetime(
             year=date.year,
@@ -839,7 +838,7 @@ def save_url_report(url: Url, date: datetime, calculation, is_the_newest=False):
             minute=date.minute,
             second=59,
             microsecond=999999,
-            tzinfo=pytz.utc,
+            tzinfo=timezone.utc,
         )
 
     url_report.total_endpoints = len(calculation["endpoints"])
@@ -1298,7 +1297,7 @@ def attach_ultimate_report_to_everything_in_database():
 
 def attach_ultimate_report(url: Url, endpoint: Endpoint):
     log.debug(f"Attaching ultimate report to {url}, endpoint: {endpoint}.")
-    now = datetime.now(pytz.utc)
+    now = datetime.now(timezone.utc)
     metadata = get_backend_scanmetadata()
 
     # This approach is dumb and inefficient, but good enough for testing

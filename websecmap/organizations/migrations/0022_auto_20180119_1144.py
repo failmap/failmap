@@ -6,7 +6,6 @@ import datetime
 
 import django.db.models.deletion
 from django.db import migrations, models
-from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
@@ -19,7 +18,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="coordinate",
             name="created_on",
-            field=models.DateTimeField(blank=True, default=datetime.datetime(2016, 1, 1, 0, 0, tzinfo=utc), null=True),
+            field=models.DateTimeField(
+                blank=True, default=datetime.datetime(2016, 1, 1, 0, 0, tzinfo=datetime.timezone.utc), null=True
+            ),
         ),
         migrations.AddField(
             model_name="coordinate",
@@ -47,7 +48,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="organization",
             name="created_on",
-            field=models.DateTimeField(blank=True, default=datetime.datetime(2016, 1, 1, 0, 0, tzinfo=utc), null=True),
+            field=models.DateTimeField(
+                blank=True, default=datetime.datetime(2016, 1, 1, 0, 0, tzinfo=datetime.timezone.utc), null=True
+            ),
         ),
         migrations.AddField(
             model_name="organization",

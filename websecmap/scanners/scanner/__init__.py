@@ -3,7 +3,7 @@ import json
 import logging
 import random
 from json import JSONDecodeError
-from typing import List, Any
+from typing import Any, List
 
 from constance import config
 from django.db.models import Q

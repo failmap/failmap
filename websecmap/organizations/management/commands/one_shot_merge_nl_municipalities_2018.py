@@ -1,7 +1,6 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
-import pytz
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -19,7 +18,7 @@ class Command(BaseCommand):
 
     # https://nl.wikipedia.org/wiki/Gemeentelijke_herindelingen_in_Nederland#Komende_herindelingen
     def handle(self, *app_labels, **options):
-        merge_date = datetime(year=2018, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
+        merge_date = datetime(year=2018, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
 
         # testing :)
         # merge(["Assen", "Alkmaar", "Aalten"], "Yolo-Swaggertown", merge_date)

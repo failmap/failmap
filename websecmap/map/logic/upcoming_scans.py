@@ -1,15 +1,14 @@
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 from django.contrib.humanize.templatetags.humanize import naturaltime
-from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django_celery_beat.models import PeriodicTask
 
 
 def get_next_and_last_scans():
     def next_periodic_task(obj):
-        _, my_y = obj.schedule.is_due(last_run_at=timezone.now())
-        date = timezone.now() + timedelta(seconds=my_y)
+        _, my_y = obj.schedule.is_due(last_run_at=datetime.now(timezone.utc))
+        date = datetime.now(timezone.utc) + timedelta(seconds=my_y)
         return date
 
     periodic_tasks = (

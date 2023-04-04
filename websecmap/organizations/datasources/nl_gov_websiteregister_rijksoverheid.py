@@ -1,18 +1,17 @@
 import re
-from datetime import datetime
-from typing import List, Tuple, Dict
+from datetime import datetime, timezone
+from typing import Dict, List, Tuple
 
-import pytz
 import requests
 import tldextract
+from django.core.files.uploadedfile import SimpleUploadedFile
 from pyexcel_ods import get_data
 from requests import RequestException
 
 from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
-from websecmap.organizations.models import Organization, GenericFileDataset
-from django.core.files.uploadedfile import SimpleUploadedFile
+from websecmap.organizations.models import GenericFileDataset, Organization
 
 
 def find_current_websiteregister_download_link() -> str:
@@ -67,7 +66,7 @@ def download_websiteregister_spreadsheet() -> int:
     idataset.file_format = "websiteregister_rijksoverheid"
     idataset.is_imported = False
 
-    now = datetime.now(pytz.utc).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
 
     download_link = find_current_websiteregister_download_link()
     if not download_link:
@@ -78,7 +77,8 @@ def download_websiteregister_spreadsheet() -> int:
             response = requests.get(download_link)
             idataset.file = SimpleUploadedFile(f"websiteregister_rijksoverheid_{now}.ods", response.content)
             idataset.origin = (
-                f"Automatic download from Websiteregister Rijksoverheid, on" f" {datetime.now(pytz.utc).isoformat()}."
+                f"Automatic download from Websiteregister Rijksoverheid, on"
+                f" {datetime.now(timezone.utc).isoformat()}."
             )
             idataset.state = "uploaded"
         except RequestException as exc:
@@ -106,7 +106,7 @@ def import_file(generic_file_dataset_id: int):
         download.state += f"Amongst failures are: {', '.join(error_domains)}"
 
     download.is_imported = True
-    download.imported_on = datetime.now(pytz.utc)
+    download.imported_on = datetime.now(timezone.utc)
     download.save()
 
 

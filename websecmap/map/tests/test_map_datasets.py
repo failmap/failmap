@@ -1,8 +1,5 @@
-# Create your tests here.
 import logging
-
-# from unittest import mock
-from django.utils import timezone
+from datetime import datetime, timezone
 
 from websecmap.map.logic.datasets import export_urls_only
 from websecmap.organizations.models import Organization, OrganizationType, Url
@@ -38,12 +35,12 @@ def test_map_datasets(db):
     organization_type, created = OrganizationType.objects.all().get_or_create(name="municipality")
 
     organization, created = Organization.objects.all().get_or_create(
-        name="test", country="NL", created_on=timezone.now(), is_dead=False
+        name="test", country="NL", created_on=datetime.now(timezone.utc), is_dead=False
     )
     organization.layers.add(organization_type)
 
     url, created = Url.objects.all().get_or_create(
-        url="test.nl", created_on=timezone.now(), is_dead=False, not_resolvable=False
+        url="test.nl", created_on=datetime.now(timezone.utc), is_dead=False, not_resolvable=False
     )
 
     # create the n-n connection between url and organization
@@ -51,7 +48,7 @@ def test_map_datasets(db):
     url.save()
 
     url, created = Url.objects.all().get_or_create(
-        url="test2.nl", created_on=timezone.now(), is_dead=False, not_resolvable=False
+        url="test2.nl", created_on=datetime.now(timezone.utc), is_dead=False, not_resolvable=False
     )
 
     # create the n-n connection between url and organization
@@ -59,7 +56,7 @@ def test_map_datasets(db):
     url.save()
 
     url, created = Url.objects.all().get_or_create(
-        url="test3.nl", created_on=timezone.now(), is_dead=False, not_resolvable=False
+        url="test3.nl", created_on=datetime.now(timezone.utc), is_dead=False, not_resolvable=False
     )
     # create the n-n connection between url and organization
     url.organization.add(organization)

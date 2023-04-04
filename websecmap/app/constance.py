@@ -1,7 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
-import pytz
 from constance import config
 from requests.structures import CaseInsensitiveDict
 
@@ -61,7 +60,7 @@ def constance_cached_value(key):
     :param key:
     :return:
     """
-    now = datetime.now(pytz.utc).timestamp()
+    now = datetime.now(timezone.utc).timestamp()
     expired = now - 600  # 10 minute cache, 600 seconds. So changes still affect a rebuild.
 
     if constance_cache.get(key, None):
@@ -70,7 +69,7 @@ def constance_cached_value(key):
 
     # add value to cache, or update cache
     value = getattr(config, key)
-    constance_cache[key] = {"value": value, "time": datetime.now(pytz.utc).timestamp()}
+    constance_cache[key] = {"value": value, "time": datetime.now(timezone.utc).timestamp()}
     return value
 
 

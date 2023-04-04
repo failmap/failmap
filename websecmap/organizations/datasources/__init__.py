@@ -19,13 +19,12 @@ Note: organizations that are imported have the following format:
 
 import hashlib
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from os import makedirs, path, rename
 from time import sleep, time
 from typing import List
 
 import googlemaps
-import pytz
 import requests
 import tldextract
 from constance import config
@@ -292,7 +291,7 @@ def save_coordinate(organization, lat, lng, address):
         )
 
         if created:
-            coordinate.created_on = datetime.now(pytz.utc)
+            coordinate.created_on = datetime.now(timezone.utc)
             coordinate.creation_metadata = address
             coordinate.save(update_fields=["created_on", "creation_metadata"])
 
@@ -335,7 +334,7 @@ def save_organization(organization, organization_type):
     # a new organization does not have the created_on fields set. These have to be set.
     if created:
         failmap_organization.internal_notes = organization["dataset"]
-        failmap_organization.created_on = datetime.now(pytz.utc)
+        failmap_organization.created_on = datetime.now(timezone.utc)
         failmap_organization.save(update_fields=["created_on"])
         failmap_organization.layers.add(organization_type)
 
@@ -369,7 +368,7 @@ def save_url(website, failmap_organization):
         url = Url.objects.all().filter(url=website, is_dead=False).first()
 
     if created:
-        url.created_on = datetime.now(pytz.utc)
+        url.created_on = datetime.now(timezone.utc)
         url.internal_notes = "Added using a source importer."
 
     # the 'if created' results in the same code.

@@ -1,6 +1,4 @@
-from datetime import datetime
-
-import pytz
+from datetime import datetime, timezone
 
 from websecmap.scanners.models import EndpointGenericScan, PlannedScan
 from websecmap.scanners.scanner.autoexplain_no_https_possible import plan_scan, scan
@@ -22,15 +20,15 @@ def test_autoexplain_no_https_possible(db, default_scan_metadata, default_policy
     e1 = create_endpoint(u1, 4, "https", 443)
     e2 = create_endpoint(u1, 6, "https", 443)
     es1 = create_endpoint_scan(
-        e1, "plain_http", "no_https_redirect_and_no_https_on_standard_port", datetime(2020, 1, 1, tzinfo=pytz.utc)
+        e1, "plain_http", "no_https_redirect_and_no_https_on_standard_port", datetime(2020, 1, 1, tzinfo=timezone.utc)
     )
-    es2 = create_endpoint_scan(e2, "plain_http", "redirecting_properly", datetime(2020, 1, 1, tzinfo=pytz.utc))
+    es2 = create_endpoint_scan(e2, "plain_http", "redirecting_properly", datetime(2020, 1, 1, tzinfo=timezone.utc))
 
     u2 = create_url("sip.example2.com")
     link_url_to_organization(u2, o)
     e3 = create_endpoint(u2, 4, "https", 443)
     es3 = create_endpoint_scan(
-        e3, "plain_http", "no_https_redirect_and_no_https_on_standard_port", datetime(2020, 1, 1, tzinfo=pytz.utc)
+        e3, "plain_http", "no_https_redirect_and_no_https_on_standard_port", datetime(2020, 1, 1, tzinfo=timezone.utc)
     )
 
     plan_scan()

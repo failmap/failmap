@@ -1,6 +1,6 @@
-from django.utils import timezone
+from datetime import datetime, timezone
 
-from websecmap.organizations.models import Organization, AlternativeName
+from websecmap.organizations.models import AlternativeName, Organization
 
 
 def organization_altname(name):
@@ -9,7 +9,7 @@ def organization_altname(name):
 
 def test_alternative_names(db):
 
-    org = Organization.objects.create(name="Test", created_on=timezone.now())
+    org = Organization.objects.create(name="Test", created_on=datetime.now(timezone.utc))
     org.alternative_names.add(AlternativeName.objects.create(name="Test2"))
 
     org = Organization.objects.get(alternative_names=organization_altname("Test2"))

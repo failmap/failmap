@@ -1,10 +1,9 @@
 import importlib
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from json import loads
 
 import nested_admin
-import pytz
 import tldextract
 from django import forms
 from django.contrib import admin, messages
@@ -22,26 +21,26 @@ from websecmap import types
 from websecmap.app.models import Job
 from websecmap.celery import app
 from websecmap.organizations import datasources
+from websecmap.organizations.administration import force_merge_organizations
 from websecmap.organizations.datasources import dutch_government, excel
-from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid import (
-    import_file as nl_gov_websiteregister_import_file,
-)
 from websecmap.organizations.datasources.nl_gov_government_register_2023 import (
     import_dataset as nl_gov_government_register_import_file,
 )
+from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid import (
+    import_file as nl_gov_websiteregister_import_file,
+)
 from websecmap.organizations.models import (
+    AlternativeName,
     Coordinate,
     Dataset,
+    GenericFileDataset,
     Organization,
     OrganizationType,
     Url,
-    GenericFileDataset,
-    AlternativeName,
 )
 from websecmap.reporting.models import UrlReport
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, UrlIp
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
-from websecmap.organizations.administration import force_merge_organizations
 
 log = logging.getLogger(__name__)
 
@@ -742,7 +741,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
         for url in queryset:
             url.is_dead = True
             url.is_dead_reason = "Killed via admin interface"
-            url.is_dead_since = datetime.now(pytz.utc)
+            url.is_dead_since = datetime.now(timezone.utc)
             url.save()
         self.message_user(request, "Declare dead: Done")
 
@@ -968,7 +967,7 @@ def dataset_import_finished(dataset_id):
         return
 
     dataset.is_imported = True
-    dataset.imported_on = datetime.now(pytz.utc)
+    dataset.imported_on = datetime.now(timezone.utc)
     dataset.save()
 
 

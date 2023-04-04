@@ -7,10 +7,9 @@ import ipaddress
 import json
 import logging
 from copy import copy
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Tuple
 
-import pytz
 import tldextract
 from celery import Task, group
 from constance import config
@@ -243,7 +242,7 @@ def handle_unknown_state(scan_id):
 
     # not the state check, but the moment the state was created...
     if scan.state in timeouts and scan.last_state_change + timedelta(seconds=timeouts[scan.state]) < datetime.now(
-        pytz.utc
+        timezone.utc
     ):
         return group(update_state(scan.pk, "timeout", f"The state '{scan.state}' timed out, attempting to retry."))
 
@@ -337,21 +336,21 @@ def update_state(scan_id: int, new_state: str, new_state_message: str):
         # Scan.state needs to be taken into account: there could be a mismatch between the log and the scan,
         # and the scan is leading. The same issue is fixed in the internet.nl dashboard, see "test_scan".
         if existing_log.state == new_state == scan.state and existing_log.state_message == new_state_message:
-            scan.last_state_check = datetime.now(pytz.utc)
+            scan.last_state_check = datetime.now(timezone.utc)
             scan.save()
 
-            existing_log.last_state_check = datetime.now(pytz.utc)
+            existing_log.last_state_check = datetime.now(timezone.utc)
             existing_log.save()
             return
 
     old_state = copy(scan.state)
     _apply_similar_properties_to_object(new_state, scan, new_state_message)
-    scan.last_state_change = datetime.now(pytz.utc)
+    scan.last_state_change = datetime.now(timezone.utc)
     scan.save()
 
     statelog = InternetNLV2StateLog()
     statelog.scan = scan
-    statelog.at_when = datetime.now(pytz.utc)
+    statelog.at_when = datetime.now(timezone.utc)
     _apply_similar_properties_to_object(new_state, statelog, new_state_message)
     statelog.save()
 
@@ -361,7 +360,7 @@ def update_state(scan_id: int, new_state: str, new_state_message: str):
 def _apply_similar_properties_to_object(new_state, arg1, new_state_message):
     arg1.state = new_state
     arg1.state_message = new_state_message[:200]
-    arg1.last_state_check = datetime.now(pytz.utc)
+    arg1.last_state_check = datetime.now(timezone.utc)
 
 
 def api_has_usable_response(response, scan_id):

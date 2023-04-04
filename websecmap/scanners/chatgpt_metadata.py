@@ -4,7 +4,7 @@ import openai
 
 from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
-from websecmap.scanners.models import Product, ProductVendor, ProductGoal, ProductRelationship, ProductHierarchy
+from websecmap.scanners.models import Product, ProductGoal, ProductHierarchy, ProductRelationship, ProductVendor
 
 
 def enrich_product_metadata():

@@ -1,31 +1,30 @@
-from datetime import timedelta
-from django.utils import timezone
+from datetime import datetime, timedelta, timezone
 
 from websecmap.organizations.administration import (
-    merge_similar_organizations,
-    merge_organizations,
     force_merge_organizations,
+    merge_organizations,
+    merge_similar_organizations,
 )
-from websecmap.organizations.models import AlternativeName, Organization, OrganizationType, Url, Coordinate
+from websecmap.organizations.models import AlternativeName, Coordinate, Organization, OrganizationType, Url
 
 
 def test_merge_similar_organizations(db):
     ot_test = OrganizationType.objects.create(name="test")
     ot_appel = OrganizationType.objects.create(name="appel")
 
-    old_org = Organization.objects.create(name="Test", country="NL", created_on=timezone.now())
+    old_org = Organization.objects.create(name="Test", country="NL", created_on=datetime.now(timezone.utc))
     old_org.alternative_names.add(AlternativeName.objects.create(name="Test3"))
     old_org.layers.add(ot_test)
 
     # the newer organization has the alt name "Test" which matches the old org.
     new_org = Organization.objects.create(
-        name="Iets Anders", country="NL", created_on=timezone.now(), twitter_handle="@ietsanders123"
+        name="Iets Anders", country="NL", created_on=datetime.now(timezone.utc), twitter_handle="@ietsanders123"
     )
     new_org.alternative_names.add(AlternativeName.objects.create(name="Test"))
     new_org.layers.add(ot_appel)
 
     # a much older organizatio with a newer ID (which is weird) is skipped
-    Organization.objects.create(name="Test", country="NL", created_on=timezone.now() - timedelta(days=10))
+    Organization.objects.create(name="Test", country="NL", created_on=datetime.now(timezone.utc) - timedelta(days=10))
 
     assert Organization.objects.all().filter(is_dead=False).count() == 3
 
@@ -40,13 +39,13 @@ def test_merge_organizations(db):
     ot_test = OrganizationType.objects.create(name="test")
     ot_appel = OrganizationType.objects.create(name="appel")
 
-    old_org = Organization.objects.create(name="Test", country="NL", created_on=timezone.now())
+    old_org = Organization.objects.create(name="Test", country="NL", created_on=datetime.now(timezone.utc))
     old_org.alternative_names.add(AlternativeName.objects.create(name="Test3"))
     old_org.layers.add(ot_test)
 
     # the newer organization has the alt name "Test" which matches the old org.
     new_org = Organization.objects.create(
-        name="Iets Anders", country="NL", created_on=timezone.now(), twitter_handle="@ietsanders123"
+        name="Iets Anders", country="NL", created_on=datetime.now(timezone.utc), twitter_handle="@ietsanders123"
     )
     new_org.alternative_names.add(AlternativeName.objects.create(name="Test"))
     new_org.layers.add(ot_appel)
@@ -85,14 +84,14 @@ def test_merge_organizations(db):
 
 
 def test_force_merge_organizations(db):
-    now = timezone.now()
+    now = datetime.now(timezone.utc)
     org1 = Organization.objects.create(name="Test", country="NL", created_on=now)
-    org2 = Organization.objects.create(name="Test", country="NL", created_on=timezone.now())
-    org3 = Organization.objects.create(name="Test", country="NL", created_on=timezone.now())
-    org4 = Organization.objects.create(name="Test", country="NL", created_on=timezone.now())
+    org2 = Organization.objects.create(name="Test", country="NL", created_on=now)
+    org3 = Organization.objects.create(name="Test", country="NL", created_on=now)
+    org4 = Organization.objects.create(name="Test", country="NL", created_on=now)
 
     # a record that does not merged, to make sure not the entire database is nuked
-    Organization.objects.create(name="Test", country="NL", created_on=timezone.now())
+    Organization.objects.create(name="Test", country="NL", created_on=datetime.now(timezone.utc))
     assert Organization.objects.all().filter(is_dead=False).count() == 5
 
     force_merge_organizations([org1, org2, org3, org4])

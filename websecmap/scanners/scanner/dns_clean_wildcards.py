@@ -13,10 +13,10 @@ select computed_domain, computed_suffix, count(*) amount from url where is_dead 
 import logging
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timezone
+from difflib import SequenceMatcher
 from typing import List
 
-import pytz
 import requests
 import tldextract
 from celery import Task, group
@@ -26,7 +26,6 @@ from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.scanner import q_configurations_to_scan, unique_and_random, url_filters
 from websecmap.scanners.scanner.subdomains import discover_wildcard
-from difflib import SequenceMatcher
 
 log = logging.getLogger(__name__)
 
@@ -194,5 +193,5 @@ def store(url_ids: List[int]):
             continue
         url.is_dead = True
         url.is_dead_reason = "Same content as wildcard. So no additional value to scan."
-        url.is_dead_since = datetime.now(pytz.utc)
+        url.is_dead_since = datetime.now(timezone.utc)
         url.save()

@@ -27,7 +27,7 @@
 # Not needed with python < 3.5, we support 3.7 and up.
 
 # 4 requires python 3.8 and only 4.2 released summer 2023 has LTS support
-django==4.2
+django<=4.2
 # Jet admin interface with several Django 3 fixes. Breaks the tab container + select2 lists. But it's better than
 # nothing. Jet has not been maintained, even though it's been great, and alternatives are like 20 euro a month.
 # This means we'll probably move to the (simpler) grapelli interface.

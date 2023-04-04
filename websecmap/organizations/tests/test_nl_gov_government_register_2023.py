@@ -1,9 +1,6 @@
-from websecmap.organizations.datasources.nl_gov_government_register_2023 import (
-    import_dataset,
-    remove_redundant_urls,
-)
+from websecmap.organizations.datasources.nl_gov_government_register_2023 import import_dataset, remove_redundant_urls
 from websecmap.organizations.datasources.utils import save_succesful_download
-from websecmap.organizations.models import OrganizationType, Organization, Url, Coordinate
+from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 
 
 def read_file(path):

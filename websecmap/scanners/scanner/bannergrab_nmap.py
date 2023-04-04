@@ -7,27 +7,22 @@ they use fake banners, that's much more fun :)
 """
 
 import contextlib
-from typing import Dict, Any, List
-
-from websecmap.app.constance import constance_cached_value
-from websecmap.scanners.models import UrlIp, Endpoint, EndpointGenericScan
-from websecmap.scanners.scanmanager import store_endpoint_scan_result, endpoint_has_scans
 import logging
+from typing import Any, Dict, List
 
+import nmap
 from celery import Task, group
 
+from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.scanners import init_dict
-from websecmap.scanners.scanner.__init__ import (
-    allowed_to_scan,
-    unique_and_random,
-)
-import nmap
-
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlIp
+from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, unique_and_random
 from websecmap.scanners.scanner.banners.detect_version import (
-    detect_a_likely_version,
     SERVICE_IDENTITY_NO_BANNER_FOUND,
     clean_banner,
+    detect_a_likely_version,
 )
 from websecmap.scanners.scanner.banners.utils import get_urls_by_ip
 from websecmap.scanners.scanner.utils import in_chunks

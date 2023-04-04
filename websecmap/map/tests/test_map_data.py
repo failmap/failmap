@@ -1,11 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
-import pytz
 from dateutil.relativedelta import relativedelta
 
-from websecmap.map.logic.map import get_cached_map_data, get_map_data, get_altnames
+from websecmap.map.logic.map import get_altnames, get_cached_map_data, get_map_data
 from websecmap.map.models import MapDataCache
-from websecmap.organizations.models import OrganizationType, AlternativeName, Organization
+from websecmap.organizations.models import AlternativeName, Organization, OrganizationType
 
 
 def test_get_cached_map_data(db):
@@ -19,7 +18,7 @@ def test_get_cached_map_data(db):
     mdc = MapDataCache()
     mdc.country = "NL"
     mdc.organization_type = ot
-    mdc.at_when = datetime.now(pytz.utc) - relativedelta(days=8)
+    mdc.at_when = datetime.now(timezone.utc) - relativedelta(days=8)
     mdc.dataset = expected_result
     mdc.filters = ["all"]
     mdc.save()

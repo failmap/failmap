@@ -1,24 +1,33 @@
-from django.utils import timezone
+from datetime import datetime, timezone
+
+from constance.test.pytest import override_config
 from freezegun import freeze_time
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanner.ports import mark_unusual_ports, string_to_list_of_ints
-from constance.test.pytest import override_config
 
 
 def test_ports(db, default_policy, default_scan_metadata):
     with freeze_time("2020-01-01"):
         with override_config(PORTSCAN_SHOULD_BE_INTERNAL_PORTS="1337,4000"):
             url = Url.objects.create(url="internetcleanup.foundation")
-            Endpoint.objects.create(url=url, port=80, protocol="123", ip_version=4, discovered_on=timezone.now())
-            Endpoint.objects.create(url=url, port=443, protocol="123", ip_version=4, discovered_on=timezone.now())
+            Endpoint.objects.create(
+                url=url, port=80, protocol="123", ip_version=4, discovered_on=datetime.now(timezone.utc)
+            )
+            Endpoint.objects.create(
+                url=url, port=443, protocol="123", ip_version=4, discovered_on=datetime.now(timezone.utc)
+            )
 
             # nothing changes
             mark_unusual_ports()
 
-            Endpoint.objects.create(url=url, port=1337, protocol="leet", ip_version=4, discovered_on=timezone.now())
-            Endpoint.objects.create(url=url, port=4000, protocol="leet", ip_version=4, discovered_on=timezone.now())
+            Endpoint.objects.create(
+                url=url, port=1337, protocol="leet", ip_version=4, discovered_on=datetime.now(timezone.utc)
+            )
+            Endpoint.objects.create(
+                url=url, port=4000, protocol="leet", ip_version=4, discovered_on=datetime.now(timezone.utc)
+            )
 
             assert Endpoint.objects.all().count() == 4
 

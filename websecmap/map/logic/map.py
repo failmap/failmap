@@ -1,12 +1,11 @@
-from datetime import datetime, date
+from datetime import date, datetime, timezone
 from typing import Any, Dict, List
 
-import pytz
 import simplejson as json
 from django.db import connection
 from django.utils.text import slugify
 
-from websecmap.map.logic.map_defaults import REMARK, get_country, get_organization_type, determine_when
+from websecmap.map.logic.map_defaults import REMARK, determine_when, get_country, get_organization_type
 from websecmap.map.models import MapDataCache
 from websecmap.organizations.models import Organization
 from websecmap.reporting.diskreport import retrieve_report
@@ -115,7 +114,7 @@ def get_map_data(
     data = {
         "metadata": {
             "type": "FeatureCollection",
-            "render_date": datetime.now(pytz.utc).isoformat(),
+            "render_date": datetime.now(timezone.utc).isoformat(),
             "data_from_time": when.isoformat(),
             "remark": REMARK,
             "applied filter": displayed_issue,

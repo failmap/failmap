@@ -1,9 +1,7 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
-import pytz
 from deepdiff import DeepDiff
-from django.utils import timezone
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.duplicates import deduplicate_all_endpoints_sequentially, deduplicate_all_scans_sequentially
@@ -20,11 +18,15 @@ def test_deduplicate_all_endpoints_sequentially(db):
     # a set of duplicates:
     duplicate_properties = {"protocol": "https", "port": 443, "ip_version": 4, "is_dead": False, "url": u}
     target_ep = Endpoint.objects.create(
-        **{**duplicate_properties, **{"discovered_on": datetime(2021, 7, 1, tzinfo=pytz.utc)}}
+        **{**duplicate_properties, **{"discovered_on": datetime(2021, 7, 1, tzinfo=timezone.utc)}}
     )
-    Endpoint.objects.create(**{**duplicate_properties, **{"discovered_on": datetime(2021, 7, 2, tzinfo=pytz.utc)}})
-    e1 = Endpoint.objects.create(**{**duplicate_properties, **{"discovered_on": datetime(2021, 7, 3, tzinfo=pytz.utc)}})
-    e2 = Endpoint.objects.create(**{**duplicate_properties, **{"discovered_on": datetime(2021, 7, 4, tzinfo=pytz.utc)}})
+    Endpoint.objects.create(**{**duplicate_properties, **{"discovered_on": datetime(2021, 7, 2, tzinfo=timezone.utc)}})
+    e1 = Endpoint.objects.create(
+        **{**duplicate_properties, **{"discovered_on": datetime(2021, 7, 3, tzinfo=timezone.utc)}}
+    )
+    e2 = Endpoint.objects.create(
+        **{**duplicate_properties, **{"discovered_on": datetime(2021, 7, 4, tzinfo=timezone.utc)}}
+    )
 
     # add some decoy records that should not be removed. They have to be added later as removal goes towards the past.
     Endpoint.objects.create(protocol="https", port=443, ip_version=6, is_dead=False, url=u)
@@ -40,7 +42,7 @@ def test_deduplicate_all_endpoints_sequentially(db):
         ip_version=4,
         is_dead=True,
         url=u,
-        discovered_on=datetime(2021, 7, 5, tzinfo=pytz.utc),
+        discovered_on=datetime(2021, 7, 5, tzinfo=timezone.utc),
     )
 
     # a very, very old endpoint will not be merged as its outside of the 60 days *n-days* window.:
@@ -51,7 +53,7 @@ def test_deduplicate_all_endpoints_sequentially(db):
         ip_version=4,
         is_dead=False,
         url=u,
-        discovered_on=datetime(2019, 7, 5, tzinfo=pytz.utc),
+        discovered_on=datetime(2019, 7, 5, tzinfo=timezone.utc),
     )
     log.info(f"Non deleted endpoint has id: {non_deleted.id}")
 
@@ -63,11 +65,11 @@ def test_deduplicate_all_endpoints_sequentially(db):
         ip_version=4,
         is_dead=False,
         url=u,
-        discovered_on=datetime(2023, 7, 5, tzinfo=pytz.utc),
+        discovered_on=datetime(2023, 7, 5, tzinfo=timezone.utc),
     )
 
-    EndpointGenericScan.objects.create(endpoint=e1, rating_determined_on=timezone.now())
-    EndpointGenericScan.objects.create(endpoint=e2, rating_determined_on=timezone.now())
+    EndpointGenericScan.objects.create(endpoint=e1, rating_determined_on=datetime.now(timezone.utc))
+    EndpointGenericScan.objects.create(endpoint=e2, rating_determined_on=datetime.now(timezone.utc))
 
     assert Endpoint.objects.all().count() == 11
 
@@ -96,7 +98,7 @@ def test_deduplicate_all_endpoints_sequentially(db):
     expected = [
         {
             # "id": 1,
-            "discovered_on": datetime(2021, 7, 1, 0, 0, tzinfo=pytz.utc),
+            "discovered_on": datetime(2021, 7, 1, 0, 0, tzinfo=timezone.utc),
             "protocol": "https",
             "port": 443,
             "ip_version": 4,
@@ -141,7 +143,7 @@ def test_deduplicate_all_endpoints_sequentially(db):
         },
         {
             # "id": 10,
-            "discovered_on": datetime(2019, 7, 5, 0, 0, tzinfo=pytz.utc),
+            "discovered_on": datetime(2019, 7, 5, 0, 0, tzinfo=timezone.utc),
             "protocol": "https",
             "port": 443,
             "ip_version": 4,
@@ -150,7 +152,7 @@ def test_deduplicate_all_endpoints_sequentially(db):
         },
         {
             # "id": 11,
-            "discovered_on": datetime(2023, 7, 5, 0, 0, tzinfo=pytz.utc),
+            "discovered_on": datetime(2023, 7, 5, 0, 0, tzinfo=timezone.utc),
             "protocol": "https",
             "port": 443,
             "ip_version": 4,
@@ -176,7 +178,7 @@ def _setup_endpoint_test():
         "ip_version": 4,
         "is_dead": True,
         "url": u1,
-        "discovered_on": datetime(2021, 7, 3, tzinfo=pytz.utc),
+        "discovered_on": datetime(2021, 7, 3, tzinfo=timezone.utc),
     }
     e1 = Endpoint.objects.create(**pr)
     manager = EndpointGenericScan.objects
@@ -188,8 +190,8 @@ def test_deduplicate_all_scans_sequentially_same_day(db):
     e1, manager = _setup_endpoint_test()
 
     # Straight forward test: Have two scans that are the same, they will be merged.
-    now = timezone.now()
-    then = timezone.now() - timedelta(days=1)
+    now = datetime.now(timezone.utc)
+    then = datetime.now(timezone.utc) - timedelta(days=1)
     # since they are both at the same time, the latest scan one is set to the latest scan, but which it is, is random.
     props = {
         "endpoint": e1,
@@ -240,9 +242,9 @@ def test_deduplicate_all_scans_sequentially_with_intermediate_scan(db):
     e1, manager = _setup_endpoint_test()
 
     # Straight forward test: Have two scans that are the same, they will be merged.
-    now3 = timezone.now() - timedelta(days=13)
-    now2 = timezone.now() - timedelta(days=14)
-    now1 = timezone.now() - timedelta(days=15)
+    now3 = datetime.now(timezone.utc) - timedelta(days=13)
+    now2 = datetime.now(timezone.utc) - timedelta(days=14)
+    now1 = datetime.now(timezone.utc) - timedelta(days=15)
     manager.create(endpoint=e1, rating="A", evidence="1", type="a", rating_determined_on=now1, last_scan_moment=now1)
     manager.create(endpoint=e1, rating="B", evidence="1", type="a", rating_determined_on=now2, last_scan_moment=now2)
     manager.create(endpoint=e1, rating="A", evidence="1", type="a", rating_determined_on=now3, last_scan_moment=now3)
@@ -257,15 +259,15 @@ def test_deduplicate_all_scans_sequentially_with_intermediate_scan(db):
     assert manager.count() == 4
 
     # Add even more noise that is flipping between states, nothing will be deleted.
-    now4 = timezone.now() - timedelta(days=4)
-    now5 = timezone.now() - timedelta(days=5)
-    now6 = timezone.now() - timedelta(days=6)
-    now7 = timezone.now() - timedelta(days=7)
-    now8 = timezone.now() - timedelta(days=8)
-    now9 = timezone.now() - timedelta(days=9)
-    now10 = timezone.now() - timedelta(days=10)
-    now11 = timezone.now() - timedelta(days=11)
-    now12 = timezone.now() - timedelta(days=12)
+    now4 = datetime.now(timezone.utc) - timedelta(days=4)
+    now5 = datetime.now(timezone.utc) - timedelta(days=5)
+    now6 = datetime.now(timezone.utc) - timedelta(days=6)
+    now7 = datetime.now(timezone.utc) - timedelta(days=7)
+    now8 = datetime.now(timezone.utc) - timedelta(days=8)
+    now9 = datetime.now(timezone.utc) - timedelta(days=9)
+    now10 = datetime.now(timezone.utc) - timedelta(days=10)
+    now11 = datetime.now(timezone.utc) - timedelta(days=11)
+    now12 = datetime.now(timezone.utc) - timedelta(days=12)
 
     manager.create(endpoint=e1, rating="B", evidence="1", type="a", rating_determined_on=now12, last_scan_moment=now12)
     manager.create(endpoint=e1, rating="A", evidence="1", type="a", rating_determined_on=now11, last_scan_moment=now11)
@@ -292,7 +294,7 @@ def test_deduplicate_all_scans_sequentially_with_noise(db):
         "ip_version": 4,
         "is_dead": True,
         "url": u1,
-        "discovered_on": datetime(2021, 7, 3, tzinfo=pytz.utc),
+        "discovered_on": datetime(2021, 7, 3, tzinfo=timezone.utc),
     }
     p2 = {
         "protocol": "http",
@@ -300,7 +302,7 @@ def test_deduplicate_all_scans_sequentially_with_noise(db):
         "ip_version": 4,
         "is_dead": True,
         "url": u2,
-        "discovered_on": datetime(2021, 7, 3, tzinfo=pytz.utc),
+        "discovered_on": datetime(2021, 7, 3, tzinfo=timezone.utc),
     }
     e1 = Endpoint.objects.create(**p1)
     e2 = Endpoint.objects.create(**p1)
@@ -310,8 +312,8 @@ def test_deduplicate_all_scans_sequentially_with_noise(db):
     e6 = Endpoint.objects.create(**p2)
     manager = EndpointGenericScan.objects
 
-    now2 = timezone.now() - timedelta(days=2)
-    now1 = timezone.now() - timedelta(days=3)
+    now2 = datetime.now(timezone.utc) - timedelta(days=2)
+    now1 = datetime.now(timezone.utc) - timedelta(days=3)
     manager.create(endpoint=e1, rating="A", evidence="1", type="a", rating_determined_on=now1, last_scan_moment=now1)
     manager.create(endpoint=e1, rating="B", evidence="1", type="a", rating_determined_on=now2, last_scan_moment=now2)
     manager.create(endpoint=e2, rating="A", evidence="1", type="a", rating_determined_on=now1, last_scan_moment=now1)
@@ -337,7 +339,7 @@ def test_deduplicate_all_scans_sequentially_in_a_sequence(db):
     td = timedelta
 
     # See if the whole sequence is merged into one
-    now = timezone.now()
+    now = datetime.now(timezone.utc)
     props = {"endpoint": e1, "rating": "1", "evidence": "1", "type": "a"}
     # last_scan_moment on new objects cannot be set, need to override it manually
     # auto_now_add: Note that the current date is always used; it’s not just a default value that you can override.

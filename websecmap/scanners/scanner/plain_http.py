@@ -16,10 +16,10 @@ from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan
 from websecmap.scanners.scanner.filter import (
-    generic_plan_scan,
     apply_organzation_or_endpoint_filter_before_url_filter,
-    merge_urls_filter,
+    generic_plan_scan,
     merge_organizations_filter,
+    merge_urls_filter,
 )
 from websecmap.scanners.scanner.http import (
     can_connect,

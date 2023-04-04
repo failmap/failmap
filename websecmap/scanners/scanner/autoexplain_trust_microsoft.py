@@ -1,9 +1,8 @@
 import logging
 import ssl
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
-import pytz
 from celery import group
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -277,11 +276,11 @@ def certificate_matches_microsoft_exception_policy(
         log.debug("Could not retrieve certificate for %s.", url)
         return False
 
-    if certificate.not_valid_before.astimezone(pytz.utc) > datetime.now(pytz.utc):
+    if certificate.not_valid_before.astimezone(timezone.utc) > datetime.now(timezone.utc):
         log.debug("Certificate for %s is not valid before %s. Not trusted.", url, certificate.not_valid_before)
         return False
 
-    if datetime.now(pytz.utc) > certificate.not_valid_after.astimezone(pytz.utc):
+    if datetime.now(timezone.utc) > certificate.not_valid_after.astimezone(timezone.utc):
         log.debug("Certificate for %s has expired  %s. Not trusted.", url, certificate.not_valid_after)
         return False
 

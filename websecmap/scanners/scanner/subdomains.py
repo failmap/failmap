@@ -4,11 +4,10 @@ import random
 import re
 import string
 import tempfile
-from datetime import datetime
+from datetime import datetime, timezone
 from time import sleep
 from typing import Any, Dict, List
 
-import pytz
 import requests
 from celery import Task, group
 from django.db import connection
@@ -163,7 +162,7 @@ def handle_resolves(resolves: bool, url_id: int) -> None:
     if not resolves and url.not_resolvable is False:
         url.not_resolvable = True
         url.not_resolvable_reason = "DNS did not resolve (DNS verify task)"
-        url.not_resolvable_since = datetime.now(pytz.utc)
+        url.not_resolvable_since = datetime.now(timezone.utc)
         url.save()
 
     if resolves and url.not_resolvable is True:

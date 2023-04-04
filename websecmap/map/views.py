@@ -1,14 +1,13 @@
 import json
 import logging
-from datetime import datetime, date
+from datetime import date, datetime, timezone
 from wsgiref.util import FileWrapper
 
 import django_excel as excel
 import orjson
-import pytz
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
@@ -16,7 +15,7 @@ from django.views.decorators.cache import cache_page
 
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
-from websecmap.app.constance import get_bulk_values, get_all_values, constance_cached_value
+from websecmap.app.constance import constance_cached_value, get_all_values, get_bulk_values
 from websecmap.map.logic import datasets
 from websecmap.map.logic.admin import (
     add_organization,
@@ -31,7 +30,7 @@ from websecmap.map.logic.datasets import create_filename
 from websecmap.map.logic.explain import explain, get_all_explains, get_recent_explains, remove_explanation
 from websecmap.map.logic.improvements import get_improvements
 from websecmap.map.logic.latest import get_all_latest_scans
-from websecmap.map.logic.login_plaza import login_plaza_data, get_products
+from websecmap.map.logic.login_plaza import get_products, login_plaza_data
 from websecmap.map.logic.map import get_map_data
 from websecmap.map.logic.map_defaults import (
     DEFAULT_COUNTRY,
@@ -56,11 +55,11 @@ from websecmap.map.logic.stats_and_graphs import (
 from websecmap.map.logic.ticker import get_ticker_data
 from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
 from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
-from websecmap.map.models import Configuration, OrganizationReport, LandingPage
+from websecmap.map.models import Configuration, LandingPage, OrganizationReport
 from websecmap.organizations.models import Organization
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Screenshot
-from websecmap.scanners.scanmetadata import get_scanners_for_frontend, get_backend_scanmetadata
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata, get_scanners_for_frontend
 
 log = logging.getLogger(__package__)
 
@@ -493,7 +492,7 @@ def index(request, map_configuration=None):
                 "country": my_config["PROJECT_COUNTRY"],
                 "debug": bool(settings.DEBUG),
                 "language": request.LANGUAGE_CODE[0:2],  # only support 'en' not 'en-gb',
-                "timestamp": datetime.now(pytz.UTC).isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "initial_map_data_url": "",
                 "initial_countries": initial_countries,
                 "countries_and_layers": countries_and_layers(),

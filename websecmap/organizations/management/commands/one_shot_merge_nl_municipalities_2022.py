@@ -1,16 +1,15 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
-import pytz
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from websecmap.organizations.adminstrative_transformations import add_url_to_new_organization, merge, dissolve
+from websecmap.organizations.adminstrative_transformations import add_url_to_new_organization, dissolve, merge
 from websecmap.organizations.models import Organization
 
 log = logging.getLogger(__package__)
 
-merge_date = datetime(year=2021, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
+merge_date = datetime(year=2021, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
 
 opts = {"when": merge_date, "organization_type": "municipality", "country": "NL"}
 

@@ -1,6 +1,6 @@
 # todo: move this up in the conftest levels, aka: higher directory does not warrent redefines??
-from django.core.management import call_command
 import pytest
+from django.core.management import call_command
 
 
 @pytest.fixture

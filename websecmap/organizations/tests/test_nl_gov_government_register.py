@@ -1,11 +1,11 @@
 from websecmap.organizations.datasources.nl_gov_government_register import (
-    import_dataset,
-    download,
-    GOVERNMENT_REGISTER_FILES,
     GOVERNMENT_REGISTER_BASE_URL,
+    GOVERNMENT_REGISTER_FILES,
+    download,
+    import_dataset,
 )
 from websecmap.organizations.datasources.utils import save_succesful_download
-from websecmap.organizations.models import OrganizationType, Organization, Url, GenericFileDataset, Coordinate
+from websecmap.organizations.models import Coordinate, GenericFileDataset, Organization, OrganizationType, Url
 from websecmap.organizations.tests.test_nl_gov_websiteregister_rijksoverheid import binary
 
 

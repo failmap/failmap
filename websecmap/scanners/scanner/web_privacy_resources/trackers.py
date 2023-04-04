@@ -1,9 +1,8 @@
 import json
 import os
-from typing import List, Dict
+from typing import Dict, List
 
 from websecmap.reporting import time_cache
-
 
 PRIVACY_DISCONNECTME_ENTITIES_FILE = f"{os.path.abspath(os.path.dirname(__file__))}/disconnectme/services.json"
 

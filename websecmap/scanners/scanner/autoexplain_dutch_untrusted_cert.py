@@ -1,16 +1,15 @@
 import logging
 import socket
 from base64 import b64decode, b64encode
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 import OpenSSL
-import pytz
 from celery import Task, group
-from django.utils import timezone
 from OpenSSL import SSL
 from OpenSSL.crypto import FILETYPE_PEM, dump_certificate, load_certificate
 from OpenSSL.SSL import Error
+
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
@@ -273,4 +272,4 @@ def store_bot_explaination_if_needed(needed: bool, scan_id: int):
         return
 
     log.debug("Dutch Untrusted Cert: Certificate on scan_id is a dutch state trusted cert: %s.", scan_id)
-    add_bot_explanation(scan, EXPLANATION, datetime(2028, 11, 14, tzinfo=pytz.utc) - timezone.now())
+    add_bot_explanation(scan, EXPLANATION, datetime(2028, 11, 14, tzinfo=timezone.utc) - datetime.now(timezone.utc))

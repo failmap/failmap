@@ -1,14 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
-import pytz
-
-from websecmap.reporting.severity import internet_nl, get_score_from_policy
+from websecmap.reporting.severity import get_score_from_policy, internet_nl
 from websecmap.scanners.models import EndpointGenericScan
 
 
 def test_internet_nl_standard_calculation(db, default_policy):
 
-    now = datetime.now(pytz.utc)
+    now = datetime.now(timezone.utc)
 
     # Api v1 does not have json content, api v2 does.
     scan = EndpointGenericScan()

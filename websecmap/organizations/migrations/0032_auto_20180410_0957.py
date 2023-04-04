@@ -3,7 +3,6 @@
 import datetime
 
 from django.db import migrations, models
-from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
@@ -17,7 +16,10 @@ class Migration(migrations.Migration):
             model_name="coordinate",
             name="created_on",
             field=models.DateTimeField(
-                blank=True, db_index=True, default=datetime.datetime(2016, 1, 1, 0, 0, tzinfo=utc), null=True
+                blank=True,
+                db_index=True,
+                default=datetime.datetime(2016, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -29,7 +31,10 @@ class Migration(migrations.Migration):
             model_name="organization",
             name="created_on",
             field=models.DateTimeField(
-                blank=True, db_index=True, default=datetime.datetime(2016, 1, 1, 0, 0, tzinfo=utc), null=True
+                blank=True,
+                db_index=True,
+                default=datetime.datetime(2016, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+                null=True,
             ),
         ),
         migrations.AlterField(

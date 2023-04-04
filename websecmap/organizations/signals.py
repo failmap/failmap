@@ -1,6 +1,3 @@
-# coding=UTF-8
-# from __future__ import unicode_literals
-
 import logging
 
 from django.db.models.signals import post_save

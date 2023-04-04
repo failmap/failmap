@@ -1,18 +1,18 @@
+import logging
 from typing import Callable, List
 
 from django.db.models import Q
 
 from websecmap.organizations.models import Organization, Url
+from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanner.__init__ import (
+    allowed_to_scan,
+    endpoint_filters,
     q_configurations_to_scan,
     unique_and_random,
-    endpoint_filters,
     url_filters,
-    allowed_to_scan,
 )
-from websecmap.scanners import init_dict, plannedscan
-import logging
 
 log = logging.getLogger(__name__)
 

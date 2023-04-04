@@ -1,8 +1,6 @@
 import logging
 from copy import copy
-from datetime import datetime, timedelta
-
-import pytz
+from datetime import datetime, timedelta, timezone
 
 from websecmap.organizations.models import Url
 from websecmap.reporting.report import create_url_reports
@@ -13,13 +11,13 @@ from websecmap.scanners.scanner.internet_nl_v2_websecmap import (
     calculate_forum_standaardisatie_views_mail,
     calculate_forum_standaardisatie_views_web,
     initialize_scan,
+    is_subdomain,
     lowest_value_in_results,
     process_scan_results,
     progress_running_scan,
     reuse_last_fields_and_set_them_to_error,
-    update_state,
-    is_subdomain,
     store_domain_scan_results,
+    update_state,
 )
 
 log = logging.getLogger("websecmap")
@@ -96,7 +94,7 @@ def test_internet_nl_logging(db):
     # The timeout will be fixed next progression.
     update_state(scan.pk, "registering", "This will take too long and time out.")
     scan = InternetNLV2Scan.objects.all().first()
-    scan.last_state_change = datetime.now(pytz.utc) - timedelta(days=100)
+    scan.last_state_change = datetime.now(timezone.utc) - timedelta(days=100)
     scan.save()
     progress_running_scan(scan.pk)
     last = InternetNLV2StateLog.objects.all().last()

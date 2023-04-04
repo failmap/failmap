@@ -1,16 +1,14 @@
 """Integration tests of scanner commands."""
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
-import pytz
 from django.core.management import call_command
+from requests.structures import CaseInsensitiveDict
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanner.security_headers import analyze_website_headers
-from requests.structures import CaseInsensitiveDict
-
 
 SECURITY_HEADERS = {
     "X-XSS-Protection": "1",
@@ -69,7 +67,7 @@ def test_analyze_website_headers(db):
             "ip_version": 4,
             "is_dead": False,
             "url": u,
-            "discovered_on": datetime(2021, 7, 1, tzinfo=pytz.utc),
+            "discovered_on": datetime(2021, 7, 1, tzinfo=timezone.utc),
         }
     )
 

@@ -10,13 +10,13 @@ to log network errors. These errors can be retried.
 """
 
 import logging
+from dataclasses import dataclass
 from typing import Any, Dict, List
 
 import requests
 from requests.auth import HTTPBasicAuth
 
 from websecmap.celery import app
-from dataclasses import dataclass
 
 log = logging.getLogger(__name__)
 

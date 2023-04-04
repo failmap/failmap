@@ -1,8 +1,7 @@
 import ipaddress
 import re
+from datetime import datetime, timezone
 from typing import Dict
-
-from django.utils import timezone
 
 from websecmap.map.logic.coordinates import attach_coordinate, switch_latlng
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
@@ -20,7 +19,7 @@ def operation_response(error: bool = False, success: bool = False, message: str 
         "message": message,
         "state": "error" if error else "success",
         "data": data,
-        "timestamp": timezone.now(),
+        "timestamp": datetime.now(timezone.utc),
     }
 
 
@@ -118,7 +117,7 @@ def add_organization(data):
     new_organization.country = data["country"]
     new_organization.type = OrganizationType.objects.all().filter(name=data["layer"]).first()
     new_organization.internal_notes = "Added via the Map admin interface."
-    new_organization.created_on = timezone.now()
+    new_organization.created_on = datetime.now(timezone.utc)
     new_organization.save()
 
     new_organization.layers.add(new_organization.type)

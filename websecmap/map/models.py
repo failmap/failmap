@@ -249,8 +249,11 @@ class OrganizationReport(SeriesOfUrlsReportMixin):
 
     class Meta:
         get_latest_by = "at_when"
-        index_together = [
-            ["at_when", "id"],
-        ]
+
         verbose_name = _("Organization Report")
         verbose_name_plural = _("Organization Reports")
+
+        # index_together was deprecated in django 4.2
+        indexes = [
+            models.Index(fields=["at_when", "id"]),
+        ]

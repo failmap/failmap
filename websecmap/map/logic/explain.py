@@ -1,7 +1,5 @@
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Union
-
-from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.reporting.severity import get_severity
@@ -73,7 +71,7 @@ def get_all_explains(country, organization_type, limit=0):
 def get_explanation(url_or_endpoint, scan):
     calculation = get_severity(scan)
 
-    now = timezone.now().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     explained_on = scan.comply_or_explain_explained_on.isoformat() if scan.comply_or_explain_explained_on else now
 
     this_explain = {
@@ -132,8 +130,8 @@ def explain(scan_id: int, scan_type: str, explanation: str, explained_by: str, d
 
     scan.comply_or_explain_is_explained = True
     scan.comply_or_explain_explained_by = explained_by
-    scan.comply_or_explain_explained_on = timezone.now()
-    scan.comply_or_explain_explanation_valid_until = timezone.now() + timedelta(days=duration)
+    scan.comply_or_explain_explained_on = datetime.now(timezone.utc)
+    scan.comply_or_explain_explanation_valid_until = datetime.now(timezone.utc) + timedelta(days=duration)
     scan.comply_or_explain_explanation = explanation
     scan.comply_or_explain_case_handled_by = "Logged in user..."
     scan.save()

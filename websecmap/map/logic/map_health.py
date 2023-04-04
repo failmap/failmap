@@ -1,10 +1,9 @@
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Tuple
 
 import dateutil.parser
-import pytz
 
 from websecmap.celery import app
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
@@ -43,7 +42,7 @@ def update_map_health_reports(
         for days_back in list(reversed(range(0, days))):
             total_outdated = []
             total_good = []
-            old_date = datetime.now(pytz.utc) - timedelta(days=days_back)
+            old_date = datetime.now(timezone.utc) - timedelta(days=days_back)
 
             log.debug("Creating health report of %s days back.", days_back)
             for organization in organizations_on_map:
@@ -88,7 +87,7 @@ def get_outdated_ratings(
 
     for organization in organizations:
         # log.debug(f"Creating health report of {organization} at {old_date}.")
-        latest_report = get_latest_report_of_organization(organization, datetime.now(pytz.utc))
+        latest_report = get_latest_report_of_organization(organization, datetime.now(timezone.utc))
         if not latest_report:
             continue
 
@@ -111,7 +110,7 @@ def get_latest_report_of_organization(organization, at_when):
 def split_ratings_between_good_and_bad(
     report: OrganizationReport, hours: int = OUTDATED_HOURS
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-    now = datetime.now(pytz.utc)
+    now = datetime.now(timezone.utc)
     a_while_ago = now - timedelta(hours=hours)
     infractions = []
     good = []

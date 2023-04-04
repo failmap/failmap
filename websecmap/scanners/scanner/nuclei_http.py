@@ -1,17 +1,17 @@
 import json
 import subprocess
-from typing import Dict, Any, List, Union
+from typing import Any, Dict, List, Union
 
 from celery import group
 
 from websecmap.app import log
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners import plannedscan, init_dict
-from websecmap.scanners.models import EndpointGenericScan, Endpoint, ScannerFinding, Scanner
+from websecmap.scanners import init_dict, plannedscan
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, Scanner, ScannerFinding
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner import allowed_to_scan, constance_json_value, unique_and_random
-from websecmap.scanners.scanner.filter import merge_endpoints_filter, generic_plan_scan, filter_endpoints_only
+from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
 from websecmap.scanners.support import kwargs_to_params
 
 """

@@ -1,6 +1,4 @@
-from datetime import datetime, timedelta
-
-import pytz
+from datetime import datetime, timedelta, timezone
 
 from websecmap.map.models import Configuration, OrganizationReport
 from websecmap.organizations.models import OrganizationType
@@ -79,7 +77,7 @@ def test_plan_outdated_scans(db, default_scan_metadata, default_policy):
     report = OrganizationReport()
     report.calculation = None
     report.organization = o
-    report.at_when = datetime.now(pytz.utc) - timedelta(days=100)
+    report.at_when = datetime.now(timezone.utc) - timedelta(days=100)
     report.save()
 
     # save and retrieve reports.

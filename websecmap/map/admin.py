@@ -1,9 +1,8 @@
 import logging
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict
 
-import pytz
 from celery import group
 from django.contrib import admin
 from django.db import transaction
@@ -107,7 +106,7 @@ def start_import(region_id: int):
     if not region:
         return
 
-    region.import_start_date = datetime.now(pytz.utc)
+    region.import_start_date = datetime.now(timezone.utc)
     region.save(update_fields=["import_start_date"])
 
 
@@ -249,10 +248,7 @@ def ordering_actions():
 
 
 @admin.register(models.Configuration)
-class ConfigurationAdmin(
-    ImportExportModelAdmin,
-    admin.ModelAdmin
-):
+class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     list_display = (
         "display_order",

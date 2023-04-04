@@ -1,7 +1,6 @@
-from datetime import datetime
-from typing import Dict, Any
+from datetime import datetime, timezone
+from typing import Any, Dict
 
-import pytz
 from constance import config
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.contrib.syndication.views import Feed
@@ -203,7 +202,7 @@ def latest_updates(organization_id):
 
     dataset = {
         "scans": [],
-        "render_date": datetime.now(pytz.utc).isoformat(),
+        "render_date": datetime.now(timezone.utc).isoformat(),
         "remark": REMARK,
     }
 
@@ -221,7 +220,7 @@ def latest_updates(organization_id):
 
     scans = generic_endpoint_scans + url_endpoint_scans
 
-    scans = sorted(scans, key=lambda k: getattr(k, "rating_determined_on", datetime.now(pytz.utc)), reverse=True)
+    scans = sorted(scans, key=lambda k: getattr(k, "rating_determined_on", datetime.now(timezone.utc)), reverse=True)
 
     for scan in scans:
         scan_type = scan.type

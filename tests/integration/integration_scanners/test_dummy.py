@@ -5,7 +5,6 @@ from subprocess import check_output
 
 import pytest
 
-
 # The following error will happen if you run a worker while running tests, using the same broker: different databases
 # will be used and there will be exceptions like this one, the tests will hang forever.
 # eventlet-async is not testable: {'error': 'DatabaseError', 'message':

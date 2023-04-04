@@ -1,12 +1,8 @@
-# coding=UTF-8
-# from __future__ import unicode_literals
-
 import hashlib
 import logging
-from datetime import datetime, timedelta
-from typing import Optional, List
+from datetime import datetime, timedelta, timezone
+from typing import List, Optional
 
-import pytz
 import tldextract
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, models, transaction
@@ -14,8 +10,8 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from jsonfield import JSONField
-from validators import domain
 from taggit.managers import TaggableManager
+from validators import domain
 
 log = logging.getLogger(__package__)
 
@@ -93,7 +89,7 @@ class Organization(models.Model):
     created_on = models.DateTimeField(
         blank=True,
         null=True,
-        default=datetime(year=2016, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc),
+        default=datetime(year=2016, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc),
         db_index=True,
     )
 
@@ -222,7 +218,7 @@ class Coordinate(models.Model):
         blank=True,
         null=True,
         db_index=True,
-        default=datetime(year=2016, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc),
+        default=datetime(year=2016, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc),
     )
     creation_metadata = models.CharField(max_length=255, blank=True, null=True)
     is_dead = models.BooleanField(
@@ -235,7 +231,7 @@ class Coordinate(models.Model):
 
     def kill(self):
         self.is_dead = True
-        self.is_dead_since = datetime.now(pytz.utc)
+        self.is_dead_since = datetime.now(timezone.utc)
         self.is_dead_reason = "Killed manually"
         self.save()
 
@@ -538,7 +534,7 @@ class Url(models.Model):
         existing_url = Url.objects.all().filter(url=url).first()
         if not existing_url:
             new_url = Url(url=url)
-            new_url.created_on = datetime.now(pytz.utc)
+            new_url.created_on = datetime.now(timezone.utc)
             new_url.origin = origin
             new_url.save()
             return new_url
@@ -547,11 +543,11 @@ class Url(models.Model):
 
 
 def seven_days_in_the_future():
-    return datetime.now(pytz.utc) + timedelta(days=7)
+    return datetime.now(timezone.utc) + timedelta(days=7)
 
 
 def today():
-    return datetime.now(pytz.utc).today()
+    return datetime.now(timezone.utc).today()
 
 
 class Dataset(models.Model):

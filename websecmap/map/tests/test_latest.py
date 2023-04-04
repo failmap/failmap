@@ -1,18 +1,16 @@
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
-from django.utils import timezone
 from freezegun import freeze_time
 
 from websecmap.map.logic.latest import get_all_latest_scans
-
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import EndpointGenericScan, Endpoint
+from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 
 def test_get_all_latest_scans(db, default_scan_metadata, default_policy):
 
     with freeze_time("2020-01-01 12:00"):
-        now = timezone.now()
+        now = datetime.now(timezone.utc)
         yesterday = now - timedelta(days=1)
 
         # Eg: make a follow up scan with a simple policy:

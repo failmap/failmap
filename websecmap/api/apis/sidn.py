@@ -1,9 +1,8 @@
 import csv
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from io import StringIO
 
-import pytz
 import tldextract
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -92,7 +91,7 @@ def sidn_domain_upload(user_id: int, csv_data: str):
 
     # all mashed up in a single routine, should be separate tasks...
     upload = SIDNUpload()
-    upload.at_when = datetime.now(pytz.utc)
+    upload.at_when = datetime.now(timezone.utc)
     upload.state = "new"
     upload.by_user = User.objects.all().filter(pk=user_id).first()
     upload.posted_data = csv_data

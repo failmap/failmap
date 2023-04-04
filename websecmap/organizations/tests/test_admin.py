@@ -1,8 +1,7 @@
 from django.contrib.admin import AdminSite
 from django.contrib.auth.models import User
 
-
-from websecmap.organizations.admin import UrlAdmin, MyUrlAdminForm
+from websecmap.organizations.admin import MyUrlAdminForm, UrlAdmin
 from websecmap.organizations.models import Url
 
 

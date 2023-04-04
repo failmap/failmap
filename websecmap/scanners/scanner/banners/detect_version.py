@@ -1,12 +1,12 @@
 import json
 import re
 from json import JSONDecodeError
-from websecmap.celery import app
 
 from constance import config
 
 from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
+from websecmap.celery import app
 from websecmap.scanners.models import EndpointGenericScan
 
 SERVICE_IDENTITY_LIKELY_VERSION_FOUND = "service_identity_likely_version_found"  # high

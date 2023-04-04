@@ -28,36 +28,32 @@ import ipaddress
 import logging
 import random
 import socket
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from ipaddress import AddressValueError
-from typing import Dict, List, Optional, Union, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
-import pytz
 import requests
 import urllib3
 from celery import Task, group
 from django.conf import settings
 from requests import HTTPError
 from requests.exceptions import ChunkedEncodingError, ContentDecodingError, SSLError
+from requests_toolbelt.adapters import host_header_ssl
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, UrlIp
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
-from websecmap.scanners.scanner.__init__ import (
-    allowed_to_discover_endpoints,
-    unique_and_random,
-)
+from websecmap.scanners.scanner.__init__ import allowed_to_discover_endpoints, unique_and_random
 from websecmap.scanners.scanner.filter import (
-    generic_plan_scan,
-    filter_endpoints_only,
-    merge_endpoints_filter,
     apply_organzation_or_endpoint_filter_before_url_filter,
+    filter_endpoints_only,
+    generic_plan_scan,
+    merge_endpoints_filter,
     merge_urls_filter,
 )
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
-from requests_toolbelt.adapters import host_header_ssl
 
 # suppress InsecureRequestWarning, we do those request on purpose.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -590,7 +586,7 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
     endpoint.ip_version = ip_version
 
     endpoint.is_dead = False
-    endpoint.discovered_on = datetime.now(pytz.utc)
+    endpoint.discovered_on = datetime.now(timezone.utc)
     # endpoint.dossier = "Found using the http scanner."  #
     # no other place to put it:
     endpoint.is_dead_reason = origin[:255]
@@ -621,16 +617,16 @@ def kill_url_task(ips, url: Url):
     :return:
     """
     url.not_resolvable = True
-    url.not_resolvable_since = datetime.now(pytz.utc)
+    url.not_resolvable_since = datetime.now(timezone.utc)
     url.not_resolvable_reason = "No IPv4 or IPv6 address found in http scanner."
     url.save()
 
     Endpoint.objects.all().filter(url=url).update(
-        is_dead=True, is_dead_since=datetime.now(pytz.utc), is_dead_reason="Url was killed"
+        is_dead=True, is_dead_since=datetime.now(timezone.utc), is_dead_reason="Url was killed"
     )
 
     UrlIp.objects.all().filter(url=url).update(
-        is_unused=True, is_unused_since=datetime.now(pytz.utc), is_unused_reason="Url was killed"
+        is_unused=True, is_unused_since=datetime.now(timezone.utc), is_unused_reason="Url was killed"
     )
 
 
@@ -645,7 +641,7 @@ def endpoint_exists(url_id: int, port: int, protocol: str, ip_version: int) -> i
 def get_similar_dead_endpoint_in_last_n_days(
     url_id: int, port: int, protocol: str, ip_version: int, days: int = 30
 ) -> Endpoint:
-    days_ago = datetime.now(pytz.utc) - timedelta(days=days)
+    days_ago = datetime.now(timezone.utc) - timedelta(days=days)
     return (
         Endpoint.objects.all()
         .filter(
@@ -668,7 +664,7 @@ def kill_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
 
     for endpoint in eps:
         endpoint.is_dead = True
-        endpoint.is_dead_since = datetime.now(pytz.utc)
+        endpoint.is_dead_since = datetime.now(timezone.utc)
         endpoint.is_dead_reason = f"Not found in HTTP Scanner anymore ({origin})."[:255]
         endpoint.save()
 

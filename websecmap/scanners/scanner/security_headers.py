@@ -50,7 +50,7 @@ What referrer should be allowed to access the resource. Security on referrer hea
 Classified as: Ignored
 """
 import logging
-from typing import Union, Dict
+from typing import Dict, Union
 
 import requests
 from celery import Task, group

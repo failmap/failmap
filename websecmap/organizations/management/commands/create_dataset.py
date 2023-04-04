@@ -1,7 +1,6 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
-import pytz
 from django.core.management.commands.dumpdata import Command as DumpDataCommand
 
 from websecmap.organizations.management.commands.support.datasethelpers import check_referential_integrity
@@ -70,7 +69,7 @@ class Command(DumpDataCommand):
         check_referential_integrity()
 
         # generate unique filename for every export
-        filename = self.FILENAME.format(datetime.now(pytz.utc).strftime("%Y%m%d_%H%M%S"), options=options)
+        filename = self.FILENAME.format(datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S"), options=options)
 
         # if no output specified use default file
         if not options["output"]:

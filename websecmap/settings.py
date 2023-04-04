@@ -16,8 +16,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 import os
-import sys
 import re
+import sys
 
 # required until fixed: https://github.com/jazzband/django-constance/issues/263
 from collections import OrderedDict
@@ -291,7 +291,8 @@ LANGUAGE_COOKIE_NAME = "language"
 TIME_ZONE = "UTC"
 
 USE_I18N = True
-USE_L10N = True
+# Deprecated since 4.0
+# USE_L10N = True
 
 # Loaddata will show a massive amount of warnings, therefore use load-dataset. load-dataset will
 # do exactly the same as loaddata, but will overwrite below flag preventing warnings.
@@ -1672,7 +1673,16 @@ else:
 # Allow file uploads in datasets:
 MEDIA_ROOT = os.environ.get("MEDIA_ROOT", os.path.abspath(os.path.dirname(__file__)) + "/uploads/")
 
-DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+# New in django 4.2:
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
 
 # this parameter is used in severity calculation to determine if this is a websecmap installation or
 # something else, like an internet.nl dashboard. In case of websecmap, severities are adjusted.

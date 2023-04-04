@@ -1,19 +1,17 @@
 # expose tasks for discovery by django_celery
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta, timezone
 
-import pytz
-
-from websecmap.app.models import create_job, Job  # noqa  # pylint: disable=unused-import
+from websecmap.api.models import SIDNUpload
+from websecmap.app.models import Job, create_job  # noqa  # pylint: disable=unused-import
+from websecmap.celery import app
 from websecmap.organizations.models import Dataset
 from websecmap.scanners.models import (
-    TlsQualysScratchpad,
-    PlannedScan,
-    PlannedScanStatistic,
     InternetNLV2Scan,
+    PlannedScan,
     PlannedScanLog,
+    PlannedScanStatistic,
+    TlsQualysScratchpad,
 )
-from websecmap.api.models import SIDNUpload
-from websecmap.celery import app
 
 
 @app.task(queue="storage", ignore_result=True)
@@ -28,7 +26,7 @@ def clean_application_caches_and_logs(retention_days: int = 30):
     # doesnt understand it and it's tricky to do otherwise).
     """
 
-    days_back = datetime.now(pytz.utc) - timedelta(days=retention_days)
+    days_back = datetime.now(timezone.utc) - timedelta(days=retention_days)
 
     # todo: mapdatacache should be synced to disk. Would be faster for retrieval and storage.
     tables_to_reduce = [

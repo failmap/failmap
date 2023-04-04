@@ -1,6 +1,4 @@
-from datetime import datetime
-
-import pytz
+from datetime import datetime, timezone
 
 from websecmap.organizations.models import Url
 from websecmap.reporting.models import ScanPolicy, UrlReport
@@ -10,19 +8,19 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 def test_url_report(db, default_policy, default_scan_metadata):
     # Url test.nl has been created
-    day_0 = datetime(day=1, month=1, year=2000, tzinfo=pytz.utc)
+    day_0 = datetime(day=1, month=1, year=2000, tzinfo=timezone.utc)
     # First endpoint was created, first OK scan
-    day_1 = datetime(day=2, month=1, year=2000, tzinfo=pytz.utc)
+    day_1 = datetime(day=2, month=1, year=2000, tzinfo=timezone.utc)
     # Previous scan was now a High.
-    day_2 = datetime(day=3, month=1, year=2000, tzinfo=pytz.utc)
-    day_3 = datetime(day=4, month=1, year=2000, tzinfo=pytz.utc)
-    # day_4 = datetime(day=5, month=1, year=2000, tzinfo=pytz.utc)
-    # day_5 = datetime(day=6, month=1, year=2000, tzinfo=pytz.utc)
-    # day_6 = datetime(day=7, month=1, year=2000, tzinfo=pytz.utc)
-    # day_7 = datetime(day=8, month=1, year=2000, tzinfo=pytz.utc)
-    # day_8 = datetime(day=9, month=1, year=2000, tzinfo=pytz.utc)
+    day_2 = datetime(day=3, month=1, year=2000, tzinfo=timezone.utc)
+    day_3 = datetime(day=4, month=1, year=2000, tzinfo=timezone.utc)
+    # day_4 = datetime(day=5, month=1, year=2000, tzinfo=timezone.utc)
+    # day_5 = datetime(day=6, month=1, year=2000, tzinfo=timezone.utc)
+    # day_6 = datetime(day=7, month=1, year=2000, tzinfo=timezone.utc)
+    # day_7 = datetime(day=8, month=1, year=2000, tzinfo=timezone.utc)
+    # day_8 = datetime(day=9, month=1, year=2000, tzinfo=timezone.utc)
     # Url test.nl could not be found anymore
-    # day_9 = datetime(day=10, month=1, year=2000, tzinfo=pytz.utc)
+    # day_9 = datetime(day=10, month=1, year=2000, tzinfo=timezone.utc)
     url, created = Url.objects.all().get_or_create(url="test.nl", created_on=day_0, not_resolvable=False)
 
     # a standard HTTPS endpoint
@@ -143,9 +141,9 @@ def test_aggegrate_error_in_report(db, default_policy, default_scan_metadata):
     # check if the scan policies have loaded
     assert ScanPolicy.objects.all().count() > 10
 
-    some_time = datetime(day=1, month=1, year=2000, tzinfo=pytz.utc)
-    some_later_time = datetime(day=2, month=1, year=2000, tzinfo=pytz.utc)
-    even_later = datetime(day=3, month=1, year=2000, tzinfo=pytz.utc)
+    some_time = datetime(day=1, month=1, year=2000, tzinfo=timezone.utc)
+    some_later_time = datetime(day=2, month=1, year=2000, tzinfo=timezone.utc)
+    even_later = datetime(day=3, month=1, year=2000, tzinfo=timezone.utc)
 
     url, created = Url.objects.all().get_or_create(url="test.nl", created_on=some_time, not_resolvable=False)
     first_endpoint, created = Endpoint.objects.all().get_or_create(

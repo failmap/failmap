@@ -1,6 +1,6 @@
-from django.test import Client
-from constance.test import override_config
 import pytest
+from constance.test import override_config
+from django.test import Client
 from django.urls import reverse
 
 

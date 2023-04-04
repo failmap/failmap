@@ -2,7 +2,7 @@ import pytest
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import UrlIp
-from websecmap.scanners.scanner.resolve_ip import store_ip, clean_ips
+from websecmap.scanners.scanner.resolve_ip import clean_ips, store_ip
 
 
 @pytest.mark.parametrize("is_v4", [True, False])

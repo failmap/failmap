@@ -1,11 +1,11 @@
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 import requests
 from constance import config
-from django.utils import timezone
 from requests.models import Response
 
 from websecmap.map.logic.openstreetmap import import_from_scratch
@@ -96,7 +96,7 @@ def test_openstreetmaps(db, monkeypatch):
             # test OSM import
             config.WAMBACHERS_OSM_CLIKEY = ""
             prepare_database()
-            import_from_scratch(["AL"], ["county"], timezone.now())
+            import_from_scratch(["AL"], ["county"], datetime.now(timezone.utc))
 
             assert Organization.objects.all().count() == 3
             # todo: structure changed, but the test data has not changed yet, so there are now 0 urls.
@@ -106,4 +106,4 @@ def test_openstreetmaps(db, monkeypatch):
             # test wambachers import
             config.WAMBACHERS_OSM_CLIKEY = "enabled"
             prepare_database()
-            import_from_scratch(["AL"], ["county"], timezone.now())
+            import_from_scratch(["AL"], ["county"], datetime.now(timezone.utc))

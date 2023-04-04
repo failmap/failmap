@@ -1,9 +1,9 @@
+import json
 import logging
 
 from django.core.management.base import BaseCommand
 
 from websecmap.organizations.datasources.dutch_government import parse_data
-import json
 
 log = logging.getLogger(__package__)
 

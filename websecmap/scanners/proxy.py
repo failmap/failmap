@@ -1,11 +1,10 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http.client import BadStatusLine
 from multiprocessing.pool import ThreadPool
 from time import sleep
 from typing import Any, Dict
 
-import pytz
 import requests
 from constance import config
 from django.db import transaction
@@ -65,7 +64,7 @@ def claim_proxy(tracing_label="") -> Dict[str, Any]:
                     # first claim to prevent duplicate claims
                     log.debug("Proxy %s claimed for %s et al...", proxy.id, tracing_label)
                     proxy.currently_used_in_tls_qualys_scan = True
-                    proxy.last_claim_at = datetime.now(pytz.utc)
+                    proxy.last_claim_at = datetime.now(timezone.utc)
                     proxy.save(update_fields=["currently_used_in_tls_qualys_scan", "last_claim_at"])
 
                     # we can't check for proxy quality here, as that will fill up the strorage with long tasks.
@@ -145,7 +144,7 @@ def release_claim_after_timeout(proxy: Dict[str, Any]):
 
     if all(
         [
-            db_proxy.last_claim_at < datetime.now(pytz.utc) - timedelta(hours=3),
+            db_proxy.last_claim_at < datetime.now(timezone.utc) - timedelta(hours=3),
             db_proxy.currently_used_in_tls_qualys_scan,
         ]
     ):
@@ -188,28 +187,28 @@ def check_proxy(proxy: Dict[str, Any]):
     except ProxyError:
         log.debug("ProxyError, Perhaps because: proxy does not support https.")
         store_check_result.apply_async(
-            [proxy, "ProxyError, Perhaps because: proxy does not support https.", True, datetime.now(pytz.utc)]
+            [proxy, "ProxyError, Perhaps because: proxy does not support https.", True, datetime.now(timezone.utc)]
         )
         return False
     except SSLError:
         log.debug("SSL error received.")
-        store_check_result.apply_async([proxy, "SSL error received.", True, datetime.now(pytz.utc)])
+        store_check_result.apply_async([proxy, "SSL error received.", True, datetime.now(timezone.utc)])
         return False
     except ConnectTimeout:
         log.debug("Connection timeout.")
-        store_check_result.apply_async([proxy, "Connection timeout.", True, datetime.now(pytz.utc)])
+        store_check_result.apply_async([proxy, "Connection timeout.", True, datetime.now(timezone.utc)])
         return False
     except ConnectionError:
         log.debug("Connection error.")
-        store_check_result.apply_async([proxy, "Connection error.", True, datetime.now(pytz.utc)])
+        store_check_result.apply_async([proxy, "Connection error.", True, datetime.now(timezone.utc)])
         return False
     except ProtocolError:
         log.debug("Protocol error.")
-        store_check_result.apply_async([proxy, "Protocol error.", True, datetime.now(pytz.utc)])
+        store_check_result.apply_async([proxy, "Protocol error.", True, datetime.now(timezone.utc)])
         return False
     except BadStatusLine:
         log.debug("Bad status line.")
-        store_check_result.apply_async([proxy, "Bad status line.", True, datetime.now(pytz.utc)])
+        store_check_result.apply_async([proxy, "Bad status line.", True, datetime.now(timezone.utc)])
         return False
 
     log.debug("Could connect to test site %s. Proxy is functional.", proxy_testing_url)
@@ -219,13 +218,13 @@ def check_proxy(proxy: Dict[str, Any]):
         api_results = service_provider_status(proxy)
     except RetryError:
         log.debug("Retry error. Could not connect.")
-        store_check_result.apply_async([proxy, "Retry error. Could not connect.", True, datetime.now(pytz.utc)])
+        store_check_result.apply_async([proxy, "Retry error. Could not connect.", True, datetime.now(timezone.utc)])
         return False
 
     # tried a few times, no result. Proxy is dead.
     if not api_results:
         log.debug("No result, proxy not reachable?")
-        store_check_result.apply_async([proxy, "No result, proxy not reachable?", True, datetime.now(pytz.utc)])
+        store_check_result.apply_async([proxy, "No result, proxy not reachable?", True, datetime.now(timezone.utc)])
         return False
 
     if api_results["max"] < 20 or api_results["this-client-max"] < 20 or api_results["current"] > 19:
@@ -235,7 +234,7 @@ def check_proxy(proxy: Dict[str, Any]):
                 proxy,
                 "Out of capacity.",
                 True,
-                datetime.now(pytz.utc),
+                datetime.now(timezone.utc),
                 api_results["current"],
                 api_results["max"],
                 api_results["this-client-max"],
@@ -258,7 +257,7 @@ def check_proxy(proxy: Dict[str, Any]):
                 proxy,
                 "Could not retrieve website.",
                 True,
-                datetime.now(pytz.utc),
+                datetime.now(timezone.utc),
                 api_results["current"],
                 api_results["max"],
                 api_results["this-client-max"],
@@ -272,7 +271,7 @@ def check_proxy(proxy: Dict[str, Any]):
                 proxy,
                 "Proxy too slow for standard site.",
                 True,
-                datetime.now(pytz.utc),
+                datetime.now(timezone.utc),
                 api_results["current"],
                 api_results["max"],
                 api_results["this-client-max"],
@@ -290,7 +289,7 @@ def check_proxy(proxy: Dict[str, Any]):
             proxy,
             "Proxy accessible. Capacity available.",
             False,
-            datetime.now(pytz.utc),
+            datetime.now(timezone.utc),
             api_results["current"],
             api_results["max"],
             api_results["this-client-max"],

@@ -1,7 +1,6 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
-import pytz
 from django.core.exceptions import ObjectDoesNotExist
 
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, Url, UrlGenericScan
@@ -30,7 +29,7 @@ def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, me
     # The amount of data saved runs in the gigabytes. So it's worth the while doing it like this :)
     if epgs.explanation == message and epgs.rating == rating:
         log.debug("Scan had the same rating and message, updating last_scan_moment only.")
-        epgs.last_scan_moment = datetime.now(pytz.utc)
+        epgs.last_scan_moment = datetime.now(timezone.utc)
         epgs.save(update_fields=["last_scan_moment"])
         return
 
@@ -48,8 +47,8 @@ def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, me
     epgs.type = scan_type
     # Very long CSP headers for example take a lot of space.
     epgs.evidence = evidence[:9000]
-    epgs.last_scan_moment = datetime.now(pytz.utc)
-    epgs.rating_determined_on = datetime.now(pytz.utc)
+    epgs.last_scan_moment = datetime.now(timezone.utc)
+    epgs.rating_determined_on = datetime.now(timezone.utc)
     epgs.is_the_latest_scan = True
     epgs.save()
 
@@ -82,7 +81,7 @@ def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str
     # while we have type hinting, it's still possible to pass in a boolean and then you compare a str to a bool...
     if genericscan.explanation == message and genericscan.rating == rating:
         log.debug("Scan had the same rating and message, updating last_scan_moment only.")
-        genericscan.last_scan_moment = datetime.now(pytz.utc)
+        genericscan.last_scan_moment = datetime.now(timezone.utc)
         genericscan.save(update_fields=["last_scan_moment"])
     else:
         # message and rating changed for this scan_type, so it's worth while to save the scan.
@@ -93,8 +92,8 @@ def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str
         genericscan.url = Url.objects.all().filter(id=url_id).first()
         genericscan.evidence = evidence
         genericscan.type = scan_type
-        genericscan.last_scan_moment = datetime.now(pytz.utc)
-        genericscan.rating_determined_on = datetime.now(pytz.utc)
+        genericscan.last_scan_moment = datetime.now(timezone.utc)
+        genericscan.rating_determined_on = datetime.now(timezone.utc)
         genericscan.is_the_latest_scan = True
         genericscan.save()
 

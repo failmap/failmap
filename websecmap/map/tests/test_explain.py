@@ -1,9 +1,10 @@
-from django.utils import timezone
+from datetime import datetime, timezone
+
 from freezegun import freeze_time
 
 from websecmap.map.logic.explain import get_recent_explains
-from websecmap.organizations.models import Url, Organization, OrganizationType
-from websecmap.scanners.models import EndpointGenericScan, Endpoint, UrlGenericScan
+from websecmap.organizations.models import Organization, OrganizationType, Url
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 
 
 def test_get_recent_explains(db, default_scan_metadata, default_policy):
@@ -13,7 +14,7 @@ def test_get_recent_explains(db, default_scan_metadata, default_policy):
     with freeze_time("2022-01-24"):
         # Prepare the data for a typical response
         organization_type, created = OrganizationType.objects.all().get_or_create(name="municipality")
-        now = timezone.now()
+        now = datetime.now(timezone.utc)
 
         organization = Organization.objects.all().create(
             name="test", type=organization_type, country="NL", created_on=now, is_dead=False

@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from websecmap.scanners.chatgpt_metadata import enrich_product_metadata, chatgpt_hello, chatgpt_thank_you
+from websecmap.scanners.chatgpt_metadata import chatgpt_hello, chatgpt_thank_you, enrich_product_metadata
 
 log = logging.getLogger(__name__)
 

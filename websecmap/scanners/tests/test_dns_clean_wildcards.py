@@ -1,6 +1,6 @@
 import websecmap
 from websecmap.organizations.models import Url
-from websecmap.scanners.scanner.dns_clean_wildcards import get_identical_sites_on_wildcard_url, compose_scan_task
+from websecmap.scanners.scanner.dns_clean_wildcards import compose_scan_task, get_identical_sites_on_wildcard_url
 
 random = 0
 

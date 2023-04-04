@@ -1,13 +1,9 @@
+from datetime import datetime, timedelta, timezone
 from typing import List
-
-import pytz
 
 from websecmap.app.constance import constance_cached_value
 from websecmap.scanners.models import EndpointGenericScan, UrlIp
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-
-from datetime import datetime, timedelta
-
 from websecmap.scanners.scanner.banners.detect_version import SERVICE_IDENTITY_NOT_SEEN_IN_A_WHILE
 
 
@@ -29,7 +25,9 @@ def clean_old_results(scan_types: List[str]):
     # means that it has not been seen. All the other values are auto-update etc. The amount of days depends on how
     # many times this scan is run. The data is not really stable. Probably is a lot blocks ands such. If it's blocked
     # then so be it. Might not be blocked after a day or two...
-    old_scans = datetime.now(pytz.utc) - timedelta(days=constance_cached_value("BANNERGRAB_DAYS_TO_OUTDATED_METRIC"))
+    old_scans = datetime.now(timezone.utc) - timedelta(
+        days=constance_cached_value("BANNERGRAB_DAYS_TO_OUTDATED_METRIC")
+    )
     old_epgs = EndpointGenericScan.objects.all().filter(type__in=scan_types, last_scan_moment__lte=old_scans)
 
     # When there's new stuff it will show up automatically

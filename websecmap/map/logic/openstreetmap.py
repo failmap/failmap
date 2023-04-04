@@ -4,18 +4,17 @@ import logging
 import os.path
 import re
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
-import pytz
 import requests
 import tldextract
 from constance import config
 from django.conf import settings
-from django.utils import timezone
 from django.utils.safestring import mark_safe
 from iso3166 import countries
+from osm2geojson import xml2geojson
 from rdp import rdp
 
 from websecmap.app.progressbar import print_progress_bar
@@ -28,7 +27,6 @@ from websecmap.map.logic.wikidata import (
 )
 from websecmap.map.models import AdministrativeRegion
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType
-from osm2geojson import xml2geojson
 
 log = logging.getLogger(__package__)
 
@@ -335,7 +333,7 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
         name=name,
         type=layer,
         country=country,
-        created_on=when if when else datetime.now(pytz.utc),
+        created_on=when if when else datetime.now(timezone.utc),
         wikidata=wikidata_code,
         wikipedia=wikipedia_code,
     )
@@ -344,7 +342,7 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
     log.info("Saved new organization: %s", new_organization)
 
     new_coordinate = Coordinate(
-        created_on=when if when else datetime.now(pytz.utc),
+        created_on=when if when else datetime.now(timezone.utc),
         organization=new_organization,
         creation_metadata="Automated import via OSM.",
         geojsontype=coordinates["type"],  # polygon or multipolygon
@@ -411,7 +409,7 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
 
     for old_coord in old_coordinate:
         old_coord.is_dead = True
-        old_coord.is_dead_since = when if when else datetime.now(pytz.utc)
+        old_coord.is_dead_since = when if when else datetime.now(timezone.utc)
         old_coord.is_dead_reason = message[:255]
         old_coord.save()
 
@@ -422,7 +420,7 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
         matching_organization.save()
 
     Coordinate(
-        created_on=when if when else datetime.now(pytz.utc),
+        created_on=when if when else datetime.now(timezone.utc),
         organization=matching_organization,
         creation_metadata="Automated import via OSM.",
         geojsontype=coordinates["type"],  # polygon or multipolygon
@@ -528,7 +526,7 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
     """
 
     # see if we cached a resultwikidata
-    filename = create_evil_filename([country, organization_type, str(timezone.now().date())], "zip")
+    filename = create_evil_filename([country, organization_type, str(datetime.now(timezone.utc).date())], "zip")
     filename = settings.TOOLS["openstreetmap"]["output_dir"] + filename
 
     log.debug("Saving data to %s", filename)
@@ -825,7 +823,7 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
     :return: dictionary
     """
 
-    filename = create_evil_filename([country, organization_type, str(timezone.now().date())], "osm")
+    filename = create_evil_filename([country, organization_type, str(datetime.now(timezone.utc).date())], "osm")
     filename = settings.TOOLS["openstreetmap"]["output_dir"] + filename
 
     if os.path.exists(filename):

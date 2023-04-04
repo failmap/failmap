@@ -1,10 +1,8 @@
 import logging
-from datetime import datetime, timedelta
-from typing import List, Dict, Any
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List
 
-import pytz
 from celery import group
-from django.utils import timezone
 
 from websecmap.celery import Task, app
 from websecmap.map.report import update_report_tasks
@@ -116,7 +114,9 @@ def compose_task(
 def reset_expired_onboards():
     # If the queues don't finish in 7 days, you have a problem somewhere. This will add to that problem by adding
     # EVEN MORE tasks to the queue. So an unmanaged system will run out of space somewhere sometime :)
-    expired = list(Url.objects.all().filter(onboarding_stage_set_on__lte=datetime.now(pytz.utc) - timedelta(days=7)))
+    expired = list(
+        Url.objects.all().filter(onboarding_stage_set_on__lte=datetime.now(timezone.utc) - timedelta(days=7))
+    )
 
     # some older tasks might never have an onboarding stage due to a bug. add those too:
     expired += list(Url.objects.all().filter(onboarding_stage_set_on__isnull=True))
@@ -183,7 +183,7 @@ def forward_onboarding_status(url):
     # retry crawling after scans are finished
     if url.onboarding_stage == "crawling":
         url.onboarded = True
-        url.onboarded_on = timezone.now()
+        url.onboarded_on = datetime.now(timezone.utc)
         url.onboarding_stage = "onboarded"
 
     url.save()
@@ -193,9 +193,9 @@ def forward_onboarding_status(url):
 def finish_onboarding(url):
     log.info("Finishing onboarding of %s", url)
     url.onboarded = True
-    url.onboarded_on = timezone.now()
+    url.onboarded_on = datetime.now(timezone.utc)
     url.onboarding_stage = "onboarded"
-    url.onboarding_stage_set_on = datetime.now(pytz.utc)
+    url.onboarding_stage_set_on = datetime.now(timezone.utc)
     url.save(update_fields=["onboarded_on", "onboarded", "onboarding_stage", "onboarding_stage_set_on"])
 
 
@@ -204,5 +204,5 @@ def update_stage(urls: List[Url], stage=""):
     for url in urls:
         log.info("Updating onboarding_stage of %s from %s to %s", url, url.onboarding_stage, stage)
         url.onboarding_stage = stage
-        url.onboarding_stage_set_on = datetime.now(pytz.utc)
+        url.onboarding_stage_set_on = datetime.now(timezone.utc)
         url.save(update_fields=["onboarding_stage", "onboarding_stage_set_on"])

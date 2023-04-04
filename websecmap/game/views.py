@@ -1,7 +1,6 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
-import pytz
 import simplejson as json
 import spectra
 from babel import languages
@@ -42,7 +41,7 @@ def get_default_contest(request):
             # log.debug("Trying to find the earliest active contest")
             return (
                 Contest.objects.all()
-                .filter(until_moment__gte=datetime.now(pytz.utc), from_moment__lte=datetime.now(pytz.utc))
+                .filter(until_moment__gte=datetime.now(timezone.utc), from_moment__lte=datetime.now(timezone.utc))
                 .first()
             )
         except ObjectDoesNotExist:
@@ -339,21 +338,21 @@ def contests(request):
 
     expired_contests = (
         Contest.objects.all()
-        .filter(until_moment__lt=datetime.now(pytz.utc))
+        .filter(until_moment__lt=datetime.now(timezone.utc))
         .annotate(teams=Count("team", distinct=True))
         .annotate(urls=Count("team__urlsubmission"))
     )
 
     active_contests = (
         Contest.objects.all()
-        .filter(from_moment__lt=datetime.now(pytz.utc), until_moment__gte=datetime.now(pytz.utc))
+        .filter(from_moment__lt=datetime.now(timezone.utc), until_moment__gte=datetime.now(timezone.utc))
         .annotate(teams=Count("team", distinct=True))
         .annotate(urls=Count("team__urlsubmission"))
     )
 
     future_contests = (
         Contest.objects.all()
-        .filter(from_moment__gte=datetime.now(pytz.utc))
+        .filter(from_moment__gte=datetime.now(timezone.utc))
         .annotate(teams=Count("team", distinct=True))
         .annotate(urls=Count("team__urlsubmission"))
     )
@@ -584,8 +583,8 @@ def contest_map_data(request):
     data = {
         "metadata": {
             "type": "FeatureCollection",
-            "render_date": datetime.now(pytz.utc),
-            "data_from_time": datetime.now(pytz.utc),
+            "render_date": datetime.now(timezone.utc),
+            "data_from_time": datetime.now(timezone.utc),
             "remark": "yolo",
         },
         "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},

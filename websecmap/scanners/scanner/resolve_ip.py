@@ -1,23 +1,17 @@
 """
 Retrieves IP addresses for several ip-based scans. These are stored in the UrlIp table.
 """
-from datetime import datetime
-
-import pytz
-
-from websecmap.scanners.models import UrlIp
-from websecmap.scanners.scanner.http import get_ipv4, get_ipv6
-
 import logging
+from datetime import datetime, timezone
 
 from celery import Task, group
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict
-from websecmap.scanners.scanner.__init__ import (
-    allowed_to_scan,
-)
+from websecmap.scanners.models import UrlIp
+from websecmap.scanners.scanner.__init__ import allowed_to_scan
+from websecmap.scanners.scanner.http import get_ipv4, get_ipv6
 
 SCANNER_NAME = "resolve_ip"
 
@@ -87,7 +81,7 @@ def store_ip(url: Url, is_v4: bool, ip: str):
 
     else:
         log.debug("Url: %s, ip: %s, is_v4: %s has been added to the db as first ip for this url.", url, is_v4, ip)
-        UrlIp.objects.create(url=url, is_v4=is_v4, ip=ip, discovered_on=datetime.now(pytz.utc))
+        UrlIp.objects.create(url=url, is_v4=is_v4, ip=ip, discovered_on=datetime.now(timezone.utc))
 
     # clean up the rest
     to_unuse = UrlIp.objects.all().filter(url=url, is_v4=is_v4).exclude(ip=ip)
@@ -98,6 +92,6 @@ def store_ip(url: Url, is_v4: bool, ip: str):
 
 def unuse_url_ip(url_ip: UrlIp, reason: str = "found alternative ip"):
     url_ip.is_unused = True
-    url_ip.is_unused_since = datetime.now(pytz.utc)
+    url_ip.is_unused_since = datetime.now(timezone.utc)
     url_ip.is_unused_reason = reason
     url_ip.save()

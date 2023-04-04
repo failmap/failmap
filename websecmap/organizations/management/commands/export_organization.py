@@ -1,7 +1,6 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
-import pytz
 from django.core.management.commands.dumpdata import Command as DumpDataCommand
 from django.core.serializers import serialize
 
@@ -35,7 +34,7 @@ class Command(DumpDataCommand):
             filename = options["output"]
         else:
             # generate unique filename for every export
-            filename = self.FILENAME.format(datetime.now(pytz.utc).strftime("%Y%m%d_%H%M%S"), options=options)
+            filename = self.FILENAME.format(datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S"), options=options)
 
         objects = []
 

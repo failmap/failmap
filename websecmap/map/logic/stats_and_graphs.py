@@ -1,17 +1,16 @@
 import logging
 from collections import defaultdict
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Dict, List
 
 from django.db.models import Q
-from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import (
+    determine_when,
     get_country,
     get_default_country,
     get_default_layer,
     get_organization_type,
-    determine_when,
 )
 from websecmap.map.models import Configuration, HighLevelStatistic, OrganizationReport, VulnerabilityStatistic
 from websecmap.organizations.models import Organization
@@ -77,7 +76,7 @@ def get_vulnerability_graph(country, organization_type, days_back, duration: int
 
 
 def get_organization_vulnerability_timeline(organization_id: int, duration: int = 365):
-    one_year_ago = timezone.now() - timedelta(days=duration)
+    one_year_ago = datetime.now(timezone.utc) - timedelta(days=duration)
 
     ratings = (
         OrganizationReport.objects.all()

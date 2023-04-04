@@ -1,17 +1,15 @@
-# coding=UTF-8
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
-import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.forms import model_to_dict
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
+from taggit.managers import TaggableManager
 
 from websecmap.organizations.models import Url
 from websecmap.reporting.models import ScanPolicy
-from taggit.managers import TaggableManager
 
 
 class Endpoint(models.Model):
@@ -132,7 +130,7 @@ class Endpoint(models.Model):
         endpoint.protocol = protocol
         endpoint.ip_version = ip_version
         endpoint.is_dead = False
-        endpoint.discovered_on = datetime.now(pytz.utc)
+        endpoint.discovered_on = datetime.now(timezone.utc)
         endpoint.save()
 
         return endpoint
@@ -311,7 +309,7 @@ class UrlIp(models.Model):
 
 
 def one_year_in_the_future():
-    return datetime.now(pytz.utc) + timedelta(days=365)
+    return datetime.now(timezone.utc) + timedelta(days=365)
 
 
 class LatestScanMixin(models.Model):

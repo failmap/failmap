@@ -1,10 +1,8 @@
 import logging
-from datetime import date
-
+from datetime import date, datetime, timezone
 from math import ceil
 
 from django.db import connection
-from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import REMARK, determine_when, get_country, get_organization_type
 
@@ -155,7 +153,7 @@ def rows_to_dataset(rows, when):
     data = {
         "metadata": {
             "type": "toplist",
-            "render_date": timezone.now(),
+            "render_date": datetime.now(timezone.utc),
             "data_from_time": when,
             "remark": REMARK,
         },

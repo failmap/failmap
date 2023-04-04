@@ -1,9 +1,8 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Tuple
 
 import dateutil.parser
-import pytz
 from django.db import connection
 from django.db.models import Prefetch
 from statshog.defaults.django import statsd
@@ -15,13 +14,13 @@ from websecmap.organizations.models import Organization, Url
 from websecmap.scanners.models import (
     Activity,
     Endpoint,
-    PlannedScan,
-    PlannedScanStatistic,
-    State,
-    Scanner,
-    FollowUpScan,
     EndpointGenericScan,
+    FollowUpScan,
+    PlannedScan,
     PlannedScanLog,
+    PlannedScanStatistic,
+    Scanner,
+    State,
 )
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
@@ -37,7 +36,7 @@ def store_progress():
 
     progress = calculate_progress()
     pss = PlannedScanStatistic()
-    pss.at_when = datetime.now(pytz.utc)
+    pss.at_when = datetime.now(timezone.utc)
     pss.data = progress
     pss.save()
 
@@ -154,7 +153,7 @@ def retry():
     for policy in retry_policy:
         PlannedScan.objects.all().filter(
             state=State["picked_up"].value,
-            last_state_change_at__lte=datetime.now(pytz.utc) - timedelta(hours=policy["hours"]),
+            last_state_change_at__lte=datetime.now(timezone.utc) - timedelta(hours=policy["hours"]),
             scanner__in=policy["scanners"],
         ).update(state=State["requested"].value)
 
@@ -205,7 +204,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
     # cannot update once a slice has been taken
     for scan in scans:
         scan.state = State["picked_up"].value
-        scan.last_state_change_at = datetime.now(pytz.utc)
+        scan.last_state_change_at = datetime.now(timezone.utc)
         scan.save()
         log_planned_scan_action(activity=activity, scanner=scanner, url=scan.url, state="picked_up")
 
@@ -247,7 +246,7 @@ def request(activity: str, scanner: str, urls: List[int], origin: str = ""):
             log.debug("Already registered: %s on %s for %s.", activity, scanner, url)
             continue
 
-        now = datetime.now(pytz.utc)
+        now = datetime.now(timezone.utc)
 
         planned_scan = PlannedScan()
         planned_scan.activity = Activity[activity].value
@@ -312,8 +311,8 @@ def set_scan_state(activity: str, scanner_id: int, url_id: int, state="finished"
     )
     if oldest_scan:
         oldest_scan.state = State[state].value
-        oldest_scan.last_state_change_at = datetime.now(pytz.utc)
-        oldest_scan.finished_at_when = datetime.now(pytz.utc)
+        oldest_scan.last_state_change_at = datetime.now(timezone.utc)
+        oldest_scan.finished_at_when = datetime.now(timezone.utc)
         oldest_scan.save()
         log_planned_scan_action(activity=activity, scanner=scanner_name, url=url_id, state="finished")
 
@@ -562,7 +561,7 @@ def plan_follow_up_scans(**kwargs):
             scans_matching_policy = EndpointGenericScan.objects.all().filter(
                 type=policy.scan_type,
                 rating=policy.conclusion,
-                last_scan_moment__gt=datetime.now(pytz.utc) - timedelta(minutes=amount_of_minutes_of_scan_history),
+                last_scan_moment__gt=datetime.now(timezone.utc) - timedelta(minutes=amount_of_minutes_of_scan_history),
             )
 
             for scan_matching_policy in scans_matching_policy:

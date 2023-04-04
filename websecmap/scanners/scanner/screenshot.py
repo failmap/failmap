@@ -20,11 +20,10 @@ http://screenshot_v6:1337
 import base64
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
-from typing import Dict, Union, Any
+from typing import Any, Dict, Union
 
-import pytz
 import requests
 from celery import Task, group
 from constance import config
@@ -49,7 +48,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     # basically updates screenshots. It will ignore whatever parameter you throw at it as creating screenshots every day
     # is a bit nonsense. It will update every month.
-    one_month_ago = datetime.now(pytz.utc) - timedelta(days=31)
+    one_month_ago = datetime.now(timezone.utc) - timedelta(days=31)
 
     # chromium also understands FTP servers and renders those
     endpoints = Endpoint.objects.all().filter(
@@ -228,7 +227,7 @@ def save_screenshot(response: Dict[str, Union[str, bool, int]], endpoint_id: int
 
         # administration of the image, which is used to plan scans
         scr = Screenshot()
-        scr.created_on = datetime.now(pytz.utc).date()
+        scr.created_on = datetime.now(timezone.utc).date()
         scr.endpoint = Endpoint.objects.all().get(id=endpoint_id)
         scr.filename = filename
         scr.save()

@@ -9,6 +9,7 @@ Internet.nl scans for modern web and web standards. Such as https, dnssec, secur
 import logging
 
 from celery import Task, group
+from constance import config
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
@@ -20,7 +21,6 @@ from websecmap.scanners.scanner.__init__ import (
     url_filters,
 )
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import initialize_scan
-from constance import config
 
 log = logging.getLogger(__name__)
 

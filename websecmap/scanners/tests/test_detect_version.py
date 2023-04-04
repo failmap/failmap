@@ -4,14 +4,14 @@ import pytest
 
 from websecmap.scanners.scanner.banners.detect_version import (
     SERVICE_IDENTITY_LIKELY_VERSION_FOUND,
-    SERVICE_IDENTITY_SOME_IDENTITY_FOUND,
     SERVICE_IDENTITY_NO_BANNER_FOUND,
-    detect_a_likely_version,
-    remove_ip_addresses,
-    remove_ftp_command_numbers,
-    contains_version_number,
-    clean_banner,
+    SERVICE_IDENTITY_SOME_IDENTITY_FOUND,
     add_excepted_banner_to_config,
+    clean_banner,
+    contains_version_number,
+    detect_a_likely_version,
+    remove_ftp_command_numbers,
+    remove_ip_addresses,
 )
 
 

@@ -1,15 +1,14 @@
-from collections import defaultdict
-from cachetools import cached, TTLCache
-from typing import Dict, Any, List
-
 import copy
+from collections import defaultdict
+from typing import Any, Dict, List
 
 import simplejson as json
+from cachetools import TTLCache, cached
 from simplejson import JSONDecodeError
 
 from websecmap.app import log
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
-from websecmap.scanners.models import EndpointGenericScan, ScannerFinding, Product, ProductHierarchy
+from websecmap.scanners.models import EndpointGenericScan, Product, ProductHierarchy, ScannerFinding
 
 MAX_RESULTS = 4000
 

@@ -1,30 +1,29 @@
-from datetime import datetime
-
 import copy
+from datetime import datetime, timezone
+
 import pytest
-from django.utils import timezone
 from freezegun import freeze_time
 
 from websecmap.map.logic.login_plaza import (
-    login_plaza_data,
+    get_nested_products_in_an_inefficient_way,
     get_nuclei_product_mapping,
     get_products,
-    get_nested_products_in_an_inefficient_way,
+    login_plaza_data,
+    prioritize_tech,
     set_value_to_tech_in_tree,
     smash_tree,
     smash_trees,
-    prioritize_tech,
 )
-from websecmap.organizations.models import OrganizationType, Organization, Url
+from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.scanners.models import (
     Endpoint,
     EndpointGenericScan,
-    ProductVendor,
-    ProductGoal,
-    ScannerFinding,
-    ProductRelationship,
     Product,
+    ProductGoal,
     ProductHierarchy,
+    ProductRelationship,
+    ProductVendor,
+    ScannerFinding,
 )
 
 
@@ -79,7 +78,7 @@ def test_login_plaza_data(db):
 
         # Prepare the data for a typical response
         organization_type, created = OrganizationType.objects.all().get_or_create(name="municipality")
-        now = timezone.now()
+        now = datetime.now(timezone.utc)
         organization = Organization.objects.all().create(
             name="test", type=organization_type, country="NL", created_on=now, is_dead=False
         )

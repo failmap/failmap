@@ -1,8 +1,8 @@
 from collections import defaultdict
+from datetime import datetime, timezone
 
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.db.models import Count, Q
-from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import REMARK, get_country, get_organization_type
 from websecmap.reporting.severity import get_severity
@@ -15,7 +15,7 @@ def get_all_latest_scans(country, organization_type):
 
     dataset = {
         "scans": defaultdict(list),
-        "render_date": timezone.now().isoformat(),
+        "render_date": datetime.now(timezone.utc).isoformat(),
         "remark": REMARK,
     }
 

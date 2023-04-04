@@ -1,6 +1,4 @@
-from datetime import datetime
-
-import pytz
+from datetime import datetime, timezone
 
 from websecmap.reporting.models import UrlReport
 from websecmap.reporting.report import create_timeline, create_url_reports
@@ -24,7 +22,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy, default_scan_met
     e2 = create_endpoint(u, 6, "https", 443)
 
     # e2 died on the 20th of january:
-    e2.is_dead_since = datetime(2020, 1, 20, tzinfo=pytz.utc)
+    e2.is_dead_since = datetime(2020, 1, 20, tzinfo=timezone.utc)
     e2.is_dead = True
     e2.save()
 
@@ -33,42 +31,42 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy, default_scan_met
     epgs1 = EndpointGenericScan()
     epgs1.endpoint = e1
     epgs1.rating = "F"
-    epgs1.last_scan_moment = datetime(2020, 1, 5, tzinfo=pytz.utc)
+    epgs1.last_scan_moment = datetime(2020, 1, 5, tzinfo=timezone.utc)
     epgs1.type = "tls_qualys_encryption_quality"
-    epgs1.rating_determined_on = datetime(2020, 1, 5, tzinfo=pytz.utc)
+    epgs1.rating_determined_on = datetime(2020, 1, 5, tzinfo=timezone.utc)
     epgs1.save()
 
     epgs2 = EndpointGenericScan()
     epgs2.endpoint = e1
     epgs2.rating = "A"
-    epgs2.last_scan_moment = datetime(2020, 2, 5, tzinfo=pytz.utc)
+    epgs2.last_scan_moment = datetime(2020, 2, 5, tzinfo=timezone.utc)
     epgs2.type = "tls_qualys_encryption_quality"
-    epgs2.rating_determined_on = datetime(2020, 2, 5, tzinfo=pytz.utc)
+    epgs2.rating_determined_on = datetime(2020, 2, 5, tzinfo=timezone.utc)
     epgs2.save()
 
     epgs3 = EndpointGenericScan()
     epgs3.endpoint = e2
     epgs3.rating = "F"
-    epgs3.last_scan_moment = datetime(2020, 1, 6, tzinfo=pytz.utc)
+    epgs3.last_scan_moment = datetime(2020, 1, 6, tzinfo=timezone.utc)
     epgs3.type = "tls_qualys_encryption_quality"
-    epgs3.rating_determined_on = datetime(2020, 1, 6, tzinfo=pytz.utc)
+    epgs3.rating_determined_on = datetime(2020, 1, 6, tzinfo=timezone.utc)
     epgs3.save()
 
     epgs4 = EndpointGenericScan()
     epgs4.endpoint = e2
     epgs4.rating = "A"
-    epgs4.last_scan_moment = datetime(2020, 2, 6, tzinfo=pytz.utc)
+    epgs4.last_scan_moment = datetime(2020, 2, 6, tzinfo=timezone.utc)
     epgs4.type = "tls_qualys_encryption_quality"
-    epgs4.rating_determined_on = datetime(2020, 2, 6, tzinfo=pytz.utc)
+    epgs4.rating_determined_on = datetime(2020, 2, 6, tzinfo=timezone.utc)
     epgs4.save()
 
     # extra action, to see if this is picked up, while the previous one is ignored.
     epgs5 = EndpointGenericScan()
     epgs5.endpoint = e1
     epgs5.rating = "A+"
-    epgs5.last_scan_moment = datetime(2020, 2, 7, tzinfo=pytz.utc)
+    epgs5.last_scan_moment = datetime(2020, 2, 7, tzinfo=timezone.utc)
     epgs5.type = "tls_qualys_encryption_quality"
-    epgs5.rating_determined_on = datetime(2020, 2, 7, tzinfo=pytz.utc)
+    epgs5.rating_determined_on = datetime(2020, 2, 7, tzinfo=timezone.utc)
     epgs5.save()
 
     assert EndpointGenericScan.objects.count() == 5
@@ -77,7 +75,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy, default_scan_met
     # endpoint 2 dies, then scans from the 5th and 6th of february are seen.
     print(create_timeline(u))
     assert create_timeline(u) == {
-        datetime(2020, 1, 5, 0, 0, 59, 999999, tzinfo=pytz.utc): {
+        datetime(2020, 1, 5, 0, 0, 59, 999999, tzinfo=timezone.utc): {
             "dead_endpoints": [],
             "endpoints": [e1],
             "endpoint_scans": [epgs1],
@@ -85,7 +83,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy, default_scan_met
             "urls": [],
             "endpoint_scan": {"scans": [epgs1], "endpoints": [e1]},
         },
-        datetime(2020, 1, 6, 0, 0, 59, 999999, tzinfo=pytz.utc): {
+        datetime(2020, 1, 6, 0, 0, 59, 999999, tzinfo=timezone.utc): {
             "dead_endpoints": [],
             "endpoints": [e2],
             "endpoint_scans": [epgs3],
@@ -94,7 +92,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy, default_scan_met
             "endpoint_scan": {"scans": [epgs3], "endpoints": [e2]},
         },
         # where are the scans on january fifth?
-        datetime(2020, 1, 20, 0, 0, 59, 999999, tzinfo=pytz.utc): {
+        datetime(2020, 1, 20, 0, 0, 59, 999999, tzinfo=timezone.utc): {
             "dead": True,
             "dead_endpoints": [e2],
             "endpoint_scans": [],
@@ -102,7 +100,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy, default_scan_met
             "url_scans": [],
             "urls": [],
         },
-        datetime(2020, 2, 5, 0, 0, 59, 999999, tzinfo=pytz.utc): {
+        datetime(2020, 2, 5, 0, 0, 59, 999999, tzinfo=timezone.utc): {
             "dead_endpoints": [],
             "endpoints": [e1],
             "endpoint_scans": [epgs2],
@@ -114,7 +112,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy, default_scan_met
         # in terms of timelines this is correct. But we don't want to see this in the report because the
         # endpoint died.
         # This should not cause a repeated finding: as this
-        datetime(2020, 2, 6, 0, 0, 59, 999999, tzinfo=pytz.utc): {
+        datetime(2020, 2, 6, 0, 0, 59, 999999, tzinfo=timezone.utc): {
             "dead_endpoints": [],
             "endpoints": [e2],
             "endpoint_scans": [epgs4],
@@ -124,7 +122,7 @@ def test_data_from_dead_endpoint_stays_gone(db, default_policy, default_scan_met
         },
         # add another thing, so to see if the reporting still works, even if one endpoint is skipped due to
         # being deleted.
-        datetime(2020, 2, 7, 0, 0, 59, 999999, tzinfo=pytz.utc): {
+        datetime(2020, 2, 7, 0, 0, 59, 999999, tzinfo=timezone.utc): {
             "dead_endpoints": [],
             "endpoints": [e1],
             "endpoint_scans": [epgs5],

@@ -1,5 +1,6 @@
 import logging
 import time
+from datetime import datetime, timezone
 
 import tldextract
 from dal import autocomplete
@@ -7,7 +8,6 @@ from django import forms
 from django.db import transaction
 from django.db.models.functions import Lower
 from django.forms import ValidationError
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from django_select2.forms import Select2TagWidget
@@ -39,7 +39,7 @@ class ContestForm(forms.Form):
         joined a previous compo might still have the value set anyway and we're not going to validate the contest the
         user is in on every request (or smart places).
         """
-        # has_expired = Contest.objects.all().filter(pk=id, until_moment__lte=datetime.now(pytz.utc))
+        # has_expired = Contest.objects.all().filter(pk=id, until_moment__lte=datetime.now(timezone.utc))
         # if has_expired:
         #     raise ValidationError(_('This contest is already over, you cannot participate in it anymore.'),
         #                           code='invalid', )
@@ -233,7 +233,7 @@ class OrganisationSubmissionForm(forms.Form):
             raise ValidationError("This team does not participate in this contest.")
 
         # check if the contest is expired
-        if timezone.now() > self.contest.until_moment:
+        if datetime.now(timezone.utc) > self.contest.until_moment:
             raise ValidationError("This contest has expired. You can't submit anything anymore. Too bad.")
 
     @transaction.atomic
@@ -260,7 +260,7 @@ class OrganisationSubmissionForm(forms.Form):
             organization_address_geocoded=f"[{lng}, {lat}]",
             organization_country=organization_country,
             suggested_urls=organization_suggested_urls,
-            added_on=timezone.now(),
+            added_on=datetime.now(timezone.utc),
             has_been_accepted=False,
             has_been_rejected=False,
         )
@@ -505,7 +505,7 @@ class UrlSubmissionForm(forms.Form):
             raise ValidationError("This team does not participate in this contest.")
 
         # check if the contest is expired
-        if timezone.now() > self.contest.until_moment:
+        if datetime.now(timezone.utc) > self.contest.until_moment:
             raise ValidationError("This contest has expired. You can't submit anything anymore. Too bad.")
 
         new = []
@@ -555,7 +555,7 @@ class UrlSubmissionForm(forms.Form):
                     added_by_team=Team.objects.get(pk=self.team),
                     for_organization=Organization.objects.get(pk=organization),
                     url=website,
-                    added_on=timezone.now(),
+                    added_on=datetime.now(timezone.utc),
                     has_been_accepted=False,
                 )
                 submission.save()

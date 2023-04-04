@@ -1,15 +1,13 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict
 
-import pytz
 import requests
+from django.core.files.uploadedfile import SimpleUploadedFile
 from requests import RequestException
 
 from websecmap.app import log
 from websecmap.organizations.models import GenericFileDataset
-
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 def download_dataset_file(
@@ -43,7 +41,7 @@ def save_failed_download(
     file_format="register_overheidsorganisaties", layer: str = "", origin: str = "", error: str = ""
 ):
     idataset = create_dataset(file_format, origin)
-    now = datetime.now(pytz.utc).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     idataset.state = "failed_file_download"
     idataset.parser_info = json.dumps(
         {"origin": origin, "state": "failed_file_download", "exception": error, "layer": layer, "at_when": now}
@@ -60,7 +58,7 @@ def save_succesful_download(
     data: Any = "",
 ):
     idataset = create_dataset(file_format, origin)
-    now = datetime.now(pytz.utc).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     idataset.file = SimpleUploadedFile(filename.format(now), data)
     idataset.state = "uploaded"
     idataset.parser_info = json.dumps({"origin": origin, "state": "uploaded", "layer": layer, "at_when": now})
@@ -78,7 +76,7 @@ def create_dataset(file_format: str, origin: str):
 
 def finish_import(dataset: GenericFileDataset):
     dataset.is_imported = True
-    dataset.imported_on = datetime.now(pytz.utc)
+    dataset.imported_on = datetime.now(timezone.utc)
     dataset.save()
 
 

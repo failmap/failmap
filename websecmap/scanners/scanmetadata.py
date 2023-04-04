@@ -1,10 +1,10 @@
 from collections import defaultdict
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 from django.db.models import Prefetch
 
 from websecmap.reporting.models import ScanPolicy
-from websecmap.reporting.time_cache import cache_set, cache_get
+from websecmap.reporting.time_cache import cache_get, cache_set
 from websecmap.scanners.models import Scanner, ScanSubject, ScanType
 
 

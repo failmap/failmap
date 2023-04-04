@@ -1,8 +1,7 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
-import pytz
 from django.core.management.base import BaseCommand
 
 from websecmap.organizations.models import Organization, Url
@@ -39,7 +38,7 @@ class Command(BaseCommand):
 
             new_url = Url()
             new_url.url = url
-            new_url.created_on = datetime.now(pytz.utc)
+            new_url.created_on = datetime.now(timezone.utc)
             new_url.save()
 
             for organization in organizations:

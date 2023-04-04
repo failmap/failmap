@@ -1,15 +1,9 @@
 import json
-from datetime import datetime, timedelta
-
-import pytz
+from datetime import datetime, timedelta, timezone
 
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import UrlIp, Endpoint, EndpointGenericScan
-from websecmap.scanners.scanner.bannergrab_masscan import (
-    handle_masscan_output,
-    clean_old_bannergrab_results,
-)
-
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlIp
+from websecmap.scanners.scanner.bannergrab_masscan import clean_old_bannergrab_results, handle_masscan_output
 from websecmap.scanners.scanner.banners.detect_version import (
     SERVICE_IDENTITY_LIKELY_VERSION_FOUND,
     SERVICE_IDENTITY_NOT_SEEN_IN_A_WHILE,
@@ -81,7 +75,7 @@ def test_handle_masscan_output(db, current_path):
     # add some urls and related ips, then there should be endpoints and results.
     # 93.93.121.121 == Apache/2.4.25 (Debian)
     url = Url.objects.create(url="internetcleanup.foundation")
-    UrlIp.objects.create(url=url, ip="93.93.121.121", is_v4=True, discovered_on=datetime.now(pytz.utc))
+    UrlIp.objects.create(url=url, ip="93.93.121.121", is_v4=True, discovered_on=datetime.now(timezone.utc))
 
     # now add a rule
     handle_masscan_output(data)
@@ -113,7 +107,7 @@ def test_handle_masscan_output(db, current_path):
     assert epgs.rating == SERVICE_IDENTITY_LIKELY_VERSION_FOUND
 
     # make it an old result:
-    epgs.last_scan_moment = datetime.now(pytz.utc) - timedelta(days=100)
+    epgs.last_scan_moment = datetime.now(timezone.utc) - timedelta(days=100)
     epgs.save()
 
     clean_old_bannergrab_results()

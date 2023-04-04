@@ -1,15 +1,16 @@
+from datetime import datetime, timezone
+
 import pytest
-from django.utils import timezone
 
 from websecmap.map.models import Configuration
-from websecmap.organizations.models import Url, Organization, OrganizationType
-from websecmap.scanners.models import PlannedScan, Endpoint
+from websecmap.organizations.models import Organization, OrganizationType, Url
+from websecmap.scanners.models import Endpoint, PlannedScan
 from websecmap.scanners.scanner.dnssec import plan_scan as dnssec_plan_scan
 from websecmap.scanners.scanner.ftp import plan_scan as ftp_plan_scan
 from websecmap.scanners.scanner.http import plan_discover as http_plan_discover
 from websecmap.scanners.scanner.http import plan_verify as http_plan_verify
-from websecmap.scanners.scanner.plain_http import plan_scan as plain_http_plan_scan
 from websecmap.scanners.scanner.internet_nl_v2_web import filter_scan as internet_nl_v2_web_filter_scan
+from websecmap.scanners.scanner.plain_http import plan_scan as plain_http_plan_scan
 
 
 @pytest.fixture()
@@ -17,12 +18,14 @@ def setup_some_data():
     ot = OrganizationType.objects.create(name="test")
     Configuration.objects.create(country="NL", organization_type=ot, is_scanned=True)
 
-    organization = Organization.objects.create(name="test", type=ot, created_on=timezone.now(), country="NL")
+    organization = Organization.objects.create(
+        name="test", type=ot, created_on=datetime.now(timezone.utc), country="NL"
+    )
     organization.layers.add(ot)
     url = Url.objects.create(url="google.com")
     url.organization.add(organization)
 
-    Endpoint.objects.create(url=url, discovered_on=timezone.now(), port=80, protocol="http", ip_version=4)
+    Endpoint.objects.create(url=url, discovered_on=datetime.now(timezone.utc), port=80, protocol="http", ip_version=4)
 
 
 def yeet():
@@ -86,7 +89,7 @@ def test_filter_ftp_plan_scan_endpoints(db, default_scan_metadata, setup_some_da
     assert PlannedScan.objects.count() == 0
 
     Endpoint.objects.create(
-        url=Url.objects.all().first(), discovered_on=timezone.now(), port=21, protocol="ftp", ip_version=4
+        url=Url.objects.all().first(), discovered_on=datetime.now(timezone.utc), port=21, protocol="ftp", ip_version=4
     )
     ftp_plan_scan()
     assert PlannedScan.objects.count() == 1
@@ -107,7 +110,7 @@ def test_filter_http(db, default_scan_metadata, setup_some_data):
 
     # add an enpoint that can be verified:
     Endpoint.objects.create(
-        url=Url.objects.all().first(), discovered_on=timezone.now(), port=80, protocol="http", ip_version=4
+        url=Url.objects.all().first(), discovered_on=datetime.now(timezone.utc), port=80, protocol="http", ip_version=4
     )
     http_plan_verify()
     assert PlannedScan.objects.count() == 1
@@ -120,7 +123,7 @@ def test_filter_plain_http(db, default_scan_metadata, setup_some_data):
     assert PlannedScan.objects.count() == 0
 
     Endpoint.objects.create(
-        url=Url.objects.all().first(), discovered_on=timezone.now(), port=80, protocol="http", ip_version=4
+        url=Url.objects.all().first(), discovered_on=datetime.now(timezone.utc), port=80, protocol="http", ip_version=4
     )
     plain_http_plan_scan()
     assert PlannedScan.objects.count() == 1
@@ -138,12 +141,16 @@ def setup_test_internet_nl_v2_web_filter_scan(db, default_scan_metadata):
     ot = OrganizationType.objects.create(name="test")
     Configuration.objects.create(country="NL", organization_type=ot, is_scanned=True)
 
-    organization = Organization.objects.create(name="test", type=ot, created_on=timezone.now(), country="NL")
+    organization = Organization.objects.create(
+        name="test", type=ot, created_on=datetime.now(timezone.utc), country="NL"
+    )
     organization.layers.add(ot)
 
     url1 = Url.objects.create(url="google.com", is_dead=False, not_resolvable=False)
     url1.organization.add(organization)
-    Endpoint.objects.create(url=url1, discovered_on=timezone.now(), port=80, protocol="dns_a_aaaa", ip_version=4)
+    Endpoint.objects.create(
+        url=url1, discovered_on=datetime.now(timezone.utc), port=80, protocol="dns_a_aaaa", ip_version=4
+    )
 
     # dead or non-resolving urls should not be retrieved:
     url1 = Url.objects.create(url="deadurl.com", is_dead=True, not_resolvable=False)
@@ -153,12 +160,14 @@ def setup_test_internet_nl_v2_web_filter_scan(db, default_scan_metadata):
 
     url2 = Url.objects.create(url="subdomain.google.com", is_dead=False, not_resolvable=False)
     url2.organization.add(organization)
-    Endpoint.objects.create(url=url2, discovered_on=timezone.now(), port=80, protocol="http", ip_version=6)
-    Endpoint.objects.create(url=url2, discovered_on=timezone.now(), port=80, protocol="dns_a_aaaa", ip_version=6)
+    Endpoint.objects.create(url=url2, discovered_on=datetime.now(timezone.utc), port=80, protocol="http", ip_version=6)
+    Endpoint.objects.create(
+        url=url2, discovered_on=datetime.now(timezone.utc), port=80, protocol="dns_a_aaaa", ip_version=6
+    )
 
     # add some data that should not be retreived in either case:
     organization2 = Organization.objects.create(
-        name="test 2", type=ot, created_on=timezone.now(), country="NL", is_dead=True
+        name="test 2", type=ot, created_on=datetime.now(timezone.utc), country="NL", is_dead=True
     )
     organization2.layers.add(ot)
     url3 = Url.objects.create(url="connected_to_dead_organization.com", is_dead=False, not_resolvable=False)

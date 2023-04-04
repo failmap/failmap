@@ -1,19 +1,19 @@
-from django.utils import timezone
+from datetime import datetime, timezone
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, PlannedScan, Scanner, ScannerFinding
 from websecmap.scanners.scanner.nuclei_http import (
-    store,
-    convert_nuclei_data_to_json,
-    process_nuclei_record,
-    prepare_nuclei_results_for_storage,
-    get_higher_severity,
-    neutralize_missing_metrics,
-    split_nuclei_records_per_host,
-    get_templates_from_scan_results,
-    plan_verify,
     compose_planned_verify_task,
+    convert_nuclei_data_to_json,
     extract_findings_to_scanner_findings,
+    get_higher_severity,
+    get_templates_from_scan_results,
+    neutralize_missing_metrics,
+    plan_verify,
+    prepare_nuclei_results_for_storage,
+    process_nuclei_record,
+    split_nuclei_records_per_host,
+    store,
 )
 
 three_example_nuclei_tests = data = (
@@ -414,7 +414,7 @@ def test_neutralize_missing_metrics(db):
     neutralize_missing_metrics(["nuclei_exposed_panels"], endpoint.id)
 
     # add two new metrics, in different categories. One of them is in the result, the other isn't...
-    default = {"endpoint": endpoint, "is_the_latest_scan": True, "rating_determined_on": timezone.now()}
+    default = {"endpoint": endpoint, "is_the_latest_scan": True, "rating_determined_on": datetime.now(timezone.utc)}
     EndpointGenericScan.objects.create(type="nuclei_exposed_panels", rating="high", **default)
     EndpointGenericScan.objects.create(type="nuclei_exposures", rating="high", **default)
     assert EndpointGenericScan.objects.count() == 2
@@ -462,7 +462,7 @@ def test_nuclei_plan_verify(db, default_scan_metadata):
         evidence=CITRIX_SCAN_RESULTS,
         endpoint=endpoint,
         is_the_latest_scan=True,
-        rating_determined_on=timezone.now(),
+        rating_determined_on=datetime.now(timezone.utc),
     )
 
     plan_verify()
@@ -483,7 +483,7 @@ def test_extract_findings_to_scanner_findings(db, default_scan_metadata):
         evidence=CITRIX_SCAN_RESULTS,
         endpoint=endpoint,
         is_the_latest_scan=True,
-        rating_determined_on=timezone.now(),
+        rating_determined_on=datetime.now(timezone.utc),
     )
 
     extract_findings_to_scanner_findings()

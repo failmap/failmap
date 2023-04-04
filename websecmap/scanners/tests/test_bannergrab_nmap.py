@@ -1,9 +1,7 @@
-from datetime import datetime
-
-import pytz
+from datetime import datetime, timezone
 
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import UrlIp, EndpointGenericScan
+from websecmap.scanners.models import EndpointGenericScan, UrlIp
 from websecmap.scanners.scanner.bannergrab_nmap import store_results
 from websecmap.scanners.scanner.banners.detect_version import re_evaluate_bannergrab_versions
 
@@ -63,7 +61,7 @@ def test_store_nmap_results(db):
     store_results("127.0.0.1", results)
 
     url = Url.objects.create(url="internetcleanup.foundation")
-    UrlIp.objects.create(url=url, ip="127.0.0.1", is_v4=True, discovered_on=datetime.now(pytz.utc))
+    UrlIp.objects.create(url=url, ip="127.0.0.1", is_v4=True, discovered_on=datetime.now(timezone.utc))
 
     # first moment something is stored.
     store_results("127.0.0.1", results)
@@ -154,7 +152,7 @@ def test_store_nmap_results(db):
 def test_re_evaluate_bannergrab_versions(db):
 
     url = Url.objects.create(url="basisbeveiliging.nl")
-    UrlIp.objects.create(url=url, ip="127.0.0.1", is_v4=True, discovered_on=datetime.now(pytz.utc))
+    UrlIp.objects.create(url=url, ip="127.0.0.1", is_v4=True, discovered_on=datetime.now(timezone.utc))
 
     # This should change exactly nothing.
     assert re_evaluate_bannergrab_versions() == 0
