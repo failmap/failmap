@@ -51,3 +51,6 @@ exportOO.xml
 .devenv*
 devenv.local.nix
 crawl-data.sqlite
+
+# is generated during build, don't include in git
+websecmap/__version__.py

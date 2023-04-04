@@ -26,12 +26,9 @@ from datetime import timedelta
 import sentry_sdk
 from corsheaders.defaults import default_headers
 from django.utils.translation import gettext_lazy as _
-from pkg_resources import get_distribution
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
-
-
-__version__ = get_distribution(__name__.split(".", 1)[0]).version
+from . import __version__
 
 # this application can run in 3 modes: admin, interactive and frontend
 # 'admin' exposes all routes and uses no caching. It should be restricted in access.
