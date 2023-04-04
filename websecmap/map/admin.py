@@ -4,7 +4,6 @@ from datetime import datetime
 from typing import Any, Dict
 
 import pytz
-from adminsortable2.admin import SortableAdminMixin
 from celery import group
 from django.contrib import admin
 from django.db import transaction
@@ -250,13 +249,9 @@ def ordering_actions():
 
 
 @admin.register(models.Configuration)
-# ImportExportModelAdmin and SortableAdminMixin don't work together.
-# as sortableadmin contains a bug causing double ID's, we're prefering importexportmodeladmin. Makes ordering
-# awful to handle. But we can manage by changing that to buttons that sort of work.
 class ConfigurationAdmin(
     ImportExportModelAdmin,
-    admin.ModelAdmin,
-    SortableAdminMixin,
+    admin.ModelAdmin
 ):
 
     list_display = (

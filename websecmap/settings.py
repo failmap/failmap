@@ -85,7 +85,6 @@ INSTALLED_APPS = [
     "constance",
     "constance.backends.database",
     "websecmap.app",
-    "adminsortable2",
     # Allow a client to access the data:
     "corsheaders",
     # Jet admin dashboard

@@ -6,7 +6,7 @@ from constance import config
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.contrib.syndication.views import Feed
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from websecmap.map.logic.map_defaults import REMARK
 from websecmap.organizations.models import Organization

@@ -106,7 +106,8 @@ class Configuration(models.Model):
     class Meta:
         verbose_name = _("configuration")
         verbose_name_plural = _("configurations")
-        # django-admin-sortable2
+        # django-admin-sortable2, this does not work in the jet admin (anymore), it seems to have worked...
+        # when needed just try again, currently it's been broken for a long time, so better drop the requirement
         ordering = ["display_order"]
 
     def __str__(self):

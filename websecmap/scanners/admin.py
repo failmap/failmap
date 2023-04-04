@@ -1,4 +1,3 @@
-from adminsortable2.admin import SortableAdminMixin
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -558,7 +557,7 @@ class ScannerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 @admin.register(models.ScanType)
-class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdminMixin):
+class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = (
         "display_order",
         "id",
