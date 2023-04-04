@@ -15,7 +15,7 @@ def update_whois_data(**kwargs):
 
     sleep_time = kwargs.get("rate_limit_in_seconds", 30)
 
-    for url in Url.objects.all().filter(computed_subdomain=""):
+    for url in Url.objects.all().filter(computed_subdomain="", is_dead=False):
         # don't be greedy, just take a few days to find everything. The point is not to be up to date to the minute.
         sleep(sleep_time)
         whois_data = get_whois_data(url.url)
