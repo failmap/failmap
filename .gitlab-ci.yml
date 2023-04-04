@@ -64,7 +64,8 @@ test_mysql: &test_mysql_template
   <<: *test_template
 
   services:
-    - mysql:5.6
+    # minimal version required for django 4.2 = 8.0
+    - mysql:8.0
 
   variables:
     # configuration for docker mysql service
@@ -84,8 +85,8 @@ test_postgres: &test_postgres_template
   <<: *test_template
 
   services:
-    # current version in debian jessie
-    - postgres:9.5
+    # minimum version required for django 4.2 = 12
+    - postgres:12
 
   variables:
     # configuration for docker postgres service
