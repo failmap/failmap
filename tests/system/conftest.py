@@ -10,7 +10,7 @@ import pytest
 
 log = logging.getLogger(__name__)
 
-TIMEOUT = timedelta(seconds=int(os.environ.get("SYSTEM_TEST_TIMEOUT", 60)))
+TIMEOUT = timedelta(seconds=int(os.environ.get("SYSTEM_TEST_TIMEOUT", 120)))
 INTERVAL = timedelta(seconds=1)
 
 

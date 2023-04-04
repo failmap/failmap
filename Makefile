@@ -167,7 +167,7 @@ test_mysql:
 		-e MYSQL_USER=failmap \
 		-e MYSQL_PASSWORD=failmap \
 		-v $$PWD/tests/etc/mysql-minimal-memory.cnf:/etc/mysql/conf.d/mysql.cnf \
-		mysql:8.0
+		mysql:8
 	DJANGO_DATABASE=production DB_USER=root DB_HOST=127.0.0.1 \
 		$(MAKE) test; e=$$?; docker stop mysql; exit $$e
 
