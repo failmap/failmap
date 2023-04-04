@@ -11,7 +11,8 @@ class Command(BaseCommand):
     help = __doc__
 
     # disable (MySQL) check on startup
-    requires_system_checks = False
+    # from django 4.2 this needs to be an empty list, instead of just False
+    requires_system_checks = []
 
     def run_from_argv(self, argv):
         """Replace python with celery process with given arguments."""
