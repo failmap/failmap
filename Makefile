@@ -167,7 +167,7 @@ test_mysql:
 		-e MYSQL_USER=failmap \
 		-e MYSQL_PASSWORD=failmap \
 		-v $$PWD/tests/etc/mysql-minimal-memory.cnf:/etc/mysql/conf.d/mysql.cnf \
-		mysql:5.6
+		mysql:8.0
 	DJANGO_DATABASE=production DB_USER=root DB_HOST=127.0.0.1 \
 		$(MAKE) test; e=$$?; docker stop mysql; exit $$e
 
@@ -176,7 +176,7 @@ test_postgres:
 		-e POSTGRES_DB=failmap \
 		-e POSTGRES_USER=root \
 		-e POSTGRES_PASSWORD=failmap \
-		postgres:9.5
+		postgres:12
 	DJANGO_DATABASE=production DB_ENGINE=postgresql_psycopg2 DB_USER=root DB_HOST=127.0.0.1 \
 		$(MAKE) test; e=$$?; docker stop postgres; exit $$e
 
