@@ -98,7 +98,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "import_export",
-    "websecmap.organizations.apps.OrganizationsConfig",  # because some signals need this.
+    "websecmap.organizations",
     "websecmap.scanners",
     "websecmap.reporting",
     "websecmap.map",
