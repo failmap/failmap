@@ -215,7 +215,7 @@ def plan_discover(**kwargs):
 @app.task(queue="kickoff")
 def compose_planned_discover_task(**kwargs) -> group:
     urls = plannedscan.pickup(activity="discover", scanner=SCANNER_NAME, amount=kwargs.get("amount", 1))
-    return compose_discover_task(urls)
+    return compose_discover_task(urls, kwargs)
 
 
 def compose_manual_discover_task(
@@ -225,9 +225,11 @@ def compose_manual_discover_task(
     return compose_discover_task(urls, **kwargs)
 
 
-def compose_discover_task(urls, **kwargs) -> group:
+def compose_discover_task(urls, scanner_keyword_arguments: Dict[str, Any] = None) -> group:
     return group(
-        discover.si(url.url, kwargs) | store.s(url.pk) | plannedscan.finish.si("discover", SCANNER_NAME, url.pk)
+        discover.si(url.url, scanner_keyword_arguments)
+        | store.s(url.pk)
+        | plannedscan.finish.si("discover", SCANNER_NAME, url.pk)
         for url in urls
     )
 
@@ -253,6 +255,7 @@ def discover(domain_name: str, scanner_keyword_arguments: Dict[str, Any] = None)
 
     if scanner_keyword_arguments:
         command += kwargs_to_params(scanner_keyword_arguments, prefix="-")
+
     else:
         # use some sane defaults to be able to perform a scan from the command line anyway, this gives the user
         # more power. This also makes the command testable from the command line.
@@ -282,8 +285,13 @@ def discover(domain_name: str, scanner_keyword_arguments: Dict[str, Any] = None)
 def call_amass(command: List[str]) -> str:
     # separated into a small function to be better testable
     with tempfile.TemporaryDirectory() as tmpdirname:
+        # write to the tempdir explicitly, otherwise you'll end up with the following error on a worker:
+        # Failed to create the directory: mkdir /nonexistent: permission denied
+        command += ["-dir", tmpdirname]
+
         log.debug("Running amass in temporary directory: %s", tmpdirname)
         log.debug("Running amass command: %s", " ".join(command))
+
         amass = subprocess.Popen(command, stdout=subprocess.PIPE, cwd=tmpdirname, stderr=subprocess.PIPE)
         amass.wait()
         data = amass.communicate()
