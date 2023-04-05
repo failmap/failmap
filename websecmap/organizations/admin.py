@@ -802,7 +802,7 @@ class UrlWhoisAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     def reregistered_after_monitoring(self, obj):
         # if the creation date is newer than we've added it, its probably a re-register
-        if not obj.url.created_on:
+        if not obj.url.created_on or not obj.creation_date:
             return "Unknown"
 
         delta = obj.url.created_on.date() - obj.creation_date
