@@ -813,6 +813,23 @@ class UrlWhoisAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
         return f"Yes, after {format_yd(obj.creation_date - obj.url.created_on.date())} since"
 
+    actions = []
+
+    def declare_dead(self, request, queryset):
+        for url in queryset:
+            url.url.kill("Killed due ownership transfer, organization not in scope of this site.")
+
+            # and also _all_ the subdomains:
+            for sub in Url.objects.all().filter(
+                computed_domain=url.url.computed_domain, computed_suffix=url.url.computed_suffix, is_dead=False
+            ):
+                sub.kill("Killed due ownership transfer, organization not in scope of this site.")
+
+        self.message_user(request, "Declare dead: Done")
+
+    declare_dead.short_description = "🔪  Declare dead"
+    actions.append("declare_dead")
+
 
 def format_yd(delta: timedelta) -> str:
     years = delta.days // 365

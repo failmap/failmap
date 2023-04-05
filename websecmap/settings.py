@@ -1520,7 +1520,11 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "organizations.organization", "label": "🏢 Organizations"},
             {"name": "organizations.alternativename", "label": "🏢 - Alt Names"},
             {"name": "organizations.url", "label": "🖥️ Urls"},
-            {"name": "organizations.urlwhois", "label": "- Whois (generated)"},
+            {
+                "label": "🖥️ - Dubious Re-registrations",
+                "url": "/admin/organizations/urlwhois/?o=-3",
+                "url_blank": False,
+            },
             {"name": "scanners.endpoint", "label": "🔌 Endpoints"},
             {"name": "organizations.coordinate", "label": "📍 Map Geodata"},
             {"name": "organizations.organizationtype", "label": "🗾 Map Layers"},

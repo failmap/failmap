@@ -229,10 +229,10 @@ class Coordinate(models.Model):
     is_dead_since = models.DateTimeField(blank=True, null=True, db_index=True)
     is_dead_reason = models.CharField(max_length=255, blank=True, null=True)
 
-    def kill(self):
+    def kill(self, reason: str = "Killed manually"):
         self.is_dead = True
         self.is_dead_since = datetime.now(timezone.utc)
-        self.is_dead_reason = "Killed manually"
+        self.is_dead_reason = reason[:255]
         self.save()
 
     def revive(self):
@@ -383,6 +383,12 @@ class Url(models.Model):
             return f"✝ {self.url}"
 
         return self.url
+
+    def kill(self, reason: str = ""):
+        self.is_dead = True
+        self.is_dead_since = datetime.now(timezone.utc)
+        self.is_dead_reason = reason[:255]
+        self.save()
 
     def make_unresolvable(self, message, date):
         self.not_resolvable = True
