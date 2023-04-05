@@ -1,6 +1,6 @@
 import importlib
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from json import loads
 
 import nested_admin
@@ -13,6 +13,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
@@ -777,7 +778,49 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
 @admin.register(UrlWhois)
 class UrlWhoisAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("id", "url", "creation_date", "updated_date", "registrant", "at_when", "is_the_latest")
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = queryset.select_related("url")
+        return queryset
+
+    # "updated_date", "last_update",
+    list_display = ("id", "url", "creation_date", "age", "reregistered_after_monitoring", "info", "is_the_latest")
+
+    def age(self, obj):
+        if obj.creation_date:
+            return f"{format_yd(datetime.now(timezone.utc).date() - obj.creation_date)}"
+
+    def last_update(self, obj):
+        if obj.updated_date:
+            return f"{format_yd(datetime.now(timezone.utc).date() - obj.updated_date)}"
+
+    def info(self, obj):
+        return mark_safe(
+            f"Registrant: {obj.registrant}\n<br>Admin contact: {obj.admin_contact}\n<br>"
+            f"Reseller: {obj.reseller}\n<br>Abuse: {obj.abuse}\n<br>"
+        )
+
+    def reregistered_after_monitoring(self, obj):
+        # if the creation date is newer than we've added it, its probably a re-register
+        if not obj.url.created_on:
+            return "Unknown"
+
+        delta = obj.url.created_on.date() - obj.creation_date
+        difference = delta.days
+
+        if difference > 0:
+            return "No"
+
+        return f"Yes, after {format_yd(obj.creation_date - obj.url.created_on.date())} since"
+
+
+def format_yd(delta: timedelta) -> str:
+    years = delta.days // 365
+    if years > 0:
+        remaining_days = delta.days % 365
+        return f"{years}y {remaining_days}d"
+
+    return f"{delta.days}d"
 
 
 @admin.register(OrganizationType)
