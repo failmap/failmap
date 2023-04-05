@@ -3,7 +3,7 @@ from django.forms import model_to_dict
 import websecmap
 from websecmap.organizations.models import UrlWhois, Url
 from websecmap.organizations.whois.sidn import parse_whois_data, update_whois_data
-
+from websecmap.scanners.models import ScanProxy
 
 responses = {
     # normal responses
@@ -15,7 +15,7 @@ responses = {
 }
 
 
-def patched_get_whois_data(url):
+def patched_get_whois_data(url, proxy_protocol: str = None, proxy_address: str = None):
     return responses.get(url)
 
 
@@ -43,6 +43,8 @@ def test_parse_whois_data():
 
 
 def test_update_whois_data(db, monkeypatch):
+    ScanProxy.objects.all().delete()
+
     monkeypatch.setattr(websecmap.organizations.whois.sidn, "get_whois_data", patched_get_whois_data)
 
     url, _ = Url.objects.get_or_create(url="sidn.nl")
@@ -52,6 +54,7 @@ def test_update_whois_data(db, monkeypatch):
 
 
 def test_deduplication(db, monkeypatch):
+    ScanProxy.objects.all().delete()
 
     monkeypatch.setattr(websecmap.organizations.whois.sidn, "get_whois_data", patched_get_whois_data)
     url, _ = Url.objects.get_or_create(url="sidn.nl")
@@ -74,6 +77,8 @@ def test_deduplication(db, monkeypatch):
 
 
 def test_update_whois_data_no_date(db, monkeypatch):
+    ScanProxy.objects.all().delete()
+
     # alternative cases with more annoying results
     monkeypatch.setattr(websecmap.organizations.whois.sidn, "get_whois_data", patched_get_whois_data)
 
@@ -90,6 +95,8 @@ def test_update_whois_data_no_date(db, monkeypatch):
 
 
 def test_update_whois_data_too_fast(db, monkeypatch):
+    ScanProxy.objects.all().delete()
+
     # alternative cases with more annoying results
     monkeypatch.setattr(websecmap.organizations.whois.sidn, "get_whois_data", patched_get_whois_data)
 
