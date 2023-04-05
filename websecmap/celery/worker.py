@@ -25,7 +25,7 @@ ROLES_REQUIRING_ANY_NETWORK = [
     "internet",  # the queue scanner accepts 4and6, 4 or 6 - so ANY network scan :)
 ]
 
-ROLES_REQUIRING_IPV4_AND_IPV6 = ["default", "all_internet", "bannergrab"]
+ROLES_REQUIRING_IPV4_AND_IPV6 = ["default", "all_internet", "bannergrab", "amass", "prefork"]
 
 # list of all roles that require IPv6 networking
 ROLES_REQUIRING_IPV6 = [
@@ -57,6 +57,7 @@ QUEUES_MATCHING_ROLES = {
     # Select between roles.
     # universal worker that has access to database and internet on both v4 and v6
     # will work in one-worker configuration - and slowly -  it's untested and it likely will not be a great experience
+    # This is useful for development, so it perhaps should be named 'development' instead of default.
     "default": [
         # doesn't care about network family, any network is fine
         Queue("internet"),
@@ -78,6 +79,11 @@ QUEUES_MATCHING_ROLES = {
         Queue("known_subdomains"),
         Queue("screenshot"),
         Queue("kickoff"),
+        Queue("openwpm"),
+        Queue("prefork"),
+        Queue("amass"),
+        Queue("bannergrab"),
+        Queue("followupscan"),
     ],
     # queuemonitor shows the currently running queues on the dashboard. It will not do anything else. It subscribes
     # to all queues. This does not have a worker (and doesn't need one).
@@ -179,6 +185,12 @@ QUEUES_MATCHING_ROLES = {
     ],
     "openwpm": [
         Queue("openwpm"),
+    ],
+    "amass": [
+        Queue("amass"),
+    ],
+    "prefork": [
+        Queue("prefork"),
     ],
 }
 

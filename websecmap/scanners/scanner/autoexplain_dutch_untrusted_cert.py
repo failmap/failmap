@@ -54,11 +54,7 @@ def compose_scan_task(urls: List[Url]) -> Task:
     finish_those_that_wont_be_scanned(SCANNER, scans, urls)
 
     tasks = [
-        # placed on the storage worker because gevent messes with the ssl library and causes want
-        # readerrors. Using a prefork worker avoids this problem. Todo: move to a dedicated prefork worker.
-        get_cert_chain.si(url=scan.endpoint.url.url, port=scan.endpoint.port, ip_version=scan.endpoint.ip_version).set(
-            queue="storage"
-        )
+        get_cert_chain.si(url=scan.endpoint.url.url, port=scan.endpoint.port, ip_version=scan.endpoint.ip_version)
         | certificate_chain_contains_trusted_untrusted_certificate.s()
         | store_bot_explaination_if_needed.s(scan.pk)
         | plannedscan.finish.si("scan", SCANNER, scan.endpoint.url.pk)
@@ -81,7 +77,9 @@ methods = [
 ]
 
 
-@app.task()
+# placed on the prefork worker because gevent messes with the ssl library and causes want/read errors.
+# prefork workers run the original tls code which works as intended and supports this edge case measurement
+@app.task(queue="prefork")
 def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
     chain = []
     log.debug("Attempting to retrieve SSL chert via %s different methods.", len(methods))
