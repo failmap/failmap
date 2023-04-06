@@ -6,7 +6,7 @@ readme = "README.md"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["websecmap"]  # alternatively: `exclude = ["additional*"]`
+include = ["websecmap*"]
 namespaces = false
 
 [tool.setuptools.dynamic]
