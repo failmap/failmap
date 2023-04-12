@@ -131,10 +131,21 @@ def grab_manually(is_v4: bool = True):
             store_results(host, nm[host])
 
 
-def reduce_protcol(protocol):
-    mapping = {"http-proxy": "http"}
+def reduce_protcol(protocol, port):
 
-    return mapping.get(protocol, protocol)
+    if port == 443:
+        mapping = {
+            "http-proxy": "http",
+            "ssl/http": "https",
+            "ssl": "https",
+            # this is always a misclassification
+            "gnutella": "https",
+            "ms-wbt-server": "https",
+        }
+
+        return mapping.get(protocol, protocol)
+
+    return protocol
 
 
 def store_results(host, scan_result):
@@ -270,7 +281,7 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
       }
     }
     """
-    protocol = reduce_protcol(result.get("name", "http"))
+    protocol = reduce_protcol(result.get("name", "http"), port)
 
     if protocol in ["tcpwrapped"]:
         # tcpwrapped happens when a server drops a connection. In this case it is not clear what
@@ -302,6 +313,13 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
 
     for url in get_urls_by_ip(ip):
         # todo: when are endpoints on random ports deleted? Or should we just remove old scan data for this scanner?
+
+        # nmap correctly finds that it is HTTP over port 443, not https over 443, and every time those http/443 sites
+        # will tell us to use the https version of the site. To prevent creating infinite useless endpoints
+        # silently upgrade the http results to https. We see all of those disappear over time.
+        if protocol == "http" and port == 443:
+            protocol = "https"
+
         endpoint = Endpoint.force_get(url_id=url.url.id, port=port, protocol=protocol, ip_version=ip_version(ip))
 
         # clean the banner if there was one in the past. Adds a banner if there is a new one / something has changed.

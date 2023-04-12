@@ -44,7 +44,7 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "is_dead_since",
         "is_dead_reason",
     )
-    search_fields = ("url__url", "ip_version", "port", "protocol", "is_dead", "is_dead_since", "is_dead_reason")
+    search_fields = ("url__url",)
     list_filter = [
         "url__organization__country",
         "url__organization__type__name",
@@ -52,7 +52,6 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "port",
         "protocol",
         "is_dead",
-        "is_dead_reason",
         "discovered_on",
     ][::-1]
     fieldsets = (
@@ -123,7 +122,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "explain",
         "is_the_latest_scan",
     )
-    search_fields = ("endpoint__url__url", "type", "rating", "explanation", "last_scan_moment", "rating_determined_on")
+    search_fields = ("endpoint__url__url",)
 
     list_filter = [
         "endpoint__url__organization__country",
