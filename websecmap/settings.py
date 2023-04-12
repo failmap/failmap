@@ -330,6 +330,9 @@ JET_THEMES = [
     {"theme": "light-gray", "color": "#222", "title": "Light Gray"},
 ]
 
+# fewer queries when editing records
+JET_CHANGE_FORM_SIBLING_LINKS = False
+
 # see: https://github.com/geex-arts/django-jet/blob/
 #   fea07040229d1b56800a7b8e6234e5f9419e2114/docs/config_file.rst
 # required for custom modules
