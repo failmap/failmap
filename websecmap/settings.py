@@ -820,6 +820,12 @@ CONSTANCE_CONFIG = {
         " show the ticker to every visitor, but only when clicking a specific link.",
         bool,
     ),
+    "SHOW_GEOLOCATION_RESULTS": (
+        False,
+        "Allows users to geolocate themselves and find organizations near them at various points on the site. For "
+        "example the front page and the map page.",
+        bool,
+    ),
     "TICKER_SLOGAN": ("WEB SECURITY MAP - MONITOR YOUR GOVERNMENT", "Text to show between every 10 changes.", str),
     "TICKER_VISIBLE_VIA_JS_COMMAND": (
         False,
@@ -1326,6 +1332,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_HISTORIC_COMPARISON_REPORTS",
                 "SHOW_COMPLY_OR_EXPLAIN_GUIDELINES",
                 "SHOW_METRIC_PROGRESS",
+                "SHOW_GEOLOCATION_RESULTS",
             ),
         ),
         (

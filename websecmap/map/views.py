@@ -273,6 +273,7 @@ def config_content():
             "historic_comparison_reports": configuration["SHOW_HISTORIC_COMPARISON_REPORTS"],
             "metric_progress": configuration["SHOW_METRIC_PROGRESS"],
             "comply_or_explain_guidelines": configuration["SHOW_COMPLY_OR_EXPLAIN_GUIDELINES"],
+            "geolocation_results": configuration["SHOW_GEOLOCATION_RESULTS"],
             "socials": {
                 "report": configuration["SOCIALS_SHOW_REPORT"],
                 "map": configuration["SOCIALS_SHOW_MAP"],
