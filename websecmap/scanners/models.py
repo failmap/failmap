@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, timezone
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.forms import model_to_dict
 from django.utils.text import slugify
@@ -80,6 +79,8 @@ class Endpoint(models.Model):
 
     is_dead_reason = models.CharField(max_length=255, blank=True, null=True)
 
+    origin = models.CharField(max_length=255, blank=True, null=True)
+
     def __str__(self):
         if self.is_dead:
             return f"✝ IPv{self.ip_version} {self.protocol}/{self.port} | [{self.id}] {self.url} "
@@ -106,34 +107,6 @@ class Endpoint(models.Model):
 
     def is_ipv6(self):
         return self.ip_version == 6
-
-    @staticmethod
-    def force_get(url_id: int, ip_version, protocol, port):
-        endpoints = (
-            Endpoint.objects.all()
-            .filter(protocol=protocol, url=url_id, port=port, ip_version=ip_version, is_dead=False)
-            .order_by("-discovered_on")
-        )
-
-        count = endpoints.count()
-        # >0: update the endpoint with the current information, always add to the newest one, even if there are dupes
-        # 0: make new endpoint, representing the current result
-        if count > 0:
-            return endpoints[0]
-
-        endpoint = Endpoint()
-        try:
-            endpoint.url = Url.objects.filter(id=url_id).first()
-        except ObjectDoesNotExist:
-            endpoint.url = ""
-        endpoint.port = port
-        endpoint.protocol = protocol
-        endpoint.ip_version = ip_version
-        endpoint.is_dead = False
-        endpoint.discovered_on = datetime.now(timezone.utc)
-        endpoint.save()
-
-        return endpoint
 
     @staticmethod
     # while being extermely slow, it sort of works... It's better than waiting for the whole list to download.

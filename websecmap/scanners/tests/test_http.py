@@ -1,3 +1,5 @@
+from datetime import timezone, datetime
+
 from freezegun import freeze_time
 
 from websecmap.organizations.models import Url
@@ -8,6 +10,7 @@ from websecmap.scanners.scanner.http import (
     get_random_user_agent,
     kill_endpoint,
     save_endpoint,
+    get_similar_dead_endpoint_in_last_n_days,
 )
 
 
@@ -75,6 +78,43 @@ def test_save_endpoint(db):
         assert Endpoint.objects.all().filter(is_dead=False).count() == 1
 
         assert Endpoint.objects.all().filter().count() == 2
+
+
+def test_revive_dead_endpoint(db):
+    # guarantee that a dead endpoint for a while ago can be revived;
+    url = Url(**{"url": "example.com"})
+    url.save()
+
+    # Create an old dead endpoint, this should be revived
+    port = 80
+    protocol = "http"
+    ip_version = 4
+
+    with freeze_time("2020-01-01"):
+        ep = Endpoint.objects.create(
+            protocol=protocol, url_id=url.id, port=port, is_dead=True, is_dead_since=datetime.now(timezone.utc)
+        )
+        assert Endpoint.objects.all().filter(is_dead=True).count() == 1
+        assert Endpoint.objects.all().filter(is_dead=False).count() == 0
+
+        # we should see this as dead:
+        sim = get_similar_dead_endpoint_in_last_n_days(url.id, port, protocol, ip_version)
+        assert sim.id == ep.id
+
+    # a year later, we don't see the dead endpoint anymore:
+    with freeze_time("2021-01-01"):
+        assert None is get_similar_dead_endpoint_in_last_n_days(url.id, port, protocol, ip_version)
+
+    # fourteen days later the old endpoint should have been revived
+    with freeze_time("2020-01-14"):
+
+        # we still see the dead endpoint as we're within the "expiration" window:
+        sim = get_similar_dead_endpoint_in_last_n_days(url.id, port, protocol, ip_version)
+        assert sim.id == ep.id
+
+        save_endpoint(protocol=protocol, url_id=url.id, port=port, ip_version=ip_version, origin="test")
+        assert Endpoint.objects.all().filter(is_dead=True).count() == 0
+        assert Endpoint.objects.all().filter(is_dead=False).count() == 1
 
 
 def test_can_connect(requests_mock, mocker):

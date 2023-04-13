@@ -225,7 +225,7 @@ def compose_manual_discover_task(
     return compose_discover_task(urls, **kwargs)
 
 
-def compose_discover_task(urls, scanner_keyword_arguments: Dict[str, Any] = None) -> group:
+def compose_discover_task(urls: List[Url], scanner_keyword_arguments: Dict[str, Any] = None) -> group:
     return group(
         discover.si(url.url, scanner_keyword_arguments)
         | store.s(url.pk)

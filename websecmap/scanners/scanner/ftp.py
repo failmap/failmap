@@ -435,7 +435,12 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
 
         log.debug("New FTP server discovered on %s.", url)
         endpoint = Endpoint(
-            url=db_url, port=port, protocol=protocol, ip_version=ip_version, discovered_on=datetime.now(timezone.utc)
+            url=db_url,
+            port=port,
+            protocol=protocol,
+            ip_version=ip_version,
+            discovered_on=datetime.now(timezone.utc),
+            origin="ftp scanner",
         )
         endpoint.save()
         return

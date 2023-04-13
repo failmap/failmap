@@ -16,7 +16,7 @@ from celery import Task, group
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.scanners import init_dict
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlIp
+from websecmap.scanners.models import EndpointGenericScan, UrlIp
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, unique_and_random
 from websecmap.scanners.scanner.banners.detect_version import (
@@ -25,6 +25,7 @@ from websecmap.scanners.scanner.banners.detect_version import (
     detect_a_likely_version,
 )
 from websecmap.scanners.scanner.banners.utils import get_urls_by_ip
+from websecmap.scanners.scanner.http import force_get_endpoint
 from websecmap.scanners.scanner.utils import in_chunks
 
 SCANNER_NAME = "bannergrab_nmap"
@@ -320,7 +321,9 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
         if protocol == "http" and port == 443:
             protocol = "https"
 
-        endpoint = Endpoint.force_get(url_id=url.url.id, port=port, protocol=protocol, ip_version=ip_version(ip))
+        endpoint = force_get_endpoint(
+            url_id=url.url.id, port=port, protocol=protocol, ip_version=ip_version(ip), origin="bannergrab_nmap"
+        )
 
         # clean the banner if there was one in the past. Adds a banner if there is a new one / something has changed.
         if not banner and endpoint_has_scans("bannergrab", endpoint.id) or banner:

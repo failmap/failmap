@@ -41,11 +41,13 @@ from celery import Task, group
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.scanners import init_dict
-from websecmap.scanners.models import Endpoint, UrlIp
+from websecmap.scanners.models import UrlIp
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan
+from websecmap.scanners.scanner.bannergrab_nmap import ip_version
 from websecmap.scanners.scanner.banners.detect_version import clean_banner, detect_a_likely_version
 from websecmap.scanners.scanner.banners.utils import clean_old_bannergrab_results, get_urls_by_ip
+from websecmap.scanners.scanner.http import force_get_endpoint
 
 SCANNER_NAME = "bannergrab_masscan"
 
@@ -155,7 +157,13 @@ def process_result(ip, port, service_name, banner):
     # get the urls that have this IP. And are up to date etc...
     for url in get_urls_by_ip(ip):
         # you know the urls based ip.
-        endpoint = Endpoint.force_get(url_id=url.url.id, port=port, protocol=protocol, ip_version=6 if ":" in ip else 4)
+        endpoint = force_get_endpoint(
+            url_id=url.url.id,
+            port=port,
+            protocol=protocol,
+            ip_version=ip_version(ip),
+            origin="bannergrab_masscan",
+        )
 
         store_endpoint_scan_result(
             scan_type=SCANNER_NAME, endpoint_id=endpoint.id, rating=conclusion, evidence=banner, message=""

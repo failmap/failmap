@@ -78,6 +78,9 @@ FOUND_WITH_IP = "found_with_ip"
 NO_HTTP_STATUS_CODE = "no_http_status_code"
 FOUND_WITH_HOSTNAME = "found_with_hostname"
 
+# if an endpoint dies and it is rediscovered, it will be revived instead of making a new one.
+ENDPOINT_REVIVAL_PERIOD_DAYS = 90
+
 """
 http://2.python-requests.org/en/master/user/advanced/?highlight=timeout%3D#timeouts
 
@@ -557,7 +560,12 @@ def has_internet_connection(host: str = "8.8.8.8", port: int = 53, connection_ti
         return False
 
 
-def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
+def force_get_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = "") -> Endpoint:
+    # use a different name for the same function as it is contextually easier to understand.
+    return save_endpoint(protocol, url_id, port, ip_version, origin)
+
+
+def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = "") -> Endpoint:
     log.debug(
         "Endpoint save attempt: protocol: %s, url_id: %s, port: %s, ip_version: %s, origin: %s.",
         protocol,
@@ -568,40 +576,54 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
     )
 
     # prevent duplication
-    if endpoint_exists(url_id, port, protocol, ip_version):
-        log.debug("Endpoint is already in the database")
-        return
+    if ep := endpoint_exists(url_id, port, protocol, ip_version):
+        log.debug("Endpoint is already in the database, returning the existing one.")
+        return ep
 
-    similar = get_similar_dead_endpoint_in_last_n_days(url_id, port, protocol, ip_version, days=60)
-    if similar:
-        log.debug("Reviving similar endpoint")
+    if similar := get_similar_dead_endpoint_in_last_n_days(
+        url_id, port, protocol, ip_version, days=ENDPOINT_REVIVAL_PERIOD_DAYS
+    ):
+        log.debug("Reviving similar endpoint, returning that one.")
         return revive_similar_endpoint(similar, origin)
 
     log.debug("Saving new endpoint")
     endpoint = Endpoint()
-    endpoint.url = Url.objects.all().filter(id=url_id).first()
+
+    try:
+        endpoint.url = Url.objects.all().filter(id=url_id).first()
+    except Url.DoesNotExist:
+        # do not crash, but make it clear something is wrong
+        endpoint.url = ""
+        log.error(
+            "Could not find url with id, still saving an endpoint with no further connection."
+            "Make sure to fix this issue in the source data.",
+            extra={
+                "url_id": url_id,
+                "port": port,
+                "protocol": protocol,
+                "ip_version": ip_version,
+                "origin": origin,
+            },
+        )
 
     endpoint.port = port
     endpoint.protocol = protocol
     endpoint.ip_version = ip_version
-
     endpoint.is_dead = False
     endpoint.discovered_on = datetime.now(timezone.utc)
-    # endpoint.dossier = "Found using the http scanner."  #
-    # no other place to put it:
-    endpoint.is_dead_reason = origin[:255]
+    endpoint.origin = origin[:255]
     endpoint.save()
     log.info("Added endpoint added to database: %s", endpoint)
+    return endpoint
 
 
 def revive_similar_endpoint(similar, origin):
     log.debug("Similar endpoint found that died in the last 30 days, reviving: %s", similar)
     similar.is_dead = False
     similar.is_dead_since = None
-    similar.is_dead_reason += "Revived."
-    similar.is_dead_reason = origin[:255]
+    similar.is_dead_reason = f"Revived. {similar.is_dead_reason}"[:255]
     similar.save()
-    return
+    return similar
 
 
 @app.task(queue="storage", ignore_result=True)
@@ -630,18 +652,31 @@ def kill_url_task(ips, url: Url):
     )
 
 
-def endpoint_exists(url_id: int, port: int, protocol: str, ip_version: int) -> int:
-    return (
-        Endpoint.objects.all()
-        .filter(url=url_id, port=port, ip_version=ip_version, protocol=protocol, is_dead=False)
-        .count()
+def endpoint_exists(url_id: int, port: int, protocol: str, ip_version: int) -> Optional[Endpoint]:
+    # Log if there are multiple alive endpoints, this is a sign there is a bug somewhere
+    endpoints = Endpoint.objects.all().filter(
+        url=url_id, port=port, ip_version=ip_version, protocol=protocol, is_dead=False
     )
+    if endpoints.count() > 1:
+        log.error(
+            "Found multiple endpoints with the same data",
+            extra={
+                "url_id": url_id,
+                "port": port,
+                "protocol": protocol,
+                "ip_version": ip_version,
+                "endpoints": endpoints.count(),
+            },
+        )
+
+    return endpoints.first() if endpoints.count() > 0 else None
 
 
 def get_similar_dead_endpoint_in_last_n_days(
     url_id: int, port: int, protocol: str, ip_version: int, days: int = 30
 ) -> Endpoint:
     days_ago = datetime.now(timezone.utc) - timedelta(days=days)
+    log.debug(days_ago)
     return (
         Endpoint.objects.all()
         .filter(

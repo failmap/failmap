@@ -34,6 +34,12 @@ def test_is_valid_url():
     # Works for domains that are actual domains:
     assert Url.is_valid_url("google.com") is True
     assert Url.is_valid_url("аренда.орг") is True
+    assert Url.is_valid_url("something.something.something.орг") is True
+
+    # _jabber._tcp.gmail.com, subdomains can have an underscore, but not hostnames:
+    assert Url.is_valid_url("_tcp._mumc.nl") is False
+    assert Url.is_valid_url("_tcp.mumc.nl") is True
+    assert Url.is_valid_url("_test._tcp.mumc.nl") is True
 
 
 def test_tldextract():

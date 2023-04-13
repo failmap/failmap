@@ -46,6 +46,8 @@ from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_conf
 
 # There is a balance between network timeout and qualys result cache.
 # This is relevant, since the results are not kept in cache for hours. More like 15 minutes.
+from websecmap.scanners.scanner.http import force_get_endpoint
+
 API_NETWORK_TIMEOUT = 30
 API_SERVER_TIMEOUT = 30
 
@@ -601,7 +603,9 @@ def save_scan(url: str, data: Any):
         log.debug("Message for endpoint %s is %s.", qualys_endpoint["ipAddress"], message)
 
         # Qualys might discover endpoints we don't have yet. In that case, be pragmatic and create the endpoint.
-        failmap_endpoint = Endpoint.force_get(db_url.id, ip_version, "https", 443)
+        failmap_endpoint = force_get_endpoint(
+            protocol="https", url_id=db_url.id, port=443, ip_version=ip_version, origin="tls_qualys"
+        )
 
         if message in [
             "Unable to connect to the server",

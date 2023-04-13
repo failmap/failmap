@@ -488,7 +488,7 @@ class Url(models.Model):
         return my_url
 
     @staticmethod
-    def is_valid_url(url: str):
+    def is_valid_url(url: str) -> bool:
 
         # empty strings, etc
         if not url:
@@ -497,7 +497,7 @@ class Url(models.Model):
 
         extract = tldextract.extract(url)
         if not extract.suffix:
-            log.debug("Domain has no suffix, so not valid.")
+            log.debug("Domain %s has no suffix, so not valid.", url)
             return False
 
         # Validators catches 'most' invalid urls, but there are some issues and exceptions that are not really likely
@@ -508,13 +508,26 @@ class Url(models.Model):
         # 'аренда.орг' -> 'xn--80aald4bq.xn--c1avg'
         # 'google.com' -> 'google.com'
         try:
-            valid_domain = domain(url.encode("idna").decode())
-            if valid_domain is not True:
-                return False
+            decoded = url.encode("idna").decode()
         except UnicodeError:
+            log.debug("Could not decode url %s...", url)
+            return False
+
+        # validators.domain has an error in it's validation: it does not support subdomains that start with a underscore
+        # yet this is perfectly valid. And given that _bla._.bla._bla.bla.com is hard to filter just accept underscores
+        # for now everywhere, even if the underscore is not valid as the first character of a hostname.
+        # work around that issue by not accepting that specific issue.
+        if extract.domain.startswith("_"):
+            log.debug("Domain %s starts with an underscore, so not valid.", url)
+            return False
+
+        decoded = decoded.replace("_", "")
+        valid_domain = domain(decoded)
+        if valid_domain is not True:
             # encoding with 'idna' codec failed (UnicodeError: label empty or too long)
             # .apple.com for example: this label is incorrect as it starts with a dot. You should sanitize this
             # beforehand.
+            log.debug("Not %s valid according to validators.domain.", url)
             return False
         return True
 
