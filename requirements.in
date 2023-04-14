@@ -43,7 +43,6 @@ pyyaml
 
 # use mozzila certificate bundle by default
 certifi
-pytz
 
 # task processing framework
 django-celery-beat<2.2,>2
