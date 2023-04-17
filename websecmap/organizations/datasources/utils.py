@@ -28,7 +28,7 @@ def download_dataset_file(
         return downloaded.id
 
     try:
-        response = requests.get(download_link)
+        response = requests.get(download_link, timeout=300)
         response.raise_for_status()
         return save_succesful_download(
             file_format=file_format, filename=filename, layer=layer, origin=origin, data=response.content

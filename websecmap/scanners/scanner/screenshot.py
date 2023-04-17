@@ -155,7 +155,7 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
     log.debug("Sending message %s to %s", message, screenshot_service)
 
     try:
-        answer = requests.post(screenshot_service, json=message)
+        answer = requests.post(screenshot_service, json=message, timeout=30)
 
         # make a serializable dict as an answer
         return {

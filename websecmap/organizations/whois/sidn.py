@@ -110,9 +110,11 @@ def get_whois_data(url: str, proxy_protocol: str = None, proxy_address: str = No
     # since there is a limit of MAX_WHOIS_PER_IP requests per day, per ip, just use a series of proxies to get
     # all the data needed.
     if proxy_protocol and proxy_address:
-        response = requests.get(f"https://api.sidn.nl/rest/whois?domain={url}", proxies={proxy_protocol: proxy_address})
+        response = requests.get(
+            f"https://api.sidn.nl/rest/whois?domain={url}", proxies={proxy_protocol: proxy_address}, timeout=30
+        )
     else:
-        response = requests.get(f"https://api.sidn.nl/rest/whois?domain={url}")
+        response = requests.get(f"https://api.sidn.nl/rest/whois?domain={url}", timeout=30)
     return response.text
 
 

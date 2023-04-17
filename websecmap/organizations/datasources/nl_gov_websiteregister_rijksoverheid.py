@@ -32,7 +32,7 @@ def find_current_websiteregister_download_link() -> str:
     domain = tldextract.extract(location)
 
     try:
-        data = requests.get(location)
+        data = requests.get(location, timeout=300)
         match = re.findall(pat, data.text)
         if not match:
             return ""
@@ -74,7 +74,7 @@ def download_websiteregister_spreadsheet() -> int:
         idataset.state = "failed_to_find_spreadsheet_download_url"
     else:
         try:
-            response = requests.get(download_link)
+            response = requests.get(download_link, timeout=300)
             idataset.file = SimpleUploadedFile(f"websiteregister_rijksoverheid_{now}.ods", response.content)
             idataset.origin = (
                 f"Automatic download from Websiteregister Rijksoverheid, on"

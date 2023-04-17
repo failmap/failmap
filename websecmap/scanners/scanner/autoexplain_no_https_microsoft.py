@@ -102,10 +102,11 @@ def scan_over_network(domain_name_without_protocol: str) -> bool:
 def insecure_site_redirects_to_microsoft(url: str) -> bool:
     microsoft_login_urls = ["login.microsoftonline.com", "outlook.office365.com"]
     try:
-        response = requests.head(url, verify=False, allow_redirects=True, timeout=(30, 30))
+        response = requests.head(url, verify=False, allow_redirects=True, timeout=10)
         extracted = tldextract.extract(response.url)
         return extracted.fqdn in microsoft_login_urls
     except requests.RequestException:
+        log.debug("Does not redirect to Microsoft: %s", url)
         return False
 
 

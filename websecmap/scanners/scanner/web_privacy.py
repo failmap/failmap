@@ -107,7 +107,7 @@ def scan(url_ids: List[int]) -> List[int]:
             endpoints_to_scan.append(eps[0])
 
     fqdn_urls = [f"{ep.protocol}://{ep.url.url}/" for ep in endpoints_to_scan]
-    requests.post(constance_cached_value("WEB_PRIVACY_SERVER"), json={"sites": fqdn_urls}).json()
+    requests.post(constance_cached_value("WEB_PRIVACY_SERVER"), json={"sites": fqdn_urls}, timeout=30).json()
 
     # finish them, importing results is done async, otherwise we'll always be waiting till everything is done and
     # possibly be waiting forever if there are crashes, skipped endpoints/urls etc...

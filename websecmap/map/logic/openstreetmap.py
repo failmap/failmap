@@ -941,7 +941,7 @@ def download_geojson_data(link: str) -> Dict[str, Any]:
     # oh no! key leakage :)
     log.debug("Downloading from %s", link)
     try:
-        data = requests.get(link)
+        data = requests.get(link, timeout=30)
         f = gzip.open(BytesIO(data.content), "r")
         file_content = f.read()
         file_content = file_content.decode("utf-8")

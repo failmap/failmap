@@ -181,7 +181,7 @@ def do_request(url, params={}, previous_items=[]):
     log.debug(f"Zorgkaart scraper request with parameters: {params}")
 
     response = requests.get(
-        url, auth=HTTPBasicAuth(config.ZORGKAART_USERNAME, config.ZORGKAART_PASSWORD), params=params
+        url, auth=HTTPBasicAuth(config.ZORGKAART_USERNAME, config.ZORGKAART_PASSWORD), params=params, timeout=120
     )
     response.raise_for_status()
     result = response.json()
