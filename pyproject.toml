@@ -1,6 +1,6 @@
 [project]
 requires-python = ">=3.10"
-dynamic = ["version", "dependencies"]
+dynamic = ["version", "dependencies", "optional-dependencies"]
 name = "websecmap"
 readme = "README.md"
 
@@ -12,7 +12,7 @@ namespaces = false
 [tool.setuptools.dynamic]
 version = {attr = "websecmap.VERSION"}
 dependencies = {file = ["requirements.txt"]}
-optional-dependencies = {dev = {file = ["requirements-dev.txt"]},deploy = {file = ["requirements-deploy.in"]}}
+optional-dependencies = {dev = {file = ["requirements-dev.txt"]},deploy = {file = ["requirements-deploy.txt"]}}
 
 [project.scripts]
 websecmap = "websecmap.manage:main"
