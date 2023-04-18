@@ -69,6 +69,8 @@ QUEUES_MATCHING_ROLES = {
         Queue("4and6"),
         # for tasks that require a database connection
         Queue("storage"),
+        # celery internal maintenance (eg: remove expired results)
+        Queue("celery"),
         # tasks that require no network, no database. Such as calculations, parsing of datasets etc.
         Queue("isolated"),
         # run qualys scans
@@ -132,6 +134,8 @@ QUEUES_MATCHING_ROLES = {
     # Queue used at the end of a task to store the results
     "storage": [
         Queue("storage"),
+        # celery internal maintenance (eg: remove expired results)
+        Queue("celery"),
         # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might block the worker.
         # Given there is only one storage worker, blocking it doesn't help it's work.
     ],
