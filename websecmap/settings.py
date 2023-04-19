@@ -1729,7 +1729,10 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 CORS_ALLOW_CREDENTIALS = True
 
 # required from django 4.0
-CSRF_TRUSTED_ORIGINS = ["http://localhost", "https://basisbeveiliging.nl", "https://*.basisbeveiliging.nl"]
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:8081"]
+else:
+    CSRF_TRUSTED_ORIGINS = ["https://" + h for h in ALLOWED_HOSTS]
 
 VENDOR_DIR = os.environ.get("VENDOR_DIR", os.path.abspath(os.path.dirname(__file__) + "/../vendor/") + "/")
 
