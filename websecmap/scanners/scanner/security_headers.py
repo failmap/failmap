@@ -64,6 +64,7 @@ from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
 from websecmap.scanners.scanner.http import create_standard_request_headers
+from websecmap.scanners.scanner.security_policies import further_specify_security_policy
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 from websecmap.scanners.timeout import timeout
 
@@ -240,6 +241,15 @@ def discover_service_type(headers: CaseInsensitiveDict = None):
     if content_type.lower() in html_content_types or "text/html" in content_type.lower():
         return "http"
 
+    if content_type.lower() == "application/json":
+        return "json"
+
+    if content_type.lower() == "application/xml":
+        return "xml"
+
+    if content_type.lower() == "text/plain":
+        return "text"
+
     log.debug("Unknown service type discovered.")
     return "non_http_response"
 
@@ -296,9 +306,11 @@ def analyze_headers(headers: Dict, endpoint_id):
         return {"status": "success"}
 
     if service_type == "http":
+        # normal webserver role
         return analyze_website_headers(endpoint_id, endpoint.url.id, endpoint.protocol, headers)
-    if service_type == "soap":
-        return analyze_soap_headers(endpoint_id)
+    if service_type in ["soap", "xml", "json", "text"]:
+        further_specify_security_policy(endpoint_id, "webserver", service_type)
+        return analyze_soap_headers(endpoint_id, service_type)
     if service_type == "non_http_response":
         return clean_up_existing_headers(endpoint_id, service_type=service_type, reason="unknown_content_type")
     if service_type == "access_restricted":
@@ -308,7 +320,7 @@ def analyze_headers(headers: Dict, endpoint_id):
     return clean_up_existing_headers(endpoint_id, service_type=service_type, reason="unknown_content_type")
 
 
-def analyze_soap_headers(endpoint_id):
+def analyze_soap_headers(endpoint_id, service_type: str = "soap"):
     """
     We currently have no implementation for SOAP headers, but we do know that previously discovered non-soap headers
     can be overwritten as being SOAP headers and not being relevant anymore.
@@ -326,9 +338,8 @@ def analyze_soap_headers(endpoint_id):
     existing_header_scans = EndpointGenericScan.objects.all().filter(
         endpoint=endpoint_id, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True
     )
-
     for scan in existing_header_scans:
-        store_endpoint_scan_result(scan.type, endpoint_id, "soap", "Header not relevant for SOAP service.")
+        store_endpoint_scan_result(scan.type, endpoint_id, service_type, f"header_not_relevant_for_{service_type}")
 
     return {"status": "success"}
 

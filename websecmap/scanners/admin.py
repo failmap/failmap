@@ -32,9 +32,13 @@ class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.Endpoint)
 class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("security_policies")
+
     list_display = (
         "id",
         "url",
+        "sec_policy",
         "visit",
         "discovered_on",
         "ip_version",
@@ -53,9 +57,10 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "protocol",
         "is_dead",
         "discovered_on",
+        "security_policies",
     ][::-1]
     fieldsets = (
-        (None, {"fields": ("url", "ip_version", "protocol", "port", "discovered_on")}),
+        (None, {"fields": ("url", "role", "ip_version", "protocol", "port", "discovered_on")}),
         (
             "dead endpoint management",
             {
@@ -65,6 +70,10 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     )
 
     readonly_fields = ["discovered_on"]
+
+    @staticmethod
+    def sec_policy(obj):
+        return ", ".join(o.name for o in obj.security_policies.all())
 
     @staticmethod
     def visit(inst):

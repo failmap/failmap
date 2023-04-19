@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from typing import List
 
 from django.db import models
 from django.forms import model_to_dict
@@ -80,6 +81,12 @@ class Endpoint(models.Model):
     is_dead_reason = models.CharField(max_length=255, blank=True, null=True)
 
     origin = models.CharField(max_length=255, blank=True, null=True)
+
+    security_policies = TaggableManager(blank=True, verbose_name=_("Security Policies"))
+
+    @property
+    def security_policies_list(self) -> List[str]:
+        return list(self.security_policies.values_list("name", flat=True))
 
     def __str__(self):
         if self.is_dead:

@@ -417,7 +417,7 @@ def remove_wildcards(urls: List[Url]):
 # don't overload the crt.sh service, rate limit
 # rate limit is implemented in queue system, dont hard-code it in the worst way possible.
 @app.task(queue="discover_subdomains")
-def certificate_transparency_scan(url: str):
+def certificate_transparency_scan(url: str) -> List[str]:
     """
     Checks the certificate transparency database for subdomains. Using a regex the subdomains
     are extracted. This method is extremely fast and reliable: these certificates all exist.
