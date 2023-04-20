@@ -580,6 +580,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     form = MyUrlAdminForm
 
     list_display = (
+        "id",
         "url",
         "origin",
         "in_organizations",
@@ -786,7 +787,13 @@ class UrlWhoisAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return queryset
 
     # "updated_date", "last_update",
-    list_display = ("id", "url", "creation_date", "age", "reregistered_after_monitoring", "info", "is_the_latest")
+    list_display = ("id", "url_", "creation_date", "age", "reregistered_after_monitoring", "info", "is_the_latest")
+
+    search_fields = ("url__url", "registrant", "admin_contact", "reseller", "abuse")
+
+    @staticmethod
+    def url_(obj):
+        return mark_safe(f"<a href='/admin/organizations/url/{obj.url.id}/change/'>{obj.url}</a>")
 
     def age(self, obj):
         if obj.creation_date:

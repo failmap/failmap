@@ -121,6 +121,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return qs
 
     list_display = (
+        "id",
         "endpoint",
         "type",
         "rating",
@@ -229,7 +230,8 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return qs
 
     list_display = (
-        "url",
+        "id",
+        "url_",
         "type",
         "rating",
         "explanation",
@@ -251,6 +253,10 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "comply_or_explain_is_explained",
         "is_the_latest_scan",
     ][::-1]
+
+    @staticmethod
+    def url_(obj):
+        return mark_safe(f"<a href='/admin/organizations/url/{obj.url.id}/change/'>{obj}</a>")
 
     @staticmethod
     def short_evidence(obj):
@@ -473,6 +479,7 @@ class ScanProxyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.PlannedScan)
 class PlannedScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = (
+        "id",
         "url",
         "activity",
         "scanner",
