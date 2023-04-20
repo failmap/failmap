@@ -121,6 +121,20 @@ class Organization(models.Model):
         "the API. Otherwise leave this field empty.",
     )
 
+    computed_domain_registrant_statistics = JSONField(
+        help_text="Statistics generated from the UrlWhois data, auto updated", default={}, blank=True
+    )
+    acceptable_domain_registrants = JSONField(
+        help_text="List of registrants that are the same as this organization, "
+        "this is used to find domains that are not in control of this "
+        "organization and thus make an issue out of that. If this "
+        "field is empty, no check will be performed. Know that you "
+        "will have to sometimes check if organizations have changed "
+        "their name. List of strings of registrant names.",
+        default=[],
+        blank=True,
+    )
+
     class Meta:
         managed = True
         db_table = "organization"

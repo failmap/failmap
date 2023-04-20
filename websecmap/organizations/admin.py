@@ -346,6 +346,8 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
         "wikidata",
         "wikipedia",
         "surrogate_id",
+        "computed_domain_registrant_statistics",
+        "acceptable_domain_registrants",
         "is_dead",
         "is_dead_since",
         "is_dead_reason",
