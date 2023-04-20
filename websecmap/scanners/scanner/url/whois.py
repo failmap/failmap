@@ -35,8 +35,8 @@ def check_ownership():
     # A URL can be in multiple organizations, this means that the domain has to be owned by one of these organisations
     # if it's not, then there is an issue.
     urls = Url.objects.all().filter(is_dead=False, not_resolvable=False, computed_subdomain="")
-
     for url in urls:
+
         # gather all allowed registrants.
         registrants = get_registrants_for_url(url)
         if not registrants:
@@ -54,11 +54,10 @@ def check_ownership():
                 "registrants": registrants,
             }
         )
-
         # It's dubious when a registration from the government cannot be seen/verified
         if whois.registrant == "":
             store_url_scan_result(SCANNER_NAME, url.id, "whois_unknown_ownership", "whois_unknown_ownership", evidence)
-            return
+            continue
 
         ownership = "whois_internal_ownership" if whois.registrant in registrants else "whois_external_ownership"
         store_url_scan_result(SCANNER_NAME, url.id, ownership, ownership, evidence)
