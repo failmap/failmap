@@ -34,6 +34,7 @@ from websecmap.scanners.scanner import (
     verify_unresolvable,
     web_privacy,
 )
+from websecmap.scanners.scanner.url import whois
 
 log = logging.getLogger(__name__)
 
@@ -67,6 +68,7 @@ __scanners__ = [
     web_privacy,
     nuclei_http,
     subdomains_amass,
+    whois,
 ]
 
 __others__ = [proxy, plannedscan]
