@@ -1,5 +1,4 @@
 import logging
-from collections import defaultdict
 from typing import List
 import json
 
@@ -41,10 +40,12 @@ def check_ownership():
         # gather all allowed registrants.
         registrants = get_registrants_for_url(url)
         if not registrants:
+            # if there is no registrant information, judging will be unfair
             continue
 
         whois = UrlWhois.objects.all().filter(url=url, is_the_latest=True).first()
         if not whois:
+            # can't judge if there is no whois info, so don't...
             continue
 
         evidence = json.dumps(
@@ -78,15 +79,20 @@ def regenerate_registrant_statistics_for_all_organizations():
     organizations = Organization.objects.all().filter(is_dead=False)
     for organization in organizations:
         log.debug("Regenerating registrant statistics for organization %s", organization)
-        registrant_stats = defaultdict(int)
+        registrant_stats = {}
         urls = Url.objects.all().filter(
             organization=organization, is_dead=False, not_resolvable=False, computed_subdomain=""
         )
         for url in urls:
             log.debug("Regenerating registrant statistics for url %s", url)
+
             if whois := UrlWhois.objects.all().filter(url=url, is_the_latest=True).first():
+                if whois.registrant not in registrant_stats:
+                    registrant_stats[whois.registrant] = {"urls": [], "amount": 0}
+
                 log.debug("Registrant statistics for url %s: %s", url, whois)
-                registrant_stats[whois.registrant] += 1
+                registrant_stats[whois.registrant]["amount"] += 1
+                registrant_stats[whois.registrant]["urls"].append(url.url)
 
         log.debug("Registrant statistics for organization %s: %s", organization, registrant_stats)
         organization.computed_domain_registrant_statistics = registrant_stats

@@ -16,8 +16,8 @@ def test_check_ownership(db):
         country="NL",
         created_on=datetime.now(timezone.utc),
         computed_domain_registrant_statistics={
-            "Gemeente Zutphen": 10,
-            "Non Legit Hoster": 1,
+            "Gemeente Zutphen": {"amount": 2, "urls": ["zutphen.nl, zutphen2.nl"]},
+            "Non Legit Hoster": {"amount": 2, "urls": ["zutphen3.nl"]},
         },
         acceptable_domain_registrants=["Gemeente Zutphen"],
     )
@@ -72,7 +72,10 @@ def test_regenerate_registrant_statistics_for_all_organizations(db):
     regenerate_registrant_statistics_for_all_organizations()
 
     org = Organization.objects.get(name="Gemeente Zutphen")
-    assert org.computed_domain_registrant_statistics == {"Gemeente Zutphen": 2, "Non Legit Hoster": 1}
+    assert org.computed_domain_registrant_statistics == {
+        "Gemeente Zutphen": {"amount": 2, "urls": ["zutphen.nl", "zutphen2.nl"]},
+        "Non Legit Hoster": {"amount": 1, "urls": ["zutphen3.nl"]},
+    }
     # it was empty, its easier to delete than to add
     assert org.acceptable_domain_registrants == ["Gemeente Zutphen", "Non Legit Hoster"]
 
