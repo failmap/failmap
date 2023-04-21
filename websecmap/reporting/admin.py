@@ -97,6 +97,8 @@ class ScanPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     list_filter = ["scan_type", "high", "medium", "low", "ok", "error_in_test", "conclusion"]
 
+    search_fields = ["scan_type", "conclusion", "explanation", "annotation"]
+
     def summary(self, obj):
         return format_html(obj.summary_text_and_emoji())
 
