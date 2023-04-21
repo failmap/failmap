@@ -353,9 +353,15 @@ def remove_junk_data(banner):
 
 
 PROTOCOL_CLEANERS = {
+    # make sure this is in sync with bannergrab_nmap reduce protocol
     "ftp": remove_ftp_command_numbers,
     "http": remove_junk_http_headers,
     "https": remove_junk_http_headers,
+    "http-proxy": remove_junk_http_headers,
+    "ssl/http": remove_junk_http_headers,
+    "ssl": remove_junk_http_headers,
+    "gnutella": remove_junk_http_headers,
+    "ms-wbt-server": remove_junk_http_headers,
     # looks like http traffic
     "tcpwrapped": remove_junk_http_headers,
     "smtp": remove_smtp_command_numbers,

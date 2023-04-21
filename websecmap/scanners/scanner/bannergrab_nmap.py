@@ -135,6 +135,7 @@ def grab_manually(is_v4: bool = True):
 def reduce_protcol(protocol, port):
 
     if port == 443:
+        # make sure this in sync with PROTOCOL_CLEANERS in detect_version
         mapping = {
             # http on 443 happens a lot, and while technically correct place it on 443 anyway
             "http": "https",
