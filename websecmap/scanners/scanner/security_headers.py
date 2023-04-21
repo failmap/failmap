@@ -64,7 +64,7 @@ from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
 from websecmap.scanners.scanner.http import create_standard_request_headers
-from websecmap.scanners.scanner.security_policies import further_specify_security_policy
+from websecmap.scanners.security_policies import add_policy_by_name
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 from websecmap.scanners.timeout import timeout
 
@@ -247,8 +247,9 @@ def discover_service_type(headers: CaseInsensitiveDict = None):
     if content_type.lower() == "application/xml":
         return "xml"
 
-    if content_type.lower() == "text/plain":
-        return "text"
+    # text is a typical thing to protect with headers i guess
+    # if content_type.lower() == "text/plain":
+    #     return "text"
 
     log.debug("Unknown service type discovered.")
     return "non_http_response"
@@ -308,8 +309,8 @@ def analyze_headers(headers: Dict, endpoint_id):
     if service_type == "http":
         # normal webserver role
         return analyze_website_headers(endpoint_id, endpoint.url.id, endpoint.protocol, headers)
-    if service_type in ["soap", "xml", "json", "text"]:
-        further_specify_security_policy(endpoint_id, "webserver", service_type)
+    if service_type in ["soap", "xml", "json"]:
+        add_policy_by_name(endpoint_id, f"{service_type}_api")
         return analyze_soap_headers(endpoint_id, service_type)
     if service_type == "non_http_response":
         return clean_up_existing_headers(endpoint_id, service_type=service_type, reason="unknown_content_type")

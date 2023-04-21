@@ -8,10 +8,16 @@ from jet.filters import RelatedFieldAjaxListFilter
 
 from websecmap.map.admin import ordering_actions
 from websecmap.scanners import models
-from websecmap.scanners.models import Product, ProductHierarchy, State
+from websecmap.scanners.models import Product, ProductHierarchy, State, Endpoint
 from websecmap.scanners.proxy import check_proxy
 from websecmap.scanners.scanner.banners.detect_version import add_excepted_banner_to_config, clean_and_detect
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import progress_running_scan, recover_and_retry
+from websecmap.scanners.security_policies import (
+    apply_security_policy,
+    remove_security_policy,
+    apply_affects,
+    remove_affects,
+)
 
 
 class EndpointGenericScanInline(CompactInline):
@@ -28,6 +34,57 @@ class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_filter = ["url", "ip", "rdns_name", "discovered_on", "is_unused_since"][::-1]
     fields = ("url", "ip", "rdns_name", "discovered_on", "is_unused", "is_unused_since", "is_unused_reason")
     readonly_fields = ["discovered_on"]
+
+
+@admin.register(models.SecurityPolicy)
+class SecurityPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = (
+        "id",
+        "name_",
+        "applied",
+        "description",
+        "common_subdomains",
+        "common_protocols",
+        "common_ports",
+        "common_ip_versions",
+        "affects_which_explain",
+    )
+
+    @staticmethod
+    def affects_which_explain(obj):
+        return "".join(f"{affect}" for affect in obj.affect_explain_scoring_policy.all())
+
+    @staticmethod
+    def applied(obj):
+        return Endpoint.objects.all().filter(security_policies=obj).count()
+
+    @staticmethod
+    def name_(obj):
+        return f"{obj.technical_policy_name}: {obj.name}"
+
+    actions = ["apply_policies", "remove_policies", "apply_affect", "remove_affect"]
+
+    def remove_policies(self, request, queryset):
+        # only if there are no policies set.
+        for item in queryset:
+            remove_security_policy(item)
+
+    def apply_policies(self, request, queryset):
+        # only if there are no policies set.
+        for item in queryset:
+            apply_security_policy(item)
+
+    def apply_affect(self, request, queryset):
+        affected = 0
+        for item in queryset:
+            affected = apply_affects(item)
+        self.message_user(request, f"Affected {affected} scans.")
+
+    def remove_affect(self, request, queryset):
+        affected = 0
+        for item in queryset:
+            affected = remove_affects(item)
+        self.message_user(request, f"Affected {affected} scans.")
 
 
 @admin.register(models.Endpoint)

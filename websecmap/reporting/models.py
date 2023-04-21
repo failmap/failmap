@@ -431,4 +431,4 @@ class ScanPolicy(AllIssuesCombined):
         #   `action_flag`, `change_message`) VALUES (\'2022-09-09 07:52:07.296311\', 1, 62, \'942\',
         #   \'\xf0\x9f\x8f\x85 [internet_nl_mail_ipv6 passed]\', 1, \'[{\\"added\\": {}}]\')'
         # -> (1366, "Incorrect string value: '\\xF0\\x9F\\x8F\\x85 [...' for column 'object_repr' at row 1")
-        return f"{self.summary_text()} = [{self.scan_type} {self.conclusion}]"
+        return f"{self.scan_type}: {self.conclusion} ({self.summary_text()})"

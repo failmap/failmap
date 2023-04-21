@@ -12,6 +12,30 @@ from websecmap.organizations.models import Url
 from websecmap.reporting.models import ScanPolicy
 
 
+class SecurityPolicy(models.Model):
+    name = models.CharField(max_length=255)
+    technical_policy_name = models.SlugField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True)
+
+    # for automatically determining default policies per endpoint
+    common_subdomains = JSONField(
+        blank=True, help_text="List[str] of common subdomains where this policy applies to", default=[]
+    )
+    common_ports = JSONField(blank=True, help_text="List[int] of port numbers this policy applies to", default=[])
+    common_protocols = JSONField(blank=True, help_text="List[str] of protocols this policy applies to", default=[])
+    common_ip_versions = models.IntegerField(
+        blank=True, null=True, help_text="0 for all, 4 for ipv4, 6 for ipv6", default=0
+    )
+
+    affect_explain_scoring_policy = models.ManyToManyField(
+        ScanPolicy,
+        blank=True,
+        help_text="Will explain specific scan scores on this endpoint so they are not counted as issues anymore. "
+        "It makes sense to only explain scan scores that have a negative impact. And be sure that this "
+        "score is actually applied to the previous set of critera / these specific endpoints.",
+    )
+
+
 class Endpoint(models.Model):
     """
     Endpoints are created using (some) scan tools but mostly harvesters.
@@ -82,11 +106,14 @@ class Endpoint(models.Model):
 
     origin = models.CharField(max_length=255, blank=True, null=True)
 
-    security_policies = TaggableManager(blank=True, verbose_name=_("Security Policies"))
+    security_policies = models.ManyToManyField(
+        SecurityPolicy,
+        blank=True,
+    )
 
     @property
     def security_policies_list(self) -> List[str]:
-        return list(self.security_policies.values_list("name", flat=True))
+        return list(self.security_policies.values_list("technical_policy_name", flat=True))
 
     def __str__(self):
         if self.is_dead:
