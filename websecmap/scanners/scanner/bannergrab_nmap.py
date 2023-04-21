@@ -136,7 +136,9 @@ def reduce_protcol(protocol, port):
 
     if port == 443:
         mapping = {
-            "http-proxy": "http",
+            # http on 443 happens a lot, and while technically correct place it on 443 anyway
+            "http": "https",
+            "http-proxy": "https",
             "ssl/http": "https",
             "ssl": "https",
             # this is always a misclassification
