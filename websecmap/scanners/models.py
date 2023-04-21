@@ -35,6 +35,9 @@ class SecurityPolicy(models.Model):
         "score is actually applied to the previous set of critera / these specific endpoints.",
     )
 
+    def __str__(self):
+        return f"{self.technical_policy_name}: {self.name}"
+
 
 class Endpoint(models.Model):
     """

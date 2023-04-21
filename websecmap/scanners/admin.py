@@ -117,7 +117,7 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "security_policies",
     ][::-1]
     fieldsets = (
-        (None, {"fields": ("url", "role", "ip_version", "protocol", "port", "discovered_on")}),
+        (None, {"fields": ("url", "security_policies", "ip_version", "protocol", "port", "discovered_on")}),
         (
             "dead endpoint management",
             {
