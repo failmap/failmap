@@ -203,6 +203,7 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
 
         tasks.append(
             scan.s([uri_url], params)
+            # {ep.uri_url(): {"endpoint": ep.id, "url": ep.url.id} for ep in relevant_endpoints}
             | store.s({uri_url: {"endpoint": endpoint_id, "url": url_id}})
             | plannedscan.finish.si("verify", SCANNER_NAME, url_id)
         )
@@ -278,17 +279,31 @@ def store(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[str, Dict[str, in
     for host, nuclei_records_per_host in results_per_host.items():
         combined_metrics = prepare_nuclei_results_for_storage(nuclei_records_per_host)
 
-        endpoint_id = host_to_endpoint_mapping[host]["endpoint"]
-        for category_name, data in combined_metrics.items():
-            store_endpoint_scan_result(
-                category_name,
-                endpoint_id,
-                data["highest-severity"],
-                "",
-                # Has to be readable by the verify scanner
-                json.dumps(data["findings"]),
+        try:
+            endpoint_id = host_to_endpoint_mapping[host]["endpoint"]
+            for category_name, data in combined_metrics.items():
+                store_endpoint_scan_result(
+                    category_name,
+                    endpoint_id,
+                    data["highest-severity"],
+                    "",
+                    # Has to be readable by the verify scanner
+                    json.dumps(data["findings"]),
+                )
+        except KeyError as e:
+            # ssl/ssl-dns-names.yaml will alter the 'host' from https://pw.tweedekamer.nl:443 to pw.tweedekamer.nl
+            # and without host you don't know to what endpoint to save specifically? Perhaps a mapping can be made
+            # so there are fallback hosts / urls etc.
+            # monitor exceptions for a while
+            log.exception(
+                "Could not host from nuclei report in host-endpoint-mapping",
+                extra={
+                    "host": host,
+                    "endpoint_id": host_to_endpoint_mapping,
+                    "combined_metrics": combined_metrics,
+                    "exception": e,
+                },
             )
-
         # and clean up the stuff that has been solved completely:
         # this currently adds noise. Things should just all be rescanned.
         # current_categories_of_metrics = list(combined_metrics.keys())
