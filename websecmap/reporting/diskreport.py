@@ -4,6 +4,8 @@ Reports are stored to disk and retrieved from disk transparently using the faste
 Reports can be stored in various formats, where the "original" is the original from websecmap. A variant might be
 added without detailed findings for example.
 """
+from json import JSONDecodeError
+
 import gzip
 import json
 import logging
@@ -97,4 +99,8 @@ def _read_json_from_gzip(location):
             return json.loads(file.read())
     except FileNotFoundError:
         log.info("Report does not exist on location %s.", location)
+        return {}
+    except JSONDecodeError:
+        # this is weird, should not happen. Don't crash.
+        log.error(f"Report does not contain valid json, {location}.", location)
         return {}
