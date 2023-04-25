@@ -443,7 +443,9 @@ CITRIX_SCAN_RESULTS = """[
 
 
 def test_get_templates_from_scan_results():
-    assert get_templates_from_scan_results(CITRIX_SCAN_RESULTS) == ["citrix-vpn-panel", "netscaler-aaa-login-panel"]
+    assert list(sorted(get_templates_from_scan_results(CITRIX_SCAN_RESULTS))) == list(
+        sorted(["citrix-vpn-panel", "netscaler-aaa-login-panel"])
+    )
 
     assert get_templates_from_scan_results("""[]""") == []
 

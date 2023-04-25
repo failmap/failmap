@@ -1,3 +1,4 @@
+import copy
 import json
 import subprocess
 from typing import Any, Dict, List, Union
@@ -218,8 +219,9 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
         scan_these_templates = {"name": "template-id", "type": "list-to-duplicate-arguments", "value": template_ids}
         # merge scanner params with the templates that need to be used for the rescan
         if scanner_keyword_arguments and "args" in scanner_keyword_arguments:
-            scanner_keyword_arguments["args"].append(scan_these_templates)
-            params = scanner_keyword_arguments
+            args_copy = copy.deepcopy(scanner_keyword_arguments)
+            args_copy["args"].append(scan_these_templates)
+            params = args_copy
         else:
             params = {"args": [scan_these_templates]}
 
@@ -255,7 +257,8 @@ def get_templates_from_scan_results(processed_nuclei_data) -> List[str]:
         if possible_result not in REDUNDANT_TEMPLATES + ["unknown"]:
             templates.append(possible_result)
 
-    return templates
+    # do not return duplicate templates, one 'waf-detect' is enough
+    return list(set(templates))
 
 
 # todo: move above code into abstraction:
@@ -301,6 +304,10 @@ def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None) -> b
 def store(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[str, Dict[str, int]]) -> None:
     raw_nuclei_records = convert_nuclei_data_to_json(raw_nuclei_data)
     results_per_host = split_nuclei_records_per_host(raw_nuclei_records)
+
+    # todo: what if raw_nuclei_records is empty? what host exactly should then be cleaned?
+    # at verify the nr of hosts/endpoints is always 1. So that should then be cleaned if there
+    # are no records?
 
     for host, nuclei_records_per_host in results_per_host.items():
         combined_metrics = prepare_nuclei_results_for_storage(nuclei_records_per_host)
