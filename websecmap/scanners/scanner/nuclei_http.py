@@ -90,8 +90,20 @@ def plan_verify() -> None:
             endpoint__url__is_dead=False,
             endpoint__is_dead=False,
         )
+        # you cannot verify clean endpoints because it is not clear what templates need to be used for
+        # rescan. If there is something new there, it will pop up in the next large sweep scan.
+        .exclude(rating="clean")
         .select_related("endpoint", "endpoint__url")
-        .only("endpoint__url")
+        .only(
+            "endpoint__url",
+            "rating_determined_on",
+            "type",
+            "rating",
+            "endpoint__is_dead",
+            "endpoint__ip_version",
+            "endpoint__port",
+            "endpoint__protocol",
+        )
     )
     urls = unique_and_random([scan.endpoint.url for scan in scans])
     plannedscan.request(activity="verify", scanner=SCANNER_NAME, urls=urls)
@@ -179,15 +191,25 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
             "endpoint__ip_version",
         )
     )
-    if not current_scans:
-        return group()
+    if not len(current_scans):
+        # why is there a difference between what has been planned to verify and the query here?
+        # anyway: no scans means that we can finish these tasks...
+        # perhaps the url died?
+        return group([plannedscan.finish.si("verify", SCANNER_NAME, url.url) for url in urls])
+
+    # there might be some scans, but not for all urls, which means those urls will be left over and never finished
+    # so figure out what urls have scans and finish the rest after this.
+    all_urls = [url.url for url in urls]  # finish goes via the name of the url not the id.
+    urls_rescanned = []
 
     tasks = []
     for current_scan in current_scans:
         endpoint_id = current_scan.endpoint.id
         url_id = current_scan.endpoint.url.id
         uri_url = current_scan.endpoint.uri_url()
+        urls_rescanned.append(current_scan.endpoint.url.url)
 
+        # when something is clean up, it will be empty. So there is a scan but no data...
         template_ids = get_templates_from_scan_results(current_scan.evidence)
         if not template_ids:
             tasks.append(plannedscan.finish.si("verify", SCANNER_NAME, url_id))
@@ -207,6 +229,10 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
             | store.s({uri_url: {"endpoint": endpoint_id, "url": url_id}})
             | plannedscan.finish.si("verify", SCANNER_NAME, url_id)
         )
+
+    # figure out non-rescanned urls, finish them as well:
+    missing = list(set(all_urls) - set(urls_rescanned))
+    tasks.extend(plannedscan.finish.si("verify", SCANNER_NAME, url_name) for url_name in missing)
 
     return group(tasks)
 
