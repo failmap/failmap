@@ -258,17 +258,11 @@ def get_templates_from_scan_results(processed_nuclei_data) -> List[str]:
             templates.append(possible_result)
 
     # do not return duplicate templates, one 'waf-detect' is enough
-    return list(set(templates))
+    # order it to get consistent scans and testable commands
+    return list(sorted(list(set(templates))))
 
 
-# todo: move above code into abstraction:
-
-
-@app.task(queue="ipv4")
-def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None) -> bin:
-    # This reduces the standard number of requests from ±1000 to ±700.
-    # There will be 2000 templates instead of 4000.
-
+def create_nuclei_scan_command(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None):
     disabled_templates = constance_json_value("NUCLEI_HTTP_DISABLED_TEMPLATES")
 
     # probably call a container instead of running this directly?
@@ -285,14 +279,22 @@ def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None) -> b
     command += [
         # do not scan redundant stuff that we already get elsewhere
         "-exclude-id",
-        ",".join(set(REDUNDANT_TEMPLATES + disabled_templates)),
+        ",".join(list(sorted(list(set(REDUNDANT_TEMPLATES + disabled_templates))))),
     ]
 
     for url in urls:
         command += ["-u", url]
 
     log.debug("Starting nuclei scan with command: %s", " ".join(command))
+    return command
 
+
+@app.task(queue="ipv4")
+def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None) -> bin:
+    # This reduces the standard number of requests from ±1000 to ±700.
+    # There will be 2000 templates instead of 4000.
+
+    command = create_nuclei_scan_command(urls, scanner_keyword_arguments)
     nuc = subprocess.Popen(command, stdout=subprocess.PIPE, env={"HOME": "/opt/nuclei"}, cwd="/tmp")
     output = nuc.communicate()
 

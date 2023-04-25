@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+from websecmap.app import log
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, PlannedScan, Scanner, ScannerFinding
 from websecmap.scanners.scanner.nuclei_http import (
@@ -14,6 +15,8 @@ from websecmap.scanners.scanner.nuclei_http import (
     process_nuclei_record,
     split_nuclei_records_per_host,
     store,
+    compose_verify_task,
+    create_nuclei_scan_command,
 )
 
 three_example_nuclei_tests = data = (
@@ -491,3 +494,123 @@ def test_extract_findings_to_scanner_findings(db, default_scan_metadata):
     extract_findings_to_scanner_findings()
 
     assert ScannerFinding.objects.all().count() == 2
+
+
+def create_sample_data_for_url(url_str: str, scan_type: str, scan_data=None):
+    url, _ = Url.objects.get_or_create(**{"url": url_str})
+    endpoint, _ = Endpoint.objects.get_or_create(**{"url": url, "protocol": "http", "port": 443})
+    EndpointGenericScan.objects.create(
+        type=scan_type,
+        rating="info",
+        evidence=scan_data,
+        endpoint=endpoint,
+        is_the_latest_scan=True,
+        rating_determined_on=datetime.now(timezone.utc),
+    )
+    return url
+
+
+def test_nuclei_compose_verify_task(db):
+    # should create 2 scans on this domain, one for each prior scan:
+    url1 = create_sample_data_for_url(
+        "mail.rhcvechtenvenen.nl",
+        "nuclei_exposed_panels",
+        """[
+        {"template-id": "phpmyadmin-panel", "name": "phpMyAdmin Panel - Detect", "finding-name": "nuclei_phpmyadmin_panel", "evidence": {"extracted-results": ["5.2.1"], "matched-at": "https://mail.rhcvechtenvenen.nl:443/phpmyadmin/"}}
+    ]""",  # noqa
+    )
+    create_sample_data_for_url(
+        "mail.rhcvechtenvenen.nl",
+        "nuclei_technologies",
+        """[
+        {"template-id": "apache-detect", "name": "Apache Detection", "finding-name": "nuclei_apache_detect", "evidence": {"extracted-results": ["Apache/2"], "matched-at": "https://mail.rhcvechtenvenen.nl:443"}}, 
+        {"template-id": "waf-detect", "name": "WAF Detection", "finding-name": "nuclei_waf_detect_apachegeneric", "evidence": {"extracted-results": [], "matched-at": "https://mail.rhcvechtenvenen.nl:443/"}}]
+        """,  # noqa
+    )
+
+    url2 = create_sample_data_for_url(
+        "tw.omnibuzz.nl",
+        "nuclei_technologies",
+        """[
+        {"template-id": "apache-detect", "name": "Apache Detection", "finding-name": "nuclei_apache_detect", "evidence": {"extracted-results": ["Apache"], "matched-at": "https://tw.omnibuzz.nl:443"}}, 
+        {"template-id": "favicon-detect", "name": "favicon-detection", "finding-name": "nuclei_favicon_detect_mitel_networks_micollab_end_user_portal", "evidence": {"extracted-results": [], "matched-at": "https://tw.omnibuzz.nl:443/favicon.ico"}}, 
+        {"template-id": "waf-detect", "name": "WAF Detection", "finding-name": "nuclei_waf_detect_apachegeneric", "evidence": {"extracted-results": [], "matched-at": "https://tw.omnibuzz.nl:443/"}}]
+        """,  # noqa
+    )
+    url3 = create_sample_data_for_url(
+        "erfgoed.utrecht.nl",
+        "nuclei_technologies",
+        """[
+        {"template-id": "metatag-cms", "name": "Metatag CMS Detection", "finding-name": "nuclei_metatag_cms", "evidence": {"extracted-results": ["TYPO3 CMS"], "matched-at": "https://erfgoed.utrecht.nl:443"}}, 
+        {"template-id": "tech-detect", "name": "Wappalyzer Technology Detection", "finding-name": "nuclei_tech_detect_typo3_cms", "evidence": {"extracted-results": [], "matched-at": "https://erfgoed.utrecht.nl:443"}}, 
+        {"template-id": "typo3-detect", "name": "TYPO3 Detection", "finding-name": "nuclei_typo3_detect", "evidence": {"extracted-results": [], "matched-at": "https://erfgoed.utrecht.nl:443"}}] 
+    """,  # noqa
+    )
+    url4 = create_sample_data_for_url(
+        "serviscope-acc.kpn.com",
+        "nuclei_technologies",
+        """[
+        {"template-id": "tech-detect", "name": "Wappalyzer Technology Detection", "finding-name": "nuclei_tech_detect_awselb", "evidence": {"extracted-results": [], "matched-at": "https://serviscope-acc.kpn.com:443"}}]
+    """,  # noqa
+    )
+
+    task = compose_verify_task(
+        [url1, url2, url3, url4],
+        {"args": []},
+    )
+
+    out = str(task)
+    # 5 scans means 5 re-scans
+    assert str(task).count("nuclei_http.scan") == 5
+
+    # make the output a bit shorter to make easier comparisons:
+    out = out.replace("{'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', ", "")
+    out = out.replace("'value':", "")
+    import re
+
+    out = re.sub(r"[^A-Za-z0-9 ]+", "", out)
+
+    log.debug(out)
+    assert "httpserviscopeacckpncom443  techdetect" in out  # noqa
+    assert "httpmailrhcvechtenvenennl443  apachedetect wafdetect" in out  # noqa
+    assert 1 == out.count("httpmailrhcvechtenvenennl443  phpmyadminpanel")  # noqa
+    assert 1 == out.count("httperfgoedutrechtnl443  metatagcms techdetect typo3detect")  # noqa
+    assert 1 == out.count("httptwomnibuzznl443  apachedetect favicondetect wafdetect")  # noqa
+
+
+def test_create_nuclei_scan_command(db):
+
+    command = create_nuclei_scan_command(
+        ["test.nl"],
+        {
+            "args": [
+                {"name": "silent", "type": "no-value"},
+                {"name": "disable-update-check", "type": "no-value"},
+                {"name": "rate-limit", "type": "single-argument", "value": "10"},
+                {"name": "config-directory", "type": "single-argument", "value": "/tmp"},
+                {
+                    "name": "template-id",
+                    "type": "list-to-duplicate-arguments",
+                    "value": ["netscaler-aaa-login-panel", "citrix-vpn-panel"],
+                },
+            ]
+        },
+    )
+    assert command == [
+        "/usr/local/bin/nuclei",
+        "-json",
+        "-silent",
+        "-disable-update-check",
+        "-rate-limit",
+        "10",
+        "-config-directory",
+        "/tmp",
+        "-template-id",
+        "netscaler-aaa-login-panel",
+        "-template-id",
+        "citrix-vpn-panel",
+        "-exclude-id",
+        "deprecated-tls,dmarc-detect,dnssec-detection,http-missing-security-headers,robots-txt,robots-txt-endpoint,security-txt,ssl-issuer,tls-version,xss-deprecated-header",  # noqa
+        "-u",
+        "test.nl",
+    ]
