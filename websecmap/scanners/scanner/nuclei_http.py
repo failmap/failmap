@@ -195,7 +195,7 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
         # why is there a difference between what has been planned to verify and the query here?
         # anyway: no scans means that we can finish these tasks...
         # perhaps the url died?
-        return group([plannedscan.finish.si("verify", SCANNER_NAME, url.url) for url in urls])
+        return group([plannedscan.finish.si("verify", SCANNER_NAME, url.id) for url in urls])
 
     # there might be some scans, but not for all urls, which means those urls will be left over and never finished
     # so figure out what urls have scans and finish the rest after this.
