@@ -12,6 +12,7 @@ import requests
 from celery import Task, group
 from django.db import connection
 from django.db.models import Q
+from dns.query import BadResponse
 from dnsrecon.__main__ import brute_domain, ds_zone_walk
 from dnsrecon.lib.dnshelper import DnsHelper
 from requests import RequestException
@@ -509,9 +510,13 @@ def nsec_scan(url: str):
 
 
 @timeout(120, "Took too long to nsec zone walk, possibly an infinite loop.")
-def nsec_scan_work(url: str):
+def nsec_scan_work(url: str) -> List[Dict[str, Any]]:
     resolver = DnsHelper(url, [get_random_nameserver()], 3)
-    return ds_zone_walk(resolver, url, 3)
+    try:
+        return ds_zone_walk(resolver, url, 3)
+    except BadResponse:
+        log.error("DNS Server did not respond correctly.", extra={"url": url, "resolver": resolver})
+        return []
 
 
 def get_subdomains(countries: List, organization_types: List = None):
