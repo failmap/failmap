@@ -228,6 +228,8 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
         tasks.append(
             scan.s([uri_url], params)
             # {ep.uri_url(): {"endpoint": ep.id, "url": ep.url.id} for ep in relevant_endpoints}
+            # todo: tell what scan type is being stored in a re-scan, and if there
+            #  is no data, then the thing is clean.
             | store.s({uri_url: {"endpoint": endpoint_id, "url": url_id}})
             | plannedscan.finish.si("verify", SCANNER_NAME, url_id)
         )

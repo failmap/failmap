@@ -95,6 +95,7 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = (
         "id",
         "url",
+        "origin",
         "sec_policy",
         "visit",
         "discovered_on",
@@ -113,11 +114,12 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "port",
         "protocol",
         "is_dead",
+        "origin",
         "discovered_on",
         "security_policies",
     ][::-1]
     fieldsets = (
-        (None, {"fields": ("url", "security_policies", "ip_version", "protocol", "port", "discovered_on")}),
+        (None, {"fields": ("url", "security_policies", "ip_version", "protocol", "port", "discovered_on", "origin")}),
         (
             "dead endpoint management",
             {
@@ -126,7 +128,7 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         ),
     )
 
-    readonly_fields = ["discovered_on"]
+    readonly_fields = ["discovered_on", "origin"]
 
     @staticmethod
     def sec_policy(obj):

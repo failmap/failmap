@@ -321,7 +321,9 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
         # nmap correctly finds that it is HTTP over port 443, not https over 443, and every time those http/443 sites
         # will tell us to use the https version of the site. To prevent creating infinite useless endpoints
         # silently upgrade the http results to https. We see all of those disappear over time.
-        if protocol == "http" and port == 443:
+        # nmap results appear to be a string, and therefore the protocol is not upgraded to https in this
+        # specific scenario.
+        if protocol == "http" and port in {443, "443"}:
             protocol = "https"
 
         endpoint = force_get_endpoint(
