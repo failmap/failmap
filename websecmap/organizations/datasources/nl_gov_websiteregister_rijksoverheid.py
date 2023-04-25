@@ -101,9 +101,11 @@ def import_file(generic_file_dataset_id: int):
         return
 
     error_domains, success_domains = import_websiteregister(download.file.path)
-    download.state = f"imported {len(success_domains)} domains sucessfully and {len(error_domains)} failed. "
+    state = f"imported {len(success_domains)} domains sucessfully and {len(error_domains)} failed. "
     if error_domains:
-        download.state += f"Amongst failures are: {', '.join(error_domains)}"
+        state += f"Amongst failures are: {', '.join(error_domains)}"
+
+    download.state = state[:3999]
 
     download.is_imported = True
     download.imported_on = datetime.now(timezone.utc)
