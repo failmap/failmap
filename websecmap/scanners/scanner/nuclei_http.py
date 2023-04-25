@@ -199,15 +199,15 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
 
     # there might be some scans, but not for all urls, which means those urls will be left over and never finished
     # so figure out what urls have scans and finish the rest after this.
-    all_urls = [url.url for url in urls]  # finish goes via the name of the url not the id.
-    urls_rescanned = []
+    all_urls: List[int] = [url.id for url in urls]  # finish goes via the name of the url not the id.
+    urls_rescanned: List[int] = []
 
     tasks = []
     for current_scan in current_scans:
         endpoint_id = current_scan.endpoint.id
         url_id = current_scan.endpoint.url.id
         uri_url = current_scan.endpoint.uri_url()
-        urls_rescanned.append(current_scan.endpoint.url.url)
+        urls_rescanned.append(url_id)
 
         # when something is clean up, it will be empty. So there is a scan but no data...
         template_ids = get_templates_from_scan_results(current_scan.evidence)
@@ -232,7 +232,7 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
 
     # figure out non-rescanned urls, finish them as well:
     missing = list(set(all_urls) - set(urls_rescanned))
-    tasks.extend(plannedscan.finish.si("verify", SCANNER_NAME, url_name) for url_name in missing)
+    tasks.extend(plannedscan.finish.si("verify", SCANNER_NAME, url_id) for url_id in missing)
 
     return group(tasks)
 
