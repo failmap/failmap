@@ -32,6 +32,10 @@ def test_check_ownership(db):
     check_ownership()
     first_scan = UrlGenericScan.objects.all().filter(type="whois_domain_ownership").first()
     assert first_scan.rating == "whois_internal_ownership"
+    assert (
+        first_scan.evidence == '{"found_registrant": "Gemeente Zutphen", '
+        '"allowed_registrants": ["Gemeente Zutphen"]}'
+    )
 
     # now check a domain that has a different organization
     url = Url.objects.create(url="nonlegit_basisbeveiliging.nl")

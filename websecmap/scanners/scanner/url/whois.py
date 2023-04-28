@@ -50,8 +50,8 @@ def check_ownership():
 
         evidence = json.dumps(
             {
-                "registrant": whois.registrant,
-                "registrants": registrants,
+                "found_registrant": whois.registrant,
+                "allowed_registrants": registrants,
             }
         )
         # It's dubious when a registration from the government cannot be seen/verified
