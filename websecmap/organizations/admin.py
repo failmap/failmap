@@ -476,6 +476,61 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     actions.append("revive_organization")
 
 
+class WhoisOrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
+    # A view that only deals with whois fields, so they are editable and managble easily
+    list_display = (
+        "id",
+        "name_details",
+        "layers_",
+        "country",
+        "computed_domain_registrant_statistics",
+        "acceptable_domain_registrants",
+        "reasoning_for_registrant_decisions",
+    )
+
+    @staticmethod
+    def name_details(inst):
+        if inst.is_dead:
+            return (
+                f"✝ {inst.name}, {inst.country} ({inst.created_on.strftime('%b %Y') if inst.created_on else ''} "
+                f"- {inst.is_dead_since.strftime('%b %Y') if inst.is_dead_since else ''})"
+            )
+
+        return f"{inst.name}, {inst.country} ({inst.created_on.strftime('%b %Y')})"
+
+    def layers_(self, inst):
+        return [layer.name for layer in inst.layers.all()]
+
+    search_fields = ["name", "country", "type__name"]
+    list_filter = ["country", "created_on", "is_dead", "is_dead_since", "layers__name"][::-1]
+
+    fields = [
+        "computed_domain_registrant_statistics",
+        "acceptable_domain_registrants",
+        "reasoning_for_registrant_decisions",
+    ]
+
+
+def create_modeladmin(modeladmin, model, name=None):
+    # This creates a proxy model so there can be a different view on organization data.
+    # In this case we can create WhoisOrganization which only allows easy overview and record editing
+    # of registrar information.
+    # https://stackoverflow.com/questions/2223375/multiple-modeladmins-views-for-same-model-in-django-admin
+    class Meta:
+        proxy = True
+        app_label = model._meta.app_label
+
+    attrs = {"__module__": "", "Meta": Meta}
+
+    newmodel = type(name, (model,), attrs)
+
+    admin.site.register(newmodel, modeladmin)
+    return modeladmin
+
+
+create_modeladmin(WhoisOrganizationAdmin, name="organization-registrar", model=Organization)
+
+
 # https://docs.djangoproject.com/en/2.0/ref/forms/validation/
 class MyUrlAdminForm(forms.ModelForm):
     def clean_url(self):

@@ -1529,6 +1529,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         "items": [
             {"name": "organizations.organization", "label": "🏢 Organizations"},
             {"name": "organizations.alternativename", "label": "🏢 - Alt Names"},
+            {"url": "/admin/organizations/organization-registrar/", "label": "🏢 - Domain Registrars"},
             {"name": "organizations.url", "label": "🖥️ Urls"},
             {
                 "label": "🖥️ - Dubious Re-registrations",
