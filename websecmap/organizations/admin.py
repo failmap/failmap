@@ -333,27 +333,49 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ["name", "country", "type__name"]
     list_filter = ["country", "created_on", "is_dead", "is_dead_since", "layers__name"][::-1]
 
-    fields = (
-        "name",
-        "type",
-        "layers",
-        "alternative_names",
-        "country",
-        "internal_notes",
-        "written_address",
-        "twitter_handle",
-        "created_on",
-        "wikidata",
-        "wikipedia",
-        "surrogate_id",
-        "computed_domain_registrant_statistics",
-        "acceptable_domain_registrants",
-        "is_dead",
-        "is_dead_since",
-        "is_dead_reason",
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "name",
+                    "layers",
+                    "alternative_names",
+                    "country",
+                    "internal_notes",
+                    "written_address",
+                    "twitter_handle",
+                    "wikidata",
+                    "wikipedia",
+                    "surrogate_id",
+                )
+            },
+        ),
+        (
+            "Registrant",
+            {
+                "fields": (
+                    "computed_domain_registrant_statistics",
+                    "acceptable_domain_registrants",
+                    "reasoning_for_registrant_decisions",
+                ),
+            },
+        ),
+        (
+            "Life Cycle",
+            {
+                "fields": ("created_on", "is_dead", "is_dead_since", "is_dead_reason"),
+            },
+        ),
+        (
+            "Deprecated",
+            {
+                "fields": ("type",),
+            },
+        ),
     )
 
-    inlines = [CoordinateAdminInline, UrlAdminInline, OrgAltNameAdminInline]  #
+    inlines = [OrgAltNameAdminInline, UrlAdminInline, CoordinateAdminInline]  #
 
     @staticmethod
     def name_details(inst):
