@@ -150,7 +150,7 @@ def random_string(length: int = 16):
     return "".join(random.choice(string.ascii_lowercase) for _ in range(length))
 
 
-@app.task(queue="all_internet")
+@app.task(queue="internet")
 def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
 
     if not discover_wildcard(wildcard_url):
