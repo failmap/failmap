@@ -926,18 +926,22 @@ class UrlWhoisAdmin(ImportExportModelAdmin, admin.ModelAdmin):
          And they have to be able to gain confidence and trust from registrations.
         """
         registrants_to_remove = {whois.registrant for whois in queryset if whois.registrant}
-
-        for organization in Organization.objects.all().filter(is_dead=False):
-            for registrant_to_remove in registrants_to_remove:
-                if registrant_to_remove in organization.acceptable_domain_registrants:
-                    organization.acceptable_domain_registrants.remove(registrant_to_remove)
-                    organization.reasoning_for_registrant_decisions += f"{registrant_to_remove}: bulk removed\n"
-            organization.save()
+        for registrant_to_remove in registrants_to_remove:
+            remove_registrant_from_allowed_registrars(registrant_to_remove)
 
     remove_registrant_from_allowed_registrars_everywhere.short_description = (
         "Remove registrant from allowed registrars everywhere"
     )
     actions.append("remove_registrant_from_allowed_registrars_everywhere")
+
+
+def remove_registrant_from_allowed_registrars(registrant_to_remove):
+    for organization in Organization.objects.all().filter(
+        is_dead=False, acceptable_domain_registrants__contains=registrant_to_remove
+    ):
+        organization.acceptable_domain_registrants.remove(registrant_to_remove)
+        organization.reasoning_for_registrant_decisions += f"{registrant_to_remove}: bulk removed\n"
+        organization.save()
 
 
 def format_yd(delta: timedelta) -> str:
