@@ -939,6 +939,10 @@ def remove_registrant_from_allowed_registrars(registrant_to_remove):
     for organization in Organization.objects.all().filter(
         is_dead=False, acceptable_domain_registrants__contains=registrant_to_remove
     ):
+        # "-" is somewhere in that registrant data, but it might not be in the list as an item.
+        if registrant_to_remove not in organization.acceptable_domain_registrants:
+            continue
+
         organization.acceptable_domain_registrants.remove(registrant_to_remove)
         organization.reasoning_for_registrant_decisions += f"{registrant_to_remove}: bulk removed\n"
         organization.save()
