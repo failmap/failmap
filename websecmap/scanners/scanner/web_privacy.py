@@ -184,8 +184,8 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         store_endpoint_scan_result(
             WEB_PRIVACY_THIRD_PARTY_REQUESTS,
             endpoint_id,
-            WEB_PRIVACY_TRACKING_ERROR,
-            WEB_PRIVACY_TRACKING_ERROR,
+            WEB_PRIVACY_THIRD_PARTY_ERROR,
+            WEB_PRIVACY_THIRD_PARTY_ERROR,
             evidence=error,
         )
         store_endpoint_scan_result(
