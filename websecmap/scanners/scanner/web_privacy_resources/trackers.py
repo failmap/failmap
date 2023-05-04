@@ -72,12 +72,13 @@ def get_tracker_info_from_websecmap(url: str) -> Dict[str, str]:
         # our partners collect about you, including across devices.
         # Note that we principally rely on consent (i) to send marketing messages, (ii) for third-party data sharing
         # related to advertising, and, to the extent applicable, (iii) for the use of location data for advertising
-        "tracking.monsido.com": {
-            "Category": "Analytics",
-            "Company": "Monsido",
-            "Platform": "https://monsido.com",
-            "Tracking Url": "tracking.monsido.com",
-        },
+        # Seen a contract, seems to be a legit eu business. Don't know yet how to place this.
+        # "tracking.monsido.com": {
+        #     "Category": "Analytics",
+        #     "Company": "Monsido",
+        #     "Platform": "https://monsido.com",
+        #     "Tracking Url": "tracking.monsido.com",
+        # },
         # missing in the disconnectme set
         "use.typekit.net": {
             "Category": "Content",

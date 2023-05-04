@@ -1111,14 +1111,9 @@ CONSTANCE_CONFIG = {
         "Do not send in subdomains. To reduce the number of tests while still getting an impression on a broader scope",
         bool,
     ),
-    "WEB_PRIVACY_DATABASE_LOCATION": (
-        os.environ.get("WEB_PRIVACY_DATABASE_LOCATION", "crawl-data.sqlite"),
-        "Location where openwpm stores their glorious browsing data.",
-        str,
-    ),
     "WEB_PRIVACY_SERVER": (
-        os.environ.get("WEB_PRIVACY_SERVER", "http://localhost:31337"),
-        "Where to talk to the openwpm container.",
+        os.environ.get("PLAYWRIGHT_PRIVACY_SERVER", "http://localhost:31337"),
+        "Where to talk to the playwright container.",
         str,
     ),
     "NUCLEI_HTTP_DISABLED_TEMPLATES": (
@@ -1386,7 +1381,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         ),
         (
             "Web Privacy",
-            ("WEB_PRIVACY_DATABASE_LOCATION", "WEB_PRIVACY_SERVER"),
+            ("WEB_PRIVACY_SERVER",),
         ),
         (
             "Plus",

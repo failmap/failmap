@@ -1,5 +1,5 @@
 {
-  "license": "Copyright 2010-2022 Disconnect, Inc. / Licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (the “License”). A summary of the License is available here: https://creativecommons.org/licenses/by-nc-sa/4.0/. The text version of the License is here: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt. Please see the License for the specific language governing permissions and limitations under the License. Unless agreed to in writing or required by law, software distributed under the License on an \"as is\" basis without warranties or conditions of any kind, either express or implied. This license does not apply to any Disconnect logos or marks contained in this repo.",
+  "license": "Copyright 2010-2023 Disconnect, Inc. / Licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (the “License”). A summary of the License is available here: https://creativecommons.org/licenses/by-nc-sa/4.0/. The text version of the License is here: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt. Please see the License for the specific language governing permissions and limitations under the License. Unless agreed to in writing or required by law, software distributed under the License on an \"as is\" basis without warranties or conditions of any kind, either express or implied. This license does not apply to any Disconnect logos or marks contained in this repo.",
   "entities": {
     "10Web": {
       "properties": [
@@ -54,7 +54,7 @@
     },
     "4dem": {
       "properties": [
-        "2"
+        "4dem.it"
       ],
       "resources": [
         "4dem.it"
@@ -88,6 +88,14 @@
         "i-stats.com"
       ]
     },
+    "6sense": {
+      "properties": [
+        "6sense.com"
+      ],
+      "resources": [
+        "6sc.co"
+      ]
+    },
     "8d8.biz": {
       "properties": [
         "8d8.biz"
@@ -102,6 +110,14 @@
       ],
       "resources": [
         "abaxinteractive.com"
+      ]
+    },
+    "ABTasty": {
+      "properties": [
+        "abtasty.com"
+      ],
+      "resources": [
+        "abtasty.com"
       ]
     },
     "Accelia": {
@@ -2399,6 +2415,14 @@
         "backbeatmedia.com"
       ]
     },
+    "Baidu": {
+      "properties": [
+        "baidu.com"
+      ],
+      "resources": [
+        "baidu.com"
+      ]
+    },
     "Bandzoogle": {
       "properties": [
         "bandzoogle.com"
@@ -2767,6 +2791,14 @@
         "bluecava.com"
       ]
     },
+    "BlueConic": {
+      "properties": [
+        "blueconic.com"
+      ],
+      "resources": [
+        "blueconic.net"
+      ]
+    },
     "BlueKai": {
       "properties": [
         "bluekai.com",
@@ -3087,15 +3119,6 @@
         "pulsemgr.com"
       ]
     },
-    "BuzzFeed": {
-      "properties": [
-        "buzzfeed.com"
-      ],
-      "resources": [
-        "buzzfed.com",
-        "buzzfeed.com"
-      ]
-    },
     "BuzzParadise": {
       "properties": [
         "buzzparadise.com"
@@ -3142,6 +3165,15 @@
       ],
       "resources": [
         "cadreon.com"
+      ]
+    },
+    "CafeMedia": {
+      "properties": [
+        "adthrive.com",
+        "cafemedia.com"
+      ],
+      "resources": [
+        "adthrive.com"
       ]
     },
     "CallSource": {
@@ -3969,6 +4001,14 @@
         "contactmonkey.com"
       ]
     },
+    "ContentSquare": {
+      "properties": [
+        "contentsquare.com"
+      ],
+      "resources": [
+        "contentsquare.net"
+      ]
+    },
     "CONTEXTin": {
       "properties": [
         "admailtiser.com",
@@ -4192,6 +4232,14 @@
       ],
       "resources": [
         "crowdscience.com"
+      ]
+    },
+    "Crownpeak": {
+      "properties": [
+        "crownpeak.com"
+      ],
+      "resources": [
+        "betrad.com"
       ]
     },
     "CryptoLoot": {
@@ -4673,6 +4721,15 @@
         "adsymptotic.com",
         "drawbrid.ge",
         "drawbridge.com"
+      ]
+    },
+    "Drift": {
+      "properties": [
+        "drift.com"
+      ],
+      "resources": [
+        "drift.com",
+        "driftt.com"
       ]
     },
     "DS-IQ": {
@@ -5284,6 +5341,7 @@
     "Facebook": {
       "properties": [
         "atlassolutions.com",
+        "commercepartnerhub.com",
         "e.gg",
         "facebook.com",
         "facebook.de",
@@ -5423,6 +5481,14 @@
       ],
       "resources": [
         "emailinc.net"
+      ]
+    },
+    "FirstID": {
+      "properties": [
+        "first-id.fr"
+      ],
+      "resources": [
+        "first-id.fr"
       ]
     },
     "Fizz-Buzz Media": {
@@ -5736,6 +5802,14 @@
       "resources": [
         "genesismedia.com",
         "genesismediaus.com"
+      ]
+    },
+    "Genesys": {
+      "properties": [
+        "genesys.com"
+      ],
+      "resources": [
+        "boldchat.com"
       ]
     },
     "GENIEE": {
@@ -6553,6 +6627,14 @@
         "healthpricer.com"
       ]
     },
+    "Heap": {
+      "properties": [
+        "heap.io"
+      ],
+      "resources": [
+        "heapanalytics.com"
+      ]
+    },
     "Hearst": {
       "properties": [
         "hearst.com",
@@ -6572,6 +6654,14 @@
         "sptag1.com",
         "sptag2.com",
         "sptag3.com"
+      ]
+    },
+    "HelpScout": {
+      "properties": [
+        "helpscout.com"
+      ],
+      "resources": [
+        "helpscout.net"
       ]
     },
     "Heyzap": {
@@ -6695,7 +6785,8 @@
         "hs-analytics.net",
         "hsms06.com",
         "hubspot.com",
-        "hubspotemail.net"
+        "hubspotemail.net",
+        "usemessages.com"
       ]
     },
     "Hunter": {
@@ -7139,6 +7230,14 @@
         "investingchannel.com"
       ]
     },
+    "iotechnologies": {
+      "properties": [
+        "iotechnologies.com"
+      ],
+      "resources": [
+        "onthe.io"
+      ]
+    },
     "iovation": {
       "properties": [
         "iovation.com"
@@ -7312,6 +7411,14 @@
       "resources": [
         "adcolony.com",
         "jirbo.com"
+      ]
+    },
+    "JivoChat": {
+      "properties": [
+        "jivochat.com"
+      ],
+      "resources": [
+        "jivosite.com"
       ]
     },
     "Jivox": {
@@ -7779,6 +7886,7 @@
       ],
       "resources": [
         "liveramp.com",
+        "rlcdn.com",
         "tvpixel.com"
       ]
     },
@@ -8321,14 +8429,6 @@
         "mediacom.com"
       ]
     },
-    "mediaFORGE": {
-      "properties": [
-        "mediaforge.com"
-      ],
-      "resources": [
-        "mediaforge.com"
-      ]
-    },
     "Medialets": {
       "properties": [
         "medialets.com"
@@ -8542,6 +8642,7 @@
         "iegallery.com",
         "linkedin.com",
         "live.com",
+        "lnkd.in",
         "microsoft.com",
         "microsoftalumni.com",
         "microsoftalumni.org",
@@ -8752,7 +8853,8 @@
       ],
       "resources": [
         "moat.com",
-        "moatads.com"
+        "moatads.com",
+        "moatpixel.com"
       ]
     },
     "MobFox": {
@@ -9247,18 +9349,6 @@
       ],
       "resources": [
         "nextag.com"
-      ]
-    },
-    "NextPerformance": {
-      "properties": [
-        "nextperf.com",
-        "nextperformance.com",
-        "nxtck.com"
-      ],
-      "resources": [
-        "nextperf.com",
-        "nextperformance.com",
-        "nxtck.com"
       ]
     },
     "NextSTAT": {
@@ -10355,6 +10445,14 @@
         "qualaroo.com"
       ]
     },
+    "Qualtrics": {
+      "properties": [
+        "qualtrics.com"
+      ],
+      "resources": [
+        "qualtrics.com"
+      ]
+    },
     "Quantcast": {
       "properties": [
         "quantcast.com",
@@ -10469,7 +10567,10 @@
         "kenko.com",
         "kobo.com",
         "marketspeed.jp",
+        "nextperf.com",
+        "nextperformance.com",
         "nikki.ne.jp",
+        "nxtck.com",
         "rakuten-bank.co.jp",
         "rakuten-card.co.jp",
         "rakuten-insurance.co.jp",
@@ -10497,6 +10598,10 @@
         "ebates.com",
         "linkshare.com",
         "linksynergy.com",
+        "mediaforge.com",
+        "nextperf.com",
+        "nextperformance.com",
+        "nxtck.com",
         "rakutenmarketing.com"
       ]
     },
@@ -11341,6 +11446,14 @@
         "signifyd.com"
       ]
     },
+    "SimpleAnalytics": {
+      "properties": [
+        "simpleanalytics.com"
+      ],
+      "resources": [
+        "simpleanalyticscdn.com"
+      ]
+    },
     "Simpli.fi": {
       "properties": [
         "simpli.fi"
@@ -11578,6 +11691,14 @@
       ],
       "resources": [
         "sojern.com"
+      ]
+    },
+    "SolarWinds": {
+      "properties": [
+        "solarwinds.com"
+      ],
+      "resources": [
+        "pingdom.net"
       ]
     },
     "SomoAudience": {
@@ -12468,12 +12589,10 @@
     "TowerData": {
       "properties": [
         "rapleaf.com",
-        "rlcdn.com",
         "towerdata.com"
       ],
       "resources": [
-        "rapleaf.com",
-        "rlcdn.com"
+        "rapleaf.com"
       ]
     },
     "TraceMyIP.org": {
@@ -12533,7 +12652,8 @@
       ],
       "resources": [
         "trafficfactory.biz",
-        "trafficfactory.com"
+        "trafficfactory.com",
+        "tsyndicate.com"
       ]
     },
     "TrafficHaus": {
@@ -13962,10 +14082,12 @@
         "api-maps.yandex.ru",
         "moikrug.ru",
         "web-visor.com",
+        "webvisor.com",
         "webvisor.org",
         "yandex.by",
         "yandex.com",
         "yandex.com.tr",
+        "yandex.md",
         "yandex.ru",
         "yandex.st",
         "yandex.ua"
