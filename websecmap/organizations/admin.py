@@ -476,7 +476,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     actions.append("revive_organization")
 
 
-class WhoisOrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
+class WhoisOrganizationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     # A view that only deals with whois fields, so they are editable and managble easily
     list_display = (
         "id",
@@ -866,6 +866,8 @@ class UrlWhoisAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     # "updated_date", "last_update",
     list_display = ("id", "url_", "creation_date", "age", "reregistered_after_monitoring", "info", "is_the_latest")
 
+    list_filter = ["registrant", "is_the_latest", "admin_contact", "reseller", "abuse", "creation_date"][::-1]
+
     search_fields = ("url__url", "registrant", "admin_contact", "reseller", "abuse")
 
     @staticmethod
@@ -915,6 +917,27 @@ class UrlWhoisAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     declare_dead.short_description = "🔪  Declare dead"
     actions.append("declare_dead")
+
+    def remove_registrant_from_allowed_registrars_everywhere(self, request, queryset):
+        """
+        This removes the registrar from all organisations as being acceptable.
+        Acceptable registrars are only organizations directly: so governments and such, never
+         some marketing organization or whatever. Citizens need to be able to see who is in control.
+         And they have to be able to gain confidence and trust from registrations.
+        """
+        registrants_to_remove = {whois.registrant for whois in queryset if whois.registrant}
+
+        for organization in Organization.objects.all().filter(is_dead=False):
+            for registrant_to_remove in registrants_to_remove:
+                if registrant_to_remove in organization.acceptable_domain_registrants:
+                    organization.acceptable_domain_registrants.remove(registrant_to_remove)
+                    organization.reasoning_for_registrant_decisions += f"{registrant_to_remove}: bulk removed\n"
+            organization.save()
+
+    remove_registrant_from_allowed_registrars_everywhere.short_description = (
+        "Remove registrant from allowed registrars everywhere"
+    )
+    actions.append("remove_registrant_from_allowed_registrars_everywhere")
 
 
 def format_yd(delta: timedelta) -> str:
