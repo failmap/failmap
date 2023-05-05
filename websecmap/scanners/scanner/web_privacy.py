@@ -95,7 +95,7 @@ def compose_scan_task(urls: List[Url]) -> group:
     return group(tasks)
 
 
-@app.task(queue="openwpm", ignore_result=True)
+@app.task(queue="playwright-privacy", ignore_result=True)
 def scan(url: str) -> Dict[str, Any]:
     # just except the loudest way possible in case of exceptions.
     log.debug("Scanning privacy on %s", url)

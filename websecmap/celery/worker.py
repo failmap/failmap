@@ -39,7 +39,7 @@ ROLES_REQUIRING_IPV4 = [
     "v4_internet",
     "default_ipv4",
     "qualys",  # only supports ipv4(!)
-    "openwpm",
+    "playwright-privacy",
 ]
 
 ROLES_REQUIRING_NO_NETWORK = [
@@ -81,7 +81,7 @@ QUEUES_MATCHING_ROLES = {
         Queue("known_subdomains"),
         Queue("screenshot"),
         Queue("kickoff"),
-        Queue("openwpm"),
+        Queue("playwright-privacy"),
         Queue("prefork"),
         Queue("amass"),
         Queue("bannergrab"),
@@ -187,8 +187,8 @@ QUEUES_MATCHING_ROLES = {
     "bannergrab": [
         Queue("bannergrab"),
     ],
-    "openwpm": [
-        Queue("openwpm"),
+    "playwright-privacy": [
+        Queue("playwright-privacy"),
     ],
     "amass": [
         Queue("amass"),
