@@ -1174,6 +1174,58 @@ CONSTANCE_CONFIG = {
     ),
     "SIDE_WIDE_SEARCH_TITLE_NL": ("Bekijk de basisbeveiliging van", "Heading of the site wide search search bar.", str),
     "SIDE_WIDE_SEARCH_TITLE_EN": ("View the baseline security of", "Heading of the site wide search search bar.", str),
+    "SHOW_THANK_YOU": (
+        False,
+        "Shows thank you buttons and perhaps other stuff that allows visitors to thank this project via e-mail. This is"
+        " done via mail because you can see e-mail footers, recipient and reply address for increased legitimacy of "
+        "the thank-you.",
+        bool,
+    ),
+    "THANK_YOU_EMAIL_ADDRESS": (
+        "",
+        "E-mail adress that recieves thank you emails.",
+        str,
+    ),
+    "THANK_YOU_EMAIL_SUBJECT_EN": (
+        "",
+        "E-mail adress that recieves thank you emails.",
+        str,
+    ),
+    "THANK_YOU_EMAIL_SUBJECT_NL": (
+        "",
+        "E-mail adress that recieves thank you emails.",
+        str,
+    ),
+    "THANK_YOU_EMAIL_BODY_EN": (
+        "",
+        "E-mail adress that recieves thank you emails.",
+        str,
+    ),
+    "THANK_YOU_EMAIL_BODY_NL": (
+        "",
+        "E-mail adress that recieves thank you emails.",
+        str,
+    ),
+    "THANK_YOU_WILL_FIX_EMAIL_SUBJECT_EN": (
+        "",
+        "E-mail adress that recieves thank you emails.",
+        str,
+    ),
+    "THANK_YOU_WILL_FIX_EMAIL_SUBJECT_NL": (
+        "",
+        "E-mail adress that recieves thank you emails.",
+        str,
+    ),
+    "THANK_YOU_WILL_FIX_EMAIL_BODY_EN": (
+        "",
+        "E-mail adress that recieves thank you emails.",
+        str,
+    ),
+    "THANK_YOU_WILL_FIX_EMAIL_BODY_NL": (
+        "",
+        "E-mail adress that recieves thank you emails.",
+        str,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1390,6 +1442,21 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         (
             "Data Import Preferences",
             ("WEBSITEREGISTER_DOWNLOAD_PAGE", "WEBSITEREGISTER_SPREADSHEET_FILE_PATTERN_ON_PAGE"),
+        ),
+        (
+            "Thank You",
+            (
+                "SHOW_THANK_YOU",
+                "THANK_YOU_EMAIL_ADDRESS",
+                "THANK_YOU_EMAIL_SUBJECT_EN",
+                "THANK_YOU_EMAIL_SUBJECT_NL",
+                "THANK_YOU_EMAIL_BODY_EN",
+                "THANK_YOU_EMAIL_BODY_NL",
+                "THANK_YOU_WILL_FIX_EMAIL_SUBJECT_EN",
+                "THANK_YOU_WILL_FIX_EMAIL_SUBJECT_NL",
+                "THANK_YOU_WILL_FIX_EMAIL_BODY_EN",
+                "THANK_YOU_WILL_FIX_EMAIL_BODY_NL",
+            ),
         ),
         (
             "App",

@@ -274,6 +274,7 @@ def config_content():
             "metric_progress": configuration["SHOW_METRIC_PROGRESS"],
             "comply_or_explain_guidelines": configuration["SHOW_COMPLY_OR_EXPLAIN_GUIDELINES"],
             "geolocation_results": configuration["SHOW_GEOLOCATION_RESULTS"],
+            "thank_you": configuration["SHOW_THANK_YOU"],
             "socials": {
                 "report": configuration["SOCIALS_SHOW_REPORT"],
                 "map": configuration["SOCIALS_SHOW_MAP"],
@@ -335,6 +336,12 @@ def config_content():
                 "footer": {
                     "content": configuration["FOOTER_CONTENT_HTML_EN"],
                 },
+                "thank_you_email": {
+                    "will_fix_subject": configuration["THANK_YOU_WILL_FIX_EMAIL_SUBJECT_EN"],
+                    "will_fix_body": configuration["THANK_YOU_WILL_FIX_EMAIL_BODY_EN"],
+                    "thank_you_subject": configuration["THANK_YOU_EMAIL_SUBJECT_EN"],
+                    "thank_you_body": configuration["THANK_YOU_EMAIL_BODY_EN"],
+                },
             },
             "nl": {
                 "landing": {
@@ -358,6 +365,12 @@ def config_content():
                 },
                 "footer": {
                     "content": configuration["FOOTER_CONTENT_HTML_NL"],
+                },
+                "thank_you_email": {
+                    "will_fix_subject": configuration["THANK_YOU_WILL_FIX_EMAIL_SUBJECT_NL"],
+                    "will_fix_body": configuration["THANK_YOU_WILL_FIX_EMAIL_BODY_NL"],
+                    "thank_you_subject": configuration["THANK_YOU_EMAIL_SUBJECT_NL"],
+                    "thank_you_body": configuration["THANK_YOU_EMAIL_BODY_NL"],
                 },
             },
         },
