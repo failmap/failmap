@@ -160,7 +160,7 @@ def compose_scan_task(urls: List[Url], scanner_keyword_arguments: Dict[str, Any]
 
     return group(
         scan.s(hosts, scanner_keyword_arguments)
-        | store.s(host_to_endpoint_mapping)
+        | store_new_scan_results.s(host_to_endpoint_mapping)
         | group(
             plannedscan.finish.si(SCANNER_ACTION, SCANNER_NAME, mapping["url"])
             for url, mapping in host_to_endpoint_mapping.items()
@@ -184,6 +184,7 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
         .select_related("endpoint", "endpoint__url")
         .only(
             "evidence",
+            "type",
             "endpoint__url__url",
             "endpoint__id",
             "endpoint__url__id",
@@ -205,9 +206,7 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
 
     tasks = []
     for current_scan in current_scans:
-        endpoint_id = current_scan.endpoint.id
         url_id = current_scan.endpoint.url.id
-        uri_url = current_scan.endpoint.uri_url()
         urls_rescanned.append(url_id)
 
         # when something is clean up, it will be empty. So there is a scan but no data...
@@ -226,11 +225,8 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
             params = {"args": [scan_these_templates]}
 
         tasks.append(
-            scan.s([uri_url], params)
-            # {ep.uri_url(): {"endpoint": ep.id, "url": ep.url.id} for ep in relevant_endpoints}
-            # todo: tell what scan type is being stored in a re-scan, and if there
-            #  is no data, then the thing is clean.
-            | store.s({uri_url: {"endpoint": endpoint_id, "url": url_id}})
+            scan.s([current_scan.endpoint.uri_url()], params)
+            | store_verify_results.s(current_scan.endpoint.id, current_scan.type)
             | plannedscan.finish.si("verify", SCANNER_NAME, url_id)
         )
 
@@ -305,7 +301,12 @@ def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None) -> b
 
 
 @app.task(queue="storage", ignore_result=True)
-def store(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[str, Dict[str, int]]) -> None:
+def store_new_scan_results(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[str, Dict[str, int]]) -> None:
+    """
+    In a new nuclei scan, you do not know what categories are scanned and what metrics are actually returned:
+    nuclei only returns data if a scan was successful. So you might get less categories than you requested etc.
+    In a new scan just dump whatever you find to the database: the scan types are derived from the scan data.
+    """
     raw_nuclei_records = convert_nuclei_data_to_json(raw_nuclei_data)
     results_per_host = split_nuclei_records_per_host(raw_nuclei_records)
 
@@ -341,10 +342,25 @@ def store(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[str, Dict[str, in
                     "exception": e,
                 },
             )
-        # and clean up the stuff that has been solved completely:
-        # this currently adds noise. Things should just all be rescanned.
-        # current_categories_of_metrics = list(combined_metrics.keys())
-        # neutralize_missing_metrics(current_categories_of_metrics, endpoint_id)
+
+
+@app.task(queue="storage", ignore_result=True)
+def store_verify_results(raw_nuclei_data: bin, endpoint_id: int, scan_type: str) -> None:
+    """
+    A verify scan knows what scan has been performed. Nuclei does not return data in case it has not found anything,
+    in that case we just neutralize a missing if it exists for that category.
+
+    This assumes that a scan type contains all possible scans.
+    """
+    raw_nuclei_records = convert_nuclei_data_to_json(raw_nuclei_data)
+    if not raw_nuclei_records:
+        neutralize_missing_metrics([scan_type], endpoint_id=endpoint_id)
+        return
+
+    # Story anything you get back under the known category. It could be that scans have been moved to
+    # different categories and such. The result is always whatever you asked to scan or a subset.
+    data = force_combine_all_processed_metrics_into_one_category(raw_nuclei_records)
+    store_endpoint_scan_result(scan_type, endpoint_id, data["highest-severity"], "", json.dumps(data["findings"]))
 
 
 def split_nuclei_records_per_host(raw_nuclei_records) -> Dict[str, List[Dict[str, Any]]]:
@@ -416,13 +432,35 @@ def combine_processed_nuclei_records(processed_records) -> Dict[str, Any]:
             combined_metrics[category]["highest-severity"], record["severity"]
         )
 
-        # don't mix up severity for end users, they will just not understand it.
-        del record["severity"]
-        # remove redundant category name
-        del record["category"]
+        record = clean_nuclei_record(record)
         combined_metrics[category]["findings"].append(record)
 
     return combined_metrics
+
+
+def force_combine_all_processed_metrics_into_one_category(raw_nuclei_records):
+    processed_nuclei_records = [process_nuclei_record(record) for record in raw_nuclei_records]
+
+    combined_metrics = {"highest-severity": "unknown", "amount-of-findings": 0, "findings": []}
+    # in this case category is not relevant:
+    for record in processed_nuclei_records:
+
+        combined_metrics["highest-severity"] = get_higher_severity(
+            combined_metrics["highest-severity"], record["severity"]
+        )
+        combined_metrics["amount-of-findings"] += 1
+        record = clean_nuclei_record(record)
+        combined_metrics["findings"].append(record)
+
+    return combine_processed_nuclei_records(processed_nuclei_records)
+
+
+def clean_nuclei_record(record):
+    # don't mix up severity for end users, they will just not understand it.
+    del record["severity"]
+    # remove redundant category name
+    del record["category"]
+    return record
 
 
 def process_nuclei_record(n_record: Dict[str, Any]) -> Dict[str, Any]:

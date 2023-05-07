@@ -14,7 +14,7 @@ from websecmap.scanners.scanner.nuclei_http import (
     prepare_nuclei_results_for_storage,
     process_nuclei_record,
     split_nuclei_records_per_host,
-    store,
+    store_new_scan_results,
     compose_verify_task,
     create_nuclei_scan_command,
 )
@@ -74,11 +74,11 @@ def test_nuclei_store(db, current_path):
     }
 
     # no results should be no issue
-    store(b"", host_to_endpoint_mapping)
+    store_new_scan_results(b"", host_to_endpoint_mapping)
     assert EndpointGenericScan.objects.count() == 0
 
     # all categorized into the technologies area.
-    store(three_example_nuclei_tests, host_to_endpoint_mapping)
+    store_new_scan_results(three_example_nuclei_tests, host_to_endpoint_mapping)
     assert EndpointGenericScan.objects.count() == 2
 
 
