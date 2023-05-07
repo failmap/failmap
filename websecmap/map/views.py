@@ -400,6 +400,7 @@ def config_content():
             "custom_css": configuration["CUSTOM_CSS"],
             "logo_image": configuration["LOGO_IMAGE"],
             "favicon": configuration["FAVICON"],
+            "thank_you_email_address": configuration["THANK_YOU_EMAIL_ADDRESS"],
             "relevant_for_ui": {
                 "high": configuration["RELEVANT_FOR_UI_HIGH"],
                 "medium": configuration["RELEVANT_FOR_UI_MEDIUM"],
