@@ -465,6 +465,7 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_BROKER_CONNECTION_RETRY = True
 CELERY_BROKER_CONNECTION_MAX_RETRIES = 400
 CELERY_RESULT_EXPIRES = timedelta(hours=4)
+CELERY_TASK_RESULT_EXPIRES = timedelta(hours=4)
 
 # Use the value of 2 for celery prefetch multiplier. Previous was 1. The
 # assumption is that 1 will block a worker thread until the current (rate
