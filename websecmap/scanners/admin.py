@@ -879,6 +879,13 @@ class HttpEndpointContentAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "is_the_latest",
     )
 
-    list_filter = ["content_type", "at_when", "is_the_latest"][::-1]
+    list_filter = [
+        "content_type",
+        "at_when",
+        "is_the_latest",
+        "endpoint__protocol",
+        "endpoint__port",
+        "endpoint__ip_version",
+    ][::-1]
 
-    search_fields = ("endpoint__url__url",)
+    search_fields = ("endpoint__url__url", "content")
