@@ -75,7 +75,7 @@ def get_http_content(uri, path):
     }
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def store_http_content(response: Dict[str, Any], endpoint_id: int):
 
     endpoint = Endpoint.objects.filter(id=endpoint_id).first()
