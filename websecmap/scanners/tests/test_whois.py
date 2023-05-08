@@ -81,7 +81,7 @@ def test_regenerate_registrant_statistics_for_all_organizations(db):
         "Non Legit Hoster": {"amount": 1, "urls": ["zutphen3.nl"]},
     }
     # it was empty, its easier to delete than to add
-    assert org.acceptable_domain_registrants == ["Gemeente Zutphen", "Non Legit Hoster"]
+    assert list(sorted(org.acceptable_domain_registrants)) == list(sorted(["Gemeente Zutphen", "Non Legit Hoster"]))
 
 
 def test_get_registrants_for_url(db):
