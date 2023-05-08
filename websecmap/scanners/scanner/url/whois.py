@@ -97,5 +97,9 @@ def regenerate_registrant_statistics_for_all_organizations():
         organization.computed_domain_registrant_statistics = registrant_stats
         # it's easier to delete stuff than add stuff, so just add all new keys as being legit
         if not organization.acceptable_domain_registrants:
-            organization.acceptable_domain_registrants = list(registrant_stats.keys())
+            all_registrants = list(registrant_stats.keys())
+            # never allow the empty registrant
+            if "" in all_registrants:
+                all_registrants.remove("")
+            organization.acceptable_domain_registrants = all_registrants
         organization.save()
