@@ -1634,6 +1634,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "scanners.scanneractivity", "label": "🚴 Scanner Activities"},
             {"name": "scanners.followupscan", "label": "⏭️ Follow Up Scans"},
             {"name": "scanners.securitypolicy", "label": "🚥️ Security Policies"},
+            {"name": "scanners.httpendpointcontent", "label": "📖 HTTP endpoint content"},
         ],
     },
     {

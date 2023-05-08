@@ -22,7 +22,15 @@ def apply_all_affects():
 
 
 def check_policy_sanity(policy: SecurityPolicy) -> bool:
-    return any([policy.common_subdomains, policy.common_ports, policy.common_ip_versions, policy.common_protocols])
+    return any(
+        [
+            policy.common_subdomains,
+            policy.common_ports,
+            policy.common_ip_versions,
+            policy.common_protocols,
+            policy.common_html_front_page_content,
+        ]
+    )
 
 
 def filter_policy_endpoints(policy: SecurityPolicy) -> List[Endpoint]:
@@ -43,6 +51,13 @@ def filter_policy_endpoints(policy: SecurityPolicy) -> List[Endpoint]:
 
     if policy.common_subdomains:
         endpoints_in_policy = endpoints_in_policy.filter(url__computed_subdomain__in=policy.common_subdomains)
+
+    if policy.common_html_front_page_content:
+        endpoints_in_policy = endpoints_in_policy.filter(
+            httpendpointcontent__content__contains=policy.common_html_front_page_content,
+            httpendpointcontent__path="/",
+            httpendpointcontent__is_the_latest=True,
+        )
 
     return list(endpoints_in_policy)
 

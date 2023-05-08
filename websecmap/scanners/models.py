@@ -26,6 +26,12 @@ class SecurityPolicy(models.Model):
     common_ip_versions = models.IntegerField(
         blank=True, null=True, help_text="0 for all, 4 for ipv4, 6 for ipv6", default=0
     )
+    common_html_front_page_content = models.CharField(
+        blank=True,
+        null=True,
+        help_text="Checks for a certain string on the latest http response of this page (slow!). Case sensitive.",
+        max_length=255,
+    )
 
     affect_explain_scoring_policy = models.ManyToManyField(
         ScanPolicy,
@@ -1041,3 +1047,21 @@ class ProductHierarchy(models.Model):
 
     def __str__(self):
         return f"{self.product} -> {self.relationship} -> {self.related_product}"
+
+
+class HttpEndpointContent(models.Model):
+    # use playwright to only get text of the page and not the HTML?
+    endpoint = models.ForeignKey(Endpoint, on_delete=models.CASCADE)
+
+    path = models.CharField(max_length=4000, blank=True, null=True)
+    status_code = models.IntegerField(blank=True, null=True)
+    content_type = models.CharField(max_length=40, blank=True, db_index=True, null=True)
+    content = models.TextField(blank=True, null=True)
+    content_hash = models.CharField(max_length=40, blank=True)
+    title = models.CharField(max_length=200, blank=True, null=True)
+    length_in_bytes = models.IntegerField(blank=True, null=True)
+    headers = models.JSONField(blank=True, null=True)  # possibly a jsonfield
+
+    at_when = models.DateTimeField(blank=True, null=True)
+    last_scan_moment = models.DateTimeField(blank=True, null=True)
+    is_the_latest = models.BooleanField(default=False, null=True, blank=True)

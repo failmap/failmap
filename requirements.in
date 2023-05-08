@@ -177,3 +177,6 @@ django-taggit
 
 # replacemenet for time_cache:
 cachetools
+
+# http endpoint content for comply or explain
+bs4

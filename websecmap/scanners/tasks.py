@@ -33,6 +33,7 @@ from websecmap.scanners.scanner import (
     tls_qualys,
     verify_unresolvable,
     web_privacy,
+    endpoint_content,
 )
 from websecmap.scanners.scanner.url import whois
 
@@ -69,6 +70,7 @@ __scanners__ = [
     nuclei_http,
     subdomains_amass,
     whois,
+    endpoint_content,
 ]
 
 __others__ = [proxy, plannedscan]

@@ -47,6 +47,7 @@ class SecurityPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "common_protocols",
         "common_ports",
         "common_ip_versions",
+        "common_html_front_page_content",
         "affects_which_explain",
     )
 
@@ -861,3 +862,23 @@ class TagProxy(taggit.models.Tag):
 @admin.register(TagProxy)
 class TagAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ("id", "name", "slug")
+
+
+@admin.register(models.HttpEndpointContent)
+class HttpEndpointContentAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = (
+        "id",
+        "endpoint",
+        "path",
+        "title",
+        "content_type",
+        "status_code",
+        "length_in_bytes",
+        "at_when",
+        "last_scan_moment",
+        "is_the_latest",
+    )
+
+    list_filter = ["content_type", "at_when", "is_the_latest"][::-1]
+
+    search_fields = ("endpoint__url__url",)

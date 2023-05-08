@@ -20,8 +20,12 @@ async-timeout==4.0.2
     #   redis
 attrs==22.2.0
     # via aiohttp
+beautifulsoup4==4.12.2
+    # via bs4
 billiard==3.6.4.0
     # via celery
+bs4==0.0.1
+    # via -r requirements.in
 cachetools==5.3.0
     # via -r requirements.in
 celery[gevent,redis]==4.4.7
@@ -277,6 +281,8 @@ six==1.16.0
     #   python-dateutil
     #   python-monkey-business
     #   requests-file
+soupsieve==2.4.1
+    # via beautifulsoup4
 sqlparse==0.4.3
     # via django
 statsd==4.0.0
