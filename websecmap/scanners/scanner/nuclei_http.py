@@ -452,7 +452,7 @@ def force_combine_all_processed_metrics_into_one_category(raw_nuclei_records):
         record = clean_nuclei_record(record)
         combined_metrics["findings"].append(record)
 
-    return combine_processed_nuclei_records(processed_nuclei_records)
+    return combined_metrics
 
 
 def clean_nuclei_record(record):

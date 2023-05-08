@@ -1057,7 +1057,7 @@ class HttpEndpointContent(models.Model):
     status_code = models.IntegerField(blank=True, null=True)
     content_type = models.CharField(max_length=40, blank=True, db_index=True, null=True)
     content = models.TextField(blank=True, null=True)
-    content_hash = models.CharField(max_length=40, blank=True)
+    content_hash = models.CharField(max_length=64, blank=True)
     title = models.CharField(max_length=200, blank=True, null=True)
     length_in_bytes = models.IntegerField(blank=True, null=True)
     headers = models.JSONField(blank=True, null=True)  # possibly a jsonfield

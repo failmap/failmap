@@ -4,6 +4,7 @@ from typing import Any, Dict
 import requests
 
 from celery import group
+from django.db import OperationalError
 
 from websecmap.celery import app
 from websecmap.scanners.models import HttpEndpointContent, Endpoint
@@ -51,18 +52,23 @@ def get_http_content(uri, path):
             break
     response.close()
 
-    data = data.decode("utf-8")
+    try:
+        data = data.decode("utf-8")
+    except UnicodeDecodeError:
+        # todo: make it cleaner
+        data = "UnicodeDecodeError"
     soup = BeautifulSoup(data, "html.parser")
 
     # can be serialized
     return {
         "path": path,
         "status_code": response.status_code,
-        "content_type": response.headers.get("content-type", None),
+        "content_type": response.headers.get("content-type", "")[:40],
         # soup.get_text() would perhaps be nicer, but might miss non-html content
-        "content": data,
+        # data might be complete garbage with weird continuation characters, incorrect unicode etc...
+        "content": str(data),
         "content_hash": hashlib.sha256(str(data).encode()).hexdigest(),
-        "title": soup.title.string if soup.title else "",
+        "title": soup.title.string[:200] if soup.title else "",
         "length_in_bytes": response.headers.get("content-length", None),
         # the conversio to dict might lose some headers in edge cases
         "headers": dict(response.headers),
@@ -95,10 +101,14 @@ def store_http_content(response: Dict[str, Any], endpoint_id: int):
         previous.is_the_latest = False
         previous.save()
 
-    HttpEndpointContent.objects.create(
-        endpoint=endpoint,
-        is_the_latest=True,
-        last_scan_moment=datetime.now(timezone.utc),
-        at_when=datetime.now(timezone.utc),
-        **response,
-    )
+    try:
+        HttpEndpointContent.objects.create(
+            endpoint=endpoint,
+            is_the_latest=True,
+            last_scan_moment=datetime.now(timezone.utc),
+            at_when=datetime.now(timezone.utc),
+            **response,
+        )
+    except OperationalError:
+        # (1366, "Incorrect string value: '\\xF0\\x9F\\x99\\x82? ...' for column 'content' at row 1")
+        return
