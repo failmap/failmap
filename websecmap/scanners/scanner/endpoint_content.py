@@ -68,7 +68,7 @@ def get_http_content(uri, path):
         # data might be complete garbage with weird continuation characters, incorrect unicode etc...
         "content": str(data),
         "content_hash": hashlib.sha256(str(data).encode()).hexdigest(),
-        "title": soup.title.string[:200] if soup.title else "",
+        "title": soup.title.string[:200] if soup and soup.title and soup.title.string else "",
         "length_in_bytes": response.headers.get("content-length", None),
         # the conversio to dict might lose some headers in edge cases
         "headers": dict(response.headers),
