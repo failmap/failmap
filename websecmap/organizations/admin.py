@@ -357,6 +357,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
                 "fields": (
                     "computed_domain_registrant_statistics",
                     "acceptable_domain_registrants",
+                    "structured_reasoning_for_registrant_decisions",
                     "reasoning_for_registrant_decisions",
                 ),
             },
@@ -485,7 +486,7 @@ class WhoisOrganizationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "country",
         "computed_domain_registrant_statistics",
         "acceptable_domain_registrants",
-        "reasoning_for_registrant_decisions",
+        "structured_reasoning_for_registrant_decisions",
     )
 
     @staticmethod
@@ -507,6 +508,7 @@ class WhoisOrganizationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     fields = [
         "computed_domain_registrant_statistics",
         "acceptable_domain_registrants",
+        "structured_reasoning_for_registrant_decisions",
         "reasoning_for_registrant_decisions",
     ]
 
@@ -945,6 +947,11 @@ def remove_registrant_from_allowed_registrars(registrant_to_remove):
 
         organization.acceptable_domain_registrants.remove(registrant_to_remove)
         organization.reasoning_for_registrant_decisions += f"{registrant_to_remove}: bulk removed\n"
+        if registrant_to_remove not in organization.not_allowed_registrant_names:
+            organization.structured_reasoning_for_registrant_decisions.append(
+                {"registrant": registrant_to_remove, "reason": "bulk removed"}
+            )
+
         organization.save()
 
 

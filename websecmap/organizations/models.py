@@ -137,12 +137,23 @@ class Organization(models.Model):
     reasoning_for_registrant_decisions = models.TextField(
         default="",
         blank=True,
-        help_text="Reasoning why a registrant has been rejected or allowed. Accepted registrants usually are "
+        help_text="DEPRECATED",
+    )
+    structured_reasoning_for_registrant_decisions = JSONField(
+        help_text="List of decision. "
+        "Reasoning why a registrant has been rejected or allowed. Accepted registrants usually are "
         "organization names that direcly connect to the domain. Rejected registrants can for example be "
         "names of employees, other companies, commercial companies that are not the organization themselves."
         "For example: 'texel.nl' belongs to 'Municipality of Texel' and not 'godaddy', 'herman acker' or ''. "
-        "This field is purely for documentation and knowledge transfer.",
+        "This field is purely for documentation and knowledge transfer."
+        'Example: [{"registrant": "", "reason": "empty registrant"}]',
+        blank=True,
+        default=[{"registrant": "", "reason": "empty registrant"}],
     )
+
+    @property
+    def not_allowed_registrant_names(self):
+        return [reg["registrant"] for reg in self.structured_reasoning_for_registrant_decisions]
 
     class Meta:
         managed = True

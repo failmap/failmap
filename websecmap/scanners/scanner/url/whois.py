@@ -101,5 +101,33 @@ def regenerate_registrant_statistics_for_all_organizations():
             # never allow the empty registrant
             if "" in all_registrants:
                 all_registrants.remove("")
-            organization.acceptable_domain_registrants = all_registrants
+
+            # remove all not allowed registrants:
+            leftover = list(set(all_registrants) - set(organization.not_allowed_registrant_names))
+
+            organization.acceptable_domain_registrants = leftover
         organization.save()
+
+
+def remove_not_allowed_registrants_from_acceptable_domain_registrants():
+    organizations = Organization.objects.all().filter(is_dead=False)
+    for org in organizations:
+        leftover = list(set(org.acceptable_domain_registrants) - set(org.not_allowed_registrant_names))
+        org.acceptable_domain_registrants = leftover
+        org.save()
+
+
+def move_non_structured_reasoning_to_structured_reasoning():
+    for org in Organization.objects.all():
+        if org.reasoning_for_registrant_decisions:
+            lines = org.reasoning_for_registrant_decisions.split("\n")
+            for line in lines:
+                clean_line = line.strip()
+                clean_line = clean_line.replace('"', "")
+                clean_line = clean_line.replace(",", "")
+                clean_line = clean_line.split(":", 1)[0]
+                if clean_line and clean_line not in org.not_allowed_registrant_names:
+                    org.structured_reasoning_for_registrant_decisions.append(
+                        {"registrant": clean_line.strip(), "reason": "bulk removed"}
+                    )
+                    org.save()
