@@ -7,6 +7,7 @@ Thanks to:
 - https://codeberg.org/dataskydd.net/
 - https://github.com/PrivacyScore/privacyscanner/tree/whotracksme/privacyscanner/scanmodules
 """
+from json import JSONDecodeError
 from typing import Any, Dict, List
 
 import requests
@@ -18,7 +19,7 @@ from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
-from websecmap.scanners.models import Endpoint
+from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
@@ -227,3 +228,30 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         message=WEB_PRIVACY_COOKIES_NEUTRAL,
         evidence=json.dumps(cookies),
     )
+
+
+def privacy_counters(add_urls: bool = False) -> None:
+    scans = EndpointGenericScan.objects.all().filter(
+        type="web_privacy_tracking",
+        is_the_latest_scan=True,
+        endpoint__is_dead=False,
+        endpoint__url__is_dead=False,
+        endpoint__url__not_resolvable=False,
+    )
+    # todo: specify layers
+    keys = ["Company", "Platform", "Tracking Url"]
+    for key in keys:
+        companies = {}
+        for scan in scans:
+            try:
+                evidence = json.loads(scan.evidence.replace("'", '"'))
+                for tracker in evidence:
+                    if tracker[key] not in companies:
+                        companies[tracker[key]] = {"amount": 0, "urls": []}
+                    companies[tracker[key]]["amount"] += 1
+                    if add_urls:
+                        companies[tracker[key]]["urls"].append(scan.endpoint.url.url)
+            except JSONDecodeError:
+                pass
+        print(key)
+        print(json.dumps(companies, indent=4))

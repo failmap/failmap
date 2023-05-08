@@ -7,6 +7,8 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan, Url, UrlGen
 
 log = logging.getLogger(__package__)
 
+MAX_EVIDENCE_LENGTH = 9000
+
 
 def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, message: str, evidence: str = ""):
     log.debug(
@@ -27,8 +29,10 @@ def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, me
 
     # To deduplicate data, only store changes to scans. We'll update just the scan moment, and the rest stays the same.
     # The amount of data saved runs in the gigabytes. So it's worth the while doing it like this :)
-    if epgs.explanation == message and epgs.rating == rating:
-        log.debug("Scan had the same rating and message, updating last_scan_moment only.")
+    # in privacy metrics the rating may stay the same but the evidence can change. Make sure that this change
+    # in evidence is reflected.
+    if epgs.explanation == message and epgs.rating == rating and epgs.evidence == evidence[:MAX_EVIDENCE_LENGTH]:
+        log.debug("Scan had the same rating, message and evidence, updating last_scan_moment only.")
         epgs.last_scan_moment = datetime.now(timezone.utc)
         epgs.save(update_fields=["last_scan_moment"])
         return
@@ -46,7 +50,7 @@ def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, me
     epgs.endpoint = Endpoint.objects.all().filter(id=endpoint_id).first()
     epgs.type = scan_type
     # Very long CSP headers for example take a lot of space.
-    epgs.evidence = evidence[:9000]
+    epgs.evidence = evidence[:MAX_EVIDENCE_LENGTH]
     epgs.last_scan_moment = datetime.now(timezone.utc)
     epgs.rating_determined_on = datetime.now(timezone.utc)
     epgs.is_the_latest_scan = True
