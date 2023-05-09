@@ -562,7 +562,7 @@ class OrganizationReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "inspect_organization",
     )
     search_fields = ["organization__name", "at_when"]
-    list_filter = ["organization", "organization__country", "organization__type__name", "at_when"][::-1]
+    list_filter = ["organization", "organization__country", "organization__layers__name", "at_when"][::-1]
     # fields = [field.name for field in OrganizationRating._meta.get_fields() if field.name != "id"][::-1]
 
     fields = (

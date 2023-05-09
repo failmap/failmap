@@ -93,7 +93,7 @@ def calculate_impact():
             url__is_dead=False,
             url__not_resolvable=False,
             url__organization__country=config.PROJECT_COUNTRY,
-            url__organization__type__name="municipality",
+            url__organization__layers__name="municipality",
         )
         .only("id")
         .order_by("-id")
@@ -105,7 +105,7 @@ def calculate_impact():
             endpoint__url__is_dead=False,
             endpoint__url__not_resolvable=False,
             endpoint__url__organization__country=config.PROJECT_COUNTRY,
-            endpoint__url__organization__type__name="municipality",
+            endpoint__url__organization__layers__name="municipality",
         )
         .only("id")
     )
@@ -118,7 +118,7 @@ def calculate_impact():
             endpoint__url__is_dead=False,
             endpoint__url__not_resolvable=False,
             endpoint__url__organization__country=config.PROJECT_COUNTRY,
-            endpoint__url__organization__type__name="municipality",
+            endpoint__url__organization__layers__name="municipality",
             is_the_latest_scan=True,
         )
         .only("id")

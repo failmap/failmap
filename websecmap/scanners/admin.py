@@ -110,7 +110,7 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ("url__url",)
     list_filter = [
         "url__organization__country",
-        "url__organization__type__name",
+        "url__organization__layers__name",
         "ip_version",
         "port",
         "protocol",
@@ -196,7 +196,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     list_filter = [
         "endpoint__url__organization__country",
-        "endpoint__url__organization__type__name",
+        "endpoint__url__organization__layers__name",
         "endpoint__url__is_dead",
         ("endpoint", RelatedFieldAjaxListFilter),
         "type",
@@ -305,7 +305,7 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ("url__url", "type", "rating", "explanation", "last_scan_moment", "rating_determined_on")
     list_filter = [
         "url__organization__country",
-        "url__organization__type__name",
+        "url__organization__layers__name",
         "type",
         "rating",
         "last_scan_moment",

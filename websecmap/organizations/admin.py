@@ -688,7 +688,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
         "organization",
         "onboarded",
         "onboarding_stage",
-        "organization__type__name",
+        "organization__layers__name",
         "organization__country",
         "dns_supports_mx",
         HasEndpointScansListFilter,
