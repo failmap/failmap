@@ -882,6 +882,13 @@ phpMyAdmin is written in PHP, which runs on Windows/Linux/MacOS, has the goal of
 """
 
 
+class SecurityImpact(models.Model):
+    name = models.SlugField(max_length=30, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 class ScannerFinding(models.Model):
     name = models.CharField(max_length=200, blank=True, null=False)
     slug = models.SlugField(max_length=200, blank=True)
@@ -948,6 +955,13 @@ class Product(models.Model):
     # products / technologies that should not be returned because they never add a lot of value
     # such as defaults and such.
     is_irrelevant = models.BooleanField(default=False, null=True, blank=True)
+
+    technology_presence_security_impact = models.ForeignKey(
+        SecurityImpact, blank=True, null=True, on_delete=models.CASCADE, related_name="technology_security_impact"
+    )
+    login_panel_presence_security_impact = models.ForeignKey(
+        SecurityImpact, blank=True, null=True, on_delete=models.CASCADE, related_name="panel_security_impact"
+    )
 
     def as_dict(self):
         return {

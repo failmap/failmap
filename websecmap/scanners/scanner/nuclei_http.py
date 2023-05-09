@@ -532,18 +532,30 @@ def extract_findings_to_scanner_findings():
     # do not attempt to re-insert something we already have
     # this reduces many many queries into ±2k
     found_findings_names = []
-
     for epgs in EndpointGenericScan.objects.all().filter(type__startswith="nuclei_"):
-        try:
-            json_data = json.loads(epgs.evidence)
-        except json.decoder.JSONDecodeError:
-            json_data = {}
-        if not json_data:
-            continue
-        # it's a list of dicts
+        json_data = load_finding_data(epgs.evidence)
         for row in json_data:
             if row["finding-name"] in found_findings_names:
                 continue
-
             found_findings_names.append(row["finding-name"])
             ScannerFinding.objects.get_or_create(name=row["finding-name"], nice_name=row["name"], scanner=scanner)
+
+
+def load_finding_data(data):
+    try:
+        json_data = json.loads(data)
+    except json.decoder.JSONDecodeError:
+        json_data = []
+    return json_data
+
+
+def get_all_panels(panel_name: str = "phpmyadmin"):
+    # creates a list of all phpmyadmin installations. This is convenient for retesting separately by hand.
+    # Used via the shell, not in code here in the app (yet).
+    panels = set()
+    for epgs in EndpointGenericScan.objects.all().filter(type__startswith="nuclei_exposed_panels").order_by("-id"):
+        json_data = load_finding_data(epgs.evidence)
+        for row in json_data:
+            if panel_name.lower() in row["name"].lower():
+                panels.add(row["evidence"]["matched-at"])
+    return panels

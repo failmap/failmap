@@ -781,7 +781,12 @@ class ProductAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "tag_list",
         "vendor",
         "goal",
+        "impact",
     )
+
+    @staticmethod
+    def impact(obj):
+        return f"T: {obj.technology_presence_security_impact} P:{obj.login_panel_presence_security_impact}"
 
     def tag_list(self, obj):
         return ", ".join(o.name for o in obj.tags.all())
