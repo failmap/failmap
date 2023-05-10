@@ -29,9 +29,10 @@ import websecmap.app.dashboard_module_views  # noqa  # pylint: disable=unused-im
 # Django 1.10 http://stackoverflow.com/questions/38744285/
 # django-urls-error-view-must-be-a-callable-or-a-list-tuple-in-the-case-of-includ#38744286
 from websecmap.organizations.models import Coordinate, Organization
+from . import __version__
 
-admin.site.site_header = "Web Security Map Admin"
-admin.site.site_title = "Web Security Map Admin"
+admin.site.site_header = f"Web Security Map Admin {__version__}"
+admin.site.site_title = f"Web Security Map Admin"
 
 
 def trigger_error():
