@@ -32,7 +32,8 @@ from websecmap.organizations.models import Coordinate, Organization
 from . import __version__
 
 admin.site.site_header = f"Web Security Map Admin {__version__}"
-admin.site.site_title = f"Web Security Map Admin"
+# Don't show version in title, as that might be shared without auth
+admin.site.site_title = "Web Security Map Admin"
 
 
 def trigger_error():
