@@ -1079,3 +1079,60 @@ class HttpEndpointContent(models.Model):
     at_when = models.DateTimeField(blank=True, null=True)
     last_scan_moment = models.DateTimeField(blank=True, null=True)
     is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+
+
+class DomainIp(models.Model):
+    # This does not need to be a complete DNS overview yet
+    # This maps external urls, so any domain to an ip address, which is useful for geolocation.
+    # rarely happens that something is > 250 characters long, but if it happens will change the db
+    domain = models.CharField(max_length=255, blank=True, null=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    ip_version = models.IntegerField(blank=True, null=True, help_text="0 for all, 4 for ipv4, 6 for ipv6", default=0)
+
+    at_when = models.DateTimeField(blank=True, null=True)
+    last_scan_moment = models.DateTimeField(blank=True, null=True)
+    is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+
+
+class GeoIp(models.Model):
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+
+    # not public stuff cannot be queried of course.
+    designation = models.CharField(max_length=15, blank=True, null=True)
+
+    # if something went wrong requesting data:
+    error = models.CharField(max_length=200, blank=True, null=True)
+
+    # maxmind data
+    continent_code = models.CharField(max_length=2, blank=True, null=True)
+    continent_geoname_id = models.IntegerField(blank=True, null=True)
+    continent_in_en = models.CharField(max_length=50, blank=True, null=True)
+
+    country_iso_code = models.CharField(max_length=2, blank=True, null=True)
+    country_geoname_id = models.IntegerField(blank=True, null=True)
+    country_in_en = models.CharField(max_length=80, blank=True, null=True)
+
+    city_geoname_id = models.IntegerField(blank=True, null=True)
+    city_in_en = models.CharField(max_length=200, blank=True, null=True)
+
+    location_latitude = models.FloatField(blank=True, null=True)
+    location_longitude = models.FloatField(blank=True, null=True)
+    location_accuracy = models.IntegerField(blank=True, null=True)
+    location_metro_code = models.CharField(max_length=5, blank=True, null=True)
+
+    isp_country_code = models.CharField(max_length=2, blank=True, null=True)
+    isp_country_geoname_id = models.IntegerField(blank=True, null=True)
+    isp_country_in_en = models.CharField(max_length=80, blank=True, null=True)
+
+    as_number = models.IntegerField(blank=True, null=True)
+    as_organization = models.CharField(max_length=200, blank=True, null=True)
+    isp_name = models.CharField(max_length=200, blank=True, null=True)
+    network = models.CharField(max_length=200, blank=True, null=True)
+
+    # and all data returned for further inspection, for example for subdivisions
+    response_data = models.JSONField(blank=True, null=True)
+
+    # over time
+    at_when = models.DateTimeField(blank=True, null=True)
+    last_scan_moment = models.DateTimeField(blank=True, null=True)
+    is_the_latest = models.BooleanField(default=False, null=True, blank=True)

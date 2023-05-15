@@ -180,3 +180,6 @@ cachetools
 
 # http endpoint content for comply or explain
 bs4
+
+# ip geolocation (experimental)
+geoip2

@@ -222,6 +222,7 @@ def get_ips(url: str):
 
 
 # It's possible you don't get an address back, it could not be configured on our or their side.
+@app.task(queue="internet")
 def get_ipv4(url: str):
     # https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
     ipv4 = ""
@@ -248,6 +249,7 @@ def get_ipv4(url: str):
 
 
 # It's possible you don't get an address back, it could not be configured on our or their side.
+@app.task(queue="internet")
 def get_ipv6(url: str):
     # https://www.iana.org/assignments/iana-ipv6-special-registry/iana-ipv6-special-registry.xhtml
     ipv6 = ""

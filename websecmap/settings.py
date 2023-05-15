@@ -1228,6 +1228,160 @@ CONSTANCE_CONFIG = {
         "E-mail adress that recieves thank you emails.",
         str,
     ),
+    "GEO_IP_ACCOUNT_ID": (
+        "",
+        "Sequence of numbers",
+        str,
+    ),
+    "GEO_IP_LICENSE_KEY": (
+        "",
+        "License key string",
+        str,
+    ),
+    "GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_OK": (
+        '["NL", "BE"]',
+        "List of country codes that will show a medium impact on the map due to data processing happening in these"
+        " countries. If nothing specified, this is the default. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_LOW": (
+        '["NL", "BE"]',
+        "List of country codes that will show a medium impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_MEDIUM": (
+        '["NL", "BE"]',
+        "List of country codes that will show a medium impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_HIGH": (
+        '["NL", "BE"]',
+        "List of country codes that will show a high impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_OK": (
+        '["NL", "BE"]',
+        "List of continent codes that will show a ok impact on the map due to data processing happening in these"
+        " countries. If nothing specified, this is the default. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_LOW": (
+        '["NL", "BE"]',
+        "List of continent codes that will show a high impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_MEDIUM": (
+        '["NL", "BE"]',
+        "List of continent codes that will show a medium impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_HIGH": (
+        '["NL", "BE"]',
+        "List of continent codes that will show a high impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEB_SERVER_IN_COUNTRIES_OK": (
+        '["NL", "BE"]',
+        "List of country codes that will show a medium impact on the map due to data processing happening in these"
+        " countries. If nothing specified, this is the default. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEB_SERVER_IN_COUNTRIES_LOW": (
+        '["NL", "BE"]',
+        "List of country codes that will show a high impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEB_SERVER_IN_COUNTRIES_MEDIUM": (
+        '["NL", "BE"]',
+        "List of country codes that will show a medium impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEB_SERVER_IN_COUNTRIES_HIGH": (
+        '["NL", "BE"]',
+        "List of country codes that will show a high impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEB_SERVER_IN_CONTINENT_OK": (
+        '["NL", "BE"]',
+        "List of continent codes that will show a medium impact on the map due to data processing happening in these"
+        " countries. If nothing specified, this is the default. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEB_SERVER_IN_CONTINENT_LOW": (
+        '["NL", "BE"]',
+        "List of continent codes that will show a high impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEB_SERVER_IN_CONTINENT_MEDIUM": (
+        '["NL", "BE"]',
+        "List of continent codes that will show a medium impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEB_SERVER_IN_CONTINENT_HIGH": (
+        '["NL", "BE"]',
+        "List of continent codes that will show a high impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_OK": (
+        '["NL", "BE"]',
+        "List of country codes that will show a medium impact on the map due to data processing happening in these"
+        " countries. If nothing specified, this is the default. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_LOW": (
+        '["NL", "BE"]',
+        "List of country codes that will show a high impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_MEDIUM": (
+        '["NL", "BE"]',
+        "List of country codes that will show a medium impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_HIGH": (
+        '["NL", "BE"]',
+        "List of country codes that will show a high impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_OK": (
+        '["NL", "BE"]',
+        "List of continent codes that will show a medium impact on the map due to data processing happening in these"
+        " countries. If nothing specified, this is the default. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_LOW": (
+        '["NL", "BE"]',
+        "List of continent codes that will show a high impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_MEDIUM": (
+        '["NL", "BE"]',
+        "List of continent codes that will show a medium impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
+    "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_HIGH": (
+        '["NL", "BE"]',
+        "List of continent codes that will show a high impact on the map due to data processing happening in these"
+        " countries. List[str] of iso codes",
+        str,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1250,6 +1404,8 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "MAPBOX_ACCESS_TOKEN",
                 "WAMBACHERS_OSM_CLIKEY",
                 "GOOGLE_MAPS_API_KEY",
+                "GEO_IP_ACCOUNT_ID",
+                "GEO_IP_LICENSE_KEY",
             ),
         ),
         (
@@ -1497,6 +1653,40 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "INTERNET_NL_WEB_ONLY_TOP_LEVEL",
             ),
         ),
+        (
+            "Geography & Privacy Country (overrides continent)",
+            (
+                "GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_OK",
+                "GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_LOW",
+                "GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_MEDIUM",
+                "GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_HIGH",
+                "GEOGRAPHY_WEB_SERVER_IN_COUNTRIES_OK",
+                "GEOGRAPHY_WEB_SERVER_IN_COUNTRIES_LOW",
+                "GEOGRAPHY_WEB_SERVER_IN_COUNTRIES_MEDIUM",
+                "GEOGRAPHY_WEB_SERVER_IN_COUNTRIES_HIGH",
+                "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_OK",
+                "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_LOW",
+                "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_MEDIUM",
+                "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_HIGH",
+            ),
+        ),
+        (
+            "Geography & Privacy Continent (overwritten by country)",
+            (
+                "GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_OK",
+                "GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_LOW",
+                "GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_MEDIUM",
+                "GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_HIGH",
+                "GEOGRAPHY_WEB_SERVER_IN_CONTINENT_OK",
+                "GEOGRAPHY_WEB_SERVER_IN_CONTINENT_LOW",
+                "GEOGRAPHY_WEB_SERVER_IN_CONTINENT_MEDIUM",
+                "GEOGRAPHY_WEB_SERVER_IN_CONTINENT_HIGH",
+                "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_OK",
+                "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_LOW",
+                "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_MEDIUM",
+                "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_HIGH",
+            ),
+        ),
         ("Screenshot service options", ("SCREENSHOT_API_URL_V4", "SCREENSHOT_API_URL_V6")),
         (
             '<span class="beta">beta</span> Zorgkaart Nederland (Tilanus)',
@@ -1663,6 +1853,8 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "reporting.urlreport", "label": "📑 Url Reports"},
             {"name": "map.organizationreport", "label": "📑 Organization Reports"},
             {"name": "map.maphealthreport", "label": "📑 Map Health Reports"},
+            {"name": "scanners.domainip", "label": "IP Addresses (all data)"},
+            {"name": "scanners.urlip", "label": "IP Addresses (urls)"},
         ],
     },
     {

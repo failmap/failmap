@@ -56,6 +56,9 @@ WEB_PRIVACY_COOKIES = "web_privacy_cookies"
 WEB_PRIVACY_COOKIES_NEUTRAL = "web_privacy_cookies_neutral"
 WEB_PRIVACY_COOKIES_ERROR = "web_privacy_cookies_error"
 
+WEB_PRIVACY_THIRD_PARTY_DOMAINS = "web_privacy_third_party_domains"
+WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL = "web_privacy_third_party_domains_neutral"
+
 
 @app.task(queue="kickoff", ignore_result=True)
 def plan_scan(**kwargs) -> None:
@@ -227,6 +230,14 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         WEB_PRIVACY_COOKIES_NEUTRAL,
         message=WEB_PRIVACY_COOKIES_NEUTRAL,
         evidence=json.dumps(cookies),
+    )
+
+    store_endpoint_scan_result(
+        WEB_PRIVACY_THIRD_PARTY_DOMAINS,
+        endpoint_id,
+        WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
+        message=WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
+        evidence=json.dumps(third_party_domains),
     )
 
 

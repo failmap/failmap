@@ -894,3 +894,34 @@ class HttpEndpointContentAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ][::-1]
 
     search_fields = ("endpoint__url__url", "content")
+
+
+@admin.register(models.DomainIp)
+class DomainIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("id", "domain", "ip_address", "ip_version", "at_when", "last_scan_moment", "is_the_latest")
+    search_fields = ["domain", "ip_address"]
+    list_filter = [
+        "ip_address",
+        "at_when",
+        "is_the_latest",
+        "ip_version",
+    ][::-1]
+
+
+@admin.register(models.GeoIp)
+class GeoIpAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "ip_address",
+        "designation",
+        "error",
+        "continent_code",
+        "country_iso_code",
+        "city_in_en",
+        "as_number",
+        "as_organization",
+        "isp_name",
+    )
+
+    list_filter = ["designation", "continent_code", "country_iso_code", "city_in_en"]
+    ...

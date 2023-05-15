@@ -351,7 +351,7 @@ def get_dns_records(url: str, record_type):
         # a little delay to be friendly towards the server
         # this doesn't really help with parallel requests from the same server. Well, a little bit.
         sleep(0.03)
-        return resolver.query(url, record_type)
+        return resolver.resolve(url, record_type, search=True)
     except NoAnswer:
         log.debug("The DNS response does not contain an answer to the question. %s %s ", url, record_type)
         return None
@@ -382,7 +382,7 @@ def get_dns_records_accepting_no_answer(url: str, record_type):
         # a little delay to be friendly towards the server
         # this doesn't really help with parallel requests from the same server. Well, a little bit.
         sleep(0.03)
-        answer = resolver.query(url, record_type, raise_on_no_answer=False)
+        answer = resolver.resolve(url, record_type, raise_on_no_answer=False, search=True)
         log.debug("dns query returned an answer %s %s", url, record_type)
         return answer
     except NoAnswer:
