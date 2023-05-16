@@ -11,7 +11,7 @@ from websecmap.scanners import models
 from websecmap.scanners.models import Product, ProductHierarchy, State, Endpoint
 from websecmap.scanners.proxy import check_proxy
 from websecmap.scanners.scanner.banners.detect_version import add_excepted_banner_to_config, clean_and_detect
-from websecmap.scanners.scanner.internet_nl_v2_websecmap import progress_running_scan, recover_and_retry
+from websecmap.scanners.scanner.internet_nl_websecmap import progress_running_scan, recover_and_retry
 from websecmap.scanners.security_policies import (
     apply_security_policy,
     remove_security_policy,
@@ -607,8 +607,17 @@ class PlannedScanStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.Scanner)
 class ScannerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     help_text = "test"
-    list_display = ("id", "name", "python_name", "enabled", "rate_limit", "description", "to", "needs_results_from",
-                    "enabled_acts")
+    list_display = (
+        "id",
+        "name",
+        "python_name",
+        "enabled",
+        "rate_limit",
+        "description",
+        "to",
+        "needs_results_from",
+        "enabled_acts",
+    )
     save_as = True
 
     def enabled_acts(self, obj):

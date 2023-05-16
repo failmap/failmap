@@ -1,4 +1,4 @@
-from websecmap.scanners.scanner.internet_nl_v2_websecmap import calculate_ipv6_views_mail, calculate_ipv6_views_web
+from websecmap.scanners.scanner.internet_nl_websecmap import calculate_ipv6_views_mail, calculate_ipv6_views_web
 
 
 def test_v6_web_v6_ready():

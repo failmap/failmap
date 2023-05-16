@@ -9,8 +9,8 @@ from websecmap.scanners.scanner import (
     dnssec,
     ftp,
     http,
-    internet_nl_v2_mail,
-    internet_nl_v2_web,
+    internet_nl_mail,
+    internet_nl_web,
     plain_http,
     security_headers,
     subdomains,
@@ -40,8 +40,8 @@ class Command(BaseCommand):
             dns_known_subdomains,
             dns_endpoints,
             http,
-            internet_nl_v2_mail,
-            internet_nl_v2_web,
+            internet_nl_mail,
+            internet_nl_web,
             verify_unresolvable,
         ]:
             for planning_method in ["plan_discover", "plan_verify", "plan_scan"]:

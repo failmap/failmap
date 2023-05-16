@@ -9,7 +9,7 @@ from websecmap.scanners.scanner.dnssec import plan_scan as dnssec_plan_scan
 from websecmap.scanners.scanner.ftp import plan_scan as ftp_plan_scan
 from websecmap.scanners.scanner.http import plan_discover as http_plan_discover
 from websecmap.scanners.scanner.http import plan_verify as http_plan_verify
-from websecmap.scanners.scanner.internet_nl_v2_web import filter_scan as internet_nl_v2_web_filter_scan
+from websecmap.scanners.scanner.internet_nl_web import filter_scan as internet_nl_web_filter_scan
 from websecmap.scanners.scanner.plain_http import plan_scan as plain_http_plan_scan
 
 
@@ -137,7 +137,7 @@ def test_filter_plain_http(db, default_scan_metadata, setup_some_data):
 
 
 @pytest.fixture()
-def setup_test_internet_nl_v2_web_filter_scan(db, default_scan_metadata):
+def setup_test_internet_nl_web_filter_scan(db, default_scan_metadata):
     ot = OrganizationType.objects.create(name="test")
     Configuration.objects.create(country="NL", organization_type=ot, is_scanned=True)
 
@@ -175,14 +175,14 @@ def setup_test_internet_nl_v2_web_filter_scan(db, default_scan_metadata):
 
 
 @pytest.mark.override_config(INTERNET_NL_WEB_ONLY_TOP_LEVEL=False)
-def test_internet_nl_v2_web_filter_scan_web_enabled(setup_test_internet_nl_v2_web_filter_scan):
+def test_internet_nl_web_filter_scan_web_enabled(setup_test_internet_nl_web_filter_scan):
     # switching override config in a testcase is not possible it seems. So test split up between cases.
-    urls = internet_nl_v2_web_filter_scan()
+    urls = internet_nl_web_filter_scan()
     assert sorted([u.url for u in urls]) == sorted(["google.com", "subdomain.google.com"])
 
 
 @pytest.mark.override_config(INTERNET_NL_WEB_ONLY_TOP_LEVEL=True)
-def test_internet_nl_v2_web_filter_scan_web_disabled(setup_test_internet_nl_v2_web_filter_scan):
-    urls = internet_nl_v2_web_filter_scan()
+def test_internet_nl_web_filter_scan_web_disabled(setup_test_internet_nl_web_filter_scan):
+    urls = internet_nl_web_filter_scan()
     assert len(urls) == 1
     assert urls[0].url == "google.com"

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from websecmap.organizations.models import Url, Organization, UrlWhois
 from websecmap.scanners.models import UrlGenericScan
-from websecmap.scanners.scanner.url.whois import (
+from websecmap.scanners.scanner.whois import (
     check_ownership,
     get_registrants_for_url,
     regenerate_registrant_statistics_for_all_organizations,

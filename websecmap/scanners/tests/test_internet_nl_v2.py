@@ -6,7 +6,7 @@ from websecmap.organizations.models import Url
 from websecmap.reporting.report import create_url_reports
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, InternetNLV2Scan, InternetNLV2StateLog
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.internet_nl_v2_websecmap import (
+from websecmap.scanners.scanner.internet_nl_websecmap import (
     add_calculation,
     calculate_forum_standaardisatie_views_mail,
     calculate_forum_standaardisatie_views_web,

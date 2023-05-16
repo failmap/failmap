@@ -20,8 +20,8 @@ from websecmap.scanners.scanner import (
     dummy,
     ftp,
     http,
-    internet_nl_v2_mail,
-    internet_nl_v2_web,
+    internet_nl_mail,
+    internet_nl_web,
     nuclei_http,
     plain_http,
     ports,
@@ -35,7 +35,7 @@ from websecmap.scanners.scanner import (
     web_privacy,
     endpoint_content,
 )
-from websecmap.scanners.scanner.url import whois
+from websecmap.scanners.scanner import whois
 
 log = logging.getLogger(__name__)
 
@@ -49,8 +49,8 @@ __scanners__ = [
     dummy,
     ftp,
     http,
-    internet_nl_v2_mail,
-    internet_nl_v2_web,
+    internet_nl_mail,
+    internet_nl_web,
     plain_http,
     screenshot,
     security_headers,

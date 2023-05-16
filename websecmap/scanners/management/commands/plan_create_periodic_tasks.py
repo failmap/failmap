@@ -106,11 +106,11 @@ class Command(BaseCommand):
         consume("dns_endpoints", "planned_discover", "every 10 minutes", amount=200),
         # internet.nl v2: scan
         # add urls to the queue
-        plan_daily("internet_nl_v2_mail", "scan", "every 3 days"),
-        plan_daily("internet_nl_v2_web", "scan", "every 3 days"),
+        plan_daily("internet_nl_mail", "scan", "every 3 days"),
+        plan_daily("internet_nl_web", "scan", "every 3 days"),
         # and then run a scan on them, as long as there are urls, per 500:
-        consume("internet_nl_v2_mail", "planned_scan", "every 30 minutes", amount=500),
-        consume("internet_nl_v2_web", "planned_scan", "every 30 minutes", amount=500),
+        consume("internet_nl_mail", "planned_scan", "every 30 minutes", amount=500),
+        consume("internet_nl_web", "planned_scan", "every 30 minutes", amount=500),
         # known subdomains: discover
         # it's very intense as it tries a number of words per domain, so don't use it too often
         plan_daily("dns_known_subdomains", "discover", "every 7 days"),

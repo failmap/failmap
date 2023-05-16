@@ -52,8 +52,6 @@ const messages = {
 
         "internet_nl_mail": "Internet.nl Mail",
         "internet_nl_web": "Internet.nl Web",
-        "internet_nl_v2_mail": "Internet.nl Mail",
-        "internet_nl_v2_web": "Internet.nl Web",
         "verify_unresolvable": "Revive unresolvable",
 
         "https": "Website (https)",
