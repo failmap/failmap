@@ -76,7 +76,7 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", days
               AND total_urls > 0
             GROUP BY organization.name
             HAVING high = 0 AND medium = 0
-            ORDER BY low ASC, total_endpoints DESC, organization.name ASC
+            ORDER BY total_endpoints DESC, organization.name ASC
             """
 
     # log.debug(sql)

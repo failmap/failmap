@@ -1855,6 +1855,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "map.maphealthreport", "label": "📑 Map Health Reports"},
             {"name": "scanners.domainip", "label": "IP Addresses (all data)"},
             {"name": "scanners.urlip", "label": "IP Addresses (urls)"},
+            {"name": "scanners.geoip", "label": "IP Geo database"},
         ],
     },
     {

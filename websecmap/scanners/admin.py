@@ -607,8 +607,12 @@ class PlannedScanStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.Scanner)
 class ScannerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     help_text = "test"
-    list_display = ("id", "name", "python_name", "enabled", "rate_limit", "description", "to", "needs_results_from")
+    list_display = ("id", "name", "python_name", "enabled", "rate_limit", "description", "to", "needs_results_from",
+                    "enabled_acts")
     save_as = True
+
+    def enabled_acts(self, obj):
+        return ", ".join([act.name for act in obj.enabled_activities.all()])
 
     actions = []
 
