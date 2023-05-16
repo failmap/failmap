@@ -1693,7 +1693,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_HIGH",
             ),
         ),
-        ("Page Content", ("CONTENT_ERRONEOUS", )),
+        ("Page Content", ("CONTENT_ERRONEOUS",)),
         ("Screenshot service options", ("SCREENSHOT_API_URL_V4", "SCREENSHOT_API_URL_V6")),
         (
             '<span class="beta">beta</span> Zorgkaart Nederland (Tilanus)',
