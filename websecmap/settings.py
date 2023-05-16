@@ -1382,6 +1382,12 @@ CONSTANCE_CONFIG = {
         " countries. List[str] of iso codes",
         str,
     ),
+    "CONTENT_ERRONEOUS": (
+        '["This file has the following configurations: MySQL settings", ""]',
+        "Page content that contains errors or exceptions: stuff that should not be public. Nuclei contains "
+        "most of these checks already. List[str].",
+        str,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1687,6 +1693,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_HIGH",
             ),
         ),
+        ("Page Content", ("CONTENT_ERRONEOUS", )),
         ("Screenshot service options", ("SCREENSHOT_API_URL_V4", "SCREENSHOT_API_URL_V6")),
         (
             '<span class="beta">beta</span> Zorgkaart Nederland (Tilanus)',
