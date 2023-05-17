@@ -932,9 +932,24 @@ class GeoIpAdmin(admin.ModelAdmin):
         "country_iso_code",
         "city_in_en",
         "as_number",
+        "network",
         "as_organization",
         "isp_name",
+        "at_when",
+        "last_scan_moment",
+        "is_the_latest",
     )
 
-    list_filter = ["designation", "continent_code", "country_iso_code", "city_in_en"]
-    ...
+    search_fields = ["ip_address", "as_organization", "isp_name", "city_in_en", "network", "as_number"]
+
+    list_filter = [
+        "designation",
+        "continent_code",
+        "country_iso_code",
+        "city_in_en",
+        "network",
+        "as_number",
+        "as_organization",
+        "isp_name",
+        "at_when",
+    ]
