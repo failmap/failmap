@@ -18,6 +18,7 @@ from websecmap.scanners.security_policies import (
     apply_affects,
     remove_affects,
 )
+from django_countries import countries
 
 
 class EndpointGenericScanInline(CompactInline):
@@ -929,7 +930,7 @@ class GeoIpAdmin(admin.ModelAdmin):
         "designation",
         "error",
         "continent_code",
-        "country_iso_code",
+        "country_iso_code_",
         "city_in_en",
         "as_number",
         "network",
@@ -952,4 +953,11 @@ class GeoIpAdmin(admin.ModelAdmin):
         "as_organization",
         "isp_name",
         "at_when",
-    ]
+        "is_the_latest",
+    ][::-1]
+
+    @staticmethod
+    def country_iso_code_(obj):
+        if obj.country_iso_code:
+            return f"{obj.country_iso_code}: {dict(countries)[obj.country_iso_code]}"
+        return "-"
