@@ -23,6 +23,7 @@ IP_LINK_LOCAL = "link_local"
 
 @app.task(queue="kickoff")
 def create_tasks() -> group:
+    # todo: also create a task for only new ip's, as that will be cheaper and can run every day.
     # let's hope this data is accurate enough to figure out the continent.
     # add some list somewhere of what countries have what impact
     ips = (
@@ -263,3 +264,10 @@ def store(data: Dict[str, Any]):
         fields_that_signify_change=["response_data", "designation", "error"],
         data_for_new_record=data,
     )
+
+
+def update():
+    # Do not update all ip's as that is costly
+    # get an IP from each network, see if the network changed. If so, then get everything for that network.
+    # update the whole list once a year or so
+    ...
