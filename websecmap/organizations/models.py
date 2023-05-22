@@ -167,16 +167,10 @@ class Organization(models.Model):
 
     def __str__(self):
 
-        if self.type_id not in self.organization_name_cache:
-            # log.debug("caching...")
-            self.organization_name_cache[self.type_id] = self.type.name
-
-        type_label = self.organization_name_cache[self.type_id]
-
         if self.is_dead:
-            return f"✝ {self.name}, {self.country}/{type_label} ({self.created_on.strftime('%b %Y')})"
+            return f"✝ {self.name}, {self.country} ({self.created_on.strftime('%b %Y')})"
 
-        return f"{self.name}, {self.country}/{type_label} ({self.created_on.strftime('%b %Y')})"
+        return f"{self.name}, {self.country} ({self.created_on.strftime('%b %Y')})"
 
     @property
     def names(self) -> List[str]:

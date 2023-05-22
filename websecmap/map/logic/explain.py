@@ -37,7 +37,7 @@ def get_all_explains(country, organization_type, limit=0):
             is_the_latest_scan=True,
             url__organization__is_dead=False,
             url__organization__country=country,
-            url__organization__type_id=organization_type,
+            url__organization__layers=organization_type,
             url__is_dead=False,
             url__not_resolvable=False,
         )
@@ -54,7 +54,7 @@ def get_all_explains(country, organization_type, limit=0):
             endpoint__url__is_dead=False,
             endpoint__url__organization__is_dead=False,
             endpoint__url__organization__country=country,
-            endpoint__url__organization__type_id=organization_type,
+            endpoint__url__organization__layers=organization_type,
         )
         .order_by("-comply_or_explain_explained_on")[:limit]
     )
