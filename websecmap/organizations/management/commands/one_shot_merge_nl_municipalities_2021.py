@@ -68,7 +68,7 @@ def rebuild_reports(organizations: List[str]):
         name__in=organizations,
         is_dead=False,
         country="NL",
-        type__name="municipality",
+        layers__name="municipality",
     )
 
     recreate_organization_reports([o.pk for o in db_organizations])

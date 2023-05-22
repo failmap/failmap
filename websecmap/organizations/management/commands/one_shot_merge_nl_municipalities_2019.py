@@ -182,7 +182,7 @@ class Command(BaseCommand):
             ],
             is_dead=False,
             country="NL",
-            type__name="municipality",
+            layers__name="municipality",
         )
 
         recreate_organization_reports([o.pk for o in organizations])

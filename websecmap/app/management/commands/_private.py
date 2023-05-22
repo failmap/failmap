@@ -194,7 +194,7 @@ class GenericTaskCommand(TaskCommand):
         if options["organization_type"]:
             # create a case-insensitive filter to match organizations by name
             regex = "^(" + "|".join(options["organization_type"]) + ")$"
-            organizations_filter = {"type__name__iregex": regex}
+            organizations_filter = {"layers__name__iregex": regex}
 
         if options["country"]:
             # create a case-insensitive filter to match organizations by name
@@ -273,7 +273,7 @@ class ScannerTaskCommand(TaskCommand):
         if options["organization_type"]:
             # create a case-insensitive filter to match organizations by name
             regex = "^(" + "|".join(options["organization_type"]) + ")$"
-            organizations_filter = {"type__name__iregex": regex}
+            organizations_filter = {"layers__name__iregex": regex}
 
         if options["country"]:
             # create a case-insensitive filter to match organizations by name
@@ -372,7 +372,7 @@ class DiscoverTaskCommand(TaskCommand):
         if options["organization_type"]:
             # create a case-insensitive filter to match organizations by name
             regex = "^(" + "|".join(options["organization_type"]) + ")$"
-            organization_filter = {"type__name__iregex": regex}
+            organization_filter = {"layers__name__iregex": regex}
 
         if options["country"]:
             # create a case-insensitive filter to match organizations by name

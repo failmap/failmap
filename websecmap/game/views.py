@@ -397,7 +397,7 @@ def submitted_organizations(request):
         Organization.objects.all()
         .filter(country=contest.target_country)
         .select_related("type")
-        .order_by("type__name", "name")
+        .order_by("layers__name", "name")
     )
 
     return render(
@@ -991,7 +991,7 @@ class OrganizationAutocomplete(autocomplete.Select2QuerySetView):
         """
         if len(self.q.split(" ")) < 4:
             for query in self.q.split(" "):
-                qs = qs.filter(Q(name__icontains=query) | Q(type__name__icontains=query))
+                qs = qs.filter(Q(name__icontains=query) | Q(layers__name__icontains=query))
         else:
             qs = qs.filter(name__icontains=self.q)
 

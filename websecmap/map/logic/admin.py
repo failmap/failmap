@@ -96,7 +96,11 @@ def add_organization(data):
         return operation_response(error=True, message="Domains should be present and at least empty.")
 
     # prevent duplicate organizations
-    if Organization.objects.all().filter(name=data["name"], country=data["country"], type__name=data["layer"]).first():
+    if (
+        Organization.objects.all()
+        .filter(name=data["name"], country=data["country"], layers__name=data["layer"])
+        .first()
+    ):
         return operation_response(
             error=True, message="Organization with this name already exists in this layer." " Preventing a duplicate."
         )

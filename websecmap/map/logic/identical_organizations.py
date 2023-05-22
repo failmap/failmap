@@ -17,7 +17,7 @@ def triage_identical():
 
     :return:
     """
-    organizations = Organization.objects.all().filter(country="NL", type__name="government")
+    organizations = Organization.objects.all().filter(country="NL", layers__name="government")
     urls = {}
     for organization in organizations:
         urls[organization.pk] = set(

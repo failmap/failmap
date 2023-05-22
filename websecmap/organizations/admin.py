@@ -330,7 +330,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
         "wikipedia_",
         "twitter_handle",
     )
-    search_fields = ["name", "country", "type__name"]
+    search_fields = ["name", "country", "layers__name", "alternative_names__name"]
     list_filter = ["country", "created_on", "is_dead", "is_dead_since", "layers__name"][::-1]
 
     fieldsets = (
@@ -502,7 +502,7 @@ class WhoisOrganizationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def layers_(self, inst):
         return [layer.name for layer in inst.layers.all()]
 
-    search_fields = ["name", "country", "type__name"]
+    search_fields = ["name", "country", "layers__name"]
     list_filter = ["country", "created_on", "is_dead", "is_dead_since", "layers__name"][::-1]
 
     fields = [

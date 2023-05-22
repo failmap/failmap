@@ -180,7 +180,9 @@ def match_and_place_row(row: List[str]) -> Dict[str, str]:
     if organization_key[1] == "/":
         organization_key = "(" + organization_key[2 : len(organization_key)]
 
-    domain = row[0].replace("http://", "").replace("https://", "")
+    domain_extract = tldextract.extract(row[0])
+    domain_without_subdomain = f"{domain_extract.domain}.{domain_extract.suffix}"
+    domain_with_subdomain = domain_extract.fqdn
 
     # There should only be one that is currently 'alive'. No there can be more, as there can be multiple maps
     # where this organization is used (and the n-n relation has not yet been implemented).
@@ -192,15 +194,16 @@ def match_and_place_row(row: List[str]) -> Dict[str, str]:
 
     if not organizations:
         log.error(
-            "Could not find an organization name with key %s, could not place domains %s.", organization_key, domain
+            "Could not find an organization name with key %s, could not place domains %s.",
+            organization_key,
+            domain_without_subdomain,
         )
-        return {"state": "error", "domain": domain, "key": organization_key}
+        return {"state": "error", "domain": domain_with_subdomain, "key": organization_key}
 
     for organization in organizations:
-        organization.add_url(domain, origin="import dutch websiteregister")
+        organization.add_url(domain_without_subdomain, origin="import dutch websiteregister")
 
-        if re.match(r"^www\.", domain):
-            without_www = domain.replace("www.", "", 1)
-            organization.add_url(without_www, origin="import dutch websiteregister")
+        if domain_without_subdomain != domain_with_subdomain:
+            organization.add_url(domain_with_subdomain, origin="import dutch websiteregister")
 
-    return {"state": "success", "domain": domain, "key": organization_key}
+    return {"state": "success", "domain": domain_with_subdomain, "key": organization_key}

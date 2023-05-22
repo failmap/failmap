@@ -322,7 +322,7 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
     # Verify that this doesn't exist yet to prevent double imports (when mistakes are made).
     if (
         Organization.objects.all()
-        .filter(name=name, country=country, type__name=organization_type, is_dead=False)
+        .filter(name=name, country=country, layers__name=organization_type, is_dead=False)
         .exists()
     ):
         log.debug("Organization %s exists in country %s and type %s, skipping.", name, country, organization_type)
@@ -446,7 +446,7 @@ def match_organization(openstreetmap_properties, country, organization_type):
             matching_organization = Organization.objects.filter(
                 name=openstreetmap_properties[attempted_property],
                 country=country,
-                type__name=organization_type,
+                layers__name=organization_type,
                 is_dead=False,
             ).first()
 
