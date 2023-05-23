@@ -18,6 +18,7 @@ from websecmap.scanners.scanner.nuclei_http import (
     compose_verify_task,
     create_nuclei_scan_command,
 )
+from constance.test import override_config
 
 three_example_nuclei_tests = data = (
     b'{"template":"technologies/metatag-cms.yaml","template-url":"https://github.com/projectdiscovery/nuclei-template'
@@ -578,6 +579,7 @@ def test_nuclei_compose_verify_task(db):
     assert 1 == out.count("httptwomnibuzznl443  apachedetect favicondetect wafdetect")  # noqa
 
 
+@override_config(NUCLEI_HTTP_DISABLED_TEMPLATES='["robots-txt", "security-txt"]')
 def test_create_nuclei_scan_command(db):
 
     command = create_nuclei_scan_command(
@@ -610,7 +612,7 @@ def test_create_nuclei_scan_command(db):
         "-template-id",
         "citrix-vpn-panel",
         "-exclude-id",
-        "deprecated-tls,dmarc-detect,dnssec-detection,http-missing-security-headers,robots-txt,robots-txt-endpoint,security-txt,ssl-issuer,tls-version,xss-deprecated-header",  # noqa
+        "robots-txt,security-txt",
         "-u",
         "test.nl",
     ]

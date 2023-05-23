@@ -42,21 +42,6 @@ DONE: Add sub-scanners based on this scanner with just a set of templates, to lo
 NUCLEI_SEVERITY_ORDER = [None, "unknown", "info", "low", "medium", "high", "critical"]
 
 
-# These metrics are already collected in a better way using different scanners. So don't try those again here.
-# Todo: this has to come from configuration, that will save some time filtering and allows others to tailor results
-REDUNDANT_TEMPLATES = [
-    "http-missing-security-headers",
-    "deprecated-tls",
-    "security-txt",
-    "dnssec-detection",
-    "dmarc-detect",
-    "robots-txt",
-    "robots-txt-endpoint",
-    "ssl-issuer",
-    "xss-deprecated-header",
-    "tls-version",
-]
-
 SCANNER_NAME = "nuclei_http"
 SCANNER_ACTION = "scan"
 
@@ -249,10 +234,12 @@ def get_templates_from_scan_results(processed_nuclei_data) -> List[str]:
         log.debug("No nuclei records found")
         return []
 
+    disabled_templates = constance_json_value("NUCLEI_HTTP_DISABLED_TEMPLATES")
+
     templates = []
     for result in json_data:
         possible_result = result.get("template-id", "unknown")
-        if possible_result not in REDUNDANT_TEMPLATES + ["unknown"]:
+        if possible_result not in disabled_templates + ["unknown"]:
             templates.append(possible_result)
 
     # do not return duplicate templates, one 'waf-detect' is enough
@@ -260,8 +247,10 @@ def get_templates_from_scan_results(processed_nuclei_data) -> List[str]:
     return list(sorted(list(set(templates))))
 
 
-def create_nuclei_scan_command(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None):
-    disabled_templates = constance_json_value("NUCLEI_HTTP_DISABLED_TEMPLATES")
+def create_nuclei_scan_command(
+    urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None, include_disabled: bool = False
+):
+    disabled_templates = [] if include_disabled else constance_json_value("NUCLEI_HTTP_DISABLED_TEMPLATES")
 
     # probably call a container instead of running this directly?
     # the string[] documentation is vague.
@@ -277,7 +266,7 @@ def create_nuclei_scan_command(urls: List[str], scanner_keyword_arguments: Dict[
     command += [
         # do not scan redundant stuff that we already get elsewhere
         "-exclude-id",
-        ",".join(list(sorted(list(set(REDUNDANT_TEMPLATES + disabled_templates))))),
+        ",".join(list(sorted(list(set(disabled_templates))))),
     ]
 
     for url in urls:
@@ -288,7 +277,7 @@ def create_nuclei_scan_command(urls: List[str], scanner_keyword_arguments: Dict[
 
 
 @app.task(queue="ipv4")
-def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None) -> bin:
+def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None, include_disabled: bool = False) -> bin:
     # This reduces the standard number of requests from ±1000 to ±700.
     # There will be 2000 templates instead of 4000.
 
