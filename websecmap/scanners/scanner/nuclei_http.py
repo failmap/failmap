@@ -263,11 +263,12 @@ def create_nuclei_scan_command(
     if scanner_keyword_arguments:
         command += kwargs_to_params(scanner_keyword_arguments, prefix="-")
 
-    command += [
-        # do not scan redundant stuff that we already get elsewhere
-        "-exclude-id",
-        ",".join(list(sorted(list(set(disabled_templates))))),
-    ]
+    if disabled_string := ",".join(list(sorted(list(set(disabled_templates))))):
+        command += [
+            # do not scan redundant stuff that we already get elsewhere
+            "-exclude-id",
+            disabled_string,
+        ]
 
     for url in urls:
         command += ["-u", url]
