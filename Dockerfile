@@ -86,6 +86,7 @@ RUN apt-get update && apt-get install -yqq \
   libyaml-perl \
   libjson-xs-perl \
   # nuclei dependencies
+  sudo \
   chromium \
   ca-certificates \
   dnsutils \
@@ -100,17 +101,18 @@ RUN ln -s /pyenv/bin/uwsgi /usr/local/bin/
 RUN ln -s /pyenv/bin/celery /usr/local/bin/
 RUN ln -s /pyenv/bin/dnssec.pl /usr/local/bin/
 
-COPY --from=nuclei /go/bin/nuclei /usr/local/bin/nuclei
+COPY --from=nuclei /go/bin/nuclei /go/bin/nuclei
 
-# it is not possible to influence the directory of nuclei from nonexistent to the home dir.
-# so instead work around this by creating the nonexistent directory... which is insane
-# failed to create config directory at /nonexistent/.config/nuclei got: mkdir /nonexistent: permission denied
-# failed to write config file at /nonexistent/.config/nuclei/.templates-config.json got
-RUN install -o nobody -g nogroup -d /nonexistent
-RUN install -o nobody -g nogroup -d /opt/nuclei
-USER nobody:nogroup
-RUN HOME=/opt/nuclei /usr/local/bin/nuclei -config-directory=/opt/nuclei -update-templates
-USER root
+# add nuclei user
+RUN useradd --create-home nuclei
+RUN echo 'nobody ALL=(nuclei) NOPASSWD: /go/bin/nuclei' >> /etc/sudoers
+
+# wrap nuclei command so it is run as nuclei user
+RUN echo '#!/bin/sh\nsudo -u nuclei /go/bin/nuclei "$@"' > /usr/local/bin/nuclei
+RUN chmod a+x /usr/local/bin/nuclei
+
+# update templates
+RUN /usr/local/bin/nuclei -update-templates
 
 COPY --from=amass /go/bin/amass /usr/local/bin/amass
 
@@ -166,6 +168,6 @@ USER nobody:nogroup
 
 RUN websecmap --version | grep -E '[0-9]+\.[0-9]+\.[0-9]+'
 RUN dnssec.pl 2>&1 | grep usage:
-RUN HOME=/opt/nuclei nuclei -config-directory=/opt/nuclei -disable-update-check
+RUN nuclei -disable-update-check
 ARG AMASS_VERSION
 RUN amass -version 2>&1 | grep ${AMASS_VERSION}

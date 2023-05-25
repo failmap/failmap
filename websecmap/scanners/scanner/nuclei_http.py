@@ -282,7 +282,7 @@ def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None, incl
     # There will be 2000 templates instead of 4000.
 
     command = create_nuclei_scan_command(urls, scanner_keyword_arguments)
-    nuc = subprocess.Popen(command, stdout=subprocess.PIPE, env={"HOME": "/opt/nuclei"}, cwd="/tmp")
+    nuc = subprocess.Popen(command, stdout=subprocess.PIPE, cwd="/tmp")
     output = nuc.communicate()
 
     # Data is returned in jsonl format, binary
