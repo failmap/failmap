@@ -256,8 +256,7 @@ def create_nuclei_scan_command(
     # the string[] documentation is vague.
     command = [
         "/usr/local/bin/nuclei",
-        # Work with json lines
-        "-json",
+        "-jsonl",
     ]
 
     if scanner_keyword_arguments:
