@@ -34,7 +34,7 @@ def test_check_ownership(db):
     assert first_scan.rating == "whois_internal_ownership"
     assert (
         first_scan.evidence == '{"found_registrant": "Gemeente Zutphen", '
-        '"allowed_registrants": ["Gemeente Zutphen"]}'
+        '"known_acceptable_registrants": ["Gemeente Zutphen"]}'
     )
 
     # now check a domain that has a different organization
