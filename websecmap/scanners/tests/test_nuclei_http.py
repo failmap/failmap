@@ -600,7 +600,7 @@ def test_create_nuclei_scan_command(db):
     )
     assert command == [
         "/usr/local/bin/nuclei",
-        "-json",
+        "-jsonl",
         "-silent",
         "-disable-update-check",
         "-rate-limit",
