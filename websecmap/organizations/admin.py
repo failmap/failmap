@@ -872,6 +872,10 @@ class UrlWhoisAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     search_fields = ("url__url", "registrant", "admin_contact", "reseller", "abuse")
 
+    # there are a lot of urls, which makes loading of this page slow.
+    # There is no real reason to change the url...
+    readonly_fields = ["url"]
+
     @staticmethod
     def url_(obj):
         return mark_safe(f"<a href='/admin/organizations/url/{obj.url.id}/change/'>{obj.url}</a>")
