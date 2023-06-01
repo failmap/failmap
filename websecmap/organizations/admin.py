@@ -866,9 +866,20 @@ class UrlWhoisAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return queryset
 
     # "updated_date", "last_update",
-    list_display = ("id", "url_", "creation_date", "age", "reregistered_after_monitoring", "info", "is_the_latest")
+    list_display = (
+        "id",
+        "url_",
+        "creation_date",
+        "age",
+        "reregistered_after_monitoring",
+        "info",
+        "is_the_latest",
+        "at_when",
+    )
 
-    list_filter = ["registrant", "is_the_latest", "admin_contact", "reseller", "abuse", "creation_date"][::-1]
+    list_filter = ["registrant", "is_the_latest", "admin_contact", "reseller", "abuse", "creation_date", "at_when"][
+        ::-1
+    ]
 
     search_fields = ("url__url", "registrant", "admin_contact", "reseller", "abuse")
 

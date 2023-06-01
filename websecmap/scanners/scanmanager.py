@@ -66,7 +66,7 @@ def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str
 
     # Check if the latest scan has the same rating or not:
     try:
-        genericscan = (
+        ugs = (
             UrlGenericScan.objects.all()
             .filter(
                 type=scan_type,
@@ -75,7 +75,7 @@ def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str
             .latest("last_scan_moment")
         )
     except ObjectDoesNotExist:
-        genericscan = UrlGenericScan()
+        ugs = UrlGenericScan()
 
     # here we figured out that you can still pass a bool while type hinting.
     # log.debug("Explanation new: '%s', old: '%s' eq: %s, Rating new: '%s', old: '%s', eq: %s" %
@@ -83,27 +83,27 @@ def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str
 
     # last scan had exactly the same result, so don't create a new scan and just update the last scan date.
     # while we have type hinting, it's still possible to pass in a boolean and then you compare a str to a bool...
-    if genericscan.explanation == message and genericscan.rating == rating:
+    if ugs.explanation == message and ugs.rating == rating and ugs.evidence == evidence[:MAX_EVIDENCE_LENGTH]:
         log.debug("Scan had the same rating and message, updating last_scan_moment only.")
-        genericscan.last_scan_moment = datetime.now(timezone.utc)
-        genericscan.save(update_fields=["last_scan_moment"])
+        ugs.last_scan_moment = datetime.now(timezone.utc)
+        ugs.save(update_fields=["last_scan_moment"])
     else:
         # message and rating changed for this scan_type, so it's worth while to save the scan.
         log.debug("Message or rating changed: making a new generic scan.")
-        genericscan = UrlGenericScan()
-        genericscan.explanation = message
-        genericscan.rating = rating
-        genericscan.url = Url.objects.all().filter(id=url_id).first()
-        genericscan.evidence = evidence
-        genericscan.type = scan_type
-        genericscan.last_scan_moment = datetime.now(timezone.utc)
-        genericscan.rating_determined_on = datetime.now(timezone.utc)
-        genericscan.is_the_latest_scan = True
-        genericscan.save()
+        ugs = UrlGenericScan()
+        ugs.explanation = message
+        ugs.rating = rating
+        ugs.url = Url.objects.all().filter(id=url_id).first()
+        ugs.evidence = evidence
+        ugs.type = scan_type
+        ugs.last_scan_moment = datetime.now(timezone.utc)
+        ugs.rating_determined_on = datetime.now(timezone.utc)
+        ugs.is_the_latest_scan = True
+        ugs.save()
 
-        UrlGenericScan.objects.all().filter(url=genericscan.url, type=genericscan.type).exclude(
-            pk=genericscan.pk
-        ).update(is_the_latest_scan=False)
+        UrlGenericScan.objects.all().filter(url=ugs.url, type=ugs.type).exclude(pk=ugs.pk).update(
+            is_the_latest_scan=False
+        )
 
 
 def endpoint_has_scans(scan_type: str, endpoint_id: int):
