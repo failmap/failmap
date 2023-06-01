@@ -61,19 +61,13 @@ For time indexes on these videos, visit: https://monitoryourgovernment.org/
 - Configuration options: https://youtu.be/LX5_lHgljxY
 - Add organizations using Data sets: https://youtu.be/YvK79QGaHTY
 
-For all server and deployment related topics, visit: https://gitlab.com/internet-cleanup-foundation/server/
-
-The source repository you're watching right now will only get you a development setup.
-
 ## Getting started
 
 Keywords: quickstart, installation
 
-### If you want a complete production setup
+### If you want a (self)hosted setup
 
-Then read the installation tutorial, which is significantly easier than the below development setup!
-
-For full installation with everything and anything, check: https://gitlab.com/internet-cleanup-foundation/server/
+Please contact us at the email adres found here: https://internetcleanup.foundation/about-us/
 
 ### If you want a local test or development environment
 
