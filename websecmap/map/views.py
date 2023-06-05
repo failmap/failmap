@@ -534,7 +534,7 @@ def security_txt(request):
         return HttpResponseRedirect(config["SECURITY_TXT_REDIRECT_URL"])
 
     # constance trims data stored in the database, the standard says it needs to end in CRLF.
-    return HttpResponse(config["SECURITY_TXT_CONTENT"]+"\r\n", content_type="text/plain")
+    return HttpResponse(config["SECURITY_TXT_CONTENT"] + "\r\n", content_type="text/plain")
 
 
 @cache_page(TEN_MINUTES)

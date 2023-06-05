@@ -8,8 +8,9 @@ from jet.filters import RelatedFieldAjaxListFilter
 
 from websecmap.map.admin import ordering_actions
 from websecmap.scanners import models
-from websecmap.scanners.models import Product, ProductHierarchy, State, Endpoint
+from websecmap.scanners.models import Endpoint, Product, ProductHierarchy, State
 from websecmap.scanners.proxy import check_proxy
+from websecmap.scanners.scanmanager import delete_metric_and_set_previous_to_latest
 from websecmap.scanners.scanner.banners.detect_version import add_excepted_banner_to_config, clean_and_detect
 from websecmap.scanners.scanner.internet_nl_websecmap import progress_running_scan, recover_and_retry
 from websecmap.scanners.security_policies import (
@@ -281,6 +282,13 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     add_version_exception.short_description = "Add banner to excepted banners"
     actions.append("add_version_exception")
+
+    def delete_metric_and_set_previous_to_latest_(self, request, queryset):
+        for item in queryset:
+            delete_metric_and_set_previous_to_latest(item)
+
+    delete_metric_and_set_previous_to_latest_.short_description = "Delete metric and set previous to latest"
+    actions.append("delete_metric_and_set_previous_to_latest_")
 
 
 @admin.register(models.UrlGenericScan)

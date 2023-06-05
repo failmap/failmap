@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timezone
+from typing import Union
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -128,3 +129,30 @@ def endpoint_has_scans(scan_type: str, endpoint_id: int):
             return True
     except ObjectDoesNotExist:
         return False
+
+
+def delete_metric_and_set_previous_to_latest(item: Union[EndpointGenericScan, UrlGenericScan]):
+    # This helps setting the latest scan of the same scan type to "is the latest" when the latest scan is deleted.
+
+    # no need to transfer the latest scan to another scan.
+    if not item.is_the_latest_scan:
+        item.delete()
+
+    if item.__class__.__name__ == "EndpointGenericScan":
+        manager = EndpointGenericScan
+    else:
+        manager = UrlGenericScan
+
+    if (
+        previous_item := manager.objects.filter(
+            endpoint=item.endpoint,
+            type=item.type,
+        )
+        .exclude(id=item.id)
+        .order_by("-id")
+        .first()
+    ):
+        previous_item.is_the_latest_scan = True
+        previous_item.save()
+
+    item.delete()
