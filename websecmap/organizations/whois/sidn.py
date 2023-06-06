@@ -24,9 +24,11 @@ def update_whois_data(**kwargs):
     sleep_time = kwargs.get("rate_limit_in_seconds", DEFAULT_SLEEP_PER_REQUEST)
 
     # they have a rate limit of MAX_WHOIS_PER_IP requests per day, per ip
+    # SIDN Whois only returns answers for .nl. You CAN ask for a .com but will answer with .nl data,
+    # which is sneaky. It will just strip the TLD and answer for its own data.
     urls_to_process = list(
         Url.objects.all()
-        .filter(computed_subdomain="", is_dead=False, not_resolvable=False)
+        .filter(computed_subdomain="", computed_suffix="nl", is_dead=False, not_resolvable=False)
         .only("id", "url")
         .order_by("?")
         .values("id", "url")
