@@ -66,7 +66,7 @@ def sync_reports_from_db_to_disk(model: Type["Model"] = OrganizationReport, limi
     Don't forget to optimize tables afterwards otherwise disk space is not reclaimed.
     """
 
-    for report in OrganizationReport.objects.all().only("id")[:limit]:
+    for report in model.objects.all().only("id")[:limit]:
         sync_report_from_db_to_disk(report.id, model)
 
 

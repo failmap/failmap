@@ -26,6 +26,10 @@ def update_whois_data(**kwargs):
     # they have a rate limit of MAX_WHOIS_PER_IP requests per day, per ip
     # SIDN Whois only returns answers for .nl. You CAN ask for a .com but will answer with .nl data,
     # which is sneaky. It will just strip the TLD and answer for its own data.
+    # clean your db with:
+    #
+    # UrlGenericScan.objects.all().filter(type="whois_domain_ownership",
+    #  url__in=Url.objects.all().filter(computed_subdomain="").exclude(computed_suffix="nl")).delete()
     urls_to_process = list(
         Url.objects.all()
         .filter(computed_subdomain="", computed_suffix="nl", is_dead=False, not_resolvable=False)

@@ -951,6 +951,17 @@ class UrlWhoisAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     )
     actions.append("remove_registrant_from_allowed_registrars_everywhere")
 
+    def accept_registrant_at_current_organization(self, request, queryset):
+        """
+        This places the registrant to the list of acceptable registrants, and removes it from not-accepted
+        registrants at all organizations this domain is listed in.
+        """
+        for urlwhois in queryset:
+            accept_registrant(urlwhois.url, urlwhois.registrant)
+
+    accept_registrant_at_current_organization.short_description = "✅ Accept registrant at current organization(s)"
+    actions.append("accept_registrant_at_current_organization")
+
 
 def remove_registrant_from_allowed_registrars(registrant_to_remove):
     for organization in Organization.objects.all().filter(
@@ -968,6 +979,21 @@ def remove_registrant_from_allowed_registrars(registrant_to_remove):
             )
 
         organization.save()
+
+
+def accept_registrant(url: Url, registrant: str):
+    for organization in url.organization.all():
+        # accept it
+        if registrant not in organization.acceptable_domain_registrants:
+            organization.acceptable_domain_registrants.append(registrant)
+            organization.save(update_fields=["acceptable_domain_registrants"])
+
+        # remove it from the non-accepted list:
+        for denied in organization.structured_reasoning_for_registrant_decisions:
+            if denied["registrant"] == registrant:
+                # don't break, may be denied multiple times due to bugs etc
+                organization.structured_reasoning_for_registrant_decisions.remove(denied)
+                organization.save(update_fields=["structured_reasoning_for_registrant_decisions"])
 
 
 def format_yd(delta: timedelta) -> str:
