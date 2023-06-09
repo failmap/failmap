@@ -20,7 +20,7 @@ from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, InternetNLV2Scan, InternetNLV2StateLog
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.internet_nl import InternetNLApiSettings, register, result, status
+from websecmap.scanners.scanner.internet_nl import InternetNLApiSettings, register, result, status, result_technical
 
 log = logging.getLogger(__name__)
 
@@ -310,7 +310,12 @@ def storing_scan_results(scan_id: int):
     if not valid_api_settings(scan):
         return group([])
 
-    return result.si(scan.scan_id, create_api_settings(scan.pk)) | result_administration.s(scan.pk)
+    return group(
+        result_technical.si(scan.scan_id, create_api_settings(scan.pk))
+        | result_administration_technical.s(scan.pk)
+        | result.si(scan.scan_id, create_api_settings(scan.pk))
+        | result_administration.s(scan.pk)
+    )
 
 
 def processing_scan_results(scan_id: int):
@@ -324,6 +329,7 @@ def processing_scan_results(scan_id: int):
     return process_scan_results.s(scan.pk)
 
 
+@app.task(queue="storage")
 def update_state(scan_id: int, new_state: str, new_state_message: str):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
@@ -545,6 +551,41 @@ def result_administration(response: Tuple[int, dict], scan_id: int):
 
 
 @app.task(queue="storage")
+def result_administration_technical(response: Tuple[int, dict], scan_id: int):
+    scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
+    if not scan:
+        log.debug("Could not retrieve scan %s.", scan_id)
+        return
+
+    if not api_has_usable_response(response, scan_id):
+        return
+
+    _, response_content = response
+
+    # store everything, including the api_version, which might come in handy for custom parsing of old stuff
+    """
+    {
+      "api_version": "2.3.0",
+      "request": {
+        "name": "{\"source\": \"Web Security Map\", \"type\": \"web\"}",
+        "submit_date": "2023-06-06T15:42:59.718516+00:00",
+        "finished_date": "2023-06-06T16:29:19.311152+00:00",
+        "request_type": "web",
+        "status": "done",
+        "request_id": "64c1cf1a0e7f400fac2d9807b37832e8"
+      },
+      "domains": {
+       "example.nl": ...,
+       "www.example.nl": ...,
+       ...
+      }
+    }
+    """
+    scan.retrieved_scan_report_technical = response_content
+    scan.save()
+
+
+@app.task(queue="storage")
 def process_scan_results(scan_id: int):
     scan_type_to_protocol = {
         # mail is used for web security map, it is a subset of mail servers that dedupes servers on cnames.
@@ -566,12 +607,52 @@ def process_scan_results(scan_id: int):
         store_domain_scan_results(
             domain=domain,
             scan_data=scan.retrieved_scan_report[domain],
+            technical_details=scan.retrieved_scan_report_technical.get("domains", {}).get(domain, {}),
             scan_type=scan.type,
             endpoint_protocol=scan_type_to_protocol[scan.type],
         )
 
     update_state(scan.pk, "scan results processed", "")
     update_state(scan.pk, "finished", "")
+
+
+def gather_evidence_from_technical_details_on_domain(scan_type: str, technical_details_for_domain: dict) -> dict:
+    # example for security.txt to see how difficult this is.
+
+    # no technical details at all:
+    details = {}
+    if not technical_details_for_domain:
+        return details
+
+    td = technical_details_for_domain
+
+    if scan_type in {
+        "internet_nl_web_appsecpriv_securitytxt",
+        "internet_nl_wsm_web_appsecpriv_securitytxt",
+    }:
+        for ip_version in ["ipv4", "ipv6"]:
+            if data := expect(td, ["webservers", ip_version, "details"]):
+                details[ip_version] = {
+                    "securitytxt_enabled": data.get("securitytxt_enabled", False),
+                    "securitytxt_errors": data.get("securitytxt_errors", []),
+                    "securitytxt_recommendations": data.get("securitytxt_recommendations", []),
+                    "securitytxt_found_host": data.get("securitytxt_found_host", ""),
+                }
+
+    # no implementation yet...
+    return details
+
+
+def expect(complex_dict: dict, path: list[str], counter: int = 0):
+    try:
+        if counter == len(path):
+            return complex_dict
+
+        return expect(complex_dict.get(path[counter]), path, counter + 1)
+    except KeyError:
+        return ""
+    except AttributeError:
+        return ""
 
 
 def reuse_last_fields_and_set_them_to_error(endpoint_id: int):
@@ -594,7 +675,9 @@ def reuse_last_fields_and_set_them_to_error(endpoint_id: int):
 # todo: store this on another queue: there are so many results that it blocks the entire storage worker...
 # should be a scan management queue that just does planned scans?
 @app.task(queue="storage")
-def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endpoint_protocol: str):
+def store_domain_scan_results(
+    domain: str, scan_data: dict, technical_details: dict, scan_type: str, endpoint_protocol: str
+):
     """
         The error status only occurs when there was a crash during the scanning of a domain. This is usually
         a bug in the internet.nl scanner, which has to be fixed over time. An error will be emitted when
@@ -628,6 +711,8 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
                 }
             }
         }
+
+    Technical details can contain basically everything or nothing about a host. Every bit of data is optional.
 
     :return:
     :param domain: a domain name, such as "internet.nl"
@@ -715,12 +800,12 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
         )
 
     # standard tests:
-    store_test_results(endpoint.pk, scan_data["results"]["tests"])
+    store_test_results(endpoint.pk, scan_data["results"]["tests"], technical_details)
 
     # prepare for calculated results
     scan_data["results"]["calculated_results"] = {}
     scan_data = add_calculated_values(scan_data, scan_type, domain)
-    store_test_results(endpoint.pk, scan_data["results"]["calculated_results"])
+    store_test_results(endpoint.pk, scan_data["results"]["calculated_results"], technical_details)
 
 
 def add_calculated_values(scan_data, scan_type: str, domain: str):
@@ -753,7 +838,7 @@ def add_calculated_values(scan_data, scan_type: str, domain: str):
     return scan_data
 
 
-def store_test_results(endpoint_id, test_results):
+def store_test_results(endpoint_id, test_results, technical_details):
     # this way new fields are automatically added
     test_results_keys = test_results.keys()
 
@@ -778,7 +863,7 @@ def store_test_results(endpoint_id, test_results):
             message=json.dumps(
                 {"translation": test_result["verdict"], "technical_details_hash": technical_details_hash}
             ),
-            evidence="",
+            evidence=json.dumps(gather_evidence_from_technical_details_on_domain(scan_type, technical_details)),
         )
 
 

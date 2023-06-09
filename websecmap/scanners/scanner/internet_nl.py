@@ -77,6 +77,11 @@ def result(scan_id: int, settings: Dict[str, Any]):
     return generic_internet_nl_api_request("get", f"{settings['url']}/requests/{scan_id}/results", settings)
 
 
+@app.task(queue="storage")
+def result_technical(scan_id: int, settings: Dict[str, Any]):
+    return generic_internet_nl_api_request("get", f"{settings['url']}/requests/{scan_id}/results_technical", settings)
+
+
 def generic_internet_nl_api_request(operation, url: str, settings: Dict[str, Any]):
     # We're dealing with all kinds of network issues by returning a network issue as a status code.
     # Network issues can be recovered and the next step can be retried. Network issues can take a long time and

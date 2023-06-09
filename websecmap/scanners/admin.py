@@ -401,11 +401,12 @@ class InternetNLV2ScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "last_state_change",
         "metadata",
         "retrieved_scan_report",
+        "retrieved_scan_report_technical",
         "subject_urls",
     )
     # todo: subject_urls inline
 
-    readonly_fields = ["subject_urls", "metadata", "retrieved_scan_report"]
+    readonly_fields = ["subject_urls", "metadata", "retrieved_scan_report", "retrieved_scan_report_technical"]
 
     @staticmethod
     def domains(obj):

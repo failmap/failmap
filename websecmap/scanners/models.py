@@ -611,7 +611,8 @@ class InternetNLV2Scan(models.Model):
     subject_urls = models.ManyToManyField(Url)
 
     # for error recovery and debugging reasons, store the entire result (which can be pretty huge).
-    retrieved_scan_report = JSONField(default=None, blank=True, null=True)
+    retrieved_scan_report = JSONField(default={}, blank=True, null=True)
+    retrieved_scan_report_technical = JSONField(default={}, blank=True, null=False)
 
     created_at_when = models.DateTimeField(auto_now_add=True, db_index=True)
 

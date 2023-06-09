@@ -18,6 +18,7 @@ from websecmap.scanners.scanner.internet_nl_websecmap import (
     reuse_last_fields_and_set_them_to_error,
     store_domain_scan_results,
     update_state,
+    gather_evidence_from_technical_details_on_domain,
 )
 
 log = logging.getLogger("websecmap")
@@ -1003,7 +1004,6 @@ def test_is_subdomain():
 
 
 def create_scan_data(result):
-
     return {
         "status": "ok",
         "report": {"url": "https://dev.batch.internet.nl/site/internet.nl/120932/"},
@@ -1022,7 +1022,9 @@ def test_internet_nl_security_txt_websecmap_subdomains(db):
 
     scan_data = create_scan_data("passed")
 
-    store_domain_scan_results(scan_data=scan_data, domain="internet.nl", scan_type="web", endpoint_protocol="https")
+    store_domain_scan_results(
+        scan_data=scan_data, domain="internet.nl", technical_details={}, scan_type="web", endpoint_protocol="https"
+    )
 
     db_contents = [x.type for x in EndpointGenericScan.objects.all()]
 
@@ -1049,6 +1051,7 @@ def store_and_process(scan_data, domain: str, expected: str):
     store_domain_scan_results(
         scan_data=scan_data,
         domain=domain,
+        technical_details={},
         scan_type="web",
         endpoint_protocol="https",
     )
@@ -1059,3 +1062,147 @@ def store_and_process(scan_data, domain: str, expected: str):
         .first()
     )
     assert result.rating == expected
+
+
+def test_gather_evidence_from_technical_details():
+    data_for_domain = {
+        "status": "ok",
+        "domain": {"dnssec": {"status": "secure"}},
+        "nameservers": {
+            "SGSINRAZDNS01.example.com.": {
+                "ipv4": {
+                    "addresses": [
+                        {
+                            "address": "199.49.15.218",
+                            "reachable": True,
+                            "routing": [{"origin": "AS40810", "route": "199.49.14.0/23", "rov_state": "not-found"}],
+                        }
+                    ]
+                },
+                "ipv6": {"addresses": []},
+            },
+            "USPILRAZDNS01.example.com.": {
+                "ipv4": {
+                    "addresses": [
+                        {
+                            "address": "199.49.20.5",
+                            "reachable": True,
+                            "routing": [{"origin": "AS3571", "route": "199.49.20.0/24", "rov_state": "not-found"}],
+                        }
+                    ]
+                },
+                "ipv6": {"addresses": []},
+            },
+            "USFWTRAZDNS01.example.com.": {
+                "ipv4": {
+                    "addresses": [
+                        {
+                            "address": "199.49.30.249",
+                            "reachable": True,
+                            "routing": [{"origin": "AS400060", "route": "199.49.30.0/24", "rov_state": "not-found"}],
+                        }
+                    ]
+                },
+                "ipv6": {"addresses": []},
+            },
+            "DEFRNRAZDNS01.example.com.": {
+                "ipv4": {
+                    "addresses": [
+                        {
+                            "address": "145.62.66.103",
+                            "reachable": True,
+                            "routing": [{"origin": "AS211280", "route": "145.62.64.0/20", "rov_state": "valid"}],
+                        }
+                    ]
+                },
+                "ipv6": {"addresses": []},
+            },
+            "DERUSRAZDNS01.example.com.": {
+                "ipv4": {
+                    "addresses": [
+                        {
+                            "address": "145.62.82.85",
+                            "reachable": True,
+                            "routing": [{"origin": "AS201208", "route": "145.62.80.0/20", "rov_state": "valid"}],
+                        }
+                    ]
+                },
+                "ipv6": {"addresses": []},
+            },
+        },
+        "webservers": {
+            "ipv4": {
+                "addresses": [
+                    {
+                        "address": "199.49.20.6",
+                        "reachable": True,
+                        "routing": [{"origin": "AS3571", "route": "199.49.20.0/24", "rov_state": "not-found"}],
+                    }
+                ],
+                "https_enabled": True,
+                "server_reachable": True,
+                "tested_address": "199.49.20.6",
+                "details": {
+                    "dane_status": "none",
+                    "dane_records": [],
+                    "kex_params_bad": [],
+                    "kex_params_phase_out": [],
+                    "ciphers_bad": [],
+                    "ciphers_phase_out": [],
+                    "cipher_order": "na",
+                    "cipher_order_violation": [],
+                    "protocols_bad": [],
+                    "protocols_phase_out": [],
+                    "compression": False,
+                    "secure_reneg": True,
+                    "client_reneg": False,
+                    "zero_rtt": "na",
+                    "ocsp_stapling": "ok",
+                    "kex_hash_func": "good",
+                    "https_redirect": "good",
+                    "http_compression": False,
+                    "hsts": True,
+                    "hsts_policies": ["max-age=31536000; includeSubDomains"],
+                    "cert_chain": [
+                        "www.example.com",
+                        "Entrust Certification Authority - L1K",
+                        "Entrust Root Certification Authority - G2",
+                        "Entrust Root Certification Authority",
+                    ],
+                    "cert_trusted": 0,
+                    "cert_pubkey_bad": [],
+                    "cert_pubkey_phase_out": [],
+                    "cert_signature_bad": {},
+                    "cert_hostmatch_bad": [],
+                    "content_security_policy_enabled": False,
+                    "content_security_policy_values": [],
+                    "content_security_policy_errors": [],
+                    "referrer_policy_enabled": False,
+                    "referrer_policy_values": [],
+                    "x_content_type_options_enabled": False,
+                    "x_content_type_options_values": [],
+                    "x_frame_options_enabled": False,
+                    "x_frame_options_values": [],
+                    "securitytxt_enabled": False,
+                    "securitytxt_errors": [{"msgid": "no_security_txt_404"}],
+                    "securitytxt_recommendations": [],
+                    "securitytxt_found_host": "www.example.com",
+                },
+            },
+            "ipv6": {"addresses": []},
+        },
+    }
+
+    # keys should match one on one for recongizability
+    data = gather_evidence_from_technical_details_on_domain("internet_nl_web_appsecpriv_securitytxt", data_for_domain)
+    assert data == {
+        "ipv4": {
+            "securitytxt_enabled": False,
+            "securitytxt_errors": [{"msgid": "no_security_txt_404"}],
+            "securitytxt_found_host": "www.example.com",
+            "securitytxt_recommendations": [],
+        }
+    }
+
+    data = gather_evidence_from_technical_details_on_domain("test_does_not_exist", data_for_domain)
+    assert data == {}
