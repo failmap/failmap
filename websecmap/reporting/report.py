@@ -723,7 +723,8 @@ def judge(amount_of_issues, clean_issues_for_judgement, key, reports: List):
     return amount_of_issues, judgement_issues
 
 
-def statistics_over_url_calculation(calculation):
+def statistics_over_url_calculation(calculation, at_when: datetime = None):
+    # at_when is used to see if the explanation is still valid at this moment.
     empty_with_some_extras = {
         "high": 0,
         "medium": 0,
@@ -766,7 +767,17 @@ def statistics_over_url_calculation(calculation):
 
         # Simply sum numbers.
         for report in endpoint["ratings"]:
-            if report["is_explained"]:
+            # explanation needs to be valid at time of the report. Explanations can expire.
+            # explanations should be their own table but otoh explanations probably perpetuate anyway and will become
+            # more of just a list of the same explanations over time, which is just a waste of complexity.
+            if (
+                report["is_explained"]
+                and report["comply_or_explain_explained_on"]
+                and report["comply_or_explain_explanation_valid_until"]
+                and report["comply_or_explain_explained_on"]
+                < at_when
+                < report["comply_or_explain_explanation_valid_until"]
+            ):
                 amount_of_issues = add_report_to_key(amount_of_issues, "endpoint_explained", report)
             else:
                 amount_of_issues = add_report_to_key(amount_of_issues, "endpoint", report)
@@ -788,7 +799,12 @@ def statistics_over_url_calculation(calculation):
         calculation["endpoints"][i]["explained_low"] = explained_judgement_issues["endpoint_explained"]["low"]
 
     for report in calculation["ratings"]:
-        if report["is_explained"]:
+        if (
+            report["is_explained"]
+            and report["comply_or_explain_explained_on"]
+            and report["comply_or_explain_explanation_valid_until"]
+            and report["comply_or_explain_explained_on"] < at_when < report["comply_or_explain_explanation_valid_until"]
+        ):
             amount_of_issues = add_report_to_key(amount_of_issues, "url_explained", report)
         else:
             amount_of_issues = add_report_to_key(amount_of_issues, "url", report)
@@ -820,7 +836,7 @@ def statistics_over_url_calculation(calculation):
 
 def save_url_report(url: Url, date: datetime, calculation, is_the_newest=False):
     # This also injects the statistics into the json, for use in representations / views in the right places.
-    calculation, amount_of_issues = statistics_over_url_calculation(calculation)
+    calculation, amount_of_issues = statistics_over_url_calculation(calculation, at_when=date)
 
     url_report = UrlReport()
     url_report.url = url
@@ -1018,7 +1034,7 @@ def inspect_timeline(timeline, url: Url):
     return message
 
 
-def aggegrate_url_rating_scores(url_ratings: List, only_include_issues: List[str] = None):
+def aggegrate_url_rating_scores(url_ratings: List, only_include_issues: List[str] = None, at_when: datetime = None):
     """
 
     :param url_ratings: All url ratings that should be combined into a single report.
@@ -1088,7 +1104,7 @@ def aggegrate_url_rating_scores(url_ratings: List, only_include_issues: List[str
         if only_include_issues:
             calculation = remove_issues_from_calculation(urlrating.calculation, only_include_issues)
             # This already overrides endpoint statistics, use the calculation you get from this.
-            calculation, amount_of_issues = statistics_over_url_calculation(calculation)
+            calculation, amount_of_issues = statistics_over_url_calculation(calculation, at_when=at_when)
             # overwrite the rest of the statistics.
             calculation = add_statistics_to_calculation(calculation, amount_of_issues)
         else:

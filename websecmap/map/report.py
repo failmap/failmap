@@ -763,7 +763,8 @@ def create_organization_report_on_moment(organization: Organization, when: datet
     # Here used to be a lost of nested queries: getting the "last" one per url. This has been replaced with a
     # custom query that is many many times faster.
     all_url_ratings = get_latest_urlratings_fast(urls, when)
-    scores = aggegrate_url_rating_scores(all_url_ratings)
+    # when is relevant because you want to see if the explanation has not expired.
+    scores = aggegrate_url_rating_scores(all_url_ratings, at_when=when)
 
     # Still do deepdiff to prevent double reports.
     try:
