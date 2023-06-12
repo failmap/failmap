@@ -440,7 +440,7 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
                 scan_type="http_security_header_strict_transport_security",
                 endpoint_id=endpoint_id,
                 rating="present",
-                message=headers["Strict-Transport-Security"],
+                message="present",
                 evidence=headers["Strict-Transport-Security"],
             )
         else:
