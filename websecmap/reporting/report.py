@@ -723,6 +723,10 @@ def judge(amount_of_issues, clean_issues_for_judgement, key, reports: List):
     return amount_of_issues, judgement_issues
 
 
+def convert_optional_string_to_datetime(value: Union[str, datetime]) -> datetime:
+    return datetime.fromisoformat(value) if isinstance(value, str) else value
+
+
 def statistics_over_url_calculation(calculation, at_when: datetime = None):
     # at_when is used to see if the explanation is still valid at this moment.
     empty_with_some_extras = {
@@ -774,9 +778,9 @@ def statistics_over_url_calculation(calculation, at_when: datetime = None):
                 report["is_explained"]
                 and report["comply_or_explain_explained_on"]
                 and report["comply_or_explain_explanation_valid_until"]
-                and report["comply_or_explain_explained_on"]
+                and convert_optional_string_to_datetime(report["comply_or_explain_explained_on"])
                 < at_when
-                < report["comply_or_explain_explanation_valid_until"]
+                < convert_optional_string_to_datetime(report["comply_or_explain_explanation_valid_until"])
             ):
                 amount_of_issues = add_report_to_key(amount_of_issues, "endpoint_explained", report)
             else:
@@ -803,7 +807,9 @@ def statistics_over_url_calculation(calculation, at_when: datetime = None):
             report["is_explained"]
             and report["comply_or_explain_explained_on"]
             and report["comply_or_explain_explanation_valid_until"]
-            and report["comply_or_explain_explained_on"] < at_when < report["comply_or_explain_explanation_valid_until"]
+            and convert_optional_string_to_datetime(report["comply_or_explain_explained_on"])
+            < at_when
+            < convert_optional_string_to_datetime(report["comply_or_explain_explanation_valid_until"])
         ):
             amount_of_issues = add_report_to_key(amount_of_issues, "url_explained", report)
         else:
