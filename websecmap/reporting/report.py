@@ -1,8 +1,8 @@
 import logging
 from collections import defaultdict
 from copy import copy, deepcopy
-from datetime import datetime, timezone
-from typing import List, Union
+from datetime import datetime, timezone, timedelta
+from typing import List, Union, Any
 
 from django.db.models import Q
 
@@ -723,8 +723,24 @@ def judge(amount_of_issues, clean_issues_for_judgement, key, reports: List):
     return amount_of_issues, judgement_issues
 
 
-def convert_optional_string_to_datetime(value: Union[str, datetime]) -> datetime:
+def to_datetime(value: Union[str, datetime]) -> datetime:
     return datetime.fromisoformat(value) if isinstance(value, str) else value
+
+
+def explanation_valid_around_this_moment(rating: dict[str, Any], at_when: datetime) -> bool:
+    # At when is usually a start of a day. Therefore be lenient with handing out compliancy, just give them a day
+    # extra before and afterwards to compensate for any issues.
+
+    explained_on = rating["comply_or_explain_explained_on"]
+    valid_until = rating["comply_or_explain_explanation_valid_until"]
+
+    # can't use "all" because that would evaluate 'all' instead of stopping at the first thing that is not correct
+    return bool(
+        rating["is_explained"]
+        and explained_on
+        and valid_until
+        and to_datetime(explained_on) - timedelta(days=1) < at_when < to_datetime(valid_until) + timedelta(days=1)
+    )
 
 
 def statistics_over_url_calculation(calculation, at_when: datetime = None):
@@ -774,14 +790,7 @@ def statistics_over_url_calculation(calculation, at_when: datetime = None):
             # explanation needs to be valid at time of the report. Explanations can expire.
             # explanations should be their own table but otoh explanations probably perpetuate anyway and will become
             # more of just a list of the same explanations over time, which is just a waste of complexity.
-            if (
-                report["is_explained"]
-                and report["comply_or_explain_explained_on"]
-                and report["comply_or_explain_explanation_valid_until"]
-                and convert_optional_string_to_datetime(report["comply_or_explain_explained_on"])
-                < at_when
-                < convert_optional_string_to_datetime(report["comply_or_explain_explanation_valid_until"])
-            ):
+            if explanation_valid_around_this_moment(report, at_when):
                 amount_of_issues = add_report_to_key(amount_of_issues, "endpoint_explained", report)
             else:
                 amount_of_issues = add_report_to_key(amount_of_issues, "endpoint", report)
@@ -803,14 +812,7 @@ def statistics_over_url_calculation(calculation, at_when: datetime = None):
         calculation["endpoints"][i]["explained_low"] = explained_judgement_issues["endpoint_explained"]["low"]
 
     for report in calculation["ratings"]:
-        if (
-            report["is_explained"]
-            and report["comply_or_explain_explained_on"]
-            and report["comply_or_explain_explanation_valid_until"]
-            and convert_optional_string_to_datetime(report["comply_or_explain_explained_on"])
-            < at_when
-            < convert_optional_string_to_datetime(report["comply_or_explain_explanation_valid_until"])
-        ):
+        if explanation_valid_around_this_moment(report, at_when):
             amount_of_issues = add_report_to_key(amount_of_issues, "url_explained", report)
         else:
             amount_of_issues = add_report_to_key(amount_of_issues, "url", report)
