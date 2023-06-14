@@ -7,7 +7,9 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 from taggit.managers import TaggableManager
+from statshog.defaults.django import statsd
 
+from websecmap.app import log
 from websecmap.organizations.models import Url
 from websecmap.reporting.models import ScanPolicy
 
@@ -160,6 +162,38 @@ class Endpoint(models.Model):
     class Meta:
         verbose_name = _("endpoint")
         verbose_name_plural = _("endpoint")
+
+    def save(self, *args, **kwargs):
+        """
+        Create endpoint manipulation statistics. This helps with figuring out if scanners are broken or have
+        conflicting implementations. You can also see if new scanners are run etc, which is quite interesting.
+
+        This will allow you to:
+        - See if the endpoint is set to is_dead or not. (monitor boolean value)
+        - An endpoint is created (creating a new record)
+        """
+        tags = {"protocol": self.protocol, "port": self.port, "ip_version": self.ip_version}
+
+        # don't execute a query if you don't know the id of the object.
+        old = None
+        if getattr(self, "pk", None):
+            old = Endpoint.objects.filter(pk=getattr(self, "pk", None)).first()
+
+        if not old:
+            self.to_statsd("created ", tags)
+        else:
+            if old.is_dead and not self.is_dead:
+                self.to_statsd("revived ", tags)
+            if not old.is_dead and self.is_dead:
+                self.to_statsd("killed ", tags)
+        super().save(*args, **kwargs)
+
+    # TODO Rename this here and in `save`
+    @staticmethod
+    def to_statsd(action, tags):
+        log.debug(f"endpoint_{action} {tags}")
+        statsd.incr(f"endpoint_{action}", 1, tags=tags)
+        statsd.incr("endpoint", 1, tags=tags | {action: 1})
 
 
 class ScanProxy(models.Model):
