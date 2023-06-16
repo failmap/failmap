@@ -331,7 +331,6 @@ def test_statistics_over_url_calculation():
 
 
 def test_explanation_valid_around_this_moment():
-
     rating = {
         "is_explained": True,
         "comply_or_explain_explained_on": datetime(2022, 4, 1, 1, tzinfo=timezone.utc),
@@ -354,3 +353,32 @@ def test_explanation_valid_around_this_moment():
     assert explanation_valid_around_this_moment(rating, datetime(2022, 5, 2, tzinfo=timezone.utc)) is True
 
     assert explanation_valid_around_this_moment(rating, datetime(2022, 5, 3, tzinfo=timezone.utc)) is False
+
+    # random sample from report where things go wrong
+    assert (
+        explanation_valid_around_this_moment(
+            {
+                "type": "ports",
+                "explanation": "port_should_not_be_open",
+                "evidence": "",
+                "since": "2023-04-14T09:01:42+00:00",
+                "last_scan": "2023-06-16T09:01:14+00:00",
+                "high": 0,
+                "medium": 1,
+                "low": 0,
+                "ok": 0,
+                "not_testable": 0,
+                "not_applicable": 0,
+                "error_in_test": 0,
+                "is_explained": True,
+                "comply_or_explain_explanation": "policy_explanation_fits_cloudflare_open_port",
+                "comply_or_explain_explained_on": "2023-05-08T15:08:36+00:00",
+                "comply_or_explain_explanation_valid_until": "2026-02-01T15:08:36+00:00",
+                "comply_or_explain_valid_at_time_of_report": True,
+                "scan": 13373584,
+                "scan_type": "ports",
+            },
+            datetime(2023, 6, 16, tzinfo=timezone.utc),
+        )
+        is True
+    )
