@@ -411,7 +411,7 @@ def combine_processed_nuclei_records(processed_records) -> Dict[str, Any]:
         "findings": [... list of relevant processed records ...]
     }
     """
-    combined_metrics = {}
+    combined_metrics: Dict[str, Any] = {}
     for record in processed_records:
         category = f'nuclei_{record["category"].replace("-", "_")}'
         if category not in combined_metrics:
@@ -423,6 +423,14 @@ def combine_processed_nuclei_records(processed_records) -> Dict[str, Any]:
 
         record = clean_nuclei_record(record)
         combined_metrics[category]["findings"].append(record)
+
+    # sort the findings on template-id, name and finding-name, otherwise they will be stored again and again
+    # in different orders
+    for category in combined_metrics:
+        combined_metrics[category]["findings"] = sorted(
+            combined_metrics[category]["findings"],
+            key=lambda k: (k.get("template-id", None), k.get("name", None), k.get("finding-name", None)),
+        )
 
     return combined_metrics
 
@@ -441,6 +449,12 @@ def force_combine_all_processed_metrics_into_one_category(raw_nuclei_records):
         record = clean_nuclei_record(record)
         combined_metrics["findings"].append(record)
 
+    # sort the findings on template-id, name and finding-name, otherwise they will be stored again and again
+    # in different orders
+    combined_metrics["findings"] = sorted(
+        combined_metrics["findings"],
+        key=lambda k: (k.get("template-id", None), k.get("name", None), k.get("finding-name", None)),
+    )
     return combined_metrics
 
 
