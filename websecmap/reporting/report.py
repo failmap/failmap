@@ -791,7 +791,6 @@ def statistics_over_url_calculation(calculation, at_when: datetime = None):
     clean_issues_for_judgement = deepcopy(amount_of_issues)
 
     for i, endpoint in enumerate(calculation["endpoints"]):
-        log.error("next endpoint")
 
         # make sure all keys exist:
         calculation["endpoints"][i] = {
