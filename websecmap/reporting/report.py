@@ -734,13 +734,20 @@ def explanation_valid_around_this_moment(rating: dict[str, Any], at_when: dateti
     explained_on = rating["comply_or_explain_explained_on"]
     valid_until = rating["comply_or_explain_explanation_valid_until"]
 
-    # can't use "all" because that would evaluate 'all' instead of stopping at the first thing that is not correct
-    return bool(
-        rating["is_explained"]
-        and explained_on
-        and valid_until
-        and to_datetime(explained_on) - timedelta(days=1) < at_when < to_datetime(valid_until) + timedelta(days=1)
-    )
+    if not all([rating["is_explained"], explained_on, valid_until]):
+        return False
+
+    # make sure the time is a datetime and set to the earliest of the day at start and the earliest of the next day
+    # at the end
+    tmp = to_datetime(explained_on).date()
+    explained_on = datetime(tmp.year, tmp.month, tmp.day, tzinfo=timezone.utc)
+
+    tmp = to_datetime(valid_until).date()
+    valid_until = datetime(tmp.year, tmp.month, tmp.day, tzinfo=timezone.utc) + timedelta(days=1)
+
+    log.debug(f"explained_on: {explained_on}, valid_until: {valid_until}, now: {at_when}")
+
+    return explained_on <= at_when <= valid_until
 
 
 def statistics_over_url_calculation(calculation, at_when: datetime = None):

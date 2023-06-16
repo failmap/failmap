@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from websecmap.reporting.report import statistics_over_url_calculation
+from websecmap.reporting.report import statistics_over_url_calculation, explanation_valid_around_this_moment
 
 # fit statements on one 120 char line.
 isoformat = datetime.fromisoformat
@@ -145,3 +145,29 @@ def test_statistics_over_url_calculation():
     assert amount_of_issues["overall_explained"]["high"] == 0
     assert amount_of_issues["overall"]["high"] == 1
     assert calculation["endpoints"][0]["explained_high"] == 0
+
+
+def test_explanation_valid_around_this_moment():
+
+    rating = {
+        "is_explained": True,
+        "comply_or_explain_explained_on": datetime(2022, 4, 1, 1, tzinfo=timezone.utc),
+        "comply_or_explain_explanation_valid_until": datetime(2022, 5, 1, 1, tzinfo=timezone.utc),
+    }
+    # before the explanation is valid:
+    assert explanation_valid_around_this_moment(rating, datetime(2022, 3, 31, tzinfo=timezone.utc)) is False
+
+    # one day in the range is ok, day two of the month
+    assert explanation_valid_around_this_moment(rating, datetime(2022, 4, 2, 1, tzinfo=timezone.utc)) is True
+
+    # on the same day is ok, at the exact moment it starts
+    # reports are usually made at the start of the day, which means that the explain could be valid later that day.
+    # so explains are valid from the start of the day, regardless what the timestamp says.
+    assert explanation_valid_around_this_moment(rating, datetime(2022, 4, 1, tzinfo=timezone.utc)) is True
+    assert explanation_valid_around_this_moment(rating, datetime(2022, 4, 30, 23, 59, 59, tzinfo=timezone.utc)) is True
+
+    assert explanation_valid_around_this_moment(rating, datetime(2022, 5, 1, 23, 59, 59, tzinfo=timezone.utc)) is True
+    # explanation is lenient for one day, which might cause some slight deviations in stats
+    assert explanation_valid_around_this_moment(rating, datetime(2022, 5, 2, tzinfo=timezone.utc)) is True
+
+    assert explanation_valid_around_this_moment(rating, datetime(2022, 5, 3, tzinfo=timezone.utc)) is False
