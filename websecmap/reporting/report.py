@@ -791,16 +791,38 @@ def statistics_over_url_calculation(calculation, at_when: datetime = None):
     clean_issues_for_judgement = deepcopy(amount_of_issues)
 
     for i, endpoint in enumerate(calculation["endpoints"]):
+        log.error("next endpoint")
+
+        # make sure all keys exist:
+        calculation["endpoints"][i] = {
+            **calculation["endpoints"][i],
+            **{
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "ok": 0,
+                "explained_high": 0,
+                "explained_medium": 0,
+                "explained_low": 0,
+            },
+        }
 
         # Simply sum numbers.
-        for report in endpoint["ratings"]:
+        for rating in endpoint["ratings"]:
             # explanation needs to be valid at time of the report. Explanations can expire.
             # explanations should be their own table but otoh explanations probably perpetuate anyway and will become
             # more of just a list of the same explanations over time, which is just a waste of complexity.
-            if explanation_valid_around_this_moment(report, at_when):
-                amount_of_issues = add_report_to_key(amount_of_issues, "endpoint_explained", report)
+            if explanation_valid_around_this_moment(rating, at_when):
+                amount_of_issues = add_report_to_key(amount_of_issues, "endpoint_explained", rating)
+                calculation["endpoints"][i]["explained_high"] += rating["high"]
+                calculation["endpoints"][i]["explained_medium"] += rating["medium"]
+                calculation["endpoints"][i]["explained_low"] += rating["low"]
             else:
-                amount_of_issues = add_report_to_key(amount_of_issues, "endpoint", report)
+                amount_of_issues = add_report_to_key(amount_of_issues, "endpoint", rating)
+                calculation["endpoints"][i]["high"] += rating["high"]
+                calculation["endpoints"][i]["medium"] += rating["medium"]
+                calculation["endpoints"][i]["low"] += rating["low"]
+                calculation["endpoints"][i]["ok"] += rating["ok"]
 
         amount_of_issues, judgement_issues = judge(
             amount_of_issues, clean_issues_for_judgement, "endpoint", [amount_of_issues["endpoint"]]
@@ -810,19 +832,22 @@ def statistics_over_url_calculation(calculation, at_when: datetime = None):
         )
 
         # inject statistics inside the calculation per endpoint.
-        calculation["endpoints"][i]["high"] = judgement_issues["endpoint"]["high"]
-        calculation["endpoints"][i]["medium"] = judgement_issues["endpoint"]["medium"]
-        calculation["endpoints"][i]["low"] = judgement_issues["endpoint"]["low"]
-        calculation["endpoints"][i]["ok"] = judgement_issues["endpoint"]["ok"]
-        calculation["endpoints"][i]["explained_high"] = explained_judgement_issues["endpoint_explained"]["high"]
-        calculation["endpoints"][i]["explained_medium"] = explained_judgement_issues["endpoint_explained"]["medium"]
-        calculation["endpoints"][i]["explained_low"] = explained_judgement_issues["endpoint_explained"]["low"]
+        # this was not possible given that you first summarize, and try to add some stuff from the summary
+        # yet you need to add this per endpoint and then summarize the endpoints (as you where doing).
+        # so therefore this code was added above.
+        # calculation["endpoints"][i]["high"] = judgement_issues["endpoint"]["high"]
+        # calculation["endpoints"][i]["medium"] = judgement_issues["endpoint"]["medium"]
+        # calculation["endpoints"][i]["low"] = judgement_issues["endpoint"]["low"]
+        # calculation["endpoints"][i]["ok"] = judgement_issues["endpoint"]["ok"]
+        # calculation["endpoints"][i]["explained_high"] = explained_judgement_issues["endpoint_explained"]["high"]
+        # calculation["endpoints"][i]["explained_medium"] = explained_judgement_issues["endpoint_explained"]["medium"]
+        # calculation["endpoints"][i]["explained_low"] = explained_judgement_issues["endpoint_explained"]["low"]
 
-    for report in calculation["ratings"]:
-        if explanation_valid_around_this_moment(report, at_when):
-            amount_of_issues = add_report_to_key(amount_of_issues, "url_explained", report)
+    for rating in calculation["ratings"]:
+        if explanation_valid_around_this_moment(rating, at_when):
+            amount_of_issues = add_report_to_key(amount_of_issues, "url_explained", rating)
         else:
-            amount_of_issues = add_report_to_key(amount_of_issues, "url", report)
+            amount_of_issues = add_report_to_key(amount_of_issues, "url", rating)
 
     amount_of_issues, _ = judge(amount_of_issues, clean_issues_for_judgement, "url", [amount_of_issues["url"]])
     amount_of_issues, _ = judge(
