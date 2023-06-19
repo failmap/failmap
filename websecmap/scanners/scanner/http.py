@@ -354,10 +354,14 @@ ACCEPTABLE_CONNECTION_ERRORS = [
     "unexpected_eof_while_reading",
     "tlsv1_unrecognized_name",
     "wrong_version_number",
-    "sslv3_alert_handshake_failure",
     "eof occurred in violation of protocol (_ssl.c:1007)",
     "unsafe_legacy_renegotiation_disabled",
     "sslv3_alert_bad_certificate",
+    "unsupported_protocol",
+    "decryption_failed_or_bad_record_mac",
+    "sslv3_alert_certificate_unknown",
+    "dh_key_too_small",
+    "sslv3_alert_illegal_parameter",
 ]
 
 
