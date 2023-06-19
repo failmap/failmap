@@ -11,7 +11,27 @@ from websecmap.scanners.scanner.http import (
     kill_endpoint,
     save_endpoint,
     get_similar_dead_endpoint_in_last_n_days,
+    has_acceptable_error,
 )
+
+
+def test_has_acceptable_error():
+    # just anything should not be accepted
+    assert has_acceptable_error("") is False
+    assert has_acceptable_error("some random stuff") is False
+    # case insensitive
+    assert has_acceptable_error("TLSV1_ALERT_INTERNAL_ERROR") is True
+    assert has_acceptable_error("tlsv1_ALERT_INTERNAL_ERROR") is True
+    # could contain a lot of data:
+    assert has_acceptable_error("some data, something, tlsv1_ALERT_INTERNAL_ERROR, something") is True
+    # something from a productio system:
+    assert (
+        has_acceptable_error(
+            "HTTPSConnectionPool(host='www.webportal.spijkenisse.nl', port=443): Max retries exceeded with url: / "
+            "(Caused by SSLError(SSLError(1, '[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure"
+        )
+        is True
+    )
 
 
 def test_connection_answer():

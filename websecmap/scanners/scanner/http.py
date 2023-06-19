@@ -71,6 +71,7 @@ PORT_TO_PROTOCOL = {80: "http", 8008: "http", 8080: "http", 443: "https", 8443: 
 PREFERRED_PORT_ORDER = [443, 80, 8443, 8080, 8008]
 
 CONTENT_FOUND_WITH_ENCODING_ISSUES = "content_found_with_encoding_issues"
+CONTENT_FOUND_WITH_SSL_ERRORS = "content_found_with_ssl_errors"
 NO_CONTENT_BUT_ERROR_INDICATES_SERVER = "no_content_but_error_indicates_server"
 NO_CONTENT_AND_SERVER_INDICATES_ERROR = "no_content_and_server_indicates_error"
 GENERIC_EXCEPTION = "generic_exception"
@@ -91,7 +92,7 @@ to slightly larger than a multiple of 3, which is the default TCP packet retrans
 1 second is surely too short, it results in a lot of false positives, especially when scanning a lot of sites.
 Make it very long, like 20 seconds, to make sure not too much stuff gets rediscovered
 """
-CONNECT_TIMEOUT = 5
+CONNECT_TIMEOUT = 15
 
 """
 Once your client has connected to the server and sent the HTTP request, the read timeout is the number of seconds the
@@ -327,27 +328,36 @@ def connection_answer(
 
 # These errors indicate there _IS_ a connection, but there is some kind of misconfiguration.
 # These are snippets from the received errors
+# all lowercase!
 ACCEPTABLE_CONNECTION_ERRORS = [
-    "BadStatusLine",
-    "CertificateError",
+    "badstatusline",
+    "certificateerror",
     "certificate verify failed",
     "bad handshake",
-    # Handshake failure: so there is an option to create a handshake, but perhaps the server wont respond.
-    # Still a valid endpoint.
-    "SSLV3_ALERT_HANDSHAKE_FAILURE",
-    # When connecting based on ip address and separate host header, the error returned
-    # might not be an SSLV3_ALERT_HANDSHAKE_FAILURE but an TLSV1_ALERT_INTERNAL_ERROR.
-    # In that case there is still a connection, although there is something going wrong with TLS.
-    # in general all SSLErrors mean there is a connection.
-    "TLSV1_ALERT_INTERNAL_ERROR",
-    # Done: what to do with a connection reset. It denotes that there is a service running
-    #  because otherwise there would not be a RST from the TCP handshake. It frequently happens
+    # handshake failure: so there is an option to create a handshake, but perhaps the server wont respond.
+    # still a valid endpoint.
+    "sslv3_alert_handshake_failure",
+    # when connecting based on ip address and separate host header, the error returned
+    # might not be an sslv3_alert_handshake_failure but an tlsv1_alert_internal_error.
+    # in that case there is still a connection, although there is something going wrong with tls.
+    # in general all sslerrors mean there is a connection.
+    "tlsv1_alert_internal_error",
+    # done: what to do with a connection reset. it denotes that there is a service running
+    #  because otherwise there would not be a rst from the tcp handshake. it frequently happens
     #  that a http site redirects to https and the https gives a connection reset.
-    #  In this case we follow what nmap does; it means the port is open. So perhaps this method
-    #  should be called 'has open port' or 'runs a service'. While we can't connect there is
+    #  in this case we follow what nmap does; it means the port is open. so perhaps this method
+    #  should be called 'has open port' or 'runs a service'. while we can't connect there is
     #  definitely a service running there, which means scans should take place.
     #  -> this will move 'missing https' endpoint warnings to 'could not test' errors.
-    "Connection aborted",
+    "connection aborted",
+    "tlsv13_alert_certificate_required",
+    "unexpected_eof_while_reading",
+    "tlsv1_unrecognized_name",
+    "wrong_version_number",
+    "sslv3_alert_handshake_failure",
+    "eof occurred in violation of protocol (_ssl.c:1007)",
+    "unsafe_legacy_renegotiation_disabled",
+    "sslv3_alert_bad_certificate",
 ]
 
 
@@ -366,6 +376,7 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
 
     ok_answers = [
         CONTENT_FOUND_WITH_ENCODING_ISSUES,
+        CONTENT_FOUND_WITH_SSL_ERRORS,
         NO_CONTENT_BUT_ERROR_INDICATES_SERVER,
         FOUND_WITH_HOSTNAME,
         FOUND_WITH_IP,
@@ -406,9 +417,13 @@ def http_call_handling_exceptions(callable, **args) -> Tuple[str, str]:
         # There is a connection and you can get something back. But it doesn't decode properly.
         # For example InvalidChunkLength(got length b'<!DOCTYPE html>\\n', 0 bytes read)",
         return CONTENT_FOUND_WITH_ENCODING_ISSUES, str(my_exception)
-    except (ConnectionError, HTTPError, SSLError, requests.RequestException) as my_exception:
+    except SSLError as my_exception:
+        # SSl issues are ok, this means there is something to connect to, but it doesn't matter if we can't connect
         log.debug(f"- Exception: {my_exception}")
-        if has_acceptable_error(str(my_exception.args)):
+        return CONTENT_FOUND_WITH_SSL_ERRORS, str(my_exception)
+    except (ConnectionError, HTTPError, requests.RequestException) as my_exception:
+        log.debug(f"- Exception: {my_exception}")
+        if has_acceptable_error(str(my_exception)):
             return NO_CONTENT_BUT_ERROR_INDICATES_SERVER, str(my_exception)
 
         # this has to be retried using get_via_hostname.
@@ -506,6 +521,7 @@ def create_standard_request_headers(url: str = "") -> Dict[str, str]:
 
 def has_acceptable_error(strerror: str) -> bool:
     log.debug(strerror)
+    strerror = strerror.lower()
     acceptable = any(True for error in ACCEPTABLE_CONNECTION_ERRORS if error in strerror)
     if acceptable:
         log.debug("Acceptable error. There is a server, but could not communicate directly: %s", strerror)
