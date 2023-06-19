@@ -394,7 +394,8 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
     log.debug("Attempting connect via ip on: %s", uri)
     answer, message = http_call_handling_exceptions(request_via_ip, **{"uri": uri, "url": url})
     log.debug(f"- Answer: {answer}, exc: {message}")
-    if message in ok_answers:
+    if answer in ok_answers or message in ok_answers:
+        log.debug("Got an ok answer, so we can connect, but not easily...")
         return connection_answer(True, message)
 
     # instead of trying on no_content_and_server_indicates_error, always retry this way
@@ -404,7 +405,7 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
         request_via_hostname, **{"protocol": protocol, "url": url, "port": port}
     )
     log.debug(f"- Answer: {answer}, exc: {message}")
-    if message in ok_answers:
+    if answer in ok_answers or message in ok_answers:
         return connection_answer(True, message)
 
     log.debug("No http connection possible")
@@ -412,6 +413,7 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
 
 
 def http_call_handling_exceptions(callable, **args) -> Tuple[str, str]:
+    # returns message and detail info
     try:
         log.debug(f"Calling {callable.__name__} with args: {args}")
         answer = callable(**args)
