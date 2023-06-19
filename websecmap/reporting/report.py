@@ -752,7 +752,7 @@ def explanation_valid_around_this_moment(rating: dict[str, Any], at_when: dateti
 
     explained_on = rating["comply_or_explain_explained_on"]
     valid_until = rating["comply_or_explain_explanation_valid_until"]
-    log.info(f"explained_on: {explained_on}, valid_until: {valid_until}, now: {at_when}")
+    # log.info(f"explained_on: {explained_on}, valid_until: {valid_until}, now: {at_when}")
 
     if not all([rating["is_explained"], explained_on, valid_until]):
         return False
@@ -765,7 +765,7 @@ def explanation_valid_around_this_moment(rating: dict[str, Any], at_when: dateti
     tmp = to_datetime(valid_until).date()
     valid_until = datetime(tmp.year, tmp.month, tmp.day, tzinfo=timezone.utc) + timedelta(days=1)
 
-    log.info(f"explained_on: {explained_on}, valid_until: {valid_until}, now: {at_when}")
+    # log.info(f"explained_on: {explained_on}, valid_until: {valid_until}, now: {at_when}")
 
     return explained_on <= at_when <= valid_until
 
@@ -832,13 +832,13 @@ def statistics_over_url_calculation(calculation, at_when: datetime = None):
             # explanations should be their own table but otoh explanations probably perpetuate anyway and will become
             # more of just a list of the same explanations over time, which is just a waste of complexity.
             if explanation_valid_around_this_moment(rating, at_when):
-                log.info(f"Explanation valid for {rating['type']} on {at_when}")
+                # log.info(f"Explanation valid for {rating['type']} on {at_when}")
                 amount_of_issues = add_report_to_key(amount_of_issues, "endpoint_explained", rating)
                 calculation["endpoints"][i]["explained_high"] += rating["high"]
                 calculation["endpoints"][i]["explained_medium"] += rating["medium"]
                 calculation["endpoints"][i]["explained_low"] += rating["low"]
             else:
-                log.info(f"Explanation NOT valid for {rating['type']} on {at_when}")
+                # log.info(f"Explanation NOT valid for {rating['type']} on {at_when}")
                 amount_of_issues = add_report_to_key(amount_of_issues, "endpoint", rating)
                 calculation["endpoints"][i]["high"] += rating["high"]
                 calculation["endpoints"][i]["medium"] += rating["medium"]
