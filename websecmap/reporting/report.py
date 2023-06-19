@@ -174,9 +174,20 @@ def significant_moments(urls: List[Url] = None, reported_scan_types: List[str] =
     endpoint_scans = latest_rating_per_day_only(endpoint_scans)
     endpoint_scan_dates = [x.rating_determined_on for x in endpoint_scans]
 
+    # The scan dates are significant, but the explanation dates are also important. It is a usual
+    # practice that an explanation is added after a scan. Since statistics are built on significant moments,
+    # we also need to add the moment explanations where added. Same goes for url ratings ofc.
+    # The data model is currently limited to a single explanation per measurement, even if it expires.
+    # The validity of the explanation is done while creating reports. Worst case an explanation might be
+    # valid a bit longer(?).
+    endpoint_explanation_dates = [
+        x.comply_or_explain_explained_on for x in endpoint_scans if x.comply_or_explain_explained_on
+    ]
+
     url_scans = UrlGenericScan.objects.all().filter(type__in=reported_scan_types, url__in=urls).prefetch_related("url")
     url_scans = latest_rating_per_day_only(url_scans)
     url_scan_dates = [x.rating_determined_on for x in url_scans]
+    url_explanation_dates = [x.comply_or_explain_explained_on for x in url_scans if x.comply_or_explain_explained_on]
 
     dead_endpoints = Endpoint.objects.all().filter(url__in=urls, is_dead=True)
     dead_scan_dates = [x.is_dead_since for x in dead_endpoints]
@@ -189,7 +200,15 @@ def significant_moments(urls: List[Url] = None, reported_scan_types: List[str] =
 
     # reduce this to one moment per day only, otherwise there will be a report for every change
     # which is highly inefficient. Using the latest possible time of the day is used.
-    moments = endpoint_scan_dates + url_scan_dates + non_resolvable_dates + dead_scan_dates + dead_url_dates
+    moments = (
+        endpoint_scan_dates
+        + url_scan_dates
+        + non_resolvable_dates
+        + dead_scan_dates
+        + dead_url_dates
+        + endpoint_explanation_dates
+        + url_explanation_dates
+    )
     moments = [latest_moment_of_datetime(x) for x in moments]
     moments = sorted(set(moments))
 
