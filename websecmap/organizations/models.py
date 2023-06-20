@@ -150,6 +150,12 @@ class Organization(models.Model):
         blank=True,
         default=[{"registrant": "", "reason": "empty registrant"}],
     )
+    arbitrary_kv_data = JSONField(
+        help_text="Any other data that is extracted from the datasource, in key value pairs. It depends on "
+        "the datasource imported. Every time of organization has their own unique codes.",
+        blank=True,
+        default={},
+    )
 
     @property
     def not_allowed_registrant_names(self):
@@ -645,7 +651,8 @@ class Dataset(models.Model):
         "<a href='/static/websecmap/empty_organizations_import_file.xlsx'>empty file</a>. "
         "You can also download "
         "an example that shows how to enter the data correctly. You can download the example here: "
-        "<a href='/static/websecmap/example_organizations_import_file.xlsx'>example file</a>",
+        "<a href='/static/websecmap/example_organizations_import_file.xlsx'>example file</a>. Any additional fields "
+        "will be used and stored in the arbitrary_kv_data column. This can be useful for later processing.",
     )
 
     is_imported = models.BooleanField(

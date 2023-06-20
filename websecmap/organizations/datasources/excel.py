@@ -47,9 +47,25 @@ def parse_data(dataset, filename):
     sheet = p.get_sheet(file_name=filename, name_columns_by_row=0)
     records = sheet.to_records()
 
-    for record in records:
+    # these fields directly map to the database somehow
+    normalized_keys = [
+        "Name",
+        "Address",
+        "Hint",
+        "Countrycode",
+        "Layer",
+        "Lat",
+        "Lng",
+        "Websites (csv)",
+        "Surrogate ID",
+    ]
 
+    for record in records:
         validate_record(record)
+
+        arbitrary_keys = list(set(record.keys()) - set(normalized_keys))
+        arbitrary_kv_data = {key.lower(): record[key] for key in arbitrary_keys}
+        log.debug(arbitrary_kv_data)
 
         sites = record["Websites (csv)"].strip().split(",")
         sites = [x.strip() for x in sites]
@@ -65,7 +81,9 @@ def parse_data(dataset, filename):
                 "layer": record["Layer"],
                 "lat": record.get("Lat", ""),
                 "lng": record.get("Lng", ""),
+                "surrogate_id": record.get("Surrogate ID", ""),
                 "dataset": dataset,
+                "arbitrary_kv_data": arbitrary_kv_data,
             }
         )
 
@@ -84,8 +102,9 @@ def validate_record(record):
     if not record.get("Address", ""):
         ValueError('Missing "Address" column or column was empty.')
 
-    if not record.get("Websites (csv)", ""):
-        ValueError('Missing "Websites (csv)" column or column was empty.')
+    # not mandatory in favor of getting all organizations from datasets in...
+    # if not record.get("Websites (csv)", ""):
+    #     ValueError('Missing "Websites (csv)" column or column was empty.')
 
     if not record.get("Countrycode", ""):
         ValueError('Missing "Countrycode" column or column was empty.')

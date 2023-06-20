@@ -348,6 +348,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
                     "wikidata",
                     "wikipedia",
                     "surrogate_id",
+                    "arbitrary_kv_data",
                 )
             },
         ),

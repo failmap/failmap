@@ -171,10 +171,11 @@ def geolocate_organizations(organizations: List):
         # https://console.cloud.google.com/google/maps-apis/apis/geocoding-backend.googleapis.com/credentials
         # todo: country code to apply restrictions?
         try:
+            log.debug("Geocoding %s", organization["address"])
             geocode_result = gmaps.geocode(f"{organization['address']}, {organization['geocoding_hint']}")
 
-            # give a little slack, so the server is not overburdened.
-            sleep(0.1)
+            # give a little slack, so the server is not overburdened. No: its paid for, so just go!
+            # sleep(0.03)
 
         except googlemaps.exceptions.ApiError as my_exception:
             # sometimes the API is just obnoxiously blocking the request, saying the IP is not authorized,
@@ -332,11 +333,32 @@ def save_organization(organization, organization_type):
         )
 
     # a new organization does not have the created_on fields set. These have to be set.
-    if created:
+    changed = False
+    if not failmap_organization.surrogate_id and organization.get("surrogate_id", None):
+        failmap_organization.surrogate_id = organization.get("surrogate_id", None)
+        changed = True
+
+    if not failmap_organization.written_address and organization["address"]:
+        failmap_organization.written_address = organization["address"]
+        changed = True
+
+    if not failmap_organization.arbitrary_kv_data and organization.get("arbitrary_kv_data", {}):
+        failmap_organization.arbitrary_kv_data = organization.get("arbitrary_kv_data", {})
+        changed = True
+
+    if not failmap_organization.internal_notes:
         failmap_organization.internal_notes = organization["dataset"]
+        changed = True
+
+    if created:
         failmap_organization.created_on = datetime.now(timezone.utc)
-        failmap_organization.save(update_fields=["created_on"])
-        failmap_organization.layers.add(organization_type)
+        changed = True
+
+    if changed:
+        failmap_organization.save()
+
+    # always add the organization to the requested layer
+    failmap_organization.layers.add(organization_type)
 
     return failmap_organization
 
