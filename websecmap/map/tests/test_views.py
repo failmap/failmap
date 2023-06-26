@@ -8,6 +8,7 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericS
 
 
 def test_config(db, default_scan_metadata):
+    run_setup()
     conf = config_content()
     assert conf["project"]["country"] == "NL"
     assert conf["debug"] is False
@@ -17,8 +18,8 @@ def test_config(db, default_scan_metadata):
 now = datetime.now(timezone.utc)
 
 
-def setup():
-    # Automagically called
+def run_setup():
+    # Automagically called, but not with the database fixture, so this has been renamed to run_setup
     ott = OrganizationType(**{"name": "gov"})
     ott.save()
     url = Url(**{"url": "example.com"})
@@ -70,6 +71,7 @@ def setup():
 
 
 def test_what_to_improve(db, default_scan_metadata):
+    run_setup()
     # Add two tests to the db, one that needs to be improved, and one that doesn't.
     # The view should show 1 thing... for both endpoint and url
 
