@@ -219,7 +219,7 @@ pip-sync:
 	# synchronizes the .venv with the state of requirements.txt
 	python3 -m piptools sync requirements.txt requirements-dev.txt
 
-update_requirements: pip_compile_args=--upgrade
+update_requirements: pip_compile_args=--upgrade --resolver=backtracking
 update_requirements: _mark_outdated requirements.txt requirements-dev.txt requirements-deploy.txt _commit_update
 
 upgrade_package: | ${pip-compile} ## upgrade a single Python package in requirements.txt
