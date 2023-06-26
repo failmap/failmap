@@ -208,13 +208,13 @@ requirements: ${requirements}
 
 # perform 'pip freeze' on first class requirements in .in files.
 requirements.txt: requirements.in | ${pip-compile}
-	${pip-compile} ${pip_compile_args} --output-file $@ $<
+	${pip-compile} ${pip_compile_args} --resolver=backtracking --output-file $@ $<
 
 requirements-dev.txt: requirements-dev.in requirements.in | ${pip-compile}
-	${pip-compile} ${pip_compile_args} --output-file $@ $<
+	${pip-compile} ${pip_compile_args} --resolver=backtracking --output-file $@ $<
 
 requirements-deploy.txt: requirements-deploy.in requirements.in | ${pip-compile}
-	${pip-compile} ${pip_compile_args} --output-file $@ $<
+	${pip-compile} ${pip_compile_args} --resolver=backtracking --output-file $@ $<
 
 pip-sync:
 	# synchronizes the .venv with the state of requirements.txt

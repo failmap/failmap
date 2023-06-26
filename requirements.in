@@ -183,3 +183,10 @@ bs4
 
 # ip geolocation (experimental)
 geoip2
+
+
+# An error was not yet corrected:
+# https://github.com/pyexcel/pyexcel-xlsx/issues/52
+pyexcel==0.6.7
+pyexcel-xlsx==0.6.0
+openpyxl==3.0.10
