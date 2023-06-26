@@ -2,7 +2,6 @@ from websecmap.scanners import init_dict
 
 
 def test_init_dict():
-
     a = None
     b = None
     c = None

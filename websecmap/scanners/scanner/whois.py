@@ -36,7 +36,6 @@ def check_ownership():
     # if it's not, then there is an issue.
     urls = Url.objects.all().filter(is_dead=False, not_resolvable=False, computed_subdomain="")
     for url in urls:
-
         # gather all allowed registrants.
         registrants = get_registrants_for_url(url)
         if not registrants:

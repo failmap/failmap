@@ -35,13 +35,10 @@ def claim_proxy(tracing_label="") -> Dict[str, Any]:
 
     # try to get the first available, fastest, proxy
     while True:
-
         log.debug("Attempting to claim a proxy to scan %s et al...", tracing_label)
 
         try:
-
             with transaction.atomic():
-
                 # proxies can die if they are limited too often.
                 proxy = (
                     ScanProxy.objects.all()
@@ -60,7 +57,6 @@ def claim_proxy(tracing_label="") -> Dict[str, Any]:
                 )
 
                 if proxy:
-
                     # first claim to prevent duplicate claims
                     log.debug("Proxy %s claimed for %s et al...", proxy.id, tracing_label)
                     proxy.currently_used_in_tls_qualys_scan = True

@@ -152,7 +152,6 @@ def random_string(length: int = 16):
 
 @app.task(queue="internet")
 def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
-
     if not discover_wildcard(wildcard_url):
         log.debug("No wildcard found at %s.", wildcard_url)
         return []
@@ -169,7 +168,6 @@ def get_identical_sites_on_wildcard_url(wildcard_url: str) -> List[int]:
 
     identical = []
     for subdomain in subdomains_under_wildcard(wildcard_url):
-
         # couldn't get the filtering correct in the subdomains_under_wildcard method.
         if subdomain.url == wildcard_url:
             continue

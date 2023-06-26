@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("organizations", "0038_auto_20180824_0959"),
         ("map", "0024_vulnerabilitystatistic_scan_type"),

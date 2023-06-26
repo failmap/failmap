@@ -8,7 +8,6 @@ from websecmap.organizations.models import AlternativeName, Organization, Organi
 
 
 def test_get_cached_map_data(db):
-
     expected_result = {"test": "hello world"}
 
     ot = OrganizationType()
@@ -29,7 +28,6 @@ def test_get_cached_map_data(db):
 
 
 def test_get_altnames(db):
-
     org = Organization.objects.create(name="test")
     assert get_altnames(org.id) == ""
 

@@ -13,7 +13,6 @@ class Command(BaseCommand):
     """
 
     def handle(self, *args, **options):
-
         # make sure there are creation dates etc...
         organizations = Url.objects.all().filter(is_dead=True, is_dead_since__isnull=True)
         for organization in organizations:

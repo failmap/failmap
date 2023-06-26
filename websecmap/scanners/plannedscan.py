@@ -89,7 +89,6 @@ def calculate_progress() -> List[Dict[str, int]]:
             for activity in activities_from_finished_tasks(scanner_id, overview):
                 # unknown error and timeout are ignored because they are not used
                 for state in [State["requested"].value, State["picked_up"].value, State["finished"].value]:
-
                     # it's not in the overview when we're here, so add it:
                     if not already_in_overview(overview, scanner_id, activity, state):
                         overview.append({"scanner": scanner_id, "activity": activity, "state": state, "amount": 0})
@@ -267,7 +266,6 @@ def request(activity: str, scanner: str, urls: List[int], origin: str = ""):
 
 
 def log_planned_scan_action(activity: str, scanner: str, url: int, state: str = "", origin: str = ""):
-
     if isinstance(url, Url):
         # might be an n+1
         url = url.url
@@ -563,7 +561,6 @@ def plan_follow_up_scans(**kwargs):
     ):
         # are there scans in the last 10 minutes that match this policy:
         for policy in follow_up_scan.otherpolicies:
-
             log.info("Checking if there are follow ups for %s, %s", policy.scan_type, policy.conclusion)
 
             scans_matching_policy = EndpointGenericScan.objects.all().filter(

@@ -17,7 +17,6 @@ from websecmap.scanners.scanner.banners.detect_version import (
 
 @pytest.mark.override_config(BANNERGRAB_GENERIC_BANNERS='["Something Version 1.2.3"]')
 def test_detect_a_likely_version(db):
-
     found = SERVICE_IDENTITY_LIKELY_VERSION_FOUND
     maybe = SERVICE_IDENTITY_SOME_IDENTITY_FOUND
     none = SERVICE_IDENTITY_NO_BANNER_FOUND

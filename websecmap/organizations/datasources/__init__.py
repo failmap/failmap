@@ -40,10 +40,8 @@ SKIP_GEO = False
 
 
 def get_data(dataset, download_function):
-
     # support downloads:
     if dataset["url"]:
-
         filename = url_to_filename(dataset["url"])
         log.debug("Data will be stored in: %s", filename)
 
@@ -58,7 +56,6 @@ def get_data(dataset, download_function):
 
     # support file uploads
     if dataset["file"]:
-
         db_dataset = Dataset.objects.all().filter(id=dataset["file"]).first()
         if not db_dataset:
             return ""
@@ -70,7 +67,6 @@ def get_data(dataset, download_function):
 
 
 def generic_dataset_import(dataset, parser_function, download_function):
-
     check_environment()
 
     data = get_data(dataset=dataset, download_function=download_function)
@@ -113,7 +109,6 @@ def url_to_filename(url: str):
 
 
 def check_environment():
-
     # we may ignore, and geolocate_organizations afterwards the organizations that don't have a geolocation yet?
     # is there are more generic library?
     if not config.GOOGLE_MAPS_API_KEY:
@@ -149,7 +144,6 @@ def find_suggested_site(search_string):
 
 
 def geolocate_organizations(organizations: List):
-
     # read out once, to prevent a database query every time the variable is needed.
     # note: geocoding costs money(!)
     gmaps = googlemaps.Client(key=config.GOOGLE_MAPS_API_KEY)
@@ -225,7 +219,6 @@ def geolocate_organizations(organizations: List):
 
 
 def store_data(organizations: List):
-
     for iteration, organization in enumerate(organizations):
         print_progress_bar(iteration, len(organizations), " store")
 
@@ -262,7 +255,6 @@ def download_http_get_no_credentials(url, filename_to_save):
 
 def save_websites(organization, websites: List[str]):
     for website in websites:
-
         website = website.lower()
         extract = tldextract.extract(website)
 
@@ -374,7 +366,6 @@ def save_organization_type(name):
 
 
 def save_url(website, failmap_organization):
-
     # don't save non resolving urls.
     if not resolves(website):
         return

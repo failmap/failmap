@@ -480,7 +480,6 @@ def test_nuclei_plan_verify(db, default_scan_metadata):
 
 
 def test_extract_findings_to_scanner_findings(db, default_scan_metadata):
-
     url = Url.objects.create(**{"url": "example.com"})
     endpoint = Endpoint.objects.create(**{"url": url, "protocol": "http", "port": 443})
     EndpointGenericScan.objects.create(
@@ -581,7 +580,6 @@ def test_nuclei_compose_verify_task(db):
 
 @override_config(NUCLEI_HTTP_DISABLED_TEMPLATES='["robots-txt", "security-txt"]')
 def test_create_nuclei_scan_command(db):
-
     command = create_nuclei_scan_command(
         ["test.nl"],
         {

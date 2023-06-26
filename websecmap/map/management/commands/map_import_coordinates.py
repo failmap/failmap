@@ -21,7 +21,6 @@ class Command(BaseCommand):
     # all, all... which you don't want(!) :) : failmap import_coordinates --date=2018-01-01
 
     def add_arguments(self, parser):
-
         parser.add_argument("--country", help="Country code. Eg: NL, DE, EN", required=False)
 
         parser.add_argument("--region", help="Region: municipality, province, water board ...", required=False)
@@ -39,7 +38,6 @@ class Command(BaseCommand):
 
     # https://nl.wikipedia.org/wiki/Gemeentelijke_herindelingen_in_Nederland#Komende_herindelingen
     def handle(self, *app_labels, **options):
-
         if options["list"]:
             log.info("Currently available administrative regions:")
             log.info("Hint: add the via the admin interface.")

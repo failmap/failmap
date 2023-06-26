@@ -56,7 +56,6 @@ def compose_scan_task(urls):
 
 @app.task(queue="storage", ignore_result=True)
 def scan(scan_id: int):
-
     a_scan = EndpointGenericScan.objects.all().filter(id=scan_id).first()
     if not a_scan:
         return

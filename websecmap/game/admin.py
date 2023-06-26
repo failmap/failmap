@@ -67,7 +67,6 @@ class UrlSubmissionInline(CompactInline):
 
 @admin.register(Contest)
 class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     list_display = ("name", "target_country", "from_moment", "until_moment", "admin_user", "teams")
     search_fields = ("name", "target_country")
     list_filter = ("name", "target_country")
@@ -603,7 +602,6 @@ def generate_team_name_docker():
 # todo: submissioninline, read only... there are going to be MANY new things...
 @admin.register(Team)
 class TeamAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     list_display = ("name", "team_color", "participating_in_contest", "allowed_to_submit_things")
     search_fields = ("name", "participating_in_contest__name")
     list_filter = ("name", "participating_in_contest__name", "participating_in_contest__target_country")
@@ -692,7 +690,6 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     @transaction.atomic
     def accept(self, request, queryset):
         for urlsubmission in queryset:
-
             # don't add the same thing over and over, allows to re-select the ones already added without a problem
             # once rejected, can't be accepted via buttons: needs to be a manual action
             if urlsubmission.has_been_accepted or urlsubmission.has_been_rejected:
@@ -774,7 +771,6 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     @transaction.atomic
     def accept(self, request, queryset):
         for osm in queryset:
-
             # don't add the same thing over and over, allows to re-select the ones already added without a problem
             # once rejected, can't be accepted via buttons: needs to be a manual action
             # todo: make it possible to reject afterwards, and delete all subdomains etc.
@@ -835,7 +831,6 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 urls = osm.suggested_urls.replace("[", "").replace("'", "").replace("]", "").replace(",", "").split(" ")
                 urls = check_valid_urls(urls)
                 for url in urls:
-
                     # don't auto add the URL, to have a bit more control over what is being added
                     # new_url = Url()
                     # new_url.url = url

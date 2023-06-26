@@ -286,7 +286,6 @@ def test_autoexplain_including_headers(db, monkeypatch):
 
 
 def test_any_in_list_match():
-
     assert any_in_list_match(["a"], ["b"]) is False
     assert any_in_list_match(["a", "b", "c"], ["d"]) is False
     assert any_in_list_match(["a", "b", "c"], []) is False

@@ -208,7 +208,6 @@ def log_quota_warning(data_dict: Dict[str, Any]) -> None:
 
 
 def reduce_maxmind_data(data_dict: Dict[str, Any]) -> Dict:
-
     # only English fields are guaranteed, all other are just fluctuating data
     if "city" in data_dict:
         data_dict["city"]["names"] = {"en": data_dict["city"]["names"]["en"]}

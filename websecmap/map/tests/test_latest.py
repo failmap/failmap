@@ -8,7 +8,6 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 
 def test_get_all_latest_scans(db, default_scan_metadata, default_policy):
-
     with freeze_time("2020-01-01 12:00"):
         now = datetime.now(timezone.utc)
         yesterday = now - timedelta(days=1)

@@ -38,7 +38,6 @@ def consume(scanner: str, method: str, interval: str, amount: int):
 
 
 def fitting_icon(some_text):
-
     options = {
         "scan": "Schedule Scan",
         "verify": "Schedule Verification",
@@ -129,7 +128,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # internet.nl v2 scanner has to be used in websecmap.
         for item in self.regime:
-
             if PeriodicTask.objects.all().filter(name=item["friendly_name"]).exists():
                 log.warning("Periodic task with %s already exists, removing.", item["friendly_name"])
                 PeriodicTask.objects.all().filter(name=item["friendly_name"]).delete()

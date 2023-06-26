@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("organizations", "0054_auto_20190325_1005"),
         ("map", "0046_highlevelstatistic"),

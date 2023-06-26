@@ -6,9 +6,7 @@ from websecmap.map.logic.map_defaults import determine_when
 
 
 def test_determine_when():
-
     with freeze_time("2021-02-03 13:37:42"):
-
         # make sure freeze time supports time
         assert datetime.now().hour == 13
 

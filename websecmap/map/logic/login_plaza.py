@@ -67,7 +67,6 @@ def get_products():
 
 @cached(cache=TTLCache(maxsize=1024, ttl=4 * 60 * 60))
 def get_nested_products_in_an_inefficient_way(product_id: int, max_depth: int = 3) -> list[dict[str, Any]]:
-
     # prevent infinite circular references
     max_depth -= 1
     if max_depth < 1:
@@ -176,7 +175,6 @@ def load_json(data: str):
 
 
 def set_value_to_tech_in_tree(product_tree: Dict[Any, Any], product_id: int, property: str, value: Any):
-
     if property in product_tree and product_tree["product"] == product_id:
         if product_tree[property] not in ["unknown", "", value]:
             log.warning(
@@ -266,7 +264,6 @@ def login_plaza_data(country: str = None, layer: str = None):
     list_of_urls = []
 
     for scan in scans:
-
         portals = load_json(scan.evidence)
 
         if not portals:

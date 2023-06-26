@@ -13,7 +13,6 @@ class Command(GenericTaskCommand):
     help = __doc__
 
     def handle(self, *args, **options):
-
         try:
             self.scanner_module = rebuild_report
             return super().handle(self, *args, **options)

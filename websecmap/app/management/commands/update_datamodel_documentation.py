@@ -11,7 +11,6 @@ class Command(BaseCommand):
     help = "Adds some documentation artifacts to this project."
 
     def handle(self, *args, **options):
-
         apps = ["organizations", "scanners", "map", "game", "app", "pro"]
 
         for app in apps:

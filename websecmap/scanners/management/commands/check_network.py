@@ -11,7 +11,6 @@ class Command(BaseCommand):
     help = "Try to establish ipv4 and ipv6 connections to test the network, on both a worker and locally."
 
     def handle(self, *args, **options):
-
         log.info("Checking the network locally, this might take a while.")
 
         # locally

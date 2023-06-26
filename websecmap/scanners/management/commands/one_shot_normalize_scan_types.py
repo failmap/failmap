@@ -15,7 +15,6 @@ class Command(VerifyTaskCommand):
     help = __doc__
 
     def handle(self, *args, **options):
-
         from websecmap.scanners.models import EndpointGenericScan
 
         scans = EndpointGenericScan.objects.all().filter(

@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [("organizations", "0053_url_do_not_find_subdomains"), ("map", "0041_auto_20190222_1036")]

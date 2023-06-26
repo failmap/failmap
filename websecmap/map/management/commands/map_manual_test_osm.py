@@ -11,7 +11,6 @@ class Command(BaseCommand):
 
     # https://nl.wikipedia.org/wiki/Gemeentelijke_herindelingen_in_Nederland#Komende_herindelingen
     def handle(self, *app_labels, **options):
-
         country = "NL"
         admin_level = 8
 

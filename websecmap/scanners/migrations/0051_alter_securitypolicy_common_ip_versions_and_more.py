@@ -5,7 +5,6 @@ import jsonfield.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("scanners", "0050_remove_securitypolicy_slug_and_more"),
     ]

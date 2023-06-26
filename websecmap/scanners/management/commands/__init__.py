@@ -14,7 +14,6 @@ class ActionCommand(TaskCommand):
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
-
         try:
             if options["scanner"][0] not in self.scanners:
                 print(f"Scanner does not exist. Please specify a scanner: {self.scanners.keys()} ")

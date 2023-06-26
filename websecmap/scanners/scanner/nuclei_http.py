@@ -441,7 +441,6 @@ def force_combine_all_processed_metrics_into_one_category(raw_nuclei_records):
     combined_metrics = {"highest-severity": "unknown", "amount-of-findings": 0, "findings": []}
     # in this case category is not relevant:
     for record in processed_nuclei_records:
-
         combined_metrics["highest-severity"] = get_higher_severity(
             combined_metrics["highest-severity"], record["severity"]
         )

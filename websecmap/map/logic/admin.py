@@ -73,7 +73,6 @@ def delete_coordinate(data):
 
 
 def add_organization(data):
-
     if not data.get("layer", 0):
         return operation_response(error=True, message="No layer selected, cannot add organization.")
 
@@ -195,7 +194,6 @@ def add_urls(organization_id, urls: str):
 
 
 def add_proxies(proxies: str):
-
     # urls is basically garbage input on multiple lines with spaces and comma's and all kinds of unicode.
     # here we try to break up this garbage into small pieces text, some are a url, some are garbage...
     proxies = proxies.replace(",", " ")
@@ -227,7 +225,6 @@ def add_proxies(proxies: str):
 
 
 def is_valid_ip_address_and_port(address):
-
     if ":" not in address:
         return False
 

@@ -48,7 +48,6 @@ class Command(BaseCommand):
 
         log.debug("Compiling messages")
         for language in settings.LANGUAGES:
-
             # Compiles .po files created by makemessages to .mo files for use with the built-in gettext support.
             # Default is to process all.
             # if you don't specify the locale, it will do ALL LOCALES IT KNOWS! which takes a long time to do nothing

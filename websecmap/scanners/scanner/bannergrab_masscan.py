@@ -71,7 +71,6 @@ def compose_manual_scan_task(
 
 @app.task(queue="storage", ignore_result=True)
 def grab_banners():
-
     if not allowed_to_scan(SCANNER_NAME):
         return
 
@@ -83,7 +82,6 @@ def grab_banners():
 
 
 def grab_banners_ip_version(listen_ip: str, is_v4: bool = True):
-
     if not listen_ip:
         log.error("Cannot listen to returned packets without a listen ip. Configure one or disable this scanner.")
         return

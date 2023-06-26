@@ -23,7 +23,6 @@ def test_CaseInsensitiveDict():
 
 
 def test_get_headers(requests_mock):
-
     # Should just work with broken headers, but now seeing an MissingHeaderBodySeparatorDefect warning
     # probably the warning is just ignored, It's not trivial to simulate.
     # https://gvo.schiedam.nl

@@ -64,7 +64,6 @@ def _import_agentschappen(dataset):
 
 
 def test_download_government_register_csvs(db, requests_mock, current_path):
-
     for file in GOVERNMENT_REGISTER_FILES:
         requests_mock.get(
             f"{GOVERNMENT_REGISTER_BASE_URL}/{file}.csv",

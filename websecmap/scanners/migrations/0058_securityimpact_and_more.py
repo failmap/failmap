@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("scanners", "0057_alter_httpendpointcontent_content_hash"),
     ]

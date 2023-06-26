@@ -19,7 +19,6 @@ class Command(BaseCommand):
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
-
         source = options.get("source", None)
         target = options.get("target", None)
 

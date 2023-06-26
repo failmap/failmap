@@ -17,7 +17,6 @@ class Command(VerifyTaskCommand):
     help = __doc__
 
     def handle(self, *args, **options):
-
         try:
             expired = Url.objects.all().filter(onboarding_stage__in=["endpoint_discovery", "scans_running", "crawling"])
 

@@ -29,7 +29,6 @@ admin.site.register(Job, JobAdmin)
 
 
 class MyPeriodicTaskForm(PeriodicTaskForm):
-
     fieldsets = PeriodicTaskAdmin.fieldsets
 
     """
@@ -45,7 +44,6 @@ class MyPeriodicTaskForm(PeriodicTaskForm):
     """
 
     def clean(self):
-
         cleaned_data = super().clean()
 
         # if not self.cleaned_data['last_run_at']:
@@ -573,7 +571,6 @@ class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
     actions.append(add_game_user)
 
     def add_volunteer(self, request, _):
-
         # password is random and non-recoverable. It has to be set explicitly by the admin
         alphabet = string.ascii_letters + string.digits
         password = "".join(choice(alphabet) for i in range(42))

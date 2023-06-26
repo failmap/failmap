@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("scanners", "0022_alter_followupscan_run_follow_up_on_any_of_these_policies"),
     ]

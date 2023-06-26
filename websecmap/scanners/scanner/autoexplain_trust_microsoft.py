@@ -345,7 +345,6 @@ def autoexplain_trust_microsoft_and_include_their_webserver_headers(a_scan: Endp
     relevant_endpoints = list(set(http_endpoint))
 
     for endpoint in relevant_endpoints + [a_scan.endpoint]:
-
         intended_for_devices = "service_intended_for_devices_not_browsers"
 
         # Also retrieve all http security headers, they are never correct. The only thing that is actually

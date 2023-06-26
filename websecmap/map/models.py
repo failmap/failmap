@@ -70,7 +70,6 @@ class AdministrativeRegion(models.Model):
 
 
 class Configuration(models.Model):
-
     country = CountryField(db_index=True, help_text="Part of the combination shown on the map.")
 
     organization_type = models.ForeignKey(
@@ -115,7 +114,6 @@ class Configuration(models.Model):
 
 
 class MapHealthReport(models.Model):
-
     map_configuration = models.ForeignKey(
         Configuration,
         on_delete=models.CASCADE,
@@ -131,7 +129,6 @@ class MapHealthReport(models.Model):
 
 
 class LandingPage(models.Model):
-
     map_configuration = models.ForeignKey(
         Configuration, on_delete=models.CASCADE, help_text="To what map configuration this landing page is relevant."
     )
@@ -154,7 +151,6 @@ class LandingPage(models.Model):
 
 
 class MapDataCache(models.Model):
-
     country = CountryField(db_index=True, help_text="Part of the combination shown on the map.")
 
     organization_type = models.ForeignKey(
@@ -178,7 +174,6 @@ class MapDataCache(models.Model):
 # It took too long to calculate these stats, resulting in non showing graphs. Therefore we're now storing
 # them in this model.
 class VulnerabilityStatistic(models.Model):
-
     country = CountryField(db_index=True, help_text="Part of the combination shown on the map.")
 
     organization_type = models.ForeignKey(
@@ -210,7 +205,6 @@ class VulnerabilityStatistic(models.Model):
 
 
 class HighLevelStatistic(models.Model):
-
     country = CountryField(db_index=True, help_text="Part of the combination shown on the map.")
 
     organization_type = models.ForeignKey(

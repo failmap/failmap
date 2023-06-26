@@ -14,7 +14,6 @@ log = logging.getLogger(__name__)
 # Described here: https://www.vinta.com.br/blog/2016/database-concurrency-in-django-the-right-way/
 @receiver(post_save, sender=Url)
 def onboard_after_add(sender, instance, created, **kwargs):
-
     # only new record:
     if not created:
         return

@@ -12,7 +12,6 @@ from websecmap.scanners.tests.test_plannedscan import create_organization
 
 
 def test_report_syncing(db):
-
     stored_data = {"yolo": "swag"}
 
     # setup creates a report for an organization

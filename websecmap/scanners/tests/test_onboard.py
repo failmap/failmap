@@ -12,7 +12,6 @@ TEST_STAGES = [
 
 
 def test_backward():
-
     assert backward("endpoint_discovery", TEST_STAGES) == {"name": "", "active": False}
 
     # can't go backward

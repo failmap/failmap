@@ -66,7 +66,6 @@ def get_improvements(country, organization_type, days_back, duration: int = 7, a
 
     # stats for the newest, should be made a function:
     for urlrating in newest_urlratings:
-
         # url level, why are there reports without url ratings / empty url ratings like
         if "ratings" in urlrating.calculation:
             for rating in urlrating.calculation["ratings"]:
@@ -99,7 +98,6 @@ def get_improvements(country, organization_type, days_back, duration: int = 7, a
 
     # and the oldest stats, which should be the same function
     for urlrating in oldest_urlratings:
-
         if "ratings" in urlrating.calculation:
             for rating in urlrating.calculation["ratings"]:
                 if rating["type"] not in old_measurement:

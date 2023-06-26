@@ -19,9 +19,7 @@ class Command(BaseCommand):
 
     # https://nl.wikipedia.org/wiki/Gemeentelijke_herindelingen_in_Nederland#Komende_herindelingen
     def handle(self, *app_labels, **options):
-
         with transaction.atomic():
-
             # prevent running this twice:
             if Organization.objects.all().filter(name="Gemeente Eemsdelta").exists():
                 raise EnvironmentError("Eemsdelta already exists, this migration was probably run already.")

@@ -52,7 +52,6 @@ def test_make_screenshot_with_browserless(requests_mock, db, current_path):
 
 
 def test_determine_subdir():
-
     assert "000" == determine_subdir(999)
     assert "000" == determine_subdir(0)
     assert "100" == determine_subdir(1000)

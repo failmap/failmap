@@ -13,7 +13,6 @@ class Command(VerifyTaskCommand):
     help = __doc__
 
     def handle(self, *args, **options):
-
         metadata = get_backend_scanmetadata()
 
         log.info("Deleting not used scan types.")

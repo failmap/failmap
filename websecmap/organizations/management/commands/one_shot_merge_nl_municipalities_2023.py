@@ -25,14 +25,13 @@ class Command(BaseCommand):
 
 @transaction.atomic
 def merge_nl_municipalities_2023():
-
     new = "Gemeente Voorne aan Zee"
     if not Organization.objects.all().filter(name=new).exists():
         print("gemeenten Brielle, Hellevoetsluis en Westvoorne: samenvoeging tot een nieuwe gemeente Voorne aan Zee.")
         merge(
             source_organizations_names=["Gemeente Brielle", "Gemeente Hellevoetsluis", "Gemeente Westvoorne"],
             target_organization_name=new,
-            **opts
+            **opts,
         )
         add_url_to_new_organization("NL", "municipality", new, "voorneaanzee.nl", merge_date)
 

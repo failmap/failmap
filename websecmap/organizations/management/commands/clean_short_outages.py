@@ -45,13 +45,11 @@ def merge_endpoints_that_recently_died():
 
     # find difference between "is_dead_since" and "discovered_on" for the same url.
     for url in Url.objects.all():
-
         # merging can only happen with dead endpoints that have similar endpoints within the timespan
         # ordered by oldest first (the "-" syntax is so confusing)
         dead_endpoints = Endpoint.objects.all().filter(url=url, is_dead=True).order_by("is_dead_since")
 
         for dead_endpoint in dead_endpoints:
-
             # bugs and manually entering this happen, and then there is still no date. (todo should not be possible)
             if not dead_endpoint.is_dead_since:
                 continue
@@ -88,7 +86,6 @@ def merge_endpoints_that_recently_died():
                 log.info("Identical: %s (created: %s, died: %s)", id_ep, id_ep.discovered_on, id_ep.is_dead_since)
 
             for identical_endpoint in identical_endpoints:
-
                 # merge everything that relates to the identical endpoints to the dead_endpoint:
                 EndpointGenericScan.objects.all().filter(endpoint=identical_endpoint).update(endpoint=dead_endpoint)
                 Screenshot.objects.all().filter(endpoint=identical_endpoint).update(endpoint=dead_endpoint)

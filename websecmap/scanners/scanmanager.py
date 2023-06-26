@@ -64,7 +64,6 @@ def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, me
 
 
 def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str, evidence: str = ""):
-
     # Check if the latest scan has the same rating or not:
     try:
         ugs = (

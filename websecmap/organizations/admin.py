@@ -241,7 +241,6 @@ class ActionMixin:
 
     # overrides the standard model class get_actions
     def get_actions(self, request):
-
         # using this function maker, scan functions can be generated.
         def scan_function_maker(scanner_name, verbose_name):
             def scan_function(self, *args, **kwargs):
@@ -537,7 +536,6 @@ create_modeladmin(WhoisOrganizationAdmin, name="organization-registrar", model=O
 # https://docs.djangoproject.com/en/2.0/ref/forms/validation/
 class MyUrlAdminForm(forms.ModelForm):
     def clean_url(self):
-
         url_string = self.data.get("url")
 
         # urls must be lowercase
@@ -650,7 +648,6 @@ class HasEndpointScansListFilter(admin.SimpleListFilter):
 # NestedModelAdmin used as in documentation.
 @admin.register(Url)
 class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmin):  # pylint: disable=no-member
-
     # It's efficient to already get all endpints. Makes 30 second load into 8 second load.
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
@@ -1091,7 +1088,6 @@ class CoordinateAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     def switch_lnglat(self, request, queryset):
         for coordinate in queryset:
-
             if coordinate.geojsontype != "Point":
                 continue
 
@@ -1107,7 +1103,6 @@ class CoordinateAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append("switch_lnglat")
 
     def save_model(self, request, obj, form, change):
-
         # log.info(form.changed_data)
         # grrr, both area and edit_area are ALWAYS changed... even if you didn't change the values in these
         # fields... this is obviously a bug or "optimization". We now have to resort to queries to figure out
@@ -1167,7 +1162,6 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     # Then we also need the options to be expanded with options from the database.
 
     def import_(self, request, queryset):
-
         # check if the environment is sane, if not, return a user message with the error
         try:
             datasources.check_environment()

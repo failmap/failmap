@@ -7,7 +7,6 @@ from websecmap.map.report import reduce_to_days, reduce_to_months, reduce_to_sav
 
 
 def test_reduce_to_days():
-
     dates = [
         datetime(2020, 1, 1, 20, 0, 0, tzinfo=timezone.utc),
         datetime(2020, 1, 1, 21, 0, 0, tzinfo=timezone.utc),
@@ -29,7 +28,6 @@ def test_reduce_to_days():
 
 
 def test_reduce_to_weeks():
-
     dates = [
         datetime(2019, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
         datetime(2019, 1, 2, 0, 0, 0, tzinfo=timezone.utc),
@@ -54,7 +52,6 @@ def test_reduce_to_weeks():
 
 
 def test_reduce_to_months():
-
     # tzinfo should be kept
     dates = [
         datetime(2018, 1, 1, 20, 0, 0, tzinfo=timezone.utc),
@@ -96,7 +93,6 @@ def test_reduce_to_save_data():
 
     # the cutoff depends on the actual time, so make sure the time is always the same:
     with freeze_time("2020-06-01"):
-
         dates = [
             # dailies this year, will reduce to
             #   [datetime(2020, 1, 1, tzinfo=timezone.utc), datetime(2020, 1, 2, tzinfo=timezone.utc)]

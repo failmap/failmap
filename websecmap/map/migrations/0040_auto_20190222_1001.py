@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("organizations", "0053_url_do_not_find_subdomains"),
         ("map", "0039_auto_20190129_0955"),

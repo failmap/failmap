@@ -8,7 +8,6 @@ PRIVACY_DISCONNECTME_ENTITIES_FILE = f"{os.path.abspath(os.path.dirname(__file__
 
 
 def get_known_trackers_from_urls(urls: List[str]):
-
     all_urls = []
     # disconnectme doesn't always have the www domain listed in their sources:
     for url in urls:
@@ -38,7 +37,6 @@ def get_tracker_info_from_disconnectme(url: str) -> Dict[str, str]:
 
 
 def convert_disconnectme_to_tracker_info():
-
     if cached := time_cache.cache_get("disconnectme"):
         return cached
 

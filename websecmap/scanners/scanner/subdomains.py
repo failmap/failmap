@@ -155,7 +155,6 @@ def url_resolves(url: str):
 
 @app.task(queue="storage")
 def handle_resolves(resolves: bool, url_id: int) -> None:
-
     url = Url.objects.all().filter(pk=url_id).first()
     if not url:
         return
@@ -202,7 +201,6 @@ def has_wildcards(urls: List[Dict[str, Any]]):
     urls_without_wildcards = []
 
     for url in urls:
-
         db_url = Url.objects.all().filter(pk=url["id"]).first()
         if not db_url:
             continue
@@ -368,7 +366,6 @@ def remove_wildcards_using_statistics(found_hosts, url: str):
     # Create a list of how many IP's are used
     # dnsrecon filters out the first IP, so if there is only one wildcard IP, then that's that.
     for host in found_hosts:
-
         # Points to a A / AAAA record
         if "address" in host:
             if host["address"] not in ip_stats:
@@ -398,7 +395,6 @@ def find_interesting_ips(ip_stats, found_hosts):
     interesting_found_hosts = []
     # remove all found hosts that are on the banned IP list:
     for host in found_hosts:
-
         if "address" in host and host["address"] not in banned_ips:
             interesting_found_hosts.append(host)
 

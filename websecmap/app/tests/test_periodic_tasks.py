@@ -18,12 +18,10 @@ def test_periodic_tasks(db):
 
 
 def verify_periodic_tasks_from_fixture(fixture):
-
     call_command("loaddata", fixture, verbosity=0)
 
     periodic_tasks = PeriodicTask.objects.all()
     for periodic_task in periodic_tasks:
-
         # only test websecmap modules.
         if not periodic_task.task.startswith("websecmap"):
             continue
@@ -50,7 +48,6 @@ def verify_periodic_tasks_from_fixture(fixture):
             "websecmap.app.models.create_planned_verify_job",
             "websecmap.app.models.create_planned_scan_job",
         ]:
-
             # also validate that the argument exists.
             args = json.loads(periodic_task.args)
             # will crash if the module does not exist.

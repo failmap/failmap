@@ -29,7 +29,6 @@ class Command(BaseCommand):
 
 
 def askreset():
-
     # The dev dataset should not mean anything.
     if settings.DEBUG:
         and_its_gone()

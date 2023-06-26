@@ -9,7 +9,6 @@ log = logging.getLogger(__package__)
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-
         organizations = Organization.objects.all()
 
         for organization in organizations:

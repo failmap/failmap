@@ -40,7 +40,6 @@ def return_safe_response(answer):
 
 @app.task(queue="storage")
 def register(domains: List[str], scan_type: str, tracking_information: str, settings: Dict[str, Any]) -> (str, str):
-
     data = {"type": scan_type, "name": tracking_information, "domains": domains}
 
     try:

@@ -31,7 +31,7 @@ def merge_nl_municipalities_2022():
         merge(
             source_organizations_names=["Gemeente Heerhugowaard", "Gemeente Langedijk"],
             target_organization_name=new,
-            **opts
+            **opts,
         )
         add_url_to_new_organization("NL", "municipality", new, "dijkenwaard.nl", merge_date)
 
@@ -50,7 +50,7 @@ def merge_nl_municipalities_2022():
                 "Gemeente Sint Anthonis",
             ],
             target_organization_name=new,
-            **opts
+            **opts,
         )
         add_url_to_new_organization("NL", "municipality", new, "landvancuijk.nl", merge_date)
 

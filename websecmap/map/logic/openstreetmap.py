@@ -134,7 +134,6 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
 
     for country in sorted(countries):
         for organization_type in sorted(organization_types):
-
             if not get_region(country, organization_type):
                 log.info("The combination of %s and %s does not exist in OSM. Skipping.", country, organization_type)
                 continue
@@ -150,7 +149,6 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
                 continue
 
             for index, feature in enumerate(data["features"]):
-
                 if "properties" not in feature:
                     continue
 
@@ -197,10 +195,8 @@ def store_import_message(country, organization_type, message):
 # @transaction.atomic
 @app.task(queue="storage", ignore_result=True)
 def update_coordinates(countries: List[str] = None, organization_types: List[str] = None, when=None):
-
     for country in sorted(countries):
         for organization_type in sorted(organization_types):
-
             log.info("Attempting to update coordinates for: %s %s.", country, organization_type)
 
             # you are about to load 50 megabyte of data. Or MORE! :)
@@ -218,7 +214,6 @@ def update_coordinates(countries: List[str] = None, organization_types: List[str
 
             log.info("Parsing features:")
             for index, feature in enumerate(data["features"]):
-
                 if "properties" not in feature:
                     log.debug("Feature misses 'properties' property :)")
                     continue
@@ -431,12 +426,10 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
 
 
 def match_organization(openstreetmap_properties, country, organization_type):
-
     # in preferred order:
     attempted_properties = ["name", "official_name", "alt_name", "localname"]
 
     for attempted_property in attempted_properties:
-
         # By FAR not the same properties are used, sometimes not at all, sometimes all are used.
         if attempted_property not in openstreetmap_properties:
             continue
@@ -472,7 +465,6 @@ def match_organization(openstreetmap_properties, country, organization_type):
 
 
 def add_official_websites(organization, wikidata_code):
-
     website = get_property_from_code(wikidata_code, OFFICIAL_WEBSITE)
 
     if not website:

@@ -13,7 +13,6 @@ class Command(BaseCommand):
     help = "Show failmap version"
 
     def handle(self, *args, **options):
-
         print(f"Python version: {platform.python_version()}")
         print(f"Django version: {django.get_version()}")
         print(f"Failmap version: {__version__}")

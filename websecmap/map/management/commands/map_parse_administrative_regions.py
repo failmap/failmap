@@ -22,7 +22,6 @@ class Command(BaseCommand):
     help = "Downloads Administrative Region from the OSM wiki and imports them into AdministrativeRegion"
 
     def handle(self, *args, **options):
-
         with open("osm_wiki_10_column_countries.txt", "r", encoding="utf-8") as file_handle:
             ten_region = file_handle.read()
 
@@ -72,14 +71,11 @@ class Command(BaseCommand):
 
 
 def import_matches(matches):
-
     for match in matches:
-
         otype = OrganizationType.objects.all().filter(name=match["organization_type"]).first()
         if not AdministrativeRegion.objects.all().filter(
             country=match["country"], organization_type=otype, admin_level=match["admin_level"]
         ):
-
             administrative_region = AdministrativeRegion()
             administrative_region.country = match["country"]
             administrative_region.admin_level = match["admin_level"]

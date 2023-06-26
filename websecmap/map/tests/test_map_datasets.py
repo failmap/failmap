@@ -31,7 +31,6 @@ def mocked_requests_get(*args, **kwargs):
 # Failed: Database access not allowed, use the "django_db" mark, or the "db" or "transactional_db" fixtures to enable it
 # @mock.patch('requests.get', side_effect=mocked_requests_get)
 def test_map_datasets(db):
-
     organization_type, created = OrganizationType.objects.all().get_or_create(name="municipality")
 
     organization, created = Organization.objects.all().get_or_create(

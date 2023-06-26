@@ -5,7 +5,6 @@ import jsonfield.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("organizations", "0073_organization_acceptable_domain_registrants_and_more"),
     ]

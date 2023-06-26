@@ -11,7 +11,6 @@ log = logging.getLogger(__package__)
 
 @admin.register(models.SIDNUpload)
 class SIDNUploadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     list_display = ("by_user", "at_when", "state", "amount_of_newly_added_domains", "newly_added_domains")
     search_fields = ["posted_data"]
     list_filter = ["by_user", "at_when", "state", "amount_of_newly_added_domains"][::-1]

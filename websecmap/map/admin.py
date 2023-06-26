@@ -22,7 +22,6 @@ log = logging.getLogger(__package__)
 
 @admin.register(models.AdministrativeRegion)
 class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     list_display = (
         "country",
         "organization_type",
@@ -134,7 +133,6 @@ def report_country(organization_filter: Dict[str, Any]):
 
 @app.task(queue="storage", ignore_result=True)
 def add_configuration(country: str, organization_type: int):
-
     if models.Configuration.objects.all().filter(country=country, organization_type=organization_type).exists():
         log.debug("This configuration already exists, skipping.")
         return
@@ -173,11 +171,9 @@ def ordering_actions():
     actions = []
 
     def reorder(self, request, queryset):
-
         first_order = None
 
         for configuration in queryset:
-
             # set the first order, and keep counting from that.
             if not first_order:
                 if not int(configuration.display_order):
@@ -197,7 +193,6 @@ def ordering_actions():
 
     @transaction.atomic
     def move_up(self, request, queryset):
-
         for configuration in queryset:
             next_config = (
                 models.Configuration.objects.all()
@@ -222,7 +217,6 @@ def ordering_actions():
 
     @transaction.atomic
     def move_down(self, request, queryset):
-
         for configuration in reversed(queryset):
             previous_config = (
                 models.Configuration.objects.all()
@@ -249,7 +243,6 @@ def ordering_actions():
 
 @admin.register(models.Configuration)
 class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     list_display = (
         "display_order",
         "country",
@@ -323,7 +316,6 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions = []
 
     def display(self, request, queryset):
-
         for configuration in queryset:
             configuration.is_displayed = True
             configuration.save()
@@ -332,7 +324,6 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append(display)
 
     def hide(self, request, queryset):
-
         for configuration in queryset:
             configuration.is_displayed = False
             configuration.save()
@@ -341,7 +332,6 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append(hide)
 
     def allow_scanning(self, request, queryset):
-
         for configuration in queryset:
             configuration.is_scanned = True
             configuration.save()
@@ -350,7 +340,6 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append(allow_scanning)
 
     def stop_scanning(self, request, queryset):
-
         for configuration in queryset:
             configuration.is_scanned = False
             configuration.save()
@@ -359,7 +348,6 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append(stop_scanning)
 
     def allow_reporting(self, request, queryset):
-
         for configuration in queryset:
             configuration.is_reported = True
             configuration.save()
@@ -368,7 +356,6 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append(allow_reporting)
 
     def stop_reporting(self, request, queryset):
-
         for configuration in queryset:
             configuration.is_reported = False
             configuration.save()
@@ -377,9 +364,7 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append(stop_reporting)
 
     def create_report(self, request, queryset):
-
         for configuration in queryset:
-
             organization_filter = {"country": configuration.country, "type": configuration.organization_type}
 
             log.debug(organization_filter)
@@ -392,9 +377,7 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append(create_report)
 
     def set_default(self, request, queryset):
-
         for configuration in queryset:
-
             models.Configuration.objects.all().update(is_the_default_option=False)
 
             configuration.is_the_default_option = True
@@ -404,7 +387,6 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append(set_default)
 
     def remove_default(self, request, queryset):
-
         for configuration in queryset:
             configuration.is_the_default_option = False
             configuration.save()
@@ -501,7 +483,6 @@ class VulnerabilityStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.HighLevelStatistic)
 class HighLevelStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     list_display = (
         "country",
         "organization_type",
@@ -521,7 +502,6 @@ class HighLevelStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.LandingPage)
 class LandingPageAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     list_display = ("map_configuration", "directory", "enabled")
     list_filter = ["map_configuration", "directory", "enabled"][::-1]
     search_fields = ["map_configuration", "directory", "enabled"]
@@ -529,7 +509,6 @@ class LandingPageAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.OrganizationReport)
 class OrganizationReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     # do NOT load the calculation field, as that will be slow.
     # https://stackoverflow.com/questions/34774028/how-to-ignore-loading-huge-fields-in-django-admin-list-display
     def get_queryset(self, request):

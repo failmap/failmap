@@ -27,7 +27,6 @@ class Command(DumpDataCommand):
         super().add_arguments(parser)
 
     def handle(self, *app_labels, **options):
-
         options["format"] = self.FORMAT
 
         if options["output"]:

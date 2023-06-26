@@ -116,9 +116,8 @@ def generic_plan_scan(
     organizations_filter: dict = None,
     urls_filter: dict = None,
     endpoints_filter: dict = None,
-    **kwargs
+    **kwargs,
 ):
-
     if not allowed_to_scan(scanner_name, activity):
         log.debug("Not allowed to perform %s with scanner %s.", activity, scanner_name)
         return []
@@ -130,7 +129,6 @@ def generic_plan_scan(
 
 
 def merge_endpoints_filter(some_filter=None, **kwargs):
-
     if not some_filter:
         return kwargs
 
@@ -140,7 +138,6 @@ def merge_endpoints_filter(some_filter=None, **kwargs):
 
 
 def merge_urls_filter(some_filter=None, **kwargs):
-
     if not some_filter:
         return kwargs
 
@@ -149,7 +146,6 @@ def merge_urls_filter(some_filter=None, **kwargs):
 
 
 def merge_organizations_filter(some_filter=None, **kwargs):
-
     if not some_filter:
         return kwargs
 

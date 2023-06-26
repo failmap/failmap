@@ -137,7 +137,6 @@ def test_url_report(db, default_policy, default_scan_metadata):
 
 
 def test_aggegrate_error_in_report(db, default_policy, default_scan_metadata):
-
     # check if the scan policies have loaded
     assert ScanPolicy.objects.all().count() > 10
 

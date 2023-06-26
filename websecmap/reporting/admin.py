@@ -7,7 +7,6 @@ from websecmap.reporting import models
 
 @admin.register(models.UrlReport)
 class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     # do NOT load the calculation field, as that will be slow.
     # https://stackoverflow.com/questions/34774028/how-to-ignore-loading-huge-fields-in-django-admin-list-display
     def get_queryset(self, request):
@@ -81,7 +80,6 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.ScanPolicy)
 class ScanPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     list_display = (
         "summary",
         "scan_type",

@@ -27,7 +27,6 @@ def test_url_admin(db):
 
 
 def test_adminform(db):
-
     form = MyUrlAdminForm()
     form.data = {"url": "https://www.example.com:1337/asd#12"}
     cleaned = form.clean_url()

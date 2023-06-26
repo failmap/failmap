@@ -5,7 +5,6 @@ import jsonfield.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("organizations", "0072_urlwhois"),
     ]

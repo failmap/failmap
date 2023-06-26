@@ -797,7 +797,7 @@ def redirects_to_safety(url: str):
             return _follow_history_up_until_safety(response)
         log.debug("Request was not redirected, so not going to a safe url.")
         return False
-    except (Exception) as my_exception:  # noqa  # pylint: disable=broad-except
+    except Exception as my_exception:  # noqa  # pylint: disable=broad-except
         # Replaces basically everything, it's just a plethora of stuff that can go wrong which is outside of our usecase
         # ConnectTimeout,
         # HTTPError,

@@ -11,7 +11,6 @@ log = logging.getLogger(__package__)
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-
         # list(set( fixes distinct: django.db.utils.NotSupportedError:
         #   DISTINCT ON fields is not supported by this database backend
         countries = list(set(Configuration.objects.all().values_list("country", flat=True)))

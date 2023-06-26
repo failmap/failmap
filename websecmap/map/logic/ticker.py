@@ -125,7 +125,6 @@ def get_ticker_data(
 
     changes = []
     for newest_urlrating in newest_urlratings:
-
         change = {
             "organization": newest_urlrating.name,
             "now": {

@@ -512,7 +512,6 @@ def create_url_reports(url: Url) -> List[UrlReport]:
         # we don't need to remove the previous ratings, unless we want to save memory (Nah :))
         if "dead_endpoints" in timeline[moment]:
             for dead_endpoint in timeline[moment]["dead_endpoints"]:
-
                 # make sure that scan results are never added to dead endpoints.
                 # this can happen when a scan result is stored or performed _after_ the endpoint is declared dead
                 # as the endpoint is dead, no new scans will be added to it, overwriting the data.
@@ -811,7 +810,6 @@ def statistics_over_url_calculation(calculation, at_when: datetime = None):
     clean_issues_for_judgement = deepcopy(amount_of_issues)
 
     for i, endpoint in enumerate(calculation["endpoints"]):
-
         # make sure all keys exist:
         calculation["endpoints"][i] = {
             **calculation["endpoints"][i],
@@ -1048,7 +1046,6 @@ def inspect_timeline(timeline, url: Url):
     message += f"{newline}"
     message += url.url + newline
     for moment in timeline:
-
         message += f"|{newline}"
         message += f"|- {moment}{newline}"
         # for debugging
@@ -1157,7 +1154,6 @@ def aggegrate_url_rating_scores(url_ratings: List, only_include_issues: List[str
         scores[field] = 0
 
     for urlrating in url_ratings:
-
         # done: filter out only the relevant issues in the calculations and throw away the rest.
         # done if the 'only_include_issues' has been set, all calculations are void and have to be done again
         # todo: when the calculation changed, all properties from the urlrating are void.
@@ -1379,7 +1375,6 @@ def attach_ultimate_report(url: Url, endpoint: Endpoint):
 
     # This approach is dumb and inefficient, but good enough for testing
     for policy in ScanPolicy.objects.all():
-
         scanner = metadata["scanners_by_scan_type"][policy.scan_type]
 
         if scanner["to"] == ScanSubject.URL:

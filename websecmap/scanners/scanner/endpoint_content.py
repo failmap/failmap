@@ -16,7 +16,6 @@ from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 
 @app.task(queue="kickoff")
 def get_content():
-
     endpoints = Endpoint.objects.all().filter(
         protocol__in=["http", "https"], is_dead=False, url__is_dead=False, url__not_resolvable=False
     )
@@ -77,7 +76,6 @@ def get_http_content(uri, path):
 
 @app.task(queue="storage", ignore_result=True)
 def store_http_content(response: Dict[str, Any], endpoint_id: int):
-
     endpoint = Endpoint.objects.filter(id=endpoint_id).first()
     if not endpoint:
         return

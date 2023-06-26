@@ -256,7 +256,6 @@ def get_short_and_simple_stats(days_back: int = 0, at_date: date = None) -> Dict
     simplestat = defaultdict(dict)
 
     for configuration in configurations:
-
         stats = (
             HighLevelStatistic.objects.all()
             .filter(country=configuration.country, organization_type=configuration.organization_type, at_when__lte=when)

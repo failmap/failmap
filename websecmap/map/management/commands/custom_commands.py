@@ -13,7 +13,6 @@ class CalculateCommand(BaseCommand):
     command: Callable = lambda days, countries, organization_types: f"{days}{countries}{organization_types}"
 
     def add_arguments(self, parser):
-
         parser.add_argument("--days", type=check_positive, help="Number of days to go back in time.", required=False)
 
         parser.add_argument("--country", type=is_iso, help="2 character iso code of country", required=False)

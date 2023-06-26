@@ -43,7 +43,6 @@ class Command(BaseCommand):
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
-
         try:
             if options["subject"][0] not in self.subjects:
                 print(f"Subject cannot be revived, no code for that: {self.subjects.keys()} ")

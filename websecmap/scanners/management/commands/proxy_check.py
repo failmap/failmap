@@ -18,7 +18,6 @@ class Command(BaseCommand):
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
-
         try:
             if options["id"]:
                 for option_id in options["id"]:

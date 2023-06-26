@@ -279,7 +279,6 @@ def compose_planned_scan_task(**kwargs) -> Task:
 
 
 def compose_scan_task(urls: List[Url]) -> Task:
-
     if not urls:
         return group()
 
@@ -311,13 +310,13 @@ def compose_scan_task(urls: List[Url]) -> Task:
 # Note that this is a per worker instance rate limit, and not a global rate limit.
 # http://docs.celeryproject.org/en/latest/userguide/tasks.html
 
+
 # scan takes about 30 minutes.
 # 12 / hour = 1 every 5 minutes. In 30 minutes 6 scans will run at the same time. We used to have 10.
 # 20 / hour = 1 every 3 minutes. In 30 minutes 10 scans will run at the same time.
 # 30 / hours = 1 every 2 minutes. In 30 minutes 15 scans will run at the same time.
 @app.task(queue="qualys", acks_late=True)
 def qualys_scan_bulk(proxy: Dict[str, Any], urls: List[str]):
-
     log.debug("Initiating bulk scan")
     log.debug("Received proxy: %s", proxy)
     log.debug("Received urls: %s", urls)
@@ -334,7 +333,6 @@ def qualys_scan_bulk(proxy: Dict[str, Any], urls: List[str]):
         # Even if qualys is down, it will just wait until it knows you can add more... And the retry is infinite
         # every 30 seconds. So they may be even down for a day and it will continue.
         for url in urls:
-
             try:
                 api_results = service_provider_status(proxy)
                 while api_results["max"] < 20 or api_results["this-client-max"] < 20 or api_results["current"] > 19:
@@ -366,7 +364,6 @@ def qualys_scan_bulk(proxy: Dict[str, Any], urls: List[str]):
 
 # keeps scanning in a loop until it has the data to fire a
 def qualys_scan_thread(proxy: Dict[str, Any], url: str):
-
     normal_waiting_time = 30
     error_waiting_time = 60  # seconds until retry, can be increased when queues are full. Max = 180
     max_waiting_time = 360

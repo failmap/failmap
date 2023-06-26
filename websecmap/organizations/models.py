@@ -172,7 +172,6 @@ class Organization(models.Model):
     organization_name_cache = {}
 
     def __str__(self):
-
         if self.is_dead:
             return f"✝ {self.name}, {self.country} ({self.created_on.strftime('%b %Y')})"
 
@@ -187,7 +186,6 @@ class Organization(models.Model):
         return list(self.alternative_names.all().values_list("name", flat=True))
 
     def add_url(self, url: str, origin: str = ""):
-
         # add url to database with validation etc:
         url = Url.add(url, origin=origin)
 
@@ -196,7 +194,6 @@ class Organization(models.Model):
         url.save()
 
     def save(self, *args, **kwarg):
-
         # handle computed values
         self.computed_name_slug = slugify(self.name)
         super().save(*args, **kwarg)
@@ -431,7 +428,6 @@ class Url(models.Model):
         self.save()
 
     def clean(self):
-
         if self.is_dead and (not self.is_dead_since or not self.is_dead_reason):
             raise ValidationError(_("When telling this is dead, also enter the date and reason for it."))
 
@@ -454,7 +450,6 @@ class Url(models.Model):
         # this is really a shortcoming of Django.
 
     def save(self, *args, **kwarg):
-
         # handle computed values
 
         result = tldextract.extract(self.url)
@@ -523,7 +518,6 @@ class Url(models.Model):
 
     @staticmethod
     def is_valid_url(url: str) -> bool:
-
         # empty strings, etc
         if not url:
             log.debug("Domain is empty, so not valid.")

@@ -25,7 +25,6 @@ def noop(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("fail", "0008_merge_20170222_2030"),
     ]

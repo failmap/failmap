@@ -43,7 +43,6 @@ DEVELOPMENT_FIXTURES = "development_user,development_scandata,periodic_tasks,tes
 
 
 def start_borker(uuid):
-
     name = f"websecmap-broker-{str(uuid.int)}"
 
     borker_command = f"docker run --rm --name={name} -p 6379 redis"
@@ -65,7 +64,6 @@ def start_borker(uuid):
 
 
 def start_worker(broker_port, silent=True):
-
     if silent:
         log.debug("Todo: silent is not yet supported.")
 

@@ -93,7 +93,6 @@ def get_default_country():
 
 
 def get_default_layer():
-
     organization_type = (
         Configuration.objects.all()
         .filter(is_displayed=True, is_the_default_option=True)
@@ -109,7 +108,6 @@ def get_default_layer():
 
 
 def get_default_layer_for_country(country: str = "NL"):
-
     organization_type = (
         Configuration.objects.all()
         .filter(is_displayed=True, country=get_country(country))
@@ -144,7 +142,6 @@ def get_countries():
 
 
 def get_layers(country: str = "NL"):
-
     layers = (
         Configuration.objects.all()
         .filter(country=get_country(country), is_displayed=True)

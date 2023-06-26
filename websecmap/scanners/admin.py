@@ -257,7 +257,6 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions = []
 
     def reevaluate_version(self, request, queryset):
-
         changed = 0
         for item in queryset:
             if item.type != "bannergrab":
@@ -273,7 +272,6 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append("reevaluate_version")
 
     def add_version_exception(self, request, queryset):
-
         for item in queryset:
             if item.type != "bannergrab":
                 continue
@@ -873,7 +871,6 @@ class ScannerFindingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     @staticmethod
     def add_product(obj):
-
         return mark_safe("<a href='/admin/scanners/product/add/'>add</a>")
 
     @staticmethod

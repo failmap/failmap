@@ -56,7 +56,6 @@ def get_default_contest(request):
 # todo: what about urls that are being added through another contest?
 @login_required(login_url="/authentication/login/")
 def submit_url(request):
-
     # validate you're in a session
     if not request.session.get("team"):
         return redirect("/game/team/")
@@ -93,7 +92,6 @@ def submit_url(request):
 
 @login_required(login_url="/authentication/login/")
 def submit_organisation(request):
-
     # validate you're in a session
     if not request.session.get("team"):
         return redirect("/game/team/")
@@ -322,7 +320,6 @@ def scores(request):
 
 @cache_page(ONE_MINUTE)
 def contests(request):
-
     if request.POST:
         form = ContestForm(request.POST)
 
@@ -552,7 +549,6 @@ def get_submitted_urls(contest):
         relevant_endpoint_scans = []
 
         if submitted_url.url_in_system:
-
             # some urls might not have scans yet
             if submitted_url.url_in_system.pk in lookup_table:
                 relevant_urls_scans = lookup_table[submitted_url.url_in_system.pk]["url_scans"]
@@ -786,7 +782,6 @@ def get_bare_organization_feature(submitted_organization):
 
 
 def add_bare_url_features(features, my_submitted_urls):
-
     # submitted url is always for a single organization.
     for submitted_url in my_submitted_urls:
         # as the submitted urls doesn't have ratings etc, we only check if we need to add the organization
@@ -917,7 +912,6 @@ def get_organizations(scan):
 
 @login_required(login_url="/authentication/login/")
 def teams(request):
-
     # if you don't have a contest selected, you're required to do so...
     # contest 0 can exist. ?
     if request.session.get("contest", -1) < 0:
@@ -962,12 +956,10 @@ def get_team_info(request):
 
 
 class OrganizationAutocomplete(autocomplete.Select2QuerySetView):
-
     # allow a bit of scrolling
     paginate_by = 100
 
     def get_queryset(self):
-
         qs = Organization.objects.all().filter(is_dead=False).order_by(Lower("name"))
 
         organization_type = self.forwarded.get("organization_type_name", None)
@@ -999,11 +991,9 @@ class OrganizationAutocomplete(autocomplete.Select2QuerySetView):
 
 
 class OrganizationTypeAutocomplete(autocomplete.Select2QuerySetView):
-
     paginate_by = 100
 
     def get_queryset(self):
-
         qs = OrganizationType.objects.all().filter().order_by("name")
 
         if self.q:

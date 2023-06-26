@@ -23,7 +23,6 @@ def get_organization_report_by_name(
     days_back=0,
     at_date: date = None,
 ):
-
     organization = Organization.objects.filter(
         computed_name_slug=slugify(organization_name),
         country=get_country(country),

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("reporting", "0014_auto_20220812_1220"),
         ("scanners", "0051_alter_securitypolicy_common_ip_versions_and_more"),

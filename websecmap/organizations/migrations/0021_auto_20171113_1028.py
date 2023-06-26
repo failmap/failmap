@@ -8,7 +8,6 @@ import websecmap.organizations.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("organizations", "0020_auto_20171112_1149"),
     ]

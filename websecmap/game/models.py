@@ -94,7 +94,6 @@ class Team(models.Model):
 
 
 class OrganizationSubmission(models.Model):
-
     organization_country = CountryField()
 
     added_by_team = models.ForeignKey(Team, null=True, blank=True, on_delete=models.CASCADE)

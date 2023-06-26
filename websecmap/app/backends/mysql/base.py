@@ -17,7 +17,6 @@ log = logging.getLogger(__name__)
 
 
 class DatabaseWrapper(MysqlDatabaseWrapper):
-
     # retry
     @retry(logger=log, tries=TRIES, delay=1, backoff=2, max_delay=5)
     def get_new_connection(self, *args, **kwargs):

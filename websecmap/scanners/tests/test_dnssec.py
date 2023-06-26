@@ -4,7 +4,6 @@ from websecmap.scanners.scanner.dnssec import analyze_result
 
 
 def test_analyze_result():
-
     # standard info
     result = """0.000: INFO Begin testing DNSSEC for faalkaart.nl.
         2.543: INFO Found DS record for faalkaart.nl at parent.

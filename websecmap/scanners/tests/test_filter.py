@@ -97,7 +97,6 @@ def test_filter_ftp_plan_scan_endpoints(db, default_scan_metadata, setup_some_da
 
 
 def test_filter_http(db, default_scan_metadata, setup_some_data):
-
     # see if nothing happens when there is no endpoint
     Endpoint.objects.all().delete()
     http_plan_verify()

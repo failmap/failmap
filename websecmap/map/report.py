@@ -327,7 +327,6 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
             processed_urls = []
 
             for direct_report in direct_reports:
-
                 # log.debug("Processing rating of %s " %
                 #     organizationrating.calculation["organization"].get("name", "UNKOWN"))
 
@@ -337,7 +336,6 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
 
                 # group by vulnerability type
                 for urlrating in urlratings:
-
                     # prevent the same urls counting double or more...
                     if urlrating["url"] in processed_urls:
                         # log.debug("Removed url because it's already in the report: %s" % urlrating["url"])
@@ -355,7 +353,6 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                     # www.kindpakket.groningen.nl is missing
                     # url reports
                     for rating in urlrating["ratings"]:
-
                         # log.debug("- type: %s H: %s, M: %s, L: %s" %
                         #     (rating['type'], rating['high'], rating['medium'], rating['low']))
 
@@ -386,7 +383,6 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
 
                     # endpoint reports
                     for endpoint in urlrating["endpoints"]:
-
                         for rating in endpoint["ratings"]:
                             if rating["type"] not in measurement:
                                 measurement[rating["type"]] = {
@@ -473,7 +469,6 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
         for days_back in list(reversed(range(days))):
             when = datetime.now(timezone.utc) - timedelta(days=days_back)
             for scan_type in scan_types:
-
                 # You can expect something to change each day. Therefore just store the map data each day.
                 MapDataCache.objects.all().filter(
                     at_when=when,
@@ -599,7 +594,6 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
 
             noduplicates = []
             for rating in ratings:
-
                 measurement["total_organizations"] += 1
 
                 if rating.high:
@@ -654,7 +648,6 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                             measurement["explained"][rat["type"]]["total"] += 1
 
                     for endpoint in url["endpoints"]:
-
                         # Only add the endpoint once for a series of ratings. And only if the
                         # ratings is not a repeated finding.
                         added_endpoint = False
@@ -832,7 +825,6 @@ def default_organization_rating(organizations: List[int]):
         organizations = list(Organization.objects.all().values_list("id", flat=True))
 
     for organization_id in organizations:
-
         organization = Organization.objects.all().filter(id=organization_id).first()
         if not organization:
             continue

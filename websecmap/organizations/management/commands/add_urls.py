@@ -24,7 +24,6 @@ class Command(BaseCommand):
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
-
         new_urls = get_new_urls(options["urls"])
 
         if not new_urls:
@@ -35,14 +34,12 @@ class Command(BaseCommand):
         organizations = inquire_organization()
 
         for url in new_urls:
-
             new_url = Url()
             new_url.url = url
             new_url.created_on = datetime.now(timezone.utc)
             new_url.save()
 
             for organization in organizations:
-
                 new_url.organization.add(organization)
                 new_url.save()
 
@@ -50,7 +47,6 @@ class Command(BaseCommand):
 
 
 def get_new_urls(urls: List[str]):
-
     new_urls = []
 
     for url in urls:

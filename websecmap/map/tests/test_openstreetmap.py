@@ -63,7 +63,6 @@ def mocked_osm_to_geojson(filename):
 
 
 def prepare_database():
-
     # An import created organizations, coordinates and urls.
     Coordinate.objects.all().delete()
     Url.objects.all().delete()
@@ -92,7 +91,6 @@ def test_openstreetmaps(db, monkeypatch):
 
     with patch("websecmap.map.logic.openstreetmap.get_property_from_code", mock_get_property_from_code):
         with patch("websecmap.map.logic.openstreetmap.osm_to_geojson", mocked_osm_to_geojson):
-
             # test OSM import
             config.WAMBACHERS_OSM_CLIKEY = ""
             prepare_database()

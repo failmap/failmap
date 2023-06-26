@@ -225,7 +225,6 @@ def worker_verify_role_capabilities(role):
     if role in ROLES_REQUIRING_IPV6 or role in ROLES_REQUIRING_IPV4_AND_IPV6:
         # allow IPv6 support to be faked during development
         if not os.environ.get("NETWORK_SUPPORTS_IPV6", False):
-
             # verify if a https connection to a IPv6 website can be made
             if not connect_socket(socket.AF_INET6, config.IPV6_TEST_DOMAIN):
                 failed = True

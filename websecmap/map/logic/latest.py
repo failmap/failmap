@@ -68,7 +68,6 @@ def get_all_latest_scans(country, organization_type):
             )
 
     for scan_type in metadata["published_url_scan_types"]:
-
         scans = (
             UrlGenericScan.objects.filter(
                 type=scan_type,

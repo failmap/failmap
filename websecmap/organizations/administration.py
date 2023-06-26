@@ -164,7 +164,6 @@ def merge_similar_organizations():
         handled_organizations.append(organization)
         log.debug("Merging organization %s, id: %s", organization, organization.id)
         for name in organization.names:
-
             # we don't care about the layer, it might be any layer: that is the point of merging
             while existing_organization := find_organization_by_names_and_layer_and_country(
                 names=[name], country=organization.country, excluding=handled_organizations

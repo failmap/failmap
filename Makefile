@@ -83,7 +83,8 @@ qa: autofix test
 check: check_py check_migrations check_sh  ## code quality checks
 check_py: ${pysrc} ${app}
 	# check code quality
-	pylama .
+	# TOML file config are ignored since 8.4.1 so use direct params :(
+	pylama --max-line-length=120 --ignore="E252,W605,E203" --skip="*/migrations/*,vendor/*,docs/*,build/*,.*/*" --linters="pycodestyle,pyflakes" .
 	# check formatting
 	black --check .
 

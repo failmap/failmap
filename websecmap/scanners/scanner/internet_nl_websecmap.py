@@ -914,7 +914,6 @@ def lowest_value_in_results(scan_data, test_names: List[str], where="tests") -> 
     lowest_test_outcome = 10
     lowest_test_status = "passed"
     for test_name in test_names:
-
         # Might be the case that not all tests are in the results, as for the ipv6 version of internet.nl
         if test_name not in scan_data["results"][where]:
             continue

@@ -14,7 +14,6 @@ class Command(LoadDataCommand):
     help = "Load data, without messages about naive datetimes (bug in pyyaml)"
 
     def handle(self, *app_labels, **options):
-
         # suppressing warnings about naive datetimes:
         # given the USE_TZ feature doesn't work correctly here.
         warnings.filterwarnings(

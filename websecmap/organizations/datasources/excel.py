@@ -95,7 +95,6 @@ def parse_data(dataset, filename):
 
 
 def validate_record(record):
-
     if not record.get("Name", ""):
         ValueError('Missing "Name" column or column was empty.')
 

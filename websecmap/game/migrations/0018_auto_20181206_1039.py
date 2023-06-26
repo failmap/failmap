@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("game", "0017_contest_url_organization_discovery_help"),
     ]

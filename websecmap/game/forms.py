@@ -49,7 +49,6 @@ class ContestForm(forms.Form):
 # RadioSelect, there is a lot of hacking, terrible answers on stackoverflow and other mismatches available
 # to the point that you're working hours to fix a miniscule thing that should be trivial.
 class TeamForm(forms.Form):
-
     contest = Contest()
 
     def __init__(self, *args, **kwargs):
@@ -93,7 +92,6 @@ class TeamForm(forms.Form):
 
 
 def has_permission(permission_code, user):
-
     if not user:
         return False
 
@@ -104,12 +102,10 @@ def has_permission(permission_code, user):
 
 
 class OrganisationSubmissionForm(forms.Form):
-
     contest = None
     team = None
 
     def __init__(self, *args, **kwargs):
-
         self.contest = kwargs.pop("contest", None)
         self.team = kwargs.pop("team", None)
 
@@ -275,12 +271,10 @@ class OrganisationSubmissionForm(forms.Form):
 
 
 class UrlSubmissionForm(forms.Form):
-
     contest = None
     team = None
 
     def __init__(self, *args, **kwargs):
-
         self.contest = kwargs.pop("contest", None)
         self.team = kwargs.pop("team", None)
 
@@ -511,7 +505,6 @@ class UrlSubmissionForm(forms.Form):
         new = []
         for organization in organizations:
             for website in websites:
-
                 if Url.objects.all().filter(url=website, organization=organization).exists():
                     # This URL %(url)s is already in the production data for organization %(organization)s
                     continue
@@ -528,7 +521,6 @@ class UrlSubmissionForm(forms.Form):
 
     @transaction.atomic
     def save(self):
-
         # validate again to prevent duplicates within the transaction
         # we can also check if the data is not in the db yet, which is nicer as it potentially saves a lot of time
         self.clean()
@@ -538,7 +530,6 @@ class UrlSubmissionForm(forms.Form):
 
         for organization in organizations:
             for website in websites:
-
                 exists = (
                     UrlSubmission.objects.all()
                     .filter(

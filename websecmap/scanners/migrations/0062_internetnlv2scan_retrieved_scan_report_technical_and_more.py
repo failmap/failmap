@@ -5,7 +5,6 @@ import jsonfield.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("scanners", "0061_geoip"),
     ]

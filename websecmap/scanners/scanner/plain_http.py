@@ -155,7 +155,6 @@ def get_endpoints_with_missing_encryption(url):
 
 @app.task(queue="storage", ignore_result=True)
 def well_done(endpoint_id):
-
     if endpoint_has_scans("plain_http", endpoint_id):
         store_endpoint_scan_result("plain_http", endpoint_id, "redirecting_properly", CLEANED_UP)
 
@@ -214,7 +213,6 @@ def scan(ip_version: int, url: str):
 
 @app.task(queue="storage", ignore_result=True)
 def store(results, endpoint_id):
-
     resolves, can_connect_result, redirects_to_safety_result = results
 
     if not resolves:

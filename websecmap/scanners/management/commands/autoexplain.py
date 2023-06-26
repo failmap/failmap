@@ -13,7 +13,6 @@ class Command(BaseCommand):
     help = __doc__
 
     def handle(self, *args, **options):
-
         try:
             autoexplain()
             log.info("Autoexplain finished!")

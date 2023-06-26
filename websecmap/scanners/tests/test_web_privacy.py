@@ -184,7 +184,6 @@ def demo_data():
 
 
 def test_get_all_third_party_requests(settings, current_path, db):
-
     data = demo_data()
     third_party_domains = data["third-party-domains"]
 
@@ -217,7 +216,6 @@ def test_get_all_third_party_requests(settings, current_path, db):
 
 
 def test_web_privacy_scan(db, requests_mock, current_path, caplog):
-
     requests_mock.get("http://localhost:31337/?site=https://zutphen.nl", json=demo_data())
     url = Url.objects.create(url="zutphen.nl")
     ep = Endpoint.objects.create(

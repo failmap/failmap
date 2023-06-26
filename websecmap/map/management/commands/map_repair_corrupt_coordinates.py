@@ -10,7 +10,6 @@ log = logging.getLogger(__package__)
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-
         coordinates = Coordinate.objects.all().filter(geojsontype="Point")
 
         for coordinate in coordinates:

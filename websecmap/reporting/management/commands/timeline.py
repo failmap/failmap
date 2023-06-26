@@ -18,7 +18,6 @@ class Command(BaseCommand):
         parser.add_argument("-u", "--url_addresses", nargs="*")
 
     def handle(self, *args, **options):
-
         if not options["url_addresses"]:
             print("Specify url using -u. timeline -u example.com")
             sys.exit()

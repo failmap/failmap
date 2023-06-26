@@ -4,7 +4,6 @@ from websecmap.app.models import censor_sensitive_data
 
 
 def test_censor_sensitive_data():
-
     # single qouted secret, will be single qouted
     sensitive_data = "test, password='secret', other text"
     censored = censor_sensitive_data(sensitive_data)

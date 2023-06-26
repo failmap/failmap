@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("organizations", "0074_alter_organization_acceptable_domain_registrants_and_more"),
     ]

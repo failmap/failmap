@@ -86,7 +86,6 @@ def compose_scan_task(urls) -> group:
 
 @app.task(queue="storage", ignore_result=True)
 def store_dnssec(result: List[str], url_id: int):
-
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
         return ParentFailed("skipping result parsing because scan failed.", cause=result)

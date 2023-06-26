@@ -37,7 +37,7 @@ skip_covered = true
 show_missing = true
 
 [tool.isort]
-line_length = 100
+line_length = 120
 known_first_party = "websecmap"
 
 [tool.pep8]

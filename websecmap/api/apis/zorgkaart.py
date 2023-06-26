@@ -53,7 +53,6 @@ log = logging.getLogger(__package__)
 
 @transaction.atomic
 def organization_and_url_import(flat_organizations: List[Dict[str, Any]]):
-
     if not config.GOOGLE_MAPS_API_KEY:
         log.warning("Warning: the google maps api key is not set, fallback geocoding of addresses will not happen.")
 
@@ -119,7 +118,6 @@ def organization_and_url_import(flat_organizations: List[Dict[str, Any]]):
     """
 
     for flat_organization in flat_organizations:
-
         validate_flat_organization(flat_organization)
 
         # try to handle updates to existing organizations.
@@ -243,7 +241,6 @@ def translate(orglist):
 
     outlist = []
     for org in orglist:
-
         if not OrganizationType.objects.all().filter(name=org["type"]).first():
             OrganizationType.objects.create(name=org["type"])
 

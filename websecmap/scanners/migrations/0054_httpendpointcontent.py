@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("scanners", "0053_alter_securitypolicy_affect_explain_scoring_policy"),
     ]

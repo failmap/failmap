@@ -68,7 +68,6 @@ def clean_ips(url: Url, is_v4: bool):
 
 
 def store_ip(url: Url, is_v4: bool, ip: str):
-
     has_ip = UrlIp.objects.all().filter(url=url, is_v4=is_v4, ip=ip).first()
     if has_ip:
         log.debug("Url: %s, ip: %s, is_v4: %s is already in the database: cleaning.", url, is_v4, ip)

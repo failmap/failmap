@@ -10,7 +10,6 @@ log = logging.getLogger(__package__)
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-
         ministries = {
             "description": "Dutch ministries",
             "layer": "government",

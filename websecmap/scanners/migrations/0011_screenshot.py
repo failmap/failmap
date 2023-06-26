@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("organizations", "0007_url_created_on"),
         ("scanners", "0010_auto_20170911_1635"),

@@ -125,7 +125,6 @@ def extract_geojson_from_row(row) -> List[float]:
 
 
 def remove_redundant_urls(urls: List[str]) -> List[str]:
-
     for redundant in REDUNDANT_URLS:
         if redundant in urls:
             urls.remove(redundant)

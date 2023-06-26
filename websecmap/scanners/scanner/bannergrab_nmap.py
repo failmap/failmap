@@ -46,7 +46,6 @@ def compose_manual_scan_task(
 
 @app.task(queue="storage", ignore_result=True)
 def grab_banners():
-
     if not allowed_to_scan(SCANNER_NAME):
         return
 
@@ -133,7 +132,6 @@ def grab_manually(is_v4: bool = True):
 
 
 def reduce_protcol(protocol, port):
-
     if port == 443:
         # make sure this in sync with PROTOCOL_CLEANERS in detect_version
         mapping = {
@@ -382,7 +380,6 @@ def clean_all_other_ports(host, do_not_clean_these_ports):
     }
 
     for url in get_urls_by_ip(host):
-
         # get the relevant endpoints.
         scans = (
             EndpointGenericScan.objects.all()
@@ -397,7 +394,6 @@ def clean_all_other_ports(host, do_not_clean_these_ports):
         log.debug("Found %s scans to remove data on.", scans.count())
 
         for scan in scans:
-
             # optimization:
             # do not attempt to store anything if the current result is already empty:
             if scan.rating == scan_type_to_empty.get(scan.type, ""):

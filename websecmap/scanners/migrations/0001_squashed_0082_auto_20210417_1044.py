@@ -10,7 +10,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     replaces = [
         ("scanners", "0001_initial"),
         ("scanners", "0002_auto_20170226_2007"),

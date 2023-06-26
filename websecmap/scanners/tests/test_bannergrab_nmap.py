@@ -17,7 +17,6 @@ generic_data = {
 
 
 def test_store_nmap_results(db):
-
     results = {
         **generic_data,
         **{
@@ -150,7 +149,6 @@ def test_store_nmap_results(db):
 
 
 def test_re_evaluate_bannergrab_versions(db):
-
     url = Url.objects.create(url="basisbeveiliging.nl")
     UrlIp.objects.create(url=url, ip="127.0.0.1", is_v4=True, discovered_on=datetime.now(timezone.utc))
 

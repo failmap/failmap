@@ -238,7 +238,6 @@ def get_map_data(
     # log.error(reports)
 
     for i in rows:
-
         # Here we're going to do something stupid: to rebuild the high, medium, low classifcation based on scan_types
         # It's somewhat insane to do it like this, but it's also insane to keep adding columns for each vulnerability
         # that's added to the system. This solution will be a bit slow, but given the caching and such it wouldn't

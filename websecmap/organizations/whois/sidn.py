@@ -76,7 +76,6 @@ def get_stuff(
     proxy_protocol: str = None,
     proxy_address: str = None,
 ) -> None:
-
     for url in urls_to_process:
         whois_data = unlimited_try_to_fetch_data(url["url"], sleep_time, 0, proxy_protocol, proxy_address)
         if whois_data:
@@ -90,7 +89,6 @@ def unlimited_try_to_fetch_data(
     proxy_protocol: str = None,
     proxy_address: str = None,
 ) -> Optional[UrlWhois]:
-
     sleep(sleep_time)
 
     if depth > MAX_DEPTH:

@@ -18,7 +18,6 @@ def get_recent_explains(country, organization_type):
 
 
 def get_all_explains(country, organization_type, limit=0):
-
     limit = 999999 if limit == 0 else limit
 
     country = get_country(country)
@@ -110,7 +109,6 @@ def get_scan(scan_id: int, scan_type: str) -> Union[EndpointGenericScan, UrlGene
 
 
 def explain(scan_id: int, scan_type: str, explanation: str, explained_by: str, duration: int = 365) -> Dict[str, Any]:
-
     scan = get_scan(scan_id, scan_type)
     if not scan:
         return {

@@ -5,7 +5,6 @@ from websecmap.scanners.models import EndpointGenericScan
 
 
 def test_internet_nl_standard_calculation(db, default_policy):
-
     now = datetime.now(timezone.utc)
 
     # Api v1 does not have json content, api v2 does.

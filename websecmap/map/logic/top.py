@@ -86,7 +86,6 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", days
 
 
 def get_top_fail_data(country: str = "NL", organization_type="municipality", days_back=0, at_date: date = None):
-
     when = determine_when(days_back, at_date)
     cursor = connection.cursor()
 

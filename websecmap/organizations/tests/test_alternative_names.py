@@ -8,7 +8,6 @@ def organization_altname(name):
 
 
 def test_alternative_names(db):
-
     org = Organization.objects.create(name="Test", created_on=datetime.now(timezone.utc))
     org.alternative_names.add(AlternativeName.objects.create(name="Test2"))
 

@@ -35,7 +35,6 @@ def test_has_acceptable_error():
 
 
 def test_connection_answer():
-
     a = connection_answer()
     assert a == {"result": False, "error": ""}
 
@@ -65,7 +64,6 @@ def test_save_endpoint(db):
     endpoint_1_params = {"protocol": "http", "url_id": url_id, "port": 80, "ip_version": 4, "origin": "test"}
 
     with freeze_time("2020-01-01"):
-
         assert Endpoint.objects.all().filter().count() == 0
 
         save_endpoint(**endpoint_1_params)
@@ -127,7 +125,6 @@ def test_revive_dead_endpoint(db):
 
     # fourteen days later the old endpoint should have been revived
     with freeze_time("2020-01-14"):
-
         # we still see the dead endpoint as we're within the "expiration" window:
         sim = get_similar_dead_endpoint_in_last_n_days(url.id, port, protocol, ip_version)
         assert sim.id == ep.id

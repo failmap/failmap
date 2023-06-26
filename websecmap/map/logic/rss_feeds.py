@@ -26,7 +26,6 @@ def _scanner_metadata_available_for_scan_type(scan_metadata: Dict[Any, Any], sca
 
 
 class UpdatesOnOrganizationFeed(Feed):
-
     link = "/data/updates_on_organization_feed/"
     description = "Update feed."
 
@@ -159,7 +158,6 @@ class LatestScanFeed(Feed):
         return f"{badge} {rating} - {item.endpoint.url.url}"
 
     def item_description(self, item):
-
         metadata = get_backend_scanmetadata()
         if not _scanner_metadata_available_for_scan_type(metadata, item.type):
             return ""

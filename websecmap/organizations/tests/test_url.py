@@ -24,7 +24,6 @@ def test_add_subdomain(db):
 
 
 def test_is_valid_url():
-
     # This is not going to work as there is a dot in front of the domain.
     # No crashes because of IDNA.
     assert Url.is_valid_url(".espacenet.com") is False

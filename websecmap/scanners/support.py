@@ -20,7 +20,6 @@ def kwargs_to_params(kwargs, prefix="-") -> List[str]:
         return arguments
 
     for arg in kwargs["args"]:
-
         param = f"{prefix}{arg['name']}"
 
         if arg["type"] == "no-value":

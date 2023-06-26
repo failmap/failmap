@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("organizations", "0058_organization_surrogate_id"),
         ("scanners", "0069_scanproxy_last_claim_at"),
