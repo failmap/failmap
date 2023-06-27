@@ -39,14 +39,14 @@ def demo_data():
                 "url": "https://script.shoppingminds.com/rvo_nl/index.js?_=1687874430050",
                 "resource_type": "script",
                 "method": "GET",
-                "post_data": None
+                "post_data": None,
             },
             {
                 "url": "https://trkr.shoppingminds.net/api/rvo/rvo",
                 "resource_type": "xhr",
                 "method": "POST",
-                "post_data": "siteInfo%5Bsite%5D=rvo&siteInfo%5Blanguage%5D=nl&siteInfo%5Bcountry%5D=nl&action=ne"
-            }
+                "post_data": "siteInfo%5Bsite%5D=rvo&siteInfo%5Blanguage%5D=nl&siteInfo%5Bcountry%5D=nl&action=ne",
+            },
         ],
         "third-party-requests": [
             "https://app-script.monsido.com/v2/monsido-script.js",
