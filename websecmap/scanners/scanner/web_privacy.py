@@ -33,7 +33,6 @@ SCANNER_NAME = "web_privacy"
 STANDARD_ENDPOINT_FILTER = {
     "protocol": "https",
     "is_dead": False,
-    "url__computed_subdomain": "",
     "url__is_dead": False,
     "url__not_resolvable": False,
     "ip_version": 4,
@@ -197,7 +196,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         )
         return
 
-    third_party_requests = result_data.get("third-party-requests", [])
+    third_party_requests = result_data.get("third-party-requests-structured", [])
     third_party_domains = result_data.get("third-party-domains", [])
     cookies = result_data.get("timeless-cookies", [])
 
@@ -214,13 +213,14 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     )
 
     # happens a lot, due to easiest path of development / culture
+    # todo: to avoid duplicate findings ignore content of parameters, only check for parameters and addresses
     web_third_party_rating = WEB_PRIVACY_THIRD_PARTY_FOUND if third_party_requests else WEB_PRIVACY_THIRD_PARTY_OK
     store_endpoint_scan_result(
         WEB_PRIVACY_THIRD_PARTY_REQUESTS,
         endpoint_id,
         web_third_party_rating,
         message=web_third_party_rating,
-        evidence="\n".join(third_party_requests),
+        evidence=json.dumps(third_party_requests),
     )
 
     # also store cookies for later inspection
