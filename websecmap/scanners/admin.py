@@ -200,6 +200,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "endpoint__url__organization__country",
         "endpoint__url__organization__layers__name",
         "endpoint__url__is_dead",
+        "endpoint__url__not_resolvable",
         ("endpoint", RelatedFieldAjaxListFilter),
         "type",
         "rating",

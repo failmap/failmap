@@ -7,6 +7,8 @@ Further reading:
 https://stackoverflow.com/questions/20475552/python-requests-library-redirect-new-url#20475712
 """
 import logging
+from typing import Dict, Union
+import json
 
 from celery import group
 
@@ -214,6 +216,14 @@ def scan(ip_version: int, url: str):
 @app.task(queue="storage", ignore_result=True)
 def store(results, endpoint_id):
     resolves, can_connect_result, redirects_to_safety_result = results
+    if redirects_to_safety_result:
+        redirects_to_safety_boolean, redirects = redirects_to_safety_result
+    else:
+        redirects_to_safety_boolean = False
+        redirects = []
+
+    resolves: bool = resolves
+    can_connect_result: Dict[str, Union[str, bool]] = can_connect_result
 
     if not resolves:
         # Don't administrate endpoints that don't resolve, that is a task for the http verify scanner. Here we just
@@ -231,7 +241,7 @@ def store(results, endpoint_id):
         return
 
     connect_result(
-        can_connect_result,
+        result=can_connect_result,
         protocol="https",
         url_id=endpoint.url.pk,
         port=443,
@@ -239,23 +249,42 @@ def store(results, endpoint_id):
         origin="plain_http",
     )
 
-    # issue resolved.
+    # issue resolved: there was a scan in the past and now there is an https connection possible.
+    # So store it, but also add evidence, so we can inspect pingpong issues.
+    # We're not interested if we can't connect or if we didn't have an issue in the past...
     if can_connect_result["result"] and endpoint_has_scans("plain_http", endpoint_id):
-        store_endpoint_scan_result("plain_http", endpoint_id, "redirecting_properly", CLEANED_UP)
+        store_endpoint_scan_result(
+            # todo: this is not 'redirecting_properly': because there is no redirect. It should be named
+            #  connecting properly. And this is weird, as there is a ping pong between nothing there and
+            #  connecting properly.
+            scan_type="plain_http",
+            endpoint_id=endpoint_id,
+            rating="redirecting_properly",
+            message=CLEANED_UP,
+            evidence=json.dumps(can_connect_result),
+        )
+        return
 
     # Really no security at all
-    if not can_connect_result["result"] and redirects_to_safety_result is False:
-        log.info("%s does not have a https site. Saving/updating scan.", endpoint.url)
-        store_endpoint_scan_result(
-            "plain_http", endpoint_id, "no_https_redirect_and_no_https_on_standard_port", NO_HTTPS_AT_ALL
-        )
+    if not can_connect_result["result"]:
+        if redirects_to_safety_boolean:
+            # some redirections that might have flaws etc.
+            log.info("%s redirects to safety, saved by the bell.", endpoint.url)
+            store_endpoint_scan_result(
+                "plain_http",
+                endpoint_id,
+                "https_redirect_on_insecure_port_and_no_https_on_standard_port",
+                SAVED_BY_THE_BELL,
+                evidence=json.dumps({"redirects": redirects}),
+            )
+            return
 
-    # some redirections that might have flaws etc.
-    if not can_connect_result["result"] and redirects_to_safety_result is True:
-        log.info("%s redirects to safety, saved by the bell.", endpoint.url)
+        # no redirects...
+        log.info("%s does not have a https site. Saving/updating scan.", endpoint.url)
         store_endpoint_scan_result(
             "plain_http",
             endpoint_id,
-            "https_redirect_on_insecure_port_and_no_https_on_standard_port",
-            SAVED_BY_THE_BELL,
+            "no_https_redirect_and_no_https_on_standard_port",
+            NO_HTTPS_AT_ALL,
+            evidence=json.dumps(can_connect_result),
         )

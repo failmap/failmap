@@ -36,16 +36,16 @@ def test_has_acceptable_error():
 
 def test_connection_answer():
     a = connection_answer()
-    assert a == {"result": False, "error": ""}
+    assert a == {"result": False, "response_text": "", "error": ""}
 
     a = connection_answer(True)
-    assert a == {"result": True, "error": ""}
+    assert a == {"result": True, "response_text": "", "error": ""}
 
     a = connection_answer(True, TimeoutError("test"))
-    assert a == {"result": True, "error": "TimeoutError"}
+    assert a == {"result": True, "response_text": "", "error": "TimeoutError"}
 
     a = connection_answer(True, "error_code")
-    assert a == {"result": True, "error": "error_code"}
+    assert a == {"result": True, "response_text": "", "error": "error_code"}
 
 
 def test_get_random_user_agent():
@@ -142,12 +142,21 @@ def test_can_connect(requests_mock, mocker):
     assert can_connect("https", "1.example.com", 443, 4) == {
         "result": False,
         "error": "No mock address: GET https://1.example.com:443/",
+        "response_text": "",
     }
 
     # test request via hostname:
     requests_mock.get("https://1.example.com:443/", text="200", status_code=200)
-    assert can_connect("https", "1.example.com", 443, 4) == {"result": True, "error": "found_with_hostname"}
+    assert can_connect("https", "1.example.com", 443, 4) == {
+        "result": True,
+        "error": "found_with_hostname",
+        "response_text": "200: 200",
+    }
 
     # test request via ip4:
     requests_mock.get("https://127.0.0.1:443/", text="200", status_code=200)
-    assert can_connect("https", "1.example.com", 443, 4) == {"result": True, "error": "found_with_ip"}
+    assert can_connect("https", "1.example.com", 443, 4) == {
+        "result": True,
+        "error": "found_with_ip",
+        "response_text": "200: 200",
+    }

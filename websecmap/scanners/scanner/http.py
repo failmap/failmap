@@ -28,6 +28,7 @@ import ipaddress
 import logging
 import random
 import socket
+import tldextract
 from datetime import datetime, timedelta, timezone
 from ipaddress import AddressValueError
 from typing import Dict, List, Optional, Tuple, Union
@@ -309,9 +310,9 @@ def get_ipv6(url: str):
 
 
 def connection_answer(
-    connection_result: bool = False, exception: Optional[Union[Exception, str]] = None
+    connection_result: bool = False, exception: Optional[Union[Exception, str]] = None, response_text: str = ""
 ) -> Dict[str, str]:
-    data = {"result": connection_result, "error": ""}
+    data = {"result": connection_result, "error": "", "response_text": response_text}
 
     if not exception:
         return data
@@ -389,55 +390,55 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
 
     uri = build_uri_from_components(protocol, url, port, ip_version)
     if not uri:
-        return connection_answer(False, f"ipv{ip_version}_resolve_error")
+        return connection_answer(False, f"ipv{ip_version}_resolve_error", "")
 
     log.debug("Attempting connect via ip on: %s", uri)
-    answer, message = http_call_handling_exceptions(request_via_ip, **{"uri": uri, "url": url})
+    answer, message, response_text = http_call_handling_exceptions(request_via_ip, **{"uri": uri, "url": url})
     log.debug(f"- Answer: {answer}, exc: {message}")
     if answer in ok_answers or message in ok_answers:
         log.debug("Got an ok answer, so we can connect, but not easily...")
-        return connection_answer(True, message)
+        return connection_answer(True, message, response_text)
 
     # instead of trying on no_content_and_server_indicates_error, always retry this way
     # why? because there might be timeouts via approach 1 that don't occur via approach 2.
     log.debug("Attempting connect via name on: %s:", url)
-    answer, message = http_call_handling_exceptions(
+    answer, message, response_text = http_call_handling_exceptions(
         request_via_hostname, **{"protocol": protocol, "url": url, "port": port}
     )
     log.debug(f"- Answer: {answer}, exc: {message}")
     if answer in ok_answers or message in ok_answers:
-        return connection_answer(True, message)
+        return connection_answer(True, message, response_text)
 
     log.debug("No http connection possible")
-    return connection_answer(False, message)
+    return connection_answer(False, message, response_text)
 
 
-def http_call_handling_exceptions(callable, **args) -> Tuple[str, str]:
+def http_call_handling_exceptions(callable, **args) -> Tuple[str, str, str]:
     # returns message and detail info
     try:
         log.debug(f"Calling {callable.__name__} with args: {args}")
         answer = callable(**args)
-        return answer["result"], answer["error"]
+        return answer["result"], answer["error"], answer["response_text"]
     except (ChunkedEncodingError, ContentDecodingError) as my_exception:
         log.debug(f"- Exception: {my_exception}")
         # There is a connection and you can get something back. But it doesn't decode properly.
         # For example InvalidChunkLength(got length b'<!DOCTYPE html>\\n', 0 bytes read)",
-        return CONTENT_FOUND_WITH_ENCODING_ISSUES, str(my_exception)
+        return CONTENT_FOUND_WITH_ENCODING_ISSUES, str(my_exception), ""
     except SSLError as my_exception:
         # SSl issues are ok, this means there is something to connect to, but it doesn't matter if we can't connect
         log.debug(f"- Exception: {my_exception}")
-        return CONTENT_FOUND_WITH_SSL_ERRORS, str(my_exception)
+        return CONTENT_FOUND_WITH_SSL_ERRORS, str(my_exception), ""
     except (ConnectionError, HTTPError, requests.RequestException) as my_exception:
         log.debug(f"- Exception: {my_exception}")
         if has_acceptable_error(str(my_exception)):
-            return NO_CONTENT_BUT_ERROR_INDICATES_SERVER, str(my_exception)
+            return NO_CONTENT_BUT_ERROR_INDICATES_SERVER, str(my_exception), ""
 
         # this has to be retried using get_via_hostname.
-        return NO_CONTENT_AND_SERVER_INDICATES_ERROR, str(my_exception)
+        return NO_CONTENT_AND_SERVER_INDICATES_ERROR, str(my_exception), ""
     # Whatever timeouts and other junk that might play up...
     except BaseException as my_exception:  # pylint: disable=broad-except
         log.debug(f"- Exception: {my_exception}")
-        return GENERIC_EXCEPTION, str(my_exception)
+        return GENERIC_EXCEPTION, str(my_exception), ""
 
 
 def request_via_ip(uri, url) -> Dict[str, str]:
@@ -460,10 +461,11 @@ def request_via_ip(uri, url) -> Dict[str, str]:
     )
 
     log.debug("Response: %s", response)
+    response_text = f"{response.status_code}: {response.text[:100]}"
 
     if response.status_code:
-        return connection_answer(True, FOUND_WITH_IP)
-    return connection_answer(True, NO_HTTP_STATUS_CODE)
+        return connection_answer(connection_result=True, exception=FOUND_WITH_IP, response_text=response_text)
+    return connection_answer(connection_result=True, exception=NO_HTTP_STATUS_CODE, response_text=response_text)
 
 
 def request_via_hostname(protocol, url, port) -> Dict[str, str]:
@@ -486,10 +488,11 @@ def request_via_hostname(protocol, url, port) -> Dict[str, str]:
     )
 
     log.debug("Response: %s", response)
+    response_text = f"{response.status_code}: {response.text[:100]}"
 
     if response.status_code:
-        return connection_answer(True, FOUND_WITH_HOSTNAME)
-    return connection_answer(True, NO_HTTP_STATUS_CODE)
+        return connection_answer(connection_result=True, exception=FOUND_WITH_HOSTNAME, response_text=response_text)
+    return connection_answer(connection_result=True, exception=NO_HTTP_STATUS_CODE, response_text=response_text)
 
 
 def build_uri_from_components(protocol: str, url: str, port: int, ip_version: int) -> Optional[str]:
@@ -759,15 +762,16 @@ def check_network(code_location=""):
     log.info("Network could be reached could be reached via %s", code_location)
 
 
-def redirects_to_safety(url: str):
+def redirects_to_safety(url: str) -> Tuple[bool, List[Dict[str, str]]]:
     """
     Also includes the ip-version of the endpoint. Implies that the endpoint resolves.
     Any safety over any network is accepted now, both A and AAAA records.
 
     To enable debugging: logging.basicConfig(level=logging.DEBUG)
 
-    :param endpoint:
-    :return:
+    :param url:
+    :return: Tuple with the first value true if the last in the chain has https. The second will be filled with
+    # the redirects encountered.
     """
 
     # A feature of requests is to send any headers you've sent when there are redirects.
@@ -796,7 +800,7 @@ def redirects_to_safety(url: str):
         if response.history:
             return _follow_history_up_until_safety(response)
         log.debug("Request was not redirected, so not going to a safe url.")
-        return False
+        return False, []
     except Exception as my_exception:  # noqa  # pylint: disable=broad-except
         # Replaces basically everything, it's just a plethora of stuff that can go wrong which is outside of our usecase
         # ConnectTimeout,
@@ -809,21 +813,27 @@ def redirects_to_safety(url: str):
         # requests.RequestException
         log.debug("Request resulted into an error, it's not redirecting properly.")
         log.debug("The error retrieved was: %s", my_exception)
-        return False
+        return False, []
 
 
-def _follow_history_up_until_safety(response):
+def _follow_history_up_until_safety(response) -> Tuple[bool, List[Dict[str, str]]]:
+    # we don't need all tracking parameters, just the redirect urls are enough
+    redirects = []
     log.debug("Request was redirected, there is hope. Redirect path:")
     for index, resp in enumerate(response.history):
         log.debug("- Redirect %s: %s.", index, resp.url)
+        extract = tldextract.extract(resp.url)
+        redirects.append({"url": extract.fqdn, "status_code": resp.status_code, "content": resp.text[:100]})
     log.debug("Final destination:")
     log.debug("%s: %s", response.status_code, response.url)
+    extract = tldextract.extract(response.url)
+    redirects.append({"url": extract.fqdn, "status_code": response.status_code, "content": response.text[:100]})
 
     if response.url.startswith("https://"):
         log.debug("Url starts with https, so it redirects to safety.")
-        return True
+        return True, redirects
     log.debug("Url is not redirecting to a safe url.")
-    return False
+    return False, redirects
 
 
 # http://useragentstring.com/pages/useragentstring.php/
