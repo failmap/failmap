@@ -50,3 +50,20 @@ def test_reflag_endpointgenericscan(db):
     # highest ID is affected
     e3 = EndpointGenericScan.objects.get(id=othere2.pk)
     assert e3.is_the_latest_scan is True
+
+
+def test_bulk_reflag(db):
+    u = Url.objects.create(url="basisbeveiliging.nl")
+
+    for _ in range(1001):
+        e = Endpoint.objects.create(protocol="https", port=443, ip_version=4, is_dead=False, url=u)
+        args = {
+            "type": "tls_qualys",
+            "last_scan_moment": now(),
+            "endpoint": e,
+            "rating_determined_on": now(),
+        }
+        EndpointGenericScan.objects.create(**args)
+
+    reflag_endpointgenericscan("tls_qualys")
+    assert EndpointGenericScan.objects.filter(is_the_latest_scan=True).count() == 1001

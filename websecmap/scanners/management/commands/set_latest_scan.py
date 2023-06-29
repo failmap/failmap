@@ -1,10 +1,12 @@
 import logging
 from datetime import datetime, timezone
+from typing import Union, List
 
 from django.core.management.base import BaseCommand
 
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
+from websecmap.scanners.scanner import chunks2
 
 log = logging.getLogger(__name__)
 
@@ -68,8 +70,15 @@ def reflag_endpointgenericscan(scan_type):
     updatescans(EndpointGenericScan.objects.raw(sql))
 
 
-def updatescans(scans):
-    log.debug("Updating %s scans", len(list(scans)))
-    for scan in scans:
-        scan.is_the_latest_scan = True
-        scan.save()
+def updatescans(scans: List[Union[UrlGenericScan, EndpointGenericScan]]) -> None:
+    ids = [scan.id for scan in scans]
+    log.debug("Updating %s scans", len(ids))
+
+    # update per large batch of scans, so not to overload with an IN query with a million id's
+    for chunk in chunks2(ids, 1000):
+        EndpointGenericScan.objects.filter(id__in=chunk).update(is_the_latest_scan=True)
+
+    # old and slower, but less error prone implementation:
+    # for scan in scans:
+    #     scan.is_the_latest_scan = True
+    #     scan.save()
