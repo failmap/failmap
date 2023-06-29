@@ -12,12 +12,14 @@ import websecmap
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanner import (
-    autoexplain_dutch_untrusted_cert,
     autoexplain_microsoft_neighboring_services,
     autoexplain_no_https_microsoft,
     autoexplain_trust_microsoft,
 )
 from websecmap.scanners.scanner.autoexplain_trust_microsoft import any_in_list_match
+from websecmap.scanners.scanner.autoexplain_dutch_untrusted_cert import (
+    certificate_chain_contains_trusted_untrusted_certificate,
+)
 
 log = logging.getLogger("websecmap")
 
@@ -32,22 +34,21 @@ def test_certificate_chain_ends_on_non_trusted_dutch_root_ca(current_path):
     # Validate a complete chain that ends in the desired root certificate
     with open(f"{current_path}/websecmap/scanners/tests/autoexplain/valid_chain.json") as f:
         certificate_data = json.load(f)
-    assert (
-        autoexplain_dutch_untrusted_cert.certificate_chain_contains_trusted_untrusted_certificate(certificate_data)
-        is True
-    )
+    assert certificate_chain_contains_trusted_untrusted_certificate(certificate_data) is True
 
-    # Fail to validate something that does not end in the root certificate
+    # An incomplete chain that has the services certificate
     with open(f"{current_path}/websecmap/scanners/tests/autoexplain/missing_root.json") as f:
         certificate_data = json.load(f)
-    assert (
-        autoexplain_dutch_untrusted_cert.certificate_chain_contains_trusted_untrusted_certificate(certificate_data)
-        is False
-    )
+    assert certificate_chain_contains_trusted_untrusted_certificate(certificate_data) is True
+
+    # A chain where the certs are completely missing, from microsoft.com
+    with open(f"{current_path}/websecmap/scanners/tests/autoexplain/microsoft_com.json") as f:
+        certificate_data = json.load(f)
+    assert certificate_chain_contains_trusted_untrusted_certificate(certificate_data) is False
 
     # Supplying garbage causes no problems / crashes:
-    assert autoexplain_dutch_untrusted_cert.certificate_chain_contains_trusted_untrusted_certificate([]) is False
-    assert autoexplain_dutch_untrusted_cert.certificate_chain_contains_trusted_untrusted_certificate("asdasd") is False
+    assert certificate_chain_contains_trusted_untrusted_certificate([]) is False
+    assert certificate_chain_contains_trusted_untrusted_certificate("asdasd") is False
 
 
 def test_autoexplain_no_https_microsoft(db, mocker):

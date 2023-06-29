@@ -16,6 +16,7 @@ from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan
 from websecmap.scanners.scanner import finish_those_that_wont_be_scanned, unique_and_random
+from dataclasses import dataclass
 
 log = logging.getLogger(__package__)
 
@@ -77,10 +78,15 @@ methods = [
 ]
 
 
+def command_line_cert_check(url: str, port: int = 443, ip_version: int = 4):
+    chain = get_cert_chain(url=url, port=port, ip_version=ip_version)
+    return certificate_chain_contains_trusted_untrusted_certificate(chain)
+
+
 # placed on the prefork worker because gevent messes with the ssl library and causes want/read errors.
 # prefork workers run the original tls code which works as intended and supports this edge case measurement
 @app.task(queue="prefork")
-def get_cert_chain(url, port, ip_version) -> List[OpenSSL.crypto.X509]:
+def get_cert_chain(url, port, ip_version) -> List[str]:
     chain = []
     log.debug("Attempting to retrieve SSL chert via %s different methods.", len(methods))
     for method, method_name in methods:
@@ -184,34 +190,79 @@ def certificate_chain_contains_trusted_untrusted_certificate(serialized_certific
         log.debug("Dutch Untrusted Cert: Only one certificate received, this cannot be a trusted cert.")
         return False
     # how do we know this cert is the right cert exactly and not something that has been yolo-added to the chain?
-    checks = [cert_is_staat_der_nederlanden_root_ca_g1]
-    # is it enough to just add the raw cert data and not check on a deserialized cert?
-    for check in checks:
-        for cert in certificates:
-            if check(cert):
-                return True
-    return False
+    return any(is_acceptable_certificate(cert) for cert in certificates)
 
 
-def cert_is_staat_der_nederlanden_root_ca_g1(certificate: OpenSSL.crypto.X509):
+@dataclass
+class AcceptableCertificate:
+    digest: bytes
+    serial: int
+    issuer: str
+    subject: str
+    notafter: bytes
+
+
+ACCEPTABLE_CERTIFICATES = [
+    AcceptableCertificate(
+        digest=b"C6:C1:BB:C7:1D:4F:30:C7:6D:4D:B3:AF:B5:D0:66:DE:49:9E:9A:2D",
+        serial=10004001,
+        issuer="/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Root CA - G1",
+        subject="/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Root CA - G1",
+        notafter=b"20281113230000Z",
+    ),
+    AcceptableCertificate(
+        digest=b"03:67:7B:4E:C0:FF:CA:9D:3C:AD:6C:04:4A:73:3B:3E:7A:75:D1:FD",
+        serial=10004104,
+        issuer="/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Root CA - G1",
+        subject="/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Services CA - G1",
+        notafter=b"20281112230000Z",
+    ),
+    # this one was also on the site..., not yet requested. Time might be off.
+    # AcceptableCertificate(
+    #     digest=b"87:0C:A5:9F:98:4D:CD:F0:EB:C1:43:B7:3F:7C:88:9A:AD:4A:0F:B5",
+    #     serial=5613314895991348523,
+    #     issuer="/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Services CA - G1",
+    #     subject="/C=NL/O=CIBG/CN=UZI-register Private Server CA G1",
+    #     notafter=b"20281112000000Z",
+    # ),
+]
+
+
+def inspect_certificate(certificate: OpenSSL.crypto.X509) -> None:
+    issuer = "".join(
+        f"/{name.decode():s}={value.decode():s}" for name, value in certificate.get_issuer().get_components()
+    )
+    subject = "".join(
+        f"/{name.decode():s}={value.decode():s}" for name, value in certificate.get_subject().get_components()
+    )
+    print(f'digest={certificate.digest("sha1")},')
+    print(f"serial={certificate.get_serial_number()},")
+    print(f'issuer="{issuer}",')
+    print(f'subject="{subject}",')
+    print(f"notafter={certificate.get_notAfter()}")
+
+
+def is_acceptable_certificate(certificate: OpenSSL.crypto.X509):
     # we've seen the g1 cert after a kpn root cert... so this g1 thing can be anywhere in the chain.
     # see: test-digikoppeling.eindhoven.nl
     if not isinstance(certificate, OpenSSL.crypto.X509):
         log.debug("Dutch Untrusted Cert: Not an x509 instance but a %s.", type(certificate))
         return False
+
+    return any(cert_matches(certificate, acceptable_certificate) for acceptable_certificate in ACCEPTABLE_CERTIFICATES)
+
+
+def cert_matches(certificate1: OpenSSL.crypto.X509, certificate2: AcceptableCertificate):
     if not all(
         [
-            cert_digest_match(certificate, b"C6:C1:BB:C7:1D:4F:30:C7:6D:4D:B3:AF:B5:D0:66:DE:49:9E:9A:2D"),
-            cert_serial_match(certificate, 10004001),
-            cert_issuer_match(
-                certificate, "/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Root CA - G1"
-            ),
-            cert_subject_match(
-                certificate, "/C=NL/O=Staat der Nederlanden/CN=Staat der Nederlanden Private Root CA - G1"
-            ),
-            cert_notafter_match(certificate, b"20281113230000Z"),
+            cert_digest_match(certificate1, certificate2.digest),
+            cert_serial_match(certificate1, certificate2.serial),
+            cert_issuer_match(certificate1, certificate2.issuer),
+            cert_subject_match(certificate1, certificate2.subject),
+            cert_notafter_match(certificate1, certificate2.notafter),
         ]
     ):
+        log.debug("Dutch Untrusted Cert: Certificate does not match!")
         return False
     log.debug("Dutch Untrusted Cert: Certificate match!")
     return True
@@ -220,6 +271,7 @@ def cert_is_staat_der_nederlanden_root_ca_g1(certificate: OpenSSL.crypto.X509):
 def cert_notafter_match(certificate: OpenSSL.crypto.X509, expected_notafter: bytes) -> bool:
     # Date in UTC, not in dutch time :)
     if certificate.get_notAfter() == expected_notafter:
+        log.debug(f"Dutch Untrusted Cert: match on expected_notafter: {expected_notafter}.")
         return True
     log.debug("Dutch Untrusted Cert: No cert match on expected expiration date.")
     return False
@@ -227,6 +279,7 @@ def cert_notafter_match(certificate: OpenSSL.crypto.X509, expected_notafter: byt
 
 def cert_digest_match(certificate: OpenSSL.crypto.X509, expected_digest: bytes) -> bool:
     if certificate.digest("sha1") == expected_digest:
+        log.debug(f"Dutch Untrusted Cert: match on expected digest: {expected_digest}.")
         return True
     log.debug("Dutch Untrusted Cert: No cert match on digest.")
     return False
@@ -234,6 +287,7 @@ def cert_digest_match(certificate: OpenSSL.crypto.X509, expected_digest: bytes) 
 
 def cert_serial_match(certificate: OpenSSL.crypto.X509, expected_serial: int) -> bool:
     if certificate.get_serial_number() == expected_serial:
+        log.debug(f"Dutch Untrusted Cert: match on expected serial: {expected_serial}.")
         return True
     log.debug("Dutch Untrusted Cert: No cert match on serial.")
     return False
@@ -244,6 +298,7 @@ def cert_issuer_match(certificate: OpenSSL.crypto.X509, expected_issuer: str) ->
         f"/{name.decode():s}={value.decode():s}" for name, value in certificate.get_issuer().get_components()
     )
     if issuer == expected_issuer:
+        log.debug(f"Dutch Untrusted Cert: match on expected serial: {expected_issuer}.")
         return True
     log.debug("Dutch Untrusted Cert: No cert match on issuer.")
     return False
@@ -254,6 +309,7 @@ def cert_subject_match(certificate: OpenSSL.crypto.X509, expected_subject: str) 
         f"/{name.decode():s}={value.decode():s}" for name, value in certificate.get_subject().get_components()
     )
     if subject == expected_subject:
+        log.debug(f"Dutch Untrusted Cert: match on expected serial: {expected_subject}.")
         return True
     log.debug("Dutch Untrusted Cert: No cert match on subject.")
     return False
