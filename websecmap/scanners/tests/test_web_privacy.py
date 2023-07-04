@@ -4,7 +4,12 @@ from deepdiff import DeepDiff
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
-from websecmap.scanners.scanner.web_privacy import store, scan
+from websecmap.scanners.scanner.web_privacy import (
+    store,
+    scan,
+    truncate_long_post_data,
+    remove_duplicate_third_party_requests,
+)
 
 from websecmap.scanners.scanner.web_privacy_resources.trackers import (
     get_known_trackers_from_urls,
@@ -249,3 +254,142 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
         EndpointGenericScan.objects.all().filter(type="web_privacy_third_party_requests").first().rating
         == "web_privacy_third_party_found"
     )
+
+
+def test_truncate_long_post_data():
+    # Some sites just post tons and tons of post data. This part of the code reduces this because otherwise it will
+    # just never fit. Too bad some data is lost. There unfortunately is a max row size in mysql of 65,535 bytes.
+    # And there will be this website that has over 65,535 bytes of data on evidence. This means it has to go to files.
+    # and that is just terrible. Postgres has a 1.6TB row size. So perhaps it's time to switch.
+    requests = [
+        {
+            "url": "https://jnn-pa.googleapis.com/$rpc/google.internal.waa.v1.Waa/Create",
+            "resource_type": "xhr",
+            "method": "POST",
+            "post_data": '["O43z0dpjhgX20SCx4KAo"]',
+        },
+        {
+            "url": "https://jnn-pa.googleapis.com/$rpc/google.internal.waa.v1.Waa/GenerateIT",
+            "resource_type": "xhr",
+            "method": "POST",
+            "post_data": '["O43z0dpjhgX20SCx4KAo","$9mk5aTRRAAZmMFhTRjDeNUTsWzOFJ3unADkAIwj8RggJyNxJa-hSEECqXw6bA"]',
+        },
+        {
+            "url": "https://logging.simanalytics.nl/piwik.js",
+            "resource_type": "script",
+            "method": "GET",
+            "post_data": None,
+        },
+        {
+            "url": "https://logging.simanalytics.nl/piwik.php?action_name=www.brabantsedelta.nl%2FHome%20%7C%20Brabant",
+            "resource_type": "ping",
+            "method": "POST",
+            "post_data": None,
+        },
+    ]
+
+    truncated_requests = truncate_long_post_data(requests, 20)
+
+    assert truncated_requests == [
+        {
+            "url": "https://jnn-pa.googleapis.com/$rpc/google.internal.waa.v1.Waa/Create",
+            "resource_type": "xhr",
+            "method": "POST",
+            "post_data": '["O43z0dpjhgX20SCx4KAo"]',
+        },
+        {
+            "url": "https://jnn-pa.googleapis.com/$rpc/google.internal.waa.v1.Waa/GenerateIT",
+            "resource_type": "xhr",
+            "method": "POST",
+            "post_data": '["O43z0dpjhgX20SCx4K... truncated 69 characters',
+        },
+        {
+            "url": "https://logging.simanalytics.nl/piwik.js",
+            "resource_type": "script",
+            "method": "GET",
+            "post_data": None,
+        },
+        {
+            "url": "https://logging.simanalytics.nl/piwik.php?action_name=www.brabantsedelta.nl%2FHome%20%7C%20Brabant",
+            "resource_type": "ping",
+            "method": "POST",
+            "post_data": None,
+        },
+    ]
+
+
+def test_remove_duplicate_third_party_requestss():
+    requests = [
+        {
+            "url": "https://logging.simanalytics.nl/piwik.js",
+            "resource_type": "script",
+            "method": "GET",
+            "post_data": None,
+        },
+        {
+            "url": "https://logging.simanalytics.nl/piwik.php?action_name=www.brabantsedelta.nl%2FHome%20%7C%20Brabants"
+            "e%20Delta&idsite=818&rec=1&r=134959&h=23&m=10&s=11&url=https%3A%2F%2Fwww.brabantsedelta.nl%2F&_id=9"
+            "2a4d58c16ebffa3&_idn=1&send_image=0&_refts=0&cookie=1&res=1280x720&dimension1=landing_page&cvar=%7B"
+            "%221%22%3A%5B%22ContentType%22%2C%22landing_page%22%5D%7D&pv_id=pxKG5y&pf_net=108&pf_srv=53&pf_tfr="
+            "19&pf_dm1=358&uadata=%7B%22fullVersionList%22%3A%5B%7B%22brand%22%3A%22Not%2FA)Brand%22%2C%22versio"
+            "n%22%3A%2299.0.0.0%22%7D%2C%7B%22brand%22%3A%22HeadlessChrome%22%2C%22version%22%3A%22115.0.5790.24"
+            "%22%7D%2C%7B%22brand%22%3A%22Chromium%22%2C%22version%22%3A%22115.0.5790.24%22%7D%5D%2C%22mobile%22"
+            "%3Afalse%2C%22model%22%3A%22%22%2C%22platform%22%3A%22Linux%22%2C%22platformVersion%22%3A%224.15.0%"
+            "22%7D",
+            "resource_type": "ping",
+            "method": "POST",
+            "post_data": None,
+        },
+        {
+            "url": "https://logging.simanalytics.nl/piwik.php?action_name=www.brabantsedelta.nl%2FHome%20%7C%20Brabants"
+            "e%20Delta&idsite=818&rec=1&r=417021&h=23&m=10&s=11&url=https%3A%2F%2Fwww.brabantsedelta.nl%2F&_id=9"
+            "2a4d58c16ebffa3&_idn=0&send_image=0&_refts=0&cookie=1&res=1280x720&dimension1=landing_page&cvar=%7B"
+            "%221%22%3A%5B%22ContentType%22%2C%22landing_page%22%5D%7D&pv_id=bfDaqA&pf_net=108&pf_srv=53&pf_tfr="
+            "19&pf_dm1=358&uadata=%7B%22fullVersionList%22%3A%5B%7B%22brand%22%3A%22Not%2FA)Brand%22%2C%22versio"
+            "n%22%3A%2299.0.0.0%22%7D%2C%7B%22brand%22%3A%22HeadlessChrome%22%2C%22version%22%3A%22115.0.5790.24"
+            "%22%7D%2C%7B%22brand%22%3A%22Chromium%22%2C%22version%22%3A%22115.0.5790.24%22%7D%5D%2C%22mobile%22"
+            "%3Afalse%2C%22model%22%3A%22%22%2C%22platform%22%3A%22Linux%22%2C%22platformVersion%22%3A%224.15.0%"
+            "22%7D",
+            "resource_type": "ping",
+            "method": "POST",
+            "post_data": None,
+        },
+        {
+            "url": "https://logging.simanalytics.nl/plugins/HeatmapSessionRecording/configs.php?idsite=818&trackerid=We"
+            "4is6&url=https%3A%2F%2Fwww.brabantsedelta.nl%2F",
+            "resource_type": "script",
+            "method": "GET",
+            "post_data": None,
+        },
+    ]
+
+    deduplicated_requests = remove_duplicate_third_party_requests(requests)
+    assert deduplicated_requests == [
+        {
+            "url": "https://logging.simanalytics.nl/piwik.js",
+            "resource_type": "script",
+            "method": "GET",
+            "post_data": None,
+        },
+        {
+            "url": "https://logging.simanalytics.nl/piwik.php?action_name=www.brabantsedelta.nl%2FHome%20%7C%20Brabants"
+            "e%20Delta&idsite=818&rec=1&r=134959&h=23&m=10&s=11&url=https%3A%2F%2Fwww.brabantsedelta.nl%2F&_id=9"
+            "2a4d58c16ebffa3&_idn=1&send_image=0&_refts=0&cookie=1&res=1280x720&dimension1=landing_page&cvar=%7B"
+            "%221%22%3A%5B%22ContentType%22%2C%22landing_page%22%5D%7D&pv_id=pxKG5y&pf_net=108&pf_srv=53&pf_tfr="
+            "19&pf_dm1=358&uadata=%7B%22fullVersionList%22%3A%5B%7B%22brand%22%3A%22Not%2FA)Brand%22%2C%22versio"
+            "n%22%3A%2299.0.0.0%22%7D%2C%7B%22brand%22%3A%22HeadlessChrome%22%2C%22version%22%3A%22115.0.5790.24"
+            "%22%7D%2C%7B%22brand%22%3A%22Chromium%22%2C%22version%22%3A%22115.0.5790.24%22%7D%5D%2C%22mobile%22"
+            "%3Afalse%2C%22model%22%3A%22%22%2C%22platform%22%3A%22Linux%22%2C%22platformVersion%22%3A%224.15.0%"
+            "22%7D",
+            "resource_type": "ping",
+            "method": "POST",
+            "post_data": None,
+        },
+        {
+            "url": "https://logging.simanalytics.nl/plugins/HeatmapSessionRecording/configs.php?idsite=818&trackerid=We"
+            "4is6&url=https%3A%2F%2Fwww.brabantsedelta.nl%2F",
+            "resource_type": "script",
+            "method": "GET",
+            "post_data": None,
+        },
+    ]

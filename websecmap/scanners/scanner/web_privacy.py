@@ -19,6 +19,7 @@ from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
+from websecmap.scanners.comperators import third_party_request_is_present
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
@@ -57,6 +58,7 @@ WEB_PRIVACY_COOKIES_ERROR = "web_privacy_cookies_error"
 
 WEB_PRIVACY_THIRD_PARTY_DOMAINS = "web_privacy_third_party_domains"
 WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL = "web_privacy_third_party_domains_neutral"
+WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR = "web_privacy_third_party_domains_error"
 
 
 @app.task(queue="kickoff", ignore_result=True)
@@ -194,9 +196,26 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         store_endpoint_scan_result(
             WEB_PRIVACY_COOKIES, endpoint_id, WEB_PRIVACY_COOKIES_ERROR, WEB_PRIVACY_COOKIES_ERROR, evidence=error
         )
+
+        store_endpoint_scan_result(
+            WEB_PRIVACY_THIRD_PARTY_DOMAINS,
+            endpoint_id,
+            WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
+            WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
+            evidence=error,
+        )
         return
 
     third_party_requests = result_data.get("third-party-requests-structured", [])
+    # it's easy to have more than 9000 characters with third party stuff. there make this shorter
+    # This removes urls with the same parameters but different content. As that's just more of the same.
+    third_party_requests = remove_duplicate_third_party_requests(third_party_requests)
+    # limit the total amount of requests to 500, which is already more than insanely ridiculous.
+    # That would mean several fonts, tons of images, external css and whatnot. This prevents that the
+    # evidence grows to gigabytes.
+    third_party_requests = third_party_requests[:500]
+    # don't store extremely long post data, which has little value. 200 chars is already insane for a site visit.
+    third_party_requests = truncate_long_post_data(third_party_requests, 200)
     third_party_domains = result_data.get("third-party-domains", [])
     cookies = result_data.get("timeless-cookies", [])
 
@@ -266,3 +285,36 @@ def privacy_counters(add_urls: bool = False) -> None:
                 pass
         print(key)
         print(json.dumps(companies, indent=4))
+
+
+def truncate_long_post_data(third_party_requests: List[Dict[str, str]], max_chars: int = 60) -> List[Dict[str, str]]:
+    """
+    60 characters is long enough to see what about is being sent, but to too long.
+      {
+        "url": "https://cuatro.sim-cdn.nl/assets/1.93.0/iconFonts/fontawesome6/css/fontawesome.6.4.0.css",
+        "resource_type": "stylesheet",
+        "method": "GET",
+        "post_data": null
+      },
+    """
+
+    truncation_message_length = 35
+    for request in third_party_requests:
+        if request["post_data"] and len(request["post_data"]) > max_chars + truncation_message_length:
+            truncated = len(request["post_data"][max_chars:])
+            request["post_data"] = request["post_data"][:max_chars] + "... truncated " + str(truncated) + " characters"
+
+    return third_party_requests
+
+
+def remove_duplicate_third_party_requests(third_party_requests: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    # Removes urls that have the same set of parameters but with different values. Urls themselves on face value
+    # are already unique, but ignoring the parameters can make them not be unique.
+    # This only works when urls are still in-tact. It might be possible that urls are not compliant with the uri schema
+    #
+
+    new_list = []
+    for request in third_party_requests:
+        if not third_party_request_is_present(request, new_list):
+            new_list.append(request)
+    return new_list
