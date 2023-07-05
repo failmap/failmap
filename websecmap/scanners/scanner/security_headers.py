@@ -50,7 +50,7 @@ What referrer should be allowed to access the resource. Security on referrer hea
 Classified as: Ignored
 """
 import logging
-from typing import Dict, Union
+from typing import Dict, Union, Any, List
 
 import requests
 from celery import Task, group
@@ -67,6 +67,8 @@ from websecmap.scanners.scanner.http import create_standard_request_headers
 from websecmap.scanners.security_policies import add_policy_by_name
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 from websecmap.scanners.timeout import timeout
+import copy
+import json
 
 log = logging.getLogger(__name__)
 
@@ -224,7 +226,7 @@ def discover_service_type(headers: CaseInsensitiveDict = None):
 
     # We're going to ignore all service types, except whatever looks like html/xhtml/etc
     # So text/plain, text/json and such are ignored.
-    content_type = headers.get("Content-Type", "UNKNOWN")
+    content_type = headers.get("Content-Type", "unknown")
     html_content_types = [
         "text/html; charset=utf-8",
         "text/html",
@@ -256,7 +258,7 @@ def discover_service_type(headers: CaseInsensitiveDict = None):
 
 
 @app.task(queue="storage")
-def analyze_headers(headers: Dict, endpoint_id):
+def analyze_headers(headers: Union[bool, List[Dict[str, Any]]], endpoint_id):
     # todo: remove code paths, and make a more clear case per header type. That's easier to understand edge cases.
     # todo: Content-Security-Policy, Referrer-Policy
 
@@ -299,8 +301,12 @@ def analyze_headers(headers: Dict, endpoint_id):
         return {"status": "unreachable-set-to-unreachable"}
 
     # prevent all issues with capitalization, x-XSS and X-Xss etc are all used out there
-    headers = CaseInsensitiveDict(headers)
-    service_type = discover_service_type(headers)
+    last_redirect_headers = headers[-1]["headers"]
+
+    # Discover the service type of the last set of headers after possible redirects. Based on this service type
+    # not all headers are mandatory. This includes the HSTS header which is mandated by law, even though
+    # automated programs will not care about the HSTS header.
+    service_type = discover_service_type(CaseInsensitiveDict(last_redirect_headers))
 
     endpoint = Endpoint.objects.all().filter(pk=endpoint_id).only("pk", "url__id", "protocol").first()
     if not endpoint:
@@ -368,7 +374,7 @@ def clean_up_existing_headers(endpoint_id: int, service_type: str, reason: str):
     return {"status": "success"}
 
 
-def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: CaseInsensitiveDict):
+def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: List[Dict[str, Any]]):
     # The HTTP specification RFC 7230 section 3.2 says header names are case-insensitive.
 
     """
@@ -385,26 +391,28 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
 
     X-Content-Type-Options is not affected.
     """
+    # normal headers only need to be present on the last page, whereas hsts needs to be present on each https page.
+    last_redirect_headers = CaseInsensitiveDict(headers[-1]["headers"])
 
     # A complex mess, we're not requiring it, but at least we can grade it low or ok if need be.
-    generic_check(endpoint_id, headers, "Content-Security-Policy")
+    generic_check(endpoint_id, last_redirect_headers, "Content-Security-Policy")
 
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy
     # This is based on an allowlist. Secure defaults?
-    generic_check(endpoint_id, headers, "Permissions-Policy")
+    generic_check(endpoint_id, last_redirect_headers, "Permissions-Policy")
 
     # default since 2020 = strict-origin-when-cross-origin, which leaks data.
     # The privacy friendly default should be same-origin or no-referrer. So this should be set to a privacy
     # friendly level.
-    generic_check(endpoint_id, headers, "Referrer-Policy")
+    generic_check(endpoint_id, last_redirect_headers, "Referrer-Policy")
 
     # We've removed conditional scans in scannerss, as more scan data is better.
     # you can cohose not to display or report it. Below used to be conditional scans.
 
     # x-xss is deprecated
     # generic_check_using_csp_fallback(endpoint_id, headers, "X-XSS-Protection")
-    generic_check_using_csp_fallback(endpoint_id, headers, "X-Frame-Options")
-    generic_check(endpoint_id, headers, "X-Content-Type-Options")
+    generic_check_using_csp_fallback(endpoint_id, last_redirect_headers, "X-Frame-Options")
+    generic_check(endpoint_id, last_redirect_headers, "X-Content-Type-Options")
 
     """
     https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
@@ -429,30 +437,116 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
     everywhere and users will certainly click OK if they can.
 
     If you think it works differently, just file an issue or make a pull request. We want to get it right.
+
+    July 5th 2023: the HSTS header is now mandatory by Dutch law, also on devices. We've had a lot of time to
+    think about this header and it makes sense to apply it _even_ when there is no unsecure endpoint. This has
+    to do with connecting to the site one a rogue network. Would HSTS be missing a downgrade attack is possible since
+    there is nothing enforcing the browser to stay on the https website (except good behaviour by the browser).
+    So as long as browsers allow connecting to port 80 this is an issue.
+    Additionally HSTS has to be present on all websites in a redirect chain.
+
+    The evidence we want:
+    [
+        {
+            "request": 1,
+            "url": "http://...".
+            "headers": {}
+        },
+        {
+            "request": 2,
+            "url": "http://...".
+            "headers": {}
+        }
+    ]
     """
-    if protocol == "https":
-        # runs any unsecured http service? (on ANY port).
-        if Endpoint.objects.all().filter(url=url, protocol="http", is_dead=False).exists():
-            generic_check(endpoint_id, headers, "Strict-Transport-Security")
-        elif "Strict-Transport-Security" in headers:
-            log.debug("Has Strict-Transport-Security")
-            store_endpoint_scan_result(
-                scan_type="http_security_header_strict_transport_security",
-                endpoint_id=endpoint_id,
-                rating="present",
-                message="present",
-                evidence=headers["Strict-Transport-Security"],
-            )
-        else:
-            log.debug("Has no Strict-Transport-Security, yet offers no insecure http service.")
-            store_endpoint_scan_result(
-                "http_security_header_strict_transport_security",
-                endpoint_id,
-                "missing_but_no_insecure_service_offered",
-                "Security Header not present: Strict-Transport-Security, yet offers no insecure http service.",
-            )
+
+    # at this point all https redirects or pages should have HSTS enabled, all xml-stuff has been filtered out before
+    # this is required up until all browsers do not allow connection to port 80 (this should be behind a setting so
+    # nobody uses port 80 in practice unless they really really want to).
+    has_https = False
+    for header_metadata in headers:
+        if header_metadata["protocol"] == "https":
+            has_https = True
+            if "Strict-Transport-Security" not in CaseInsensitiveDict(header_metadata["headers"]):
+                store_endpoint_scan_result(
+                    scan_type="http_security_header_strict_transport_security",
+                    endpoint_id=endpoint_id,
+                    rating="missing",
+                    message="missing",
+                    evidence=json.dumps(prepare_headers_for_evidence(headers)),
+                )
+                return {"status": "success"}
+
+    if has_https:
+        # it was missing nowhere, so it is present wherever it was needed, and given one of the things was via https it
+        # was needed!
+        store_endpoint_scan_result(
+            scan_type="http_security_header_strict_transport_security",
+            endpoint_id=endpoint_id,
+            rating="present",
+            message="present",
+            evidence=json.dumps(prepare_headers_for_evidence(headers)),
+        )
 
     return {"status": "success"}
+
+    # the "missing_but_no_insecure_service_offered" is now removed as hsts is always needed on hostile networks
+    # if protocol == "https":
+    #     # runs any unsecured http service? (on ANY port).
+    #     if Endpoint.objects.all().filter(url=url, protocol="http", is_dead=False).exists():
+    #         generic_check(endpoint_id, headers, "Strict-Transport-Security")
+    #     elif "Strict-Transport-Security" in headers:
+    #         log.debug("Has Strict-Transport-Security")
+    #         store_endpoint_scan_result(
+    #             scan_type="http_security_header_strict_transport_security",
+    #             endpoint_id=endpoint_id,
+    #             rating="present",
+    #             message="present",
+    #             evidence=headers["Strict-Transport-Security"],
+    #         )
+    #     else:
+    #         log.debug("Has no Strict-Transport-Security, yet offers no insecure http service.")
+    #         # store_endpoint_scan_result(
+    #         #     "http_security_header_strict_transport_security",
+    #         #     endpoint_id,
+    #         #     "missing_but_no_insecure_service_offered",
+    #         #     "Security Header not present: Strict-Transport-Security, yet offers no insecure http service.",
+    #         # )
+
+
+def prepare_headers_for_evidence(headers: List[Dict[str, Any]]) -> str:
+    # removes all headers that are not in the allow-list. This is because some headers just
+    # change all the time such as Set-Cookie, Date, Content Length etc.
+    # There will probably be more in the future. But for now this is fine, it covers all our tests and then some.
+    #: Server: not included because load balancers will give you a different server every time.
+    allowed_headers = [
+        "content-security-policy",
+        "permissions-policy",
+        "referrer-policy",
+        "x-frame-options",
+        "content-type",
+        "x-clacks-overhead",
+        "cross-origin-opener-policy",
+        "x-content-type-options",
+        "referrer-policy",
+        "location",
+        "content-type",
+        "link",
+        "x-xss-protection",
+        "strict-transport-security",
+    ]
+    prepared_headers = copy.deepcopy(headers)
+
+    # todo: sort headers as well!
+    for header_metadata in prepared_headers:
+        # transform to lowercase headers, and then filter out what we don't need:
+        header_metadata["headers"] = {k.lower(): v.lower() for k, v in header_metadata["headers"].items()}
+        header_metadata["headers"] = {k: v for k, v in header_metadata["headers"].items() if k in allowed_headers}
+
+        # sort the headers alphabetically
+        header_metadata["headers"] = dict(sorted(header_metadata["headers"].items()))
+
+    return prepared_headers
 
 
 def header_to_scan_type(header_name: str) -> str:
@@ -514,7 +608,7 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
 
 
 @app.task()
-def get_headers(uri_url: str, host: str) -> Union[Dict, bool]:
+def get_headers(uri_url: str, host: str) -> Union[List[Dict[str, Any]], bool]:
     # wrap the get headers request in case it starts downloading slow/long files. We don't want to wait.
     # Placed inside separate function because the decorator will probably not match this method
     # call / warp or distort the canvas or etc.
@@ -528,7 +622,7 @@ def get_headers(uri_url: str, host: str) -> Union[Dict, bool]:
 
 
 @timeout(HEADER_RETRIEVAL_TRANSFER_TIMEOUT, "Retrieving header took too long.")
-def get_headers_timed(uri_url: str, host: str) -> Union[Dict, bool]:
+def get_headers_timed(uri_url: str, host: str) -> Union[List[Dict[str, Any]], bool]:
     """
     Issue #94:
     TL;DR: The fix is to follow all redirects.
@@ -589,8 +683,22 @@ def get_headers_timed(uri_url: str, host: str) -> Union[Dict, bool]:
         return False
 
     # redirects are followed, this gives an indication on how many redirects are followed, and what url the
-    # headers are taken from:
+    # headers are taken from. We need the headers of all sites in this history to make sure the HSTS header is
+    # set everywhere.
+    responses = []
     for index, resp in enumerate(response.history):
+        responses.append(
+            {
+                "request": index + 1,
+                "url": resp.url,
+                "protocol": "https" if resp.url.startswith("https") else "http",
+                "status_code": resp.status_code,
+                # casing works fine as this is now a case insensitive dict.
+                "content_type": resp.headers.get("Content-Type", "unknown").lower(),
+                # case insensitive dicts are not serializable
+                "headers": dict(resp.headers),
+            }
+        )
         log.debug("- Redirect %s: %s.", index, resp.url)
 
     log.debug("- You are now at %s.", response.url)
@@ -604,4 +712,18 @@ def get_headers_timed(uri_url: str, host: str) -> Union[Dict, bool]:
 
     for header in response.headers:
         log.debug("Received header: %s", header)
-    return dict(response.headers)
+
+    # and the final response:
+    responses.append(
+        {
+            "request": len(responses) + 1,
+            "url": response.url,
+            "protocol": response.url.startswith("https") and "https" or "http",
+            "status_code": response.status_code,
+            "content_type": response.headers.get("Content-Type", "unknown").lower(),
+            # case insensitive dicts are not serializable
+            "headers": dict(response.headers),
+        }
+    )
+
+    return responses
