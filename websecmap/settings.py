@@ -468,6 +468,10 @@ CELERY_RESULT_EXPIRES = timedelta(hours=4)
 CELERY_TASK_RESULT_EXPIRES = timedelta(hours=4)
 CELERY_MESSAGE_COMPRESSION = "bzip2"
 
+# for monitoring (celery-exporter)
+CELERY_WORKER_SEND_TASK_EVENTS = True
+CELERY_TASK_SEND_SENT_EVENT = True
+
 # Use the value of 2 for celery prefetch multiplier. Previous was 1. The
 # assumption is that 1 will block a worker thread until the current (rate
 # limited) task is completed. When using 2 (or higher) the assumption is that
