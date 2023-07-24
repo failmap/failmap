@@ -1128,6 +1128,28 @@ class DomainIp(models.Model):
     is_the_latest = models.BooleanField(default=False, null=True, blank=True)
 
 
+class DomainMX(models.Model):
+    domain = models.CharField(max_length=255, blank=True, null=True)
+    """
+    [
+        {
+            "preference": 10,
+            "hostname": "example.com"
+        },
+        {
+            "preference": 20,
+            "hostname": "mx4-eu.spamexperts.com"
+        }, 
+    ]
+    """
+    mail_server_records = models.JSONField(blank=True, null=True)
+
+    # time dimension
+    at_when = models.DateTimeField(blank=True, null=True)
+    last_scan_moment = models.DateTimeField(blank=True, null=True)
+    is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+
+
 class GeoIp(models.Model):
     ip_address = models.GenericIPAddressField(blank=True, null=True)
 

@@ -7,7 +7,7 @@ from celery import group
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import DomainIp, EndpointGenericScan
+from websecmap.scanners.models import DomainIp, EndpointGenericScan, DomainMX
 from websecmap.scanners.scanner.http import get_ipv4, get_ipv6
 from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_THIRD_PARTY_DOMAINS
 from websecmap.scanners.time_storage import abstract_time_storage
@@ -15,7 +15,23 @@ from websecmap.scanners.time_storage import abstract_time_storage
 
 @app.task(queue="kickoff")
 def create_tasks() -> group:
-    return group([add_domains_from_organization_urls(), add_domains_from_privacy_scan()])
+    return group([
+        add_domains_from_organization_urls(),
+        add_domains_from_privacy_scan(),
+        add_domains_from_mailserver_records(),
+    ])
+
+
+def add_domains_from_mailserver_records() -> group:
+    domains = set()
+    for list_of_domains in DomainMX.objects.all().filter(
+        is_the_latest=True
+    ):
+        if list_of_domains.mail_server_records:
+            mail_server_records = list_of_domains.mail_server_records
+            for mail_server_record in mail_server_records:
+                domains.add(mail_server_record['domain'])
+    return group([update_ips(domain) for domain in list(domains)])
 
 
 def add_domains_from_privacy_scan() -> group:

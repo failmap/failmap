@@ -968,3 +968,8 @@ class GeoIpAdmin(admin.ModelAdmin):
         if obj.country_iso_code:
             return f"{obj.country_iso_code}: {dict(countries)[obj.country_iso_code]}"
         return "-"
+
+
+@admin.register(models.DomainMX)
+class DomainMXAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("id", "domain", "mail_server_records")
