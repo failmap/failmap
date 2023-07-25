@@ -16,6 +16,8 @@ This is based on the following scans, which must all work in order for this to w
 You need to run the following periodic tasks:
 - websecmap.scanners.scanner_for_everything.mailserver
 - websecmap.scanners.scanner_for_everything.ip_geolocation
+- - scan_using_known_data daily
+- - once every two weeks: create_tasks (and this will run out of credits at some point)
 - websecmap.scanners.scanner_for_everything.domain_to_ip
 - websecmap.scanners.scanner.web_privacy
 
