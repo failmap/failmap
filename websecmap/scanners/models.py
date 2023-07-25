@@ -1139,7 +1139,7 @@ class DomainMX(models.Model):
         {
             "preference": 20,
             "hostname": "mx4-eu.spamexperts.com"
-        }, 
+        },
     ]
     """
     mail_server_records = models.JSONField(blank=True, null=True)

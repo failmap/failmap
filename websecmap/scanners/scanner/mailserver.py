@@ -36,10 +36,7 @@ def get_mailservers(url: str) -> List:
 
         # don't add empty domains. In fact everything can be terrible here, but assume it's not?
         if mail_domain:
-            records.append({
-                'priority': mail_prio,
-                'domain': mail_domain
-            })
+            records.append({"priority": mail_prio, "domain": mail_domain})
 
     return records
 
