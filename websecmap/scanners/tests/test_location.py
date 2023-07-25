@@ -3,16 +3,20 @@ from datetime import datetime, timezone
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import GeoIp, DomainIp, DomainMX, UrlGenericScan, EndpointGenericScan, Endpoint
-from websecmap.scanners.scanner.location import (
+from websecmap.scanners.scanner_for_everything.location import (
     scan_mailservers,
     get_geo_ip_database_directly,
     get_domain_to_ip_database_directly,
     get_domain_mx_database_directly,
     get_policy,
-    scan_servers, scan_third_party_site_content, SCAN_TYPE_WEBSITE_CONTENT,
+    scan_servers,
+    scan_third_party_site_content,
+    SCAN_TYPE_WEBSITE_CONTENT,
 )
-from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_THIRD_PARTY_DOMAINS, \
-    WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL
+from websecmap.scanners.scanner.web_privacy import (
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
+)
 
 
 def test_scan_mailservers(db, default_scan_metadata, default_policy):
@@ -136,7 +140,7 @@ def test_scan_third_party_site_content(db):
         rating=WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
         evidence=json.dumps(["example.com"]),
         rating_determined_on=datetime.now(timezone.utc),
-        is_the_latest_scan=True
+        is_the_latest_scan=True,
     )
 
     scan_third_party_site_content()

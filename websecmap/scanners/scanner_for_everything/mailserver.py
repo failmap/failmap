@@ -48,10 +48,7 @@ def store_mailserver(mail_server_records: Optional[str], domain: str):
 
     # only store empty records if there was a previous mail server. Don't store empty records as that is a waste of
     # space.
-    if (
-        not mail_server_records
-        and not DomainMX.objects.filter(domain=domain).count()
-    ):
+    if not mail_server_records and not DomainMX.objects.filter(domain=domain).count():
         log.debug("No mail server records found for domain %s", domain)
         return
 

@@ -76,7 +76,10 @@ __scanners__ = [
 
 __everything__ = [domain_to_ip, ip_geolocation, location, mailserver]
 
-__others__ = [proxy, plannedscan, ]
+__others__ = [
+    proxy,
+    plannedscan,
+]
 
 # This is the single source of truth regarding scanner configuration.
 # Lists to be used elsewhere when tasks need to be composed, these lists contain compose functions.

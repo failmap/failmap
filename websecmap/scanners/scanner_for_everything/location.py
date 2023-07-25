@@ -21,6 +21,9 @@ You need to run the following periodic tasks:
 
 This scanner is nothing more than administrative process. Based on the above data in the database results can
 be calculated and are added to Url and Endpoint scans.
+
+This results in three different scan types: server, mail_server and third_party_website_content. Each of them
+can have the values clean, unknown, ok, low, medium and high.
 """
 import json
 import contextlib

@@ -1,5 +1,12 @@
+"""
+scan_using_known_data should be run every day, as this costs no API credits. The create_tasks should be run
+every 14 days or so. It is already optimized to no call the API twice if the network is known.
+"""
 import ipaddress
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
+
+from django.forms import model_to_dict
+from netaddr import IPNetwork, IPAddress
 
 import geoip2.webservice
 from celery import group
@@ -26,18 +33,99 @@ def create_tasks() -> group:
     # todo: also create a task for only new ip's, as that will be cheaper and can run every day.
     # let's hope this data is accurate enough to figure out the continent.
     # add some list somewhere of what countries have what impact
+    # ips can be many of the same:
+    return group(scan_intelligently.si(get_all_ips()))
 
-    # todo: do not scan ip's of which we already know the answer, because they are in the same network.
-    #  in that case use the results we already have for these networks!
+
+def get_all_ips() -> List[str]:
     ips = (
         DomainIp.objects.all()
         .filter(is_the_latest=True)
         .exclude(ip_address__isnull=True)
         .values_list("ip_address", flat=True)
     )
+    # distinct:
+    ips = list(sorted(list(set(ips))))
+    if "" in ips:
+        ips.remove("")
+    if "-" in ips:
+        ips.remove("-")
+    return ips
 
-    # ips can be many of the same:
-    return group([scan.si(ip) | store.s() for ip in list(set(ips))])
+
+@app.task(queue="storage")
+def scan_intelligently(ips: List[str]):
+    # We can't just scan everything now because we need to know what network an ip address belongs to.
+    # Because when we do, there is no need to re-query the geoip2 API and waste credits or time.
+    # If the ip is in one of the known networks, just return that network information.
+    # In our test data this results in:
+    # 165 API calls
+    # 211 saved calls
+    # production has 35k ips now
+
+    # dict of networks, with the associated scan result data.
+    complete_network_data = {}
+
+    for ip in ips:
+        if network_info := has_known_network(ip, complete_network_data):
+            log.debug("IP %s is in known network %s. Saved a call.", ip, network_info["network"])
+            network_info["ip_address"] = ip
+            store(network_info)
+            continue
+
+        log.debug("IP %s is in unknown network. Calling API.", ip)
+        network_info = scan(ip)
+        complete_network_data[network_info["network"]] = network_info
+        store(network_info)
+
+
+@app.task(queue="storage")
+def scan_using_known_data():
+    # This does not ever connect to the API but will check if the IP has no data but data is already
+    # available from another result in the database. This will re-use that data. This can save calls when
+    # perfoming this daily, while the API scan can be done bi-weekly or monthly.
+
+    # recover network data:
+    complete_network_data = {}
+    known_ips = []
+    for info in GeoIp.objects.all().filter(is_the_latest=True):
+        known_ips.append(info.ip_address)
+        if info.network not in complete_network_data:
+            tmp = model_to_dict(info)
+            del tmp["ip_address"]
+            del tmp["id"]
+            del tmp["at_when"]
+            del tmp["last_scan_moment"]
+            del tmp["is_the_latest"]
+            complete_network_data[info.network] = tmp
+
+    log.debug("Found %d known IPs", len(known_ips))
+    log.debug("Found %d known networks", len(complete_network_data))
+
+    # then check if the ip is in one of the known networks and if so then store this.
+    all_ips = get_all_ips()
+    log.debug("We know %d IPs", len(all_ips))
+    for ip in all_ips:
+        if ip in known_ips:
+            continue
+
+        log.debug("Checking if ip %s is in known networks", ip)
+
+        if network_info := has_known_network(ip, complete_network_data):
+            log.debug("IP %s is in known network %s. Saved a call.", ip, network_info["network"])
+            network_info["ip_address"] = ip
+            store(network_info)
+
+
+def has_known_network(ip_address: str, complete_network_data: dict) -> Optional[Dict]:
+    return next(
+        (
+            network_info
+            for network, network_info in complete_network_data.items()
+            if IPAddress(ip_address) in IPNetwork(network)
+        ),
+        False,
+    )
 
 
 def get_data(ip_address):
