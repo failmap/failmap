@@ -6,6 +6,7 @@ from typing import Optional, List
 
 from celery import group
 
+from websecmap.app import log
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import DomainMX
@@ -44,6 +45,15 @@ def get_mailservers(url: str) -> List:
 @app.task(queue="storage", ignore_result=True)
 def store_mailserver(mail_server_records: Optional[str], domain: str):
     data = {"mail_server_records": mail_server_records or None, "domain": domain[:255]}
+
+    # only store empty records if there was a previous mail server. Don't store empty records as that is a waste of
+    # space.
+    if (
+        not mail_server_records
+        and not DomainMX.objects.filter(domain=domain).count()
+    ):
+        log.debug("No mail server records found for domain %s", domain)
+        return
 
     abstract_time_storage(
         DomainMX,

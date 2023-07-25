@@ -3,7 +3,8 @@ import logging
 
 from celery import group
 
-from websecmap.scanners import plannedscan, proxy, domain_to_ip, geo_ip
+from websecmap.scanners import plannedscan, proxy
+from websecmap.scanners.scanner_for_everything import domain_to_ip, ip_geolocation, location, mailserver
 from websecmap.scanners.scanner import (
     autoexplain_dutch_untrusted_cert,
     autoexplain_microsoft_neighboring_services,
@@ -73,7 +74,9 @@ __scanners__ = [
     endpoint_content,
 ]
 
-__others__ = [proxy, plannedscan, domain_to_ip, geo_ip]
+__everything__ = [domain_to_ip, ip_geolocation, location, mailserver]
+
+__others__ = [proxy, plannedscan, ]
 
 # This is the single source of truth regarding scanner configuration.
 # Lists to be used elsewhere when tasks need to be composed, these lists contain compose functions.

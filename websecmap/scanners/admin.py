@@ -972,4 +972,4 @@ class GeoIpAdmin(admin.ModelAdmin):
 
 @admin.register(models.DomainMX)
 class DomainMXAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("id", "domain", "mail_server_records")
+    list_display = ("id", "domain", "mail_server_records", "last_scan_moment", "is_the_latest")

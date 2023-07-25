@@ -1,14 +1,18 @@
 import json
+from datetime import datetime, timezone
+
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import GeoIp, DomainIp, DomainMX, UrlGenericScan
+from websecmap.scanners.models import GeoIp, DomainIp, DomainMX, UrlGenericScan, EndpointGenericScan, Endpoint
 from websecmap.scanners.scanner.location import (
     scan_mailservers,
     get_geo_ip_database_directly,
     get_domain_to_ip_database_directly,
     get_domain_mx_database_directly,
     get_policy,
-    scan_servers,
+    scan_servers, scan_third_party_site_content, SCAN_TYPE_WEBSITE_CONTENT,
 )
+from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_THIRD_PARTY_DOMAINS, \
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL
 
 
 def test_scan_mailservers(db, default_scan_metadata, default_policy):
@@ -82,6 +86,67 @@ def test_scan_servers(db, default_scan_metadata, default_policy):
     evidence = json.loads(first.evidence)
 
     # also has an ipv6 address for which we don't have any info, so that will be an unknown
+    assert evidence == [
+        {
+            "domain": "example.com",
+            "evidence": {
+                "continent_rating": "medium",
+                "country_rating": "ok",
+                "found_location": {
+                    "as_number": 1337,
+                    "as_organization": "test organization",
+                    "city_in_en": None,
+                    "continent_code": "NA",
+                    "country_iso_code": None,
+                    "isp_ame": "Test Isp",
+                    "network": "10.0.0.0/8",
+                },
+            },
+            "rating": "location_medium",
+        },
+        {
+            "domain": "example.com",
+            "evidence": {
+                "continent_rating": "unknown",
+                "country_rating": "unknown",
+                "found_location": {
+                    "AS Number": -1,
+                    "AS Organization": "",
+                    "ISP Name": "",
+                    "city": "",
+                    "continent": "",
+                    "country": "",
+                    "network": "",
+                },
+            },
+            "rating": "location_unknown",
+        },
+    ]
+
+
+def test_scan_third_party_site_content(db):
+    create_sample_geoip()
+    create_sample_domainip()
+
+    url = Url.objects.create(url="example.com")
+    endpoint = Endpoint.objects.create(url=url, port=443, protocol="https", ip_version=4)
+    EndpointGenericScan.objects.create(
+        endpoint=endpoint,
+        type=WEB_PRIVACY_THIRD_PARTY_DOMAINS,
+        rating=WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
+        evidence=json.dumps(["example.com"]),
+        rating_determined_on=datetime.now(timezone.utc),
+        is_the_latest_scan=True
+    )
+
+    scan_third_party_site_content()
+
+    # previous scan and the newly derived scan
+    assert EndpointGenericScan.objects.all().count() == 2
+    first = EndpointGenericScan.objects.all().filter(type=SCAN_TYPE_WEBSITE_CONTENT).first()
+    assert first.rating == "location_medium"
+    assert first.type == SCAN_TYPE_WEBSITE_CONTENT
+    evidence = json.loads(first.evidence)
     assert evidence == [
         {
             "domain": "example.com",

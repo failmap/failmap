@@ -3,24 +3,49 @@ Rates location based on geographical ip information.
 
 1st iteration is the location of the server
 
-Todo: Harvest mail server IP addresses / MX records
+DONE: Harvest mail server IP addresses / MX records
 Todo: GeoIP info is returned in ranges, this means we can re-use these ranges to prevent queries. eg: 131.224.250.0/24
-Todo: also test website_content
+DONE: also test website_content
+
+This is based on the following scans, which must all work in order for this to work:
+- domain_to_up scanner: which gathers domains from the following scans and gets ip addresses for these domains:
+- - MX records, servers and third party website content
+- ip_geolocation (geo_ip) scanner for finding what IP address belongs to what location.
+- For mail servers: MX records scanner (DomainMX)
+
+You need to run the following periodic tasks:
+- websecmap.scanners.scanner_for_everything.mailserver
+- websecmap.scanners.scanner_for_everything.ip_geolocation
+- websecmap.scanners.scanner_for_everything.domain_to_ip
+- websecmap.scanners.scanner.web_privacy
+
+This scanner is nothing more than administrative process. Based on the above data in the database results can
+be calculated and are added to Url and Endpoint scans.
 """
 import json
+import contextlib
 
 from collections import defaultdict
+from json import JSONDecodeError
 from typing import Any, Dict, Tuple, List
 
+from celery import group
+
+from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
+from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.reporting import time_cache
-from websecmap.scanners.models import GeoIp, DomainIp, DomainMX, UrlGenericScan
-from websecmap.scanners.scanmanager import store_url_scan_result
+from websecmap.scanners.models import GeoIp, DomainIp, DomainMX, UrlGenericScan, EndpointGenericScan
+from websecmap.scanners.scanmanager import store_url_scan_result, store_endpoint_scan_result
+from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_THIRD_PARTY_DOMAINS
 
+# On URL:
 SCAN_TYPE_SERVER = "location_server"
 SCAN_TYPE_MAIL_SERVER = "location_mail_server"
-SCAN_TYPE_WEBSITE_CONTENT = "location_website_content"
+
+# On Endpoint:
+SCAN_TYPE_WEBSITE_CONTENT = "location_third_party_website_content"
 
 LOCATION_HIGH = "location_high"
 LOCATION_MEDIUM = "location_medium"
@@ -32,7 +57,7 @@ LOCATION_UNKNOWN = "location_unknown"
 # mail servers in the past but not any more.
 LOCATION_CLEAN = "location_clean"
 
-SUPPORTED_GEOGRAPHY_TYPES = ["web_server", "mail_server", "website_content"]
+SUPPORTED_GEOGRAPHY_TYPES = ["server", "mail_server", "website_content"]
 SEVERITY_ORDER = [
     "unknown",
     "location_unknown",
@@ -111,14 +136,15 @@ def get_domain_mx_database_directly():
     return {record["domain"]: record["mail_server_records"] for record in records}
 
 
-def scan():
+@app.task(queue="kickoff")
+def create_tasks() -> group:
     # This largely depends on the accuracy and up-to-date-ness of the geo-ip database and the resolving of the
     # ip addresses, which are separate tasks that are run daily.
     # Todo: make sure these scans are scheduled in logical order.
-    scan_servers()
-    scan_mailservers()
+    return group([scan_servers.si(), scan_mailservers.si(), scan_third_party_site_content.si()])
 
 
+@app.task(queue="storage", ignore_result=True)
 def scan_mailservers():
     # there can be many mailservers configured. Each of them has to comply.
     # MX is just a bunch of domains, which is the same check as a webserver scan, but multiple times.
@@ -164,6 +190,7 @@ def scan_mailservers():
         )
 
 
+@app.task(queue="storage", ignore_result=True)
 def scan_servers():
     # basically every server that is resolvable will get a metric, so you don't need to remove findings.
     geo_ip_data = get_geoip_database()
@@ -181,6 +208,29 @@ def scan_servers():
             message=worst_rating,
             evidence=json.dumps(rating_series),
         )
+
+
+@app.task(queue="storage", ignore_result=True)
+def scan_third_party_site_content():
+    geo_ip_data = get_geoip_database()
+    domain_ip_data = get_domain_to_ip_database()
+    epgss = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_THIRD_PARTY_DOMAINS, is_the_latest_scan=True)
+    log.debug("Found %d endpoints with site content", epgss.count())
+
+    for epgs in epgss:
+        # There will always be site content, if not the list will be empty and thus this metric also.
+        # No need to clean this up.
+        with contextlib.suppress(JSONDecodeError):
+            evidence_domains = json.loads(epgs.evidence)
+            domains = [{"domain": domain} for domain in evidence_domains]
+            worst_rating, rating_series = create_rating_series_for_domains(domains, domain_ip_data, geo_ip_data)
+            store_endpoint_scan_result(
+                scan_type=SCAN_TYPE_WEBSITE_CONTENT,
+                endpoint_id=epgs.endpoint.id,
+                rating=worst_rating,
+                message=worst_rating,
+                evidence=json.dumps(rating_series),
+            )
 
 
 def create_rating_series_for_domains(domains: List[Dict[str, Any]], domain_ip_database, geo_ip_database):
@@ -214,7 +264,7 @@ def create_rating_series_for_domains(domains: List[Dict[str, Any]], domain_ip_da
 
 
 def match_ip_up_to_policy(
-    ip_address, geopgraphy_type: str = "web_server", geo_ip_database=None
+    ip_address, geopgraphy_type: str = "server", geo_ip_database=None
 ) -> Tuple[str, Dict[str, Any]]:
     if ip_address not in geo_ip_database:
         return LOCATION_UNKNOWN, {
@@ -280,7 +330,7 @@ def _extracted_from_rate_3(geo_ip_record, arg1, c_or_c, policy):
     return LOCATION_UNKNOWN
 
 
-def get_policy(geography_type: str = "web_server"):
+def get_policy(geography_type: str = "server"):
     if geography_type not in SUPPORTED_GEOGRAPHY_TYPES:
         raise ValueError(f"content_type must be one of {SUPPORTED_GEOGRAPHY_TYPES}, got {geography_type}")
 
@@ -297,7 +347,7 @@ def get_policy(geography_type: str = "web_server"):
             "country_high": "GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_HIGH",
         }
 
-    elif geography_type == "web_server":
+    elif geography_type == "server":
         keys = {
             "continent_ok": "GEOGRAPHY_SERVER_IN_CONTINENT_OK",
             "continent_low": "GEOGRAPHY_SERVER_IN_CONTINENT_LOW",

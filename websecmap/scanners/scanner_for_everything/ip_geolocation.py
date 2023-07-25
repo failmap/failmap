@@ -26,6 +26,9 @@ def create_tasks() -> group:
     # todo: also create a task for only new ip's, as that will be cheaper and can run every day.
     # let's hope this data is accurate enough to figure out the continent.
     # add some list somewhere of what countries have what impact
+
+    # todo: do not scan ip's of which we already know the answer, because they are in the same network.
+    #  in that case use the results we already have for these networks!
     ips = (
         DomainIp.objects.all()
         .filter(is_the_latest=True)
