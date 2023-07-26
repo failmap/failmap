@@ -4,7 +4,7 @@ Rates location based on geographical ip information.
 1st iteration is the location of the server
 
 DONE: Harvest mail server IP addresses / MX records
-Todo: GeoIP info is returned in ranges, this means we can re-use these ranges to prevent queries. eg: 131.224.250.0/24
+DONE: GeoIP info is returned in ranges, this means we can re-use these ranges to prevent queries. eg: 131.224.250.0/24
 DONE: also test website_content
 
 This is based on the following scans, which must all work in order for this to work:
@@ -46,11 +46,11 @@ from websecmap.scanners.scanmanager import store_url_scan_result, store_endpoint
 from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_THIRD_PARTY_DOMAINS
 
 # On URL:
-SCAN_TYPE_SERVER = "location_server"
-SCAN_TYPE_MAIL_SERVER = "location_mail_server"
+SCAN_TYPE_LOCATION_SERVER = "location_server"
+SCAN_TYPE_LOCATION_MAIL_SERVER = "location_mail_server"
 
 # On Endpoint:
-SCAN_TYPE_WEBSITE_CONTENT = "location_third_party_website_content"
+SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT = "location_third_party_website_content"
 
 LOCATION_HIGH = "location_high"
 LOCATION_MEDIUM = "location_medium"
@@ -169,12 +169,12 @@ def scan_mailservers():
             # one can have a different one and some of them might be removed.
             existing_scan = (
                 UrlGenericScan.objects.all()
-                .filter(type=SCAN_TYPE_MAIL_SERVER, url_id=url.id, is_the_latest_scan=True)
+                .filter(type=SCAN_TYPE_LOCATION_MAIL_SERVER, url_id=url.id, is_the_latest_scan=True)
                 .first()
             )
-            if existing_scan.rating != LOCATION_CLEAN:
+            if existing_scan and existing_scan.rating != LOCATION_CLEAN:
                 store_url_scan_result(
-                    scan_type=SCAN_TYPE_MAIL_SERVER,
+                    scan_type=SCAN_TYPE_LOCATION_MAIL_SERVER,
                     url_id=url.id,
                     rating=LOCATION_CLEAN,
                     message=LOCATION_CLEAN,
@@ -187,7 +187,7 @@ def scan_mailservers():
         worst_rating, rating_series = create_rating_series_for_domains(mail_servers, domain_ip_data, geo_ip_data)
 
         store_url_scan_result(
-            scan_type=SCAN_TYPE_MAIL_SERVER,
+            scan_type=SCAN_TYPE_LOCATION_MAIL_SERVER,
             url_id=url.id,
             rating=worst_rating,
             message=worst_rating,
@@ -207,7 +207,7 @@ def scan_servers():
             [{"domain": url.url}], domain_ip_data, geo_ip_data
         )
         store_url_scan_result(
-            scan_type=SCAN_TYPE_SERVER,
+            scan_type=SCAN_TYPE_LOCATION_SERVER,
             url_id=url.id,
             rating=worst_rating,
             message=worst_rating,
@@ -230,7 +230,7 @@ def scan_third_party_site_content():
             domains = [{"domain": domain} for domain in evidence_domains]
             worst_rating, rating_series = create_rating_series_for_domains(domains, domain_ip_data, geo_ip_data)
             store_endpoint_scan_result(
-                scan_type=SCAN_TYPE_WEBSITE_CONTENT,
+                scan_type=SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
                 endpoint_id=epgs.endpoint.id,
                 rating=worst_rating,
                 message=worst_rating,
@@ -330,7 +330,7 @@ def _extracted_from_rate_3(geo_ip_record, arg1, c_or_c, policy):
         return LOCATION_LOW
     if found_code in policy[f"{c_or_c}_medium"]:
         return LOCATION_MEDIUM
-    if found_code not in policy[f"{c_or_c}_ok"]:
+    if found_code in policy[f"{c_or_c}_ok"]:
         return LOCATION_OK
     return LOCATION_UNKNOWN
 

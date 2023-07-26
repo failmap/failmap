@@ -11,7 +11,7 @@ from websecmap.scanners.scanner_for_everything.location import (
     get_policy,
     scan_servers,
     scan_third_party_site_content,
-    SCAN_TYPE_WEBSITE_CONTENT,
+    SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
 )
 from websecmap.scanners.scanner.web_privacy import (
     WEB_PRIVACY_THIRD_PARTY_DOMAINS,
@@ -41,7 +41,7 @@ def test_scan_mailservers(db, default_scan_metadata, default_policy):
             "domain": "example.com",
             "evidence": {
                 "continent_rating": "medium",
-                "country_rating": "ok",
+                "country_rating": "unknown",
                 "found_location": {
                     "as_number": 1337,
                     "as_organization": "test organization",
@@ -95,7 +95,7 @@ def test_scan_servers(db, default_scan_metadata, default_policy):
             "domain": "example.com",
             "evidence": {
                 "continent_rating": "medium",
-                "country_rating": "ok",
+                "country_rating": "unknown",
                 "found_location": {
                     "as_number": 1337,
                     "as_organization": "test organization",
@@ -147,16 +147,16 @@ def test_scan_third_party_site_content(db):
 
     # previous scan and the newly derived scan
     assert EndpointGenericScan.objects.all().count() == 2
-    first = EndpointGenericScan.objects.all().filter(type=SCAN_TYPE_WEBSITE_CONTENT).first()
+    first = EndpointGenericScan.objects.all().filter(type=SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT).first()
     assert first.rating == "location_medium"
-    assert first.type == SCAN_TYPE_WEBSITE_CONTENT
+    assert first.type == SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT
     evidence = json.loads(first.evidence)
     assert evidence == [
         {
             "domain": "example.com",
             "evidence": {
                 "continent_rating": "medium",
-                "country_rating": "ok",
+                "country_rating": "unknown",
                 "found_location": {
                     "as_number": 1337,
                     "as_organization": "test organization",
