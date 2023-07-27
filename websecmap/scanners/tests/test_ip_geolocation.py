@@ -208,12 +208,15 @@ def test_has_known_network():
         "192.168.0.0/24": {"more": "data"},
         "172.20.0.0/24": {"more": "data"},
         "2001:4860::/32": {"more": "data"},
+        "['ip']": None,
     }
 
     assert has_known_network("192.168.0.1", network_data) == {"more": "data"}
-    assert has_known_network("192.168.2.1", network_data) is False
+    assert has_known_network("192.168.2.1", network_data) is None
     assert has_known_network("2001:4860:4860::8888", network_data) == {"more": "data"}
-    assert has_known_network("2000:4860:4860::8888", network_data) is False
+    assert has_known_network("2000:4860:4860::8888", network_data) is None
+    assert has_known_network(None, network_data) is None
+    assert has_known_network("['ip']", network_data) is None
 
 
 def test_scan_using_known_data(db):

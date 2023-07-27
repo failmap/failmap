@@ -62,6 +62,10 @@ def store_ip(ip: Optional[str], domain: str, ip_version: int):
     # longer domains incl subdomains, then change the data type to a very long type.
     data = {"ip_address": ip or None, "domain": domain[:255], "ip_version": ip_version}
 
+    # don't store useless data, only store an empty ip if there was an ip in the past
+    if not ip and not DomainIp().objects.filter(domain=domain, ip_version=ip_version).exists():
+        return
+
     abstract_time_storage(
         DomainIp,
         fields_to_retrieve_latest={"domain": domain, "ip_version": ip_version},

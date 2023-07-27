@@ -5,6 +5,7 @@ every 14 days or so. It is already optimized to no call the API twice if the net
 import ipaddress
 from typing import Any, Dict, List, Optional
 
+import netaddr
 from django.forms import model_to_dict
 from netaddr import IPNetwork, IPAddress
 
@@ -118,14 +119,18 @@ def scan_using_known_data():
 
 
 def has_known_network(ip_address: str, complete_network_data: dict) -> Optional[Dict]:
-    return next(
-        (
-            network_info
-            for network, network_info in complete_network_data.items()
-            if IPAddress(ip_address) in IPNetwork(network)
-        ),
-        False,
-    )
+    try:
+        return next(
+            (
+                network_info
+                for network, network_info in complete_network_data.items()
+                if network and ip_address and IPAddress(ip_address) in IPNetwork(network)
+            ),
+            None,
+        )
+    except netaddr.core.AddrFormatError:
+        # incorrectly formatted IP addresses
+        return None
 
 
 def get_data(ip_address):
