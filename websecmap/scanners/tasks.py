@@ -4,7 +4,13 @@ import logging
 from celery import group
 
 from websecmap.scanners import plannedscan, proxy
-from websecmap.scanners.scanner_for_everything import domain_to_ip, ip_geolocation, location, mailserver
+from websecmap.scanners.scanner_for_everything import (
+    domain_to_ip,
+    ip_geolocation,
+    location,
+    mailserver,
+    ip_geolocation_correction,
+)
 from websecmap.scanners.scanner import (
     autoexplain_dutch_untrusted_cert,
     autoexplain_microsoft_neighboring_services,
@@ -74,7 +80,7 @@ __scanners__ = [
     endpoint_content,
 ]
 
-__everything__ = [domain_to_ip, ip_geolocation, location, mailserver]
+__everything__ = [domain_to_ip, ip_geolocation, location, mailserver, ip_geolocation_correction]
 
 __others__ = [
     proxy,

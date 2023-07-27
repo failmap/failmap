@@ -11,6 +11,7 @@ from websecmap.scanners.models import DomainIp, EndpointGenericScan, DomainMX
 from websecmap.scanners.scanner.http import get_ipv4, get_ipv6
 from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_THIRD_PARTY_DOMAINS
 from websecmap.scanners.time_storage import abstract_time_storage
+import tldextract
 
 
 @app.task(queue="kickoff")
@@ -30,7 +31,11 @@ def add_domains_from_mailserver_records() -> group:
         if list_of_domains.mail_server_records:
             mail_server_records = list_of_domains.mail_server_records
             for mail_server_record in mail_server_records:
-                domains.add(mail_server_record["domain"])
+                # todo: should not be an ip address. should be an fqdn.
+                if mail_server_record["domain"]:
+                    extract = tldextract.extract(mail_server_record["domain"])
+                    if extract.fqdn:
+                        domains.add(extract.fqdn)
     return group([update_ips(domain) for domain in list(domains)])
 
 
@@ -53,7 +58,7 @@ def add_domains_from_organization_urls() -> group:
 
 
 def update_ips(domain: str):
-    return get_ipv4.si(domain) | store_ip.s(domain, 4) | get_ipv6.si(domain) | store_ip.s(domain, 6)
+    return group(get_ipv4.si(domain) | store_ip.s(domain, 4) | get_ipv6.si(domain) | store_ip.s(domain, 6))
 
 
 @app.task(queue="storage", ignore_result=True)
@@ -63,7 +68,7 @@ def store_ip(ip: Optional[str], domain: str, ip_version: int):
     data = {"ip_address": ip or None, "domain": domain[:255], "ip_version": ip_version}
 
     # don't store useless data, only store an empty ip if there was an ip in the past
-    if not ip and not DomainIp().objects.filter(domain=domain, ip_version=ip_version).exists():
+    if not ip and not DomainIp.objects.filter(domain=domain, ip_version=ip_version).exists():
         return
 
     abstract_time_storage(

@@ -104,3 +104,8 @@ def _read_json_from_gzip(location):
         # this is weird, should not happen. Don't crash.
         log.error(f"Report does not contain valid json, {location}.", location)
         return {}
+    except Exception as e:
+        # Possibly corrupted gzip file, this might happen for whatever reason.
+        # Error -3 while decompressing data: invalid stored block lengths
+        log.exception("Other error occurred when reading report from %s: %s", location, e)
+        return {}
