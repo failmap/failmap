@@ -1,0 +1,220 @@
+{
+    "service": {
+        "name": "search"
+    },
+    "parameters": {
+        "inverse-lookup": {},
+        "type-filters": {},
+        "flags": {
+            "flag": [
+                {
+                    "value": "no-referenced"
+                },
+                {
+                    "value": "no-irt"
+                }
+            ]
+        },
+        "query-strings": {
+            "query-string": [
+                {
+                    "value": "13.107.224.0"
+                }
+            ]
+        },
+        "sources": {
+            "source": [
+                {
+                    "id": "RIPE"
+                }
+            ]
+        }
+    },
+    "objects": {
+        "object": [
+            {
+                "type": "inetnum",
+                "link": {
+                    "type": "locator",
+                    "href": "https://rest.db.ripe.net/ripe/inetnum/6.0.0.0 - 13.115.255.255"
+                },
+                "source": {
+                    "id": "ripe"
+                },
+                "primary-key": {
+                    "attribute": [
+                        {
+                            "name": "inetnum",
+                            "value": "6.0.0.0 - 13.115.255.255"
+                        }
+                    ]
+                },
+                "attributes": {
+                    "attribute": [
+                        {
+                            "name": "inetnum",
+                            "value": "6.0.0.0 - 13.115.255.255"
+                        },
+                        {
+                            "name": "netname",
+                            "value": "NON-RIPE-NCC-MANAGED-ADDRESS-BLOCK"
+                        },
+                        {
+                            "name": "descr",
+                            "value": "IPv4 address block not managed by the RIPE NCC"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "------------------------------------------------------"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": ""
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "For registration information,"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "you can consult the following sources:"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": ""
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "IANA"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "http://www.iana.org/assignments/ipv4-address-space"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "http://www.iana.org/assignments/iana-ipv4-special-registry"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "http://www.iana.org/assignments/ipv4-recovered-address-space"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": ""
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "AFRINIC (Africa)"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "http://www.afrinic.net/ whois.afrinic.net"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": ""
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "APNIC (Asia Pacific)"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "http://www.apnic.net/ whois.apnic.net"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": ""
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "ARIN (Northern America)"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "http://www.arin.net/ whois.arin.net"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": ""
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "LACNIC (Latin America and the Carribean)"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "http://www.lacnic.net/ whois.lacnic.net"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": ""
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "------------------------------------------------------"
+                        },
+                        {
+                            "name": "country",
+                            "value": "EU",
+                            "comment": "Country is really world wide"
+                        },
+                        {
+                            "link": {
+                                "type": "locator",
+                                "href": "https://rest.db.ripe.net/ripe/role/IANA1-RIPE"
+                            },
+                            "name": "admin-c",
+                            "value": "IANA1-RIPE",
+                            "referenced-type": "role"
+                        },
+                        {
+                            "link": {
+                                "type": "locator",
+                                "href": "https://rest.db.ripe.net/ripe/role/IANA1-RIPE"
+                            },
+                            "name": "tech-c",
+                            "value": "IANA1-RIPE",
+                            "referenced-type": "role"
+                        },
+                        {
+                            "name": "status",
+                            "value": "ALLOCATED UNSPECIFIED"
+                        },
+                        {
+                            "link": {
+                                "type": "locator",
+                                "href": "https://rest.db.ripe.net/ripe/mntner/RIPE-NCC-HM-MNT"
+                            },
+                            "name": "mnt-by",
+                            "value": "RIPE-NCC-HM-MNT",
+                            "referenced-type": "mntner"
+                        },
+                        {
+                            "name": "created",
+                            "value": "2019-01-07T10:49:33Z"
+                        },
+                        {
+                            "name": "last-modified",
+                            "value": "2019-01-07T10:49:33Z"
+                        },
+                        {
+                            "name": "source",
+                            "value": "RIPE"
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "terms-and-conditions": {
+        "type": "locator",
+        "href": "http://www.ripe.net/db/support/db-terms-conditions.pdf"
+    },
+    "version": {
+        "version": "1.107",
+        "timestamp": "2023-06-05T09:29:55Z",
+        "commit-id": "82c3dcc"
+    }
+}

@@ -973,3 +973,18 @@ class GeoIpAdmin(admin.ModelAdmin):
 @admin.register(models.DomainMX)
 class DomainMXAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ("id", "domain", "mail_server_records", "last_scan_moment", "is_the_latest")
+
+
+@admin.register(models.GeoIpCorrection)
+class GeoIpCorrectionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("id", "source", "link", "network", "country_code", "at_when", "last_scan_moment", "is_the_latest")
+
+    def link(self, instance):
+        if instance.source == "ripe":
+            return mark_safe(
+                f'<a href="https://rest.db.ripe.net/search.json?query-'
+                f"string={instance.network}&type-filter=inetnum"
+                f'&flags=no-referenced&flags=no-irt&source=RIPE"'
+                f'target="_blank">{instance.network}</a>'
+            )
+        return ""

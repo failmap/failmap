@@ -1192,3 +1192,19 @@ class GeoIp(models.Model):
     at_when = models.DateTimeField(blank=True, null=True)
     last_scan_moment = models.DateTimeField(blank=True, null=True)
     is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+
+
+class GeoIpCorrection(models.Model):
+    """
+    Data from the GeoIP database is sometimes wrong. These corrections make sure that findings are auto-explained
+    until the data is corrected at the source.
+    """
+
+    source = models.CharField(max_length=10, blank=True, null=True)
+    network = models.CharField(max_length=200, blank=True, null=True)
+    country_code = models.CharField(max_length=2, blank=True, null=True)
+    response = models.TextField(blank=True, null=True)
+
+    at_when = models.DateTimeField(blank=True, null=True)
+    last_scan_moment = models.DateTimeField(blank=True, null=True)
+    is_the_latest = models.BooleanField(default=False, null=True, blank=True)

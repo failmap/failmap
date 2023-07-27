@@ -1,0 +1,219 @@
+{
+    "service": {
+        "name": "search"
+    },
+    "parameters": {
+        "inverse-lookup": {},
+        "type-filters": {},
+        "flags": {
+            "flag": [
+                {
+                    "value": "no-referenced"
+                },
+                {
+                    "value": "no-irt"
+                }
+            ]
+        },
+        "query-strings": {
+            "query-string": [
+                {
+                    "value": "81.169.176.0"
+                }
+            ]
+        },
+        "sources": {
+            "source": [
+                {
+                    "id": "RIPE"
+                }
+            ]
+        }
+    },
+    "objects": {
+        "object": [
+            {
+                "type": "inetnum",
+                "link": {
+                    "type": "locator",
+                    "href": "https://rest.db.ripe.net/ripe/inetnum/81.169.157.0 - 81.169.188.255"
+                },
+                "source": {
+                    "id": "ripe"
+                },
+                "primary-key": {
+                    "attribute": [
+                        {
+                            "name": "inetnum",
+                            "value": "81.169.157.0 - 81.169.188.255"
+                        }
+                    ]
+                },
+                "attributes": {
+                    "attribute": [
+                        {
+                            "name": "inetnum",
+                            "value": "81.169.157.0 - 81.169.188.255"
+                        },
+                        {
+                            "name": "netname",
+                            "value": "STRATO-RZG-DED"
+                        },
+                        {
+                            "link": {
+                                "type": "locator",
+                                "href": "https://rest.db.ripe.net/ripe/organisation/ORG-SRA1-RIPE"
+                            },
+                            "name": "org",
+                            "value": "ORG-SRA1-RIPE",
+                            "referenced-type": "organisation"
+                        },
+                        {
+                            "name": "descr",
+                            "value": "Strato Rechenzentrum, Berlin"
+                        },
+                        {
+                            "name": "country",
+                            "value": "DE"
+                        },
+                        {
+                            "link": {
+                                "type": "locator",
+                                "href": "https://rest.db.ripe.net/ripe/role/SRDS-RIPE"
+                            },
+                            "name": "admin-c",
+                            "value": "SRDS-RIPE",
+                            "referenced-type": "role"
+                        },
+                        {
+                            "link": {
+                                "type": "locator",
+                                "href": "https://rest.db.ripe.net/ripe/role/SRDS-RIPE"
+                            },
+                            "name": "tech-c",
+                            "value": "SRDS-RIPE",
+                            "referenced-type": "role"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "************************************************************"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "* Please send abuse complaints to abuse@strato.de *"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "* or fax +49-30-88615-755 ONLY. *"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "* Abuse reports to other e-mail addresses will be ignored. *"
+                        },
+                        {
+                            "name": "remarks",
+                            "value": "************************************************************"
+                        },
+                        {
+                            "name": "status",
+                            "value": "ASSIGNED PA"
+                        },
+                        {
+                            "link": {
+                                "type": "locator",
+                                "href": "https://rest.db.ripe.net/ripe/mntner/STRATO-RZG-MNT"
+                            },
+                            "name": "mnt-by",
+                            "value": "STRATO-RZG-MNT",
+                            "referenced-type": "mntner"
+                        },
+                        {
+                            "name": "created",
+                            "value": "2004-02-03T18:37:52Z"
+                        },
+                        {
+                            "name": "last-modified",
+                            "value": "2020-05-27T10:03:57Z"
+                        },
+                        {
+                            "name": "source",
+                            "value": "RIPE"
+                        }
+                    ]
+                }
+            },
+            {
+                "type": "route",
+                "link": {
+                    "type": "locator",
+                    "href": "https://rest.db.ripe.net/ripe/route/81.169.176.0/24AS6724"
+                },
+                "source": {
+                    "id": "ripe"
+                },
+                "primary-key": {
+                    "attribute": [
+                        {
+                            "name": "route",
+                            "value": "81.169.176.0/24"
+                        },
+                        {
+                            "name": "origin",
+                            "value": "AS6724"
+                        }
+                    ]
+                },
+                "attributes": {
+                    "attribute": [
+                        {
+                            "name": "route",
+                            "value": "81.169.176.0/24"
+                        },
+                        {
+                            "name": "descr",
+                            "value": "STRATO AG"
+                        },
+                        {
+                            "name": "descr",
+                            "value": "prefix only advertised in case of DDoS"
+                        },
+                        {
+                            "name": "origin",
+                            "value": "AS6724"
+                        },
+                        {
+                            "link": {
+                                "type": "locator",
+                                "href": "https://rest.db.ripe.net/ripe/mntner/STRATO-RZG-MNT"
+                            },
+                            "name": "mnt-by",
+                            "value": "STRATO-RZG-MNT",
+                            "referenced-type": "mntner"
+                        },
+                        {
+                            "name": "created",
+                            "value": "2014-02-18T16:19:06Z"
+                        },
+                        {
+                            "name": "last-modified",
+                            "value": "2014-02-18T16:19:06Z"
+                        },
+                        {
+                            "name": "source",
+                            "value": "RIPE"
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "terms-and-conditions": {
+        "type": "locator",
+        "href": "http://www.ripe.net/db/support/db-terms-conditions.pdf"
+    },
+    "version": {
+        "version": "1.107",
+        "timestamp": "2023-06-05T09:29:55Z",
+        "commit-id": "82c3dcc"
+    }
+}

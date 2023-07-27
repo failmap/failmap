@@ -1869,6 +1869,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "scanners.domainip", "label": "IP Addresses (all data)"},
             {"name": "scanners.urlip", "label": "IP Addresses (urls)"},
             {"name": "scanners.geoip", "label": "IP Geo database"},
+            {"name": "scanners.geoipcorrection", "label": "IP Geo Correction DB"},
             {"name": "scanners.domainmx", "label": "Domain Mail Servers"},
         ],
     },
