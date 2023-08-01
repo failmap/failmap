@@ -35,7 +35,7 @@ def create_tasks() -> group:
     # let's hope this data is accurate enough to figure out the continent.
     # add some list somewhere of what countries have what impact
     # ips can be many of the same:
-    return group(scan_intelligently.si(get_all_ips()))
+    return group(scan_intelligently.si())
 
 
 def get_all_ips() -> List[str]:
@@ -55,7 +55,7 @@ def get_all_ips() -> List[str]:
 
 
 @app.task(queue="storage")
-def scan_intelligently(ips: List[str]):
+def scan_intelligently():
     # We can't just scan everything now because we need to know what network an ip address belongs to.
     # Because when we do, there is no need to re-query the geoip2 API and waste credits or time.
     # If the ip is in one of the known networks, just return that network information.
@@ -63,6 +63,8 @@ def scan_intelligently(ips: List[str]):
     # 165 API calls
     # 211 saved calls
     # production has 35k ips now
+
+    ips = get_all_ips()
 
     # dict of networks, with the associated scan result data.
     complete_network_data = {}
@@ -135,6 +137,9 @@ def has_known_network(ip_address: str, complete_network_data: dict) -> Optional[
 
 def get_data(ip_address):
     """
+    registered_country: A JSON object containing details about the country in which the ISP has registered the IP addres
+    country: A JSON object containing details about the country where MaxMind believes the end user is located.
+
     Returns:
     {
       'city': {
@@ -272,9 +277,15 @@ def map_maxmind_data_to_result(result, data_dict: Dict[str, Any]) -> Dict:
     result["continent_geoname_id"] = data_dict.get("continent", {}).get("geoname_id", None)
     result["continent_in_en"] = data_dict.get("continent", {}).get("names", {}).get("en", None)
 
+    # Where maxmind believes the IP is used / located.
     result["country_iso_code"] = data_dict.get("country", {}).get("iso_code", None)
     result["country_geoname_id"] = data_dict.get("country", {}).get("geoname_id", None)
     result["country_in_en"] = data_dict.get("country", {}).get("names", {}).get("en", None)
+
+    # registred_country: where the ISP has registred the IP
+    result["country_isp_iso_code"] = data_dict.get("registered_country", {}).get("iso_code", None)
+    result["country_isp_geoname_id"] = data_dict.get("country", {}).get("geoname_id", None)
+    result["country_isp_in_en"] = data_dict.get("country", {}).get("names", {}).get("en", None)
 
     result["city_geoname_id"] = data_dict.get("city", {}).get("geoname_id", None)
     result["city_in_en"] = data_dict.get("city", {}).get("names", {}).get("en", "")
@@ -285,10 +296,11 @@ def map_maxmind_data_to_result(result, data_dict: Dict[str, Any]) -> Dict:
     result["location_metro_code"] = data_dict.get("location", {}).get("metro_code", None)
 
     # would this ever be not present?
-    result["as_number"] = data_dict["traits"]["autonomous_system_number"]
-    result["as_organization"] = data_dict["traits"]["autonomous_system_organization"]
-    result["isp_name"] = data_dict["traits"]["isp"]
-    result["network"] = data_dict["traits"]["network"]
+    traits = data_dict.get("traits", {})
+    result["as_number"] = traits.get("autonomous_system_number", "")
+    result["as_organization"] = traits.get("autonomous_system_organization", "")
+    result["isp_name"] = traits.get("isp", "")
+    result["network"] = traits.get("network", "")
 
     result["response_data"] = data_dict
 

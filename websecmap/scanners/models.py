@@ -1168,6 +1168,10 @@ class GeoIp(models.Model):
     country_geoname_id = models.IntegerField(blank=True, null=True)
     country_in_en = models.CharField(max_length=80, blank=True, null=True)
 
+    country_isp_iso_code = models.CharField(max_length=2, blank=True, null=True)
+    country_isp_geoname_id = models.IntegerField(blank=True, null=True)
+    country_isp_in_en = models.CharField(max_length=80, blank=True, null=True)
+
     city_geoname_id = models.IntegerField(blank=True, null=True)
     city_in_en = models.CharField(max_length=200, blank=True, null=True)
 
