@@ -7,7 +7,7 @@ from django.core.management import call_command
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
-from websecmap.scanners.scanner.security_headers import analyze_website_headers
+from websecmap.scanners.scanner.security_headers import analyze_website_headers, measure_hsts_header
 
 SECURITY_HEADERS = {
     "X-XSS-Protection": "1",
@@ -132,3 +132,118 @@ def test_analyze_website_headers(db):
     ]
     analyze_website_headers(ep.id, u.id, "https", headers)
     assert EndpointGenericScan.objects.all().count() == 18
+
+
+def test_measure_hsts_header():
+    # when no hsts header is present, but there is no https site, this will result in a not applicable
+
+    # straight forward use case: https site has hsts, so ok.
+    headers = [
+        {
+            "request": 1,
+            "url": "https://www.basisbeveiliging.nl/",
+            "protocol": "https",
+            "headers": {
+                "STRICT-Transport-Security": "max-age=63072000; includeSubDomains;",
+            },
+        }
+    ]
+    assert measure_hsts_header(headers) == "present"
+
+    # third request on the same host has hsts, so ok:
+    headers = [
+        {
+            "request": 1,
+            "url": "https://www.basisbeveiliging.nl/",
+            "protocol": "https",
+            "headers": {},
+        },
+        {
+            "request": 2,
+            "url": "https://www.basisbeveiliging.nl/",
+            "protocol": "https",
+            "headers": {},
+        },
+        {
+            "request": 3,
+            "url": "https://www.basisbeveiliging.nl/",
+            "protocol": "https",
+            "headers": {
+                "STRICT-Transport-Security": "max-age=63072000; includeSubDomains;",
+            },
+        },
+    ]
+    assert measure_hsts_header(headers) == "present"
+
+    # first request on another host does NOT have hsts, but the final site does. So here a missing is returned:
+    headers = [
+        {
+            "request": 1,
+            "url": "https://www.nu.nl/",
+            "protocol": "https",
+            "headers": {},
+        },
+        {
+            "request": 2,
+            "url": "https://www.basisbeveiliging.nl/",
+            "protocol": "https",
+            "headers": {},
+        },
+        {
+            "request": 3,
+            "url": "https://www.basisbeveiliging.nl/",
+            "protocol": "https",
+            "headers": {
+                "STRICT-Transport-Security": "max-age=63072000; includeSubDomains;",
+            },
+        },
+    ]
+    assert measure_hsts_header(headers) == "missing"
+
+    # the first site is a http site, in that case no HSTS is needed and the second site has https, so that will need it:
+    headers = [
+        {
+            "request": 1,
+            "url": "http://www.nu.nl/",
+            "protocol": "http",
+            "headers": {},
+        },
+        {
+            "request": 2,
+            "url": "https://www.basisbeveiliging.nl/",
+            "protocol": "https",
+            "headers": {},
+        },
+        {
+            "request": 3,
+            "url": "https://www.basisbeveiliging.nl/",
+            "protocol": "https",
+            "headers": {
+                "STRICT-Transport-Security": "max-age=63072000; includeSubDomains;",
+            },
+        },
+    ]
+    assert measure_hsts_header(headers) == "present"
+
+    # all sites are http, so no hsts is needed:
+    headers = [
+        {
+            "request": 1,
+            "url": "http://www.nu.nl/",
+            "protocol": "http",
+            "headers": {},
+        },
+        {
+            "request": 2,
+            "url": "http://www.basisbeveiliging.nl/",
+            "protocol": "http",
+            "headers": {},
+        },
+        {
+            "request": 3,
+            "url": "http://www.basisbeveiliging.nl/",
+            "protocol": "http",
+            "headers": {},
+        },
+    ]
+    assert measure_hsts_header(headers) == "not_applicable"

@@ -55,6 +55,7 @@ from typing import Dict, Union, Any, List
 import requests
 from celery import Task, group
 from requests.structures import CaseInsensitiveDict
+from tldextract import tldextract
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
@@ -374,6 +375,14 @@ def clean_up_existing_headers(endpoint_id: int, service_type: str, reason: str):
     return {"status": "success"}
 
 
+def extract_host(url):
+    extract = tldextract.extract(url)
+    # if ip, only domain is set:
+    if extract.domain and not extract.subdomain and not extract.suffix:
+        return extract.domain
+    return extract.fqdn
+
+
 def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: List[Dict[str, Any]]):
     # The HTTP specification RFC 7230 section 3.2 says header names are case-insensitive.
 
@@ -459,36 +468,55 @@ def analyze_website_headers(endpoint_id: int, url: int, protocol: str, headers: 
         }
     ]
     """
+    result = measure_hsts_header(headers)
+    store_endpoint_scan_result(
+        "http_security_header_strict_transport_security",
+        endpoint_id,
+        rating=result,
+        message=result,
+        evidence=json.dumps(prepare_headers_for_evidence(headers)),
+    )
 
+    return {"status": "success"}
+
+
+def measure_hsts_header(headers):
     # at this point all https redirects or pages should have HSTS enabled, all xml-stuff has been filtered out before
     # this is required up until all browsers do not allow connection to port 80 (this should be behind a setting so
     # nobody uses port 80 in practice unless they really really want to).
+    # Correction: every host needs to set the HSTS header once. So if there is a redirect that goes to the same host
+    # and the second page sets HSTS this is fine. There is always an issue on first visit: that is not solved by setting
+    # the HSTS header on the first or second response on the host: that does not matter as long as every host sets it.
     has_https = False
+    # Dict with address and then if that host has HSTS
+    hsts_header_per_https_host = {}
     for header_metadata in headers:
+        host = extract_host(header_metadata["url"])
+
         if header_metadata["protocol"] == "https":
             has_https = True
-            if "Strict-Transport-Security" not in CaseInsensitiveDict(header_metadata["headers"]):
-                store_endpoint_scan_result(
-                    scan_type="http_security_header_strict_transport_security",
-                    endpoint_id=endpoint_id,
-                    rating="missing",
-                    message="missing",
-                    evidence=json.dumps(prepare_headers_for_evidence(headers)),
-                )
-                return {"status": "success"}
 
-    if has_https:
-        # it was missing nowhere, so it is present wherever it was needed, and given one of the things was via https it
-        # was needed!
-        store_endpoint_scan_result(
-            scan_type="http_security_header_strict_transport_security",
-            endpoint_id=endpoint_id,
-            rating="present",
-            message="present",
-            evidence=json.dumps(prepare_headers_for_evidence(headers)),
-        )
+            # default to false, and it should be there
+            if host not in hsts_header_per_https_host:
+                hsts_header_per_https_host[host] = False
 
-    return {"status": "success"}
+            # correct it to true if hsts is present
+            if "Strict-Transport-Security" in CaseInsensitiveDict(header_metadata["headers"]):
+                hsts_header_per_https_host[host] = True
+
+    # no https, means there is no reason to have this header.
+    if not has_https:
+        # clean up existing header metrics. HSTS is only needed on HTTPS connections.
+        # HTTPS is mandatory nowadays, so this won't happen often
+        return "not_applicable"
+
+    for has_hsts in hsts_header_per_https_host.values():
+        if not has_hsts:
+            return "missing"
+
+    # it was missing nowhere, so it is present wherever it was needed, and given one of the things was via https it
+    # was needed!
+    return "present"
 
     # the "missing_but_no_insecure_service_offered" is now removed as hsts is always needed on hostile networks
     # if protocol == "https":
