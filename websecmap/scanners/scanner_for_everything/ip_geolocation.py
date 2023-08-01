@@ -78,7 +78,9 @@ def scan_intelligently():
 
         log.debug("IP %s is in unknown network. Calling API.", ip)
         network_info = scan(ip)
-        complete_network_data[network_info["network"]] = network_info
+        # error messages do not have a network.
+        if "network" in network_info:
+            complete_network_data[network_info["network"]] = network_info
         store(network_info)
 
 
