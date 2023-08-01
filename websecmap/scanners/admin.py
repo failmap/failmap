@@ -938,6 +938,7 @@ class GeoIpAdmin(admin.ModelAdmin):
         "error",
         "continent_code",
         "country_iso_code_",
+        "country_isp_iso_code_",
         "city_in_en",
         "as_number",
         "network",
@@ -954,6 +955,7 @@ class GeoIpAdmin(admin.ModelAdmin):
         "designation",
         "continent_code",
         "country_iso_code",
+        "country_isp_iso_code",
         "city_in_en",
         "network",
         "as_number",
@@ -965,9 +967,17 @@ class GeoIpAdmin(admin.ModelAdmin):
 
     @staticmethod
     def country_iso_code_(obj):
-        if obj.country_iso_code:
-            return f"{obj.country_iso_code}: {dict(countries)[obj.country_iso_code]}"
-        return "-"
+        return nice_country(obj.country_iso_code)
+
+    @staticmethod
+    def country_isp_iso_code_(obj):
+        return nice_country(obj.country_isp_iso_code)
+
+
+def nice_country(country_code):
+    if country_code:
+        return f"{country_code}: {dict(countries)[country_code]}"
+    return "-"
 
 
 @admin.register(models.DomainMX)
