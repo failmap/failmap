@@ -297,7 +297,7 @@ def map_maxmind_data_to_result(result, data_dict: Dict[str, Any]) -> Dict:
 
     # would this ever be not present?
     traits = data_dict.get("traits", {})
-    result["as_number"] = traits.get("autonomous_system_number", "")
+    result["as_number"] = traits.get("autonomous_system_number", 0)
     result["as_organization"] = traits.get("autonomous_system_organization", "")
     result["isp_name"] = traits.get("isp", "")
     result["network"] = traits.get("network", "")
