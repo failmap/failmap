@@ -993,7 +993,7 @@ class GeoIpCorrectionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         if instance.source == "ripe":
             return mark_safe(
                 f'<a href="https://rest.db.ripe.net/search.json?query-'
-                f"string={instance.network}&type-filter=inetnum"
+                f"string={instance.network}&type-filter=inetnum,inet6num"
                 f'&flags=no-referenced&flags=no-irt&source=RIPE"'
                 f'target="_blank">{instance.network}</a>'
             )

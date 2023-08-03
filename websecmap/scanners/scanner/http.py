@@ -641,6 +641,8 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
     endpoint.origin = origin[:255]
     endpoint.save()
     log.info("Added endpoint added to database: %s", endpoint)
+    # to trace why endpoints are killed/revived. Does an N+1 on url.url
+    log.info("Created endpoint: %s, url: %s. protocol: %s", endpoint, endpoint.url.url, endpoint.protocol)
     return endpoint
 
 
@@ -650,6 +652,8 @@ def revive_similar_endpoint(similar, origin):
     similar.is_dead_since = None
     similar.is_dead_reason = f"Revived. {similar.is_dead_reason}"[:255]
     similar.save()
+    # to trace why endpoints are killed/revived. Does an N+1 on url.url
+    log.info("Revived endpoint: %s, url: %s. protocol: %s", similar, similar.url.url, similar.protocol)
     return similar
 
 
@@ -729,6 +733,9 @@ def kill_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
         endpoint.is_dead_since = datetime.now(timezone.utc)
         endpoint.is_dead_reason = f"Not found in HTTP Scanner anymore ({origin})."[:255]
         endpoint.save()
+
+        # to trace why endpoints are killed. Does an N+1 on url.url
+        log.info("Killed endpoint: %s, url: %s. protocol: %s", endpoint, endpoint.url.url, endpoint.protocol)
 
 
 @app.task(queue="4and6")

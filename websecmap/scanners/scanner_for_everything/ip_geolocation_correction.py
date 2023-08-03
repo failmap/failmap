@@ -36,10 +36,13 @@ def get_correction_data_for_ip_geolocation_from_ripe():
     RIPE is the authority in the EU. The API does NOT work with IPv6.
     IPv6 corrections are now done heuristically: if the IPv4 is correct, the IPv6 is also correct.
     """
+    # ripe DOES do ipv6:
+    # https://apps.db.ripe.net/db-web-ui/query?searchtext=2001:67c:18a0::%2F48
+    # https://apps.db.ripe.net/db-web-ui/query?searchtext=2a02:9e0::%2F32
     offending_networks_ipv4, offending_networks_ipv6 = get_offending_networks()
 
     # for which networks do we not have corrections yet?
-    uncorrected_networks = get_uncorrected_networks(offending_networks_ipv4)
+    uncorrected_networks = get_uncorrected_networks(offending_networks_ipv4 + offending_networks_ipv6)
 
     for uncorrected_network in uncorrected_networks:
         check_ripe_for_uncorrected_network(uncorrected_network)
@@ -120,7 +123,7 @@ def call_ripe_api(network: str):
     sleep(0.3)
 
     url = (
-        f"https://rest.db.ripe.net/search.json?query-string={network}&type-filter=inetnum"
+        f"https://rest.db.ripe.net/search.json?query-string={network}&type-filter=inetnum,inet6num"
         f"&flags=no-referenced&flags=no-irt&source=RIPE"
     )
     response = requests.get(url)
@@ -132,8 +135,14 @@ def parse_ripe_api_response(response) -> str:
 
     # check if this is a non-eu / non ripe managed response. If so, the finding is probably correct.
     for attribute in attributes:
-        if attribute["name"] == "descr" and attribute["value"] == "IPv4 address block not managed by the RIPE NCC":
-            return "??"
+        if attribute["name"] == "descr":
+            # negative results for ipv4
+            if attribute["value"] == "IPv4 address block not managed by the RIPE NCC":
+                return "??"
+
+            # negative results for ipv6
+            if attribute["value"] == "The whole IPv6 address space":
+                return "??"
 
     # ripe will only give EU countries and EU country codes
     for attribute in attributes:

@@ -51,7 +51,7 @@ def test_get_correction_data_for_ip_geolocation_from_ripe(db, requests_mock, cur
     content_path = f"{current_path}/websecmap/scanners/tests/ip_geolocation_correction/ripe_country_eu.json"
     requests_mock.get(
         "https://rest.db.ripe.net/search.json?query-string=162.55.62.0/23&"
-        "type-filter=inetnum&flags=no-referenced&flags=no-irt&source=RIPE",
+        "type-filter=inetnum,inet6num&flags=no-referenced&flags=no-irt&source=RIPE",
         json=json.loads(text(content_path)),
         status_code=200,
     )

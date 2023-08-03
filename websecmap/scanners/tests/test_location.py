@@ -17,8 +17,10 @@ from websecmap.scanners.scanner.web_privacy import (
     WEB_PRIVACY_THIRD_PARTY_DOMAINS,
     WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
 )
+from constance.test import override_config
 
 
+@override_config(GEOGRAPHY_RATINGS_INCLUDE_IPV6=True)
 def test_scan_mailservers(db, default_scan_metadata, default_policy):
     # todo: overwrite some caching functions to make sure test results are unique.
     create_sample_geoip()
@@ -76,6 +78,7 @@ def test_scan_mailservers(db, default_scan_metadata, default_policy):
     ]
 
 
+@override_config(GEOGRAPHY_RATINGS_INCLUDE_IPV6=True)
 def test_scan_servers(db, default_scan_metadata, default_policy):
     create_sample_geoip()
     create_sample_domainip()
@@ -128,6 +131,7 @@ def test_scan_servers(db, default_scan_metadata, default_policy):
     ]
 
 
+@override_config(GEOGRAPHY_RATINGS_INCLUDE_IPV6=True)
 def test_scan_third_party_site_content(db):
     create_sample_geoip()
     create_sample_domainip()

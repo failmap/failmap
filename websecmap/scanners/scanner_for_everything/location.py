@@ -242,12 +242,14 @@ def create_rating_series_for_domains(domains: List[Dict[str, Any]], domain_ip_da
     # domains list contains "domain" and optionally "priority" for mailservers
     # eg: [{'domain': 'example.com', 'priority': 'high'}, {'domain': 'test.nl'}]...
     rating_series = []
+    include_ipv6 = constance_cached_value("GEOGRAPHY_RATINGS_INCLUDE_IPV6")
     for mail_server in domains:
         ips = []
         if ipv4 := domain_ip_database.get(mail_server["domain"], {}).get(4, None):
             ips.append(ipv4)
-        if ipv6 := domain_ip_database.get(mail_server["domain"], {}).get(6, None):
-            ips.append(ipv6)
+        if include_ipv6:
+            if ipv6 := domain_ip_database.get(mail_server["domain"], {}).get(6, None):
+                ips.append(ipv6)
 
         for ip in ips:
             overall_rating, evidence = match_ip_up_to_policy(ip, "mail_server", geo_ip_database)

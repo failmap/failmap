@@ -1394,6 +1394,13 @@ CONSTANCE_CONFIG = {
         "most of these checks already. List[str].",
         str,
     ),
+    "GEOGRAPHY_RATINGS_INCLUDE_IPV6": (
+        False,
+        "IPv6 locations are of worse quality than ipv4. They often show an entirely different location and have the "
+        "habit to be shown in the US. Data of IPv6 ranges often misses in the RIPE database even if the range is "
+        "in use in Europe.",
+        bool,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1665,6 +1672,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "INTERNET_NL_WEB_ONLY_TOP_LEVEL",
             ),
         ),
+        ("Geography General Settings", ("GEOGRAPHY_RATINGS_INCLUDE_IPV6",)),
         (
             "Geography & Privacy Country (overrides continent)",
             (

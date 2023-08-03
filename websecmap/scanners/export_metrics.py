@@ -7,6 +7,7 @@ import uuid
 
 import pyexcel
 
+from websecmap.app import log
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 import json
 
@@ -164,7 +165,7 @@ def determine_pivot_records(scan_type: str, scan) -> List[dict[str, Any]]:
     return []
 
 
-def pivot_location_evidence(scan):
+def pivot_location_evidence(scan: Union[EndpointGenericScan, UrlGenericScan]) -> List[dict[str, Any]]:
     """
     Convert
       {
@@ -201,21 +202,26 @@ def pivot_location_evidence(scan):
       },
     """
 
-    evidence = json.loads(scan.evidence)
-    return [
-        {
-            "rating": record.get("rating"),
-            "continent_code": record.get("evidence", {}).get("found_location", {}).get("continent_code", ""),
-            "country_iso_code": record.get("evidence", {}).get("found_location", {}).get("country_iso_code", ""),
-            "city_in_en": record.get("evidence", {}).get("found_location", {}).get("city_in_en", ""),
-            "as_number": record.get("evidence", {}).get("found_location", {}).get("as_number", -1),
-            "as_organization": record.get("evidence", {}).get("found_location", {}).get("as_organization", ""),
-            "isp_ame": record.get("evidence", {}).get("found_location", {}).get("isp_ame", ""),
-            "network": record.get("evidence", {}).get("found_location", {}).get("network", ""),
-            "country_rating": record.get("evidence", {}).get("country_rating", ""),
-            "continent_rating": record.get("evidence", {}).get("continent_rating", ""),
-            "domain": record.get("domain", ""),
-            "priority": record.get("priority", ""),
-        }
-        for record in evidence
-    ]
+    try:
+        # might be corrupted etc...
+        evidence = json.loads(scan.evidence)
+        return [
+            {
+                "rating": record.get("rating"),
+                "continent_code": record.get("evidence", {}).get("found_location", {}).get("continent_code", ""),
+                "country_iso_code": record.get("evidence", {}).get("found_location", {}).get("country_iso_code", ""),
+                "city_in_en": record.get("evidence", {}).get("found_location", {}).get("city_in_en", ""),
+                "as_number": record.get("evidence", {}).get("found_location", {}).get("as_number", -1),
+                "as_organization": record.get("evidence", {}).get("found_location", {}).get("as_organization", ""),
+                "isp_ame": record.get("evidence", {}).get("found_location", {}).get("isp_ame", ""),
+                "network": record.get("evidence", {}).get("found_location", {}).get("network", ""),
+                "country_rating": record.get("evidence", {}).get("country_rating", ""),
+                "continent_rating": record.get("evidence", {}).get("continent_rating", ""),
+                "domain": record.get("domain", ""),
+                "priority": record.get("priority", ""),
+            }
+            for record in evidence
+        ]
+    except json.JSONDecodeError:
+        log.debug("Invalid location evidence for scan %s with id %s", scan.type, scan.id)
+        return []

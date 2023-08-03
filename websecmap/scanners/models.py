@@ -808,6 +808,11 @@ class Scanner(models.Model):
         "queue. Tweak this setting to not overwhelm workers and "
         "gradually work through all planned tasks.",
     )
+    task_pickup_timeout_in_minutes = models.IntegerField(
+        default=240,
+        help_text="The time it takes for a picked up task to be performed. If a task is older than this it will be "
+        "reset to queued and tried again.",
+    )
 
     # currently limited to one scanner. This might become something else in the future
     # usually the hierarchy should be stored externally, but the limit to one has served
