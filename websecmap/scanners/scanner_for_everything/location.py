@@ -314,8 +314,11 @@ def rate(geo_ip_record: dict, policy: dict):
     continent_rating = _extracted_from_rate_3(geo_ip_record, "continent_code", "continent", policy)
     country_rating = _extracted_from_rate_3(geo_ip_record, "country_iso_code", "country", policy)
 
-    # country rating is more specific and thus more important than continent rating
-    if SEVERITY_ORDER.index(country_rating) > SEVERITY_ORDER.index(continent_rating):
+    # country rating is more specific and thus more important than continent rating.
+    # if the country rating is something more specific than unknown, than the country rating
+    # always takes preference. 0 + 1 are unknown, many countries will be unknown while the
+    # continent will be filled.
+    if SEVERITY_ORDER.index(country_rating) > 1:
         overall_rating = country_rating
     else:
         overall_rating = continent_rating
