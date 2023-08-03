@@ -15,10 +15,10 @@ from websecmap.scanners.models import EndpointGenericScan, GeoIpCorrection, UrlG
 from websecmap.scanners.scanner_for_everything.location import (
     SCAN_TYPE_LOCATION_SERVER,
     SCAN_TYPE_LOCATION_MAIL_SERVER,
+    SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
     LOCATION_MEDIUM,
     LOCATION_LOW,
     LOCATION_HIGH,
-    SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
 )
 from websecmap.scanners.time_storage import abstract_time_storage
 

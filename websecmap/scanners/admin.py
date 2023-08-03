@@ -988,6 +988,8 @@ class DomainMXAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.GeoIpCorrection)
 class GeoIpCorrectionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ("id", "source", "link", "network", "country_code", "at_when", "last_scan_moment", "is_the_latest")
+    list_filter = ["country_code", "at_when", "is_the_latest", "source"]
+    search_fields = ["network", "country_code", "source"]
 
     def link(self, instance):
         if instance.source == "ripe":

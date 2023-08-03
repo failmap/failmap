@@ -10,6 +10,7 @@ from websecmap.scanners.scanner_for_everything import (
     location,
     mailserver,
     ip_geolocation_correction,
+    locate_and_correct,
 )
 from websecmap.scanners.scanner import (
     autoexplain_dutch_untrusted_cert,
@@ -80,7 +81,7 @@ __scanners__ = [
     endpoint_content,
 ]
 
-__everything__ = [domain_to_ip, ip_geolocation, location, mailserver, ip_geolocation_correction]
+__everything__ = [domain_to_ip, ip_geolocation, location, mailserver, ip_geolocation_correction, locate_and_correct]
 
 __others__ = [
     proxy,
