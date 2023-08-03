@@ -17,11 +17,7 @@ import tldextract
 @app.task(queue="kickoff")
 def create_tasks() -> group:
     return group(
-        [
-            add_domains_from_organization_urls(),
-            add_domains_from_privacy_scan(),
-            add_domains_from_mailserver_records(),
-        ]
+        [add_domains_from_organization_urls() | add_domains_from_privacy_scan() | add_domains_from_mailserver_records()]
     )
 
 

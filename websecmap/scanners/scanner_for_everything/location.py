@@ -146,13 +146,7 @@ def create_tasks() -> group:
     # This largely depends on the accuracy and up-to-date-ness of the geo-ip database and the resolving of the
     # ip addresses, which are separate tasks that are run daily.
     # Todo: make sure these scans are scheduled in logical order.
-    return group(
-        [
-            scan_servers.si(),
-            scan_mailservers.si(),
-            scan_third_party_site_content.si(),
-        ]
-    )
+    return group([scan_servers.si() | scan_mailservers.si() | scan_third_party_site_content.si()])
 
 
 @app.task(queue="storage", ignore_result=True)

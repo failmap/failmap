@@ -25,7 +25,7 @@ from websecmap.scanners.time_storage import abstract_time_storage
 
 @app.task(queue="storage", ignore_result=True)
 def create_tasks():
-    return group([get_correction_data_for_ip_geolocation_from_ripe.si(), apply_corrections.si()])
+    return group([get_correction_data_for_ip_geolocation_from_ripe.si() | apply_corrections.si()])
 
 
 @app.task(queue="storage", ignore_result=True)
