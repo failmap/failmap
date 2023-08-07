@@ -26,7 +26,6 @@ Likely: 80, 8080, 8008, 8888, 8088
 """
 import ipaddress
 import logging
-import random
 import socket
 import tldextract
 from datetime import datetime, timedelta, timezone
@@ -41,6 +40,7 @@ from requests import HTTPError
 from requests.exceptions import ChunkedEncodingError, ContentDecodingError, SSLError
 from requests_toolbelt.adapters import host_header_ssl
 
+from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
@@ -844,24 +844,8 @@ def _follow_history_up_until_safety(response) -> Tuple[bool, List[Dict[str, str]
 
 
 # http://useragentstring.com/pages/useragentstring.php/
-def get_random_user_agent():
-    user_agents = [
-        # Samsung Galaxy S6
-        "Mozilla/5.0 (Linux; Android 6.0.1; SM-G920V Build/MMB29K) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36",
-        # HTC One M9
-        "Mozilla/5.0 (Linux; Android 6.0; HTC One M9 Build/MRA58K) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36",
-        # Windows 10 with Edge
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
-        # Safari
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
-        "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
-        # Windows 7
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:64.0) Gecko/20100101 Firefox/64.0",
-    ]
-
-    return random.choice(user_agents)
+def get_random_user_agent() -> str:
+    # servers react different to different user-agents, which means that the tests will fluctuate all the time.
+    # this has been reduced by returning the same string always.
+    # Use a popular browser.
+    return constance_cached_value("SCANNER_DEFAULT_BROWSER_USER_AGENT")

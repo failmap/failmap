@@ -49,10 +49,9 @@ def test_connection_answer():
 
 
 def test_get_random_user_agent():
-    testdata = set()
-    for _ in range(0, 200):
-        testdata.add(get_random_user_agent())
-    assert len(testdata) > 2
+    # randomization lead to unpredictable test results, so it's now just 1
+    testdata = {get_random_user_agent() for _ in range(10)}
+    assert len(testdata) == 1
 
 
 def test_save_endpoint(db):

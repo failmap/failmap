@@ -1401,6 +1401,11 @@ CONSTANCE_CONFIG = {
         "in use in Europe.",
         bool,
     ),
+    "SCANNER_DEFAULT_BROWSER_USER_AGENT": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0",
+        "The default user agent that is used in http connection requests and header tests.",
+        str,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1587,7 +1592,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         ),
         (
             "Scanning preferences",
-            ("SCAN_AT_ALL", "SCANNER_NAMESERVERS"),
+            ("SCAN_AT_ALL", "SCANNER_NAMESERVERS", "SCANNER_DEFAULT_BROWSER_USER_AGENT"),
         ),
         (
             "Banner Grabbing",
