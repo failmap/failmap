@@ -3,6 +3,7 @@ import ssl
 from datetime import datetime, timedelta, timezone
 from typing import List
 
+import tldextract
 from celery import group
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -20,9 +21,26 @@ log = logging.getLogger(__package__)
 
 SCANNER = "autoexplain_trust_microsoft"
 
+# because this changes frequently include top level domains of the MS services. We don't care about
+# the specific subdomain anymore, it's all fine.
 applicable_subdomains = {
-    "lyncdiscover": ["*.online.lync.com", "meet.lync.com", "*.infra.lync.com", "sched.lync.com", "*.lync.com"],
-    "sip": ["sipfed.online.lync.com", "*.online.lync.com", "*.infra.lync.com", "*.lync.com"],
+    "lyncdiscover": [
+        "*.online.lync.com",
+        "meet.lync.com",
+        "*.infra.lync.com",
+        "sched.lync.com",
+        "*.lync.com",
+        # just use all domains, instead of specific ones.
+        "lync.com",
+    ],
+    "sip": [
+        "sipfed.online.lync.com",
+        "*.online.lync.com",
+        "*.infra.lync.com",
+        "*.lync.com",
+        # just use all domains, instead of specific ones.
+        "lync.com",
+    ],
     "enterpriseenrollment": [
         "manage.microsoft.com",
         "admin.manage.microsoft.com",
@@ -46,8 +64,16 @@ applicable_subdomains = {
         "NA02.manage.microsoft.com",
         "NA01.manage.microsoft.com",
         "NA00.manage.microsoft.com",
+        # just use all domains, instead of specific ones.
+        "microsoft.com",
     ],
-    "enterpriseregistration": ["*.enterpriseregistration.windows.net", "enterpriseregistration.windows.net"],
+    "enterpriseregistration": [
+        "*.enterpriseregistration.windows.net",
+        "enterpriseregistration.windows.net",
+        # "graph.windows.net",
+        # just use all domains, instead of specific ones.
+        "windows.net",
+    ],
     "webmail": [
         "*.internal.outlook.com",
         "*.outlook.com",
@@ -74,6 +100,18 @@ applicable_subdomains = {
         "*.hotmail.com",
         "portal.office.com",
         "*.msappproxy.net",
+        # just use all domains, instead of specific ones.
+        "msappproxy.net",
+        "outlook.com",
+        "office365.com",
+        "office.com",
+        "live.net",
+        "office.net",
+        "officeppe.net",
+        "footprintdns.com",
+        "microsoftonline.com",
+        "live.com",
+        "hotmail.com",
     ],
     "msoid": [
         "*.accesscontrol.windows.net",
@@ -138,6 +176,29 @@ applicable_subdomains = {
         "*.r.login.microsoftonline.com",
         "*.r.login.microsoft.com",
         "*.login.microsoft.com",
+        # just use all domains, instead of specific ones.
+        "azure-int.net",
+        "azure.net",
+        "b2clogin.com",
+        "ccsctp.com",
+        "live-int.com",
+        "live.com",
+        "login.live-int.com",
+        "login.microsoft.com",
+        "microsoft-ppe.com",
+        "microsoft.com",
+        "microsoftazuread-sso.com",
+        "microsoftonline-int.com",
+        "microsoftonline-p-int.com",
+        "microsoftonline-p-int.net",
+        "microsoftonline-p.com",
+        "microsoftonline-p.net",
+        "microsoftonline-pst.com",
+        "microsoftonline.com",
+        "windows-int.net",
+        "windows-ppe.net",
+        "windows.net",
+        "windowsazure.us",
     ],
 }
 
@@ -147,6 +208,7 @@ MS_TRUSTED_CERT_VENDORS = [
     "Microsoft Corporation",
     "Sectigo Limited",
     "DigiCert Inc",
+    "DigiCert, Inc.",
     "Let's Encrypt",
     "QuoVadis Limited",
     # There are also empty items, not trusting those, which could mean self-signed but without a name?
@@ -210,14 +272,10 @@ def scan(scan_id):
     if not epgs:
         return
 
-    certificate = retrieve_certificate(url=epgs.endpoint.url.url, port=epgs.endpoint.port)
-
-    matches_exception_policy = certificate_matches_microsoft_exception_policy(
-        certificate,
-        epgs.endpoint.url.url,
-        epgs.endpoint.url.computed_subdomain,
-        applicable_subdomains,
-        trusted_organization="Microsoft Corporation",
+    matches_exception_policy = scan_url(
+        url=epgs.endpoint.url.url,
+        subdomain=epgs.endpoint.url.computed_subdomain,
+        port=epgs.endpoint.port,
     )
 
     if not matches_exception_policy:
@@ -227,6 +285,18 @@ def scan(scan_id):
     log.debug("Scan %s fits all criteria to be auto explained for incorrect cert usage.", epgs)
     add_bot_explanation(epgs, "trusted_on_local_device_with_custom_trust_policy", timedelta(days=365 * 10))
     autoexplain_trust_microsoft_and_include_their_webserver_headers(epgs)
+
+
+def scan_url(url: str, subdomain: str, port: int) -> bool:
+    certificate = retrieve_certificate(url=url, port=port)
+
+    return certificate_matches_microsoft_exception_policy(
+        certificate,
+        url,
+        subdomain,
+        applicable_subdomains,
+        trusted_organization="Microsoft Corporation",
+    )
 
 
 def get_relevant_microsoft_domains_from_database() -> List[Url]:
@@ -309,7 +379,7 @@ def certificate_matches_microsoft_exception_policy(
     # <Name(C=US,ST=Washington,L=Redmond,O=Microsoft Corporation,OU=Microsoft IT,CN=Microsoft IT TLS CA 5)>
     _names = certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
     names = [name.value for name in _names]
-    if names[0] not in applicable_subdomains[microsoft_service]:
+    if try_parse_first_name(names[0]) not in applicable_subdomains[microsoft_service]:
         # if ms changed the names, we want to know.
         # this will create a list of certs we don't care about that piggy back on the same subdomain while forging the
         # certificate name. Slim chance though... This will change every so often.
@@ -317,7 +387,7 @@ def certificate_matches_microsoft_exception_policy(
             "Certificate for %s not in accepted names, value: %s. %s not in %s. Not trusted.",
             url,
             names,
-            names[0],
+            try_parse_first_name(names[0]),
             applicable_subdomains[microsoft_service],
         )
         return False
@@ -325,10 +395,26 @@ def certificate_matches_microsoft_exception_policy(
     return True
 
 
+def try_parse_first_name(name: str) -> str:
+    # this can by any value, does not need to be a domain name.
+    try:
+        extract = tldextract.extract(name)
+        # do not return the specific subdomain, as those subdomains change all the time and will cause
+        # false positives when that is not managed weekly.
+        # name + suffix indicate this passes as a domain name. An IP will only have domain.
+        if extract.domain and extract.suffix:
+            return f"{extract.domain}.{extract.suffix}"
+    except Exception:  # pylint: disable=broad-except
+        return name
+
+    return name
+
+
 def any_in_list_match(list1: List[str], list2: List[str]) -> bool:
     return any(item in list2 for item in list1)
 
 
+# todo: it's better to apply a security policy than to set this directly in code
 def autoexplain_trust_microsoft_and_include_their_webserver_headers(a_scan: EndpointGenericScan) -> None:
     # Find a neighboring http endpoint, also there the headers are not relevant as the same security
     # protocol is used. DNS can only switch on addresses and ip-versions. But not protocol and port.
