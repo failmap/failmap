@@ -22,7 +22,7 @@ bandit==1.7.5
     # via -r requirements-dev.in
 black==23.3.0
     # via -r requirements-dev.in
-certifi==2023.5.7
+certifi==2023.7.22
     # via
     #   -c requirements.txt
     #   requests
@@ -63,8 +63,10 @@ freezegun==1.2.2
     # via -r requirements-dev.in
 gitdb==4.0.10
     # via gitpython
-gitpython==3.1.31
-    # via bandit
+gitpython==3.1.32
+    # via
+    #   -r requirements-dev.in
+    #   bandit
 httmock==1.4.0
     # via -r requirements-dev.in
 idna==3.4

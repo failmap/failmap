@@ -61,3 +61,6 @@ py>=1.11.0
 # (aka brew install watchman, watchman watch .)
 #
 pywatchman
+
+# pin for security updates
+gitpython>=3.1.32

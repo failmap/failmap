@@ -3,5 +3,5 @@
 # make sure there are no version conflicts with requirements.txt
 -c requirements.txt
 
-uwsgi
+uwsgi>=2.0.22
 django-uwsgi

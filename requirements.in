@@ -50,7 +50,7 @@ django-constance[database]
 pyyaml
 
 # use mozzila certificate bundle by default
-certifi
+certifi>=2023.7.22
 
 # task processing framework
 django-celery-beat<2.2,>2
@@ -198,3 +198,6 @@ geoip2
 pyexcel==0.6.7
 pyexcel-xlsx==0.6.0
 openpyxl==3.0.10
+
+# pin version for security fixes
+cryptography>=41.0.2
