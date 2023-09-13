@@ -144,6 +144,8 @@ ENV UWSGI_DISABLE_WRITE_EXCEPTION true
 ENV TOOLS_DIR /usr/local/bin/
 ENV VENDOR_DIR /source/vendor/
 
+ENV TLDEXTRACT_CACHE /tmp/tldextract_cache
+
 # collect all static files form all django applications into static files directory
 RUN /pyenv/bin/websecmap collectstatic
 
