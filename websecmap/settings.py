@@ -389,7 +389,7 @@ LOGGING = {
             "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG") if DEBUG else "ERROR",
         },
         "celery.worker.strategy": {
-            "level": "INFO" if DEBUG else "ERROR",
+            "level": "INFO",
         },
     },
 }
