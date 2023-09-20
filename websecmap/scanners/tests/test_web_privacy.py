@@ -1,14 +1,20 @@
 from datetime import datetime, timezone
-
 from deepdiff import DeepDiff
 
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import Endpoint, EndpointGenericScan
+from websecmap.scanners.models import (
+    Endpoint,
+    EndpointGenericScan,
+    ProductCookieIndicator,
+    Product,
+    CookieIndicatorFields,
+)
 from websecmap.scanners.scanner.web_privacy import (
     store,
     scan,
     truncate_long_post_data,
     remove_duplicate_third_party_requests,
+    products_from_cookies,
 )
 
 from websecmap.scanners.scanner.web_privacy_resources.trackers import (
@@ -241,10 +247,16 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
         url=url, discovered_on=datetime.now(timezone.utc), port=443, protocol="https", ip_version=4
     )
 
+    p = Product.objects.create(
+        name="Google Analytics",
+    )
+
+    ProductCookieIndicator.objects.create(match_field=CookieIndicatorFields.NAME, match_regex="_ga", product=p)
+
     store(scan("https://zutphen.nl"), ep.id)
 
     # also cookies and the list of third party domains
-    assert EndpointGenericScan.objects.all().count() == 4
+    assert EndpointGenericScan.objects.all().count() == 5
     assert (
         EndpointGenericScan.objects.all().filter(type="web_privacy_tracking").first().rating
         == "web_privacy_tracking_trackers_found"
@@ -253,6 +265,10 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
     assert (
         EndpointGenericScan.objects.all().filter(type="web_privacy_third_party_requests").first().rating
         == "web_privacy_third_party_found"
+    )
+
+    assert (
+        EndpointGenericScan.objects.all().filter(type="web_privacy_products").first().evidence == '["Google Analytics"]'
     )
 
 
@@ -393,3 +409,15 @@ def test_remove_duplicate_third_party_requestss():
             "post_data": None,
         },
     ]
+
+
+def test_products_from_cookies(db):
+    p = Product.objects.create(
+        name="Google Analytics",
+    )
+
+    ProductCookieIndicator.objects.create(match_field=CookieIndicatorFields.NAME, match_regex="_ga", product=p)
+
+    cookies = demo_data()["cookies"]
+
+    assert products_from_cookies(cookies) == ["Google Analytics"]

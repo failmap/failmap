@@ -9,18 +9,18 @@ Thanks to:
 """
 from json import JSONDecodeError
 from typing import Any, Dict, List
-
+import re
 import requests
 
 from celery import group
-
+from collections import defaultdict
 from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.comperators import third_party_request_is_present
-from websecmap.scanners.models import Endpoint, EndpointGenericScan
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, ProductCookieIndicator
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
@@ -59,6 +59,10 @@ WEB_PRIVACY_COOKIES_ERROR = "web_privacy_cookies_error"
 WEB_PRIVACY_THIRD_PARTY_DOMAINS = "web_privacy_third_party_domains"
 WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL = "web_privacy_third_party_domains_neutral"
 WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR = "web_privacy_third_party_domains_error"
+
+WEB_PRIVACY_PRODUCTS = "web_privacy_products"
+WEB_PRIVACY_PRODUCTS_NEUTRAL = "web_privacy_products_neutral"
+WEB_PRIVACY_PRODUCTS_ERROR = "web_privacy_products_error"
 
 
 @app.task(queue="kickoff", ignore_result=True)
@@ -204,6 +208,14 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
             WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
             evidence=error,
         )
+
+        store_endpoint_scan_result(
+            WEB_PRIVACY_PRODUCTS,
+            endpoint_id,
+            WEB_PRIVACY_PRODUCTS_ERROR,
+            WEB_PRIVACY_PRODUCTS_ERROR,
+            evidence=error,
+        )
         return
 
     third_party_requests = result_data.get("third-party-requests-structured", [])
@@ -217,7 +229,8 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     # don't store extremely long post data, which has little value. 200 chars is already insane for a site visit.
     third_party_requests = truncate_long_post_data(third_party_requests, 200)
     third_party_domains = result_data.get("third-party-domains", [])
-    cookies = result_data.get("timeless-cookies", [])
+    timeless_cookies = result_data.get("timeless-cookies", [])
+    cookies = result_data.get("cookies", [])
 
     known_trackers = get_known_trackers_from_urls(third_party_domains)
 
@@ -248,7 +261,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         endpoint_id,
         WEB_PRIVACY_COOKIES_NEUTRAL,
         message=WEB_PRIVACY_COOKIES_NEUTRAL,
-        evidence=json.dumps(cookies),
+        evidence=json.dumps(timeless_cookies),
     )
 
     store_endpoint_scan_result(
@@ -258,6 +271,41 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         message=WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
         evidence=json.dumps(third_party_domains),
     )
+
+    products = products_from_cookies(cookies)
+    store_endpoint_scan_result(
+        WEB_PRIVACY_PRODUCTS,
+        endpoint_id,
+        WEB_PRIVACY_PRODUCTS_NEUTRAL,
+        message=WEB_PRIVACY_PRODUCTS_NEUTRAL,
+        evidence=json.dumps(products),
+    )
+
+
+def products_from_cookies(cookies: list = []) -> list[str]:
+    cookie_indicators = defaultdict(set)
+
+    for indicator in ProductCookieIndicator.objects.all():
+        cookie_indicators[indicator.get_match_field_display()].add(
+            (re.compile(indicator.match_regex), indicator.product.name)
+        )
+
+    # cookie_indicators = {
+    #     "name": (
+    #         (re.compile("JSESSION"), "Java"),
+    #     )
+    # }
+
+    products = set()
+    for field, matches in cookie_indicators.items():
+        for cookie in cookies:
+            for regex, product in matches:
+                if regex.match(cookie[field]):
+                    products.add(product)
+                    break
+            else:
+                log.debug(f"No product match for cookie: {cookie}")
+    return list(products)
 
 
 def privacy_counters(add_urls: bool = False) -> None:

@@ -136,6 +136,10 @@ run-worker: ${app}  ## only run worker component
 run-broker:  ## only run broker
 	docker run --rm --name=redis -p 6379:6379 redis
 
+run-tool-playwright-privacy:
+	docker run --rm --name=playwright-privacy -p 31337:31337 \
+		registry.gitlab.com/internet-cleanup-foundation/playwright-privacy/main:latest
+
 testcase: ${app}
 	# run specific testcase
 	# example: make testcase case=test_openstreetmaps

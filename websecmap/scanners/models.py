@@ -1102,6 +1102,22 @@ class ProductHierarchy(models.Model):
         return f"{self.product} -> {self.relationship} -> {self.related_product}"
 
 
+class CookieIndicatorFields(models.IntegerChoices):
+    NAME = 0, "name"
+    DOMAIN = 1, "domain"
+    PATH = 2, "path"
+
+
+class ProductCookieIndicator(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    match_field = models.PositiveSmallIntegerField(
+        choices=CookieIndicatorFields.choices,
+        default=CookieIndicatorFields.NAME,
+        db_index=True,
+    )
+    match_regex = models.CharField(max_length=200, blank=True, null=False)
+
+
 class HttpEndpointContent(models.Model):
     # use playwright to only get text of the page and not the HTML?
     endpoint = models.ForeignKey(Endpoint, on_delete=models.CASCADE)

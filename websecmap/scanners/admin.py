@@ -8,7 +8,7 @@ from jet.filters import RelatedFieldAjaxListFilter
 
 from websecmap.map.admin import ordering_actions
 from websecmap.scanners import models
-from websecmap.scanners.models import Endpoint, Product, ProductHierarchy, State
+from websecmap.scanners.models import Endpoint, Product, ProductHierarchy, State, ProductCookieIndicator
 from websecmap.scanners.proxy import check_proxy
 from websecmap.scanners.scanmanager import delete_metric_and_set_previous_to_latest
 from websecmap.scanners.scanner.banners.detect_version import add_excepted_banner_to_config, clean_and_detect
@@ -841,6 +841,15 @@ class ProductRelationshipAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     @staticmethod
     def uses(obj):
         return ProductHierarchy.objects.all().filter(relationship=obj).count()
+
+
+@admin.register(models.ProductCookieIndicator)
+class ProductCookieIndicatorAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("id", "match_field", "match_regex", "product")
+
+    @staticmethod
+    def uses(obj):
+        return ProductCookieIndicator.objects.all().filter(relationship=obj).count()
 
 
 @admin.register(models.ProductGoal)
