@@ -201,3 +201,6 @@ openpyxl==3.0.10
 
 # pin version for security fixes
 cryptography>=41.0.2
+
+# try to fix connection issue in Celery: https://github.com/redis/redis-py/issues/2636
+redis>=5

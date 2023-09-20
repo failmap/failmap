@@ -262,8 +262,10 @@ pyyaml==6.0
     #   tablib
 rdp==0.8
     # via -r requirements.in
-redis==4.6.0
-    # via celery
+redis==5.0.0
+    # via
+    #   -r requirements.in
+    #   celery
 requests==2.31.0
     # via
     #   -r requirements.in
