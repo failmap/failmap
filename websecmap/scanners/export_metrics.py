@@ -1,6 +1,8 @@
 import itertools
 from datetime import datetime, timezone
 from typing import List, Union, Any, Dict
+
+import tldextract
 from django.conf import settings
 import os
 import uuid
@@ -11,6 +13,7 @@ from websecmap.app import log
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 import json
 
+from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_COOKIES
 from websecmap.scanners.scanner_for_everything.location import (
     SCAN_TYPE_LOCATION_MAIL_SERVER,
     SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
@@ -48,7 +51,7 @@ def export_current_metrics(
     print(json.dumps(data, indent=4))
 
 
-def export_pivot(scan_types: List[str]):
+def export_pivot(scan_types: List[str]) -> str:
     product = []
     for scan_type in scan_types:
         endpoint_scans = list(EndpointGenericScan.objects.all().filter(is_the_latest_scan=True, type=scan_type))
@@ -68,19 +71,17 @@ def export_pivot(scan_types: List[str]):
                     new_record = {**endpoint_record, **scan_data, **pivot_record}
                     product.append(new_record)
 
-    save_pivot(product)
+    return save_pivot(product)
 
 
-def save_pivot(product: List[Dict[str, Any]]):
+def save_pivot(product: List[Dict[str, Any]]) -> str:
     book = pyexcel.get_book(bookdict={"source": make_data_2d(product)})
     # save the book to the media root:
     os.makedirs(os.path.join(settings.MEDIA_ROOT, "pivot"), exist_ok=True)
     # random name prevents brute-forcing if the file has been uploaded somewhere
-    book.save_as(
-        filename=os.path.join(
-            settings.MEDIA_ROOT, f"pivot/pivot-{datetime.now(timezone.utc).date()}-{uuid.uuid4()}.xlsx"
-        )
-    )
+    filename = f"pivot/pivot-{datetime.now(timezone.utc).date()}-{uuid.uuid4()}.xlsx"
+    book.save_as(filename=os.path.join(settings.MEDIA_ROOT, filename))
+    return filename
 
 
 def make_data_2d(data: List[Dict[str, Any]]) -> List[List[str]]:
@@ -162,7 +163,71 @@ def determine_pivot_records(scan_type: str, scan) -> List[dict[str, Any]]:
     ]:
         return pivot_location_evidence(scan)
 
+    if scan_type in [WEB_PRIVACY_COOKIES]:
+        return pivot_cookies(scan)
+
     return []
+
+
+def load_possible_json(data):
+    try:
+        return json.loads(data)
+    except json.JSONDecodeError:
+        return []
+
+
+def pivot_cookies(scan: Union[EndpointGenericScan, UrlGenericScan]) -> List[dict[str, Any]]:
+    # Cookies are already a flat object. But we'll add a cookie_ prefix to better identify them:
+    # currently the value is not stored as it's usually random and causes a lot of data
+    """
+    [
+      {
+        "name": "ClientId",
+        "domain": "outlook.office365.com",
+        "path": "/",
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      ...
+
+    to:
+        [
+      {
+        "cookie_name": "ClientId",
+        "cookie_domain": "outlook.office365.com",
+        "cookie_path": "/",
+        "cookie_httpOnly": false,
+        "cookie_secure": true,
+        "cookie_sameSite": "None"
+      },
+      ...
+
+    """
+    print(scan)
+    evidence = load_possible_json(scan.evidence)
+    export = []
+    for row in evidence:
+        extract = tldextract.extract(row["domain"])
+
+        export.append(
+            {
+                # the well known fields of cookies
+                "cookie_name": row["name"],
+                "cookie_domain": row["domain"],
+                "cookie_path": row["path"],
+                "cookie_httpOnly": row["httpOnly"],
+                "cookie_secure": row["secure"],
+                "cookie_sameSite": row["sameSite"],
+                # there can be patterns in subdomains as well
+                # and perhaps this information might be junk?
+                "cookie_parsed_subdomain": extract.subdomain,
+                "cookie_parsed_domain": extract.domain,
+                "cookie_parsed_domainsuffix": extract.suffix,
+                "cookie_parsed_fqdn": extract.fqdn,
+            }
+        )
+    return export
 
 
 def pivot_location_evidence(scan: Union[EndpointGenericScan, UrlGenericScan]) -> List[dict[str, Any]]:
