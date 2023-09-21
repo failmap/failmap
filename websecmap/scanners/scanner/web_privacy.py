@@ -26,6 +26,7 @@ from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
 from websecmap.scanners.scanner.web_privacy_resources.trackers import get_known_trackers_from_urls
 import json
+from websecmap.utils import normalize_cookies
 
 SCANNER_NAME = "web_privacy"
 
@@ -229,8 +230,8 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     # don't store extremely long post data, which has little value. 200 chars is already insane for a site visit.
     third_party_requests = truncate_long_post_data(third_party_requests, 200)
     third_party_domains = result_data.get("third-party-domains", [])
-    timeless_cookies = result_data.get("timeless-cookies", [])
-    cookies = result_data.get("cookies", [])
+    timeless_cookies = normalize_cookies(result_data.get("timeless-cookies", []))
+    cookies = normalize_cookies(result_data.get("cookies", []))
 
     known_trackers = get_known_trackers_from_urls(third_party_domains)
 
