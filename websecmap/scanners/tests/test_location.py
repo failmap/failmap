@@ -12,10 +12,15 @@ from websecmap.scanners.scanner_for_everything.location import (
     scan_servers,
     scan_third_party_site_content,
     SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
+    create_meaning_of_location_at_web_privacy_cookies,
+    extract_domains_from_cookies,
+    SCAN_TYPE_LOCATION_COOKIES,
 )
 from websecmap.scanners.scanner.web_privacy import (
     WEB_PRIVACY_THIRD_PARTY_DOMAINS,
     WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
+    WEB_PRIVACY_COOKIES,
+    WEB_PRIVACY_COOKIES_NEUTRAL,
 )
 from constance.test import override_config
 
@@ -279,3 +284,121 @@ def test_get_domain_mx_database_directly(db):
     assert db == {
         "example.com": [{"domain": "example.com", "priority": 10}, {"domain": "mxin2.amsterdam.nl", "priority": 20}],
     }
+
+
+@override_config(GEOGRAPHY_RATINGS_INCLUDE_IPV6=True)
+def test_create_meaning_of_location_at_web_privacy_cookies(db):
+    create_sample_geoip()
+    create_sample_domainip()
+
+    url = Url.objects.create(url="example.com")
+    endpoint = Endpoint.objects.create(url=url, port=443, protocol="https", ip_version=4)
+    EndpointGenericScan.objects.create(
+        endpoint=endpoint,
+        type=WEB_PRIVACY_COOKIES,
+        rating=WEB_PRIVACY_COOKIES_NEUTRAL,
+        evidence=json.dumps(
+            [
+                {"name": "__utma", "domain": ".example.com", "sameSite": "Lax"},
+                {"name": "__utmb", "domain": ".example.com", "sameSite": "Lax"},
+                {"name": "__utmc", "domain": ".example.com", "sameSite": "Lax"},
+                {"name": "__utmt", "domain": ".example.com", "sameSite": "Lax"},
+                {"name": "__utmz", "domain": ".example.com", "sameSite": "Lax"},
+                {"name": "_ga", "domain": ".example.com", "path": "/", "sameSite": "Lax"},
+                {"name": "_ga_SPWNB9HS5Y", "domain": ".example.com", "secure": False, "sameSite": "Lax"},
+                {"name": "_pk_id.1.961b", "domain": "www.example.com", "path": "/", "sameSite": "Lax"},
+                {
+                    "name": "_pk_ses.1.961b",
+                    "domain": "www.example.com",
+                    "path": "/",
+                    "httpOnly": False,
+                },
+            ]
+        ),
+        rating_determined_on=datetime.now(timezone.utc),
+        is_the_latest_scan=True,
+    )
+
+    create_meaning_of_location_at_web_privacy_cookies()
+
+    epgs = EndpointGenericScan.objects.filter(type=WEB_PRIVACY_COOKIES).first()
+    assert "locations" in epgs.meaning
+    assert epgs.meaning["locations"] == [
+        {
+            "domain": "example.com",
+            "evidence": {
+                "continent_rating": "medium",
+                "country_rating": "unknown",
+                "found_location": {
+                    "as_number": 1337,
+                    "as_organization": "test organization",
+                    "city_in_en": None,
+                    "continent_code": "NA",
+                    "country_iso_code": None,
+                    "isp_ame": "Test Isp",
+                    "network": "10.0.0.0/8",
+                },
+            },
+            "rating": "location_medium",
+        },
+        {
+            "domain": "example.com",
+            "evidence": {
+                "continent_rating": "unknown",
+                "country_rating": "unknown",
+                "found_location": {
+                    "AS Number": -1,
+                    "AS Organization": "",
+                    "ISP Name": "",
+                    "city": "",
+                    "continent": "",
+                    "country": "",
+                    "network": "",
+                },
+            },
+            "rating": "location_unknown",
+        },
+    ]
+    assert epgs.meaning["locations_worst_rating"] == "location_medium"
+
+    # an additional scan was created, and the above endpoint received some meaning
+    assert EndpointGenericScan.objects.count() == 2
+    epgs = EndpointGenericScan.objects.filter(type=SCAN_TYPE_LOCATION_COOKIES).first()
+    assert epgs.rating == "location_medium"
+    assert epgs
+
+
+def test_extract_domains_from_cookies():
+    # omit some fields so it fits in a single line for readability
+    kex = [
+        {"name": "__utma", "domain": ".hardenberg.nl", "sameSite": "Lax"},
+        {"name": "__utmb", "domain": ".hardenberg.nl", "sameSite": "Lax"},
+        {"name": "__utmc", "domain": ".hardenberg.nl", "sameSite": "Lax"},
+        {"name": "__utmt", "domain": ".hardenberg.nl", "sameSite": "Lax"},
+        {"name": "__utmz", "domain": ".hardenberg.nl", "sameSite": "Lax"},
+        {"name": "_ga", "domain": ".hardenberg.nl", "path": "/", "sameSite": "Lax"},
+        {"name": "_ga_SPWNB9HS5Y", "domain": ".hardenberg.nl", "secure": False, "sameSite": "Lax"},
+        {"name": "_pk_id.1.961b", "domain": "www.hardenberg.nl", "path": "/", "sameSite": "Lax"},
+        {
+            "name": "_pk_ses.1.961b",
+            "domain": "www.hardenberg.nl",
+            "path": "/",
+            "httpOnly": False,
+        },
+    ]
+
+    assert extract_domains_from_cookies(kex) == ["hardenberg.nl", "www.hardenberg.nl"]
+
+    # some more scenarios
+    kekz = [
+        {"name": "__utma", "domain": ".hardenberg.nl", "sameSite": "Lax"},
+        {"name": "__utma", "domain": ".nu.nl", "sameSite": "Lax"},
+        {"name": "__utma", "domain": ".internetcleanup.foundation", "sameSite": "Lax"},
+    ]
+    assert extract_domains_from_cookies(kekz) == [
+        "hardenberg.nl",
+        "internetcleanup.foundation",
+        "nu.nl",
+    ]
+
+    assert extract_domains_from_cookies([]) == []

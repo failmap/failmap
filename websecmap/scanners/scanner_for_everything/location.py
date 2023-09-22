@@ -43,7 +43,7 @@ from websecmap.organizations.models import Url
 from websecmap.reporting import time_cache
 from websecmap.scanners.models import GeoIp, DomainIp, DomainMX, UrlGenericScan, EndpointGenericScan
 from websecmap.scanners.scanmanager import store_url_scan_result, store_endpoint_scan_result
-from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_THIRD_PARTY_DOMAINS
+from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_THIRD_PARTY_DOMAINS, WEB_PRIVACY_COOKIES
 
 # On URL:
 SCAN_TYPE_LOCATION_SERVER = "location_server"
@@ -51,6 +51,7 @@ SCAN_TYPE_LOCATION_MAIL_SERVER = "location_mail_server"
 
 # On Endpoint:
 SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT = "location_third_party_website_content"
+SCAN_TYPE_LOCATION_COOKIES = "location_cookies"
 
 LOCATION_HIGH = "location_high"
 LOCATION_MEDIUM = "location_medium"
@@ -236,6 +237,62 @@ def scan_third_party_site_content():
                 message=worst_rating,
                 evidence=json.dumps(rating_series),
             )
+
+
+@app.task(queue="storage", ignore_result=True)
+def create_meaning_of_location_at_web_privacy_cookies():
+    # It's ofc not possible to set a cookie for a different domain. As we already track every request to every site
+    # this means cookie domains are also 100% covered.
+    """
+    {"name": "__utma", "domain": ".hardenberg.nl", "path": "/", "httpOnly...
+    {"name": "__utmb", "domain": ".hardenberg.nl", "path": "/", "httpOnly...
+    {"name": "__utmc", "domain": ".hardenberg.nl", "path": "/", "httpOnly...
+    {"name": "__utmt", "domain": ".hardenberg.nl", "path": "/", "httpOnly...
+    {"name": "__utmz", "domain": ".hardenberg.nl", "path": "/", "httpOnly...
+    {"name": "_ga", "domain": ".hardenberg.nl", "path": "/", "httpOnly": ...
+    {"name": "_ga_SPWNB9HS5Y", "domain": ".hardenberg.nl", "path": "/", "...
+    {"name": "_pk_id.1.961b", "domain": "www.hardenberg.nl", "path": "/",...
+    {"name": "_pk_ses.1.961b", "domain": "www.hardenberg.nl", "path": "/"...
+    """
+    geo_ip_data = get_geoip_database()
+    domain_ip_data = get_domain_to_ip_database()
+    epgss = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_COOKIES, is_the_latest_scan=True)
+    log.debug("Found %d endpoints with site content", epgss.count())
+
+    # todo: perhaps this SHOULD become a separate metric? Or do we just provide this for info and fun cause we can?
+    # let's do both for now...
+    for epgs in epgss:
+        # There will always be site content, if not the list will be empty and thus this metric also.
+        # No need to clean this up.
+        with contextlib.suppress(JSONDecodeError):
+            cookies = json.loads(epgs.evidence)
+            domains = [{"domain": domain} for domain in extract_domains_from_cookies(cookies)]
+            worst_rating, rating_series = create_rating_series_for_domains(domains, domain_ip_data, geo_ip_data)
+            epgs.meaning["locations"] = rating_series
+            epgs.meaning["locations_worst_rating"] = worst_rating
+            epgs.save()
+            store_endpoint_scan_result(
+                scan_type=SCAN_TYPE_LOCATION_COOKIES,
+                endpoint_id=epgs.endpoint.id,
+                rating=worst_rating,
+                message=worst_rating,
+                evidence=json.dumps(rating_series),
+            )
+
+
+def extract_domains_from_cookies(cookies: List[Dict[str, Any]]) -> List[str]:
+    """
+    Extracts domains from a list of cookies.
+    """
+    domains = set()
+    for cookie in cookies:
+        if domain := cookie.get("domain", None):
+            if domain.startswith("."):
+                domain = domain[1:]
+
+            domains.add(domain)
+    # constant ordering so values stay in the same order always
+    return list(sorted(domains))
 
 
 def create_rating_series_for_domains(domains: List[Dict[str, Any]], domain_ip_database, geo_ip_database):
