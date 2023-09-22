@@ -20,7 +20,7 @@ from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.comperators import third_party_request_is_present
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, ProductCookieIndicator
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, ProductCookieIndicator, CookieIndicatorFields
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
@@ -218,8 +218,8 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     # don't store extremely long post data, which has little value. 200 chars is already insane for a site visit.
     third_party_requests = truncate_long_post_data(third_party_requests, 200)
     third_party_domains = result_data.get("third-party-domains", [])
-    timeless_cookies = normalize_cookies(result_data.get("timeless-cookies", []))
-    cookies = normalize_cookies(result_data.get("cookies", []))
+    # timeless-cookies are cookies with unique components (like: value, timestamp) stripped
+    cookies = normalize_cookies(result_data.get("timeless-cookies", []))
 
     known_trackers = get_known_trackers_from_urls(third_party_domains)
 
@@ -256,7 +256,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         WEB_PRIVACY_COOKIES_NEUTRAL,
         message=WEB_PRIVACY_COOKIES_NEUTRAL,
         meaning=cookies_meaning,
-        evidence=json.dumps(timeless_cookies),
+        evidence=json.dumps(cookies),
     )
 
     # derive location metrics from cookies
@@ -272,6 +272,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
 
 
 def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
+    """Generate list of products determined from cookies."""
     cookie_indicators = defaultdict(set)
 
     for indicator in ProductCookieIndicator.objects.all():
@@ -287,12 +288,17 @@ def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
                     products[product.id]["product_id"] = product.id
                     products[product.id]["product_name"] = product.name
                     products[product.id]["product_version"] = "unknown"
-                    products[product.id]["cookies"].append(cookie)
+                    products[product.id]["cookies"].append(strip_irrelevant_cookie_fields(cookie))
                     break
             else:
                 log.debug(f"No product match for cookie: {cookie}")
 
     return products.values()
+
+
+def strip_irrelevant_cookie_fields(cookie: dict, keep_fields={x[1] for x in CookieIndicatorFields.choices}) -> dict:
+    """Strip fields from cookies that where not used to determine product."""
+    return {k: cookie[k] for k in cookie if k in keep_fields}
 
 
 def privacy_counters(add_urls: bool = False) -> None:

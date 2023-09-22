@@ -15,6 +15,7 @@ from websecmap.scanners.scanner.web_privacy import (
     truncate_long_post_data,
     remove_duplicate_third_party_requests,
     product_meaning_from_cookies,
+    strip_irrelevant_cookie_fields,
 )
 
 from websecmap.scanners.scanner.web_privacy_resources.trackers import (
@@ -272,7 +273,7 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
     meaning = EndpointGenericScan.objects.all().filter(type="web_privacy_cookies").first().meaning
 
     assert meaning["products"][0]["product_name"] == "Google Analytics"
-    assert meaning["products"][0]["cookies"][0] == demo_data()["cookies"][0]
+    assert meaning["products"][0]["cookies"][0] == strip_irrelevant_cookie_fields(demo_data()["timeless-cookies"][0])
 
 
 def test_truncate_long_post_data():
@@ -421,13 +422,16 @@ def test_product_meaning_from_cookies(db):
 
     ProductCookieIndicator.objects.create(match_field=CookieIndicatorFields.NAME, match_regex="_gat?", product=p)
 
-    cookies = demo_data()["cookies"]
+    cookies = demo_data()["timeless-cookies"]
 
     assert list(product_meaning_from_cookies(cookies)) == [
         {
             "product_id": p.id,
             "product_name": "Google Analytics",
             "product_version": "unknown",
-            "cookies": [demo_data()["cookies"][0], demo_data()["cookies"][2]],
+            "cookies": [
+                strip_irrelevant_cookie_fields(demo_data()["timeless-cookies"][0]),
+                strip_irrelevant_cookie_fields(demo_data()["timeless-cookies"][1]),
+            ],
         }
     ]
