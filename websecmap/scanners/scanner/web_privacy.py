@@ -269,7 +269,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     )
 
 
-def product_meaning_from_cookies(cookies: list = []) -> dict[str: Any]:
+def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
     cookie_indicators = defaultdict(set)
 
     for indicator in ProductCookieIndicator.objects.all():
@@ -282,10 +282,10 @@ def product_meaning_from_cookies(cookies: list = []) -> dict[str: Any]:
         for cookie in cookies:
             for regex, product in matches:
                 if regex.match(cookie[field]):
-                    products[product.id]['product_id'] = product.id
-                    products[product.id]['product_name'] = product.name
-                    products[product.id]['product_version'] = 'unknown'
-                    products[product.id]['cookies'].append(cookie)
+                    products[product.id]["product_id"] = product.id
+                    products[product.id]["product_name"] = product.name
+                    products[product.id]["product_version"] = "unknown"
+                    products[product.id]["cookies"].append(cookie)
                     break
             else:
                 log.debug(f"No product match for cookie: {cookie}")

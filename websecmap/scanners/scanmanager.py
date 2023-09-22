@@ -11,7 +11,9 @@ log = logging.getLogger(__package__)
 MAX_EVIDENCE_LENGTH = 9000
 
 
-def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, message: str, evidence: str = "", meaning: str = ""):
+def store_endpoint_scan_result(
+    scan_type: str, endpoint_id: int, rating: str, message: str, evidence: str = "", meaning: str = ""
+):
     log.debug(
         "Storage requested for scan type %s, endpoint_id %s, rating: %s, message: %s, meaning: %s",
         scan_type,
@@ -33,7 +35,12 @@ def store_endpoint_scan_result(scan_type: str, endpoint_id: int, rating: str, me
     # The amount of data saved runs in the gigabytes. So it's worth the while doing it like this :)
     # in privacy metrics the rating may stay the same but the evidence can change. Make sure that this change
     # in evidence is reflected.
-    if epgs.explanation == message and epgs.rating == rating and epgs.evidence == evidence[:MAX_EVIDENCE_LENGTH] and epgs.meaning == meaning:
+    if (
+        epgs.explanation == message
+        and epgs.rating == rating
+        and epgs.evidence == evidence[:MAX_EVIDENCE_LENGTH]
+        and epgs.meaning == meaning
+    ):
         log.debug("Scan had the same rating, message and evidence, updating last_scan_moment only.")
         epgs.last_scan_moment = datetime.now(timezone.utc)
         epgs.save(update_fields=["last_scan_moment"])
