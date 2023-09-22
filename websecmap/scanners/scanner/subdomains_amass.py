@@ -191,6 +191,7 @@ Usage: amass enum [options] -d DOMAIN
 import subprocess
 import tempfile
 from typing import Any, Dict, List
+from django.conf import settings
 
 from celery import group
 
@@ -294,8 +295,9 @@ def call_amass(command: List[str]) -> str:
 
         amass = subprocess.Popen(command, stdout=subprocess.PIPE, cwd=tmpdirname, stderr=subprocess.PIPE)
         amass.wait()
-        data = amass.communicate()
-        log.debug(data)
+        if settings.DEBUG:
+            data = amass.communicate()
+            log.debug(data)
 
         with open(f"{tmpdirname}/tmpfile.json", "r") as f:
             json_lines = f.read()
