@@ -514,6 +514,14 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
         help_text="Content that might help understanding the result.",
         blank=True,
     )
+    meaning = JSONField(
+        default={},
+        help_text="Structured meaning about data in evidence. This is derived information based on what "
+                  "evidence is available and will be different for each scan type. This allows for more flexible"
+                  "subtype analysis and updatable policies etc. This column is derived for the latest scan only, not "
+                  "for previous data (unless you have some special powers via the command line ofc)."
+    )
+
     last_scan_moment = models.DateTimeField(
         auto_now_add=True,
         db_index=True,
