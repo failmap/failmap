@@ -15,6 +15,7 @@ from websecmap.scanners.scanner_for_everything.location import (
     create_meaning_of_location_at_web_privacy_cookies,
     extract_domains_from_cookies,
     SCAN_TYPE_LOCATION_COOKIES,
+    applicable_cookies,
 )
 from websecmap.scanners.scanner.web_privacy import (
     WEB_PRIVACY_THIRD_PARTY_DOMAINS,
@@ -293,26 +294,15 @@ def test_create_meaning_of_location_at_web_privacy_cookies(db):
 
     url = Url.objects.create(url="example.com")
     endpoint = Endpoint.objects.create(url=url, port=443, protocol="https", ip_version=4)
-    EndpointGenericScan.objects.create(
+    endpointgenericscan = EndpointGenericScan.objects.create(
         endpoint=endpoint,
         type=WEB_PRIVACY_COOKIES,
         rating=WEB_PRIVACY_COOKIES_NEUTRAL,
         evidence=json.dumps(
             [
                 {"name": "__utma", "domain": ".example.com", "sameSite": "Lax"},
-                {"name": "__utmb", "domain": ".example.com", "sameSite": "Lax"},
-                {"name": "__utmc", "domain": ".example.com", "sameSite": "Lax"},
-                {"name": "__utmt", "domain": ".example.com", "sameSite": "Lax"},
-                {"name": "__utmz", "domain": ".example.com", "sameSite": "Lax"},
-                {"name": "_ga", "domain": ".example.com", "path": "/", "sameSite": "Lax"},
-                {"name": "_ga_SPWNB9HS5Y", "domain": ".example.com", "secure": False, "sameSite": "Lax"},
-                {"name": "_pk_id.1.961b", "domain": "www.example.com", "path": "/", "sameSite": "Lax"},
-                {
-                    "name": "_pk_ses.1.961b",
-                    "domain": "www.example.com",
-                    "path": "/",
-                    "httpOnly": False,
-                },
+                {"name": "_ga", "domain": "google.com", "sameSite": "Lax"},
+                {"name": "_pk_id.1.961b", "domain": "www.example.com", "sameSite": "Lax"},
             ]
         ),
         rating_determined_on=datetime.now(timezone.utc),
@@ -321,7 +311,7 @@ def test_create_meaning_of_location_at_web_privacy_cookies(db):
 
     create_meaning_of_location_at_web_privacy_cookies()
 
-    epgs = EndpointGenericScan.objects.filter(type=WEB_PRIVACY_COOKIES).first()
+    epgs = EndpointGenericScan.objects.filter(type=WEB_PRIVACY_COOKIES, id=endpointgenericscan.pk).first()
     assert "locations" in epgs.meaning
     assert epgs.meaning["locations"] == [
         {
@@ -340,6 +330,9 @@ def test_create_meaning_of_location_at_web_privacy_cookies(db):
                 },
             },
             "rating": "location_medium",
+            "applicable_cookies": [
+                {"name": "__utma", "domain": ".example.com", "sameSite": "Lax"},
+            ],
         },
         {
             "domain": "example.com",
@@ -357,6 +350,10 @@ def test_create_meaning_of_location_at_web_privacy_cookies(db):
                 },
             },
             "rating": "location_unknown",
+            # todo: it's not clear that this an ipv6 finding i guess.
+            "applicable_cookies": [
+                {"name": "__utma", "domain": ".example.com", "sameSite": "Lax"},
+            ],
         },
     ]
     assert epgs.meaning["locations_worst_rating"] == "location_medium"
@@ -402,3 +399,27 @@ def test_extract_domains_from_cookies():
     ]
 
     assert extract_domains_from_cookies([]) == []
+
+    assert extract_domains_from_cookies(None) == []
+
+
+def test_relevant_cookies():
+    kex = [
+        {"name": "__utma", "domain": ".hardenberg.nl", "sameSite": "Lax"},
+        {"name": "_pk_id.1.961b", "domain": "www.hardenberg.nl", "path": "/", "sameSite": "Lax"},
+    ]
+
+    assert applicable_cookies("hardenberg.nl", kex) == [
+        {"name": "__utma", "domain": ".hardenberg.nl", "sameSite": "Lax"},
+    ]
+
+    assert applicable_cookies(".hardenberg.nl", kex) == [
+        {"name": "__utma", "domain": ".hardenberg.nl", "sameSite": "Lax"},
+    ]
+
+    assert applicable_cookies("www.hardenberg.nl", kex) == [
+        {"name": "_pk_id.1.961b", "domain": "www.hardenberg.nl", "path": "/", "sameSite": "Lax"},
+    ]
+
+    assert applicable_cookies("www.nu.nl", kex) == []
+    assert applicable_cookies("www.nu.nl", []) == []

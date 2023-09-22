@@ -24,8 +24,27 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan, ProductCook
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
+from websecmap.scanners.scanner.metric_constants import (
+    WEB_PRIVACY_TRACKING,
+    WEB_PRIVACY_TRACKING_ERROR,
+    WEB_PRIVACY_THIRD_PARTY_REQUESTS,
+    WEB_PRIVACY_THIRD_PARTY_ERROR,
+    WEB_PRIVACY_COOKIES,
+    WEB_PRIVACY_COOKIES_ERROR,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS,
+    WEB_PRIVACY_THIRD_PARTY_FOUND,
+    WEB_PRIVACY_THIRD_PARTY_OK,
+    WEB_PRIVACY_TRACKING_OK,
+    WEB_PRIVACY_TRACKING_TRACKERS_FOUND,
+    WEB_PRIVACY_COOKIES_NEUTRAL,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
+)
+
 from websecmap.scanners.scanner.web_privacy_resources.trackers import get_known_trackers_from_urls
 import json
+
+from websecmap.scanners.scanner_for_everything.location import add_meaning_of_location_at_web_privacy_cookies
 from websecmap.utils import normalize_cookies
 
 SCANNER_NAME = "web_privacy"
@@ -40,26 +59,6 @@ STANDARD_ENDPOINT_FILTER = {
     "ip_version": 4,
     "port": 443,
 }
-
-
-# Metrics:
-WEB_PRIVACY_THIRD_PARTY_REQUESTS = "web_privacy_third_party_requests"
-WEB_PRIVACY_THIRD_PARTY_FOUND = "web_privacy_third_party_found"
-WEB_PRIVACY_THIRD_PARTY_OK = "web_privacy_third_party_ok"
-WEB_PRIVACY_THIRD_PARTY_ERROR = "web_privacy_third_party_error"
-
-WEB_PRIVACY_TRACKING = "web_privacy_tracking"
-WEB_PRIVACY_TRACKING_TRACKERS_FOUND = "web_privacy_tracking_trackers_found"
-WEB_PRIVACY_TRACKING_OK = "web_privacy_tracking_ok"
-WEB_PRIVACY_TRACKING_ERROR = "web_privacy_tracking_error"
-
-WEB_PRIVACY_COOKIES = "web_privacy_cookies"
-WEB_PRIVACY_COOKIES_NEUTRAL = "web_privacy_cookies_neutral"
-WEB_PRIVACY_COOKIES_ERROR = "web_privacy_cookies_error"
-
-WEB_PRIVACY_THIRD_PARTY_DOMAINS = "web_privacy_third_party_domains"
-WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL = "web_privacy_third_party_domains_neutral"
-WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR = "web_privacy_third_party_domains_error"
 
 
 @app.task(queue="kickoff", ignore_result=True)
@@ -251,7 +250,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     }
 
     # also store cookies for later inspection
-    store_endpoint_scan_result(
+    new_endpointgenericscan = store_endpoint_scan_result(
         WEB_PRIVACY_COOKIES,
         endpoint_id,
         WEB_PRIVACY_COOKIES_NEUTRAL,
@@ -259,6 +258,9 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         meaning=cookies_meaning,
         evidence=json.dumps(timeless_cookies),
     )
+
+    # derive location metrics from cookies
+    add_meaning_of_location_at_web_privacy_cookies(new_endpointgenericscan)
 
     store_endpoint_scan_result(
         WEB_PRIVACY_THIRD_PARTY_DOMAINS,

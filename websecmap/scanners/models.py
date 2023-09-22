@@ -509,7 +509,7 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
         help_text="Short explanation from the scanner on how the rating came to be.",
         blank=True,
     )
-    evidence = models.TextField(
+    evidence: str = models.TextField(
         default=0,
         help_text="Content that might help understanding the result.",
         blank=True,

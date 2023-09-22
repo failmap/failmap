@@ -67,9 +67,14 @@ def store_endpoint_scan_result(
     epgs.save()
 
     # Set all the previous endpoint scans of this endpoint + type to NOT be the latest scan.
-    EndpointGenericScan.objects.all().filter(endpoint=epgs.endpoint, type=epgs.type).exclude(pk=epgs.pk).update(
-        is_the_latest_scan=False
-    )
+    EndpointGenericScan.objects.all().filter(
+        endpoint=epgs.endpoint,
+        type=epgs.type,
+        # speed up by only finding the ones that are true, not all results ofc!
+        is_the_latest_scan=True,
+    ).exclude(pk=epgs.pk).update(is_the_latest_scan=False)
+
+    return epgs
 
 
 def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str, evidence: str = ""):
@@ -110,9 +115,14 @@ def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str
         ugs.is_the_latest_scan = True
         ugs.save()
 
-        UrlGenericScan.objects.all().filter(url=ugs.url, type=ugs.type).exclude(pk=ugs.pk).update(
-            is_the_latest_scan=False
-        )
+        UrlGenericScan.objects.all().filter(
+            url=ugs.url,
+            type=ugs.type,
+            # speed up by only finding the ones that are true, not all results ofc!
+            is_the_latest_scan=True,
+        ).exclude(pk=ugs.pk).update(is_the_latest_scan=False)
+
+        return ugs
 
 
 def endpoint_has_scans(scan_type: str, endpoint_id: int):

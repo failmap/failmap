@@ -255,8 +255,10 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
 
     store(scan("https://zutphen.nl"), ep.id)
 
-    # also cookies and the list of third party domains
-    assert EndpointGenericScan.objects.all().count() == 4
+    # also cookies and the list of third party domains, and the derived cookie location metric
+    # (todo: add other derived location metrics)
+    assert EndpointGenericScan.objects.all().count() == 5
+
     assert (
         EndpointGenericScan.objects.all().filter(type="web_privacy_tracking").first().rating
         == "web_privacy_tracking_trackers_found"

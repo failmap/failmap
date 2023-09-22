@@ -43,7 +43,7 @@ from websecmap.organizations.models import Url
 from websecmap.reporting import time_cache
 from websecmap.scanners.models import GeoIp, DomainIp, DomainMX, UrlGenericScan, EndpointGenericScan
 from websecmap.scanners.scanmanager import store_url_scan_result, store_endpoint_scan_result
-from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_THIRD_PARTY_DOMAINS, WEB_PRIVACY_COOKIES
+from websecmap.scanners.scanner.metric_constants import WEB_PRIVACY_THIRD_PARTY_DOMAINS, WEB_PRIVACY_COOKIES
 
 # On URL:
 SCAN_TYPE_LOCATION_SERVER = "location_server"
@@ -241,49 +241,75 @@ def scan_third_party_site_content():
 
 @app.task(queue="storage", ignore_result=True)
 def create_meaning_of_location_at_web_privacy_cookies():
+    # todo: also add this to web privacy store method, so the locations information is complete at every moment.
+
     # It's ofc not possible to set a cookie for a different domain. As we already track every request to every site
     # this means cookie domains are also 100% covered.
-    """
-    {"name": "__utma", "domain": ".hardenberg.nl", "path": "/", "httpOnly...
-    {"name": "__utmb", "domain": ".hardenberg.nl", "path": "/", "httpOnly...
-    {"name": "__utmc", "domain": ".hardenberg.nl", "path": "/", "httpOnly...
-    {"name": "__utmt", "domain": ".hardenberg.nl", "path": "/", "httpOnly...
-    {"name": "__utmz", "domain": ".hardenberg.nl", "path": "/", "httpOnly...
-    {"name": "_ga", "domain": ".hardenberg.nl", "path": "/", "httpOnly": ...
-    {"name": "_ga_SPWNB9HS5Y", "domain": ".hardenberg.nl", "path": "/", "...
-    {"name": "_pk_id.1.961b", "domain": "www.hardenberg.nl", "path": "/",...
-    {"name": "_pk_ses.1.961b", "domain": "www.hardenberg.nl", "path": "/"...
+    """[
+        {"name": "__utma", "domain": ".hardenberg.nl", "path": "/", "httpOnly...
+        {"name": "_ga", "domain": ".hardenberg.nl", "path": "/", "httpOnly": ...
+        {"name": "_ga_SPWNB9HS5Y", "domain": ".hardenberg.nl", "path": "/", "...
+        {"name": "_pk_id.1.961b", "domain": "www.hardenberg.nl", "path": "/",...
+    ]
     """
     geo_ip_data = get_geoip_database()
     domain_ip_data = get_domain_to_ip_database()
-    epgss = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_COOKIES, is_the_latest_scan=True)
-    log.debug("Found %d endpoints with site content", epgss.count())
+    endpointgenericscans = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_COOKIES, is_the_latest_scan=True)
+    log.debug("Found %d endpoints with site content", endpointgenericscans.count())
 
-    # todo: perhaps this SHOULD become a separate metric? Or do we just provide this for info and fun cause we can?
-    # let's do both for now...
-    for epgs in epgss:
-        # There will always be site content, if not the list will be empty and thus this metric also.
-        # No need to clean this up.
-        with contextlib.suppress(JSONDecodeError):
-            cookies = json.loads(epgs.evidence)
-            domains = [{"domain": domain} for domain in extract_domains_from_cookies(cookies)]
-            worst_rating, rating_series = create_rating_series_for_domains(domains, domain_ip_data, geo_ip_data)
-            epgs.meaning["locations"] = rating_series
-            epgs.meaning["locations_worst_rating"] = worst_rating
-            epgs.save()
-            store_endpoint_scan_result(
-                scan_type=SCAN_TYPE_LOCATION_COOKIES,
-                endpoint_id=epgs.endpoint.id,
-                rating=worst_rating,
-                message=worst_rating,
-                evidence=json.dumps(rating_series),
-            )
+    for endpointgenericscan in endpointgenericscans:
+        add_meaning_of_location_at_web_privacy_cookies(endpointgenericscan, domain_ip_data, geo_ip_data)
+
+
+def get_json_list(data) -> List[Any]:
+    try:
+        return json.loads(data)
+    except JSONDecodeError:
+        return []
+
+
+def add_meaning_of_location_at_web_privacy_cookies(
+    endpointgenericscan: EndpointGenericScan, domain_ip_data=None, geo_ip_data=None
+):
+    # you can give them in advance so to save this call which returns a lot of data
+    if not domain_ip_data:
+        domain_ip_data = get_domain_to_ip_database()
+    if not geo_ip_data:
+        geo_ip_data = get_geoip_database()
+
+    # There will always be site content, if not the list will be empty and thus this metric also.
+    # No need to clean this up.
+    cookies = get_json_list(endpointgenericscan.evidence)
+
+    domains = [
+        {"domain": domain, "applicable_cookies": applicable_cookies(domain, cookies)}
+        for domain in extract_domains_from_cookies(cookies)
+    ]
+    worst_rating, rating_series = create_rating_series_for_domains(domains, domain_ip_data, geo_ip_data)
+    # Add this as a separate metric and directly tie the metric to locations
+    endpointgenericscan.meaning["locations"] = rating_series
+    endpointgenericscan.meaning["locations_worst_rating"] = worst_rating
+    endpointgenericscan.save()
+    store_endpoint_scan_result(
+        scan_type=SCAN_TYPE_LOCATION_COOKIES,
+        endpoint_id=endpointgenericscan.endpoint.id,
+        rating=worst_rating,
+        message=worst_rating,
+        evidence=json.dumps(rating_series),
+    )
+
+
+def applicable_cookies(domain: str, cookies: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    return [cookie for cookie in cookies if cookie["domain"] in [domain, f".{domain}"]] if cookies else []
 
 
 def extract_domains_from_cookies(cookies: List[Dict[str, Any]]) -> List[str]:
     """
     Extracts domains from a list of cookies.
     """
+    if not cookies:
+        return []
+
     domains = set()
     for cookie in cookies:
         if domain := cookie.get("domain", None):
@@ -311,9 +337,11 @@ def create_rating_series_for_domains(domains: List[Dict[str, Any]], domain_ip_da
         for ip in ips:
             overall_rating, evidence = match_ip_up_to_policy(ip, "mail_server", geo_ip_database)
             rating = {"rating": overall_rating, "evidence": evidence, "domain": mail_server["domain"]}
-            # inject some properties if those are in the list of domains
+            # inject some properties if those are in the list of domains, should by any other value
             if "priority" in mail_server:
                 rating["priority"] = mail_server["priority"]
+            if "applicable_cookies" in mail_server:
+                rating["applicable_cookies"] = mail_server["applicable_cookies"]
             rating_series.append(rating)
 
     # get the worst from the rating series and use that as the final verdict. The Whole rating series
