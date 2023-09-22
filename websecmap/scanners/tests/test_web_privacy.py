@@ -14,7 +14,7 @@ from websecmap.scanners.scanner.web_privacy import (
     scan,
     truncate_long_post_data,
     remove_duplicate_third_party_requests,
-    products_from_cookies,
+    product_meaning_from_cookies,
 )
 
 from websecmap.scanners.scanner.web_privacy_resources.trackers import (
@@ -256,7 +256,7 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
     store(scan("https://zutphen.nl"), ep.id)
 
     # also cookies and the list of third party domains
-    assert EndpointGenericScan.objects.all().count() == 5
+    assert EndpointGenericScan.objects.all().count() == 4
     assert (
         EndpointGenericScan.objects.all().filter(type="web_privacy_tracking").first().rating
         == "web_privacy_tracking_trackers_found"
@@ -267,9 +267,10 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
         == "web_privacy_third_party_found"
     )
 
-    assert (
-        EndpointGenericScan.objects.all().filter(type="web_privacy_products").first().evidence == '["Google Analytics"]'
-    )
+    meaning = EndpointGenericScan.objects.all().filter(type="web_privacy_cookies").first().meaning
+
+    assert meaning['products'][0]["product_name"] == "Google Analytics"
+    assert meaning['products'][0]["cookies"][0] == demo_data()["cookies"][0]
 
 
 def test_truncate_long_post_data():
@@ -411,13 +412,21 @@ def test_remove_duplicate_third_party_requestss():
     ]
 
 
-def test_products_from_cookies(db):
+def test_product_meaning_from_cookies(db):
     p = Product.objects.create(
         name="Google Analytics",
     )
 
-    ProductCookieIndicator.objects.create(match_field=CookieIndicatorFields.NAME, match_regex="_ga", product=p)
+    ProductCookieIndicator.objects.create(match_field=CookieIndicatorFields.NAME, match_regex="_gat?", product=p)
 
     cookies = demo_data()["cookies"]
 
-    assert products_from_cookies(cookies) == ["Google Analytics"]
+    assert list(product_meaning_from_cookies(cookies)) == [{
+        "product_id": 1,
+        "product_name": "Google Analytics",
+        "product_version": "unknown",
+        "cookies": [
+            demo_data()["cookies"][0],
+            demo_data()["cookies"][2]
+        ]
+    }]

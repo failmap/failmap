@@ -61,10 +61,6 @@ WEB_PRIVACY_THIRD_PARTY_DOMAINS = "web_privacy_third_party_domains"
 WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL = "web_privacy_third_party_domains_neutral"
 WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR = "web_privacy_third_party_domains_error"
 
-WEB_PRIVACY_PRODUCTS = "web_privacy_products"
-WEB_PRIVACY_PRODUCTS_NEUTRAL = "web_privacy_products_neutral"
-WEB_PRIVACY_PRODUCTS_ERROR = "web_privacy_products_error"
-
 
 @app.task(queue="kickoff", ignore_result=True)
 def plan_scan(**kwargs) -> None:
@@ -210,13 +206,6 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
             evidence=error,
         )
 
-        store_endpoint_scan_result(
-            WEB_PRIVACY_PRODUCTS,
-            endpoint_id,
-            WEB_PRIVACY_PRODUCTS_ERROR,
-            WEB_PRIVACY_PRODUCTS_ERROR,
-            evidence=error,
-        )
         return
 
     third_party_requests = result_data.get("third-party-requests-structured", [])
@@ -256,12 +245,18 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         evidence=json.dumps(third_party_requests),
     )
 
+    cookies_meaning = {
+        "products": product_meaning_from_cookies(cookies),
+        "locations": [],
+    }
+
     # also store cookies for later inspection
     store_endpoint_scan_result(
         WEB_PRIVACY_COOKIES,
         endpoint_id,
         WEB_PRIVACY_COOKIES_NEUTRAL,
         message=WEB_PRIVACY_COOKIES_NEUTRAL,
+        meaning=cookies_meaning,
         evidence=json.dumps(timeless_cookies),
     )
 
@@ -273,40 +268,29 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         evidence=json.dumps(third_party_domains),
     )
 
-    products = products_from_cookies(cookies)
-    store_endpoint_scan_result(
-        WEB_PRIVACY_PRODUCTS,
-        endpoint_id,
-        WEB_PRIVACY_PRODUCTS_NEUTRAL,
-        message=WEB_PRIVACY_PRODUCTS_NEUTRAL,
-        evidence=json.dumps(products),
-    )
 
-
-def products_from_cookies(cookies: list = []) -> list[str]:
+def product_meaning_from_cookies(cookies: list = []) -> dict[str: Any]:
     cookie_indicators = defaultdict(set)
 
     for indicator in ProductCookieIndicator.objects.all():
         cookie_indicators[indicator.get_match_field_display()].add(
-            (re.compile(indicator.match_regex), indicator.product.name)
+            (re.compile(f"^{indicator.match_regex}$"), indicator.product)
         )
 
-    # cookie_indicators = {
-    #     "name": (
-    #         (re.compile("JSESSION"), "Java"),
-    #     )
-    # }
-
-    products = set()
+    products = defaultdict(lambda: dict([["cookies", list()]]))
     for field, matches in cookie_indicators.items():
         for cookie in cookies:
             for regex, product in matches:
                 if regex.match(cookie[field]):
-                    products.add(product)
+                    products[product.id]['product_id'] = product.id
+                    products[product.id]['product_name'] = product.name
+                    products[product.id]['product_version'] = 'unknown'
+                    products[product.id]['cookies'].append(cookie)
                     break
             else:
                 log.debug(f"No product match for cookie: {cookie}")
-    return list(products)
+
+    return products.values()
 
 
 def privacy_counters(add_urls: bool = False) -> None:
