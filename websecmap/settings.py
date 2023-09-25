@@ -383,12 +383,12 @@ LOGGING = {
             "handlers": ["console"],  # if IS_WORKER else None,
             "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
         },
-        # disable verbose task logging (ie: "received task...", "...succeeded in...")
-        "celery.app.trace": {
-            "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG") if DEBUG else "ERROR",
-        },
+        # log celery task received messages to console
         "celery.worker.strategy": {
+            "level": "INFO",
+        },
+        # log celery task succeeded or retry messages to console
+        "celery.app.trace": {
             "level": "INFO",
         },
     },
