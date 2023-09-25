@@ -38,7 +38,7 @@ def return_safe_response(answer):
     return answer.status_code, {}
 
 
-@app.task(queue="storage")
+@app.task(queue="database_deprecate")
 def register(domains: List[str], scan_type: str, tracking_information: str, settings: Dict[str, Any]) -> (str, str):
     data = {"type": scan_type, "name": tracking_information, "domains": domains}
 
@@ -56,27 +56,27 @@ def register(domains: List[str], scan_type: str, tracking_information: str, sett
     return return_safe_response(response)
 
 
-@app.task(queue="storage")
+@app.task(queue="database_deprecate")
 def metadata(settings: Dict[str, Any]):
     return generic_internet_nl_api_request("get", f"{settings['url']}/metadata/report", settings)
 
 
-@app.task(queue="storage")
+@app.task(queue="database_deprecate")
 def status(scan_id: int, settings: Dict[str, Any]):
     return generic_internet_nl_api_request("get", f"{settings['url']}/requests/{scan_id}", settings)
 
 
-@app.task(queue="storage")
+@app.task(queue="database_deprecate")
 def cancel(scan_id: int, settings: Dict[str, Any]):
     return generic_internet_nl_api_request("patch", f"{settings['url']}/requests/{scan_id}", settings)
 
 
-@app.task(queue="storage")
+@app.task(queue="database_deprecate")
 def result(scan_id: int, settings: Dict[str, Any]):
     return generic_internet_nl_api_request("get", f"{settings['url']}/requests/{scan_id}/results", settings)
 
 
-@app.task(queue="storage")
+@app.task(queue="database_deprecate")
 def result_technical(scan_id: int, settings: Dict[str, Any]):
     return generic_internet_nl_api_request("get", f"{settings['url']}/requests/{scan_id}/results_technical", settings)
 
