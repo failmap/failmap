@@ -67,8 +67,15 @@ QUEUES_MATCHING_ROLES = {
         Queue("ipv6"),
         # needs both network families to be present
         Queue("4and6"),
-        # for tasks that require a database connection
+        # Queue used at the end of a task to store the results
         Queue("storage"),
+        # for tasks that require db connection for reading and writing
+        # TODO: ideally a minimal amount of tasks should use this queue as tasks should get all their input
+        # handed to them and output to a 'store' task. But sometimes it might be better for performance to
+        # read and write to the DB, eg: generating reports.
+        Queue("database"),
+        # queue for tasks that talk with the DB now, but should be rewritten to not do that, se TODO above
+        Queue("database_deprecate"),
         # celery internal maintenance (eg: remove expired results)
         Queue("celery"),
         # tasks that require no network, no database. Such as calculations, parsing of datasets etc.
@@ -131,13 +138,20 @@ QUEUES_MATCHING_ROLES = {
         Queue("alt_ipv6"),
         Queue("isolated"),
     ],
-    # Queue used at the end of a task to store the results
     "storage": [
+        # Queue used at the end of a task to store the results
         Queue("storage"),
+    ],
+    "database": [
+        # for tasks that require db connection for reading and writing
+        # TODO: ideally a minimal amount of tasks should use this queue as tasks should get all their input
+        # handed to them and output to a 'store' task. But sometimes it might be better for performance to
+        # read and write to the DB, eg: generating reports.
+        Queue("database"),
+        # queue for tasks that talk with the DB now, but should be rewritten to not do that, se TODO above
+        Queue("database_deprecate"),
         # celery internal maintenance (eg: remove expired results)
         Queue("celery"),
-        # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might block the worker.
-        # Given there is only one storage worker, blocking it doesn't help it's work.
     ],
     # this is where tasks are started: scans are planned and added to the rest to the worker.
     # storage is used for storing after you're done

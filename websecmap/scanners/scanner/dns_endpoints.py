@@ -164,7 +164,7 @@ def compose_verify_task(
     return compose_new_verify_task(urls)
 
 
-@app.task(queue="storage")
+@app.task(queue="database_deprecate")
 def has_soa(url: str) -> bool:
     """
     The SOA records is the primary check for internet.nl mail. If there is a SOA
@@ -276,7 +276,7 @@ def has_soa(url: str) -> bool:
     return False
 
 
-@app.task(queue="storage")
+@app.task(queue="database_deprecate")
 def has_mx_without_cname(url: str) -> bool:
     """
     If there is an MX record, that is not part of a CNAME, store it as an mx_mail endpoint.
@@ -321,7 +321,7 @@ def has_mx_without_cname(url: str) -> bool:
     return False
 
 
-@app.task(queue="storage")
+@app.task(queue="database_deprecate")
 def has_a_or_aaaa(url: str) -> bool:
     """
     used for internet.nl web scans. The issue with regular endpoint is that you never know
