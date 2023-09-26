@@ -8,8 +8,6 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan, Url, UrlGen
 
 log = logging.getLogger(__package__)
 
-MAX_EVIDENCE_LENGTH = 9000
-
 
 def store_endpoint_scan_result(
     scan_type: str, endpoint_id: int, rating: str, message: str, evidence: str = "", meaning: str = ""
@@ -38,7 +36,9 @@ def store_endpoint_scan_result(
     if (
         epgs.explanation == message
         and epgs.rating == rating
-        and epgs.evidence == evidence[:MAX_EVIDENCE_LENGTH]
+        # TODO: this will cause issues when meanings are to be recalculated from evidence. For example with
+        # cookies, json.dumps parsing will fail due to missing closing brackets, etc.
+        and epgs.evidence == evidence
         and epgs.meaning == meaning
     ):
         log.debug("Scan had the same rating, message and evidence, updating last_scan_moment only.")
@@ -59,7 +59,7 @@ def store_endpoint_scan_result(
     epgs.endpoint = Endpoint.objects.all().filter(id=endpoint_id).first()
     epgs.type = scan_type
     # Very long CSP headers for example take a lot of space.
-    epgs.evidence = evidence[:MAX_EVIDENCE_LENGTH]
+    epgs.evidence = evidence
     epgs.meaning = meaning
     epgs.last_scan_moment = datetime.now(timezone.utc)
     epgs.rating_determined_on = datetime.now(timezone.utc)
@@ -97,7 +97,7 @@ def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str
 
     # last scan had exactly the same result, so don't create a new scan and just update the last scan date.
     # while we have type hinting, it's still possible to pass in a boolean and then you compare a str to a bool...
-    if ugs.explanation == message and ugs.rating == rating and ugs.evidence == evidence[:MAX_EVIDENCE_LENGTH]:
+    if ugs.explanation == message and ugs.rating == rating and ugs.evidence == evidence:
         log.debug("Scan had the same rating and message, updating last_scan_moment only.")
         ugs.last_scan_moment = datetime.now(timezone.utc)
         ugs.save(update_fields=["last_scan_moment"])

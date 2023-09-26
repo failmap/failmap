@@ -265,6 +265,8 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
         == "web_privacy_tracking_trackers_found"
     )
 
+    assert EndpointGenericScan.objects.all().filter(type="location_cookies").first().rating == "location_unknown"
+
     assert (
         EndpointGenericScan.objects.all().filter(type="web_privacy_third_party_requests").first().rating
         == "web_privacy_third_party_found"

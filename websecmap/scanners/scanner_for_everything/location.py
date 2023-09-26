@@ -241,8 +241,6 @@ def scan_third_party_site_content():
 
 @app.task(queue="storage", ignore_result=True)
 def create_meaning_of_location_at_web_privacy_cookies():
-    # todo: also add this to web privacy store method, so the locations information is complete at every moment.
-
     # It's ofc not possible to set a cookie for a different domain. As we already track every request to every site
     # this means cookie domains are also 100% covered.
     """[
@@ -265,27 +263,35 @@ def get_json_list(data) -> List[Any]:
     try:
         return json.loads(data)
     except JSONDecodeError:
+        log.exception("failed to get cookies from evidence")
         return []
 
 
-def add_meaning_of_location_at_web_privacy_cookies(
-    endpointgenericscan: EndpointGenericScan, domain_ip_data=None, geo_ip_data=None
-):
+def meaning_of_location_at_web_privacy_cookies(cookies, domain_ip_data=None, geo_ip_data=None):
     # you can give them in advance so to save this call which returns a lot of data
     if not domain_ip_data:
         domain_ip_data = get_domain_to_ip_database()
     if not geo_ip_data:
         geo_ip_data = get_geoip_database()
 
-    # There will always be site content, if not the list will be empty and thus this metric also.
-    # No need to clean this up.
-    cookies = get_json_list(endpointgenericscan.evidence)
-
     domains = [
         {"domain": domain, "applicable_cookies": applicable_cookies(domain, cookies)}
         for domain in extract_domains_from_cookies(cookies)
     ]
     worst_rating, rating_series = create_rating_series_for_domains(domains, domain_ip_data, geo_ip_data)
+
+    return worst_rating, rating_series
+
+
+def add_meaning_of_location_at_web_privacy_cookies(
+    endpointgenericscan: EndpointGenericScan, domain_ip_data=None, geo_ip_data=None
+):
+    # There will always be site content, if not the list will be empty and thus this metric also.
+    # No need to clean this up.
+    cookies = get_json_list(endpointgenericscan.evidence)
+
+    worst_rating, rating_series = meaning_of_location_at_web_privacy_cookies(cookies, domain_ip_data, geo_ip_data)
+
     # Add this as a separate metric and directly tie the metric to locations
     endpointgenericscan.meaning["locations"] = rating_series
     endpointgenericscan.meaning["locations_worst_rating"] = worst_rating

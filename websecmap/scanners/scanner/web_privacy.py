@@ -44,7 +44,10 @@ from websecmap.scanners.scanner.metric_constants import (
 from websecmap.scanners.scanner.web_privacy_resources.trackers import get_known_trackers_from_urls
 import json
 
-from websecmap.scanners.scanner_for_everything.location import add_meaning_of_location_at_web_privacy_cookies
+from websecmap.scanners.scanner_for_everything.location import (
+    meaning_of_location_at_web_privacy_cookies,
+    SCAN_TYPE_LOCATION_COOKIES,
+)
 from websecmap.utils import normalize_cookies
 
 SCANNER_NAME = "web_privacy"
@@ -226,9 +229,9 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     # happens sometimes, where it should not
     web_privacy_tracking_rating = WEB_PRIVACY_TRACKING_TRACKERS_FOUND if known_trackers else WEB_PRIVACY_TRACKING_OK
     store_endpoint_scan_result(
-        WEB_PRIVACY_TRACKING,
-        endpoint_id,
-        web_privacy_tracking_rating,
+        scan_type=WEB_PRIVACY_TRACKING,
+        endpoint_id=endpoint_id,
+        rating=web_privacy_tracking_rating,
         message=web_privacy_tracking_rating,
         evidence=known_trackers,
     )
@@ -237,35 +240,47 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     # todo: to avoid duplicate findings ignore content of parameters, only check for parameters and addresses
     web_third_party_rating = WEB_PRIVACY_THIRD_PARTY_FOUND if third_party_requests else WEB_PRIVACY_THIRD_PARTY_OK
     store_endpoint_scan_result(
-        WEB_PRIVACY_THIRD_PARTY_REQUESTS,
-        endpoint_id,
-        web_third_party_rating,
+        scan_type=WEB_PRIVACY_THIRD_PARTY_REQUESTS,
+        endpoint_id=endpoint_id,
+        rating=web_third_party_rating,
         message=web_third_party_rating,
         evidence=json.dumps(third_party_requests),
     )
 
+    products = product_meaning_from_cookies(cookies)
     cookies_meaning = {
-        "products": product_meaning_from_cookies(cookies),
-        "locations": [],
+        "products": products,
     }
 
     # also store cookies for later inspection
-    new_endpointgenericscan = store_endpoint_scan_result(
-        WEB_PRIVACY_COOKIES,
-        endpoint_id,
-        WEB_PRIVACY_COOKIES_NEUTRAL,
+    store_endpoint_scan_result(
+        scan_type=WEB_PRIVACY_COOKIES,
+        endpoint_id=endpoint_id,
+        rating=WEB_PRIVACY_COOKIES_NEUTRAL,
         message=WEB_PRIVACY_COOKIES_NEUTRAL,
         meaning=cookies_meaning,
         evidence=json.dumps(cookies),
     )
 
-    # derive location metrics from cookies
-    add_meaning_of_location_at_web_privacy_cookies(new_endpointgenericscan)
+    locations_worst_rating, locations_rating_series = meaning_of_location_at_web_privacy_cookies(cookies)
+    cookies_location_meaning = {
+        "locations_worst_rating": locations_worst_rating,
+        "locations": locations_rating_series,
+    }
 
     store_endpoint_scan_result(
-        WEB_PRIVACY_THIRD_PARTY_DOMAINS,
-        endpoint_id,
-        WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
+        scan_type=SCAN_TYPE_LOCATION_COOKIES,
+        endpoint_id=endpoint_id,
+        rating=locations_worst_rating,
+        message=locations_worst_rating,
+        meaning=cookies_location_meaning,
+        evidence=json.dumps(cookies),
+    )
+
+    store_endpoint_scan_result(
+        scan_type=WEB_PRIVACY_THIRD_PARTY_DOMAINS,
+        endpoint_id=endpoint_id,
+        rating=WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
         message=WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
         evidence=json.dumps(third_party_domains),
     )
