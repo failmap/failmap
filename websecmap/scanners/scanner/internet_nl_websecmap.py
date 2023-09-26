@@ -585,7 +585,7 @@ def result_administration_technical(response: Tuple[int, dict], scan_id: int):
     scan.save()
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def process_scan_results(scan_id: int):
     scan_type_to_protocol = {
         # mail is used for web security map, it is a subset of mail servers that dedupes servers on cnames.
