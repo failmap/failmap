@@ -59,27 +59,30 @@ COOKIE_NORMALIZATIONS = [
 ]
 
 
+def normalize_cookie_name(cookie_name: str) -> str:
+    # as long as it's just names...
+    new_name = ""
+
+    for regex in COOKIE_NORMALIZATIONS:
+        match = re.match(f"^{regex}$", cookie_name)
+        if not match:
+            continue
+
+        for group, value in match.groupdict().items():
+            new_name += value if group == "keep" else "<HASH_OR_ID>"
+        break
+    else:
+        return cookie_name
+
+    return new_name
+
+
 def normalize_cookies(cookies: list[dict]) -> list[dict]:
     """Remove unique hashes/id's from cookie names to make them easier to dedupe."""
 
     new_cookies = list()
     for cookie in cookies:
-        name = cookie["name"]
-        for regex in COOKIE_NORMALIZATIONS:
-            match = re.match(f"^{regex}$", cookie["name"])
-            if not match:
-                continue
-            new_name = ""
-            for group, value in match.groupdict().items():
-                if group == "keep":
-                    new_name += value
-                else:
-                    new_name += "<HASH_OR_ID>"
-            break
-        else:
-            new_name = name
-
-        new_cookies.append({**cookie, "name": new_name})
+        new_cookies.append({**cookie, "name": normalize_cookie_name(cookie["name"])})
 
     return new_cookies
 

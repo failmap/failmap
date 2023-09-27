@@ -19,6 +19,7 @@ from websecmap.scanners.scanner_for_everything.location import (
     SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
     SCAN_TYPE_LOCATION_SERVER,
 )
+from websecmap.utils import normalize_cookie_name
 
 
 def export_current_metrics(
@@ -214,6 +215,7 @@ def pivot_cookies(scan: Union[EndpointGenericScan, UrlGenericScan]) -> List[dict
             {
                 # the well known fields of cookies
                 "cookie_name": row["name"],
+                "cookie_name_normalized": normalize_cookie_name(row["name"]),
                 "cookie_domain": row["domain"],
                 "cookie_path": row["path"],
                 "cookie_httpOnly": row["httpOnly"],
