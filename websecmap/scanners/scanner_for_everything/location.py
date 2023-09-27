@@ -263,7 +263,7 @@ def get_json_list(data) -> List[Any]:
     try:
         return json.loads(data)
     except JSONDecodeError:
-        log.exception("failed to get cookies from evidence")
+        # log.exception("failed to get cookies from evidence")
         return []
 
 
