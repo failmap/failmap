@@ -9,7 +9,6 @@ import uuid
 
 import pyexcel
 
-from websecmap.app import log
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 import json
 
@@ -18,6 +17,7 @@ from websecmap.scanners.scanner_for_everything.location import (
     SCAN_TYPE_LOCATION_MAIL_SERVER,
     SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
     SCAN_TYPE_LOCATION_SERVER,
+    SCAN_TYPE_LOCATION_COOKIES,
 )
 from websecmap.utils import normalize_cookie_name
 
@@ -162,10 +162,13 @@ def determine_pivot_records(scan_type: str, scan) -> List[dict[str, Any]]:
         SCAN_TYPE_LOCATION_MAIL_SERVER,
         SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
     ]:
-        return pivot_location_evidence(scan)
+        return pivot_location_evidence(load_possible_json(scan.evidence))
 
     if scan_type in [WEB_PRIVACY_COOKIES]:
-        return pivot_cookies(scan)
+        return pivot_cookies(load_possible_json(scan.evidence))
+
+    if scan_type in [SCAN_TYPE_LOCATION_COOKIES]:
+        return pivot_cookie_locations(load_possible_json(scan.evidence))
 
     return []
 
@@ -177,62 +180,61 @@ def load_possible_json(data):
         return []
 
 
-def pivot_cookies(scan: Union[EndpointGenericScan, UrlGenericScan]) -> List[dict[str, Any]]:
+def pivot_cookies(evidence) -> List[Dict[str, Any]]:
     # Cookies are already a flat object. But we'll add a cookie_ prefix to better identify them:
     # currently the value is not stored as it's usually random and causes a lot of data
+    return [pivot_cookie_record(row) for row in evidence]
+
+
+def pivot_location_evidence(evidence: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    return [pivot_location_record(record) for record in evidence]
+
+
+def pivot_cookie_locations(evidence: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    # This mixes cookie AND location which needs to be exported to a flat list...
+    #
     """
     [
       {
-        "name": "ClientId",
-        "domain": "outlook.office365.com",
-        "path": "/",
-        "httpOnly": false,
-        "secure": true,
-        "sameSite": "None"
+        "rating": "location_ok",
+        "evidence": {
+          "found_location": {
+            "continent_code": "EU",
+            "country_iso_code": "NL",
+            "city_in_en": "",
+            "as_number": 43366,
+            "as_organization": "OSSO B.V.",
+            "isp_ame": "OSSO B.V.",
+            "network": "195.28.22.0/23"
+          },
+          "country_rating": "unknown",
+          "continent_rating": "ok"
+        },
+        "domain": "intranet-acc.landvancuijk.nl",
+        "applicable_cookies": [
+          {
+            "name": "OpenIdConnect.nonce.vOur6PVRCBGfx8IXbV%2FVi3iEM83xsoymaqEYvgC5%2BTg%3D",
+            "domain": "intranet-acc.landvancuijk.nl",
+            "path": "/",
+            "httpOnly": true,
+            "secure": true,
+            "sameSite": "None"
+          }
+        ]
       },
       ...
-
-    to:
-        [
-      {
-        "cookie_name": "ClientId",
-        "cookie_domain": "outlook.office365.com",
-        "cookie_path": "/",
-        "cookie_httpOnly": false,
-        "cookie_secure": true,
-        "cookie_sameSite": "None"
-      },
-      ...
-
+    ]
     """
-    print(scan)
-    evidence = load_possible_json(scan.evidence)
-    export = []
+    per_cookie_record = []
     for row in evidence:
-        extract = tldextract.extract(row["domain"])
-
-        export.append(
-            {
-                # the well known fields of cookies
-                "cookie_name": row["name"],
-                "cookie_name_normalized": normalize_cookie_name(row["name"]),
-                "cookie_domain": row["domain"],
-                "cookie_path": row["path"],
-                "cookie_httpOnly": row["httpOnly"],
-                "cookie_secure": row["secure"],
-                "cookie_sameSite": row["sameSite"],
-                # there can be patterns in subdomains as well
-                # and perhaps this information might be junk?
-                "cookie_parsed_subdomain": extract.subdomain,
-                "cookie_parsed_domain": extract.domain,
-                "cookie_parsed_domainsuffix": extract.suffix,
-                "cookie_parsed_fqdn": extract.fqdn,
-            }
-        )
-    return export
+        per_location_record = pivot_location_record(row)
+        for cookie in row["applicable_cookies"]:
+            cr = pivot_cookie_record(cookie)
+            per_cookie_record.append({**per_location_record, **cr})
+    return per_cookie_record
 
 
-def pivot_location_evidence(scan: Union[EndpointGenericScan, UrlGenericScan]) -> List[dict[str, Any]]:
+def pivot_location_record(record) -> Dict[str, Any]:
     """
     Convert
       {
@@ -268,27 +270,63 @@ def pivot_location_evidence(scan: Union[EndpointGenericScan, UrlGenericScan]) ->
         "domain": "app-script.monsido.com"
       },
     """
+    return {
+        "rating": record.get("rating"),
+        "continent_code": record.get("evidence", {}).get("found_location", {}).get("continent_code", ""),
+        "country_iso_code": record.get("evidence", {}).get("found_location", {}).get("country_iso_code", ""),
+        "city_in_en": record.get("evidence", {}).get("found_location", {}).get("city_in_en", ""),
+        "as_number": record.get("evidence", {}).get("found_location", {}).get("as_number", -1),
+        "as_organization": record.get("evidence", {}).get("found_location", {}).get("as_organization", ""),
+        "isp_ame": record.get("evidence", {}).get("found_location", {}).get("isp_ame", ""),
+        "network": record.get("evidence", {}).get("found_location", {}).get("network", ""),
+        "country_rating": record.get("evidence", {}).get("country_rating", ""),
+        "continent_rating": record.get("evidence", {}).get("continent_rating", ""),
+        "domain": record.get("domain", ""),
+        "priority": record.get("priority", ""),
+    }
 
-    try:
-        # might be corrupted etc...
-        evidence = json.loads(scan.evidence)
-        return [
-            {
-                "rating": record.get("rating"),
-                "continent_code": record.get("evidence", {}).get("found_location", {}).get("continent_code", ""),
-                "country_iso_code": record.get("evidence", {}).get("found_location", {}).get("country_iso_code", ""),
-                "city_in_en": record.get("evidence", {}).get("found_location", {}).get("city_in_en", ""),
-                "as_number": record.get("evidence", {}).get("found_location", {}).get("as_number", -1),
-                "as_organization": record.get("evidence", {}).get("found_location", {}).get("as_organization", ""),
-                "isp_ame": record.get("evidence", {}).get("found_location", {}).get("isp_ame", ""),
-                "network": record.get("evidence", {}).get("found_location", {}).get("network", ""),
-                "country_rating": record.get("evidence", {}).get("country_rating", ""),
-                "continent_rating": record.get("evidence", {}).get("continent_rating", ""),
-                "domain": record.get("domain", ""),
-                "priority": record.get("priority", ""),
-            }
-            for record in evidence
-        ]
-    except json.JSONDecodeError:
-        log.debug("Invalid location evidence for scan %s with id %s", scan.type, scan.id)
-        return []
+
+def pivot_cookie_record(record) -> Dict[str, Any]:
+    """
+    [
+      {
+        "name": "ClientId",
+        "domain": "outlook.office365.com",
+        "path": "/",
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      ...
+
+    to:
+        [
+      {
+        "cookie_name": "ClientId",
+        "cookie_domain": "outlook.office365.com",
+        "cookie_path": "/",
+        "cookie_httpOnly": false,
+        "cookie_secure": true,
+        "cookie_sameSite": "None"
+      },
+      ...
+
+    """
+    extract = tldextract.extract(record["domain"])
+
+    return {
+        # the well known fields of cookies
+        "cookie_name": record["name"],
+        "cookie_name_normalized": normalize_cookie_name(record["name"]),
+        "cookie_domain": record["domain"],
+        "cookie_path": record["path"],
+        "cookie_httpOnly": record["httpOnly"],
+        "cookie_secure": record["secure"],
+        "cookie_sameSite": record["sameSite"],
+        # there can be patterns in subdomains as well
+        # and perhaps this information might be junk?
+        "cookie_parsed_subdomain": extract.subdomain,
+        "cookie_parsed_domain": extract.domain,
+        "cookie_parsed_domainsuffix": extract.suffix,
+        "cookie_parsed_fqdn": extract.fqdn,
+    }
