@@ -1125,6 +1125,8 @@ class ProductCookieIndicator(models.Model):
     )
     match_regex = models.CharField(max_length=200, blank=True, null=False)
 
+    notes = models.TextField(blank=True, null=True)
+
 
 class HttpEndpointContent(models.Model):
     # use playwright to only get text of the page and not the HTML?
