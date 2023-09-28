@@ -20,7 +20,7 @@ def create_tasks() -> group:
     return group(tasks)
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="database", ignore_result=True)
 def get_mailservers(url: str) -> List:
     answer = get_dns_records(url, "MX")
     if not answer:
