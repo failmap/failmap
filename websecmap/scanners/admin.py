@@ -846,7 +846,8 @@ class ProductRelationshipAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.ProductCookieIndicator)
 class ProductCookieIndicatorAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("id", "match_field", "match_regex", "product")
+    list_display = ("id", "match_name", "match_domain", "match_path")
+    exclude = ("match_regex", "match_field")
 
     @staticmethod
     def uses(obj):

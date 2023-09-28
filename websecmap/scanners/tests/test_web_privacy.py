@@ -7,7 +7,6 @@ from websecmap.scanners.models import (
     EndpointGenericScan,
     ProductCookieIndicator,
     Product,
-    CookieIndicatorFields,
 )
 from websecmap.scanners.scanner.web_privacy import (
     store,
@@ -252,7 +251,7 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
         name="Google Analytics",
     )
 
-    ProductCookieIndicator.objects.create(match_field=CookieIndicatorFields.NAME, match_regex="_ga", product=p)
+    ProductCookieIndicator.objects.create(match_name="_ga", product=p)
 
     store(scan("https://zutphen.nl"), ep.id)
 
@@ -422,7 +421,12 @@ def test_product_meaning_from_cookies(db):
         name="Google Analytics",
     )
 
-    ProductCookieIndicator.objects.create(match_field=CookieIndicatorFields.NAME, match_regex="_gat?", product=p)
+    p2 = Product.objects.create(
+        name="OWA",
+    )
+
+    ProductCookieIndicator.objects.create(match_name="_gat?", product=p)
+    ProductCookieIndicator.objects.create(match_name="cookieTest", match_path="/owa/auth.*", product=p2)
 
     cookies = demo_data()["timeless-cookies"]
 
@@ -434,6 +438,29 @@ def test_product_meaning_from_cookies(db):
             "cookies": [
                 strip_irrelevant_cookie_fields(demo_data()["timeless-cookies"][0]),
                 strip_irrelevant_cookie_fields(demo_data()["timeless-cookies"][1]),
+            ],
+        }
+    ]
+
+    owa_cookies = [
+        {
+            "name": "cookieTest",
+            "path": "/owa/auth/example.com",
+            "domain": "example.com",
+        },
+        {
+            "name": "cookieTest",
+            "path": "/",
+            "domain": "example.com",
+        },
+    ]
+    assert list(product_meaning_from_cookies(owa_cookies)) == [
+        {
+            "product_id": p2.id,
+            "product_name": "OWA",
+            "product_version": "unknown",
+            "cookies": [
+                strip_irrelevant_cookie_fields(owa_cookies[0]),
             ],
         }
     ]

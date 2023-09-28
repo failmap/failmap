@@ -1117,6 +1117,10 @@ class CookieIndicatorFields(models.IntegerChoices):
 
 
 class ProductCookieIndicator(models.Model):
+    """Matches a cookie to a product using the 'name', 'domain' and 'path' fields of
+    the cookie. All fields must match. Leave fields empty to ignore them. Fields are
+    specified as Regular Expression which will be wrapped in `^` and `$`."""
+
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     match_field = models.PositiveSmallIntegerField(
         choices=CookieIndicatorFields.choices,
@@ -1125,7 +1129,24 @@ class ProductCookieIndicator(models.Model):
     )
     match_regex = models.CharField(max_length=200, blank=True, null=False)
 
-    notes = models.TextField(blank=True, null=True)
+    match_name = models.CharField(
+        max_length=200, blank=True, null=True, help_text="Match cookie name against this regex, is wrapped in '^$'."
+    )
+    match_domain = models.CharField(
+        max_length=200, blank=True, null=True, help_text="Match cookie domain against this regex, is wrapped in '^$'."
+    )
+    match_path = models.CharField(
+        max_length=200, blank=True, null=True, help_text="Match cookie path against this regex, is wrapped in '^$'."
+    )
+
+    notes = models.TextField(
+        blank=True,
+        null=True,
+        help_text=(
+            "Provide context around how the relation with the cookie and product was found for "
+            "future decisions to modify or remove this indicator."
+        ),
+    )
 
 
 class HttpEndpointContent(models.Model):

@@ -288,25 +288,29 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
 
 def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
     """Generate list of products determined from cookies."""
-    cookie_indicators = defaultdict(set)
+    cookie_indicators = list()
 
     for indicator in ProductCookieIndicator.objects.all():
-        cookie_indicators[indicator.get_match_field_display()].add(
-            (re.compile(f"^{indicator.match_regex}$"), indicator.product)
-        )
+        matchers = dict()
+        if indicator.match_name:
+            matchers["name"] = re.compile(f"^{indicator.match_name}$")
+        if indicator.match_domain:
+            matchers["domain"] = re.compile(f"^{indicator.match_domain}$")
+        if indicator.match_path:
+            matchers["path"] = re.compile(f"^{indicator.match_path}$")
+        cookie_indicators.append((matchers, indicator.product))
 
     products = defaultdict(lambda: dict([["cookies", list()]]))
-    for field, matches in cookie_indicators.items():
-        for cookie in cookies:
-            for regex, product in matches:
-                if regex.match(cookie[field]):
-                    products[product.id]["product_id"] = product.id
-                    products[product.id]["product_name"] = product.name
-                    products[product.id]["product_version"] = "unknown"
-                    products[product.id]["cookies"].append(strip_irrelevant_cookie_fields(cookie))
-                    break
-            else:
-                log.debug(f"No product match for cookie: {cookie}")
+    for cookie in cookies:
+        for matchers, product in cookie_indicators:
+            if all(matcher.match(cookie[field]) for field, matcher in matchers.items()):
+                products[product.id]["product_id"] = product.id
+                products[product.id]["product_name"] = product.name
+                products[product.id]["product_version"] = "unknown"
+                products[product.id]["cookies"].append(strip_irrelevant_cookie_fields(cookie))
+                break
+        else:
+            log.debug(f"No product match for cookie: {cookie}")
 
     return products.values()
 
