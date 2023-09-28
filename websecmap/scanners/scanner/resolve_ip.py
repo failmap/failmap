@@ -32,7 +32,7 @@ def compose_manual_scan_task(
     return compose_scan_task(refresh_ips.s())
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def refresh_ips():
     # find ip-addresses from all domains currently used. This is currently not in the database.
     # this takes a larger amount of dns queries.
@@ -42,6 +42,8 @@ def refresh_ips():
 
     # this is done linearly: it could be done with a threadpool, but this is already very fast... so why bother to
     # overload the resolver. That would not be nice :)
+
+    # TODO: this needs to be refactored to chunk the urls, as it can currently take hours for one run to finish
     if not allowed_to_scan(SCANNER_NAME):
         return
 
