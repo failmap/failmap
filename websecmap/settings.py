@@ -385,11 +385,11 @@ LOGGING = {
         },
         # log celery task received messages to console
         "celery.worker.strategy": {
-            "level": "INFO" if DEBUG else "ERROR",
+            "level": "INFO",
         },
         # log celery task succeeded or retry messages to console
         "celery.app.trace": {
-            "level": "INFO" if DEBUG else "ERROR",
+            "level": "INFO",
         },
     },
 }
