@@ -16,6 +16,7 @@ from websecmap.scanners.scanner.web_privacy import (
     remove_duplicate_third_party_requests,
     product_meaning_from_cookies,
     strip_irrelevant_cookie_fields,
+    update_meaning_of_location_and_products_at_web_privacy_cookies,
 )
 
 from websecmap.scanners.scanner.web_privacy_resources.trackers import (
@@ -471,7 +472,7 @@ def test_product_meaning_from_cookies(db):
         {
             "product_id": p.id,
             "product_name": "Google Analytics",
-            "product_vendor_id": 1,
+            "product_vendor_id": v.id,
             "product_vendor_name": "Google",
             "product_version": "unknown",
             "cookies": [
@@ -505,3 +506,79 @@ def test_product_meaning_from_cookies(db):
             ],
         }
     ]
+
+
+def test_web_privacy_scan_update(db, requests_mock, current_path, caplog):
+    """Update endpointgenericscan object after updating indicators should result in
+    location and product information being added."""
+    requests_mock.get("http://localhost:31337/?site=https://zutphen.nl", json=demo_data())
+    url = Url.objects.create(url="zutphen.nl")
+    ep = Endpoint.objects.create(
+        url=url, discovered_on=datetime.now(timezone.utc), port=443, protocol="https", ip_version=4
+    )
+
+    store(scan("https://zutphen.nl"), ep.id)
+
+    assert EndpointGenericScan.objects.all().count() == 6
+
+    meaning = EndpointGenericScan.objects.all().filter(type="web_privacy_cookies").first().meaning
+    assert meaning["products"] == []
+    assert meaning["locations"] == []
+    assert EndpointGenericScan.objects.all().filter(type="location_cookies").first().meaning["locations"] == []
+    assert EndpointGenericScan.objects.all().filter(type="web_privacy_products").first().meaning["products"] == []
+
+    update_meaning_of_location_and_products_at_web_privacy_cookies()
+
+    assert EndpointGenericScan.objects.all().count() == 8
+
+    meaning = EndpointGenericScan.objects.all().filter(type="web_privacy_cookies").first().meaning
+    assert meaning["products"] == []
+    assert meaning["locations"] == []
+    assert EndpointGenericScan.objects.all().filter(type="location_cookies").first().meaning["locations"] == []
+    assert EndpointGenericScan.objects.all().filter(type="web_privacy_products").first().meaning["products"] == []
+
+    # add location and product cookie indicators
+    create_sample_geoip()
+    create_sample_domainip()
+    p = Product.objects.create(name="Google Analytics")
+    ProductCookieIndicator.objects.create(match_name="_ga", product=p)
+
+    # update again
+    update_meaning_of_location_and_products_at_web_privacy_cookies()
+
+    # everything should now be there
+    assert EndpointGenericScan.objects.all().count() == 11
+
+    meaning = EndpointGenericScan.objects.all().filter(type="web_privacy_cookies").first().meaning
+    assert meaning["products"][0]["product_name"] == "Google Analytics"
+    assert meaning["locations"] == [
+        {
+            "applicable_cookies": [
+                {
+                    "domain": "example.com",
+                    "httpOnly": False,
+                    "name": "monsido",
+                    "path": "/",
+                    "sameSite": "Lax",
+                    "secure": False,
+                }
+            ],
+            "domain": "example.com",
+            "evidence": {
+                "continent_rating": "medium",
+                "country_rating": "unknown",
+                "found_location": {
+                    "as_number": 1337,
+                    "as_organization": "test organization",
+                    "city_in_en": None,
+                    "continent_code": "NA",
+                    "country_iso_code": None,
+                    "isp_ame": "Test Isp",
+                    "network": "10.0.0.0/8",
+                },
+            },
+            "rating": "location_medium",
+        },
+    ]
+    assert EndpointGenericScan.objects.all().filter(type="location_cookies").first().meaning["locations"] != []
+    assert EndpointGenericScan.objects.all().filter(type="web_privacy_products").first().meaning["products"] != []

@@ -1,4 +1,3 @@
-from websecmap.app.management.commands._private import TaskCommand
 from websecmap.celery import app
 from django.core.management.base import BaseCommand
 

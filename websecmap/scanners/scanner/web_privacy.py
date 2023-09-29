@@ -48,6 +48,8 @@ import json
 from websecmap.scanners.scanner_for_everything.location import (
     meaning_of_location_at_web_privacy_cookies,
     SCAN_TYPE_LOCATION_COOKIES,
+    get_geoip_database,
+    get_domain_to_ip_database,
 )
 from websecmap.utils import normalize_cookies
 
@@ -394,3 +396,68 @@ def remove_duplicate_third_party_requests(third_party_requests: List[Dict[str, s
         if not third_party_request_is_present(request, new_list):
             new_list.append(request)
     return new_list
+
+
+@app.task(queue="database", ignore_result=True)
+def update_meaning_of_location_and_products_at_web_privacy_cookies():
+    """Update existing endpointgenericscan objects to add location or product meaning."""
+
+    geo_ip_data = get_geoip_database()
+    domain_ip_data = get_domain_to_ip_database()
+
+    endpointgenericscans = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_COOKIES, is_the_latest_scan=True)
+    log.debug("Found %d endpoints with site content", endpointgenericscans.count())
+
+    for endpointgenericscan in endpointgenericscans:
+        add_meaning_of_location_and_products_at_web_privacy_cookies(endpointgenericscan, domain_ip_data, geo_ip_data)
+
+
+def add_meaning_of_location_and_products_at_web_privacy_cookies(
+    endpointgenericscan: EndpointGenericScan, domain_ip_data=None, geo_ip_data=None
+):
+    endpoint_id = endpointgenericscan.endpoint.id
+
+    # in the past evidence was truncated leading to invalid JSON
+    try:
+        cookies = json.loads(endpointgenericscan.evidence)
+    except JSONDecodeError:
+        log.debug("failed to get cookies from evidence")
+        cookies = []
+
+    products = product_meaning_from_cookies(cookies)
+    cookies_product_meaning = {
+        "products": products,
+    }
+
+    store_endpoint_scan_result(
+        scan_type=WEB_PRIVACY_PRODUCTS,
+        endpoint_id=endpoint_id,
+        rating=WEB_PRIVACY_COOKIES_NEUTRAL,
+        message=WEB_PRIVACY_COOKIES_NEUTRAL,
+        meaning=cookies_product_meaning,
+        evidence=json.dumps(cookies),
+    )
+
+    locations_worst_rating, locations_rating_series = meaning_of_location_at_web_privacy_cookies(cookies)
+    cookies_location_meaning = {
+        "locations_worst_rating": locations_worst_rating,
+        "locations": locations_rating_series,
+    }
+
+    store_endpoint_scan_result(
+        scan_type=SCAN_TYPE_LOCATION_COOKIES,
+        endpoint_id=endpoint_id,
+        rating=locations_worst_rating,
+        message=locations_worst_rating,
+        meaning=cookies_location_meaning,
+        evidence=json.dumps(cookies),
+    )
+
+    store_endpoint_scan_result(
+        scan_type=WEB_PRIVACY_COOKIES,
+        endpoint_id=endpoint_id,
+        rating=WEB_PRIVACY_COOKIES_NEUTRAL,
+        message=WEB_PRIVACY_COOKIES_NEUTRAL,
+        meaning={**cookies_product_meaning, **cookies_location_meaning},
+        evidence=json.dumps(cookies),
+    )

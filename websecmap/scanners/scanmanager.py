@@ -33,14 +33,7 @@ def store_endpoint_scan_result(
     # The amount of data saved runs in the gigabytes. So it's worth the while doing it like this :)
     # in privacy metrics the rating may stay the same but the evidence can change. Make sure that this change
     # in evidence is reflected.
-    if (
-        epgs.explanation == message
-        and epgs.rating == rating
-        # TODO: this will cause issues when meanings are to be recalculated from evidence. For example with
-        # cookies, json.dumps parsing will fail due to missing closing brackets, etc.
-        and epgs.evidence == evidence
-        and epgs.meaning == meaning
-    ):
+    if epgs.explanation == message and epgs.rating == rating and epgs.evidence == evidence and epgs.meaning == meaning:
         log.debug("Scan had the same rating, message and evidence, updating last_scan_moment only.")
         epgs.last_scan_moment = datetime.now(timezone.utc)
         epgs.save(update_fields=["last_scan_moment"])

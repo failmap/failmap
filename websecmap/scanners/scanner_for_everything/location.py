@@ -40,10 +40,9 @@ from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.reporting import time_cache
 from websecmap.scanners.models import GeoIp, DomainIp, DomainMX, UrlGenericScan, EndpointGenericScan
 from websecmap.scanners.scanmanager import store_url_scan_result, store_endpoint_scan_result
-from websecmap.scanners.scanner.metric_constants import WEB_PRIVACY_THIRD_PARTY_DOMAINS, WEB_PRIVACY_COOKIES
+from websecmap.scanners.scanner.metric_constants import WEB_PRIVACY_THIRD_PARTY_DOMAINS
 
 # On URL:
 SCAN_TYPE_LOCATION_SERVER = "location_server"
@@ -79,10 +78,10 @@ SEVERITY_ORDER = [
 
 
 def call_with_time_cache(function, cache_key):
-    if cached := time_cache.cache_get(cache_key):
-        return cached
+    # if cached := time_cache.cache_get(cache_key):
+    #     return cached
     answer = function()
-    time_cache.cache_set(cache_key, answer)
+    # time_cache.cache_set(cache_key, answer)
     return answer
 
 
@@ -239,34 +238,6 @@ def scan_third_party_site_content():
             )
 
 
-@app.task(queue="storage", ignore_result=True)
-def create_meaning_of_location_at_web_privacy_cookies():
-    # It's ofc not possible to set a cookie for a different domain. As we already track every request to every site
-    # this means cookie domains are also 100% covered.
-    """[
-        {"name": "__utma", "domain": ".hardenberg.nl", "path": "/", "httpOnly...
-        {"name": "_ga", "domain": ".hardenberg.nl", "path": "/", "httpOnly": ...
-        {"name": "_ga_SPWNB9HS5Y", "domain": ".hardenberg.nl", "path": "/", "...
-        {"name": "_pk_id.1.961b", "domain": "www.hardenberg.nl", "path": "/",...
-    ]
-    """
-    geo_ip_data = get_geoip_database()
-    domain_ip_data = get_domain_to_ip_database()
-    endpointgenericscans = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_COOKIES, is_the_latest_scan=True)
-    log.debug("Found %d endpoints with site content", endpointgenericscans.count())
-
-    for endpointgenericscan in endpointgenericscans:
-        add_meaning_of_location_at_web_privacy_cookies(endpointgenericscan, domain_ip_data, geo_ip_data)
-
-
-def get_json_list(data) -> List[Any]:
-    try:
-        return json.loads(data)
-    except JSONDecodeError:
-        # log.exception("failed to get cookies from evidence")
-        return []
-
-
 def meaning_of_location_at_web_privacy_cookies(cookies, domain_ip_data=None, geo_ip_data=None):
     # you can give them in advance so to save this call which returns a lot of data
     if not domain_ip_data:
@@ -281,28 +252,6 @@ def meaning_of_location_at_web_privacy_cookies(cookies, domain_ip_data=None, geo
     worst_rating, rating_series = create_rating_series_for_domains(domains, domain_ip_data, geo_ip_data)
 
     return worst_rating, rating_series
-
-
-def add_meaning_of_location_at_web_privacy_cookies(
-    endpointgenericscan: EndpointGenericScan, domain_ip_data=None, geo_ip_data=None
-):
-    # There will always be site content, if not the list will be empty and thus this metric also.
-    # No need to clean this up.
-    cookies = get_json_list(endpointgenericscan.evidence)
-
-    worst_rating, rating_series = meaning_of_location_at_web_privacy_cookies(cookies, domain_ip_data, geo_ip_data)
-
-    # Add this as a separate metric and directly tie the metric to locations
-    endpointgenericscan.meaning["locations"] = rating_series
-    endpointgenericscan.meaning["locations_worst_rating"] = worst_rating
-    endpointgenericscan.save()
-    store_endpoint_scan_result(
-        scan_type=SCAN_TYPE_LOCATION_COOKIES,
-        endpoint_id=endpointgenericscan.endpoint.id,
-        rating=worst_rating,
-        message=worst_rating,
-        evidence=json.dumps(rating_series),
-    )
 
 
 def applicable_cookies(domain: str, cookies: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
