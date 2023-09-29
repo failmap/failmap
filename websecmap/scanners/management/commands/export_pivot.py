@@ -8,18 +8,30 @@ log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    # arguments: scan type as a string:
+    # a metric on all layers
+    # websecmap export_pivot web_privacy_cookies
+    # a metric on specific layers
+    # websecmap export_pivot web_privacy_cookies government municipality
+    # Exporting pivot for: ['web_privacy_cookies'] on layers: ['government', 'municipality']
     def add_arguments(self, parser):
-        parser.add_argument("stan_type", nargs="?")
+        parser.add_argument("scan_type", nargs=1)
+        super().add_arguments(parser)
+
+        parser.add_argument("layers", nargs="*")
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
-        scan_type = options.get("stan_type")
+        scan_type = options.get("scan_type")
         if scan_type is None:
             print("Please specify a scan type")
             return
 
-        print(f"Exporting pivot for: {scan_type}")
-        filename = export_pivot([scan_type])
+        layers = options.get("layers")
+        if layers is None:
+            print("Will export all layers.")
+            return
+
+        print(f"Exporting pivot for: {scan_type[0]} on layers: {layers}")
+        filename = export_pivot(scan_type, layers=layers)
         print(f"Exported pivot to: {filename}")
         print("Done")

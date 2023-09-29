@@ -52,12 +52,18 @@ def export_current_metrics(
     print(json.dumps(data, indent=4))
 
 
-def export_pivot(scan_types: List[str]) -> str:
+def export_pivot(scan_types: List[str], layers: List[str]) -> str:
     product = []
     for scan_type in scan_types:
-        endpoint_scans = list(EndpointGenericScan.objects.all().filter(is_the_latest_scan=True, type=scan_type))
-        url_scans = list(UrlGenericScan.objects.all().filter(is_the_latest_scan=True, type=scan_type))
-        for scan in endpoint_scans + url_scans:
+        print(f"Exporting {scan_type}")
+        endpoint_scans = EndpointGenericScan.objects.all().filter(is_the_latest_scan=True, type=scan_type)
+        url_scans = UrlGenericScan.objects.all().filter(is_the_latest_scan=True, type=scan_type)
+
+        if layers:
+            endpoint_scans = endpoint_scans.filter(endpoint__url__organization__layers__name__in=layers)
+            url_scans = url_scans.filter(url__organization__layers__name__in=layers)
+
+        for scan in list(endpoint_scans) + list(url_scans):
             pivot_records = determine_pivot_records(scan_type, scan)
             scan_data = {
                 "scan_type": scan.type,
@@ -165,7 +171,10 @@ def determine_pivot_records(scan_type: str, scan) -> List[dict[str, Any]]:
         return pivot_location_evidence(load_possible_json(scan.evidence))
 
     if scan_type in [WEB_PRIVACY_COOKIES]:
-        return pivot_cookies(load_possible_json(scan.evidence))
+        # as we're now using an extensive meaning, this meaning will now be pivoted instead of the normal
+        # cookie records. This means the location and product are also loaded inside the export.
+        # return pivot_cookies(load_possible_json(scan.evidence)) #  <-- this is the simple record without meaning.
+        return pivot_cookie_meaning(load_possible_json(scan.evidence), scan.meaning)
 
     if scan_type in [SCAN_TYPE_LOCATION_COOKIES]:
         return pivot_cookie_locations(load_possible_json(scan.evidence))
@@ -180,10 +189,58 @@ def load_possible_json(data):
         return []
 
 
+def pivot_products(evidence):
+    return [pivot_product_record(row) for row in evidence]
+
+
 def pivot_cookies(evidence) -> List[Dict[str, Any]]:
     # Cookies are already a flat object. But we'll add a cookie_ prefix to better identify them:
     # currently the value is not stored as it's usually random and causes a lot of data
     return [pivot_cookie_record(row) for row in evidence]
+
+
+def pivot_cookie_meaning(evidence_records: List[Dict[str, Any]], meaning: Dict[str, Any]) -> List[Dict[str, Any]]:
+    # are 100% of all cookies processed in this export? What if there is no product and / or no location?
+    # how are these matched
+    pivot_records = []
+
+    for cookie in evidence_records:
+        p_cookie = pivot_cookie_record(cookie)
+        # start out with empty records, so all keys are present
+        p_product = pivot_product_record({})
+        p_location = pivot_location_record({})
+
+        # see in what product and location this is in
+        for product in meaning.get("products", []):
+            for product_cookie in product["cookies"]:
+                if cookies_are_equal(cookie, product_cookie):
+                    p_product = pivot_product_record(product)
+                    continue
+
+        for location in meaning.get("locations", []):
+            for location_cookie in location["applicable_cookies"]:
+                if cookies_are_equal(cookie, location_cookie):
+                    p_location = pivot_location_record(location)
+                    continue
+
+        pivot_records.append({**p_cookie, **p_product, **p_location})
+
+    return pivot_records
+
+
+def cookies_are_equal(cookie_a: Dict[str, Any], cookie_b: Dict[str, Any]):
+    if cookie_a["name"] != cookie_b["name"]:
+        return False
+
+    if cookie_a["domain"] != cookie_b["domain"]:
+        return False
+
+    if cookie_a["path"] != cookie_b["path"]:
+        return False
+
+    # We're ignoring httpOnly, secure, sameSite etc... this combo should be enough to be the key.
+
+    return True
 
 
 def pivot_location_evidence(evidence: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -234,6 +291,16 @@ def pivot_cookie_locations(evidence: List[Dict[str, Any]]) -> List[Dict[str, Any
     return per_cookie_record
 
 
+def pivot_product_record(record) -> Dict[str, Any]:
+    return {
+        "product_id": record.get("product_id", 0),
+        "product_name": record.get("product_name", ""),
+        "product_version": record.get("product_version", ""),
+        "product_vendor_name": record.get("product_vendor_name", ""),
+        "product_vendor_id": record.get("product_vendor_id", 0),
+    }
+
+
 def pivot_location_record(record) -> Dict[str, Any]:
     """
     Convert
@@ -271,19 +338,29 @@ def pivot_location_record(record) -> Dict[str, Any]:
       },
     """
     return {
-        "rating": record.get("rating"),
-        "continent_code": record.get("evidence", {}).get("found_location", {}).get("continent_code", ""),
-        "country_iso_code": record.get("evidence", {}).get("found_location", {}).get("country_iso_code", ""),
-        "city_in_en": record.get("evidence", {}).get("found_location", {}).get("city_in_en", ""),
-        "as_number": record.get("evidence", {}).get("found_location", {}).get("as_number", -1),
-        "as_organization": record.get("evidence", {}).get("found_location", {}).get("as_organization", ""),
-        "isp_ame": record.get("evidence", {}).get("found_location", {}).get("isp_ame", ""),
-        "network": record.get("evidence", {}).get("found_location", {}).get("network", ""),
-        "country_rating": record.get("evidence", {}).get("country_rating", ""),
-        "continent_rating": record.get("evidence", {}).get("continent_rating", ""),
-        "domain": record.get("domain", ""),
-        "priority": record.get("priority", ""),
+        "location_rating": record.get("rating"),
+        "location_continent_code": record.get("evidence", {}).get("found_location", {}).get("continent_code", ""),
+        "location_country_iso_code": record.get("evidence", {}).get("found_location", {}).get("country_iso_code", ""),
+        "location_city_in_en": record.get("evidence", {}).get("found_location", {}).get("city_in_en", ""),
+        "location_as_number": record.get("evidence", {}).get("found_location", {}).get("as_number", -1),
+        "location_as_organization": record.get("evidence", {}).get("found_location", {}).get("as_organization", ""),
+        "location_isp_ame": record.get("evidence", {}).get("found_location", {}).get("isp_ame", ""),
+        "location_network": record.get("evidence", {}).get("found_location", {}).get("network", ""),
+        "location_country_rating": record.get("evidence", {}).get("country_rating", ""),
+        "location_continent_rating": record.get("evidence", {}).get("continent_rating", ""),
+        "location_domain": record.get("domain", ""),
+        "location_priority": record.get("priority", ""),
     }
+
+
+def hash_cookie_record(record) -> str:
+    # {"name": "ARRAffinity", "domain": ".workforce-adhocplanner-rc.ortecapps.com", "path": "/", "httpOnly": True,
+    #          "secure": True, "sameSite": "Lax"}
+
+    return (
+        f"{record['name']}-"
+        f"{record['domain']}-{record['path']}-{record['httpOnly']}-{record['secure']}-{record['sameSite']}"
+    )
 
 
 def pivot_cookie_record(record) -> Dict[str, Any]:
