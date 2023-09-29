@@ -30,6 +30,7 @@ from websecmap.scanners.scanner.metric_constants import (
     WEB_PRIVACY_THIRD_PARTY_REQUESTS,
     WEB_PRIVACY_THIRD_PARTY_ERROR,
     WEB_PRIVACY_COOKIES,
+    WEB_PRIVACY_PRODUCTS,
     WEB_PRIVACY_COOKIES_ERROR,
     WEB_PRIVACY_THIRD_PARTY_DOMAINS,
     WEB_PRIVACY_THIRD_PARTY_FOUND,
@@ -248,17 +249,16 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     )
 
     products = product_meaning_from_cookies(cookies)
-    cookies_meaning = {
+    cookies_product_meaning = {
         "products": products,
     }
 
-    # also store cookies for later inspection
     store_endpoint_scan_result(
-        scan_type=WEB_PRIVACY_COOKIES,
+        scan_type=WEB_PRIVACY_PRODUCTS,
         endpoint_id=endpoint_id,
         rating=WEB_PRIVACY_COOKIES_NEUTRAL,
         message=WEB_PRIVACY_COOKIES_NEUTRAL,
-        meaning=cookies_meaning,
+        meaning=cookies_product_meaning,
         evidence=json.dumps(cookies),
     )
 
@@ -274,6 +274,15 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         rating=locations_worst_rating,
         message=locations_worst_rating,
         meaning=cookies_location_meaning,
+        evidence=json.dumps(cookies),
+    )
+
+    store_endpoint_scan_result(
+        scan_type=WEB_PRIVACY_COOKIES,
+        endpoint_id=endpoint_id,
+        rating=WEB_PRIVACY_COOKIES_NEUTRAL,
+        message=WEB_PRIVACY_COOKIES_NEUTRAL,
+        meaning={**cookies_product_meaning, **cookies_location_meaning},
         evidence=json.dumps(cookies),
     )
 
@@ -307,6 +316,13 @@ def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
                 products[product.id]["product_id"] = product.id
                 products[product.id]["product_name"] = product.name
                 products[product.id]["product_version"] = "unknown"
+                if product.vendor:
+                    products[product.id]["product_vendor_name"] = product.vendor.name
+                    products[product.id]["product_vendor_id"] = product.vendor.id
+                else:
+                    products[product.id]["product_vendor_name"] = None
+                    products[product.id]["product_vendor_id"] = None
+
                 products[product.id]["cookies"].append(strip_irrelevant_cookie_fields(cookie))
                 break
         else:

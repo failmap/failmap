@@ -7,6 +7,7 @@ from websecmap.scanners.models import (
     EndpointGenericScan,
     ProductCookieIndicator,
     Product,
+    ProductVendor,
 )
 from websecmap.scanners.scanner.web_privacy import (
     store,
@@ -21,6 +22,8 @@ from websecmap.scanners.scanner.web_privacy_resources.trackers import (
     get_known_trackers_from_urls,
     get_tracker_info_from_disconnectme,
 )
+
+from .test_location import create_sample_domainip, create_sample_geoip
 
 
 def test_get_tracker_info():
@@ -169,7 +172,7 @@ def demo_data():
             },
             {
                 "name": "monsido",
-                "domain": "zutphen.nl",
+                "domain": "example.com",
                 "path": "/",
                 "httpOnly": False,
                 "secure": False,
@@ -241,6 +244,9 @@ def test_get_all_third_party_requests(settings, current_path, db):
 
 
 def test_web_privacy_scan(db, requests_mock, current_path, caplog):
+    create_sample_geoip()
+    create_sample_domainip()
+
     requests_mock.get("http://localhost:31337/?site=https://zutphen.nl", json=demo_data())
     url = Url.objects.create(url="zutphen.nl")
     ep = Endpoint.objects.create(
@@ -257,14 +263,14 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
 
     # also cookies and the list of third party domains, and the derived cookie location metric
     # (todo: add other derived location metrics)
-    assert EndpointGenericScan.objects.all().count() == 5
+    assert EndpointGenericScan.objects.all().count() == 6
 
     assert (
         EndpointGenericScan.objects.all().filter(type="web_privacy_tracking").first().rating
         == "web_privacy_tracking_trackers_found"
     )
 
-    assert EndpointGenericScan.objects.all().filter(type="location_cookies").first().rating == "location_unknown"
+    assert EndpointGenericScan.objects.all().filter(type="location_cookies").first().rating == "location_medium"
 
     assert (
         EndpointGenericScan.objects.all().filter(type="web_privacy_third_party_requests").first().rating
@@ -275,6 +281,35 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
 
     assert meaning["products"][0]["product_name"] == "Google Analytics"
     assert meaning["products"][0]["cookies"][0] == strip_irrelevant_cookie_fields(demo_data()["timeless-cookies"][0])
+    assert meaning["locations"] == [
+        {
+            "applicable_cookies": [
+                {
+                    "domain": "example.com",
+                    "httpOnly": False,
+                    "name": "monsido",
+                    "path": "/",
+                    "sameSite": "Lax",
+                    "secure": False,
+                }
+            ],
+            "domain": "example.com",
+            "evidence": {
+                "continent_rating": "medium",
+                "country_rating": "unknown",
+                "found_location": {
+                    "as_number": 1337,
+                    "as_organization": "test organization",
+                    "city_in_en": None,
+                    "continent_code": "NA",
+                    "country_iso_code": None,
+                    "isp_ame": "Test Isp",
+                    "network": "10.0.0.0/8",
+                },
+            },
+            "rating": "location_medium",
+        }
+    ]
 
 
 def test_truncate_long_post_data():
@@ -417,8 +452,10 @@ def test_remove_duplicate_third_party_requestss():
 
 
 def test_product_meaning_from_cookies(db):
+    v = ProductVendor.objects.create(name="Google")
     p = Product.objects.create(
         name="Google Analytics",
+        vendor=v,
     )
 
     p2 = Product.objects.create(
@@ -434,6 +471,8 @@ def test_product_meaning_from_cookies(db):
         {
             "product_id": p.id,
             "product_name": "Google Analytics",
+            "product_vendor_id": 1,
+            "product_vendor_name": "Google",
             "product_version": "unknown",
             "cookies": [
                 strip_irrelevant_cookie_fields(demo_data()["timeless-cookies"][0]),
@@ -458,6 +497,8 @@ def test_product_meaning_from_cookies(db):
         {
             "product_id": p2.id,
             "product_name": "OWA",
+            "product_vendor_id": None,
+            "product_vendor_name": None,
             "product_version": "unknown",
             "cookies": [
                 strip_irrelevant_cookie_fields(owa_cookies[0]),
