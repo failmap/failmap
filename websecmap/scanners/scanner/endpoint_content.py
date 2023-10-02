@@ -128,21 +128,25 @@ def compare_and_clean_previous_site_copies():
     # of course some pages have changes in timestamps and news feeds and such, but that is usually just a
     # little bit of content.
 
-    # - is "descending order"!
-    scans = HttpEndpointContent.objects.all().order_by("-at_when")
+    # - is "descending order"! Don't get anything except the id, get the content etc later when needed
+    # otherwise you're drawing gigabytes of memory
+    scans = HttpEndpointContent.objects.all().only("id").order_by("-at_when")
     # check each scan against the previous scan, if the previous is the same, then delete the previous.
     # take into account that the previous scan might have been deleted.
     for scan in scans:
         log.debug("Checking scan %s against previous scans.", scan.id)
 
         # possible that this scan was deleted
+        # use this to get the actual content, so you don't have to get everything in the query above in one take
         scan_still_exists = HttpEndpointContent.objects.filter(id=scan.id).first()
         if not scan_still_exists:
             log.debug("scan %s was deleted.", scan.id)
             continue
 
         previous_scan = (
-            HttpEndpointContent.objects.filter(endpoint=scan.endpoint, at_when__lt=scan.at_when)
+            HttpEndpointContent.objects.filter(
+                endpoint=scan_still_exists.endpoint, at_when__lt=scan_still_exists.at_when
+            )
             .order_by("-at_when")
             .first()
         )
@@ -151,9 +155,9 @@ def compare_and_clean_previous_site_copies():
             log.debug("No previous scans on scan %s.", scan.id)
             continue
 
-        log.debug("Comparing scan %s with previous scan %s.", scan.id, previous_scan.id)
-        if content_is_identical(scan.content, previous_scan.content):
-            clean_endpoint_content_scan(staying=scan, delete=previous_scan)
+        log.debug("Comparing scan %s with previous scan %s.", scan_still_exists.id, previous_scan.id)
+        if content_is_identical(scan_still_exists.content, previous_scan.content):
+            clean_endpoint_content_scan(staying=scan_still_exists, delete=previous_scan)
 
 
 def clean_endpoint_content_scan(staying: HttpEndpointContent, delete: HttpEndpointContent):
