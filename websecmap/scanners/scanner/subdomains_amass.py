@@ -342,7 +342,7 @@ def extract_urls_from_json(json_data: List[Dict[str, Any]]) -> List[str]:
     return [domain["name"] for domain in json_data]
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def store(found_domains: List[str], store_to_model_id: Any) -> None:
     log.debug("Storing domains %s to organization %s", found_domains, store_to_model_id)
 

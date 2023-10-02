@@ -379,7 +379,7 @@ def websecmap_plan_outdated_scans():
     return plan_outdated_scans(metadata["published_scan_types"])
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def websecmap_list_outdated():
     # one without parameters
     metadata = get_backend_scanmetadata()

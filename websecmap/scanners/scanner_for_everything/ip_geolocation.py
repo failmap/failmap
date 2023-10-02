@@ -54,7 +54,7 @@ def get_all_ips() -> List[str]:
     return ips
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def scan_intelligently():
     # We can't just scan everything now because we need to know what network an ip address belongs to.
     # Because when we do, there is no need to re-query the geoip2 API and waste credits or time.
@@ -84,7 +84,7 @@ def scan_intelligently():
         store(network_info)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def scan_using_known_data():
     # This does not ever connect to the API but will check if the IP has no data but data is already
     # available from another result in the database. This will re-use that data. This can save calls when
@@ -365,7 +365,7 @@ def ip_designation(ip):
     return IP_GLOBAL if ip.is_global else IP_UNKNOWN
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def store(data: Dict[str, Any]):
     abstract_time_storage(
         GeoIp,

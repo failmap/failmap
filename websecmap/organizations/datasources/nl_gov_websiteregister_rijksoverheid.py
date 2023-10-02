@@ -89,7 +89,7 @@ def download_websiteregister_spreadsheet() -> int:
     return idataset.id
 
 
-@app.task(queue="storage")
+@app.task(queue="database", ignore_result=True)
 def download_and_import():
     downloaded_file = download_websiteregister_spreadsheet()
     import_file(downloaded_file)

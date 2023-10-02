@@ -173,7 +173,7 @@ def deserialize_cert_chain(certificates: List[str]) -> List[OpenSSL.crypto.X509]
     return [load_certificate(FILETYPE_PEM, b64decode(certificate)) for certificate in certificates]
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def certificate_chain_contains_trusted_untrusted_certificate(serialized_certificates: List[str]) -> bool:
     # todo: there are more untrusted certificates from the dutch state.
     # Example: https://secure-t.sittard-geleen.nl

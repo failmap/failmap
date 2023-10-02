@@ -43,7 +43,7 @@ GOVERNMENT_REGISTER_BASE_URL = "https://organisaties.overheid.nl/export"
 ORIGIN = "register_overheidsorganisaties"
 
 
-@app.task(queue="storage")
+@app.task(queue="database", ignore_result=True)
 def download_and_import():
     download()
     import_()

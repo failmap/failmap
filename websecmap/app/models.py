@@ -93,7 +93,7 @@ class Job(models.Model):
         return job
 
     @staticmethod
-    @app.task(queue="storage")
+    @app.task(queue="storage", ignore_result=True)
     def store_result(result, job_id=None):
         """Celery task to store result of wrapped task after it has completed."""
         job = Job.objects.get(id=job_id)

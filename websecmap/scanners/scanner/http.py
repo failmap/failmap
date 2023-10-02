@@ -537,7 +537,7 @@ def has_acceptable_error(strerror: str) -> bool:
     return acceptable
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def connect_result(result: Dict[str, str], protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
     if result["result"]:
         save_endpoint(protocol, url_id, port, ip_version, f"ok/{origin}/{result['error']}")
@@ -546,7 +546,7 @@ def connect_result(result: Dict[str, str], protocol: str, url_id: int, port: int
     return True
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def connect_result_simple(result: bool, protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
     # no tracing of what went wrong where, will probably be superseeded with connect_result for tracing purposes
     if result:

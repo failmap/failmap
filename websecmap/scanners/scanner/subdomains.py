@@ -153,7 +153,7 @@ def url_resolves(url: str):
     return bool(ipv4 or ipv6)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def handle_resolves(resolves: bool, url_id: int) -> None:
     url = Url.objects.all().filter(pk=url_id).first()
     if not url:
@@ -255,7 +255,7 @@ def result_contains_canary(contents: List):
     return any("does_not_exist_canary" in row["name"] for row in contents)
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def dnsrecon_parse_report_contents(contents: List, url: Dict[str, Any], origin: str = ""):
     """
     [
@@ -464,7 +464,7 @@ def certificate_transparency_scan(url: str) -> List[str]:
     return list(subdomains)
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def store_certificate_transparency_results(subdomains: List[str], url_id: int) -> List[str]:
     if not subdomains:
         return []

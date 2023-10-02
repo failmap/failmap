@@ -145,7 +145,7 @@ def contains_version_number(banner):
     return False
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def re_evaluate_bannergrab_versions():
     # Walk over all latest scans with version information. Then re-run the detect_version command and save the
 

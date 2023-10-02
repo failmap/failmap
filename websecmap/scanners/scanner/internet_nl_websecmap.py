@@ -95,7 +95,7 @@ def create_api_settings(scan: int) -> Dict[str, Any]:
     return settings.__dict__
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def initialize_scan(scan_type: str, domains: List[int]) -> int:
     scan = InternetNLV2Scan()
     scan.type = scan_type
@@ -119,7 +119,7 @@ def initialize_scan(scan_type: str, domains: List[int]) -> int:
     return scan.id
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def check_running_internet_nl_scans() -> Task:
     scans = InternetNLV2Scan.objects.all().exclude(state__in=["finished", "error", "cancelled"])
     log.debug("Checking the state of scan %s.", scans)
@@ -128,7 +128,7 @@ def check_running_internet_nl_scans() -> Task:
     return group(tasks)
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def progress_running_scan(scan_id: int) -> Task:
     """
     This monitors the state of an internet.nl scan. Depending on the state, it determines if an action is needed and
@@ -193,7 +193,7 @@ def progress_running_scan(scan_id: int) -> Task:
         return next_step(scan.id)
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def recover_and_retry(scan_id: int):
     # check the latest valid state from progress running scan, set the state to that state.
 
@@ -329,7 +329,7 @@ def processing_scan_results(scan_id: int):
     return process_scan_results.s(scan.pk)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def update_state(scan_id: int, new_state: str, new_state_message: str):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
@@ -403,7 +403,7 @@ def api_has_usable_response(response, scan_id):
 ########################################################################################################################
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def get_relevant_urls(scan_id: int) -> List[str]:
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
@@ -413,7 +413,7 @@ def get_relevant_urls(scan_id: int) -> List[str]:
     return list(scan.subject_urls.all().values_list("url", flat=True))
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def registration_administration(response: Tuple[int, dict], scan_id: int):
     """
     {
@@ -458,7 +458,7 @@ def registration_administration(response: Tuple[int, dict], scan_id: int):
     update_state(scan.pk, "registered", "scan registered at internet.nl")
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def status_administration(response: Tuple[int, dict], scan_id: int):
     """
     {
@@ -518,7 +518,7 @@ def status_administration(response: Tuple[int, dict], scan_id: int):
     update_state(scan.pk, response_content["request"]["status"], response_content["request"]["status"])
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def result_administration(response: Tuple[int, dict], scan_id: int):
     """
     Stores the scan metadata and domains.
@@ -550,7 +550,7 @@ def result_administration(response: Tuple[int, dict], scan_id: int):
     update_state(scan.pk, "scan results stored", "")
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def result_administration_technical(response: Tuple[int, dict], scan_id: int):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
@@ -674,7 +674,7 @@ def reuse_last_fields_and_set_them_to_error(endpoint_id: int):
 
 # todo: store this on another queue: there are so many results that it blocks the entire storage worker...
 # should be a scan management queue that just does planned scans?
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def store_domain_scan_results(
     domain: str, scan_data: dict, technical_details: dict, scan_type: str, endpoint_protocol: str
 ):

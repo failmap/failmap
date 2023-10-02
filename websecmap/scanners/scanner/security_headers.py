@@ -258,7 +258,7 @@ def discover_service_type(headers: CaseInsensitiveDict = None):
     return "non_http_response"
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def analyze_headers(headers: Union[bool, List[Dict[str, Any]]], endpoint_id):
     # todo: remove code paths, and make a more clear case per header type. That's easier to understand edge cases.
     # todo: Content-Security-Policy, Referrer-Policy

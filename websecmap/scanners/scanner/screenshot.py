@@ -205,7 +205,7 @@ def create_dir_if_not_exists(directory: str):
         os.makedirs(directory, exist_ok=True)
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def save_screenshot(response: Dict[str, Union[str, bool, int]], endpoint_id: int):
     if not response["success"]:
         log.debug("Could not get screenshot on endpoint %s, returned %s ", endpoint_id, response)

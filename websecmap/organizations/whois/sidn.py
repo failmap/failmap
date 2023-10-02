@@ -17,7 +17,7 @@ MAX_DEPTH = 6
 SLEEP_MULTIPLIER = 1.7
 
 
-@app.task(queue="storage")
+@app.task(queue="database", ignore_result=True)
 def update_whois_data(**kwargs):
     # url = https://api.sidn.nl/rest/whois?domain=platformhoutrook.nl
 

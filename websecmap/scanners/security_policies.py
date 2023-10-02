@@ -9,13 +9,13 @@ from websecmap.scanners.models import Endpoint, SecurityPolicy, EndpointGenericS
 from datetime import datetime, timezone, timedelta
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def apply_all_security_policies():
     for policy in SecurityPolicy.objects.all():
         apply_security_policy(policy)
 
 
-@app.task(queue="storage")
+@app.task(queue="database")
 def apply_all_affects():
     for policy in SecurityPolicy.objects.all():
         apply_affects(policy)

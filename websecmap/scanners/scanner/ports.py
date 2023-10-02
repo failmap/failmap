@@ -29,7 +29,7 @@ PORTS_IS_CLOSED = "port_could_not_be_found_anymore"
 log = logging.getLogger(__name__)
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", ignore_result=True)
 def mark_unusual_ports():
     if not allowed_to_scan(SCANNER_NAME):
         log.warning("Scanner %s is requested but not enabled.", SCANNER_NAME)
