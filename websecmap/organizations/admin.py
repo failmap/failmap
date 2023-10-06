@@ -116,6 +116,7 @@ class EndpointGenericScanInline(nested_admin.NestedTabularInline):  # pylint: di
         "comply_or_explain_case_additional_notes",
         "comply_or_explain_explanation",
         "comply_or_explain_explained_by",
+        "meaning",
     ]
 
     # this is purely informational, to save clicks when debugging.
@@ -128,6 +129,7 @@ class EndpointGenericScanInline(nested_admin.NestedTabularInline):  # pylint: di
         "rating_determined_on",
         "last_scan_moment",
         "is_the_latest_scan",
+        "meaning",
     )
 
     ordering = ["-rating_determined_on"]
@@ -151,6 +153,18 @@ class EndpointAdminInline(nested_admin.NestedStackedInline):  # pylint: disable=
     show_change_link = True
     ordering = ["is_dead"]
     inlines = [EndpointGenericScanInline]
+
+    readonly_fields = (
+        "ip_version",
+        "port",
+        "protocol",
+        "discovered_on",
+        "is_dead",
+        "is_dead_since",
+        "is_dead_reason",
+        "origin",
+        "security_policies",
+    )
 
 
 class UrlGenericScanAdminInline(CompactInline):
@@ -178,6 +192,7 @@ class UrlGenericScanAdminInline(CompactInline):
         "rating_determined_on",
         "last_scan_moment",
         "is_the_latest_scan",
+        "meaning",
     )
 
 
