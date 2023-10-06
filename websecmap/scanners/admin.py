@@ -254,7 +254,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def explain(self, instance):
         return format_html("<a href='./{}/change/#/tab/module_1/'>Explain</a>", instance.pk)
 
-    readonly_fields = ["last_scan_moment"]
+    readonly_fields = ["last_scan_moment", "meaning"]
 
     actions = []
 

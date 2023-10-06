@@ -516,6 +516,7 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
     )
     meaning = JSONField(
         default={},
+        blank=True,
         help_text="Structured meaning about data in evidence. This is derived information based on what "
         "evidence is available and will be different for each scan type. This allows for more flexible"
         "subtype analysis and updatable policies etc. This column is derived for the latest scan only, not "
