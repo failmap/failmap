@@ -10,7 +10,7 @@ log = logging.getLogger(__package__)
 
 
 def store_endpoint_scan_result(
-    scan_type: str, endpoint_id: int, rating: str, message: str, evidence: str = "", meaning: str = ""
+    scan_type: str, endpoint_id: int, rating: str, message: str, evidence: str = "", meaning: Union[dict, list] = {}
 ):
     log.debug(
         "Storage requested for scan type %s, endpoint_id %s, rating: %s, message: %s, meaning: %s",
@@ -20,6 +20,11 @@ def store_endpoint_scan_result(
         message,
         meaning,
     )
+
+    # set meaning to a sane default, it is NOT a string, but a json storage object.
+    # set the mutable object (thus change it) to a default value to prevent "" and "{'':''}" etc from being needed.
+    if not meaning:
+        meaning = {}
 
     # Check if the latest scan has the same rating or not:
     try:

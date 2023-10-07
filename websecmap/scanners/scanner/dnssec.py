@@ -28,9 +28,11 @@ from django.conf import settings
 
 from websecmap.celery import ParentFailed, app
 from websecmap.scanners import plannedscan
+from websecmap.scanners.models import UrlGenericScan
 from websecmap.scanners.scanmanager import store_url_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan
 from websecmap.scanners.scanner.filter import filter_top_level_domains, generic_plan_scan
+import re
 
 log = logging.getLogger(__name__)
 
@@ -108,7 +110,9 @@ def store_dnssec(result: List[str], url_id: int):
             "info": "DNSSEC seems to be implemented sufficiently.",
         }
 
-        store_url_scan_result(SCANNER_NAME, url_id, level, messages[level], evidence=",\n".join(result))
+        store_url_scan_result(
+            SCANNER_NAME, url_id, level, messages[level], evidence=normalize_evidence(",\n".join(result))
+        )
 
     # return something informative
     return {"status": "success", "result": level}
@@ -298,3 +302,50 @@ def analyze_result(result: List[str]):
     # log.debug(relevant_strings)
 
     return highest_level.lower(), relevant_strings
+
+
+def normalize_evidence(evidence: str) -> str:
+    # first format lines, so extra spaces are gone:
+    lines = evidence.splitlines()
+    lines = [line.strip() for line in lines]
+
+    # remove empty ines:
+    lines = filter(lambda x: not re.match(r"^\s*$", x), lines)
+
+    # remove the timestamp each line
+    lines = [re.sub(r"^[ 0-9.]+: ", "", line).strip() for line in lines]
+
+    # EXTRA_PROCESSING is returned in random order. Sort these lines, inject the sorted lines in the right spot.
+    ip_lines = [line for line in lines if line.startswith("INFO [DNSSEC:EXTRA_PROCESSING]")]
+    ip_lines.sort()
+    print(ip_lines)
+    new_lines = []
+    injected = False
+    for line in lines:
+        if line.startswith("INFO [DNSSEC:EXTRA_PROCESSING]"):
+            if not injected:
+                injected = True
+                new_lines.extend(ip_lines)
+            # otherwise id
+        else:
+            new_lines.append(line)
+    lines = new_lines
+
+    # RRSIG_EXPIRES_AT has a date string every few days.
+    # INFO [DNSSEC:RRSIG_EXPIRES_AT] Wed Oct 11 04:30:43 2023
+    lines = [
+        "INFO [DNSSEC:RRSIG_EXPIRES_AT] **DATE**," if line.startswith("INFO [DNSSEC:RRSIG_EXPIRES_AT]") else line
+        for line in lines
+    ]
+
+    return "\n".join(lines)
+
+
+def normalize_existing_dnssec_scans():
+    """DNSSEC scan evidence was not normalized, therefore a lot of duplicate data was stored in the database"
+    everything stuff was scanned. This normalizes those evidence records so the duplicates can be deduped."""
+    scans = UrlGenericScan.objects.all().filter(type=SCANNER_NAME)
+    for scan in scans:
+        log.debug("Normalizing dnssec scan: %s", scan)
+        scan.evidence = normalize_evidence(scan.evidence)
+        scan.save()
