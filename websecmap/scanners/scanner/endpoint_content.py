@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from typing import Any, Dict
-
+import time
 import requests
 
 from celery import group
@@ -118,7 +118,17 @@ def store_http_content(response: Dict[str, Any], endpoint_id: int):
 
 def content_is_identical(new_content: str, old_content: str, percentage_when_the_same: int = 90):
     # amount_when_the_same is a float representing a percentage. So 0.95 = 95%.
+    # TODO: this process is pretty CPU intensive and leads to seconds or minutes of processing time
+    # sometimes.
+    start = int(time.time())
     ratio = SequenceMatcher(None, new_content, old_content).ratio()
+    end = int(time.time())
+    log.info(
+        (
+            f"New content size: {len(new_content)}, old content size: "
+            f"{len(old_content)}, took: {end-start} seconds, ratio: {ratio}."
+        )
+    )
     log.debug("%s similarity.", round(ratio * 100, 2))
     return ratio > percentage_when_the_same / 100
 
