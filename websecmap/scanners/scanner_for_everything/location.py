@@ -149,7 +149,7 @@ def create_tasks() -> group:
     return group([scan_servers.si() | scan_mailservers.si() | scan_third_party_site_content.si()])
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="database", ignore_result=True)
 def scan_mailservers():
     # there can be many mailservers configured. Each of them has to comply.
     # MX is just a bunch of domains, which is the same check as a webserver scan, but multiple times.
@@ -195,7 +195,7 @@ def scan_mailservers():
         )
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="database", ignore_result=True)
 def scan_servers():
     # basically every server that is resolvable will get a metric, so you don't need to remove findings.
     geo_ip_data = get_geoip_database()
@@ -215,7 +215,7 @@ def scan_servers():
         )
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="database", ignore_result=True)
 def scan_third_party_site_content():
     geo_ip_data = get_geoip_database()
     domain_ip_data = get_domain_to_ip_database()
