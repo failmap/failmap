@@ -121,9 +121,6 @@ class IEPeriodicTaskAdmin(PeriodicTaskAdmin, ImportExportModelAdmin):
 
         return date
 
-    class Meta:
-        ordering = ["-name"]
-
 
 class IEUser(ImportExportModelAdmin):
     pass

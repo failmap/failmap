@@ -73,8 +73,6 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "calculation",
     )
 
-    ordering = ["-at_when"]
-
     save_as = True
 
 

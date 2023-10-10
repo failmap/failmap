@@ -35,3 +35,4 @@ class SIDNUpload(models.Model):
     class Meta:
         get_latest_by = "at_when"
         ordering = ("-at_when",)
+        indexes = [models.Index(fields=["at_when"])]

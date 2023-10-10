@@ -26,7 +26,6 @@ class EndpointGenericScanInline(CompactInline):
     model = models.EndpointGenericScan
     extra = 0
     show_change_link = True
-    ordering = ["-rating_determined_on"]
 
 
 @admin.register(models.UrlIp)
@@ -670,7 +669,6 @@ class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     save_as = True
     list_per_page = 400
     actions = ordering_actions()
-    ordering = ["display_order"]
 
     def enable_show_in_frontend(self, request, queryset):
         for instance in queryset:

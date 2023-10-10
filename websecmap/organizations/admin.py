@@ -132,8 +132,6 @@ class EndpointGenericScanInline(nested_admin.NestedTabularInline):  # pylint: di
         "meaning",
     )
 
-    ordering = ["-rating_determined_on"]
-
     verbose_name = "Generic scan"
     verbose_name_plural = "Generic scans"
 
@@ -151,7 +149,6 @@ class EndpointAdminInline(nested_admin.NestedStackedInline):  # pylint: disable=
     model = Endpoint
     extra = 0
     show_change_link = True
-    ordering = ["is_dead"]
     inlines = [EndpointGenericScanInline]
 
     readonly_fields = (
@@ -171,7 +168,6 @@ class UrlGenericScanAdminInline(CompactInline):
     model = UrlGenericScan
     extra = 0
     show_change_link = True
-    ordering = ["-rating_determined_on"]
 
     exclude = [
         "comply_or_explain_explained_on",
@@ -208,7 +204,6 @@ class CoordinateAdminInline(CompactInline):
 #     # with dozens of forms, the field limit is easily exceeded.
 #     readonly_fields = [f.name for f in OrganizationReport._meta.fields]
 #     can_delete = False
-#     ordering = ["-at_when"]
 
 
 class UrlRatingAdminInline(CompactInline):
@@ -217,7 +212,6 @@ class UrlRatingAdminInline(CompactInline):
     # with dozens of forms, the field limit is easily exceeded.
     readonly_fields = [f.name for f in UrlReport._meta.fields]
     can_delete = False
-    ordering = ["-at_when"]
 
 
 class UrlWhoisInline(CompactInline):
@@ -226,7 +220,6 @@ class UrlWhoisInline(CompactInline):
     # with dozens of forms, the field limit is easily exceeded.
     readonly_fields = [f.name for f in UrlWhois._meta.fields]
     can_delete = False
-    ordering = ["-at_when"]
 
 
 class UrlIpInline(CompactInline):
@@ -234,7 +227,6 @@ class UrlIpInline(CompactInline):
     extra = 0
     readonly_fields = ("url", "ip", "rdns_name", "discovered_on", "is_unused", "is_unused_since", "is_unused_reason")
     show_change_link = True
-    ordering = ["-discovered_on"]
 
 
 class ActionMixin:

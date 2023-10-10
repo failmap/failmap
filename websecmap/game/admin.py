@@ -25,14 +25,12 @@ class TeamInline(CompactInline):
     model = Team
     extra = 0
     can_delete = False
-    ordering = ["name"]
 
 
 class OrganizationSubmissionInline(CompactInline):
     model = OrganizationSubmission
     extra = 0
     can_delete = False
-    ordering = ["organization_name"]
     readonly_fields = [
         "organization_country",
         "added_by_team",
@@ -671,8 +669,6 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "has_been_rejected",
         "added_on",
     )
-
-    ordering = ("for_organization", "url")
 
     actions = []
 

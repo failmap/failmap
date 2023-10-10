@@ -550,6 +550,7 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
         ordering = [
             "-rating_determined_on",
         ]
+        indexes = [models.Index(fields=["rating_determined_on"])]
 
 
 class EndpointGenericScan(GenericScanMixin):
@@ -774,10 +775,6 @@ class ScanType(models.Model):
 
     def __str__(self):
         return f"{self.name}"
-
-    class Meta:
-        # django-admin-sortable2
-        ordering = ["display_order"]
 
 
 class Scanner(models.Model):
