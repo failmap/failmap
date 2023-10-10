@@ -617,6 +617,9 @@ class InternetNLV2Scan(models.Model):
 
     """
 
+    class Meta:
+        indexes = [models.Index(fields=["state"])]
+
     type = models.CharField(max_length=30, help_text="mail, mail_dashboard or web", blank=True, null=True)
 
     scan_id = models.CharField(
