@@ -207,7 +207,7 @@ def compose_manual_scan_task(organizations_filter: dict = None, urls_filter: dic
                 organization__in=organizations,  # when empty, no results...
                 **urls_filter,
             )
-            .order_by("-endpoint__endpointgenericscan__latest_scan_moment")
+            .order_by("-endpoint__endpointgenericscan__last_scan_moment")
             .only("id", "url")
         )
     else:
@@ -222,7 +222,7 @@ def compose_manual_scan_task(organizations_filter: dict = None, urls_filter: dic
                 endpoint__is_dead=False,
                 **urls_filter,
             )
-            .order_by("-endpoint__endpointgenericscan__latest_scan_moment")
+            .order_by("-endpoint__endpointgenericscan__last_scan_moment")
             .only("id", "url")
         )
 
@@ -555,6 +555,8 @@ def service_provider_scan_via_api_with_limits(proxy: Dict[str, Any], domain: str
 def save_scan(url: str, data: Any):
     """
     When a scan is ready it can contain both ipv4 and ipv6 endpoints. Sometimes multiple of both.
+    It stores _one_ result for v4 and one for v6. It might be that one of the v6 is off, it stores the first one.
+    # todo: store the worst one.
 
     :param url:
     :param data: raw JSON data from qualys
@@ -631,10 +633,43 @@ def save_scan(url: str, data: Any):
         rating_no_trust = qualys_endpoint["gradeTrustIgnored"]
 
         trust = "not trusted" if rating == "T" else "trusted"
-        store_endpoint_scan_result("tls_qualys_certificate_trusted", failmap_endpoint.pk, trust, "")
+        store_endpoint_scan_result(
+            "tls_qualys_certificate_trusted",
+            failmap_endpoint.pk,
+            trust,
+            "",
+            evidence=json.dumps(get_certs(data, ip_version)),
+        )
         store_endpoint_scan_result("tls_qualys_encryption_quality", failmap_endpoint.pk, rating_no_trust, "")
 
     return
+
+
+def get_certs(scan_data, ip_version: int) -> List[Dict[str, Any]]:
+    # get all certificate data from qualys measurements
+    cert_hashes = set()
+
+    relevant_certs = []
+
+    # filter the certs that fit the ip-version
+    for qualys_endpoint in scan_data["endpoints"]:
+        if ":" in qualys_endpoint["ipAddress"] and ip_version == 6:
+            relevant_certs.append(qualys_endpoint.get("details", {}).get("cert", {}))
+
+        if "." in qualys_endpoint["ipAddress"] and ip_version == 4:
+            relevant_certs.append(qualys_endpoint.get("details", {}).get("cert", {}))
+
+    # filter out duplicate certificates
+    unique_certs = []
+    for cert in relevant_certs:
+        if "sha1Hash" not in cert:
+            continue
+
+        if cert["sha1Hash"] not in cert_hashes:
+            cert_hashes.add(cert["sha1Hash"])
+            unique_certs.append(cert)
+
+    return unique_certs
 
 
 @app.task(queue="storage", ignore_result=True)

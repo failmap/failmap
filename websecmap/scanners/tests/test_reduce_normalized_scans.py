@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import UrlGenericScan
 from websecmap.scanners.reduce_identical_scans import reduce_normalized_identical_scans
+from freezegun import freeze_time
 
 
 def test_reduce_normalized_identical_scans(db, default_policy, default_scan_metadata):
@@ -24,6 +25,8 @@ def test_reduce_normalized_identical_scans(db, default_policy, default_scan_meta
 
     # in the end there should be 3 dnssec scans, where there where 6.
 
+    # note that last_scan_moment has an auto_now_add, which is set with time freeze
+
     # Let's setup the scenario above:
     u1 = Url.objects.create(url="range1.nl")
     u2 = Url.objects.create(url="range2.foundation")
@@ -31,102 +34,111 @@ def test_reduce_normalized_identical_scans(db, default_policy, default_scan_meta
 
     # Some things that does not match the policy
     # 01
-    UrlGenericScan.objects.create(
-        url=u1,
-        rating="G",
-        type="test",
-        evidence="test",
-        last_scan_moment=datetime(2021, 1, 1, tzinfo=timezone.utc),
-        rating_determined_on=datetime(2021, 1, 1, tzinfo=timezone.utc),
-    )
+    with freeze_time("2021-01-01"):
+        UrlGenericScan.objects.create(
+            url=u1,
+            rating="G",
+            type="test",
+            evidence="test",
+            last_scan_moment=datetime(2021, 1, 1, tzinfo=timezone.utc),
+            rating_determined_on=datetime(2021, 1, 1, tzinfo=timezone.utc),
+        )
 
     # 02
-    UrlGenericScan.objects.create(
-        url=u1,
-        rating="range 1",
-        type="dnssec",
-        evidence="range 1",
-        last_scan_moment=datetime(2021, 2, 1, tzinfo=timezone.utc),
-        rating_determined_on=datetime(2021, 2, 1, tzinfo=timezone.utc),
-    )
+    with freeze_time("2021-02-01"):
+        UrlGenericScan.objects.create(
+            url=u1,
+            rating="range 1",
+            type="dnssec",
+            evidence="range 1",
+            last_scan_moment=datetime(2021, 2, 1, tzinfo=timezone.utc),
+            rating_determined_on=datetime(2021, 2, 1, tzinfo=timezone.utc),
+        )
 
     # 03
-    UrlGenericScan.objects.create(
-        url=u1,
-        rating="G",
-        type="test",
-        evidence="test with another value",
-        last_scan_moment=datetime(2021, 3, 1, tzinfo=timezone.utc),
-        rating_determined_on=datetime(2021, 3, 1, tzinfo=timezone.utc),
-    )
+    with freeze_time("2021-03-01"):
+        UrlGenericScan.objects.create(
+            url=u1,
+            rating="G",
+            type="test",
+            evidence="test with another value",
+            last_scan_moment=datetime(2021, 3, 1, tzinfo=timezone.utc),
+            rating_determined_on=datetime(2021, 3, 1, tzinfo=timezone.utc),
+        )
 
     # 04, duplicate of 02 but explained.
-    UrlGenericScan.objects.create(
-        url=u1,
-        rating="range 1",
-        type="dnssec",
-        evidence="range 1",
-        last_scan_moment=datetime(2021, 4, 1, tzinfo=timezone.utc),
-        rating_determined_on=datetime(2021, 4, 1, tzinfo=timezone.utc),
-        comply_or_explain_is_explained=True,
-        comply_or_explain_explanation="explanation",
-        comply_or_explain_explained_on=datetime(2021, 4, 1, tzinfo=timezone.utc),
-    )
+    with freeze_time("2021-04-01"):
+        UrlGenericScan.objects.create(
+            url=u1,
+            rating="range 1",
+            type="dnssec",
+            evidence="range 1",
+            last_scan_moment=datetime(2021, 4, 1, tzinfo=timezone.utc),
+            rating_determined_on=datetime(2021, 4, 1, tzinfo=timezone.utc),
+            comply_or_explain_is_explained=True,
+            comply_or_explain_explanation="explanation",
+            comply_or_explain_explained_on=datetime(2021, 4, 1, tzinfo=timezone.utc),
+        )
 
     # 05: and the copy of 4, this is the latest scan in range 1 and should be the one left. Not explained!
     # but the previous one was, so this one should be after merging.
-    UrlGenericScan.objects.create(
-        url=u1,
-        rating="range 1",
-        type="dnssec",
-        evidence="range 1",
-        last_scan_moment=datetime(2021, 5, 1, tzinfo=timezone.utc),
-        rating_determined_on=datetime(2021, 5, 1, tzinfo=timezone.utc),
-        is_the_latest_scan=True,
-        comply_or_explain_is_explained=False,
-    )
+    with freeze_time("2021-05-01"):
+        UrlGenericScan.objects.create(
+            url=u1,
+            rating="range 1",
+            type="dnssec",
+            evidence="range 1",
+            last_scan_moment=datetime(2021, 5, 1, tzinfo=timezone.utc),
+            rating_determined_on=datetime(2021, 5, 1, tzinfo=timezone.utc),
+            is_the_latest_scan=True,
+            comply_or_explain_is_explained=False,
+        )
 
     # 06: out of scope
-    UrlGenericScan.objects.create(
-        url=u1,
-        rating="G",
-        type="test",
-        evidence="test",
-        last_scan_moment=datetime(2021, 6, 1, tzinfo=timezone.utc),
-        rating_determined_on=datetime(2021, 6, 1, tzinfo=timezone.utc),
-    )
+    with freeze_time("2021-06-01"):
+        UrlGenericScan.objects.create(
+            url=u1,
+            rating="G",
+            type="test",
+            evidence="test",
+            last_scan_moment=datetime(2021, 6, 1, tzinfo=timezone.utc),
+            rating_determined_on=datetime(2021, 6, 1, tzinfo=timezone.utc),
+        )
 
     # 07 the one at range 2 is just 1 scan and no duplication
-    UrlGenericScan.objects.create(
-        url=u2,
-        rating="range 2",
-        type="dnssec",
-        evidence="range 2",
-        last_scan_moment=datetime(2021, 7, 1, tzinfo=timezone.utc),
-        rating_determined_on=datetime(2021, 7, 1, tzinfo=timezone.utc),
-        is_the_latest_scan=True,
-    )
+    with freeze_time("2021-07-01"):
+        UrlGenericScan.objects.create(
+            url=u2,
+            rating="range 2",
+            type="dnssec",
+            evidence="range 2",
+            last_scan_moment=datetime(2021, 7, 1, tzinfo=timezone.utc),
+            rating_determined_on=datetime(2021, 7, 1, tzinfo=timezone.utc),
+            is_the_latest_scan=True,
+        )
 
     # 08: duplicate of 09
-    UrlGenericScan.objects.create(
-        url=u3,
-        rating="range 3",
-        type="dnssec",
-        evidence="range 3",
-        last_scan_moment=datetime(2021, 8, 1, tzinfo=timezone.utc),
-        rating_determined_on=datetime(2021, 8, 1, tzinfo=timezone.utc),
-    )
+    with freeze_time("2021-08-01"):
+        UrlGenericScan.objects.create(
+            url=u3,
+            rating="range 3",
+            type="dnssec",
+            evidence="range 3",
+            last_scan_moment=datetime(2021, 8, 1, tzinfo=timezone.utc),
+            rating_determined_on=datetime(2021, 8, 1, tzinfo=timezone.utc),
+        )
 
     # 09: leading scan for range 3
-    UrlGenericScan.objects.create(
-        url=u3,
-        rating="range 3",
-        type="dnssec",
-        evidence="range 3",
-        is_the_latest_scan=True,
-        last_scan_moment=datetime(2021, 9, 1, tzinfo=timezone.utc),
-        rating_determined_on=datetime(2021, 9, 1, tzinfo=timezone.utc),
-    )
+    with freeze_time("2021-09-01"):
+        UrlGenericScan.objects.create(
+            url=u3,
+            rating="range 3",
+            type="dnssec",
+            evidence="range 3",
+            is_the_latest_scan=True,
+            last_scan_moment=datetime(2021, 9, 1, tzinfo=timezone.utc),
+            rating_determined_on=datetime(2021, 9, 1, tzinfo=timezone.utc),
+        )
 
     # now reduce this as planned
     tasks = reduce_normalized_identical_scans(scan_type="dnssec")
