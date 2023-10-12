@@ -378,6 +378,15 @@ class EndpointGenericScanScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmi
 
 @admin.register(models.InternetNLV2Scan)
 class InternetNLV2ScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    # defer retrieved_scan_report and retrieved_scan_report_technical, metadata as those fields are huge and not shown
+    # when listing. List display is not a ONLY filter it seems!
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # these fields are loaded during list_display while not needed and taking up a lot of memory
+        if request.path == "/admin/scanners/internetnlv2scan/":
+            qs = qs.defer("metadata", "retrieved_scan_report", "retrieved_scan_report_technical")
+        return qs
+
     list_display = (
         "id",
         "type",
@@ -409,7 +418,9 @@ class InternetNLV2ScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     @staticmethod
     def domains(obj):
-        return obj.subject_urls.count()
+        return "?"
+        # this is usually 500 or whatever the setting is, which is a waste of resources...
+        # obj.subject_urls.count()
 
     @staticmethod
     def online(obj):
@@ -438,6 +449,24 @@ class InternetNLV2ScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     progress_scan.short_description = "Progress scan (async)"
     actions.append("progress_scan")
+
+    def force_finish(self, request, queryset):
+        for scan in queryset:
+            scan.state = "finished"
+            scan.save()
+        self.message_user(request, "Force finish.")
+
+    force_finish.short_description = "Force finish"
+    actions.append("force_finish")
+
+    def force_request(self, request, queryset):
+        for scan in queryset:
+            scan.state = "requested"
+            scan.save()
+        self.message_user(request, "Force request.")
+
+    force_request.short_description = "Force request"
+    actions.append("force_request")
 
 
 @admin.register(models.InternetNLV2StateLog)

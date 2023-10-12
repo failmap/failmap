@@ -319,7 +319,13 @@ def storing_scan_results(scan_id: int):
 
 
 def processing_scan_results(scan_id: int):
-    scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
+    # large fields are present here, so defer them to speed things up
+    scan = (
+        InternetNLV2Scan.objects.all()
+        .filter(pk=scan_id)
+        .defer("metadata", "retrieved_scan_report", "retrieved_scan_report_technical")
+        .first()
+    )
     if not scan:
         log.debug("Could not retrieve scan %s.", scan_id)
         return []
@@ -331,7 +337,13 @@ def processing_scan_results(scan_id: int):
 
 @app.task(queue="storage", ignore_result=True)
 def update_state(scan_id: int, new_state: str, new_state_message: str):
-    scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
+    # don't retrieve the large fields to speed things up
+    scan = (
+        InternetNLV2Scan.objects.all()
+        .filter(pk=scan_id)
+        .defer("metadata", "retrieved_scan_report", "retrieved_scan_report_technical")
+        .first()
+    )
     if not scan:
         log.debug("Could not retrieve scan %s.", scan_id)
         return
@@ -352,7 +364,8 @@ def update_state(scan_id: int, new_state: str, new_state_message: str):
     old_state = copy(scan.state)
     _apply_similar_properties_to_object(new_state, scan, new_state_message)
     scan.last_state_change = datetime.now(timezone.utc)
-    scan.save()
+    # specify update fields to not send the few gigantic objects to the database again. slowing things down.
+    scan.save(update_fields=["state", "state_message", "last_state_check", "last_state_change"])
 
     statelog = InternetNLV2StateLog()
     statelog.scan = scan
