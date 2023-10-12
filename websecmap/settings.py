@@ -835,6 +835,11 @@ CONSTANCE_CONFIG = {
         "example the front page and the map page.",
         bool,
     ),
+    "SHOW_REPORT_EXPERT_VIEW_CERTIFICATES": (
+        False,
+        "Shows an all in one view of all certificate data",
+        bool,
+    ),
     "TICKER_SLOGAN": ("WEB SECURITY MAP - MONITOR YOUR GOVERNMENT", "Text to show between every 10 changes.", str),
     "TICKER_VISIBLE_VIA_JS_COMMAND": (
         False,
@@ -1565,6 +1570,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_COMPLY_OR_EXPLAIN_GUIDELINES",
                 "SHOW_METRIC_PROGRESS",
                 "SHOW_GEOLOCATION_RESULTS",
+                "SHOW_REPORT_EXPERT_VIEW_CERTIFICATES",
             ),
         ),
         (
