@@ -90,7 +90,10 @@ def plan_verify() -> None:
             "endpoint__port",
             "endpoint__protocol",
         )
+        # disable default ordering because it is expensive and doesn't matter in this case
+        .order_by()
     )
+
     urls = unique_and_random([scan.endpoint.url for scan in scans])
     plannedscan.request(activity="verify", scanner=SCANNER_NAME, urls=urls)
 
