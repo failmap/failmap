@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from copy import copy, deepcopy
 from datetime import datetime, timezone, timedelta
-from typing import List, Union, Any
+from typing import List, Union, Any, Dict
 
 from django.db.models import Q
 
@@ -43,10 +43,23 @@ def recreate_url_report(url_id):
     if not url:
         return
 
+    # proactively get the timeline and the amount of reports. If that matches there is nothing new to report
+    # and we can skip the rest of this method.
+    timeline = create_timeline(url)
+    amount_of_existing_reports = UrlReport.objects.all().filter(url=url_id).count()
+
+    # if amount_of_existing_reports == len(timeline):
+    #     # this will prevent changing a metric and  rebuilding an url report from scratch every time. Only
+    #     # when the timeline changes. This optimization will prevent new explanations to become available as they
+    #     # do not affect the timeline...
+    #     log.info(f"Timeline on {url} is as long as the amount of reports, so nothing new happened.
+    #     Skipping reporting.")
+    #     return
+
     # Creating a timeline and rating it is much faster than doing an individual calculation.
     # Mainly because it gets all data in just a few queries and then builds upon that.
     # Returns chronologically ordered url reports:
-    url_reports: List[Union[UrlReport, None]] = create_url_reports(url)
+    url_reports: List[Union[UrlReport, None]] = create_url_reports(url, timeline=timeline)
 
     # in cases where there is nothing to report at all.
     if not url_reports:
@@ -60,7 +73,6 @@ def recreate_url_report(url_id):
     # log.debug(url_reports)
 
     # No new reports: the amount of items in the timeline(+rules) is the same as the existing reports.
-    amount_of_existing_reports = UrlReport.objects.all().filter(url=url_id).count()
     if amount_of_existing_reports == len(url_reports):
         log.debug("There are no new reports for %s. Updating the latest one to contain latest scan info.", url.url)
         # latest and last() are equivalent because of the sequential nature of adding reports to the database.
@@ -367,7 +379,7 @@ def create_timeline(url: Url):
     metadata = get_backend_scanmetadata()
 
     scan_types = metadata["published_scan_types"]
-    log.debug("Report includes the following scan types: %s", scan_types)
+    # log.debug("Report includes the following scan types: %s", scan_types)
 
     moments, happenings = significant_moments(urls=[url], reported_scan_types=scan_types)
 
@@ -443,8 +455,10 @@ def latest_moment_of_datetime(datetime_: datetime):
     return datetime_.replace(second=59, microsecond=999999, tzinfo=timezone.utc)
 
 
-def create_url_reports(url: Url) -> List[UrlReport]:
-    timeline = create_timeline(url)
+def create_url_reports(url: Url, timeline: Dict = None) -> List[UrlReport]:
+    # to manually support timelines elsewhere for optimization purposes
+    if not timeline:
+        timeline = create_timeline(url)
     url_reports: List[Union[UrlReport, None]] = []
 
     """

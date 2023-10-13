@@ -6,7 +6,6 @@ from datetime import date, datetime, timedelta, timezone
 from typing import List, Tuple
 
 from celery import group
-from deepdiff import DeepDiff
 from django.db.models import Count
 
 from websecmap.celery import Task, app
@@ -15,7 +14,7 @@ from websecmap.map.logic.map_health import update_map_health_reports
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.models import HighLevelStatistic, MapDataCache, OrganizationReport, VulnerabilityStatistic
 from websecmap.organizations.models import Organization, OrganizationType, Url
-from websecmap.reporting.diskreport import retrieve_report, store_report
+from websecmap.reporting.diskreport import store_report
 from websecmap.reporting.report import (
     START_DATE,
     aggegrate_url_rating_scores,
@@ -51,9 +50,14 @@ def compose_task(
 
     # Only displayed configurations are reported. Because why have reports on things you don't display?
     # apply filter to organizations (or if no filter, all organizations)
-    organizations = Organization.objects.filter(q_configurations_to_report("organization"), **organizations_filter)
+    organization_ids = Organization.objects.filter(
+        q_configurations_to_report("organization"), **organizations_filter
+    ).values_list("id", flat=True)
 
-    log.debug("Organizations: %s", len(organizations))
+    # make sure they are unique
+    organization_ids = list(set(organization_ids))
+
+    log.debug("Organizations: %s", len(organization_ids))
 
     # Create tasks for rebuilding ratings for selected organizations and urls.
     # Wheneven a url has been (re)rated the organization for that url need to
@@ -62,31 +66,44 @@ def compose_task(
     # urls (depending on url filters) after which the organization rating will
     # be rebuild.
 
+    # prevent that for every organization the same urls are being re-rated. Just rate the URL once instead of
+    # per organization...
+
+    # first uniquely get all urls for all these organizations, in batches of 1000 organizations due to
+    # limitations of the _IN  -> or just keep it stupid...
     tasks = []
-    for organization in organizations:
-        # todo: organizations that have no endpoints could get a default rating, which is much quicker
-        #  than iterating all organizations. But it does not save too much time...
-        urls = (
-            Url.objects.filter(
-                q_configurations_to_report(),
-                organization=organization,
-                **urls_filter
-                # To save time, only acccept urls that have at least one endpoint.
-            )
-            .annotate(n_endpoints=Count("endpoint"))
-            .filter(n_endpoints__gt=0)
-            .only("id")
+
+    # todo: organizations that have no endpoints could get a default rating, which is much quicker
+    #  than iterating all organizations. But it does not save too much time...
+    urls = (
+        Url.objects.filter(
+            q_configurations_to_report(),
+            organization__in=organization_ids,
+            **urls_filter
+            # To save time, only acccept urls that have at least one endpoint.
+            # which is wrong, since there could be only url ratings, and it's extremely rare?
         )
-        if not urls:
-            # can still add an empty organization rating even though there is nothing to show. Will create an
-            # empty gray region.
-            tasks.append(default_organization_rating.si([organization.pk]))
-            continue
+        .annotate(n_endpoints=Count("endpoint"))
+        .filter(n_endpoints__gt=0)
+        .only("id", "organization__id")
+        .values("id", "organization__id")
+    )
 
-        url_ids = [u.id for u in urls]
-        # make sure default organization rating is in place
-        tasks.append(group(recreate_url_reports(url_ids)) | create_organization_reports_now.si([organization.pk]))
+    organizations_with_urls = {url["organization__id"] for url in urls}
+    organizations_without_urls = set(organization_ids) - organizations_with_urls
 
+    # can still add an empty organization rating even though there is nothing to show.
+    # Will create an empty gray region.
+    tasks.append(default_organization_rating.si(list(organizations_without_urls)))
+
+    # just once for every url
+    url_ids = {url["id"] for url in urls}
+    tasks.append(group(recreate_url_reports(list(url_ids))))
+
+    tasks.extend(
+        create_organization_reports_now.si([organization_id])
+        for organization_id in organizations_with_urls
+    )
     if not tasks:
         log.warning("Could not rebuild reports, filters resulted in no tasks created.")
         log.debug("Organization filter: %s, Url filter: %s", organizations_filter, urls_filter)
@@ -759,33 +776,40 @@ def create_organization_report_on_moment(organization: Organization, when: datet
     # when is relevant because you want to see if the explanation has not expired.
     scores = aggegrate_url_rating_scores(all_url_ratings, at_when=when)
 
+    # disabled deepdiff, see below, it doesn't save anything in usual modus operandi
     # Still do deepdiff to prevent double reports.
-    try:
-        last = (
-            OrganizationReport.objects.filter(organization=organization, at_when__lte=when)
-            .defer("calculation")
-            .latest("at_when")
-        )
-    except OrganizationReport.DoesNotExist:
-        log.debug("Could not find the last organization rating, creating a dummy one.")
-        last = OrganizationReport()  # create an empty one
+    # try:
+    #     last = (
+    #         OrganizationReport.objects.filter(organization=organization, at_when__lte=when)
+    #         .defer("calculation")
+    #         .latest("at_when")
+    #     )
+    # except OrganizationReport.DoesNotExist:
+    #     log.debug("Could not find the last organization rating, creating a dummy one.")
+    #     last = OrganizationReport()  # create an empty one
 
     scores["name"] = organization.name
     calculation = {"organization": scores}
 
-    # this is 10% faster without deepdiff, the major pain is elsewhere.
-    last_report_data = retrieve_report(last.id, "OrganizationReport")
-    if DeepDiff(last_report_data, calculation, ignore_order=True, report_repetition=True):
-        save_organization_report_on_moment(organization, when, scores, calculation)
+    # since metrics change basically every day, don't deepdiff or try to optimize and just save the report
+    # every day. Dates of 'last scan' will be different anyway as at least one metric will be performed.
+    # this only would save data if there was no scan performed!
+    save_organization_report_on_moment(organization, when, scores, calculation)
 
-    else:
-        # This happens because some urls are dead etc: our filtering already removes this from the relevant information
-        # at this point in time. But since it's still a significant moment, it will just show that nothing has changed.
-        log.warning("The calculation for %s on %s is the same as the previous one. Not saving.", organization, when)
+    # therefore this has been commented out:
+    # this is 10% faster without deepdiff, the major pain is elsewhere.
+    # last_report_data = retrieve_report(last.id, "OrganizationReport")
+    # if DeepDiff(last_report_data, calculation, ignore_order=True, report_repetition=True):
+    #     save_organization_report_on_moment(organization, when, scores, calculation)
+
+    # else:
+    #     # This happens because some urls are dead etc: our filtering already removes this from the relevant info
+    #     # at this point in time. But since it's still a significant moment, it will just show that nothing changed.
+    #     log.warning("The calculation for %s on %s is the same as the previous one. Not saving.", organization, when)
 
 
 def save_organization_report_on_moment(organization, when, scores, calculation):
-    log.info("The calculation for %s on %s has changed, so we're saving this rating.", organization, when)
+    log.info("The calculation for %s on %s should have changed, so we're saving this rating.", organization, when)
 
     # remove urls and name from scores object, so it can be used as initialization parameters (saves lines)
     # this is by reference, meaning that the calculation will be affected if we don't work on a clone.
