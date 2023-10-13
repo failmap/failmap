@@ -432,6 +432,34 @@
 },
 {
   "model": "django_celery_beat.periodictask",
+  "pk": 2,
+  "fields": {
+    "name": "&#x1F4C4; Create map and graph caches based on generated reports, to speed things up",
+    "task": "websecmap.app.models.create_job",
+    "interval": null,
+    "crontab": 19,
+    "solar": null,
+    "clocked": null,
+    "args": "[\"websecmap.map.prepare_caches\"]",
+    "kwargs": "{}",
+    "queue": "storage",
+    "exchange": null,
+    "routing_key": null,
+    "headers": "{}",
+    "priority": null,
+    "expires": null,
+    "expire_seconds": null,
+    "one_off": false,
+    "start_time": null,
+    "enabled": false,
+    "last_run_at": "2019-01-23T21:00:00Z",
+    "total_run_count": 0,
+    "date_changed": "2019-01-23T21:00:40Z",
+    "description": ""
+  }
+},
+{
+  "model": "django_celery_beat.periodictask",
   "pk": 4,
   "fields": {
     "name": "celery.backend_cleanup (hidden)",

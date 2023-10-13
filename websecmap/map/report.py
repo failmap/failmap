@@ -1,3 +1,5 @@
+import time
+
 import calendar
 import logging
 from collections import OrderedDict
@@ -10,7 +12,6 @@ from django.db.models import Count
 
 from websecmap.celery import Task, app
 from websecmap.map.logic.map import get_map_data, get_reports_by_ids
-from websecmap.map.logic.map_health import update_map_health_reports
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.models import HighLevelStatistic, MapDataCache, OrganizationReport, VulnerabilityStatistic
 from websecmap.organizations.models import Organization, OrganizationType, Url
@@ -38,8 +39,6 @@ def compose_task(
     """
     Compose taskset to rebuild specified organizations/urls.
     """
-    metadata = get_backend_scanmetadata()
-
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
     if endpoints_filter:
@@ -51,7 +50,10 @@ def compose_task(
     # Only displayed configurations are reported. Because why have reports on things you don't display?
     # apply filter to organizations (or if no filter, all organizations)
     organization_ids = Organization.objects.filter(
-        q_configurations_to_report("organization"), **organizations_filter
+        q_configurations_to_report("organization"),
+        # don't report over dead organizations as results will always be the same....
+        is_dead=False,
+        **organizations_filter,
     ).values_list("id", flat=True)
 
     # make sure they are unique
@@ -82,6 +84,7 @@ def compose_task(
             **urls_filter
             # To save time, only acccept urls that have at least one endpoint.
             # which is wrong, since there could be only url ratings, and it's extremely rare?
+            # : also include deleted urls, so to stabilize reporting over time
         )
         .annotate(n_endpoints=Count("endpoint"))
         .filter(n_endpoints__gt=0)
@@ -98,9 +101,19 @@ def compose_task(
 
     # just once for every url
     url_ids = {url["id"] for url in urls}
-    tasks.append(group(recreate_url_reports(list(url_ids))))
+    tasks.extend(recreate_url_reports(list(url_ids)))
 
+    # todo: is the order right? so first url reports and then the organization reports?
     # this is placed in one task each to run simultaneously instead of sequentially in a for loop
+
+    # add dummy tasks that serve as a buffer between url reports and organization reports.
+    # dummy tasks should last as long as the longest url rating and there should be enough dummies
+    # to keep all workers busy and presto: all url reports are finished before org reports are made without
+    # the giant memory overhead on each task. This sort of works because url reports are pretty small tasks :D
+    # seen: fifo order in queue processing
+    for i in range(0, 512):
+        tasks.append(dummy.si())
+
     tasks.extend(create_organization_reports_now.si([organization_id]) for organization_id in organizations_with_urls)
     if not tasks:
         log.warning("Could not rebuild reports, filters resulted in no tasks created.")
@@ -114,35 +127,20 @@ def compose_task(
 
     log.debug("Number of tasks: %s", len(tasks))
 
-    # finally, rebuild the graphs (which can mis-matchi a bit if the last reports aren't in yet. Will have to do for now
-    # mainly as we're trying to get away from canvas and it's buggyness.
+    # after this prepare caches should be fired. BUT don't chain that task as it will be added to the memory
+    # of each of the above created tasks: this causes a factor of 100 memory increase (as every of the subtasks
+    # is added to the body of the message on queue!).
+    # If you chain organization reports and url reports, same memory issue happens.
+    # and because you don't know the order of things happening, usually fifo. So it is guaranteed that a few
+    # reports will be rated before url ratings happen. But because the queue is fifo you can add dummy tasks
+    # to create a buffer between tasks instead of chaining.
+    return group(tasks)
 
-    subtasks = []
-    # These are database heavy tasks, and executed sequentially to spread load on the database.
-    if organizations_filter.get("country__in", None):
-        subtasks.append(
-            calculate_vulnerability_statistics.si(1, organizations_filter["country__in"])
-            | calculate_map_data.si(1, organizations_filter["country__in"])
-            | calculate_high_level_stats.si(1, organizations_filter["country__in"])
-            | update_map_health_reports.si(metadata["published_scan_types"], 1, organizations_filter["country__in"])
-        )
-    elif organizations_filter.get("country", None):
-        subtasks.append(
-            calculate_vulnerability_statistics.si(1, [organizations_filter["country"]])
-            | calculate_map_data.si(1, [organizations_filter["country"]])
-            | calculate_high_level_stats.si(1, [organizations_filter["country"]])
-            | update_map_health_reports.si(metadata["published_scan_types"], 1, [organizations_filter["country"]])
-        )
-    else:
-        subtasks.append(
-            calculate_vulnerability_statistics.si(1)
-            | calculate_map_data.si(1)
-            | calculate_high_level_stats.si(1)
-            | update_map_health_reports.si(metadata["published_scan_types"], 1)
-        )
 
-    # Make sure all other reporting tasks are done
-    return group(tasks) | group(subtasks)
+@app.task(queue="reporting")
+def dummy():
+    time.sleep(1)
+    return
 
 
 @app.task(queue="reporting")
