@@ -100,10 +100,8 @@ def compose_task(
     url_ids = {url["id"] for url in urls}
     tasks.append(group(recreate_url_reports(list(url_ids))))
 
-    tasks.extend(
-        create_organization_reports_now.si([organization_id])
-        for organization_id in organizations_with_urls
-    )
+    # this is placed in one task each to run simultaneously instead of sequentially in a for loop
+    tasks.extend(create_organization_reports_now.si([organization_id]) for organization_id in organizations_with_urls)
     if not tasks:
         log.warning("Could not rebuild reports, filters resulted in no tasks created.")
         log.debug("Organization filter: %s, Url filter: %s", organizations_filter, urls_filter)
