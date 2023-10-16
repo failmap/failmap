@@ -1,0 +1,133 @@
+publiccodeYmlVersion: "0.3"
+
+name: Web Security Map
+url: "https://gitlab.com/internet-cleanup-foundation/web-security-map.git"
+landingURL: "https://websecuritymap.org/"
+softwareVersion: "dev"
+releaseDate: "2023-09-21"
+logo: img/logo.svg (TODO)
+
+platforms:
+  - linux
+  - macos
+
+categories:
+  - it-security
+  - geographic-information-systems
+  - it-management
+  - data-analytics
+  - data-collection
+  - data-visualization
+
+usedBy:
+  - Dutch Ministry of the Interior and Kingdom Relations
+  - Dutch Ministry of Justice and Security
+  - Virtually all governments and hospitals in the Netherlands
+
+developmentStatus: stable
+
+softwareType: "standalone/web"
+
+intendedAudience:
+  scope:
+    - security
+    - government
+    - science-and-technology
+
+description:
+  en:
+    localisedName: Web Security Map
+    shortDescription: >
+      Creates geographical maps that in one
+      image tells how well governments have
+      implemented well known security standards.
+
+    longDescription: >
+      Web Security Map creates geographical maps that, in one image, show how well layers the Dutch government and
+      other public institutions are adhering to well known security standards and practices. Security of these
+      governments are graded using the colors of a traffic light. For example: imagine a map of your country with
+      all municipalities, in the three traffic light colors.
+
+      The solution is deployed publicly. This allows everyone to see what the current state of security is. It is
+      aimed specifically at non-it knowledgeable people: the common citizen and C-level managers. This is intentional,
+      as they are the driving force of creating budget to solve security issues. Citizens, in the end, are the ones
+      negatively impacted when there is a lack of security.
+
+      The project goes naming and shaming: it continuously re-measures the current state of security and stores all
+      measurements over time. An improved security posture will thus be reflected publicly in a matter of days.
+      We call this "faming", taken from the word "Fame".
+
+      Every metric that is performed is published, which means there is a careful tradeoff on what to measure and
+      what to display. For this various ethical guidelines have been set up in order to only support security and
+      not cause damage. There are currently over 130 different metrics in the solution covering well known security
+      practices such as correct domain ownership, physical location (and jurisdiction) of web and mail servers,
+      preventing login portal exposure, anti spoofing for e-mail, security.txt, secure sites over https, dnssec,
+      privacy, version number exposure and many more.
+
+      Everyone can see these metrics, which are accompanied with documentation and a second opinion test link.
+
+      The solution has many other views on the gathered data. For example a chart of what organizations are
+      performing the best or the worst. It shows trend lines over time, it shows month-by-month comparison over
+      each metric showing improvement (or degradation) and so on.
+
+      The transparency that the solution has generated resulted in fixing well over 20.000 security issues and
+      probably many more indirectly. In the Netherlands this initiatives measures about 50.000 internet domains
+      such as rijksoverheid.nl.
+
+      Please get in touch for installation support, information about what to expect, possible legal challenges and
+      other first hand experience. We will support you in setting up and configuring the system, as this is fairly
+      complex due to the different bells and whistles the system has.
+
+    features:
+      - Create transparency / accountability
+      - Prioritizes adoption of security standards
+      - State of security understandable by a wide audience, including the general public and c-level people
+      - Creates public data sets of IT infrastructure
+      - Supported by the Internet Cleanup Foundation
+
+
+    screenshots:
+      - docs/screenshots/2023/wsm_multiple_map_frontpage_2023.jpeg
+      - docs/screenshots/2023/wsm_full_map_with_current_location_2023.jpeg
+      - docs/screenshots/2023/wsm_progress_report_securitytxt_2023.jpeg
+      - docs/screenshots/2023/wsm_search_accross_maps_2023.jpeg
+      - docs/screenshots/2023/wsm_best_worst_best_2023.jpe
+      - docs/screenshots/2023/wsm_best_worst_worst_2023.jpeg
+      - docs/screenshots/2023/wsm_statistics_2023.jpeg
+      - docs/screenshots/2023/wsm_report_overview_2023.jpeg
+      - docs/screenshots/2023/wsm_report_details_2023.jpeg
+      - docs/screenshots/2023/wsm_login_plaza_2023.jpeg
+    videos:
+      - https://www.youtube.com/watch?v=YvK79QGaHTY
+
+legal:
+  license: AGPL-3.0-only
+  mainCopyrightOwner: Internet Cleanup Foundation
+  repoOwner: Internet Cleanup Foundation
+
+
+maintenance:
+  type: "internal"
+
+  contractors:
+    - name: "Internet Cleanup Foundation"
+      email: "info@internetcleanup.foundation"
+      website: "https://internetcleanup.foundation"
+      until: "2030-01-01"
+
+  contacts:
+    - name: Elger Jonker
+      email: "elger@internetcleanup.foundation"
+      affiliation: Board Member of the Foundation
+      phone: "+31 6 1342 5622"
+
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - en
+    - nl
+
+dependsOn:
+  open:
+    - name: Docker
+      optional: false
