@@ -1,5 +1,8 @@
 from datetime import datetime, timezone
+
+import pytest
 from deepdiff import DeepDiff
+from constance.test import override_config
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import (
@@ -8,6 +11,7 @@ from websecmap.scanners.models import (
     ProductCookieIndicator,
     Product,
     ProductVendor,
+    CookiePurpose,
 )
 from websecmap.scanners.scanner.web_privacy import (
     store,
@@ -17,6 +21,7 @@ from websecmap.scanners.scanner.web_privacy import (
     product_meaning_from_cookies,
     strip_irrelevant_cookie_fields,
     update_meaning_of_location_and_products_at_web_privacy_cookies,
+    worse_rating,
 )
 
 from websecmap.scanners.scanner.web_privacy_resources.trackers import (
@@ -25,6 +30,11 @@ from websecmap.scanners.scanner.web_privacy_resources.trackers import (
 )
 
 from .test_location import create_sample_domainip, create_sample_geoip
+from ..scanner.metric_constants import (
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_HIGH,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK,
+)
 
 
 def test_get_tracker_info():
@@ -481,6 +491,31 @@ def test_remove_duplicate_third_party_requestss():
     ]
 
 
+def test_worse_rating():
+    # left > right
+    assert (
+        worse_rating(WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_HIGH, WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM)
+        == WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_HIGH
+    )
+
+    # right > left
+    assert (
+        worse_rating(WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK, WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM)
+        == WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM
+    )
+
+    # identical
+    assert (
+        worse_rating(WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM, WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM)
+        == WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM
+    )
+
+    # not existing, crash
+    with pytest.raises(ValueError):
+        assert worse_rating("appel", "ei")
+
+
+@override_config(COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_MEDIUM=["marketing"])
 def test_product_meaning_from_cookies(db):
     v = ProductVendor.objects.create(name="Google")
     p = Product.objects.create(
@@ -492,24 +527,47 @@ def test_product_meaning_from_cookies(db):
         name="OWA",
     )
 
-    ProductCookieIndicator.objects.create(match_name="_gat?", product=p)
-    ProductCookieIndicator.objects.create(match_name="cookieTest", match_path="/owa/auth.*", product=p2)
+    marketing_cookie = CookiePurpose.objects.create(name="marketing")
+    session_cookie = CookiePurpose.objects.create(name="session")
 
+    ProductCookieIndicator.objects.create(match_name="_gat?", product=p, most_significant_purpose=marketing_cookie)
+    ProductCookieIndicator.objects.create(
+        match_name="cookieTest", match_path="/owa/auth.*", product=p2, most_significant_purpose=session_cookie
+    )
+
+    # Happens to be one rule for the same product, that does not always need to be the case.
+    # They can also have multiple purposes, one per indicator.
     cookies = demo_data()["timeless-cookies"]
-
-    assert list(product_meaning_from_cookies(cookies)) == [
-        {
-            "product_id": p.id,
-            "product_name": "Google Analytics",
-            "product_vendor_id": v.id,
-            "product_vendor_name": "Google",
-            "product_version": "unknown",
-            "cookies": [
-                strip_irrelevant_cookie_fields(demo_data()["timeless-cookies"][0]),
-                strip_irrelevant_cookie_fields(demo_data()["timeless-cookies"][1]),
-            ],
-        }
-    ]
+    assert product_meaning_from_cookies(cookies) == {
+        "products": [
+            {
+                "cookies": [
+                    {
+                        "domain": ".zutphen.nl",
+                        "indicator": 1,
+                        "name": "_ga",
+                        "path": "/",
+                        "purpose": "marketing",
+                        "purpose_rating": "medium",
+                    },
+                    {
+                        "domain": ".zutphen.nl",
+                        "indicator": 1,
+                        "name": "_gat",
+                        "path": "/",
+                        "purpose": "marketing",
+                        "purpose_rating": "medium",
+                    },
+                ],
+                "product_id": 1,
+                "product_name": "Google Analytics",
+                "product_vendor_id": 1,
+                "product_vendor_name": "Google",
+                "product_version": "unknown",
+            }
+        ],
+        "worst_purpose_rating": "medium",
+    }
 
     owa_cookies = [
         {
@@ -523,18 +581,28 @@ def test_product_meaning_from_cookies(db):
             "domain": "example.com",
         },
     ]
-    assert list(product_meaning_from_cookies(owa_cookies)) == [
-        {
-            "product_id": p2.id,
-            "product_name": "OWA",
-            "product_vendor_id": None,
-            "product_vendor_name": None,
-            "product_version": "unknown",
-            "cookies": [
-                strip_irrelevant_cookie_fields(owa_cookies[0]),
-            ],
-        }
-    ]
+    assert product_meaning_from_cookies(owa_cookies) == {
+        "products": [
+            {
+                "product_id": p2.id,
+                "product_name": "OWA",
+                "product_vendor_id": None,
+                "product_vendor_name": None,
+                "product_version": "unknown",
+                "cookies": [
+                    {
+                        "domain": "example.com",
+                        "indicator": 2,
+                        "name": "cookieTest",
+                        "path": "/owa/auth/example.com",
+                        "purpose": "session",
+                        "purpose_rating": "ok",
+                    }
+                ],
+            }
+        ],
+        "worst_purpose_rating": "ok",
+    }
 
 
 def test_web_privacy_scan_update(db, requests_mock, current_path, caplog):

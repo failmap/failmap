@@ -586,8 +586,8 @@ CONSTANCE_ADDITIONAL_FIELDS = {
     ],
     # Todo: no validation options, that is offloaded to the widget?
     "json": [
-        "django.forms.fields.CharField",
-        {"widget": "django.forms.Textarea"},
+        "django.forms.fields.JSONField",
+        # {"widget": "django.forms.Textarea"},
     ],
 }
 
@@ -1411,6 +1411,27 @@ CONSTANCE_CONFIG = {
         "The default user agent that is used in http connection requests and header tests.",
         str,
     ),
+    "COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_OK": (
+        [],
+        "The default is that everything else is OK. So only fill something in here if you want to make it explicit. "
+        'Fill in a json list of purposes, such as: ["consent", "analytics"]',
+        "json",
+    ),
+    "COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_LOW": (
+        [],
+        'Fill in a json list of purposes graded as low risk, such as: ["consent", "analytics"]',
+        "json",
+    ),
+    "COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_MEDIUM": (
+        [],
+        'Fill in a json list of purposes graded as medium risk, such as: ["consent", "analytics"]',
+        "json",
+    ),
+    "COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_HIGH": (
+        [],
+        'Fill in a json list of purposes graded as high risk, such as: ["consent", "analytics"]',
+        "json",
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1716,6 +1737,15 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_LOW",
                 "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_MEDIUM",
                 "GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_HIGH",
+            ),
+        ),
+        (
+            "Grading of cookies received without consent. Fill in different purposes per grade.",
+            (
+                "COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_OK",
+                "COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_LOW",
+                "COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_MEDIUM",
+                "COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_HIGH",
             ),
         ),
         ("Page Content", ("CONTENT_ERRONEOUS",)),

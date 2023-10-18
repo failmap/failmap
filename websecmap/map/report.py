@@ -98,6 +98,7 @@ def compose_task(
     # can still add an empty organization rating even though there is nothing to show.
     # Will create an empty gray region.
     if list(organizations_without_urls):
+        # warning: default_organization_rating has a side effect, it will rate everything if nothing is given...
         tasks.append(default_organization_rating.si(list(organizations_without_urls)))
 
     # just once for every url

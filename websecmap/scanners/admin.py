@@ -871,10 +871,26 @@ class ProductRelationshipAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return ProductHierarchy.objects.all().filter(relationship=obj).count()
 
 
+@admin.register(models.CookiePurpose)
+class CookiePurposeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("id", "name")
+
+    def __str__(self):
+        return self.name
+
+
 @admin.register(models.ProductCookieIndicator)
 class ProductCookieIndicatorAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("id", "match_name", "match_domain", "match_path", "product")
+    list_display = ("id", "match_name", "match_domain", "match_path", "product", "purposes_")
     exclude = ("match_regex", "match_field")
+
+    search_fields = ("match_name", "purposes__name", "product__vendor__name", "product__name")
+
+    list_filter = ("purposes", "product")
+
+    @staticmethod
+    def purposes_(obj):
+        return ", ".join(p.name for p in obj.purposes.all())
 
     @staticmethod
     def uses(obj):

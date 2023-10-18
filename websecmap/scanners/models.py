@@ -1117,6 +1117,13 @@ class CookieIndicatorFields(models.IntegerChoices):
     PATH = 2, "path"
 
 
+class CookiePurpose(models.Model):
+    name = models.SlugField(max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
 class ProductCookieIndicator(models.Model):
     """Matches a cookie to a product using the 'name', 'domain' and 'path' fields of
     the cookie. All fields must match. Leave fields empty to ignore them. Fields are
@@ -1139,6 +1146,12 @@ class ProductCookieIndicator(models.Model):
     match_path = models.CharField(
         max_length=200, blank=True, null=True, help_text="Match cookie path against this regex, is wrapped in '^$'."
     )
+
+    # purposes will not be used and removed
+    purposes = models.ManyToManyField(CookiePurpose, blank=True, related_name="obsolete_purposes")
+    most_significant_purpose = models.ForeignKey(CookiePurpose, blank=True, null=True, on_delete=models.CASCADE)
+
+    cookiedatabase_link = models.URLField(blank=True, null=True, help_text="Link to cookiedatabase.org")
 
     notes = models.TextField(
         blank=True,

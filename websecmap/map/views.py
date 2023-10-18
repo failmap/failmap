@@ -26,6 +26,7 @@ from websecmap.map.logic.admin import (
     switch_lattitude_and_longitude,
     user_is_staff_member,
 )
+from websecmap.map.logic.cookies import get_cookie_database
 from websecmap.map.logic.datasets import create_filename
 from websecmap.map.logic.explain import explain, get_all_explains, get_recent_explains, remove_explanation
 from websecmap.map.logic.improvements import get_improvements
@@ -936,3 +937,8 @@ def login_plaza(
 @cache_page(ONE_HOUR)
 def login_plaza_products(request):
     return json_response(get_products())
+
+
+@cache_page(ONE_HOUR)
+def cookie_indicators(request):
+    return json_response(get_cookie_database())

@@ -30,7 +30,7 @@ from websecmap.scanners.scanner.metric_constants import (
     WEB_PRIVACY_THIRD_PARTY_REQUESTS,
     WEB_PRIVACY_THIRD_PARTY_ERROR,
     WEB_PRIVACY_COOKIES,
-    WEB_PRIVACY_PRODUCTS,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT,
     WEB_PRIVACY_COOKIES_ERROR,
     WEB_PRIVACY_THIRD_PARTY_DOMAINS,
     WEB_PRIVACY_THIRD_PARTY_FOUND,
@@ -40,6 +40,10 @@ from websecmap.scanners.scanner.metric_constants import (
     WEB_PRIVACY_COOKIES_NEUTRAL,
     WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
     WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_HIGH,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_LOW,
 )
 
 from websecmap.scanners.scanner.web_privacy_resources.trackers import get_known_trackers_from_urls
@@ -252,13 +256,13 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
 
     products = product_meaning_from_cookies(cookies)
     cookies_product_meaning = {
-        "products": products,
+        "products": products["products"],
     }
 
     store_endpoint_scan_result(
-        scan_type=WEB_PRIVACY_PRODUCTS,
+        scan_type=WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT,
         endpoint_id=endpoint_id,
-        rating=WEB_PRIVACY_COOKIES_NEUTRAL,
+        rating=products["worst_purpose_rating"],
         message=WEB_PRIVACY_COOKIES_NEUTRAL,
         meaning=cookies_product_meaning,
         evidence=json.dumps(cookies),
@@ -297,11 +301,44 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     )
 
 
+def rate_cookie_set_without_consent(purpose):
+    if purpose in constance_cached_value("COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_HIGH"):
+        return WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_HIGH
+    if purpose in constance_cached_value("COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_MEDIUM"):
+        return WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM
+    if purpose in constance_cached_value("COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_LOW"):
+        return WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_LOW
+    # if purpose in constance_cached_value("COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_OK"):
+    #     return WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK
+    # ok is the default.
+    return WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK
+
+
+COOKIE_NO_CONSENT_RATING_ORDER = [
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_HIGH,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_LOW,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK,
+]
+
+
+def worse_rating(rating_a, rating_b):
+    if COOKIE_NO_CONSENT_RATING_ORDER.index(rating_a) <= COOKIE_NO_CONSENT_RATING_ORDER.index(rating_b):
+        return rating_a
+    return rating_b
+
+
 def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
     """Generate list of products determined from cookies."""
     cookie_indicators = list()
 
-    for indicator in ProductCookieIndicator.objects.all():
+    worst_rating = WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK
+
+    # to get the right and purpose for each cookie, it's better to have each cookieproductindicator
+    # listed separately per cookie.
+    for indicator in ProductCookieIndicator.objects.all().prefetch_related(
+        "product", "product__vendor", "most_significant_purpose"
+    ):
         matchers = dict()
         if indicator.match_name:
             matchers["name"] = re.compile(f"^{indicator.match_name}$")
@@ -309,28 +346,47 @@ def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
             matchers["domain"] = re.compile(f"^{indicator.match_domain}$")
         if indicator.match_path:
             matchers["path"] = re.compile(f"^{indicator.match_path}$")
-        cookie_indicators.append((matchers, indicator.product))
+        cookie_indicators.append((matchers, indicator))
 
+    # todo: many indiciators may point to the same product, but will be about a different cookie.
+    #  so group these products lateron
     products = defaultdict(lambda: dict([["cookies", list()]]))
     for cookie in cookies:
-        for matchers, product in cookie_indicators:
+        for matchers, indicator in cookie_indicators:
             if all(matcher.match(cookie[field]) for field, matcher in matchers.items()):
-                products[product.id]["product_id"] = product.id
-                products[product.id]["product_name"] = product.name
-                products[product.id]["product_version"] = "unknown"
-                if product.vendor:
-                    products[product.id]["product_vendor_name"] = product.vendor.name
-                    products[product.id]["product_vendor_id"] = product.vendor.id
+                # flat lists with direct keys versus complexity in nesting :)
+                products[indicator.product.id]["product_id"] = indicator.product.id
+                products[indicator.product.id]["product_name"] = indicator.product.name
+                products[indicator.product.id]["product_version"] = "unknown"
+                if indicator.product.vendor:
+                    products[indicator.product.id]["product_vendor_name"] = indicator.product.vendor.name
+                    products[indicator.product.id]["product_vendor_id"] = indicator.product.vendor.id
                 else:
-                    products[product.id]["product_vendor_name"] = None
-                    products[product.id]["product_vendor_id"] = None
+                    products[indicator.product.id]["product_vendor_name"] = None
+                    products[indicator.product.id]["product_vendor_id"] = None
 
-                products[product.id]["cookies"].append(strip_irrelevant_cookie_fields(cookie))
+                # only select the fields from the cookie that where relevant for this selection
+                my_cookie = strip_irrelevant_cookie_fields(cookie)
+
+                # and add information about the purpose of the cookie and what it means
+                # The indicator id is where all the other relevant info from the cookie
+                # database comes from in the UI. That is not used to further judge a cookie but just
+                # for information purposes. Which saves a lot of references. This might also
+                # become a table, but why.
+                my_cookie["indicator"] = indicator.id
+                my_cookie["purpose"] = indicator.most_significant_purpose.name
+                rating = rate_cookie_set_without_consent(indicator.most_significant_purpose.name)
+                my_cookie["purpose_rating"] = rating
+                worst_rating = worse_rating(worst_rating, rating)
+
+                products[indicator.product.id]["cookies"].append(my_cookie)
+
                 break
         else:
             log.debug(f"No product match for cookie: {cookie}")
 
-    return products.values()
+    # todo: get the worst rating for this cookie and add that as well.
+    return {"products": list(products.values()), "worst_purpose_rating": worst_rating}
 
 
 def strip_irrelevant_cookie_fields(cookie: dict, keep_fields={x[1] for x in CookieIndicatorFields.choices}) -> dict:
@@ -430,7 +486,7 @@ def add_meaning_of_location_and_products_at_web_privacy_cookies(
     }
 
     store_endpoint_scan_result(
-        scan_type=WEB_PRIVACY_PRODUCTS,
+        scan_type=WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT,
         endpoint_id=endpoint_id,
         rating=WEB_PRIVACY_COOKIES_NEUTRAL,
         message=WEB_PRIVACY_COOKIES_NEUTRAL,

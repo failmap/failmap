@@ -20,6 +20,15 @@ WEB_PRIVACY_THIRD_PARTY_DOMAINS = "web_privacy_third_party_domains"
 WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL = "web_privacy_third_party_domains_neutral"
 WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR = "web_privacy_third_party_domains_error"
 
-WEB_PRIVACY_PRODUCTS = "web_privacy_products"
-WEB_PRIVACY_PRODUCTS_NEUTRAL = "web_privacy_products_neutral"
-WEB_PRIVACY_PRODUCTS_ERROR = "web_privacy_products_error"
+# todo: rename from web_privacy_products to the new name
+# This is the metric for cookies that have been received without consent. This means the user has
+# not clicked on anything on the cookie dialog.
+WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT = "web_privacy_cookie_products_no_consent"
+# neutral will be phased out
+WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_NEUTRAL = "neutral"
+WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK = "ok"
+WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_LOW = "low"
+WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM = "medium"
+WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_HIGH = "high"
+# in case it was not possible to create a scan etc...
+WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_ERROR = "scan_error"
