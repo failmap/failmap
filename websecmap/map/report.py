@@ -97,7 +97,8 @@ def compose_task(
 
     # can still add an empty organization rating even though there is nothing to show.
     # Will create an empty gray region.
-    tasks.append(default_organization_rating.si(list(organizations_without_urls)))
+    if list(organizations_without_urls):
+        tasks.append(default_organization_rating.si(list(organizations_without_urls)))
 
     # just once for every url
     url_ids = {url["id"] for url in urls}
