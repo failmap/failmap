@@ -267,7 +267,7 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
         name="Google Analytics",
     )
 
-    ProductCookieIndicator.objects.create(match_name="_ga", product=p)
+    indicator = ProductCookieIndicator.objects.create(match_name="_ga", product=p)
 
     store(scan("https://zutphen.nl"), ep.id)
 
@@ -294,7 +294,7 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
     # you don't get the cookie fields, but also purpose and such:
     assert meaning["products"][0]["cookies"][0] == {
         "domain": ".zutphen.nl",
-        "indicator": 1,
+        "indicator": indicator.id,
         "name": "_ga",
         "path": "/",
         "purpose": "",
@@ -540,8 +540,10 @@ def test_product_meaning_from_cookies(db):
     marketing_cookie = CookiePurpose.objects.create(name="marketing")
     session_cookie = CookiePurpose.objects.create(name="session")
 
-    ProductCookieIndicator.objects.create(match_name="_gat?", product=p, most_significant_purpose=marketing_cookie)
-    ProductCookieIndicator.objects.create(
+    indicator_ga = ProductCookieIndicator.objects.create(
+        match_name="_gat?", product=p, most_significant_purpose=marketing_cookie
+    )
+    indicator_owa = ProductCookieIndicator.objects.create(
         match_name="cookieTest", match_path="/owa/auth.*", product=p2, most_significant_purpose=session_cookie
     )
 
@@ -554,7 +556,7 @@ def test_product_meaning_from_cookies(db):
                 "cookies": [
                     {
                         "domain": ".zutphen.nl",
-                        "indicator": 1,
+                        "indicator": indicator_ga.id,
                         "name": "_ga",
                         "path": "/",
                         "purpose": "marketing",
@@ -562,7 +564,7 @@ def test_product_meaning_from_cookies(db):
                     },
                     {
                         "domain": ".zutphen.nl",
-                        "indicator": 1,
+                        "indicator": indicator_ga.id,
                         "name": "_gat",
                         "path": "/",
                         "purpose": "marketing",
@@ -602,7 +604,7 @@ def test_product_meaning_from_cookies(db):
                 "cookies": [
                     {
                         "domain": "example.com",
-                        "indicator": 2,
+                        "indicator": indicator_owa.id,
                         "name": "cookieTest",
                         "path": "/owa/auth/example.com",
                         "purpose": "session",
