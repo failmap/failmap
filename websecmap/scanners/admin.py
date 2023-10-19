@@ -30,9 +30,9 @@ class EndpointGenericScanInline(CompactInline):
 
 @admin.register(models.UrlIp)
 class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("url", "ip", "rdns_name", "discovered_on", "is_unused_since")
+    list_display = ("url", "ip", "rdns_name", "discovered_on", "is_unused", "is_unused_since")
     search_fields = ("url__url", "ip", "rdns_name", "discovered_on", "is_unused_since")
-    list_filter = ["url", "ip", "rdns_name", "discovered_on", "is_unused_since"][::-1]
+    list_filter = ["url", "rdns_name", "discovered_on", "is_unused_since"][::-1]
     fields = ("url", "ip", "rdns_name", "discovered_on", "is_unused", "is_unused_since", "is_unused_reason")
     readonly_fields = ["discovered_on"]
 
@@ -224,6 +224,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                     "type",
                     "rating",
                     "meaning",
+                    "explanation",
                     "evidence",
                     "last_scan_moment",
                     "rating_determined_on",

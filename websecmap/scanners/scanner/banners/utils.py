@@ -42,4 +42,10 @@ def clean_old_results(scan_types: List[str]):
 
 
 def get_urls_by_ip(ip):
-    return UrlIp.objects.all().filter(ip=ip).only("id", "url", "url__id")
+    # only get current ip's otherwise there will be conclusions tied to stuff that only resolved to a certain
+    # ip in the past. We've seen happening that a certain ip was resolved, and which was used in the past
+    # on a series of other hosts. This happens when a server gets migrated to another ip for example.
+    # - in this specific case we saw one new metric from the new ip and one from the old ip right after each other.
+    # todo: a host can have multiple ip's, so when scraping ip's just see if one of the A records is one that is
+    # in the database.
+    return UrlIp.objects.all().filter(ip=ip, is_unused=False).only("id", "url", "url__id")

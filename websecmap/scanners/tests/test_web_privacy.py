@@ -19,7 +19,6 @@ from websecmap.scanners.scanner.web_privacy import (
     truncate_long_post_data,
     remove_duplicate_third_party_requests,
     product_meaning_from_cookies,
-    strip_irrelevant_cookie_fields,
     update_meaning_of_location_and_products_at_web_privacy_cookies,
     worse_rating,
 )
@@ -291,7 +290,18 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
     meaning = EndpointGenericScan.objects.all().filter(type="web_privacy_cookies").first().meaning
 
     assert meaning["products"][0]["product_name"] == "Google Analytics"
-    assert meaning["products"][0]["cookies"][0] == strip_irrelevant_cookie_fields(demo_data()["timeless-cookies"][0])
+
+    # you don't get the cookie fields, but also purpose and such:
+    assert meaning["products"][0]["cookies"][0] == {
+        "domain": ".zutphen.nl",
+        "indicator": 1,
+        "name": "_ga",
+        "path": "/",
+        "purpose": "",
+        "purpose_rating": "ok",
+    }
+
+    # assert meaning["products"][0]["cookies"][0] == strip_irrelevant_cookie_fields(demo_data()["timeless-cookies"][0])
     assert meaning["locations"] == [
         {
             "applicable_cookies": [
@@ -622,29 +632,42 @@ def test_web_privacy_scan_update(db, requests_mock, current_path, caplog):
     assert meaning["products"] == []
     assert meaning["locations"] == []
     assert EndpointGenericScan.objects.all().filter(type="location_cookies").first().meaning["locations"] == []
-    assert EndpointGenericScan.objects.all().filter(type="web_privacy_products").first().meaning["products"] == []
+    assert (
+        EndpointGenericScan.objects.all()
+        .filter(type="web_privacy_cookie_products_no_consent")
+        .first()
+        .meaning["products"]
+        == []
+    )
 
+    # todo: used to be 8, but not clear why things should change if the metric is saved right the first time?
     update_meaning_of_location_and_products_at_web_privacy_cookies()
-
-    assert EndpointGenericScan.objects.all().count() == 8
+    assert EndpointGenericScan.objects.all().count() == 6
 
     meaning = EndpointGenericScan.objects.all().filter(type="web_privacy_cookies").first().meaning
     assert meaning["products"] == []
     assert meaning["locations"] == []
     assert EndpointGenericScan.objects.all().filter(type="location_cookies").first().meaning["locations"] == []
-    assert EndpointGenericScan.objects.all().filter(type="web_privacy_products").first().meaning["products"] == []
+    assert (
+        EndpointGenericScan.objects.all()
+        .filter(type="web_privacy_cookie_products_no_consent")
+        .first()
+        .meaning["products"]
+        == []
+    )
 
     # add location and product cookie indicators
     create_sample_geoip()
     create_sample_domainip()
+    purpose = CookiePurpose.objects.create(name="analytics")
     p = Product.objects.create(name="Google Analytics")
-    ProductCookieIndicator.objects.create(match_name="_ga", product=p)
+    ProductCookieIndicator.objects.create(match_name="_ga", product=p, most_significant_purpose=purpose)
 
     # update again
     update_meaning_of_location_and_products_at_web_privacy_cookies()
 
-    # everything should now be there
-    assert EndpointGenericScan.objects.all().count() == 11
+    # everything should now be there, used to 11, see above
+    assert EndpointGenericScan.objects.all().count() == 9
 
     meaning = EndpointGenericScan.objects.all().filter(type="web_privacy_cookies").first().meaning
     assert meaning["products"][0]["product_name"] == "Google Analytics"
@@ -707,4 +730,10 @@ def test_web_privacy_scan_update(db, requests_mock, current_path, caplog):
         },
     ]
     assert EndpointGenericScan.objects.all().filter(type="location_cookies").first().meaning["locations"] != []
-    assert EndpointGenericScan.objects.all().filter(type="web_privacy_products").first().meaning["products"] != []
+    assert (
+        EndpointGenericScan.objects.all()
+        .filter(type="web_privacy_cookie_products_no_consent")
+        .first()
+        .meaning["products"]
+        != []
+    )

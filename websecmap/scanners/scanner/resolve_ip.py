@@ -34,6 +34,11 @@ def compose_manual_scan_task(
 
 @app.task(queue="database")
 def refresh_ips():
+    # todo: there will mostly be more than one A/AAAA record in the DNS and one is supplied at random. We should
+    #  get all those records and from there see if the retrieved ones matches the one in the database. If so then
+    #  we don't need to update anything. We currently act like there is only one ip per server, which is fine as long
+    #  as it resolved. But current practices makes the urlip table longer than needed.
+
     # find ip-addresses from all domains currently used. This is currently not in the database.
     # this takes a larger amount of dns queries.
 

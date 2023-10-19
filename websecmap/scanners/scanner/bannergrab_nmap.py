@@ -145,7 +145,7 @@ def reduce_protcol(protocol, port):
             "ms-wbt-server": "https",
         }
 
-        return mapping.get(protocol, protocol)
+        return mapping.get(protocol.strip().lower(), protocol)
 
     return protocol
 
@@ -324,6 +324,7 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
         if protocol == "http" and port in {443, "443"}:
             protocol = "https"
 
+        # todo: perhaps this is too greedy when the ip database has not been updated / refreshed
         endpoint = force_get_endpoint(
             url_id=url.url.id, port=port, protocol=protocol, ip_version=ip_version(ip), origin="bannergrab_nmap"
         )

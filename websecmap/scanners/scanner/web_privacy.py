@@ -301,7 +301,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     )
 
 
-def rate_cookie_set_without_consent(purpose):
+def rate_purpose_on_cookie_set_without_consent(purpose):
     if purpose in constance_cached_value("COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_HIGH"):
         return WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_HIGH
     if purpose in constance_cached_value("COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_MEDIUM"):
@@ -374,8 +374,10 @@ def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
                 # for information purposes. Which saves a lot of references. This might also
                 # become a table, but why.
                 my_cookie["indicator"] = indicator.id
-                my_cookie["purpose"] = indicator.most_significant_purpose.name
-                rating = rate_cookie_set_without_consent(indicator.most_significant_purpose.name)
+                my_cookie["purpose"] = (
+                    indicator.most_significant_purpose.name if indicator.most_significant_purpose else ""
+                )
+                rating = rate_purpose_on_cookie_set_without_consent(my_cookie["purpose"])
                 my_cookie["purpose_rating"] = rating
                 worst_rating = worse_rating(worst_rating, rating)
 
@@ -482,13 +484,13 @@ def add_meaning_of_location_and_products_at_web_privacy_cookies(
 
     products = product_meaning_from_cookies(cookies)
     cookies_product_meaning = {
-        "products": products,
+        "products": products["products"],
     }
 
     store_endpoint_scan_result(
         scan_type=WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT,
         endpoint_id=endpoint_id,
-        rating=WEB_PRIVACY_COOKIES_NEUTRAL,
+        rating=products["worst_purpose_rating"],
         message=WEB_PRIVACY_COOKIES_NEUTRAL,
         meaning=cookies_product_meaning,
         evidence=json.dumps(cookies),
