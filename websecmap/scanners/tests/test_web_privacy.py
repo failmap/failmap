@@ -571,9 +571,9 @@ def test_product_meaning_from_cookies(db):
                         "purpose_rating": "medium",
                     },
                 ],
-                "product_id": 1,
+                "product_id": p.id,
                 "product_name": "Google Analytics",
-                "product_vendor_id": 1,
+                "product_vendor_id": v.id,
                 "product_vendor_name": "Google",
                 "product_version": "unknown",
             }

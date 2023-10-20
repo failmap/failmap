@@ -308,12 +308,10 @@ def rate_purpose_on_cookie_set_without_consent(purpose):
         return WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM
     if purpose in constance_cached_value("COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_LOW"):
         return WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_LOW
-    # if purpose in constance_cached_value("COOKIE_WHEN_RECEIVED_WITHOUT_CONSENT_PURPOSES_OK"):
-    #     return WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK
-    # ok is the default.
     return WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK
 
 
+# todo: convert to ordered enum
 COOKIE_NO_CONSENT_RATING_ORDER = [
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_HIGH,
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM,
