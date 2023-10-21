@@ -70,7 +70,16 @@ def plan_verify() -> None:
     scans = (
         EndpointGenericScan.objects.all()
         .filter(
-            type__startswith="nuclei",
+            type__in=[
+                "nuclei_exposed_panels",
+                "nuclei_exposures",
+                "nuclei_http",
+                "nuclei_miscellaneous",
+                "nuclei_misconfiguration",
+                "nuclei_technologies",
+                "nuclei_unknown",
+                "nuclei_vulnerabilities",
+            ],
             is_the_latest_scan=True,
             endpoint__url__not_resolvable=False,
             endpoint__url__is_dead=False,
@@ -162,7 +171,16 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
     current_scans = (
         EndpointGenericScan.objects.all()
         .filter(
-            type__startswith="nuclei",
+            type__in=[
+                "nuclei_exposed_panels",
+                "nuclei_exposures",
+                "nuclei_http",
+                "nuclei_miscellaneous",
+                "nuclei_misconfiguration",
+                "nuclei_technologies",
+                "nuclei_unknown",
+                "nuclei_vulnerabilities",
+            ],
             is_the_latest_scan=True,
             endpoint__url__not_resolvable=False,
             endpoint__url__is_dead=False,
@@ -386,7 +404,20 @@ def neutralize_missing_metrics(current_categories_of_metrics: List[str], endpoin
     # Add an empty rating to all categories that are in the database, but not in the list.
     non_relevant_scans = (
         EndpointGenericScan.objects.all()
-        .filter(endpoint_id=endpoint_id, type__startswith="nuclei_", is_the_latest_scan=True)
+        .filter(
+            endpoint_id=endpoint_id,
+            type__in=[
+                "nuclei_exposed_panels",
+                "nuclei_exposures",
+                "nuclei_http",
+                "nuclei_miscellaneous",
+                "nuclei_misconfiguration",
+                "nuclei_technologies",
+                "nuclei_unknown",
+                "nuclei_vulnerabilities",
+            ],
+            is_the_latest_scan=True,
+        )
         .exclude(type__in=current_categories_of_metrics)
         .exclude(rating="clean")
     )
@@ -537,7 +568,18 @@ def extract_findings_to_scanner_findings():
     # do not attempt to re-insert something we already have
     # this reduces many many queries into ±2k
     found_findings_names = []
-    for epgs in EndpointGenericScan.objects.all().filter(type__startswith="nuclei_"):
+    for epgs in EndpointGenericScan.objects.all().filter(
+        type__in=[
+            "nuclei_exposed_panels",
+            "nuclei_exposures",
+            "nuclei_http",
+            "nuclei_miscellaneous",
+            "nuclei_misconfiguration",
+            "nuclei_technologies",
+            "nuclei_unknown",
+            "nuclei_vulnerabilities",
+        ]
+    ):
         json_data = load_finding_data(epgs.evidence)
         for row in json_data:
             if row["finding-name"] in found_findings_names:
@@ -558,7 +600,7 @@ def get_all_panels(panel_name: str = "phpmyadmin"):
     # creates a list of all phpmyadmin installations. This is convenient for retesting separately by hand.
     # Used via the shell, not in code here in the app (yet).
     panels = set()
-    for epgs in EndpointGenericScan.objects.all().filter(type__startswith="nuclei_exposed_panels").order_by("-id"):
+    for epgs in EndpointGenericScan.objects.all().filter(type="nuclei_exposed_panels").order_by("-id"):
         json_data = load_finding_data(epgs.evidence)
         for row in json_data:
             if panel_name.lower() in row["name"].lower():
