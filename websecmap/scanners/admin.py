@@ -882,15 +882,24 @@ class CookiePurposeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.ProductCookieIndicator)
 class ProductCookieIndicatorAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("id", "match_name", "match_domain", "match_path", "product", "purposes_")
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("product", "product__vendor")
+
+    list_display = ("id", "match_name", "match_domain", "match_path", "product", "most_significant_purpose", "link")
     exclude = ("match_regex", "match_field")
 
-    search_fields = ("match_name", "purposes__name", "product__vendor__name", "product__name")
+    search_fields = ("match_name", "product__vendor__name", "product__name")
 
-    list_filter = ("purposes", "product")
+    list_filter = ("most_significant_purpose", "product")
 
     @staticmethod
-    def purposes_(obj):
+    def link(obj):
+        if not obj.cookiedatabase_link:
+            return ""
+        return mark_safe(f"<a href='{obj.cookiedatabase_link}' target='_blank'>cdb</a>")
+
+    @staticmethod
+    def purpose(obj):
         return ", ".join(p.name for p in obj.purposes.all())
 
     @staticmethod
