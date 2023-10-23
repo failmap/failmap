@@ -276,6 +276,7 @@ def config_content():
             "comply_or_explain_guidelines": configuration["SHOW_COMPLY_OR_EXPLAIN_GUIDELINES"],
             "geolocation_results": configuration["SHOW_GEOLOCATION_RESULTS"],
             "report_expert_view_certificates": configuration["SHOW_REPORT_EXPERT_VIEW_CERTIFICATES"],
+            "report_expert_view_cookies": configuration["SHOW_REPORT_EXPERT_VIEW_COOKIES"],
             "thank_you": configuration["SHOW_THANK_YOU"],
             "socials": {
                 "report": configuration["SOCIALS_SHOW_REPORT"],
