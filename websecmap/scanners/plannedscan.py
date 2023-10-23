@@ -240,10 +240,15 @@ def request(activity: str, scanner: str, urls: List[int], origin: str = ""):
         return
 
     for url in urls:
-        if already_requested(activity, python_scanner["id"], url):
-            statsd.incr("scan_planned", tags={"state": "duplicate_request", "scanner": scanner, "activity": activity})
-            log.debug("Already registered: %s on %s for %s.", activity, scanner, url)
-            continue
+        # we've removed already requestsed as it creates a lookup for every new requested scan.
+        #
+        #  instead of this we're just adding the new scan request because it got requested.
+        #  and when finishing a scan we're finishing all unfinished ones. This prevents extra lookups and thus
+        #  speeds up handling of the queue. There could be millions of scans already finished etc...
+        # if already_requested(activity, python_scanner["id"], url):
+        #     statsd.incr("scan_planned", tags={"state": "duplicate_request", "scanner": scanner, "activity": activity})
+        #     log.debug("Already registered: %s on %s for %s.", activity, scanner, url)
+        #     continue
 
         now = datetime.now(timezone.utc)
 
@@ -305,17 +310,30 @@ def finish(activity: str, scanner: str, url_id: int):
 
 
 def set_scan_state(activity: str, scanner_id: int, url_id: int, state="finished", scanner_name=""):
-    oldest_scan = (
-        PlannedScan.objects.all()
-        .filter(
-            activity=Activity[activity].value,
-            scanner=scanner_id,
-            url=url_id,
-            state=State["picked_up"].value,
-        )
-        .first()
+    # Instead of moving just one, move all that have a certain state. This is done because we do not want to check
+    # anymore if something has been added. In case there are 10 scans for the same stuff, you only need one actual
+    # scan to finish all the ones that are requested.
+    current_scans = PlannedScan.objects.all().filter(
+        activity=Activity[activity].value,
+        scanner=scanner_id,
+        url=url_id,
+        state=State["picked_up"].value,
     )
-    if oldest_scan:
+    if not current_scans:
+        log.debug("No planned scan found for %s. Ignored.", url_id)
+        log_planned_scan_action(activity=activity, scanner=scanner_name, url=url_id, state="finished (unplanned)")
+        return
+
+    if current_scans.count() > 1:
+        log.warning(
+            "Progressiong %s %s %s scans to %s. Some tasks have been requested " "before the old ones where done.",
+            current_scans.count(),
+            activity,
+            scanner_name,
+            state,
+        )
+
+    for oldest_scan in current_scans:
         oldest_scan.state = State[state].value
         oldest_scan.last_state_change_at = datetime.now(timezone.utc)
         oldest_scan.finished_at_when = datetime.now(timezone.utc)
@@ -323,9 +341,6 @@ def set_scan_state(activity: str, scanner_id: int, url_id: int, state="finished"
         log_planned_scan_action(activity=activity, scanner=scanner_name, url=url_id, state="finished")
 
         log.debug("Altered planned scan state for %s. Changing it to %s with %s.", url_id, activity, scanner_id)
-    else:
-        log.debug("No planned scan found for %s. Ignored.", url_id)
-        log_planned_scan_action(activity=activity, scanner=scanner_name, url=url_id, state="finished (unplanned)")
 
 
 @app.task(queue="storage", ignore_result=True)

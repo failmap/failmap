@@ -192,14 +192,15 @@ def test_plan_scans(db, default_scan_metadata):
             }
         ]
 
-        # if there are already planned, no new scans will be created
+        # Obsolete, due to expensive queries: if there are already planned, no new scans will be created
+        # When new stuff is requested it will be scanned! And all of these scans will progress simultaneously.
         plan_scan()
         assert calculate_progress() == [
             {
                 "scanner": scanner_id,
                 "activity": Activity["scan"].value,
                 "state": State["requested"].value,
-                "amount": 2,
+                "amount": 2 + 2,
             }
         ]
 
@@ -231,13 +232,13 @@ def test_plan_scans(db, default_scan_metadata):
         assert egs.is_the_latest_scan is True
 
         plan_scan()
-        assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 1
+        assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 1 + 1
         assert calculate_progress() == [
             {
                 "scanner": scanner_id,
                 "activity": Activity["scan"].value,
                 "state": State["requested"].value,
-                "amount": 1,
+                "amount": 1 + 1,
             }
         ]
 
@@ -248,13 +249,13 @@ def test_plan_scans(db, default_scan_metadata):
         create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", datetime.now(timezone.utc) - timedelta(days=6))
         create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", datetime.now(timezone.utc) - timedelta(days=100))
         plan_scan()
-        assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 2
+        assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 2 + 2
         assert calculate_progress() == [
             {
                 "scanner": scanner_id,
                 "activity": Activity["scan"].value,
                 "state": State["requested"].value,
-                "amount": 2,
+                "amount": 2 + 2,
             }
         ]
 
@@ -340,7 +341,9 @@ def test_plan_follow_up_scan(db, default_scan_metadata, default_policy):
     plan_follow_up_scans()
     plan_follow_up_scans()
     plan_follow_up_scans()
-    assert PlannedScan.objects.all().count() == 1
+    # obsolete is that only scans are planned if they are not requested. Today requested means requested and
+    # multiple scans can progress with just one scan running.
+    assert PlannedScan.objects.all().count() == 1 + 8
 
     planned = PlannedScan.objects.all().last()
     assert planned.scanner.python_name == "tls_qualys"
@@ -354,11 +357,12 @@ def test_plan_follow_up_scan(db, default_scan_metadata, default_policy):
         rating_determined_on=yesterday,
     )
     plan_follow_up_scans()
-    assert PlannedScan.objects.all().count() == 2
+    assert PlannedScan.objects.all().count() == 2 + 11
 
-    planned = PlannedScan.objects.all().last()
-    assert planned.scanner.python_name == "autoexplain_no_https_possible"
-    assert planned.url.url == "pki.example.nl"
+    # this only works if there is a check that no new duplicate scans requests are added.
+    # planned = PlannedScan.objects.all().last()
+    # assert planned.scanner.python_name == "autoexplain_no_https_possible"
+    # assert planned.url.url == "pki.example.nl"
 
     scan(epgs.id)
     explained = EndpointGenericScan.objects.get(id=epgs.id)
