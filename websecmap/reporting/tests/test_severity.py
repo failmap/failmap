@@ -30,6 +30,7 @@ def test_internet_nl_standard_calculation(db, default_policy):
         "not_applicable": 0,
         "error_in_test": 0,
         "evidence": 0,
+        "meaning": {},
     }
 
     scan.explanation = '{"translation": "test"}'
@@ -52,6 +53,7 @@ def test_internet_nl_standard_calculation(db, default_policy):
         "not_testable": 0,
         "not_applicable": 0,
         "error_in_test": 0,
+        "meaning": {},
     }
 
     # special case for internet.nl scores:
@@ -79,4 +81,5 @@ def test_internet_nl_standard_calculation(db, default_policy):
         "not_testable": 0,
         "not_applicable": 0,
         "error_in_test": 0,
+        "meaning": {},
     }
