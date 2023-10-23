@@ -616,6 +616,51 @@ def test_product_meaning_from_cookies(db):
         "worst_purpose_rating": "ok",
     }
 
+    # make sure another indicator that leads to the same product has the cookies merged into the first product.
+    # thus one product can have many cookies from different indicators.
+    # todo what to do with cookies that do not have an indicator?
+    indicator_gid_to_same_product = ProductCookieIndicator.objects.create(
+        match_name="_gid", product=p, most_significant_purpose=session_cookie
+    )
+    assert product_meaning_from_cookies(cookies) == {
+        "products": [
+            {
+                "cookies": [
+                    {
+                        "domain": ".zutphen.nl",
+                        "indicator": indicator_ga.id,
+                        "name": "_ga",
+                        "path": "/",
+                        "purpose": "marketing",
+                        "purpose_rating": "medium",
+                    },
+                    {
+                        "domain": ".zutphen.nl",
+                        "indicator": indicator_ga.id,
+                        "name": "_gat",
+                        "path": "/",
+                        "purpose": "marketing",
+                        "purpose_rating": "medium",
+                    },
+                    {
+                        "domain": ".zutphen.nl",
+                        "indicator": indicator_gid_to_same_product.id,
+                        "name": "_gid",
+                        "path": "/",
+                        "purpose": "session",
+                        "purpose_rating": "ok",
+                    },
+                ],
+                "product_id": p.id,
+                "product_name": "Google Analytics",
+                "product_vendor_id": v.id,
+                "product_vendor_name": "Google",
+                "product_version": "unknown",
+            }
+        ],
+        "worst_purpose_rating": "medium",
+    }
+
 
 def test_web_privacy_scan_update(db, requests_mock, current_path, caplog):
     """Update endpointgenericscan object after updating indicators should result in

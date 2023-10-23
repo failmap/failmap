@@ -346,8 +346,6 @@ def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
             matchers["path"] = re.compile(f"^{indicator.match_path}$")
         cookie_indicators.append((matchers, indicator))
 
-    # todo: many indiciators may point to the same product, but will be about a different cookie.
-    #  so group these products lateron
     products = defaultdict(lambda: dict([["cookies", list()]]))
     for cookie in cookies:
         for matchers, indicator in cookie_indicators:
