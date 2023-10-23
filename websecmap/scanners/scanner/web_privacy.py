@@ -44,6 +44,7 @@ from websecmap.scanners.scanner.metric_constants import (
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM,
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK,
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_LOW,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_ERROR,
 )
 
 from websecmap.scanners.scanner.web_privacy_resources.trackers import get_known_trackers_from_urls
@@ -193,6 +194,9 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         return
 
     if error := result_data.get("error"):
+        # An error means that previous metrics have no value anymore, so store the new erroneous state for
+        # all of the sub-scans.
+
         store_endpoint_scan_result(
             WEB_PRIVACY_TRACKING, endpoint_id, WEB_PRIVACY_TRACKING_ERROR, WEB_PRIVACY_TRACKING_ERROR, evidence=error
         )
@@ -212,6 +216,22 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
             endpoint_id,
             WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
             WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
+            evidence=error,
+        )
+
+        store_endpoint_scan_result(
+            SCAN_TYPE_LOCATION_COOKIES,
+            endpoint_id,
+            "scan_error",
+            "scan_error",
+            evidence=error,
+        )
+
+        store_endpoint_scan_result(
+            WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT,
+            endpoint_id,
+            WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_ERROR,
+            WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_ERROR,
             evidence=error,
         )
 
