@@ -31,21 +31,22 @@ def test_get_cookie_database(db):
     data = get_cookie_database()
 
     assert data == {
-        i1.id: {
+        # id's in json are not integers
+        str(i1.id): {
             "cookie_database_link": None,
             "most_significant_purpose": "marketing",
             "notes": None,
             "product_id": 1,
             "product_vendor_id": 1,
         },
-        i2.id: {
+        str(i2.id): {
             "cookie_database_link": None,
             "most_significant_purpose": "session",
             "notes": None,
             "product_id": 2,
             "product_vendor_id": None,
         },
-        i3.id: {
+        str(i3.id): {
             "cookie_database_link": "http://example.com",
             "most_significant_purpose": None,
             "notes": None,

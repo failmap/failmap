@@ -10,7 +10,7 @@ def get_cookie_database():
     )
 
     return {
-        i.id: {
+        str(i.id): {
             "cookie_database_link": i.cookiedatabase_link,
             "most_significant_purpose": i.most_significant_purpose.name if i.most_significant_purpose else None,
             "notes": i.notes,
