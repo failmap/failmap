@@ -7,7 +7,7 @@ from django.core.management import call_command
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
-from websecmap.scanners.scanner.security_headers import analyze_website_headers, measure_hsts_header
+from websecmap.scanners.scanner.security_headers import analyze_website_headers, measure_hsts_header, clean_csp_header
 
 SECURITY_HEADERS = {
     "X-XSS-Protection": "1",
@@ -247,3 +247,75 @@ def test_measure_hsts_header():
         },
     ]
     assert measure_hsts_header(headers) == "not_applicable"
+
+
+def test_test_clean_csp_header():
+    data = (
+        "default-src 'self'; base-uri 'self'; img-src * data:; frame-src 'self' https://kaart.pdok.nl "
+        "https://websurveys2.govmetric.com https://app-eu.readspeaker.com https://www.youtube-nocookie.com "
+        "https://www.youtube.com https://content.googleapis.com/ https://vars.hotjar.com; frame-ancestors 'self'; "
+        "manifest-src 'self'; media-src 'self' blob:; script-src 'self' "
+        "'nonce-NGQyYTkyOGYtNWMxNy00MjYyLWFiZWEtOWRkYTY3YmYwMDM5' "
+        "https://stats.pusher.com https://www.browsealoud.com https://www.googletagmanager.com "
+        "https://www.google-analytics.com https://apis.google.com https://maps.googleapis.com "
+        "https://siteimproveanalytics.com https://cloudstatic.obi4wan.com https://websurveys2.govmetric.com "
+        "https://platform.hireserve.nl https://websurveys2.servmetric.com https://cdn1.readspeaker.com "
+        "https://cdn-eu.readspeaker.com https://virtuele-gemeente-assistent.nl https://static.hotjar.com "
+        "https://script.hotjar.com https://connect.facebook.net https://snap.licdn.com https://*.timeblockr.com; "
+        "connect-src 'self' https://sockjs-eu.pusher.com wss://ws-eu.pusher.com https://vttts-eu.readspeaker.com "
+        "https://cloudstatic.obi4wan.com https://chatapi.obi4wan.com https://media-eu.readspeaker.com "
+        "https://rstts-eu.readspeaker.com https://www.browsealoud.com https://plus.browsealoud.com "
+        "https://speech.speechstream.net https://speech-eu.speechstream.net "
+        "https://www.google-analytics.com https://maps.googleapis.com https://region1.google-analytics.com "
+        "https://stats.g.doubleclick.net https://app.obi4wan.ai https://app-eu.readspeaker.com/ "
+        "https://hitcounter.govmetric.com https://platform.hireserve.nl/ https://cdn1.readspeaker.com "
+        "https://maps.googleapis.com https://virtuele-gemeente-assistent.nl wss://virtuele-gemeente-assistent.nl "
+        "ws://virtuele-gemeente-assistent.nl https://in.hotjar.com https://www.facebook.com "
+        "https://cdn.linkedin.oribi.io https://*.timeblockr.com; object-src 'self' https://kaart.pdok.nl; "
+        "style-src 'self' data: 'nonce-NGQyYTkyOGYtNWMxNy00MjYyLWFiZWEtOWRkYTY3YmYwMDM5' "
+        "https://fonts.googleapis.com https://platform.hireserve.nl https://websurveys2.servmetric.com "
+        "https://cdn1.readspeaker.com https://websurveys2.govmetric.com https://virtuele-gemeente-assistent.nl "
+        "https://mijn.virtuele-gemeente-assistent.nl https://maps.googleapis.com/ "
+        "https://siteimproveanalytics.com https://*.timeblockr.com; font-src 'self' data: "
+        "https://fonts.gstatic.com https://cdn1.readspeaker.com https://script.hotjar.com https://*.timeblockr.com;"
+    )
+    clean_data = clean_csp_header(data)
+
+    assert (
+        clean_data == "default-src 'self'; base-uri 'self'; img-src * data:; frame-src 'self' "
+        "https://kaart.pdok.nl "
+        "https://websurveys2.govmetric.com https://app-eu.readspeaker.com https://www.youtube-nocookie.com "
+        "https://www.youtube.com https://content.googleapis.com/ https://vars.hotjar.com; frame-ancestors 'self'; "
+        "manifest-src 'self'; media-src 'self' blob:; script-src 'self' "
+        "'nonce-<TOKEN_OR_ID>' "
+        "https://stats.pusher.com https://www.browsealoud.com https://www.googletagmanager.com "
+        "https://www.google-analytics.com https://apis.google.com https://maps.googleapis.com "
+        "https://siteimproveanalytics.com https://cloudstatic.obi4wan.com https://websurveys2.govmetric.com "
+        "https://platform.hireserve.nl https://websurveys2.servmetric.com https://cdn1.readspeaker.com "
+        "https://cdn-eu.readspeaker.com https://virtuele-gemeente-assistent.nl https://static.hotjar.com "
+        "https://script.hotjar.com https://connect.facebook.net https://snap.licdn.com https://*.timeblockr.com; "
+        "connect-src 'self' https://sockjs-eu.pusher.com wss://ws-eu.pusher.com https://vttts-eu.readspeaker.com "
+        "https://cloudstatic.obi4wan.com https://chatapi.obi4wan.com https://media-eu.readspeaker.com "
+        "https://rstts-eu.readspeaker.com https://www.browsealoud.com https://plus.browsealoud.com "
+        "https://speech.speechstream.net https://speech-eu.speechstream.net "
+        "https://www.google-analytics.com https://maps.googleapis.com https://region1.google-analytics.com "
+        "https://stats.g.doubleclick.net https://app.obi4wan.ai https://app-eu.readspeaker.com/ "
+        "https://hitcounter.govmetric.com https://platform.hireserve.nl/ https://cdn1.readspeaker.com "
+        "https://maps.googleapis.com https://virtuele-gemeente-assistent.nl wss://virtuele-gemeente-assistent.nl "
+        "ws://virtuele-gemeente-assistent.nl https://in.hotjar.com https://www.facebook.com "
+        "https://cdn.linkedin.oribi.io https://*.timeblockr.com; object-src 'self' https://kaart.pdok.nl; "
+        "style-src 'self' data: 'nonce-<TOKEN_OR_ID>' "
+        "https://fonts.googleapis.com https://platform.hireserve.nl https://websurveys2.servmetric.com "
+        "https://cdn1.readspeaker.com https://websurveys2.govmetric.com https://virtuele-gemeente-assistent.nl "
+        "https://mijn.virtuele-gemeente-assistent.nl https://maps.googleapis.com/ "
+        "https://siteimproveanalytics.com https://*.timeblockr.com; font-src 'self' data: "
+        "https://fonts.gstatic.com https://cdn1.readspeaker.com https://script.hotjar.com https://*.timeblockr.com;"
+    )
+
+    assert clean_csp_header("default-src 'self'; base-uri 'self';") == "default-src 'self'; base-uri 'self';"
+
+    assert (
+        clean_csp_header("manifest-src 'self'; media-src 'self' blob:; script-src 'self' " "'nonce-<TOKEN_OR_ID>' ")
+        == "manifest-src 'self'; media-src 'self' blob:; script-src 'self' "
+        "'nonce-<TOKEN_OR_ID>' "
+    )

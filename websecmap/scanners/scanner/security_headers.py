@@ -51,6 +51,7 @@ Classified as: Ignored
 """
 import logging
 from typing import Dict, Union, Any, List
+import re
 
 import requests
 from celery import Task, group
@@ -586,16 +587,24 @@ def generic_check(endpoint_id: int, headers, header):
 
     scan_type = header_to_scan_type(header)
 
+    if scan_type == "http_security_header_content_security_policy" and header in headers:
+        headers[header] = clean_csp_header(headers[header])
+
     if header in headers.keys():
         store_endpoint_scan_result(
             scan_type=scan_type,
             endpoint_id=endpoint_id,
             rating="present",
             message="present",
-            evidence=headers[header],
+            evidence=headers[header].strip(),
         )
     else:
         store_endpoint_scan_result(scan_type, endpoint_id, "missing", "missing")
+
+
+def clean_csp_header(csp_header_value: str) -> str:
+    # replace 'nonce-random with a standard string, preventing new records per measurement
+    return re.sub(r"'nonce-[A-Za-z0-9].*?'", "'nonce-<TOKEN_OR_ID>'", csp_header_value)
 
 
 def generic_check_using_csp_fallback(endpoint_id: int, headers, header):

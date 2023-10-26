@@ -21,6 +21,13 @@ def store_endpoint_scan_result(
         meaning,
     )
 
+    # perform some normalization to prevent " present" and "present" causing separate metrics
+    # the cast is needed. The database columns are strings, but the data =given to the method are sometimes integers
+    # or lists...
+    rating = str(rating).strip()
+    message = str(message).strip()
+    evidence = str(evidence).strip()
+
     # set meaning to a sane default, it is NOT a string, but a json storage object.
     # set the mutable object (thus change it) to a default value to prevent "" and "{'':''}" etc from being needed.
     if not meaning:
