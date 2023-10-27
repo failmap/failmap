@@ -1,7 +1,7 @@
 from requests.structures import CaseInsensitiveDict
 
 import websecmap
-from websecmap.scanners.scanner.security_headers import get_headers, prepare_headers_for_evidence
+from websecmap.scanners.scanner.security_headers import get_headers, prepare_headers_for_evidence, reduce_url
 
 
 def test_CaseInsensitiveDict():
@@ -165,19 +165,7 @@ def test_prepare_headers_for_evidence():
             "status_code": 200,
             "content_type": "text/html; charset=utf-8",
             "headers": {
-                "content-type": "text/html; charset=utf-8",
-                "content-security-policy": "style-src data: 'unsafe-inline' https:; font-src data: https:; img-src dat"
-                "a: https: blob:; script-src data: 'unsafe-inline' 'unsafe-eval' https: blo"
-                "b:; object-src https:; connect-src https: wss: blob:; default-src data: '"
-                "unsafe-inline' 'unsafe-eval' https:; form-action https:; upgrade-insecure-"
-                "requests; media-src data: https: blob:; child-src data: https: blob:",
-                "link": "<https://media.nu.nl>; rel=preconnect, <https://media.nu.nl>; rel=dns-prefetch, <https://mypr"
-                "ivacy.dpgmedia.net>; rel=preconnect, <https://myprivacy.dpgmedia.net>; rel=dns-prefetch",
-                "permissions-policy": "ch-ua-model=*,ch-ua-platform-version=*",
                 "strict-transport-security": "max-age=63072000; includesubdomains; preload",
-                "x-content-type-options": "nosniff",
-                "x-frame-options": "sameorigin",
-                "x-xss-protection": "1; mode=block",
             },
         },
     ]
@@ -263,40 +251,7 @@ def test_prepare_headers_for_evidence():
         {
             "content_type": "text/html;charset=utf-8",
             "headers": {
-                "content-security-policy": "default-src 'self'; base-uri 'self'; "
-                "script-src 'self' "
-                "'nonce-mzg5yze1ogiwytrhngjknjhkzje0oda1zdmxzdkzmza=' "
-                "*.platformrijksoverheid.nl "
-                "*.rijksoverheid.nl "
-                "*.contenttoolsrijksoverheid.nl; "
-                "style-src 'self' 'unsafe-inline' "
-                "statistiek.rijksoverheid.nl "
-                "*.contenttoolsrijksoverheid.nl "
-                "*.rijksoverheid.nl; font-src 'self' "
-                "statistiek.rijksoverheid.nl; "
-                "object-src 'none'; connect-src "
-                "*.platformrijksoverheid.nl "
-                "*.rijksoverheid.nl "
-                "*.contenttoolsrijksoverheid.nl "
-                "*.rovid.nl *.rijksoverheidsvideo.nl; "
-                "img-src 'self' data: "
-                "d3oiud1b8fohdw.cloudfront.net "
-                "statistiek.rijksoverheid.nl "
-                "*.rovid.nl *.rijksoverheidsvideo.nl "
-                "*.toegankelijkheidsverklaring.nl; "
-                "media-src 'self' *.rovid.nl "
-                "*.rijksoverheidsvideo.nl; "
-                "form-action 'self' "
-                "export.highcharts.com "
-                "*.contenttoolsrijksoverheid.nl "
-                "*.rijksoverheid.nl; frame-ancestors "
-                "'none'; upgrade-insecure-requests",
-                "content-type": "text/html;charset=utf-8",
-                "referrer-policy": "strict-origin-when-cross-origin",
                 "strict-transport-security": "max-age=31622400; " "includesubdomains",
-                "x-content-type-options": "nosniff",
-                "x-frame-options": "deny",
-                "x-xss-protection": "1; mode=block",
             },
             "protocol": "https",
             "request": 3,
@@ -358,7 +313,7 @@ def test_prepare_headers_for_evidence():
     assert prepared == [
         {
             "content_type": "text/html",
-            "headers": {"content-type": "text/html", "location": "https://tweakers.net/"},
+            "headers": {"location": "https://tweakers.net/"},
             "protocol": "http",
             "request": 1,
             "status_code": 301,
@@ -367,15 +322,7 @@ def test_prepare_headers_for_evidence():
         {
             "content_type": "text/html; charset=utf-8",
             "headers": {
-                "content-security-policy": "default-src https: data: blob: "
-                "'unsafe-inline' 'unsafe-eval'; "
-                "form-action https:; frame-ancestors "
-                "tweakers.net *.tweakers.net",
-                "content-type": "text/html; charset=utf-8",
                 "strict-transport-security": "max-age=31536000; " "includesubdomains; preload",
-                "x-clacks-overhead": "gnu terry pratchett, yoeri lauwers, arie " "jan stapel",
-                "x-content-type-options": "nosniff",
-                "x-xss-protection": "1; mode=block",
             },
             "protocol": "https",
             "request": 2,
@@ -397,7 +344,16 @@ def test_prepare_headers_for_evidence():
                 "Content-Type": "text/html",
                 "Content-Length": "178",
                 "Connection": "keep-alive",
-                "Location": "https://basisbeveiliging.nl/",
+                "Location": "https://basisbeveiliging.nl/longtest/longtest/longtest/longtest/longtest/longtest/longte"
+                "st/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longt"
+                "est/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longte"
+                "st/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/"
+                "longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/"
+                "longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/"
+                "longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/"
+                "longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/"
+                "longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/"
+                "longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/",
                 "Expires": "Wed, 05 Jul 2023 11:24:23 GMT",
                 "Cache-Control": "max-age=599",
                 "Strict-Transport-Security": "max-age=31536000; includeSubdomains",
@@ -435,19 +391,17 @@ def test_prepare_headers_for_evidence():
             },
         },
     ]
+
+    # long paths will be truncated to 255 characters
     prepared = prepare_headers_for_evidence(example_set_4)
     assert prepared == [
         {
             "content_type": "text/html",
             "headers": {
-                "content-type": "text/html",
-                "location": "https://basisbeveiliging.nl/",
-                "referrer-policy": "same-origin",
+                "location": "https://basisbeveiliging.nl/longtest/longtest/longtest/longtest/longtest/longtest/longte"
+                "st/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/long"
+                "test/longtest/longtest/longtest/longtest/longtest/longtest/longtest/longtest/lo",
                 "strict-transport-security": "max-age=31536000; " "includesubdomains",
-                "x-clacks-overhead": "gnu terry pratchett",
-                "x-content-type-options": "nosniff",
-                "x-frame-options": "sameorigin",
-                "x-xss-protection": "1; mode=block",
             },
             "protocol": "http",
             "request": 1,
@@ -457,13 +411,7 @@ def test_prepare_headers_for_evidence():
         {
             "content_type": "text/html",
             "headers": {
-                "content-type": "text/html",
-                "referrer-policy": "same-origin",
                 "strict-transport-security": "max-age=31536000; " "includesubdomains",
-                "x-clacks-overhead": "gnu terry pratchett",
-                "x-content-type-options": "nosniff",
-                "x-frame-options": "sameorigin",
-                "x-xss-protection": "1; mode=block",
             },
             "protocol": "https",
             "request": 2,
@@ -494,3 +442,79 @@ def test_prepare_headers_for_evidence():
             "url": "http://basisbeveiliging.nl/",
         },
     ]
+
+
+def test_reduce_url():
+    # there are urls like this, which add random data and no value to the measurements. Remove the junk data
+    # from the current url and the location header. This costs gigabytes of data.
+
+    data = reduce_url(
+        "https://adfs.avres.nl/adfs/ls/?samlrequest=lzfbtwixeix%2fyqz36lawdlcbeiiesnadiacvpptzshg3xtuzrp"
+        "31llujxkw8nom86fvmttpf09stxnr0cht46qapew1qh7pvzfgxnpygk9tonicarn4u7tzadlpdbk%2fe%2bppdwf52geqiv"
+        "hnhkj0ejjczizpllnfw5qz1yomorc25ozy4nocaohr1x%2feaousw35qb77brigwhncsld5v1j%2fndmgd8qwjojlxquotd"
+        "fs1uzc%2bbuf2cdfqpxjlvcsbub3exypljpkuo6ihldobcqbrqpcieukuzjzvhnrzg7wgk5fhmwtmaqfwaou5lkzwlzvxei"
+        "xawckjgudw1laobsadyshnsi0wl8cjm00so3b8m8%2f%2fmn%2fjr92f1%2b0pnhw%3d%3d&relaystate=a676435c468c"
+        "3b44144481100827c66b149092505e75d3cb1b7dea6e969109c6&sigalg=http%3a%2f%2fwww.w3.org%2f2001%2f04"
+        "%2fxmldsig-more%23rsa-sha256&signature=golunuba6latkujvx8pfo701aiuzgc39lz%2bvwo%2faj9zkwpllvchn"
+        "5udpl%2f6wiucjwsg%2bfdftosgr%2f50l5knje2uaatbusyq%2ftisqulu2xvutwktlbzzhtyjlt11cbfrc8p0gztt%2f1"
+        "3%2bqxwgv%2fim7d%2f%2bpdyvhz5joolysa6stvb6r4s%2bg02dpfrm18q5%2fuimc3sp2ng2e5qe2licbhkx7jchhxq%2"
+        "bh8angpnb70yvjiwtwv5fexpj5g2kq5jcfjlwwmn38gw5kujmkpraxhysk0cqzfqdahenm%2f%2b2atmjtoukownu9%2bjy"
+        "1pbd7nuasi7pjdrzbk8fp14kapuhbvjgxquwslsnabv49w%2f%2fsti3kackhb5cnlclui%2f9p5et%2frtx5q6vqpbkt56"
+        "oqln2hdeafjhyx4ywvipg735g84tmhdvq7uupmnwcuv6yrywfjw%2bfka72o7lgjam8201akm8wvjegzsyscvstrppv53r2"
+        "wzw10o8iegycf718lf0jybe6zeafjyb8xxaecbqr5ptcnxgsoze1pzgebm%2bgpjrmdq9poxactke4t4en1zblpwdbnru05"
+        "ucczwtmgtttgumdl5mddwo%2bufpvbpu1fq2pzsxvy1dbuc3xphjnfxrkc0mje5ireucmqh4fuhqpqpprfnogpjhavpbasz"
+        "x09ccngdjy%3d"
+    )
+
+    assert data == "https://adfs.avres.nl/adfs/ls/"
+
+    data = reduce_url(
+        "https://login.cbs.nl/realms/advuploadchannel-realm/protocol/openid-connect/auth?client_id=advanceduploadc"
+        "hannel.ui&redirect_uri=https%3a%2f%2fdatabestanden.cbs.nl%2fsignin-oidc&response_type=code&scope=openid%20p"
+        "rofile%20offline_access%20roles%20audc_api%3auser&code_challenge=r8anntcsv5rmkfeky0ehudkh80p8purptmyy9ta5jv"
+        "w&code_challenge_method=s256&response_mode=form_post&nonce=638338305087075569.nzfizgiwogityjrjmy00zje3lthjmjk"
+        "tzwrkmzk0njdinjuwyte2zmvlm2qtnwjhmc00mzuylwiyngutnmvjyzc3yzhjownl&state=cfdj8kyx_cdjihlaqwyxx6qj7yypedtz72da1"
+        "rszwtbrlrypxicelousasqkaokevmef1r1jylzuwkrhhzlkkgowiakhgx49b1vdmy4yluhfmq3yw4v5hcyxunqdffludu0aowg9kn5g1kd-iu"
+        "2fb7403ks_sflsgjo08idohgw4q3iallzvrppj5zkc_43d0xhl7v3zixqjtcas0aekqt_z2evur4v6reaaqkp2sf1_jl5kmdd805mjoopyxyxu"
+        "6xcunvgk2dnx2sflcteavdgxi5g-s9cdmmws5kdbqlqkqgaifj5e59rweb9k-luqh6hhqex_zqnfmlol6x3sbl-0zdcglu2pipzijdb1t7v9s6"
+        "8ifnoskespyif31wsosr2zkmqzejnrfiarnixotymcgyy&x-client-sku=id_netstandard2_0&x-client-ver=6.7.1.0"
+    )
+
+    assert data == "https://login.cbs.nl/realms/advuploadchannel-realm/protocol/openid-connect/auth"
+
+    data = reduce_url(
+        "https://gwz.helloid.com/relayservice/redirect/4f41b800-5424-4b7d-902f-2ed6ab3bb779?samlrequest"
+        "=rvjlj9mwel7vr0c5"
+        "o47thhsttljh0vkptnw2coccjva0tujs4hewll%2bpm5tnyu%2f4np7vmfpzm4k26esyd2f7gf96phdzip5vbwnjds150nsrhzahaaffkkhj%2"
+        "f"
+        "fldwuzpjjvvglousf6hpc8civtbodvsvnfzzlt5s97erzafkht6wjyolbdltk6wafclbkssp9mqyyo9uuevj9qp6cnqzjmoo97svhs0gv0mus6"
+        "t"
+        "e9druloq9biyfmcgim%2fycrmzy8udehjssie%2bjri7gikxeabzcwgdsc5px7%2bnz2waz3sqxms9nvaul3g0cmohjucvehesrd3nmlywecgk"
+        "u"
+        "tlsnsuplef9eupjxvfv7a8ph9xegaunpt0fvz2csl49hhzst90frphlzxhfo0t9i34%2fdvt%2byf17cmodb4shpv2isg3do1cf4ytejtfel6%"
+        "2"
+        "ffrpuw7hoer6s7f6neqvhanbtkmvjolna5rokx%2f8uixqaaalx8zvxph5ux%2fpuhln4a&relaystate=https%3a%2f%2fintranet.gouda"
+        "."
+        "nl%2f&sigalg=http%3a%2f%2fwww.w3.org%2f2001%2f04%2fxmldsig-more%23rsa-sha256&signature=guusgq%2fc769uyxeeoa%2b"
+        "u"
+        "ckue%2bedhmmlrp31sdf6fvmkciulzzg6zffu9kcrs4t7ntqpm0buf1jo2v%2faazuuvefz5kxqrhd7aw3aq8erjl2lsyqutn3nqbhaljaxgny"
+        "u"
+        "73i6e27y8zrmcarwozv6qy2wan4fxc%2fyvabhfouj%2b4kz0odro2nqp5bg%2bumipckvn3trsvybcbizdc43kutufv%2fgzl3dzro8wnroan"
+        "5"
+        "jhkvllyi5aksabucmpra1%2fxkffxeaawfj3v8%2fdxxwo8%2fvsotu%2ffvs1kyyiyn9wmnzgymhe79w0x7yh0k7sink9fyloyywihevcx%2f"
+        "u"
+        "wziffygddxr8hnfnlp7%2balmref8%2fsphmy7po1hwkrtre4x6ssqxavwfx0cbany9m%2fgtww%2b3tobqslht%2b3dvlxuagbc2vyptnpbao"
+        "d"
+        "15l5he9ajrjjfhegr2lx7h%2befhjuq70mybdzy84bfaz3wdqvegp5g8twaw4dzs3vngaga%2boevigmouikryhkljd%2b4f%2bqa9p83mr%2f"
+        "o"
+        "%2bwdq1lxjx0dudo9b3muubzuozcvsjljbaevtmndwdvnxf6tvmol1cwetsyhh0nznaz8gb5hcwcsdiy3arip4%2fxjkmhdootcklcbmldbpcw"
+        "r"
+        "apzf%2fzd90eb%2bnjrg%2bgd4ssvehswgmiswi9zhkj28dp4%3d"
+    )
+
+    assert data == "https://gwz.helloid.com/relayservice/redirect/<GUID>"
+
+    # and error situations
+    assert reduce_url("https://") == "https://"
+    assert reduce_url("nonsense") == ""
+    assert reduce_url("") == ""

@@ -57,6 +57,7 @@ import requests
 from celery import Task, group
 from requests.structures import CaseInsensitiveDict
 from tldextract import tldextract
+from urllib.parse import urlparse
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
@@ -549,19 +550,23 @@ def prepare_headers_for_evidence(headers: List[Dict[str, Any]]) -> str:
     # There will probably be more in the future. But for now this is fine, it covers all our tests and then some.
     #: Server: not included because load balancers will give you a different server every time.
     allowed_headers = [
-        "content-security-policy",
-        "permissions-policy",
-        "referrer-policy",
-        "x-frame-options",
-        "content-type",
-        "x-clacks-overhead",
-        "cross-origin-opener-policy",
-        "x-content-type-options",
-        "referrer-policy",
+        # remove Content security policy because it contains nonce values.
+        # in fact, remove most of the other headers because the metric is about HSTS and other metrics
+        # are already stored elsewhere
+        # "content-security-policy",
+        # "permissions-policy",
+        # "referrer-policy",
+        # "x-frame-options",
+        # "content-type",
+        # "x-clacks-overhead",
+        # "cross-origin-opener-policy",
+        # "x-content-type-options",
+        # "referrer-policy",
+        # keep location because it tells what page is requested next. Todo: reduce location links.
         "location",
-        "content-type",
-        "link",
-        "x-xss-protection",
+        # "content-type",
+        # "link",
+        # "x-xss-protection",
         "strict-transport-security",
     ]
     prepared_headers = copy.deepcopy(headers)
@@ -574,6 +579,10 @@ def prepare_headers_for_evidence(headers: List[Dict[str, Any]]) -> str:
 
         # sort the headers alphabetically
         header_metadata["headers"] = dict(sorted(header_metadata["headers"].items()))
+
+        # reduce the location header if it is present to reduce the amount of data storage needed
+        if "location" in header_metadata["headers"]:
+            header_metadata["headers"]["location"] = reduce_url(header_metadata["headers"]["location"])
 
     return prepared_headers
 
@@ -754,7 +763,7 @@ def get_headers_timed(uri_url: str, host: str) -> Union[List[Dict[str, Any]], bo
     responses.append(
         {
             "request": len(responses) + 1,
-            "url": response.url,
+            "url": reduce_url(response.url),
             "protocol": response.url.startswith("https") and "https" or "http",
             "status_code": response.status_code,
             "content_type": response.headers.get("Content-Type", "unknown").lower(),
@@ -764,3 +773,20 @@ def get_headers_timed(uri_url: str, host: str) -> Union[List[Dict[str, Any]], bo
     )
 
     return responses
+
+
+def reduce_url(url: str) -> str:
+    # urlparse, get the address and entire path
+    clean_url = urlparse(url)
+
+    # strings such as "nonsense" in urlparse create: ://nonsense
+    if not clean_url.scheme:
+        return ""
+
+    new_url = f"{clean_url.scheme}://{clean_url.netloc}{clean_url.path}"
+
+    # then remove GUIDS from that path and replace them with <GUID>
+    new_url = re.sub(r"[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}", "<GUID>", new_url)
+
+    # then make sure that an url is not longer than 255 chars, because come on...
+    return new_url[:255]
