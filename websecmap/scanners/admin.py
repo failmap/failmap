@@ -31,7 +31,6 @@ class EndpointGenericScanInline(CompactInline):
 
 @admin.register(models.UrlIp)
 class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     paginator = TooManyRecordsPaginator
 
     list_display = ("url", "ip", "rdns_name", "discovered_on", "is_unused", "is_unused_since")
@@ -158,7 +157,6 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.TlsQualysScratchpad)
 class TlsQualysScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     paginator = TooManyRecordsPaginator
 
     list_display = ("domain", "at_when")
@@ -170,7 +168,6 @@ class TlsQualysScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.Screenshot)
 class ScreenshotAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     paginator = TooManyRecordsPaginator
 
     list_display = ("endpoint", "created_on", "filename")
@@ -387,7 +384,6 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.EndpointGenericScanScratchpad)
 class EndpointGenericScanScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     paginator = TooManyRecordsPaginator
 
     list_display = ("type", "domain", "at_when", "data")
@@ -598,7 +594,6 @@ class ScanProxyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.PlannedScan)
 class PlannedScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     paginator = TooManyRecordsPaginator
 
     list_display = (
@@ -654,7 +649,6 @@ class PlannedScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.PlannedScanLog)
 class PlannedScanLogAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     paginator = TooManyRecordsPaginator
 
     list_filter = ["at_when"]
@@ -665,7 +659,6 @@ class PlannedScanLogAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.PlannedScanStatistic)
 class PlannedScanStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     paginator = TooManyRecordsPaginator
 
     list_display = ("at_when", "data")
@@ -981,13 +974,11 @@ class TagProxy(taggit.models.Tag):
 
 @admin.register(TagProxy)
 class TagAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     list_display = ("id", "name", "slug")
 
 
 @admin.register(models.HttpEndpointContent)
 class HttpEndpointContentAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     paginator = TooManyRecordsPaginator
 
     list_display = (
@@ -1017,7 +1008,6 @@ class HttpEndpointContentAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.DomainIp)
 class DomainIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-
     paginator = TooManyRecordsPaginator
 
     list_display = ("id", "domain", "ip_address", "ip_version", "at_when", "last_scan_moment", "is_the_latest")
@@ -1032,7 +1022,6 @@ class DomainIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.GeoIp)
 class GeoIpAdmin(admin.ModelAdmin):
-
     paginator = TooManyRecordsPaginator
 
     list_display = (

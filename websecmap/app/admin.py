@@ -648,8 +648,7 @@ admin.site.register([Config], ConfigAdmin)
 
 
 class TooManyRecordsPaginator(Paginator):
-
-    def __init__(self, object_list, per_page,  something, darkside):
+    def __init__(self, object_list, per_page, something, darkside):
         super().__init__(object_list, per_page, something, darkside)
 
     @property
