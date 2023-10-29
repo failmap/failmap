@@ -6,6 +6,7 @@ from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 from jet.filters import RelatedFieldAjaxListFilter
 
+from websecmap.app.admin import TooManyRecordsPaginator
 from websecmap.map.admin import ordering_actions
 from websecmap.scanners import models
 from websecmap.scanners.models import Endpoint, Product, ProductHierarchy, State, ProductCookieIndicator
@@ -30,6 +31,9 @@ class EndpointGenericScanInline(CompactInline):
 
 @admin.register(models.UrlIp)
 class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    paginator = TooManyRecordsPaginator
+
     list_display = ("url", "ip", "rdns_name", "discovered_on", "is_unused", "is_unused_since")
     search_fields = ("url__url", "ip", "rdns_name", "discovered_on", "is_unused_since")
     list_filter = ["url", "rdns_name", "discovered_on", "is_unused_since"][::-1]
@@ -94,6 +98,8 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("security_policies")
 
+    paginator = TooManyRecordsPaginator
+
     list_display = (
         "id",
         "url",
@@ -152,6 +158,9 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.TlsQualysScratchpad)
 class TlsQualysScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    paginator = TooManyRecordsPaginator
+
     list_display = ("domain", "at_when")
     search_fields = ("domain", "at_when")
     list_filter = ["domain", "at_when"][::-1]
@@ -161,6 +170,9 @@ class TlsQualysScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.Screenshot)
 class ScreenshotAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    paginator = TooManyRecordsPaginator
+
     list_display = ("endpoint", "created_on", "filename")
     search_fields = ("endpoint__url__url", "created_on", "filename")
     list_filter = ["endpoint", "created_on", "filename"][::-1]
@@ -180,6 +192,8 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         )
 
         return qs
+
+    paginator = TooManyRecordsPaginator
 
     list_display = (
         "id",
@@ -298,6 +312,8 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         qs = qs.prefetch_related("url__organization", "url__organization__type")
         return qs
 
+    paginator = TooManyRecordsPaginator
+
     list_display = (
         "id",
         "url_",
@@ -371,6 +387,9 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.EndpointGenericScanScratchpad)
 class EndpointGenericScanScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    paginator = TooManyRecordsPaginator
+
     list_display = ("type", "domain", "at_when", "data")
     search_fields = ("type", "domain", "at_when", "data")
     list_filter = ["type", "domain", "at_when", "data"][::-1]
@@ -472,6 +491,8 @@ class InternetNLV2ScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.InternetNLV2StateLog)
 class InternetNLV2StateLogAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    paginator = TooManyRecordsPaginator
+
     list_display = ("pk", "scan", "state", "state_message", "last_state_check", "at_when")
     search_fields = ("scan__scan_id",)
     list_filter = ("state", "state_message", "last_state_check", "at_when")
@@ -577,6 +598,9 @@ class ScanProxyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.PlannedScan)
 class PlannedScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    paginator = TooManyRecordsPaginator
+
     list_display = (
         "id",
         "url",
@@ -630,6 +654,9 @@ class PlannedScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.PlannedScanLog)
 class PlannedScanLogAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    paginator = TooManyRecordsPaginator
+
     list_filter = ["at_when"]
     list_display = ["id", "at_when", "line"]
     fields = ["id", "at_when", "line"]
@@ -638,6 +665,9 @@ class PlannedScanLogAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.PlannedScanStatistic)
 class PlannedScanStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    paginator = TooManyRecordsPaginator
+
     list_display = ("at_when", "data")
     list_filter = ["at_when"][::-1]
     fields = ("at_when", "data")
@@ -951,11 +981,15 @@ class TagProxy(taggit.models.Tag):
 
 @admin.register(TagProxy)
 class TagAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
     list_display = ("id", "name", "slug")
 
 
 @admin.register(models.HttpEndpointContent)
 class HttpEndpointContentAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    paginator = TooManyRecordsPaginator
+
     list_display = (
         "id",
         "endpoint",
@@ -983,6 +1017,9 @@ class HttpEndpointContentAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.DomainIp)
 class DomainIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    paginator = TooManyRecordsPaginator
+
     list_display = ("id", "domain", "ip_address", "ip_version", "at_when", "last_scan_moment", "is_the_latest")
     search_fields = ["domain", "ip_address"]
     list_filter = [
@@ -995,6 +1032,9 @@ class DomainIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.GeoIp)
 class GeoIpAdmin(admin.ModelAdmin):
+
+    paginator = TooManyRecordsPaginator
+
     list_display = (
         "id",
         "ip_address",
@@ -1046,6 +1086,8 @@ def nice_country(country_code):
 
 @admin.register(models.DomainMX)
 class DomainMXAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    paginator = TooManyRecordsPaginator
+
     list_display = ("id", "domain", "mail_server_records", "last_scan_moment", "is_the_latest")
 
 

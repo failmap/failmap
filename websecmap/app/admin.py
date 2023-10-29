@@ -10,6 +10,7 @@ from django.contrib.auth.models import Group, User
 from django.contrib.humanize.templatetags.humanize import naturaltime
 
 # overwrites for period tasks, allowing import and export buttons to work.
+from django.core.paginator import Paginator
 from django.utils.safestring import mark_safe
 from django_celery_beat.admin import PeriodicTaskAdmin, PeriodicTaskForm
 from django_celery_beat.models import CrontabSchedule, IntervalSchedule, PeriodicTask, SolarSchedule
@@ -644,3 +645,13 @@ class ConfigAdmin(ConstanceAdmin):
 
 admin.site.unregister([Config])
 admin.site.register([Config], ConfigAdmin)
+
+
+class TooManyRecordsPaginator(Paginator):
+
+    def __init__(self, object_list, per_page,  something, darkside):
+        super().__init__(object_list, per_page, something, darkside)
+
+    @property
+    def count(self):
+        return 13374223
