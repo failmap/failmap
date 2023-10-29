@@ -478,3 +478,21 @@ def can_connect(protocol: str, url: Url, port: int, ip_version: int) -> bool:
         # smtplib.SMTPServerDisconnected: Connection unexpectedly closed: timed out
         return False
 """
+
+
+def get_ips_from_dns(url: str, record_type: str = "A") -> List[str]:
+    # this does not do a resolve but gets the A records from the DNS, which
+    # in many cases returns multiple addresses (which might not have a server behind them).
+    # nu.nl for example returns multiple ips, and different ones every time!
+    # so this will not solve the issue of changing ips.
+    ips = []
+    answer = get_dns_records_accepting_no_answer(url, record_type)
+
+    if answer is None:
+        return ips
+
+    if answer is False:
+        return ips
+
+    ips.extend(answer_line.to_text() for answer_line in answer)
+    return list(sorted(ips))

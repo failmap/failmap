@@ -3,6 +3,7 @@ Retrieves IP addresses for several ip-based scans. These are stored in the UrlIp
 """
 import logging
 from datetime import datetime, timezone
+from typing import List
 
 from celery import Task, group
 
@@ -11,6 +12,7 @@ from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict
 from websecmap.scanners.models import UrlIp
 from websecmap.scanners.scanner.__init__ import allowed_to_scan
+from websecmap.scanners.scanner.dns_endpoints import get_ips_from_dns
 from websecmap.scanners.scanner.http import get_ipv4, get_ipv6
 
 SCANNER_NAME = "resolve_ip"
@@ -55,17 +57,19 @@ def refresh_ips():
     urls = Url.objects.all().filter(is_dead=False, not_resolvable=False).only("id", "url")
 
     for url in urls:
+        ips_in_dns = get_ips_from_dns(url.url, "A")
         ipv4 = get_ipv4(url.url)
         if ipv4:
-            store_ip(url, True, ipv4)
+            store_ip(url, is_v4=True, ip=ipv4, ips_in_dns=ips_in_dns)
         else:
-            clean_ips(url, True)
+            clean_ips(url, is_v4=True)
 
         ipv6 = get_ipv6(url.url)
+        ips_in_dns = get_ips_from_dns(url.url, "AAAA")
         if ipv6:
-            store_ip(url, False, ipv6)
+            store_ip(url, is_v4=False, ip=ipv6, ips_in_dns=ips_in_dns)
         else:
-            clean_ips(url, False)
+            clean_ips(url, is_v4=False)
 
 
 def clean_ips(url: Url, is_v4: bool):
@@ -74,10 +78,20 @@ def clean_ips(url: Url, is_v4: bool):
         unuse_url_ip(url_ip, "no ip found anymore")
 
 
-def store_ip(url: Url, is_v4: bool, ip: str):
-    has_ip = UrlIp.objects.all().filter(url=url, is_v4=is_v4, ip=ip).first()
+def store_ip(url: Url, is_v4: bool, ip: str, ips_in_dns: List[str]):
+    # IP: one of the ip's retrieved, which is one retrieved from the DNS in a round robin fashion
+    # ips_in_dns: most ip's retrieved from the DNS. But this might be a subset still in case of high
+    #  volume domains. Or behind 'cloudflare' things etc...
+    has_ip = UrlIp.objects.all().filter(url=url, is_v4=is_v4, ip__in=ips_in_dns).first()
     if has_ip:
-        log.debug("Url: %s, ip: %s, is_v4: %s is already in the database: cleaning.", url, is_v4, ip)
+        log.debug("Known IP: %s", has_ip.ip)
+    log.debug("Received IP: %s", ip)
+    log.debug("Received IP from dns: %s", ips_in_dns)
+
+    if has_ip and has_ip.ip in ips_in_dns:
+        log.debug(
+            "Url: %s, ip: %s, is_v4: %s is already in the database as ip %s: cleaning.", url, is_v4, ip, has_ip.ip
+        )
 
         # revive it, but remove the others
         if has_ip.is_unused:
@@ -90,9 +104,9 @@ def store_ip(url: Url, is_v4: bool, ip: str):
         UrlIp.objects.create(url=url, is_v4=is_v4, ip=ip, discovered_on=datetime.now(timezone.utc))
 
     # clean up the rest
-    to_unuse = UrlIp.objects.all().filter(url=url, is_v4=is_v4).exclude(ip=ip)
+    to_unuse = UrlIp.objects.all().filter(url=url, is_v4=is_v4).exclude(ip__in=ips_in_dns)
     for url_ip in to_unuse:
-        log.debug("Url: %s, ip: %s, is_v4: %s is made unavailable.", url, is_v4, ip)
+        log.debug("Url: %s, ip: %s, is_v4: %s is made unavailable.", url, is_v4, url_ip.ip)
         unuse_url_ip(url_ip, "found alternative ip")
 
 
