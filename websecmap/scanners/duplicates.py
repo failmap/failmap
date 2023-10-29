@@ -75,7 +75,11 @@ def get_older_duplicate_endpoint(endpoint: Endpoint, within_days: int = 60):
     if endpoint.discovered_on is None:
         return None
 
-    return (
+    # created in a similar timefrime is nice, but also "deleted" a day before the current one is
+    # created makes sense.
+    # So let's check both:
+    log.debug("Do we have a similar endpoint for %s created in the last %s days?", endpoint, within_days)
+    by_creation_date = (
         Endpoint.objects.all()
         .filter(
             url=endpoint.url,
@@ -92,6 +96,35 @@ def get_older_duplicate_endpoint(endpoint: Endpoint, within_days: int = 60):
         .order_by("-discovered_on")
         .first()
     )
+    if by_creation_date:
+        return by_creation_date
+
+    # there can be years between creation date, but between deletion and creation is very short
+    log.debug(
+        "Do we have a similar endpoint for %s that has been deleted within %s days before" "creation of this endpoint?",
+        endpoint,
+        within_days,
+    )
+    by_deletion_date = (
+        Endpoint.objects.all()
+        .filter(
+            url=endpoint.url,
+            protocol=endpoint.protocol,
+            port=endpoint.port,
+            ip_version=endpoint.ip_version,
+            # can only be newer than N days
+            is_dead_since__gte=endpoint.discovered_on - timedelta(days=within_days),
+            # has to be older, can't be newer than yourself.
+            is_dead_since__lte=endpoint.discovered_on,
+        )
+        .exclude(pk=endpoint.pk)
+        # id descending, so the newest one first.
+        .order_by("-is_dead_since")
+        .first()
+    )
+
+    if by_deletion_date:
+        return by_deletion_date
 
 
 def deduplicate_all_scans_sequentially():
