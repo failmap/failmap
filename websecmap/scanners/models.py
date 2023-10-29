@@ -172,7 +172,7 @@ class Endpoint(models.Model):
         - See if the endpoint is set to is_dead or not. (monitor boolean value)
         - An endpoint is created (creating a new record)
         """
-        tags = {"protocol": self.protocol, "port": self.port, "ip_version": self.ip_version}
+        tags = {"protocol": self.protocol, "port": self.port, "ip_version": self.ip_version, "origin": self.origin}
 
         # don't execute a query if you don't know the id of the object.
         old = None
