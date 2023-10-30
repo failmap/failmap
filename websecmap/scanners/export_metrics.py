@@ -12,6 +12,7 @@ import pyexcel
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 import json
 
+from websecmap.scanners.scanner.metric_constants import WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT
 from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_COOKIES
 from websecmap.scanners.scanner_for_everything.location import (
     SCAN_TYPE_LOCATION_MAIL_SERVER,
@@ -170,11 +171,17 @@ def determine_pivot_records(scan_type: str, scan) -> List[dict[str, Any]]:
     ]:
         return pivot_location_evidence(load_possible_json(scan.evidence))
 
-    if scan_type in [WEB_PRIVACY_COOKIES]:
+    if scan_type in [WEB_PRIVACY_COOKIES, WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT]:
         # as we're now using an extensive meaning, this meaning will now be pivoted instead of the normal
         # cookie records. This means the location and product are also loaded inside the export.
         # return pivot_cookies(load_possible_json(scan.evidence)) #  <-- this is the simple record without meaning.
         return pivot_cookie_meaning(load_possible_json(scan.evidence), scan.meaning)
+
+    # if scan_type in [WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT]:
+    #     # as we're now using an extensive meaning, this meaning will now be pivoted instead of the normal
+    #     # cookie records. This means the location and product are also loaded inside the export.
+    #     # return pivot_cookies(load_possible_json(scan.evidence)) #  <-- this is the simple record without meaning.
+    #     return pivot_cookies_without_consent_meaning(load_possible_json(scan.evidence), scan.meaning)
 
     if scan_type in [SCAN_TYPE_LOCATION_COOKIES]:
         return pivot_cookie_locations(load_possible_json(scan.evidence))
@@ -214,6 +221,11 @@ def pivot_cookie_meaning(evidence_records: List[Dict[str, Any]], meaning: Dict[s
         for product in meaning.get("products", []):
             for product_cookie in product["cookies"]:
                 if cookies_are_equal(cookie, product_cookie):
+                    # this specific cookie is a match, so lets see the additional stuff if its there...
+                    z = cookie_indicator_data(product_cookie)
+                    p_cookie["cookie_indicator"] = z["cookie_indicator"]
+                    p_cookie["cookie_purpose"] = z["cookie_purpose"]
+                    p_cookie["cookie_purpose_rating"] = z["cookie_purpose_rating"]
                     p_product = pivot_product_record(product)
                     continue
 
@@ -406,4 +418,20 @@ def pivot_cookie_record(record) -> Dict[str, Any]:
         "cookie_parsed_domain": extract.domain,
         "cookie_parsed_domainsuffix": extract.suffix,
         "cookie_parsed_fqdn": extract.fqdn,
+        # make results consistent
+        "cookie_indicator": 0,
+        "cookie_purpose": "",
+        "cookie_purpose_rating": "",
     }
+
+
+def cookie_indicator_data(record):
+    return {
+        "cookie_indicator": record.get("indicator", 0),
+        "cookie_purpose": record.get("purpose", ""),
+        "cookie_purpose_rating": record.get("purpose_rating", ""),
+    }
+
+
+def web_privacy_cookie_products_no_consent_record(record):
+    ...

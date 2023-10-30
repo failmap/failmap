@@ -73,6 +73,9 @@ def test_pivot_cookies():
             "cookie_parsed_domainsuffix": "com",
             "cookie_parsed_fqdn": "outlook.office365.com",
             "cookie_parsed_subdomain": "outlook",
+            "cookie_indicator": 0,
+            "cookie_purpose": "",
+            "cookie_purpose_rating": "",
         },
     ]
 
@@ -185,6 +188,9 @@ def test_pivot_cookie_locations():
             "location_network": "195.28.22.0/23",
             "location_priority": "",
             "location_rating": "location_ok",
+            "cookie_indicator": 0,
+            "cookie_purpose": "",
+            "cookie_purpose_rating": "",
         },
         {
             "cookie_domain": "intranet-acc.landvancuijk.nl",
@@ -210,6 +216,9 @@ def test_pivot_cookie_locations():
             "location_network": "195.28.22.0/23",
             "location_priority": "",
             "location_rating": "location_ok",
+            "cookie_indicator": 0,
+            "cookie_purpose": "",
+            "cookie_purpose_rating": "",
         },
     ]
 
@@ -314,6 +323,9 @@ def test_pivot_cookie_meaning():
             "product_vendor_id": 0,
             "product_vendor_name": "Microsoft",
             "product_version": "unknown",
+            "cookie_indicator": 0,
+            "cookie_purpose": "",
+            "cookie_purpose_rating": "",
         },
         {
             "cookie_domain": ".example.com",
@@ -344,6 +356,9 @@ def test_pivot_cookie_meaning():
             "product_vendor_id": 0,
             "product_vendor_name": "Microsoft",
             "product_version": "unknown",
+            "cookie_indicator": 0,
+            "cookie_purpose": "",
+            "cookie_purpose_rating": "",
         },
         {
             "cookie_domain": ".proc.live",
@@ -374,5 +389,8 @@ def test_pivot_cookie_meaning():
             "product_vendor_id": 0,
             "product_vendor_name": "",
             "product_version": "",
+            "cookie_indicator": 0,
+            "cookie_purpose": "",
+            "cookie_purpose_rating": "",
         },
     ]
