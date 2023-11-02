@@ -202,9 +202,23 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
 
     # cannot update once a slice has been taken
     for scan in scans:
-        scan.state = State["picked_up"].value
-        scan.last_state_change_at = datetime.now(timezone.utc)
-        scan.save()
+        # pick up multiple at the same time. This might skew the numbers a bit if there are a few of the
+        # same url. So statistically there might be 10 of the same url and the same state that are being picked
+        # up but in terms of scanning only one scan is carried out and only one time results are stored.
+        # So planning scans multiple times is ok but don't do that too much as it will skew the numbers.
+        set_scan_state(
+            activity=activity,
+            scanner_id=python_scanner["id"],
+            url_id=scan.url,
+            from_state="requested",
+            to_state="picked_up",
+            scanner_name=scanner,
+        )
+
+        # here is the old code to only pick up one scan.
+        # scan.state = State["picked_up"].value
+        # scan.last_state_change_at = datetime.now(timezone.utc)
+        # scan.save()
         log_planned_scan_action(activity=activity, scanner=scanner, url=scan.url, state="picked_up")
 
     urls = []
@@ -305,11 +319,15 @@ def finish(activity: str, scanner: str, url_id: int):
         log.debug(f"Scanner {py_scanner} was not found, ignoring.")
         return
 
-    set_scan_state(activity, py_scanner["id"], url_id, "finished", scanner_name=scanner)
+    set_scan_state(
+        activity, py_scanner["id"], url_id, from_state="picked_up", to_state="finished", scanner_name=scanner
+    )
     statsd.incr("scan_planned", tags={"state": "finished", "scanner": scanner, "activity": activity})
 
 
-def set_scan_state(activity: str, scanner_id: int, url_id: int, state="finished", scanner_name=""):
+def set_scan_state(
+    activity: str, scanner_id: int, url_id: int, from_state="picked_up", to_state="finished", scanner_name=""
+):
     # Instead of moving just one, move all that have a certain state. This is done because we do not want to check
     # anymore if something has been added. In case there are 10 scans for the same stuff, you only need one actual
     # scan to finish all the ones that are requested.
@@ -317,7 +335,7 @@ def set_scan_state(activity: str, scanner_id: int, url_id: int, state="finished"
         activity=Activity[activity].value,
         scanner=scanner_id,
         url=url_id,
-        state=State["picked_up"].value,
+        state=State[from_state].value,
     )
     if not current_scans:
         log.debug("No planned scan found for %s. Ignored.", url_id)
@@ -330,11 +348,11 @@ def set_scan_state(activity: str, scanner_id: int, url_id: int, state="finished"
             current_scans.count(),
             activity,
             scanner_name,
-            state,
+            to_state,
         )
 
     for oldest_scan in current_scans:
-        oldest_scan.state = State[state].value
+        oldest_scan.state = State[to_state].value
         oldest_scan.last_state_change_at = datetime.now(timezone.utc)
         oldest_scan.finished_at_when = datetime.now(timezone.utc)
         oldest_scan.save()

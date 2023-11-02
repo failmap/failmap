@@ -26,6 +26,7 @@ from websecmap.scanners.plannedscan import (
     reset,
     retrieve_endpoints_from_urls,
     store_progress,
+    set_scan_state,
 )
 from websecmap.scanners.scanner.autoexplain_no_https_possible import scan
 from websecmap.scanners.scanner.tls_qualys import plan_scan
@@ -164,7 +165,7 @@ def test_plannedscan(db, default_scan_metadata):
 
     # See if there are loglines:
     loglines = PlannedScanLog.objects.all()
-    assert len(loglines) == 8
+    assert len(loglines) == 10
     assert loglines[0].line == "Url: example.com, Activity: scan, Scanner: tls_qualys, State: requested, Origin: "
 
 
@@ -367,3 +368,30 @@ def test_plan_follow_up_scan(db, default_scan_metadata, default_policy):
     scan(epgs.id)
     explained = EndpointGenericScan.objects.get(id=epgs.id)
     assert explained.comply_or_explain_is_explained is True
+
+
+def tests_bulk_state_changes(db, default_scan_metadata, default_policy):
+    u1 = Url.objects.create(url="example1.com")
+    u2 = Url.objects.create(url="example2.com")
+
+    request(scanner="tls_qualys", activity="scan", urls=[u1, u2])
+    request(scanner="tls_qualys", activity="scan", urls=[u1, u2])
+    request(scanner="tls_qualys", activity="scan", urls=[u1, u2])
+    request(scanner="tls_qualys", activity="scan", urls=[u1, u2])
+    request(scanner="tls_qualys", activity="scan", urls=[u1, u2])
+
+    # today we can request scans multiple times and have the state change for multiple items at once
+    # so setting one to finished or picked up means that all tasks of a certain url are set to picked_up.
+    # activity: str, scanner_id: int, url_id: int, state="finished", scanner_name=""
+    set_scan_state(
+        activity="scan",
+        scanner_id=22,
+        url_id=u1.id,
+        from_state="requested",
+        to_state="picked_up",
+        scanner_name="tls_qualys",
+    )
+
+    assert PlannedScan.objects.all().count() == 10
+    assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 5
+    assert PlannedScan.objects.all().filter(state=State["picked_up"].value).count() == 5
