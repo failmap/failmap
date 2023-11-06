@@ -97,7 +97,7 @@ sentry-sdk
 # allow recursive comparison of dictionaries
 deepdiff
 
-urllib3==1.26.6
+urllib3<2
 
 # loading json is faster in simplejson
 # https://stackoverflow.com/questions/712791/what-are-the-differences-between-json-and-simplejson-python-modules

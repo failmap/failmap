@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt --resolver=backtracking requirements.in
 #
-aiohttp==3.8.4
+aiohttp==3.8.6
     # via
     #   geoip2
     #   openai
@@ -55,7 +55,7 @@ charset-normalizer==3.1.0
     #   requests
 colorlog==6.7.0
     # via -r requirements.in
-cryptography==41.0.3
+cryptography==41.0.5
     # via
     #   -r requirements.in
     #   pyopenssl
@@ -69,7 +69,7 @@ defusedxml==0.7.1
     # via odfpy
 diff-match-patch==20230430
     # via django-import-export
-django==4.2.3
+django==4.2.7
     # via
     #   -r requirements.in
     #   django-celery-beat
@@ -293,6 +293,7 @@ simplejson==3.19.1
 six==1.16.0
     # via
     #   celery-statsd
+    #   django-jet-reboot
     #   python-dateutil
     #   python-monkey-business
     #   requests-file
@@ -316,7 +317,7 @@ texttable==1.6.7
     # via pyexcel
 tldextract==3.4.4
     # via -r requirements.in
-tornado==6.3.2
+tornado==6.3.3
     # via flower
 tqdm==4.65.0
     # via openai
@@ -324,7 +325,7 @@ typing-extensions==4.6.3
     # via
     #   asgiref
     #   django-countries
-urllib3==1.26.6
+urllib3==1.26.18
     # via
     #   -r requirements.in
     #   requests
