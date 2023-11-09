@@ -6,7 +6,7 @@ from django.db import connection
 from django.utils.text import slugify
 
 from websecmap.map.logic.map_defaults import REMARK, determine_when, get_country, get_organization_type
-from websecmap.map.models import MapDataCache, Configuration
+from websecmap.map.models import MapDataCache
 from websecmap.organizations.models import Organization
 from websecmap.reporting.diskreport import retrieve_report
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
@@ -97,21 +97,6 @@ def get_map_data(
     else:
         filters = desired_url_scans + desired_endpoint_scans
 
-    # //// start of bad permission check code
-    # check for permissions if this map is public. If not
-    # this is an ugly fix and needs to be altered. Note that the my_ variables are used in the query below(!)
-    my_organization_type = get_organization_type(organization_type)
-    my_country = get_country(country)
-    displayed = (
-        Configuration.objects.all()
-        .filter(organization_type=my_organization_type, country=my_country, is_displayed=True)
-        .first()
-    )
-    if not displayed:
-        # always return a nice blob with data, this is intentionally a bad decision: NL/municipality is a dutch thing.
-        return get_cached_map_data("NL", "municipality", 0, filters, at_date)
-    # \\\\ end of bad permission check code
-
     cached = get_cached_map_data(country, organization_type, days_back, filters, at_date)
 
     if cached:
@@ -145,6 +130,8 @@ def get_map_data(
     # Sept 2019: MySQL has an issue with mediumtext fields. When joined, and the query is not optimized, the
     # result will take 2 minutes to complete. Would you not select the mediumtext field, the query finishes in a second.
     # That is why there are two queries to retrieve map data from the database.
+    my_organization_type = get_organization_type(organization_type)
+    my_country = get_country(country)
 
     sql = f"""
         SELECT

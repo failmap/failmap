@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 
 from websecmap.map.logic.map import get_altnames, get_cached_map_data, get_map_data
-from websecmap.map.models import MapDataCache, Configuration
+from websecmap.map.models import MapDataCache
 from websecmap.organizations.models import AlternativeName, Organization, OrganizationType
 
 
@@ -21,9 +21,6 @@ def test_get_cached_map_data(db):
     mdc.dataset = expected_result
     mdc.filters = ["all"]
     mdc.save()
-
-    # set permissions correctly
-    Configuration.objects.create(country="NL", organization_type=ot, is_displayed=True)
 
     assert get_map_data(country="NL", organization_type="test", days_back=8) == expected_result
     assert get_cached_map_data(country="NL", organization_type="test", days_back=8) == expected_result
