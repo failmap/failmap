@@ -586,7 +586,9 @@ def organization_report_by_id(
     days_back=0,
     at_date: date = None,
 ):
-    return json_response(get_organization_report_by_id(organization_id, days_back, at_date=at_date))
+    return json_response(
+        get_organization_report_by_id(organization_id, organization_type, country, days_back, at_date=at_date)
+    )
 
 
 @cache_page(TEN_MINUTES)

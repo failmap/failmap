@@ -39,12 +39,14 @@ def get_organization_report_by_name(
     return get_organization_report_by_id(organization.pk, days_back, at_date)
 
 
-def get_organization_report_by_id(organization_id: int, days_back: int = 0, at_date: date = None):
+def get_organization_report_by_id(
+    organization_id: int, organization_type: str, country: str, days_back: int = 0, at_date: date = None
+):
     # todo: check if the organization / layer is displayed on the map.
 
     when = determine_when(days_back, at_date)
 
-    organization = Organization.objects.all().filter(pk=organization_id)
+    organization = Organization.objects.all().filter(pk=organization_id, type__name=organization_type, country=country)
     if not organization:
         return {}
 
