@@ -3,11 +3,32 @@ from multiprocessing.pool import ThreadPool
 
 from websecmap.app import log
 from websecmap.scanners.models import EndpointGenericScan
+from websecmap.scanners.scanner.plain_http import clean_can_connect_result_evidence
 from websecmap.scanners.scanner.security_headers import reduce_url
 
 
 def get_scans(scan_type: str):
     return EndpointGenericScan.objects.all().filter(type=scan_type).values_list("id", flat=True)
+
+
+def clean_plain_http_no_https_redirect_no_https_on_standard_port_evidence():
+    scans = (
+        EndpointGenericScan.objects.all()
+        .filter(rating="no_https_redirect_and_no_https_on_standard_port")
+        .values_list("id", flat=True)
+    )
+    parallelize(something_something_plain_http_no_https_redirect_no_https_on_standard_port_evidence, scans, 25)
+
+
+def something_something_plain_http_no_https_redirect_no_https_on_standard_port_evidence(scan_id):
+    epgs = EndpointGenericScan.objects.filter(id=scan_id).only("evidence").first()
+    if not epgs:
+        log.debug("No scan with id: %s", scan_id)
+        return
+
+    if epgs.evidence:
+        epgs.evidence = clean_can_connect_result_evidence(epgs.evidence)
+        epgs.save(update_fields=["evidence"])
 
 
 def clean_http_security_header_strict_transport_security():

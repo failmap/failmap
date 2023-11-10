@@ -31,6 +31,7 @@ from websecmap.scanners.scanner.http import (
     resolves_on_v6,
 )
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
+import re
 
 log = logging.getLogger(__package__)
 
@@ -213,6 +214,22 @@ def scan(ip_version: int, url: str):
     return resolves, can_connect_result, redirects_to_safety_result
 
 
+def clean_can_connect_result_evidence(result_text):
+    # Will remove the memory address and timeout number because those change over time.
+    # HTTPSConnectionPool(host='example.nl', port=443): Max retries exceeded with url: / (Caused by
+    # ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x7f2368f44310>,
+    # 'Connection to example.nl timed out. (connect timeout=15)'))
+    result_text = replace_memory_address_in_string(result_text)
+
+    return result_text
+
+
+def replace_memory_address_in_string(text):
+    # regex that replaces 0xhex-string to 0xmemory_address
+    text = re.sub(r"0x[a-f0-9]{12,24}", r"0xmemory_address", text)
+    return text
+
+
 @app.task(queue="storage", ignore_result=True)
 def store(results, endpoint_id):
     resolves, can_connect_result, redirects_to_safety_result = results
@@ -280,6 +297,9 @@ def store(results, endpoint_id):
             return
 
         # no redirects...
+        if "error" in can_connect_result:
+            can_connect_result["error"] = clean_can_connect_result_evidence(can_connect_result["error"])
+
         log.info("%s does not have a https site. Saving/updating scan.", endpoint.url)
         store_endpoint_scan_result(
             "plain_http",
