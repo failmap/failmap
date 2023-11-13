@@ -5,9 +5,7 @@
 #    pip-compile --output-file=requirements.txt --resolver=backtracking requirements.in
 #
 aiohttp==3.8.6
-    # via
-    #   geoip2
-    #   openai
+    # via geoip2
 aiosignal==1.3.1
     # via aiohttp
 amqp==2.6.1
@@ -189,8 +187,6 @@ odfpy==1.4.1
     # via
     #   pyexcel-ods
     #   tablib
-openai==0.27.8
-    # via -r requirements.in
 openpyxl==3.0.10
     # via
     #   -r requirements.in
@@ -274,7 +270,6 @@ requests==2.31.0
     #   django-proxy
     #   geoip2
     #   googlemaps
-    #   openai
     #   osm2geojson
     #   python-resize-image
     #   requests-file
@@ -321,8 +316,6 @@ tldextract==3.4.4
     # via -r requirements.in
 tornado==6.3.3
     # via flower
-tqdm==4.65.0
-    # via openai
 typing-extensions==4.6.3
     # via
     #   asgiref

@@ -671,13 +671,13 @@ CONSTANCE_CONFIG = {
         "geocode thousands of addresses.",
         str,
     ),
-    "OPENAI_API_KEY": (
+    "LARGE_LANGUAGE_MODEL_API_KEY": (
         "sk-r...1Wg",
         "This API helps with creating context around otherwise dry information",
         str,
     ),
-    "OPENAI_MODEL_NAME": (
-        "gpt-3.5-turbo",
+    "LARGE_LANGUAGE_MODEL_MODEL_NAME": (
+        "gov-1.0-beta",
         "The model used to generate product context",
         str,
     ),
@@ -1465,10 +1465,10 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             ),
         ),
         (
-            "ChatGPT / OpenAI used for product context",
+            "LLM used for product context",
             (
-                "OPENAI_API_KEY",
-                "OPENAI_MODEL_NAME",
+                "LARGE_LANGUAGE_MODEL_API_KEY",
+                "LARGE_LANGUAGE_MODEL_MODEL_NAME",
             ),
         ),
         (

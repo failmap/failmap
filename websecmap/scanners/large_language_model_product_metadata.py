@@ -1,20 +1,17 @@
 from typing import List
 
-import openai
-
 from websecmap.app import log
-from websecmap.app.constance import constance_cached_value
 from websecmap.scanners.models import Product, ProductGoal, ProductHierarchy, ProductRelationship, ProductVendor
 
 
 def enrich_product_metadata():
     log.info("Enrichting Product Metadata")
-    # chatgpt_hello()
+    # llm_hello()
 
     for product in Product.objects.all():
         enrich_product(product)
 
-    # chatgpt_thank_you()
+    # llm_thank_you()
 
 
 def enrich_product(product: Product):
@@ -28,7 +25,7 @@ def enrich_product(product: Product):
     enrich_product_tag_cloud(product)
     enrich_product_is_open_source(product)
 
-    # chatGPT4 can create something like this
+    # llm4 can create something like this
     # enrich_product_contextual_graph(product)
 
 
@@ -42,10 +39,10 @@ def clear_enrichment():
 
 
 def enrich_product_arbitrary_json_data(product: Product):
-    # these are the system requirements that are extracted from chatgpt...
+    # these are the system requirements that are extracted from llm...
     if product.arbitrary_json_data:
         return
-    product.arbitrary_json_data = chatgpt_get_product_system_requirements(product.verbose_name)
+    product.arbitrary_json_data = llm_get_product_system_requirements(product.verbose_name)
     product.save()
     log.debug("Enriched product %s with data %s", product.verbose_name, product.arbitrary_json_data)
 
@@ -54,7 +51,7 @@ def enrich_product_vendor(product: Product):
     if product.vendor:
         return
 
-    vendor = chatgpt_get_product_vendor(product.name)
+    vendor = llm_get_product_vendor(product.name)
     if semantically_empty(vendor):
         return
 
@@ -68,7 +65,7 @@ def enrich_product_goal(product: Product):
     if product.goal:
         return
 
-    goal = chatgpt_get_product_goal(product.verbose_name)
+    goal = llm_get_product_goal(product.verbose_name)
     if semantically_empty(goal):
         return
 
@@ -87,7 +84,7 @@ def enrich_product_programming_language(product: Product):
     if product.verbose_name == "Unknown Unknown":
         return
 
-    programming_language = chatgpt_get_product_programming_language(product.verbose_name)
+    programming_language = llm_get_product_programming_language(product.verbose_name)
     if semantically_empty(programming_language):
         programming_language_product, _ = Product.objects.get_or_create(name="Unknown")
         ProductHierarchy.objects.get_or_create(
@@ -104,7 +101,7 @@ def enrich_product_programming_language(product: Product):
 
 def enrich_product_execution_environment(product: Product):
     if not product.common_execution_environment:
-        response = chatgpt_get_product_common_execution_environment(product.verbose_name)
+        response = llm_get_product_common_execution_environment(product.verbose_name)
         if semantically_empty(response):
             product.common_execution_environment = "Unknown"
         else:
@@ -114,25 +111,25 @@ def enrich_product_execution_environment(product: Product):
 
 def enrich_product_intended_use_case(product: Product):
     if not product.intended_use_case_description:
-        product.intended_use_case_description = chatgpt_get_product_intended_use_case_description(product.verbose_name)
+        product.intended_use_case_description = llm_get_product_intended_use_case_description(product.verbose_name)
         product.save()
 
 
 def enrich_product_contextual_graph(product: Product):
     if not product.contextual_graph:
-        product.contextual_graph = chatgpt_get_product_contextual_graph(product.verbose_name)
+        product.contextual_graph = llm_get_product_contextual_graph(product.verbose_name)
         product.save()
 
 
 def enrich_product_is_open_source(product: Product):
     if product.is_open_source not in [True, False]:
-        product.is_open_source = chatgpt_get_product_is_open_source(product.verbose_name)
+        product.is_open_source = llm_get_product_is_open_source(product.verbose_name)
         product.save()
 
 
 def enrich_product_tag_cloud(product: Product):
     if product.tags.all().count() == 0:
-        tags = chatgpt_get_product_tag_cloud(product.verbose_name)
+        tags = llm_get_product_tag_cloud(product.verbose_name)
         for tag in tags:
             log.debug("Enriched product %s with tag %s", product.verbose_name, tag)
             product.tags.add(tag.strip())
@@ -171,7 +168,7 @@ def enrich_used_databases(product: Product):
     ...
 
 
-# Working with responses wher ChatGPT has no answer
+# Working with responses wher llm has no answer
 def semantically_empty(text: str) -> bool:
     if text is None:
         return True
@@ -194,7 +191,15 @@ def semantically_empty(text: str) -> bool:
 
 
 # Abstraction of questions
-def ask_question(question, exected_output: str = None):
+def ask_question(question, expected_output: str = None):
+    raise NotImplementedError(
+        "Support for OpenAI has been dropped as there is no guarantee that the content it dreams of "
+        "is copyright free. This code and structure are still in place to support another model "
+        "in the future. - Even though product descriptions are usually marketing material, there is no guarantee."
+    )
+
+
+def example_llm_api_implementation(question, expected_output: str = None) -> str:
     """
     Typical OpenAi response objects:
     {
@@ -216,42 +221,45 @@ def ask_question(question, exected_output: str = None):
     }
     """
 
-    log.debug("> WebSecMap: %s", question)
-    openai.api_key = constance_cached_value("OPENAI_API_KEY")
+    ...
+    # This implementation was for openai. Each library has a different approach. This is left here for inspiration.
 
-    messages = [
-        {"role": "user", "content": question},
-    ]
-    if exected_output == "csv":
-        messages.append(
-            {"role": "assistant", "content": "You are an assistant who only speaks CSV. Do not write normal text."}
-        )
+    # log.debug("> WebSecMap: %s", question)
+    # large_language_model.api_key = constance_cached_value("LARGE_LANGUAGE_MODEL_NAME_API_KEY")
+    # messages = [
+    #     {"role": "user", "content": question},
+    # ]
+    # if expected_output == "csv":
+    #     messages.append(
+    #         {"role": "assistant", "content": "You are an assistant who only speaks CSV. Do not write normal text."}
+    #     )
 
-    completion = openai.ChatCompletion.create(model=constance_cached_value("OPENAI_MODEL_NAME"), messages=messages)
+    # completion = large_language_model.ChatCompletion.create(
+    #   model=constance_cached_value("LARGE_LANGUAGE_MODEL_MODEL_NAME"), messages=messages)
 
-    answer = completion.choices[0].message["content"]
-    if answer.endswith("."):
-        answer = answer[:-1]
+    # answer = completion.choices[0].message["content"]
+    # if answer.endswith("."):
+    #     answer = answer[:-1]
 
-    log.debug("< ChatGPT: %s", answer.strip())
+    # log.debug("< llm: %s", answer.strip())
 
-    return answer.strip()
+    # return answer.strip()
 
 
-# Interaction with ChatGPT:
-def chatgpt_get_product_goal(product_name: str) -> str:
+# Interaction with llm:
+def llm_get_product_goal(product_name: str) -> str:
     return ask_question(f"In one word, what is the goal of the software product {product_name}?")
 
 
-def chatgpt_get_product_vendor(product_name: str) -> str:
+def llm_get_product_vendor(product_name: str) -> str:
     return ask_question(f"In one word: The software product {product_name} is created by which company? ")
 
 
-def chatgpt_get_product_system_requirements(product_name: str) -> str:
+def llm_get_product_system_requirements(product_name: str) -> str:
     return ask_question(f"Summarized in JSON format, what are the system requirements for {product_name}?")
 
 
-def chatgpt_get_product_programming_language(product_name: str) -> str:
+def llm_get_product_programming_language(product_name: str) -> str:
     return ask_question(
         f"In a single word, what is the programming language "
         f"that software product {product_name} is written in and/or depends on? "
@@ -259,7 +267,7 @@ def chatgpt_get_product_programming_language(product_name: str) -> str:
     )
 
 
-def chatgpt_get_product_common_execution_environment(product_name: str) -> str:
+def llm_get_product_common_execution_environment(product_name: str) -> str:
     answer = ask_question(
         f"Please answer with Browser, Server, and nothing else to the following question: "
         f"does {product_name} run in the Browser or on the Server?"
@@ -275,34 +283,34 @@ def chatgpt_get_product_common_execution_environment(product_name: str) -> str:
     return "Unknown"
 
 
-def chatgpt_get_product_is_open_source(product_name: str) -> bool:
+def llm_get_product_is_open_source(product_name: str) -> bool:
     answer = ask_question(f"Yes, No or Unkown: Is the software product {product_name} open source?")
     answer = answer.lower()
     return "yes" in answer
 
 
-def chatgpt_get_product_tag_cloud(product_name: str) -> List[str]:
+def llm_get_product_tag_cloud(product_name: str) -> List[str]:
     answer = ask_question(
-        f'Can you make a comma separated tag list for for software product "{product_name}".', exected_output="csv"
+        f'Can you make a comma separated tag list for for software product "{product_name}".', expected_output="csv"
     )
     return answer.replace('"', "").lower().split(",")
 
 
-def chatgpt_get_product_intended_use_case_description(product_name: str) -> str:
+def llm_get_product_intended_use_case_description(product_name: str) -> str:
     return ask_question(
         f"Summarized in under 400 characters, what is the intended use case " f'of software product "{product_name}"?'
     )
 
 
-def chatgpt_get_product_contextual_graph(product_name: str) -> str:
+def llm_get_product_contextual_graph(product_name: str) -> str:
     return ask_question(
         f"Can you create a ascii contextual graph of the " f'application of software product "{product_name}"?'
     )
 
 
-def chatgpt_hello() -> str:
+def llm_hello() -> str:
     return ask_question("Hello!")
 
 
-def chatgpt_thank_you() -> str:
+def llm_thank_you() -> str:
     return ask_question("Thank you!")

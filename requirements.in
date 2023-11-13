@@ -179,8 +179,6 @@ py>=1.11.0
 # convert OSM to geojson data
 osm2geojson
 
-# the hype is real, add some product metadata to give context about software products discovered by scanners
-openai
 django-taggit
 
 # replacemenet for time_cache:
