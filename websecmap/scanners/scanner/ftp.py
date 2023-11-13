@@ -8,7 +8,6 @@ Scans for missing AUTH TLS / AUTH SSL options in FTP servers.
 """
 
 import logging
-from datetime import datetime, timezone
 from ftplib import FTP, error_perm, error_proto, error_reply, error_temp  # nosec scanning for insecure ftp is the point
 
 from celery import Task, group
@@ -26,6 +25,7 @@ from websecmap.scanners.scanner.filter import (
     generic_plan_scan,
     merge_endpoints_filter,
 )
+from websecmap.scanners.scanner.http import save_endpoint, kill_endpoint
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 
 log = logging.getLogger(__name__)
@@ -396,7 +396,7 @@ def discover(url: str, port: int):
 
 
 @app.task(queue="storage", ignore_result=True)
-def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
+def store_when_new_or_kill_if_gone(connected: bool, url: int, port: int, protocol: str, ip_version: int):
     """
 
     :param url: any url where endpoints are discovered.
@@ -414,8 +414,8 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
     try:
         endpoint = (
             Endpoint.objects.filter(protocol=protocol, port=port, ip_version=ip_version, url=url, is_dead=False)
-            .only("id", "is_dead")
-            .latest("discovered_on")
+            # ip version and port etc are added to prevent N+1 queries.
+            .only("id", "is_dead", "ip_version", "protocol", "port", "url__id", "origin").latest("discovered_on")
         )
     except Endpoint.DoesNotExist:
         doesnotexist = True
@@ -434,15 +434,13 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
             return
 
         log.debug("New FTP server discovered on %s.", url)
-        endpoint = Endpoint(
-            url=db_url,
-            port=port,
+        save_endpoint(
             protocol=protocol,
+            url_id=db_url.id,
+            port=port,
             ip_version=ip_version,
-            discovered_on=datetime.now(timezone.utc),
             origin="ftp scanner",
         )
-        endpoint.save()
         return
 
     # endpoint was alive and still is. Nothing changed. We don't have a last seen date. So do nothing.
@@ -452,8 +450,11 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
     # endpoint died. Kill it.
     if endpoint.is_dead is False and not connected:
         log.debug("Existing FTP server could not be found anymore on %s, removing.", url)
-        endpoint.is_dead = True
-        endpoint.is_dead_reason = "Could not connect"
-        endpoint.is_dead_since = datetime.now(timezone.utc)
-        endpoint.save()
+        kill_endpoint(
+            protocol=protocol,
+            url_id=url,
+            port=port,
+            ip_version=ip_version,
+            origin="ftp scanner",
+        )
         return
