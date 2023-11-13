@@ -17,7 +17,7 @@ from django_celery_beat.models import CrontabSchedule, IntervalSchedule, Periodi
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from websecmap.app.models import GameUser, Job, Volunteer
+from websecmap.app.models import GameUser, Job, Volunteer, Translation
 
 
 class JobAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -654,3 +654,15 @@ class TooManyRecordsPaginator(Paginator):
     @property
     def count(self):
         return 13374223
+
+
+@admin.register(Translation)
+class TranslationAdmin(admin.ModelAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("metadata_section")
+
+    list_display = ["id", "language_code", "key", "value", "sections"]
+    list_filter = ["language_code", "key", "metadata_section"]
+
+    def sections(self, obj):
+        return ", ".join(o.name for o in obj.metadata_section.all())

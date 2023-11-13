@@ -7,6 +7,7 @@ import celery
 from django.contrib.auth.models import User
 from django.db import models
 from jsonfield import JSONField
+from taggit.managers import TaggableManager
 
 from websecmap.celery import app
 
@@ -268,3 +269,19 @@ class GameUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     # store the password in plain_text, so it's recoverable.
     password = models.TextField(max_length=200, blank=True, null=True)
+
+
+class Translation(models.Model):
+    key = models.CharField(max_length=200, blank=True, null=True)
+    language_code = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text="ISO 639-1 language code, see https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes",
+    )
+    value = models.TextField(blank=True, null=True)
+    metadata_section = TaggableManager(blank=True)
+    metadata_notes = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.key} - {self.language_code}"

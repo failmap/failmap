@@ -16,6 +16,7 @@ from django.views.decorators.cache import cache_page
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
 from websecmap.app.constance import constance_cached_value, get_all_values, get_bulk_values
+from websecmap.app.translations import get_translations
 from websecmap.map.logic import datasets
 from websecmap.map.logic.admin import (
     add_organization,
@@ -315,6 +316,8 @@ def config_content():
             "pgp_key": configuration["RESPONSIBLE_DISCLOSURE_PGP_KEY"],
             "salsa_key": configuration["RESPONSIBLE_DISCLOSURE_SALSA_KEY"],
         },
+        # admin managed translations, this will replace the constance translations(!)
+        "translation": get_translations(),
         "translations": {
             "en": {
                 "landing": {
