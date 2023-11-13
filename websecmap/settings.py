@@ -160,6 +160,7 @@ except ImportError:
     pass
 
 MIDDLEWARE = [
+    "google.cloud.sqlcommenter.django.middleware.SqlCommenter",
     "django_statsd.middleware.GraphiteRequestTimingMiddleware",
     "django_statsd.middleware.GraphiteMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
