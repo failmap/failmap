@@ -163,6 +163,8 @@ def significant_moments(urls: List[Url] = None, reported_scan_types: List[str] =
         log.info("No urls, so no moments")
         return []
 
+    url_ids = [url.id for url in urls]
+
     # since we want to know all about these endpoints, get them at the same time, which is faster.
     # Otherwise related objects where requested at create timeline.
     # Difference:
@@ -204,10 +206,12 @@ def significant_moments(urls: List[Url] = None, reported_scan_types: List[str] =
     dead_endpoints = Endpoint.objects.all().filter(url__in=urls, is_dead=True)
     dead_scan_dates = [x.is_dead_since for x in dead_endpoints]
 
-    non_resolvable_urls = Url.objects.filter(not_resolvable=True, url__in=urls)
+    # note: here url is not a reference but a string, so refer to the ID and not the the str(url)
+    # this change might have some side effects as it has never worked :)
+    non_resolvable_urls = Url.objects.filter(not_resolvable=True, pk__in=url_ids)
     non_resolvable_dates = [x.not_resolvable_since for x in non_resolvable_urls]
 
-    dead_urls = Url.objects.filter(is_dead=True, url__in=urls)
+    dead_urls = Url.objects.filter(is_dead=True, pk__in=url_ids)
     dead_url_dates = [x.is_dead_since for x in dead_urls]
 
     # reduce this to one moment per day only, otherwise there will be a report for every change

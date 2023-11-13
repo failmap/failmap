@@ -1,8 +1,12 @@
 from datetime import datetime, timezone
 
+from websecmap.organizations.models import Url
 from websecmap.reporting.report import statistics_over_url_calculation, explanation_valid_around_this_moment
 
 # fit statements on one 120 char line.
+from websecmap.scanners.models import EndpointGenericScan, Endpoint, UrlGenericScan
+from websecmap.reporting.report import significant_moments
+
 isoformat = datetime.fromisoformat
 
 
@@ -382,3 +386,69 @@ def test_explanation_valid_around_this_moment():
         )
         is True
     )
+
+
+def test_significant_moments(db, default_scan_metadata, default_policy):
+    # Creates events: a new url, a non-resolvable one and a dead one.
+    url = Url.objects.create(
+        url="test.nl",
+        created_on=datetime(2022, 3, 30, tzinfo=timezone.utc),
+        not_resolvable=True,
+        not_resolvable_since=datetime(2023, 3, 30, tzinfo=timezone.utc),
+        is_dead=True,
+        is_dead_since=datetime(2023, 4, 30, tzinfo=timezone.utc),
+    )
+
+    # a standard HTTPS endpoint, while theurl was alive and resovlable
+    first_endpoint = Endpoint.objects.create(
+        url=url,
+        protocol="https",
+        port="443",
+        ip_version=4,
+        discovered_on=datetime(2022, 5, 30, tzinfo=timezone.utc),
+        is_dead=True,
+        # metric is within the period while it was alive
+        is_dead_since=datetime(2022, 8, 30, tzinfo=timezone.utc),
+    )
+
+    epgs = EndpointGenericScan.objects.create(
+        endpoint=first_endpoint,
+        type="tls_qualys_encryption_quality",
+        rating="A+",
+        rating_determined_on=datetime(2022, 5, 30, tzinfo=timezone.utc),
+        last_scan_moment=datetime(2022, 6, 30, tzinfo=timezone.utc),
+        comply_or_explain_is_explained=False,
+        is_the_latest_scan=True,
+    )
+
+    # also add a nice url
+    ugs = UrlGenericScan.objects.create(
+        url=url,
+        type="dnssec",
+        rating="ok",
+        rating_determined_on=datetime(2022, 5, 30, tzinfo=timezone.utc),
+        last_scan_moment=datetime(2022, 6, 30, tzinfo=timezone.utc),
+        comply_or_explain_is_explained=False,
+        is_the_latest_scan=True,
+    )
+
+    # we found an issue where a dead url could not be found when the following was used:
+    # because str()/__str__ is called on the url, even though it is an url object. So database queries
+    # contained † signs on dead urls... You don't search for the str of url but on the id to fix this.
+    any_dead_url = Url.objects.filter(is_dead=True, id__in=[url.id])
+    assert any_dead_url.count() == 1
+
+    moments, happenings = significant_moments([url], ["tls_qualys_encryption_quality", "dnssec"])
+    assert moments == [
+        datetime(2022, 5, 30, 0, 0, 59, 999999, tzinfo=timezone.utc),
+        datetime(2022, 8, 30, 0, 0, 59, 999999, tzinfo=timezone.utc),
+        datetime(2023, 3, 30, 0, 0, 59, 999999, tzinfo=timezone.utc),
+        datetime(2023, 4, 30, 0, 0, 59, 999999, tzinfo=timezone.utc),
+    ]
+
+    # before this bugfix the dead and non-revolvable urls would have been emtpy
+    assert happenings["dead_endpoints"].first().id == first_endpoint.id
+    assert happenings["dead_urls"].first().id == url.id
+    assert happenings["non_resolvable_urls"].first().id == url.id
+    assert happenings["endpoint_scans"] == [epgs]
+    assert happenings["url_scans"] == [ugs]
