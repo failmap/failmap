@@ -1,3 +1,4 @@
+# For a complete map update run: report, report_organizations, report_map
 import logging
 
 from websecmap.app.management.commands._private import GenericTaskCommand

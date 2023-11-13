@@ -1,5 +1,3 @@
-import time
-
 import calendar
 import logging
 from collections import OrderedDict
@@ -112,11 +110,11 @@ def compose_task(
     # dummy tasks should last as long as the longest url rating and there should be enough dummies
     # to keep all workers busy and presto: all url reports are finished before org reports are made without
     # the giant memory overhead on each task. This sort of works because url reports are pretty small tasks :D
-    # seen: fifo order in queue processing
-    for i in range(0, 512):
-        tasks.append(dummy.si())
+    # -> currently split up in two tasks... so the dummy has been removed.
 
-    tasks.extend(create_organization_reports_now.si([organization_id]) for organization_id in organizations_with_urls)
+    # creating organization reports is now placed in report_organization, so they can be scheduled at a different time.
+    # this gives a bit more control on what tasks are added to the queue at what point.
+
     if not tasks:
         log.warning("Could not rebuild reports, filters resulted in no tasks created.")
         log.debug("Organization filter: %s, Url filter: %s", organizations_filter, urls_filter)
@@ -137,12 +135,6 @@ def compose_task(
     # reports will be rated before url ratings happen. But because the queue is fifo you can add dummy tasks
     # to create a buffer between tasks instead of chaining.
     return group(tasks)
-
-
-@app.task(queue="reporting")
-def dummy():
-    time.sleep(1)
-    return
 
 
 @app.task(queue="reporting")
