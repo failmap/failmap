@@ -32,7 +32,7 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "inspect_url",
     )
     search_fields = ["url__organization__name", "url__url", "at_when"]
-    list_filter = ["url", "at_when", "url__organization__type", "url__organization__country"][::-1]
+    list_filter = ["url", "at_when", "url__organization__layers", "url__organization__country"][::-1]
     fields = (
         "url",
         "total_endpoints",

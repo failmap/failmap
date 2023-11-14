@@ -1052,7 +1052,7 @@ class CoordinateAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ("id", "organization", "geojsontype", "created_on", "is_dead", "calculated_area_hash")
     search_fields = ("organization__name", "geojsontype")
     list_filter = [
-        "organization__type",
+        "organization__layers",
         "organization__country",
         "organization",
         "geojsontype",
