@@ -46,7 +46,9 @@ def get_organization_report_by_id(
 
     when = determine_when(days_back, at_date)
 
-    organization = Organization.objects.all().filter(pk=organization_id, type__name=organization_type, country=country)
+    organization = Organization.objects.all().filter(
+        pk=organization_id, layers__name=organization_type, country=country
+    )
     if not organization:
         return {}
 
