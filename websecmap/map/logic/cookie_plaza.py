@@ -75,12 +75,17 @@ def cookie_plaza_data(country: str = None, layer: str = None):
                         "url_url": scan.endpoint.url.url,
                         "subdomain": scan.endpoint.url.computed_subdomain,
                         "domain": f"{scan.endpoint.url.computed_domain}.{scan.endpoint.url.computed_suffix}",
-                        "last_scan_moment": scan.last_scan_moment,
-                        "rating_determined_on": scan.rating_determined_on,
+                        "last_scan_moment": scan.last_scan_moment.isoformat(),
+                        "rating_determined_on": scan.rating_determined_on.isoformat(),
                         "cookies": scan.meaning,
                         # make it easier to make uniques in the frontend
                         "scan_id": scan.id,
                     }
                 )
+
+    # stats cannot be sets as those cannot be serialized
+    for stat in stats:
+        stats[stat]["organizations_with_tracking_cookies"] = list(stats[stat]["organizations_with_tracking_cookies"])
+        stats[stat]["urls_with_tracking_cookies"] = list(stats[stat]["urls_with_tracking_cookies"])
 
     return records, stats
