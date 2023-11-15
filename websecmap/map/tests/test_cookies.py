@@ -117,7 +117,10 @@ def test_cookie_plaza_data(db):
         ]
 
         assert all_stats == {
-            "layer1": {"organizations_with_tracking_cookies": {1}, "urls_with_tracking_cookies": {"example.nl"}}
+            "layer1": {
+                "organizations_with_tracking_cookies": {organization.id},
+                "urls_with_tracking_cookies": {"example.nl"},
+            }
         }
 
         specific_layers, specific_stats = cookie_plaza_data("NL", "layer1")
