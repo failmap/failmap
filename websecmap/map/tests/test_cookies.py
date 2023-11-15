@@ -1,5 +1,19 @@
+from datetime import datetime, timezone
+
+from freezegun import freeze_time
+
+from websecmap.map.logic.cookie_plaza import cookie_plaza_data
 from websecmap.map.logic.cookies import get_cookie_database
-from websecmap.scanners.models import ProductCookieIndicator, CookiePurpose, Product, ProductVendor
+from websecmap.map.models import Configuration
+from websecmap.organizations.models import Url, Organization, OrganizationType
+from websecmap.scanners.models import (
+    ProductCookieIndicator,
+    CookiePurpose,
+    Product,
+    ProductVendor,
+    Endpoint,
+    EndpointGenericScan,
+)
 
 
 def test_get_cookie_database(db):
@@ -54,3 +68,58 @@ def test_get_cookie_database(db):
             "product_vendor_id": None,
         },
     }
+
+
+def test_cookie_plaza_data(db):
+    # no data, should not result in a crash
+    all_layers, all_stats = cookie_plaza_data()
+    assert all_layers == []
+    assert all_stats == {}
+
+    # a few metrics in a few layers, should work fine and give some duplicate results
+    with freeze_time("2022-01-24"):
+        now = datetime.now(timezone.utc)
+        url = Url.objects.create(url="example.nl")
+        organization = Organization.objects.create(name="test", country="NL")
+        url.organization.add(organization)
+        layer = OrganizationType.objects.create(name="layer1")
+        organization.layers.add(layer)
+        organization.save()
+        # make it visible as well...
+        Configuration.objects.create(is_displayed=True, country="NL", organization_type=layer)
+
+        ep = Endpoint.objects.create(url=url, discovered_on=now, port=443, protocol="https", ip_version=4)
+        epgs = EndpointGenericScan.objects.create(
+            type="web_privacy_cookie_products_no_consent",
+            meaning={},
+            endpoint=ep,
+            is_the_latest_scan=True,
+            comply_or_explain_is_explained=False,
+            rating="medium",
+            rating_determined_on=now,
+        )
+        all_layers, all_stats = cookie_plaza_data()
+        assert len(all_layers) == 1
+        assert all_layers == [
+            {
+                "cookies": {},
+                "country": "NL",
+                "domain": "example.nl",
+                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "layer": "layer1",
+                "organization_id": organization.id,
+                "organization_name": "test",
+                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
+                "scan_id": epgs.id,
+                "subdomain": "",
+                "url_url": "example.nl",
+            },
+        ]
+
+        assert all_stats == {
+            "layer1": {"organizations_with_tracking_cookies": {1}, "urls_with_tracking_cookies": {"example.nl"}}
+        }
+
+        specific_layers, specific_stats = cookie_plaza_data("NL", "layer1")
+        assert all_layers == specific_layers
+        assert all_stats == specific_stats

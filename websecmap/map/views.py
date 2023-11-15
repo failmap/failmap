@@ -27,6 +27,7 @@ from websecmap.map.logic.admin import (
     switch_lattitude_and_longitude,
     user_is_staff_member,
 )
+from websecmap.map.logic.cookie_plaza import cookie_plaza_data
 from websecmap.map.logic.cookies import get_cookie_database
 from websecmap.map.logic.datasets import create_filename
 from websecmap.map.logic.explain import explain, get_all_explains, get_recent_explains, remove_explanation
@@ -271,6 +272,7 @@ def config_content():
             "incorrect_finding": configuration["SHOW_INCORRECT_FINDING"],
             "snow": configuration["SHOW_SNOW"],
             "login_plaza": configuration["SHOW_LOGIN_PLAZA"],
+            "cookie_plaza": configuration["SHOW_COOKIE_PLAZA"],
             "time_machine": configuration["SHOW_TIME_MACHINE"],
             "historic_comparison_reports": configuration["SHOW_HISTORIC_COMPARISON_REPORTS"],
             "metric_progress": configuration["SHOW_METRIC_PROGRESS"],
@@ -934,6 +936,23 @@ def login_plaza(
 
     return json_response(
         login_plaza_data(
+            country=country,
+            layer=organization_type,
+        )
+    )
+
+
+@cache_page(ONE_HOUR)
+def cookie_plaza(
+    request,
+    country: str = "",
+    organization_type: str = "",
+):
+    if not constance_cached_value("SHOW_COOKIE_PLAZA"):
+        return JsonResponse([], encoder=JSEncoder, safe=False)
+
+    return json_response(
+        cookie_plaza_data(
             country=country,
             layer=organization_type,
         )

@@ -233,16 +233,22 @@ def login_plaza_data(country: str = None, layer: str = None):
     my_country = get_country(country)
     my_layer = get_organization_type(layer)
 
-    scans = EndpointGenericScan.objects.all().filter(
-        type="nuclei_exposed_panels",
-        is_the_latest_scan=True,
-        comply_or_explain_is_explained=False,
-        rating__in=["info", "warning", "danger"],
-        endpoint__is_dead=False,
-        endpoint__url__is_dead=False,
-        endpoint__url__not_resolvable=False,
-        endpoint__url__organization__country=my_country,
-        endpoint__url__organization__layers=my_layer,
+    scans = (
+        EndpointGenericScan.objects.all()
+        .filter(
+            type="nuclei_exposed_panels",
+            is_the_latest_scan=True,
+            comply_or_explain_is_explained=False,
+            rating__in=["info", "warning", "danger"],
+            endpoint__is_dead=False,
+            endpoint__url__is_dead=False,
+            endpoint__url__not_resolvable=False,
+            endpoint__url__organization__country=my_country,
+            endpoint__url__organization__layers=my_layer,
+        )
+        .prefetch_related(
+            "endpoint", "endpoint__url", "endpoint__url__organization", "endpoint__url__organization__layers"
+        )
     )
 
     # can't use values_list because:

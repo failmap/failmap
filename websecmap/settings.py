@@ -1144,6 +1144,11 @@ CONSTANCE_CONFIG = {
         "Show login portals on a dedicated page",
         bool,
     ),
+    "SHOW_COOKIE_PLAZA": (
+        False,
+        "Show tracking cookies on a dedicated page",
+        bool,
+    ),
     "SHOW_TIME_MACHINE": (
         False,
         "Allow to see old reports and old map data",
@@ -1592,6 +1597,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_SCAN_SCHEDULE",
                 "SHOW_DONATION",
                 "SHOW_LOGIN_PLAZA",
+                "SHOW_COOKIE_PLAZA",
                 "SHOW_TIME_MACHINE",
                 "SHOW_HISTORIC_COMPARISON_REPORTS",
                 "SHOW_COMPLY_OR_EXPLAIN_GUIDELINES",
