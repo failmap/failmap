@@ -657,7 +657,7 @@ class TooManyRecordsPaginator(Paginator):
 
 
 @admin.register(Translation)
-class TranslationAdmin(admin.ModelAdmin):
+class TranslationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("metadata_section")
 
