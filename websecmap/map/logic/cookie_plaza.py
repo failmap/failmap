@@ -21,6 +21,7 @@ def cookie_plaza_data(country: str = None, layer: str = None):
         .prefetch_related(
             "endpoint", "endpoint__url", "endpoint__url__organization", "endpoint__url__organization__layers"
         )
+        .order_by("-rating_determined_on")
     )
     if country:
         scans = scans.filter(endpoint__url__organization__country=get_country(country))
@@ -82,7 +83,10 @@ def cookie_plaza_data(country: str = None, layer: str = None):
 
     # stats cannot be sets as those cannot be serialized
     for stat in stats:
-        stats[stat]["organizations_with_tracking_cookies"] = list(stats[stat]["organizations_with_tracking_cookies"])
-        stats[stat]["urls_with_tracking_cookies"] = list(stats[stat]["urls_with_tracking_cookies"])
+        # sets dont have ordering?
+        stats[stat]["organizations_with_tracking_cookies"] = list(
+            sorted(stats[stat]["organizations_with_tracking_cookies"])
+        )
+        stats[stat]["urls_with_tracking_cookies"] = list(sorted(stats[stat]["urls_with_tracking_cookies"]))
 
     return records, stats

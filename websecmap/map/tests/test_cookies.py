@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+
 from constance.test import override_config
 
 from freezegun import freeze_time
@@ -83,6 +84,7 @@ def test_cookie_plaza_data(db):
     # a few metrics in a few layers, should work fine and give some duplicate results
     with freeze_time("2022-01-24"):
         now = datetime.now(timezone.utc)
+        earlier = datetime.now(timezone.utc) - timedelta(hours=2)
         url = Url.objects.create(url="example.nl")
         url2 = Url.objects.create(url="example2.nl")
         organization = Organization.objects.create(name="test", country="NL")
@@ -105,7 +107,7 @@ def test_cookie_plaza_data(db):
             rating_determined_on=now,
         )
 
-        ep2 = Endpoint.objects.create(url=url2, discovered_on=now, port=443, protocol="https", ip_version=4)
+        ep2 = Endpoint.objects.create(url=url2, discovered_on=earlier, port=443, protocol="https", ip_version=4)
         epgs2 = EndpointGenericScan.objects.create(
             type="web_privacy_cookie_products_no_consent",
             meaning={},
@@ -113,12 +115,13 @@ def test_cookie_plaza_data(db):
             is_the_latest_scan=True,
             comply_or_explain_is_explained=False,
             rating="medium",
-            rating_determined_on=now,
+            rating_determined_on=earlier,
         )
 
         all_layers, all_stats = cookie_plaza_data()
         assert len(all_layers) == 2
         assert all_layers == [
+            # newest metric
             {
                 "cookies": {},
                 "country": "NL",
@@ -132,15 +135,17 @@ def test_cookie_plaza_data(db):
                 "subdomain": "",
                 "url_url": "example.nl",
             },
+            # record 2 happened earlier, so will be after the newer records...
             {
                 "cookies": {},
                 "country": "NL",
                 "domain": "example2.nl",
-                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc).isoformat(),
+                # auto-date, so this will stay the same...
+                "last_scan_moment": datetime(2022, 1, 24, 00, 0, tzinfo=timezone.utc).isoformat(),
                 "layer": "layer1",
                 "organization_id": organization.id,
                 "organization_name": "test",
-                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc).isoformat(),
+                "rating_determined_on": datetime(2022, 1, 23, 22, 0, tzinfo=timezone.utc).isoformat(),
                 "scan_id": epgs2.id,
                 "subdomain": "",
                 "url_url": "example2.nl",
