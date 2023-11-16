@@ -245,6 +245,7 @@ def login_plaza_data(country: str = None, layer: str = None):
             endpoint__url__not_resolvable=False,
             endpoint__url__organization__country=my_country,
             endpoint__url__organization__layers=my_layer,
+            endpoint__url__organization__is_dead=False,
         )
         .prefetch_related(
             "endpoint", "endpoint__url", "endpoint__url__organization", "endpoint__url__organization__layers"

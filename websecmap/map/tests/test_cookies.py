@@ -120,6 +120,13 @@ def test_cookie_plaza_data(db):
             "layer1": {
                 "organizations_with_tracking_cookies": [organization.id],
                 "urls_with_tracking_cookies": ["example.nl"],
+                "organization_details": {
+                    organization.id: {
+                        "id": organization.name,
+                        "name": organization.name,
+                        "urls_with_tracking_cookies": ["example.nl"],
+                    }
+                },
             }
         }
 

@@ -17,6 +17,7 @@ def cookie_plaza_data(country: str = None, layer: str = None):
             endpoint__is_dead=False,
             endpoint__url__is_dead=False,
             endpoint__url__not_resolvable=False,
+            endpoint__url__organization__is_dead=False,
         )
         .prefetch_related(
             "endpoint", "endpoint__url", "endpoint__url__organization", "endpoint__url__organization__layers"
@@ -62,9 +63,20 @@ def cookie_plaza_data(country: str = None, layer: str = None):
                     stats[layer.name] = {
                         "organizations_with_tracking_cookies": set(),
                         "urls_with_tracking_cookies": set(),
+                        "organization_details": {},
                     }
+                if organization.id not in stats[layer.name]["organizations_with_tracking_cookies"]:
+                    stats[layer.name]["organization_details"][organization.id] = {
+                        "id": organization.name,
+                        "name": organization.name,
+                        "urls_with_tracking_cookies": [],
+                    }
+
                 stats[layer.name]["organizations_with_tracking_cookies"].add(organization.id)
                 stats[layer.name]["urls_with_tracking_cookies"].add(scan.endpoint.url.url)
+                stats[layer.name]["organization_details"][organization.id]["urls_with_tracking_cookies"].append(
+                    scan.endpoint.url.url
+                )
 
                 records.append(
                     {
