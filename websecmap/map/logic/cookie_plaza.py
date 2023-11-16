@@ -2,7 +2,7 @@ from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.map.models import Configuration
 from websecmap.scanners.models import EndpointGenericScan
 
-MAX_RESULTS = 10000
+MAX_RESULTS = 50000
 
 
 def cookie_plaza_data(country: str = None, layer: str = None):
@@ -37,19 +37,6 @@ def cookie_plaza_data(country: str = None, layer: str = None):
 
     scans = scans[:MAX_RESULTS]
 
-    # todo: build stats on the client?
-    # stats = {
-    #     "organizations_with_tracking_cookies": {
-    #         # municipality:
-    #         # {
-    #         #   number_of_organizations_with_tracking_cookies: 0,
-    #         #   total_number_of_organizations (will not be retrieve here)...
-    #         #
-    #         #   total_number_of_tracking_cookies: 0,
-    #         # }
-    #     },
-    #     "urls_with_tracking_cookies": {},
-    # }
     records = []
     stats = {}
 
@@ -63,9 +50,9 @@ def cookie_plaza_data(country: str = None, layer: str = None):
                         "urls_with_tracking_cookies": set(),
                         "organization_details": {},
                     }
-                if str(organization.id) not in stats[layer.name]["organizations_with_tracking_cookies"]:
+                if organization.id not in stats[layer.name]["organizations_with_tracking_cookies"]:
                     stats[layer.name]["organization_details"][str(organization.id)] = {
-                        "id": organization.name,
+                        "id": organization.id,
                         "name": organization.name,
                         "urls_with_tracking_cookies": [],
                     }

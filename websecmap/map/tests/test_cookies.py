@@ -84,8 +84,10 @@ def test_cookie_plaza_data(db):
     with freeze_time("2022-01-24"):
         now = datetime.now(timezone.utc)
         url = Url.objects.create(url="example.nl")
+        url2 = Url.objects.create(url="example2.nl")
         organization = Organization.objects.create(name="test", country="NL")
         url.organization.add(organization)
+        url2.organization.add(organization)
         layer = OrganizationType.objects.create(name="layer1")
         organization.layers.add(layer)
         organization.save()
@@ -102,8 +104,20 @@ def test_cookie_plaza_data(db):
             rating="medium",
             rating_determined_on=now,
         )
+
+        ep2 = Endpoint.objects.create(url=url2, discovered_on=now, port=443, protocol="https", ip_version=4)
+        epgs2 = EndpointGenericScan.objects.create(
+            type="web_privacy_cookie_products_no_consent",
+            meaning={},
+            endpoint=ep2,
+            is_the_latest_scan=True,
+            comply_or_explain_is_explained=False,
+            rating="medium",
+            rating_determined_on=now,
+        )
+
         all_layers, all_stats = cookie_plaza_data()
-        assert len(all_layers) == 1
+        assert len(all_layers) == 2
         assert all_layers == [
             {
                 "cookies": {},
@@ -118,18 +132,31 @@ def test_cookie_plaza_data(db):
                 "subdomain": "",
                 "url_url": "example.nl",
             },
+            {
+                "cookies": {},
+                "country": "NL",
+                "domain": "example2.nl",
+                "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc).isoformat(),
+                "layer": "layer1",
+                "organization_id": organization.id,
+                "organization_name": "test",
+                "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc).isoformat(),
+                "scan_id": epgs2.id,
+                "subdomain": "",
+                "url_url": "example2.nl",
+            },
         ]
 
         assert all_stats == {
             "layer1": {
                 "organizations_with_tracking_cookies": [organization.id],
-                "urls_with_tracking_cookies": ["example.nl"],
+                "urls_with_tracking_cookies": ["example.nl", "example2.nl"],
                 "organization_details": {
                     # json keys myst be strings
                     str(organization.id): {
-                        "id": organization.name,
+                        "id": organization.id,
                         "name": organization.name,
-                        "urls_with_tracking_cookies": ["example.nl"],
+                        "urls_with_tracking_cookies": ["example.nl", "example2.nl"],
                     }
                 },
             }
