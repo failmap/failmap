@@ -1,4 +1,3 @@
-from websecmap.app import log
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.map.models import Configuration
 from websecmap.scanners.models import EndpointGenericScan
@@ -30,7 +29,6 @@ def cookie_plaza_data(country: str = None, layer: str = None):
         scans = scans.filter(endpoint__url__organization__layers=get_organization_type(layer))
     else:
         # only layers that are visible
-        log.error(list(Configuration.objects.all().filter(is_displayed=True).values_list("id", flat=True)))
         scans = scans.filter(
             endpoint__url__organization__layers__in=list(
                 Configuration.objects.all().filter(is_displayed=True).values_list("organization_type", flat=True)
@@ -65,8 +63,8 @@ def cookie_plaza_data(country: str = None, layer: str = None):
                         "urls_with_tracking_cookies": set(),
                         "organization_details": {},
                     }
-                if organization.id not in stats[layer.name]["organizations_with_tracking_cookies"]:
-                    stats[layer.name]["organization_details"][organization.id] = {
+                if str(organization.id) not in stats[layer.name]["organizations_with_tracking_cookies"]:
+                    stats[layer.name]["organization_details"][str(organization.id)] = {
                         "id": organization.name,
                         "name": organization.name,
                         "urls_with_tracking_cookies": [],
@@ -74,7 +72,7 @@ def cookie_plaza_data(country: str = None, layer: str = None):
 
                 stats[layer.name]["organizations_with_tracking_cookies"].add(organization.id)
                 stats[layer.name]["urls_with_tracking_cookies"].add(scan.endpoint.url.url)
-                stats[layer.name]["organization_details"][organization.id]["urls_with_tracking_cookies"].append(
+                stats[layer.name]["organization_details"][str(organization.id)]["urls_with_tracking_cookies"].append(
                     scan.endpoint.url.url
                 )
 

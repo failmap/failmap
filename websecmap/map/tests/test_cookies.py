@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from constance.test import override_config
 
 from freezegun import freeze_time
 
@@ -14,6 +15,8 @@ from websecmap.scanners.models import (
     Endpoint,
     EndpointGenericScan,
 )
+from django.test import Client
+from django.urls import reverse
 
 
 def test_get_cookie_database(db):
@@ -70,6 +73,7 @@ def test_get_cookie_database(db):
     }
 
 
+@override_config(SHOW_COOKIE_PLAZA=False)
 def test_cookie_plaza_data(db):
     # no data, should not result in a crash
     all_layers, all_stats = cookie_plaza_data()
@@ -121,7 +125,8 @@ def test_cookie_plaza_data(db):
                 "organizations_with_tracking_cookies": [organization.id],
                 "urls_with_tracking_cookies": ["example.nl"],
                 "organization_details": {
-                    organization.id: {
+                    # json keys myst be strings
+                    str(organization.id): {
                         "id": organization.name,
                         "name": organization.name,
                         "urls_with_tracking_cookies": ["example.nl"],
@@ -133,3 +138,8 @@ def test_cookie_plaza_data(db):
         specific_layers, specific_stats = cookie_plaza_data("NL", "layer1")
         assert all_layers == specific_layers
         assert all_stats == specific_stats
+
+    # perform call to test server to see if there are no sets returned
+    client = Client()
+    response = client.get(reverse("cookie_plaza"))
+    assert response.status_code == 200
