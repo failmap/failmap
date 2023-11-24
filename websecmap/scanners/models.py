@@ -1292,7 +1292,7 @@ class Cookie(models.Model):
     endpoint = models.ForeignKey(
         Endpoint, null=True, blank=True, on_delete=models.CASCADE, help_text="Endpoint where the cookie was found"
     )
-    session_id = models.IntegerField(
+    session_id = models.BigIntegerField(
         blank=True, null=True, help_text="Unique ID for the browser session the cookie was found"
     )
     depth = models.IntegerField(blank=True, null=True, help_text="At which depth was crawled to find the cookie")
