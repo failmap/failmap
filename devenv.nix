@@ -25,6 +25,8 @@ in
   env.NETWORK_SUPPORTS_IPV6 = 1;
   env.PIP_DISABLE_PIP_VERSION_CHECK = 1;
   env.DJANGO_SETTINGS_MODULE = "websecmap.settings";
+  env.MYSQLCLIENT_CFLAGS = "-I${pkgs.libmysqlclient.dev}/include/mysql";
+  env.MYSQLCLIENT_LDFLAGS = "-L${pkgs.libmysqlclient.dev}/lib";
 
   enterShell = ''
     python_version=$(python --version)
