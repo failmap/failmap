@@ -42,6 +42,7 @@ from websecmap.scanners.scanner import (
     verify_unresolvable,
     web_privacy,
     endpoint_content,
+    cookie_consent,
 )
 from websecmap.scanners.scanner import whois
 
@@ -79,6 +80,7 @@ __scanners__ = [
     subdomains_amass,
     whois,
     endpoint_content,
+    cookie_consent,
 ]
 
 __everything__ = [domain_to_ip, ip_geolocation, location, mailserver, ip_geolocation_correction, locate_and_correct]

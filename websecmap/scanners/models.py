@@ -1278,3 +1278,53 @@ class GeoIpCorrection(models.Model):
     at_when = models.DateTimeField(blank=True, null=True)
     last_scan_moment = models.DateTimeField(blank=True, null=True)
     is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+
+
+class CookiePlacement(models.Model):
+    name = models.CharField(max_length=100)
+
+
+class Cookie(models.Model):
+    """
+    Raw Cookie
+    """
+
+    endpoint = models.ForeignKey(
+        Endpoint, null=True, blank=True, on_delete=models.CASCADE, help_text="Endpoint where the cookie was found"
+    )
+    session_id = models.IntegerField(
+        blank=True, null=True, help_text="Unique ID for the browser session the cookie was found"
+    )
+    depth = models.IntegerField(blank=True, null=True, help_text="At which depth was crawled to find the cookie")
+
+    cookie = models.TextField(blank=True, null=True, help_text="Cookie that was found")
+
+    placement = models.ManyToManyField(
+        CookiePlacement,
+        blank=True,
+        help_text="When in the browser session the cookie was placed, eg: after consent decline",
+    )
+
+
+class CookieBannerAttribute(models.Model):
+    name = models.CharField(max_length=100)
+
+
+class CookieBanner(models.Model):
+    endpoint = models.ForeignKey(
+        Endpoint,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="Endpoint where the cookie banner was found",
+    )
+    session_id = models.IntegerField(
+        blank=True, null=True, help_text="Unique ID for the browser session the cookie banner was found"
+    )
+
+    banner_indicator = models.CharField(max_length=200, blank=True, null=True, help_text="Name of banner indicator")
+    banner_attributes = models.ManyToManyField(
+        CookieBannerAttribute,
+        blank=True,
+        help_text="Attributes of the banner",
+    )

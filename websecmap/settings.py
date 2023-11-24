@@ -1889,6 +1889,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "scanners.urlgenericscan", "label": "🔬 URL Metrics"},
             {"name": "scanners.internetnlv2scan", "label": "📨 Internet.nl Scans"},
             {"name": "scanners.screenshot", "label": "📸 Screenshots"},
+            {"name": "scanners.cookie", "label": "🍪 Cookies"},
         ],
     },
     {
@@ -1911,7 +1912,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "scanners.product", "label": "🥡 Product"},
             {"name": "scanners.scannerfinding", "label": "🙋 Scanner Finding"},
             {"name": "scanners.producthierarchy", "label": "👩‍🏫 Hierarchy"},
-            {"name": "scanners.productcookieindicator", "label": "🍪 Cookie indicators"},
+            {"name": "scanners.productcookieindicator", "label": "🍪 Cookie product indicators"},
             {"name": "scanners.productvendor", "label": "🏢 Vendor"},
             {"name": "scanners.productgoal", "label": "🥅 Goal"},
             {"name": "scanners.productrelationship", "label": "🧑‍🤝‍🧑 Relationship"},

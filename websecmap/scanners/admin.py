@@ -1095,3 +1095,20 @@ class GeoIpCorrectionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 f'target="_blank">{instance.network}</a>'
             )
         return ""
+
+
+@admin.register(models.Cookie)
+class CookieAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    # def get_queryset(self, request):
+    #     return super().get_queryset(request).prefetch_related("product", "product__vendor")
+
+    list_display = ("id", "endpoint", "session_id", "depth", "get_placement", "cookie")
+    # list_display = ("id", "endpoint__url__url", "session_id", "depth", "cookie", "placement__name")
+
+    search_fields = ("endpoint__url__url", "cookie", "placement")
+
+    list_filter = ("endpoint__url__url", "session_id", "depth", "placement__name")
+
+    @staticmethod
+    def get_placement(obj):
+        return [p.name for p in obj.placement.all()]
