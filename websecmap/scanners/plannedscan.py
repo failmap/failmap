@@ -132,29 +132,22 @@ def retry():
     finished. Those things are nice investigation subjects. All scans should finish (or error).
 
     internet_nl_mail and internet_nl_web have their own retry methods, they should NOT be retried after four hours
-    but after days!
+    but after days! So plan them after a large amount of minutes! Such as 1440 minutes (a day) or triple that...
     """
 
-    internetnl_scanner_ids = list(
-        Scanner.objects.all()
-        .filter(python_name__in=["internet_nl_web", "internet_nl_mail"])
-        .values_list("id", flat=True)
-    )
-    other_scanner_ids = list(
-        Scanner.objects.all()
-        .exclude(python_name__in=["internet_nl_web", "internet_nl_mail"])
-        .values_list("id", flat=True)
-    )
-
-    retry_policy = [{"scanners": internetnl_scanner_ids, "hours": 48}, {"scanners": other_scanner_ids, "hours": 4}]
-
-    # apply the policy:
-    for policy in retry_policy:
-        PlannedScan.objects.all().filter(
-            state=State["picked_up"].value,
-            last_state_change_at__lte=datetime.now(timezone.utc) - timedelta(hours=policy["hours"]),
-            scanner__in=policy["scanners"],
-        ).update(state=State["requested"].value)
+    for scanner in Scanner.objects.all():
+        scan_timeout = datetime.now(timezone.utc) - timedelta(minutes=scanner.task_pickup_timeout_in_minutes)
+        updated = (
+            PlannedScan.objects.all()
+            .filter(
+                state=State["picked_up"].value,
+                last_state_change_at__lte=scan_timeout,
+                scanner=scanner,
+                # returns number of affected rows
+            )
+            .update(state=State["requested"].value)
+        )
+        log.debug("Retried %s planned scans for %s", updated, scanner.python_name)
 
 
 def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:

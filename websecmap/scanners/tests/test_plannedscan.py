@@ -27,6 +27,7 @@ from websecmap.scanners.plannedscan import (
     retrieve_endpoints_from_urls,
     store_progress,
     set_scan_state,
+    retry,
 )
 from websecmap.scanners.scanner.autoexplain_no_https_possible import scan
 from websecmap.scanners.scanner.tls_qualys import plan_scan
@@ -395,3 +396,16 @@ def tests_bulk_state_changes(db, default_scan_metadata, default_policy):
     assert PlannedScan.objects.all().count() == 10
     assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 5
     assert PlannedScan.objects.all().filter(state=State["picked_up"].value).count() == 5
+
+
+def test_retry(db, default_scan_metadata, default_policy, caplog):
+    with freeze_time("2020-01-01"):
+        u1 = Url.objects.create(url="example2.com")
+        request(scanner="tls_qualys", activity="scan", urls=[u1])
+        PlannedScan.objects.all().update(state=State["picked_up"].value)
+
+    # one year later this task has still not been processed.
+    with freeze_time("2021-01-01"):
+        retry()
+
+    assert "Retried 1 planned scans for tls_qualys" in caplog.text
