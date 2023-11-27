@@ -65,7 +65,7 @@ def compose_scan_task(urls):
     return group(tasks)
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="database", ignore_result=True)
 def scan(scan_id):
     # todo: break scan into smaller pieces to not interrupt the storage queue
     """

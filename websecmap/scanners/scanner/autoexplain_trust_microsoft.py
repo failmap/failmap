@@ -266,7 +266,7 @@ def compose_scan_task(urls):
 
 
 # todo: this needs to be split out onto several workers, now it can hinder the storage queue.
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="database", ignore_result=True)
 def scan(scan_id):
     epgs = EndpointGenericScan.objects.all().filter(id=scan_id).first()
     if not epgs:

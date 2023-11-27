@@ -47,7 +47,7 @@ def compose_scan_task(urls):
     )
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="database", ignore_result=True)
 def scan(scan_id: int):
     """
     explain_headers_for_explained_microsoft_trusted_tls_certificates

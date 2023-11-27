@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 SCANNER_NAME = "whois_domain_ownership"
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="database", ignore_result=True)
 def scan():
     # whois_domain_ownership
     # On url:
