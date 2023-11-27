@@ -32,6 +32,7 @@ STANDARD_ENDPOINT_FILTER = {
     "url__not_resolvable": False,
     "ip_version": 4,
     "port": 443,
+    "url__computed_subdomain": "",
 }
 
 

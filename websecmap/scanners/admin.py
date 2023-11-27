@@ -1107,7 +1107,7 @@ class CookieAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     search_fields = ("endpoint__url__url", "cookie", "placement")
 
-    list_filter = ("endpoint__url__url", "session_id", "depth", "placement__name")
+    list_filter = ("depth", "placement__name")
 
     @staticmethod
     def get_placement(obj):
