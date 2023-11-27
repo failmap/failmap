@@ -59,6 +59,18 @@ def filter_policy_endpoints(policy: SecurityPolicy) -> List[Endpoint]:
             httpendpointcontent__is_the_latest=True,
         )
 
+    if policy.common_header_names:
+        endpoints_in_policy = endpoints_in_policy.filter(
+            # all keys, inclusive, so all keys have to be present(!)
+            httpendpointheaders__header_names__has_keys=policy.common_header_names,
+            httpendpointcontent__is_the_latest=True,
+        )
+
+    if policy.common_layers:
+        endpoints_in_policy = endpoints_in_policy.filter(
+            url__organization__layers__name__in=policy.common_layers,
+        )
+
     return list(endpoints_in_policy)
 
 

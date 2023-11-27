@@ -51,7 +51,8 @@ class SecurityPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "common_protocols",
         "common_ports",
         "common_ip_versions",
-        "common_html_front_page_content",
+        "common_header_names",
+        "common_layers",
         "affects_which_explain",
     )
 
@@ -996,6 +997,32 @@ class HttpEndpointContentAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     list_filter = [
         "content_type",
+        "at_when",
+        "is_the_latest",
+        "endpoint__protocol",
+        "endpoint__port",
+        "endpoint__ip_version",
+    ][::-1]
+
+    search_fields = ("endpoint__url__url", "content")
+
+
+@admin.register(models.HttpEndpointHeaders)
+class HttpEndpointHeadersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    paginator = TooManyRecordsPaginator
+
+    list_display = (
+        "id",
+        "endpoint",
+        "header_names",
+        "headers",
+        "at_when",
+        "last_scan_moment",
+        "is_the_latest",
+    )
+
+    list_filter = [
+        "header_names",
         "at_when",
         "is_the_latest",
         "endpoint__protocol",

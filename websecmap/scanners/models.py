@@ -35,6 +35,12 @@ class SecurityPolicy(models.Model):
         max_length=255,
     )
 
+    common_header_names = JSONField(
+        blank=True, help_text="List[str] of common header names where this policy applies to, lowercase!", default=[]
+    )
+
+    common_layers = JSONField(blank=True, help_text="List[str] of common layers, case similar to layers!", default=[])
+
     affect_explain_scoring_policy = models.ManyToManyField(
         ScanPolicy,
         blank=True,
@@ -1175,6 +1181,20 @@ class HttpEndpointContent(models.Model):
     title = models.CharField(max_length=200, blank=True, null=True)
     length_in_bytes = models.IntegerField(blank=True, null=True)
     headers = models.JSONField(blank=True, null=True)  # possibly a jsonfield
+
+    at_when = models.DateTimeField(blank=True, null=True)
+    last_scan_moment = models.DateTimeField(blank=True, null=True)
+    is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+
+
+class HttpEndpointHeaders(models.Model):
+    # use playwright to only get text of the page and not the HTML?
+    endpoint = models.ForeignKey(Endpoint, on_delete=models.CASCADE)
+
+    # currently only header names is more than enough to perform exceptions on.
+    # this saves the complexity of deduplicating all possible headers on the internet.
+    headers = models.JSONField(blank=True, null=True)
+    header_names = models.JSONField(blank=True, null=True)
 
     at_when = models.DateTimeField(blank=True, null=True)
     last_scan_moment = models.DateTimeField(blank=True, null=True)
