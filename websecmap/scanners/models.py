@@ -1316,6 +1316,7 @@ class Cookie(models.Model):
         blank=True, null=True, help_text="Unique ID for the browser session the cookie was found"
     )
     depth = models.IntegerField(blank=True, null=True, help_text="At which depth was crawled to find the cookie")
+    url = models.CharField(max_length=200, blank=True, null=True, help_text="URL where cookie was first placed")
 
     cookie = models.TextField(blank=True, null=True, help_text="Cookie that was found")
 

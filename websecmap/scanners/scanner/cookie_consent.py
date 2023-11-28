@@ -82,7 +82,7 @@ def scan(url: str) -> Dict[str, Any]:
     # this is a single threaded webserver. More tasks means more waiting. So keep the amount of tasks low enough
     # so the timeout is never reached in case all tasks turn into timeouts
     playwright_server = constance_cached_value("WEB_PRIVACY_SERVER").rstrip("/")
-    request = f"{playwright_server}/cookieconsent?site={url}&depth=2"
+    request = f"{playwright_server}/cookieconsent?site={url}&depth=2&maxpages=200"
     log.debug(request)
 
     response = requests.get(request, timeout=300)
@@ -119,6 +119,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
             endpoint=endpoint,
             session_id=cookie.get("session_id"),
             depth=cookie.get("depth"),
+            url=cookie.get("url")[:200],
             cookie=cookie.get("cookie"),
         )
         placements = [CookiePlacement.objects.get_or_create(name=name)[0] for name in cookie.get("placement", [])]
