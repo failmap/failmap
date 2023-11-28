@@ -1128,10 +1128,10 @@ class CookieAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     # def get_queryset(self, request):
     #     return super().get_queryset(request).prefetch_related("product", "product__vendor")
 
-    list_display = ("id", "endpoint", "session_id", "depth", "get_placement", "cookie")
+    list_display = ("id", "endpoint", "session_id", "depth", "url", "get_placement", "cookie")
     # list_display = ("id", "endpoint__url__url", "session_id", "depth", "cookie", "placement__name")
 
-    search_fields = ("endpoint__url__url", "cookie", "placement")
+    search_fields = ("endpoint__url__url", "cookie", "url", "placement")
 
     list_filter = ("depth", "placement__name")
 
