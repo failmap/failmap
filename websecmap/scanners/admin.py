@@ -1022,7 +1022,6 @@ class HttpEndpointHeadersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     )
 
     list_filter = [
-        "header_names",
         "at_when",
         "is_the_latest",
         "endpoint__protocol",
@@ -1030,7 +1029,7 @@ class HttpEndpointHeadersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "endpoint__ip_version",
     ][::-1]
 
-    search_fields = ("endpoint__url__url", "content")
+    search_fields = ("endpoint__url__url", "header_names", "headers")
 
 
 @admin.register(models.DomainIp)

@@ -41,7 +41,9 @@ from websecmap.scanners.scanner import (
     tls_qualys,
     verify_unresolvable,
     web_privacy,
-    endpoint_content,
+    # explicitly disabled as these tasks take an infinite amount of time until refactoring
+    # endpoint_content,
+    endpoint_headers,
     cookie_consent,
 )
 from websecmap.scanners.scanner import whois
@@ -79,7 +81,7 @@ __scanners__ = [
     nuclei_http,
     subdomains_amass,
     whois,
-    endpoint_content,
+    endpoint_headers,
     cookie_consent,
 ]
 

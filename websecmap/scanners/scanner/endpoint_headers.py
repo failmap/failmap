@@ -51,8 +51,12 @@ def store(response: Dict[str, Any], endpoint_id: int):
         return
 
     # allow only stable headers that don't have randomizers and such. Note the lower case field names.
+    # make all header names lowercase. This also reduces multiple of the same headers into one.
+    # also make the content itself lowercase for easier searching.
     stable_header_names = ["content-type"]
-    filtered_headers = {key: value for key, value in response["headers"].items() if key.lower() in stable_header_names}
+    filtered_headers = {
+        key.lower(): value.lower() for key, value in response["headers"].items() if key.lower() in stable_header_names
+    }
 
     response["headers"] = filtered_headers
     response["endpoint"] = endpoint
