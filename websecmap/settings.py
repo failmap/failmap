@@ -1443,6 +1443,11 @@ CONSTANCE_CONFIG = {
         'Fill in a json list of purposes graded as high risk, such as: ["consent", "analytics"]',
         "json",
     ),
+    "SCANNER_LOG_PLANNED_SCANS": (
+        True,
+        "Used when debugging, logs all changes to planned scans to a separate table. Causes millions of records a day",
+        bool,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1632,7 +1637,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         ),
         (
             "Scanning preferences",
-            ("SCAN_AT_ALL", "SCANNER_NAMESERVERS", "SCANNER_DEFAULT_BROWSER_USER_AGENT"),
+            ("SCAN_AT_ALL", "SCANNER_NAMESERVERS", "SCANNER_DEFAULT_BROWSER_USER_AGENT", "SCANNER_LOG_PLANNED_SCANS"),
         ),
         (
             "Banner Grabbing",

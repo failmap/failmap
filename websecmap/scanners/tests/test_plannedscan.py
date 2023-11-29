@@ -31,6 +31,7 @@ from websecmap.scanners.plannedscan import (
 )
 from websecmap.scanners.scanner.autoexplain_no_https_possible import scan
 from websecmap.scanners.scanner.tls_qualys import plan_scan
+from constance.test.pytest import override_config
 
 log = logging.getLogger("websecmap")
 
@@ -84,6 +85,10 @@ def create_endpoint_scan(endpoint, type, rating, at_when):
     return egs
 
 
+# during tests this doesn't work as we're working with a cached value, which will have previously
+# been cached. So in this case we're setting the default in settings.py to true, below statement
+# doesn't affect the cached value at all. It's still here because you, the next programmer, will add it :)
+@override_config(SCANNER_LOG_PLANNED_SCANS=True)
 def test_plannedscan(db, default_scan_metadata):
     o = create_organization("Test")
     u1 = create_url("example.com")

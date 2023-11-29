@@ -7,6 +7,7 @@ from django.db import connection
 from django.db.models import Prefetch
 from statshog.defaults.django import statsd
 
+from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.map.logic.map_health import get_outdated_ratings
 from websecmap.map.map_configs import filter_map_configs
@@ -278,6 +279,11 @@ def request(activity: str, scanner: str, urls: List[int], origin: str = ""):
 
 
 def log_planned_scan_action(activity: str, scanner: str, url: int, state: str = "", origin: str = ""):
+    # logging all actions to the database is write intensive and slows things down by a bit.
+    # it quickly accumulates into a million a day and we're not even looking at that table in production anymore.
+    if constance_cached_value("SCANNER_LOG_PLANNED_SCANS") is False:
+        return
+
     if isinstance(url, Url):
         # might be an n+1
         url = url.url
