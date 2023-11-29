@@ -82,10 +82,19 @@ def scan(url: str) -> Dict[str, Any]:
     # this is a single threaded webserver. More tasks means more waiting. So keep the amount of tasks low enough
     # so the timeout is never reached in case all tasks turn into timeouts
     playwright_server = constance_cached_value("WEB_PRIVACY_SERVER").rstrip("/")
-    request = f"{playwright_server}/cookieconsent?site={url}&depth=2&maxpages=200"
+    depth = 2
+    maxpages = 200
+    timeout = 300
+    request = f"{playwright_server}/cookieconsent?site={url}&depth={depth}&maxpages={maxpages}&timeout={timeout}"
     log.debug(request)
 
-    response = requests.get(request, timeout=300)
+    try:
+        # give request some extra timout to ensure it can respond within its own timeout
+        response = requests.get(request, timeout=timeout + 30)
+    except requests.exceptions.ReadTimeout:
+        log.exception("Request timed out")
+        return None
+
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError:
