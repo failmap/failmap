@@ -39,8 +39,8 @@ def scan(uri, path):
     return {
         "headers": dict(response.headers),
         # For technical reasons, we need to save this as a dict so the has_keys query will work. That
-        # has_key does not work on lists.
-        "header_names": {key.lower(): "" for key in dict(response.headers)},
+        # has_key does not work on lists. Servers give headers in changing orders. Sort them to create stable data.
+        "header_names": {key.lower(): "" for key in list(sorted(dict(response.headers)))},
     }
 
 
@@ -53,6 +53,7 @@ def store(response: Dict[str, Any], endpoint_id: int):
     # allow only stable headers that don't have randomizers and such. Note the lower case field names.
     # make all header names lowercase. This also reduces multiple of the same headers into one.
     # also make the content itself lowercase for easier searching.
+    # this is auto-sorted
     stable_header_names = ["content-type"]
     filtered_headers = {
         key.lower(): value.lower() for key, value in response["headers"].items() if key.lower() in stable_header_names

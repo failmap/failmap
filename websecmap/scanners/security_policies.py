@@ -29,6 +29,8 @@ def check_policy_sanity(policy: SecurityPolicy) -> bool:
             policy.common_ip_versions,
             policy.common_protocols,
             policy.common_html_front_page_content,
+            policy.common_header_names,
+            policy.common_layers,
         ]
     )
 
@@ -63,7 +65,7 @@ def filter_policy_endpoints(policy: SecurityPolicy) -> List[Endpoint]:
         endpoints_in_policy = endpoints_in_policy.filter(
             # all keys, inclusive, so all keys have to be present(!)
             httpendpointheaders__header_names__has_keys=policy.common_header_names,
-            httpendpointcontent__is_the_latest=True,
+            httpendpointheaders__is_the_latest=True,
         )
 
     if policy.common_layers:
@@ -71,7 +73,9 @@ def filter_policy_endpoints(policy: SecurityPolicy) -> List[Endpoint]:
             url__organization__layers__name__in=policy.common_layers,
         )
 
-    return list(endpoints_in_policy)
+    eps = list(endpoints_in_policy)
+    log.debug("Found %s endpoints in policy", len(eps))
+    return eps
 
 
 def apply_security_policy(policy: SecurityPolicy):
