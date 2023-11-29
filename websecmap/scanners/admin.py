@@ -1131,7 +1131,7 @@ class CookieAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ("id", "at_when", "endpoint", "session_id", "depth", "url", "get_placement", "cookie")
     # list_display = ("id", "endpoint__url__url", "session_id", "depth", "cookie", "placement__name")
 
-    search_fields = ("endpoint__url__url", "cookie", "url", "placement")
+    search_fields = ("endpoint__url__url", "cookie", "url", "placement__name")
 
     list_filter = ("depth", "placement__name")
 
