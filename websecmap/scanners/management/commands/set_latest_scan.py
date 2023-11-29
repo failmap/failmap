@@ -43,14 +43,34 @@ class Command(BaseCommand):
     The queries used allow sliding through time, for example setting the latest on a certain date. Which does not
     make sense at all, but works."""
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "scan_type", nargs="*", help="The scan type to reflag, use 'all' to reflag all.", choices=valid_scan_types()
+        )
+        super().add_arguments(parser)
+
     def handle(self, *args, **options):
         metadata = get_backend_scanmetadata()
 
+        if "scan_type" not in options or "all" in options["scan_type"]:
+            selected_scan_types = metadata["url_scan_types"] + metadata["endpoint_scan_types"]
+        else:
+            selected_scan_types = options["scan_type"]
+
         for scan_type in metadata["url_scan_types"]:
+            if scan_type not in selected_scan_types:
+                continue
             reflag_urlgenericscan(scan_type=scan_type)
 
         for scan_type in metadata["endpoint_scan_types"]:
+            if scan_type not in selected_scan_types:
+                continue
             reflag_endpointgenericscan(scan_type=scan_type)
+
+
+def valid_scan_types():
+    metadata = get_backend_scanmetadata()
+    return list(sorted(metadata["url_scan_types"] + metadata["endpoint_scan_types"] + ["all"]))
 
 
 def reflag_urlgenericscan(scan_type):
