@@ -1309,6 +1309,7 @@ class Cookie(models.Model):
     Raw Cookie
     """
 
+    at_when = models.DateTimeField(auto_now_add=True)
     endpoint = models.ForeignKey(
         Endpoint, null=True, blank=True, on_delete=models.CASCADE, help_text="Endpoint where the cookie was found"
     )
@@ -1332,6 +1333,7 @@ class CookieBannerAttribute(models.Model):
 
 
 class CookieBanner(models.Model):
+    at_when = models.DateTimeField(auto_now_add=True)
     endpoint = models.ForeignKey(
         Endpoint,
         null=True,
