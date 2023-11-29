@@ -1125,16 +1125,12 @@ class GeoIpCorrectionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.Cookie)
 class CookieAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    # def get_queryset(self, request):
-    #     return super().get_queryset(request).prefetch_related("product", "product__vendor")
-
-    list_display = ("id", "at_when", "endpoint", "session_id", "depth", "url", "get_placement", "cookie")
-    # list_display = ("id", "endpoint__url__url", "session_id", "depth", "cookie", "placement__name")
+    list_display = ("id", "at_when", "endpoint", "session_id", "depth", "url", "get_placements", "cookie")
 
     search_fields = ("endpoint__url__url", "cookie", "url", "placement__name")
 
-    list_filter = ("depth", "placement__name")
+    list_filter = ("depth", "placement")
 
-    @staticmethod
-    def get_placement(obj):
-        return [p.name for p in obj.placement.all()]
+    @admin.display(description="Placements")
+    def get_placements(self, obj):
+        return ", ".join([p.name for p in obj.placement.all()])
