@@ -10,6 +10,31 @@ from websecmap.scanners.scanner import chunks2
 
 log = logging.getLogger(__name__)
 
+"""
+    The following approach is not possible, as MySQL does not allow you to specify the target table if you also
+    use that same table in a select. understabdable somewhere. But then we need a temporary table and still
+    do the same stuff we're already doing with joining stuff on id's which is slow. So there is little profit
+    going down that road.
+
+    See:
+    ERROR 1093 (HY000): You can't specify target table 'scanners_endpointgenericscan' for update in FROM clause
+
+    UPDATE
+        scanners_endpointgenericscan
+    SET
+        is_the_latest_scan = 1
+    WHERE id IN (
+        SELECT
+            id
+        FROM scanners_endpointgenericscan
+        INNER JOIN
+            (SELECT MAX(id) as id2 FROM scanners_endpointgenericscan egs2
+             WHERE last_scan_moment <= '{datetime.now(timezone.utc)}' and type = '{scan_type}' GROUP BY endpoint_id
+             ) as x
+        ON x.id2 = scanners_endpointgenericscan.id
+    )
+"""
+
 
 class Command(BaseCommand):
     """Determines which scans are the latest and sets the latest scan flag. Normally this would happen automatically
@@ -29,7 +54,7 @@ class Command(BaseCommand):
 
 
 def reflag_urlgenericscan(scan_type):
-    log.debug("Setting flags on UrlGenericScan type: %s", scan_type)
+    log.info("Setting flags on UrlGenericScan type: %s", scan_type)
     UrlGenericScan.objects.all().filter(type=scan_type).update(is_the_latest_scan=False)
 
     # get the latest scans
@@ -50,7 +75,7 @@ def reflag_urlgenericscan(scan_type):
 
 
 def reflag_endpointgenericscan(scan_type):
-    log.debug("Setting flags on EndpointGenericScan type: %s", scan_type)
+    log.info("Setting flags on EndpointGenericScan type: %s", scan_type)
     EndpointGenericScan.objects.all().filter(type=scan_type).update(is_the_latest_scan=False)
 
     # get the latest endpointgenericscans

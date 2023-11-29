@@ -22,6 +22,22 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan, InternetNLV
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.internet_nl import InternetNLApiSettings, register, result, status, result_technical
 
+
+STATE_SCAN_RESULTS_STORED = "scan results stored"
+STATE_STORING_SCAN_RESULTS = "storing scan results"
+STATE_PROCESSING_SCAN_RESULTS = "processing scan results"
+STATE_SCAN_RESULTS_PROCESSED = "scan results processed"
+STATE_FINISHED = "finished"
+STATE_CONFIGURATION_ERROR = "configuration_error"
+STATE_REQUESTED = "requested"
+STATE_REGISTERING = "registering"
+STATE_REGISTERED = "registered"
+STATE_RUNNING_SCAN = "running scan"
+STATE_SCAN_RESULTS_READY = "scan results ready"
+STATE_TIMEOUT = "timeout"
+STATE_NETWORK_ERROR = "network_error"
+
+
 log = logging.getLogger(__name__)
 
 
@@ -29,7 +45,7 @@ def valid_api_settings(scan: InternetNLV2Scan):
     if not config.INTERNET_NL_API_USERNAME:
         update_state(
             scan.pk,
-            "configuration_error",
+            STATE_CONFIGURATION_ERROR,
             "Username for internet.nl scan not configured. "
             "This setting can be configured in the settings on the admin page.",
         )
@@ -38,7 +54,7 @@ def valid_api_settings(scan: InternetNLV2Scan):
     if not config.INTERNET_NL_API_PASSWORD:
         update_state(
             scan.pk,
-            "configuration_error",
+            STATE_CONFIGURATION_ERROR,
             "Password for internet.nl scan not configured. "
             "This setting can be configured in the settings on the admin page.",
         )
@@ -47,7 +63,7 @@ def valid_api_settings(scan: InternetNLV2Scan):
     if not config.INTERNET_NL_API_URL:
         update_state(
             scan.pk,
-            "configuration_error",
+            STATE_CONFIGURATION_ERROR,
             "No url supplied for internet.nl scans. "
             "This setting can be configured in the settings on the admin page.",
         )
@@ -62,7 +78,7 @@ def valid_api_settings(scan: InternetNLV2Scan):
         except ValueError:
             update_state(
                 scan.pk,
-                "configuration_error",
+                STATE_CONFIGURATION_ERROR,
                 "The internet.nl api url is not a valid url or IP format. Always start with "
                 "https:// and then the address. "
                 "This setting can be configured in the settings on the admin page.",
@@ -72,7 +88,7 @@ def valid_api_settings(scan: InternetNLV2Scan):
     if not config.INTERNET_NL_MAXIMUM_URLS:
         update_state(
             scan.pk,
-            "configuration_error",
+            STATE_CONFIGURATION_ERROR,
             "No maximum supplied for the amount of urls in an internet.nl scans. "
             "This setting can be configured in the settings on the admin page.",
         )
@@ -105,7 +121,7 @@ def initialize_scan(scan_type: str, domains: List[int]) -> int:
     if len(domains) > max_urls:
         update_state(
             scan.pk,
-            "configuration_error",
+            STATE_CONFIGURATION_ERROR,
             f"Too many domains: {len(domains)} is more than {max_urls}. Not registering. Try "
             f"again with fewer domains or change the maximum accordingly.",
         )
@@ -114,14 +130,14 @@ def initialize_scan(scan_type: str, domains: List[int]) -> int:
     # many to many requires an object to exist.
     scan.subject_urls.set(Url.objects.all().filter(id__in=domains))
 
-    update_state(scan.pk, "requested", "requested a scan to be performed on internet.nl api")
+    update_state(scan.pk, STATE_REQUESTED, "requested a scan to be performed on internet.nl api")
 
     return scan.id
 
 
 @app.task(queue="database")
 def check_running_internet_nl_scans() -> Task:
-    scans = InternetNLV2Scan.objects.all().exclude(state__in=["finished", "error", "cancelled"])
+    scans = InternetNLV2Scan.objects.all().exclude(state__in=[STATE_FINISHED, "error", "cancelled"])
     log.debug("Checking the state of scan %s.", scans)
     tasks = [progress_running_scan(scan.pk) for scan in scans]
 
@@ -171,16 +187,16 @@ def progress_running_scan(scan_id: int) -> Task:
 
     steps = {
         # complete state progression, using active verbs to come to the next state:
-        "requested": registering_scan_at_internet_nl,
-        "registered": running_scan,
-        "running scan": continue_running_scan,
-        "scan results ready": storing_scan_results,
-        "scan results stored": processing_scan_results,
-        # "finished"
+        STATE_REQUESTED: registering_scan_at_internet_nl,
+        STATE_REGISTERED: running_scan,
+        STATE_RUNNING_SCAN: continue_running_scan,
+        STATE_SCAN_RESULTS_READY: storing_scan_results,
+        STATE_SCAN_RESULTS_STORED: processing_scan_results,
+        # STATE_FINISHED
         # recovery steps in case of (network) errors
-        "network_error": recover_and_retry,
-        "configuration_error": recover_and_retry,
-        "timeout": recover_and_retry,
+        STATE_NETWORK_ERROR: recover_and_retry,
+        STATE_CONFIGURATION_ERROR: recover_and_retry,
+        STATE_TIMEOUT: recover_and_retry,
     }
 
     with transaction.atomic():
@@ -202,8 +218,14 @@ def recover_and_retry(scan_id: int):
         log.debug("Could not retrieve scan %s.", scan_id)
         return group([])
 
-    valid_states = ["requested", "registered", "running scan", "scan results ready", "scan results stored"]
-    error_states = ["network_error", "configuration_error", "timeout"]
+    valid_states = [
+        STATE_REQUESTED,
+        STATE_REGISTERED,
+        STATE_RUNNING_SCAN,
+        STATE_SCAN_RESULTS_READY,
+        STATE_SCAN_RESULTS_STORED,
+    ]
+    error_states = [STATE_NETWORK_ERROR, STATE_CONFIGURATION_ERROR, STATE_TIMEOUT]
 
     if scan.state in valid_states:
         # no recovery needed
@@ -230,9 +252,9 @@ def handle_unknown_state(scan_id):
     # we can however deal with timeouts. If an unknown state is over a certain time, the task should be tried again.
 
     timeouts = {
-        "registering": 3600 * 24,  # 24 hours
-        "storing scan results": 3600 * 24,
-        "processing scan results": 3600 * 24,
+        STATE_REGISTERING: 3600 * 24,  # 24 hours
+        STATE_STORING_SCAN_RESULTS: 3600 * 24,
+        STATE_PROCESSING_SCAN_RESULTS: 3600 * 24,
     }
 
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
@@ -244,7 +266,7 @@ def handle_unknown_state(scan_id):
     if scan.state in timeouts and scan.last_state_change + timedelta(seconds=timeouts[scan.state]) < datetime.now(
         timezone.utc
     ):
-        return group(update_state(scan.pk, "timeout", f"The state '{scan.state}' timed out, attempting to retry."))
+        return group(update_state(scan.pk, STATE_TIMEOUT, f"The state '{scan.state}' timed out, attempting to retry."))
 
     return group([])
 
@@ -255,7 +277,7 @@ def registering_scan_at_internet_nl(scan_id):
         log.debug("Could not retrieve scan %s.", scan_id)
         return group([])
 
-    update_state(scan.pk, "registering", "registering scan at internet.nl")
+    update_state(scan.pk, STATE_REGISTERING, "registering scan at internet.nl")
 
     # todo: get some information about this installation, so we can track requests easier.
     #  For example the target county, organization running the scan.
@@ -279,7 +301,7 @@ def running_scan(scan_id: int):
         log.debug("Could not retrieve scan %s.", scan_id)
         return group([])
 
-    update_state(scan.pk, "running scan", "Running scan at internet.nl")
+    update_state(scan.pk, STATE_RUNNING_SCAN, "Running scan at internet.nl")
 
     if not valid_api_settings(scan):
         return group([])
@@ -305,7 +327,7 @@ def storing_scan_results(scan_id: int):
         log.debug("Could not retrieve scan %s.", scan_id)
         return group([])
 
-    update_state(scan.pk, "storing scan results", "")
+    update_state(scan.pk, STATE_STORING_SCAN_RESULTS, "")
 
     if not valid_api_settings(scan):
         return group([])
@@ -330,7 +352,7 @@ def processing_scan_results(scan_id: int):
         log.debug("Could not retrieve scan %s.", scan_id)
         return []
 
-    update_state(scan.pk, "processing scan results", "")
+    update_state(scan.pk, STATE_PROCESSING_SCAN_RESULTS, "")
 
     return process_scan_results.s(scan.pk)
 
@@ -387,7 +409,7 @@ def api_has_usable_response(response, scan_id):
 
     if status_code == 599:
         # using the log the previous actionable state can be retrieved as a recovery strategy.
-        update_state(scan_id, "network_error", json.dumps(response_content))
+        update_state(scan_id, STATE_NETWORK_ERROR, json.dumps(response_content))
         return False
 
     if status_code == 500:
@@ -468,7 +490,7 @@ def registration_administration(response: Tuple[int, dict], scan_id: int):
     # scan.type = response_content['request']['request_type']
     scan.save()
 
-    update_state(scan.pk, "registered", "scan registered at internet.nl")
+    update_state(scan.pk, STATE_REGISTERED, "scan registered at internet.nl")
 
 
 @app.task(queue="storage", ignore_result=True)
@@ -476,7 +498,7 @@ def status_administration(response: Tuple[int, dict], scan_id: int):
     """
     {
         "id": "f284049256dd4ca793edbcd4ae41759a",
-        "status": "finished",
+        "status": STATE_FINISHED,
         "message": "Batch request is registering domains",
         "metadata":
         {
@@ -503,23 +525,38 @@ def status_administration(response: Tuple[int, dict], scan_id: int):
 
     _, response_content = response
 
-    if response_content["request"]["status"] == "registering":
+    # todo: should we not overwrite the status when wsm is in an intermediate state?
+
+    if response_content["request"]["status"] == STATE_REGISTERING:
         # follow scan progression at internet.nl, update the status message with that information.
-        update_state(scan.pk, "running scan", response_content["request"]["status"])
+        update_state(scan.pk, STATE_RUNNING_SCAN, response_content["request"]["status"])
         return
 
     if response_content["request"]["status"] == "running":
         # follow scan progression at internet.nl, update the status message with that information.
-        update_state(scan.pk, "running scan", response_content["request"]["status"])
+        update_state(scan.pk, STATE_RUNNING_SCAN, response_content["request"]["status"])
         return
 
     if response_content["request"]["status"] == "generating":
         # follow scan progression at internet.nl, update the status message with that information.
-        update_state(scan.pk, "running scan", response_content["request"]["status"])
+        update_state(scan.pk, STATE_RUNNING_SCAN, response_content["request"]["status"])
         return
 
     if response_content["request"]["status"] == "done":
-        update_state(scan.pk, "scan results ready", response_content["request"]["status"])
+        # don't update the scan if the state is further, as it will imply a rollback
+        # these tasks might have accumulated in the queue and thus will trigger a few 'ready' and thus
+        # will process scan results over and over.
+        # this list is just all subsequent states.
+        if scan.state not in [
+            STATE_SCAN_RESULTS_STORED,
+            STATE_STORING_SCAN_RESULTS,
+            STATE_PROCESSING_SCAN_RESULTS,
+            STATE_SCAN_RESULTS_PROCESSED,
+            STATE_FINISHED,
+        ]:
+            update_state(scan.pk, STATE_SCAN_RESULTS_READY, response_content["request"]["status"])
+        else:
+            log.warning("Internet.nl scan #%s has already been processed.", scan.id)
         return
 
     if response_content["request"]["status"] == "error":
@@ -560,7 +597,7 @@ def result_administration(response: Tuple[int, dict], scan_id: int):
     scan.retrieved_scan_report = response_content["domains"]
     scan.save()
 
-    update_state(scan.pk, "scan results stored", "")
+    update_state(scan.pk, STATE_SCAN_RESULTS_STORED, "")
 
 
 @app.task(queue="storage", ignore_result=True)
@@ -625,8 +662,8 @@ def process_scan_results(scan_id: int):
             endpoint_protocol=scan_type_to_protocol[scan.type],
         )
 
-    update_state(scan.pk, "scan results processed", "")
-    update_state(scan.pk, "finished", "")
+    update_state(scan.pk, STATE_SCAN_RESULTS_PROCESSED, "")
+    update_state(scan.pk, STATE_FINISHED, "")
 
 
 def gather_evidence_from_technical_details_on_domain(scan_type: str, technical_details_for_domain: dict) -> dict:
