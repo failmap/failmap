@@ -6,7 +6,6 @@ from django.core.management.base import BaseCommand
 
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners.scanner.http import resolves
-from websecmap.scanners.scanner.subdomains import discover_wildcard
 
 log = logging.getLogger(__package__)
 
@@ -60,17 +59,17 @@ def get_new_urls(urls: List[str]):
             log.debug("Exists: %s", url)
         else:
             # check for wildcard dns...
-            if discover_wildcard(url):
-                log.info(
-                    "Cannot add %s because it's DNS has wildcards enabled. This means everything resolves. "
-                    "Use -F to override this check and still add the url. (todo: support -f) :) lolopensource"
-                )
+            # if discover_wildcard(url):
+            #     log.info(
+            #         "Cannot add %s because it's DNS has wildcards enabled. This means everything resolves. "
+            #         "Use -F to override this check and still add the url. (todo: support -f) :) lolopensource"
+            #     )
+            # else:
+            if resolves(url):
+                log.debug("Does not exist in the database, it resolved: %s", url)
+                new_urls.append(url)
             else:
-                if resolves(url):
-                    log.debug("Does not exist in the database, it resolved: %s", url)
-                    new_urls.append(url)
-                else:
-                    log.debug("Does not exist in the database, but didn't resolve, so can't be added: %s", url)
+                log.debug("Does not exist in the database, but didn't resolve, so can't be added: %s", url)
     if new_urls:
         log.debug("These urls do not exist:")
         log.debug(" ".join(new_urls))
@@ -96,9 +95,7 @@ def inquire_organization():
             break
 
         # does not take into account country or organization type, so it's not perfect.
-        real_organization = (
-            Organization.objects.all().filter(name__icontains=possible_organization, is_dead=False).first()
-        )
+        real_organization = Organization.objects.all().filter(name__iexact=possible_organization, is_dead=False).first()
 
         # don't add None search result.
         if real_organization:
