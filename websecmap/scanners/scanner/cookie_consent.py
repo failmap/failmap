@@ -92,13 +92,13 @@ def scan(url: str) -> Dict[str, Any]:
     maxpages = constance_cached_value("COOKIE_CRAWL_MAXPAGES")
     crawl_time = constance_cached_value("COOKIE_CRAWL_TIME")
     timeout = 300 + crawl_time  # add default timeout on top of crawl timeout
-    crawl_args = f"&depth={depth}&maxpages={maxpages}&timeout={timeout}"
+    crawl_args = f"&depth={depth}&maxpages={maxpages}&timeout={crawl_time}"
     request = f"{playwright_server}/cookieconsent?site={url}{crawl_args}"
     log.debug(request)
 
     try:
         # give request some extra timout to ensure it can respond within its own timeout
-        response = requests.get(request, timeout=timeout + 30)
+        response = requests.get(request, timeout=timeout)
     except requests.exceptions.ReadTimeout:
         log.exception("Request timed out")
         return None
