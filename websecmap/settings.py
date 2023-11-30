@@ -1895,6 +1895,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "scanners.internetnlv2scan", "label": "📨 Internet.nl Scans"},
             {"name": "scanners.screenshot", "label": "📸 Screenshots"},
             {"name": "scanners.cookie", "label": "🍪 Cookies"},
+            {"name": "scanners.externalresource", "label": "📖 External Resources"},
         ],
     },
     {

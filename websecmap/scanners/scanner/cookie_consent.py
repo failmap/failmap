@@ -16,7 +16,7 @@ from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
-from websecmap.scanners.models import Cookie, CookiePlacement, Endpoint
+from websecmap.scanners.models import Cookie, CookiePlacement, Endpoint, ExternalResource
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
 
@@ -32,7 +32,8 @@ STANDARD_ENDPOINT_FILTER = {
     "url__not_resolvable": False,
     "ip_version": 4,
     "port": 443,
-    "url__computed_subdomain": "",
+    # TODO: we probably do want all subdomains as well? maybe filter out stuff like www.?
+    # "url__computed_subdomain": "",
 }
 
 
@@ -49,10 +50,16 @@ def compose_planned_scan_task(**kwargs) -> group:
 
 
 def compose_manual_scan_task(
-    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
+    organizations_filter: dict = None,
+    urls_filter: dict = None,
+    endpoints_filter: dict = None,
+    standard_filter: bool = True,
+    **kwargs,
 ) -> group:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
+    if standard_filter:
+        log.debug("standard_filter: %s", STANDARD_ENDPOINT_FILTER)
+        kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
     urls = filter_endpoints_only(organizations_filter, urls_filter, **kwargs)
     log.debug("Scanning cookies on %s", urls)
     return compose_scan_task(urls)
@@ -118,11 +125,12 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
 
     if type(result_data) == list:
         cookies = result_data
+        external_resources = []
     else:
-        cookies = result_data["cookies"]
+        cookies = result_data.get("cookies", [])
+        external_resources = result_data.get("external_resources", [])
 
     for cookie in cookies:
-        print(cookie)
         endpoint = Endpoint.objects.get(pk=endpoint_id)
         c = Cookie.objects.create(
             endpoint=endpoint,
@@ -134,3 +142,19 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         placements = [CookiePlacement.objects.get_or_create(name=name)[0] for name in cookie.get("placement", [])]
         c.placement.set(placements)
         c.save()
+
+    for resource in external_resources:
+        endpoint = Endpoint.objects.get(pk=endpoint_id)
+        r = ExternalResource.objects.create(
+            endpoint=endpoint,
+            session_id=resource.get("session_id"),
+            depth=resource.get("depth"),
+            url=resource.get("url")[:200],
+            domainname=resource.get("domainname"),
+            resource_type=resource.get("type"),
+            method=resource.get("method"),
+            count=resource.get("count"),
+        )
+        attributes = [CookiePlacement.objects.get_or_create(name=name)[0] for name in resource.get("attributes", [])]
+        r.attributes.set(attributes)
+        r.save()

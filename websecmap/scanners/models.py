@@ -1306,6 +1306,7 @@ class CookiePlacement(models.Model):
     def __str__(self):
         return self.name
 
+
 class Cookie(models.Model):
     """
     Raw Cookie
@@ -1352,4 +1353,33 @@ class CookieBanner(models.Model):
         CookieBannerAttribute,
         blank=True,
         help_text="Attributes of the banner",
+    )
+
+
+class ExternalResource(models.Model):
+    """
+    External resources
+    """
+
+    at_when = models.DateTimeField(auto_now_add=True)
+    endpoint = models.ForeignKey(
+        Endpoint, null=True, blank=True, on_delete=models.CASCADE, help_text="Endpoint where the external resource(s)"
+    )
+    session_id = models.BigIntegerField(
+        blank=True, null=True, help_text="Unique ID for the browser session the external resource(s)"
+    )
+    depth = models.IntegerField(blank=True, null=True, help_text="At which depth was crawled")
+    url = models.CharField(max_length=200, blank=True, null=True, help_text="URL where resources where requested")
+
+    domainname = models.CharField(
+        max_length=200, blank=True, null=True, help_text="Domainname the resource was fetched from"
+    )
+    resource_type = models.CharField(max_length=200, blank=True, null=True, help_text="Type of resources found")
+    method = models.CharField(max_length=200, blank=True, null=True, help_text="Method used to fetch the resource")
+    count = models.IntegerField(blank=True, null=True, help_text="Amount of the specific type/method/domainname")
+
+    attributes = models.ManyToManyField(
+        CookiePlacement,
+        blank=True,
+        help_text="When in the browser session the resource was requested, eg: after consent decline",
     )

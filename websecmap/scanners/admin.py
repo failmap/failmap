@@ -1134,3 +1134,28 @@ class CookieAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     @admin.display(description="Placements")
     def get_placements(self, obj):
         return ", ".join([p.name for p in obj.placement.all()])
+
+
+@admin.register(models.ExternalResource)
+class ExternalResourceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = (
+        "id",
+        "at_when",
+        "endpoint",
+        "session_id",
+        "depth",
+        "url",
+        "get_attributes",
+        "domainname",
+        "method",
+        "resource_type",
+        "count",
+    )
+
+    search_fields = ("endpoint__url__url", "url", "domainname", "attributes__name")
+
+    list_filter = ("depth", "domainname", "resource_type", "method", "attributes")
+
+    @admin.display(description="Attributes")
+    def get_attributes(self, obj):
+        return ", ".join([p.name for p in obj.attributes.all()])
