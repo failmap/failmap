@@ -90,8 +90,10 @@ def scan(url: str) -> Dict[str, Any]:
     playwright_server = constance_cached_value("WEB_PRIVACY_SERVER").rstrip("/")
     depth = 2
     maxpages = 200
-    timeout = 300
-    request = f"{playwright_server}/cookieconsent?site={url}&depth={depth}&maxpages={maxpages}&timeout={timeout}"
+    crawl_time = 60*10 # 10 minutes
+    timeout = 300 + crawl_time
+    crawl_args = "&depth={depth}&maxpages={maxpages}&timeout={timeout}"
+    request = f"{playwright_server}/cookieconsent?site={url}{crawl_args}"
     log.debug(request)
 
     try:
