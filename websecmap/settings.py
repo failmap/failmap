@@ -1448,6 +1448,21 @@ CONSTANCE_CONFIG = {
         "Used when debugging, logs all changes to planned scans to a separate table. Causes millions of records a day",
         bool,
     ),
+    "COOKIE_CRAWL_DEPTH": (
+        2,
+        "Maximum layers to descend when crawling.",
+        int,
+    ),
+    "COOKIE_CRAWL_MAXPAGES": (
+        200,
+        "Maximum pages to visit before stopping crawling.",
+        int,
+    ),
+    "COOKIE_CRAWL_TIME": (
+        60 * 10,
+        "Maximum amount of seconds to spend crawling.",
+        int,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1772,6 +1787,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             '<span class="beta">beta</span> Zorgkaart Nederland (Tilanus)',
             ("ZORGKAART_ENDPOINT", "ZORGKAART_USERNAME", "ZORGKAART_PASSWORD", "ZORGKAART_FILTER"),
         ),
+        ("Cookie Crawler", ("COOKIE_CRAWL_DEPTH", "COOKIE_CRAWL_MAXPAGES", "COOKIE_CRAWL_TIME")),
     ]
 )
 

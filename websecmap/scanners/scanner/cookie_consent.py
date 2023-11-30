@@ -88,11 +88,11 @@ def scan(url: str) -> Dict[str, Any]:
     # this is a single threaded webserver. More tasks means more waiting. So keep the amount of tasks low enough
     # so the timeout is never reached in case all tasks turn into timeouts
     playwright_server = constance_cached_value("WEB_PRIVACY_SERVER").rstrip("/")
-    depth = 2
-    maxpages = 200
-    crawl_time = 60*10 # 10 minutes
-    timeout = 300 + crawl_time
-    crawl_args = "&depth={depth}&maxpages={maxpages}&timeout={timeout}"
+    depth = constance_cached_value("COOKIE_CRAWL_DEPTH")
+    maxpages = constance_cached_value("COOKIE_CRAWL_MAXPAGES")
+    crawl_time = constance_cached_value("COOKIE_CRAWL_TIME")
+    timeout = 300 + crawl_time  # add default timeout on top of crawl timeout
+    crawl_args = f"&depth={depth}&maxpages={maxpages}&timeout={timeout}"
     request = f"{playwright_server}/cookieconsent?site={url}{crawl_args}"
     log.debug(request)
 
