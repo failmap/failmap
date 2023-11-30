@@ -32,8 +32,7 @@ STANDARD_ENDPOINT_FILTER = {
     "url__not_resolvable": False,
     "ip_version": 4,
     "port": 443,
-    # TODO: we probably do want all subdomains as well? maybe filter out stuff like www.?
-    # "url__computed_subdomain": "",
+    "url__computed_subdomain": "",
 }
 
 
