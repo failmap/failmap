@@ -24,26 +24,29 @@ class Command(BaseCommand):
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
-        new_urls = get_new_urls(options["urls"])
+        try:
+            new_urls = get_new_urls(options["urls"])
 
-        if not new_urls:
-            return
+            if not new_urls:
+                return
 
-        log.info("Found new urls, to what organizations do you want to add these?")
-        log.info("The new urls are: %s", " ".join(new_urls))
-        organizations = inquire_organization()
+            log.info("Found new urls, to what organizations do you want to add these?")
+            log.info("The new urls are: %s", " ".join(new_urls))
+            organizations = inquire_organization()
 
-        for url in new_urls:
-            new_url = Url()
-            new_url.url = url
-            new_url.created_on = datetime.now(timezone.utc)
-            new_url.save()
-
-            for organization in organizations:
-                new_url.organization.add(organization)
+            for url in new_urls:
+                new_url = Url()
+                new_url.url = url
+                new_url.created_on = datetime.now(timezone.utc)
                 new_url.save()
 
-                log.info("Added %s to %s", url, organization)
+                for organization in organizations:
+                    new_url.organization.add(organization)
+                    new_url.save()
+
+                    log.info("Added %s to %s", url, organization)
+        except KeyboardInterrupt:
+            log.info("Done")
 
 
 def get_new_urls(urls: List[str]):
@@ -85,14 +88,17 @@ def inquire_organization():
     while True:
         if organizations:
             log.info("Currently adding to: %s", organizations)
+            log.info("If this is wrong, CTRL+C to exit")
 
-        possible_organization = input("Type the name of an organization, type - to be done: ")
+        possible_organization = input('Type the name of an organization, type "DONE" to be done: ')
 
-        if possible_organization in ["-", ""]:
+        if possible_organization in ["DONE"]:
             break
 
         # does not take into account country or organization type, so it's not perfect.
-        real_organization = Organization.objects.all().filter(name__iexact=possible_organization, is_dead=False).first()
+        real_organization = (
+            Organization.objects.all().filter(name__icontains=possible_organization, is_dead=False).first()
+        )
 
         # don't add None search result.
         if real_organization:
