@@ -3,6 +3,7 @@ Retrieves IP addresses for several ip-based scans. These are stored in the UrlIp
 """
 import logging
 from datetime import datetime, timezone
+from time import sleep
 from typing import List
 
 from celery import Task, group
@@ -56,20 +57,33 @@ def refresh_ips():
 
     urls = Url.objects.all().filter(is_dead=False, not_resolvable=False).only("id", "url")
 
-    for url in urls:
-        ips_in_dns = get_ips_from_dns(url.url, "A")
-        ipv4 = get_ipv4(url.url)
-        if ipv4:
-            store_ip(url, is_v4=True, ip=ipv4, ips_in_dns=ips_in_dns)
-        else:
-            clean_ips(url, is_v4=True)
+    tasks = [refresh_ips_from_url.si(url.id) for url in urls]
+    tasks = group(tasks)
+    tasks.apply_async()
 
-        ipv6 = get_ipv6(url.url)
-        ips_in_dns = get_ips_from_dns(url.url, "AAAA")
-        if ipv6:
-            store_ip(url, is_v4=False, ip=ipv6, ips_in_dns=ips_in_dns)
-        else:
-            clean_ips(url, is_v4=False)
+
+@app.task(queue="database")
+def refresh_ips_from_url(url_id):
+    url = Url.objects.all().filter(id=url_id, is_dead=False, not_resolvable=False).only("id", "url").first()
+    if not url:
+        return
+
+    # performing 4 requests:
+    ips_in_dns = get_ips_from_dns(url.url, "A")
+    if ipv4 := get_ipv4(url.url):
+        store_ip(url, is_v4=True, ip=ipv4, ips_in_dns=ips_in_dns)
+    else:
+        clean_ips(url, is_v4=True)
+
+    ips_in_dns = get_ips_from_dns(url.url, "AAAA")
+    if ipv6 := get_ipv6(url.url):
+        store_ip(url, is_v4=False, ip=ipv6, ips_in_dns=ips_in_dns)
+    else:
+        clean_ips(url, is_v4=False)
+
+    # add a little delay so the DNS server doesn't get too angry at us for asking a lot
+    # 5 second averaging over every 100*4 requests, shared over N threads.
+    sleep(0.05)
 
 
 def clean_ips(url: Url, is_v4: bool):
