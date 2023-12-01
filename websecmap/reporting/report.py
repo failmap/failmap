@@ -225,6 +225,11 @@ def significant_moments(urls: List[Url] = None, reported_scan_types: List[str] =
         + endpoint_explanation_dates
         + url_explanation_dates
     )
+
+    # in case of mistakes, remove all 'none' situations from the list of moments:
+    # happened on mail2.stadskanaal.nl
+    moments = [x for x in moments if x is not None]
+
     moments = [latest_moment_of_datetime(x) for x in moments]
     moments = sorted(set(moments))
 
