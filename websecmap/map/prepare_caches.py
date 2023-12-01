@@ -1,3 +1,4 @@
+from websecmap.scanners import init_dict
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 from websecmap.map.report import (
     calculate_vulnerability_statistics,
@@ -19,6 +20,8 @@ def compose_task(organizations_filter: dict = None, urls_filter: dict = None, en
 
     # finally, rebuild the graphs (which can mis-matchi a bit if the last reports aren't in yet. Will have to do for now
     # mainly as we're trying to get away from canvas and it's buggyness.
+
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
     subtasks = []
     # These are database heavy tasks, and executed sequentially to spread load on the database.
