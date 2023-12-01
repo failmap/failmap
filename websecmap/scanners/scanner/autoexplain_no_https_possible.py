@@ -56,7 +56,9 @@ def compose_scan_task(urls):
 
 @app.task(queue="database", ignore_result=True)
 def scan(scan_id: int):
-    a_scan = EndpointGenericScan.objects.all().filter(id=scan_id).first()
+    # don't try to explain scans that are already explained in the meanwhile(!) this task might be old and prior
+    # tasks could already have explained this one.
+    a_scan = EndpointGenericScan.objects.all().filter(id=scan_id, comply_or_explain_is_explained=False).first()
     if not a_scan:
         return
 

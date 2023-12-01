@@ -160,7 +160,7 @@ def scan_mailservers():
     domain_ip_data = get_domain_to_ip_database()
     domain_mx_data = get_domain_mx_database()
 
-    urls = Url.objects.all().filter(is_dead=False, not_resolvable=False)
+    urls = Url.objects.all().filter(is_dead=False, not_resolvable=False).only("id", "url")
 
     for url in urls:
         mail_servers = domain_mx_data.get(url.url, [])
@@ -201,7 +201,7 @@ def scan_servers():
     geo_ip_data = get_geoip_database()
     domain_ip_data = get_domain_to_ip_database()
 
-    urls = Url.objects.all().filter(is_dead=False, not_resolvable=False)
+    urls = Url.objects.all().filter(is_dead=False, not_resolvable=False).only("id", "url")
     for url in urls:
         worst_rating, rating_series = create_rating_series_for_domains(
             [{"domain": url.url}], domain_ip_data, geo_ip_data
@@ -219,7 +219,11 @@ def scan_servers():
 def scan_third_party_site_content():
     geo_ip_data = get_geoip_database()
     domain_ip_data = get_domain_to_ip_database()
-    epgss = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_THIRD_PARTY_DOMAINS, is_the_latest_scan=True)
+    epgss = (
+        EndpointGenericScan.objects.all()
+        .filter(type=WEB_PRIVACY_THIRD_PARTY_DOMAINS, is_the_latest_scan=True)
+        .only("endpoint_id", "evidence")
+    )
     log.debug("Found %d endpoints with site content", epgss.count())
 
     for epgs in epgss:

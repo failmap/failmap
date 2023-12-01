@@ -80,7 +80,11 @@ def scan(scan_id):
     issue will always be the same.
     """
 
-    endpoint_generic_scan = EndpointGenericScan.objects.all().filter(id=scan_id).first()
+    # don't try to explain scans that are already explained in the meanwhile(!) this task might be old and prior
+    # tasks could already have explained this one.
+    endpoint_generic_scan = (
+        EndpointGenericScan.objects.all().filter(id=scan_id, comply_or_explain_is_explained=False).first()
+    )
     if not endpoint_generic_scan:
         return
 
