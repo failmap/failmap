@@ -91,7 +91,7 @@ def reflag_urlgenericscan(scan_type):
         ON x.id2 = scanners_urlgenericscan.id
     """
 
-    updatescans(UrlGenericScan.objects.raw(sql))
+    updatescans(UrlGenericScan.objects.raw(sql), "url")
 
 
 def reflag_endpointgenericscan(scan_type):
@@ -112,16 +112,19 @@ def reflag_endpointgenericscan(scan_type):
         ON x.id2 = scanners_endpointgenericscan.id
     """
 
-    updatescans(EndpointGenericScan.objects.raw(sql))
+    updatescans(EndpointGenericScan.objects.raw(sql), "endpoint")
 
 
-def updatescans(scans: List[Union[UrlGenericScan, EndpointGenericScan]]) -> None:
+def updatescans(scans: List[Union[UrlGenericScan, EndpointGenericScan]], generictype: str = "endpoint") -> None:
     ids = [scan.id for scan in scans]
     log.debug("Updating %s scans", len(ids))
 
     # update per large batch of scans, so not to overload with an IN query with a million id's
     for chunk in chunks2(ids, 1000):
-        EndpointGenericScan.objects.filter(id__in=chunk).update(is_the_latest_scan=True)
+        if generictype == "endpoint":
+            EndpointGenericScan.objects.filter(id__in=chunk).update(is_the_latest_scan=True)
+        elif generictype == "url":
+            UrlGenericScan.objects.filter(id__in=chunk).update(is_the_latest_scan=True)
 
     # old and slower, but less error prone implementation:
     # for scan in scans:
