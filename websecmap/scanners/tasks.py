@@ -45,6 +45,7 @@ from websecmap.scanners.scanner import (
     # endpoint_content,
     endpoint_headers,
     cookie_consent,
+    blocked_endpoint,
 )
 from websecmap.scanners.scanner import whois
 
@@ -83,6 +84,7 @@ __scanners__ = [
     whois,
     endpoint_headers,
     cookie_consent,
+    blocked_endpoint,
 ]
 
 __everything__ = [domain_to_ip, ip_geolocation, location, mailserver, ip_geolocation_correction, locate_and_correct]
