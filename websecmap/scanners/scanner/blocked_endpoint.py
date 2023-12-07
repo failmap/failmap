@@ -30,7 +30,8 @@ log = logging.getLogger(__name__)
 
 SCANNER_NAME = "blocked_endpoint"
 # if they block us, it's usually an ipv4 firewall that does that automatically
-STANDARD_ENDPOINT_FILTER = {"protocol__in": ["http", "https"], "ip_version": 4}
+# if it's alive were sure we're not blocked (great assumption :))
+STANDARD_ENDPOINT_FILTER = {"protocol__in": ["http", "https"], "ip_version": 4, "is_dead": True}
 
 FINDING_BE_BLOCKED = "blocked_endpoint_blocked"
 FINDING_BE_REACHABLE = "blocked_endpoint_reachable"
@@ -65,7 +66,17 @@ def compose_manual_scan_task(
 
 
 def compose_scan_task(urls):
-    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"], ip_versions=[4])
+    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(
+        # dead means not retrievable, there might be many of them due to glitches but will be fixed using
+        # unique and random (hopefully).
+        # only filter out dead endpoints, alive ones we can connect to...
+        # and they should not have an alive counterpart discovered later... which is more complex.
+        # keep it simple for now and ignore that this situation occurs. Figure out how to merge dead endpoints anyway
+        urls,
+        protocols=["http", "https"],
+        ip_versions=[4],
+        is_dead=True,
+    )
     endpoints = unique_and_random(endpoints)
     # remove urls that don't have the relevant endpoints anymore
     for url_id in urls_without_endpoints:
