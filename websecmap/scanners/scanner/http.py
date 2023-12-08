@@ -592,7 +592,12 @@ def force_get_endpoint(protocol: str, url_id: int, port: int, ip_version: int, o
     return save_endpoint(protocol, url_id, port, ip_version, origin)
 
 
-def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = "") -> Endpoint:
+def get_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = "") -> Optional[Endpoint]:
+    """Get endpoint, but do not create it if it doesn't exist"""
+    return save_endpoint(protocol, url_id, port, ip_version, origin, create=False)
+
+
+def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = "", create=True) -> Endpoint:
     log.debug(
         "Endpoint save attempt: protocol: %s, url_id: %s, port: %s, ip_version: %s, origin: %s.",
         protocol,
@@ -602,20 +607,13 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
         origin,
     )
 
-    if "http-proxy" in protocol:
-        log.error(
-            "Endpoint save attempt with http-proxy: protocol: %s, url_id: %s, port: %s, ip_version: %s, origin: %s.",
-            protocol,
-            url_id,
-            port,
-            ip_version,
-            origin,
-        )
-
     # prevent duplication
     if ep := endpoint_exists(url_id, port, protocol, ip_version):
         log.debug("Endpoint is already in the database, returning the existing one.")
         return ep
+    else:
+        if not create:
+            return None
 
     if similar := get_similar_dead_endpoint_in_last_n_days(
         url_id, port, protocol, ip_version, days=ENDPOINT_REVIVAL_PERIOD_DAYS

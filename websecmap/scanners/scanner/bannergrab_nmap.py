@@ -16,6 +16,7 @@ from celery import Task, group
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.scanners import init_dict
+from websecmap.scanners.scanner.http import get_endpoint
 from websecmap.scanners.models import EndpointGenericScan, UrlIp
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, unique_and_random
@@ -25,7 +26,6 @@ from websecmap.scanners.scanner.banners.detect_version import (
     detect_a_likely_version,
 )
 from websecmap.scanners.scanner.banners.utils import get_urls_by_ip
-from websecmap.scanners.scanner.http import force_get_endpoint
 from websecmap.scanners.scanner.utils import in_chunks
 
 SCANNER_NAME = "bannergrab_nmap"
@@ -329,20 +329,23 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
         # reducing the protocol _again_ as it seems to be reset to an old value http-proxy,
         # while we cannot possibly reproduce this. While http-proxy endpoints keep on being added while the
         # protocol has already been reduced. This makes the variable a bit more local.
-        protocol_ = reduce_protcol(result.get("name", "http"), port)
+        protocol = reduce_protcol(result.get("name", "http"), port)
 
         # nmap correctly finds that it is HTTP over port 443, not https over 443, and every time those http/443 sites
         # will tell us to use the https version of the site. To prevent creating infinite useless endpoints
         # silently upgrade the http results to https. We see all of those disappear over time.
         # nmap results appear to be a string, and therefore the protocol is not upgraded to https in this
         # specific scenario.
-        if protocol_ == "http" and port in {443, "443", 8443, "8443"}:
-            protocol_ = "https"
+        if protocol == "http" and port in {443, "443", 8443, "8443"}:
+            protocol = "https"
 
-        # todo: perhaps this is too greedy when the ip database has not been updated / refreshed
-        endpoint = force_get_endpoint(
-            url_id=url.url.id, port=port, protocol=protocol_, ip_version=ip_version(ip), origin="bannergrab_nmap"
+        endpoint = get_endpoint(
+            url_id=url.url.id, port=port, protocol=protocol, ip_version=ip_version(ip), origin="bannergrab_nmap"
         )
+
+        if not endpoint:
+            log.warning("No endpoint found for url: %s, port: %s, protocol: %s".url.url.id, port, protocol)
+            continue
 
         # clean the banner if there was one in the past. Adds a banner if there is a new one / something has changed.
         if not banner and endpoint_has_scans("bannergrab", endpoint.id) or banner:
