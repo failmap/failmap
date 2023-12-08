@@ -31,6 +31,9 @@ from websecmap.scanners.scanner.utils import in_chunks
 SCANNER_NAME = "bannergrab_nmap"
 IPS_PER_SCAN = 100
 
+# tcpwrapped means no response
+SUPPORTED_PROTOCOLS = {"http", "https", "ssh"}
+
 log = logging.getLogger(__name__)
 
 
@@ -131,33 +134,42 @@ def grab_manually(is_v4: bool = True):
             store_results(host, nm[host])
 
 
-def reduce_protcol(protocol, port):
-    protocol = str(protocol).strip().lower()
+def reduce_protocol(protocol, port):
+    # we've found that fingerprinting is sometimes unreliable and in 99.99% of cases it's just
+    # https or http where it says otherwise. It's a flavor thing perhaps.
+    # nmap is great, but in this case we can safely assume just http/https.
+
     if int(port) in {80}:
-        mapping = {
-            "http-proxy": "http",
-            "gnutella": "http",
-            "ms-wbt-server": "http",
-        }
-        protocol = mapping.get(protocol, protocol)
+        return "http"
+
+        # mapping = {
+        #     "http-proxy": "http",
+        #     "gnutella": "http",
+        #     "ms-wbt-server": "http",
+        #     "upnp": "http",
+        #     "sip": "http",
+        # }
+        # protocol = mapping.get(protocol, protocol)
 
     if int(port) in {443, 8443}:
+        return "https"
         # make sure this in sync with PROTOCOL_CLEANERS in detect_version
-        mapping = {
-            # http on 443 happens a lot, and while technically correct place it on 443 anyway
-            "http": "https",
-            "http-proxy": "https",
-            "ssl/http": "https",
-            "ssl": "https",
-            "ssl/http-proxy": "https",
-            # this is always a misclassification
-            "gnutella": "https",
-            "ms-wbt-server": "https",
-        }
+        # mapping = {
+        #     # http on 443 happens a lot, and while technically correct place it on 443 anyway
+        #     "http": "https",
+        #     "http-proxy": "https",
+        #     "ssl/http": "https",
+        #     "ssl": "https",
+        #     "ssl/http-proxy": "https",
+        #     # this is always a misclassification
+        #     "gnutella": "https",
+        #     "ms-wbt-server": "https",
+        #     "upnp": "https",
+        #     "sip": "https",
+        # }
+        # protocol = mapping.get(protocol, protocol)
 
-        protocol = mapping.get(protocol, protocol)
-
-    return protocol
+    return str(protocol).strip().lower()
 
 
 def store_results(host, scan_result):
@@ -293,13 +305,22 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
       }
     }
     """
-    protocol = reduce_protcol(result.get("name", "http"), port)
+    protocol = result.get("name", "http")
 
-    if protocol in ["tcpwrapped"]:
-        # tcpwrapped happens when a server drops a connection. In this case it is not clear what
-        # protocol is answering in the standard port. Do not store this as a separate protocol result.
-        # Tcpwrapped means there will be no data returned and no banner...
-        # If this happens too much the intensity of scans needs to be reduced.
+    # tcpwrapped happens when a server drops a connection. In this case it is not clear what
+    # protocol is answering in the standard port. Do not store this as a separate protocol result.
+    # Tcpwrapped means there will be no data returned and no banner...
+    # If this happens too much the intensity of scans needs to be reduced.
+    # happens so often we don't want to flood the logs. Don't log it as it happens all the time.
+    if protocol == "tcpwrapped":
+        return
+
+    # make some assumptions about the protocol in use, override what nmap thinks in these cases.
+    # the http/https would have been discovered by the http/https scanner.
+    protocol = reduce_protocol(protocol, port)
+
+    if protocol not in SUPPORTED_PROTOCOLS:
+        log.error("Unsupported protocol: %s", protocol)
         return
 
     with contextlib.suppress(ValueError):
@@ -329,7 +350,6 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
         # reducing the protocol _again_ as it seems to be reset to an old value http-proxy,
         # while we cannot possibly reproduce this. While http-proxy endpoints keep on being added while the
         # protocol has already been reduced. This makes the variable a bit more local.
-        protocol = reduce_protcol(result.get("name", "http"), port)
 
         # nmap correctly finds that it is HTTP over port 443, not https over 443, and every time those http/443 sites
         # will tell us to use the https version of the site. To prevent creating infinite useless endpoints
@@ -344,7 +364,7 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
         )
 
         if not endpoint:
-            log.warning("No endpoint found for url: %s, port: %s, protocol: %s".url.url.id, port, protocol)
+            log.warning("No endpoint found for url: %s, port: %s, protocol: %s", url.url.id, port, protocol)
             continue
 
         # clean the banner if there was one in the past. Adds a banner if there is a new one / something has changed.

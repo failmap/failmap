@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import EndpointGenericScan, UrlIp
+from websecmap.scanners.models import EndpointGenericScan, UrlIp, Endpoint
 from websecmap.scanners.scanner.bannergrab_nmap import store_results
 from websecmap.scanners.scanner.banners.detect_version import re_evaluate_bannergrab_versions
 
@@ -60,6 +60,11 @@ def test_store_nmap_results(db):
     store_results("127.0.0.1", results)
 
     url = Url.objects.create(url="internetcleanup.foundation")
+    # no implicit creation of endpoints, this is not a discovery scanner
+    Endpoint.objects.create(url=url, port=22, protocol="ssh", discovered_on=datetime.now(timezone.utc))
+    Endpoint.objects.create(url=url, port=80, protocol="http", discovered_on=datetime.now(timezone.utc))
+    Endpoint.objects.create(url=url, port=443, protocol="https", discovered_on=datetime.now(timezone.utc))
+
     UrlIp.objects.create(url=url, ip="127.0.0.1", is_v4=True, discovered_on=datetime.now(timezone.utc))
 
     # first moment something is stored.
@@ -151,6 +156,9 @@ def test_store_nmap_results(db):
 def test_re_evaluate_bannergrab_versions(db):
     url = Url.objects.create(url="basisbeveiliging.nl")
     UrlIp.objects.create(url=url, ip="127.0.0.1", is_v4=True, discovered_on=datetime.now(timezone.utc))
+
+    # no implicit creation of endpoints, this is not a discovery scanner
+    Endpoint.objects.create(url=url, port=22, protocol="ssh", discovered_on=datetime.now(timezone.utc))
 
     # This should change exactly nothing.
     assert re_evaluate_bannergrab_versions() == 0
