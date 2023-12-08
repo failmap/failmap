@@ -132,7 +132,9 @@ def grab_manually(is_v4: bool = True):
 
 
 def reduce_protcol(protocol, port):
-    if port == 443:
+    protocol = str(protocol).strip().lower()
+
+    if int(port) in {443, 8443}:
         # make sure this in sync with PROTOCOL_CLEANERS in detect_version
         mapping = {
             # http on 443 happens a lot, and while technically correct place it on 443 anyway
@@ -140,12 +142,13 @@ def reduce_protcol(protocol, port):
             "http-proxy": "https",
             "ssl/http": "https",
             "ssl": "https",
+            "ssl/http-proxy": "https",
             # this is always a misclassification
             "gnutella": "https",
             "ms-wbt-server": "https",
         }
 
-        return mapping.get(protocol.strip().lower(), protocol)
+        return mapping.get(protocol, protocol)
 
     return protocol
 
@@ -316,17 +319,22 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
     for url in get_urls_by_ip(ip):
         # todo: when are endpoints on random ports deleted? Or should we just remove old scan data for this scanner?
 
+        # reducing the protocol _again_ as it seems to be reset to an old value http-proxy,
+        # while we cannot possibly reproduce this. While http-proxy endpoints keep on being added while the
+        # protocol has already been reduced. This makes the variable a bit more local.
+        protocol_ = reduce_protcol(result.get("name", "http"), port)
+
         # nmap correctly finds that it is HTTP over port 443, not https over 443, and every time those http/443 sites
         # will tell us to use the https version of the site. To prevent creating infinite useless endpoints
         # silently upgrade the http results to https. We see all of those disappear over time.
         # nmap results appear to be a string, and therefore the protocol is not upgraded to https in this
         # specific scenario.
-        if protocol == "http" and port in {443, "443"}:
-            protocol = "https"
+        if protocol_ == "http" and port in {443, "443", 8443, "8443"}:
+            protocol_ = "https"
 
         # todo: perhaps this is too greedy when the ip database has not been updated / refreshed
         endpoint = force_get_endpoint(
-            url_id=url.url.id, port=port, protocol=protocol, ip_version=ip_version(ip), origin="bannergrab_nmap"
+            url_id=url.url.id, port=port, protocol=protocol_, ip_version=ip_version(ip), origin="bannergrab_nmap"
         )
 
         # clean the banner if there was one in the past. Adds a banner if there is a new one / something has changed.
