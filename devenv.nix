@@ -16,6 +16,7 @@ in
     pkgs.libmysqlclient.dev
     # required for running dev environment
     pkgs.redis
+    pkgs.nmap
 
     # additional tools
     pkgs.shellcheck

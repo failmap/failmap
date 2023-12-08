@@ -602,6 +602,16 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
         origin,
     )
 
+    if "http-proxy" in protocol:
+        log.error(
+            "Endpoint save attempt with http-proxy: protocol: %s, url_id: %s, port: %s, ip_version: %s, origin: %s.",
+            protocol,
+            url_id,
+            port,
+            ip_version,
+            origin,
+        )
+
     # prevent duplication
     if ep := endpoint_exists(url_id, port, protocol, ip_version):
         log.debug("Endpoint is already in the database, returning the existing one.")
