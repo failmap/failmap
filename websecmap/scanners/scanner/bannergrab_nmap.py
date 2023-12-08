@@ -133,7 +133,7 @@ def grab_manually(is_v4: bool = True):
 
 def reduce_protcol(protocol, port):
     protocol = str(protocol).strip().lower()
-
+    log.info("reduce protocol: '%s' '%s' '%s'", protocol, port, int(port) in {443, 8443})
     if int(port) in {443, 8443}:
         # make sure this in sync with PROTOCOL_CLEANERS in detect_version
         mapping = {
@@ -148,8 +148,9 @@ def reduce_protcol(protocol, port):
             "ms-wbt-server": "https",
         }
 
-        return mapping.get(protocol, protocol)
-
+        protocol = mapping.get(protocol, protocol)
+        log.info('reduce protocol: "%s"', protocol)
+        return protocol
     return protocol
 
 
