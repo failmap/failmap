@@ -11,7 +11,7 @@ import requests
 from celery import Task, group
 from requests import RequestException
 
-from websecmap.celery import app
+from websecmap.celery import app, DEFAULT_TASK_TIME_LIMIT
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import ScanProxy
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
@@ -37,8 +37,8 @@ FINDING_BE_BLOCKED = "blocked_endpoint_blocked"
 FINDING_BE_REACHABLE = "blocked_endpoint_reachable"
 FINDING_BE_NOT_REACHABLE = "blocked_endpoint_not_reachable"
 
-PROXY_NETWORK_TIMEOUT = 20
-PROXY_SERVER_TIMEOUT = 20
+# default timeout for HTTP requests
+TIMEOUT = 30
 
 
 @app.task(queue="kickoff", ignore_result=True)
@@ -101,13 +101,13 @@ def compose_scan_task(urls):
     return group(tasks)
 
 
-@app.task()
+@app.task(time_limit=DEFAULT_TASK_TIME_LIMIT)
 def scan(address: str, proxies: {}) -> Dict[str, Any]:
     # attempt to contact the endpoint via a the direct connection and via a proxy.
     # note that the proxy might be ipv4 only?
     # get two or more proxies.
     with contextlib.suppress(RequestException):
-        requests.head(address)
+        requests.head(address, timeout=TIMEOUT)
         # not blocked, so don't check via proxy
         return {
             "connects_directly": True,
@@ -122,10 +122,12 @@ def scan(address: str, proxies: {}) -> Dict[str, Any]:
             requests.head(
                 address,
                 proxies={proxy["protocol"]: proxy["address"]},
-                timeout=(PROXY_NETWORK_TIMEOUT, PROXY_SERVER_TIMEOUT),
+                timeout=TIMEOUT,
             )
             connects_via_proxy.append(True)
             proxy_evidence.append({"protocol": proxy["protocol"], "address": proxy["address"], "connects": True})
+            # no need to check any further
+            continue
         except RequestException:
             connects_via_proxy.append(False)
             proxy_evidence.append({"protocol": proxy["protocol"], "address": proxy["address"], "connects": False})

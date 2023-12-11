@@ -14,6 +14,9 @@ from django.conf import settings
 import websecmap.signals  # noqa
 from websecmap.celery.worker import QUEUES_MATCHING_ROLES
 
+
+DEFAULT_TASK_TIME_LIMIT = 300
+
 log = logging.getLogger(__package__)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "websecmap.settings")
