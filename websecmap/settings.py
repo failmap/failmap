@@ -1805,7 +1805,7 @@ except EnvironmentError as my_exception:
 # https://docs.djangoproject.com/en/1.11/ref/settings/#data-upload-max-number-fields
 # The default is far too low with various inlines (even on the test dataset).
 # Yes, we happily exceed 1000 fields anyday. No problem :)
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 4242
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 42000
 
 ########
 # Begin game settings:
