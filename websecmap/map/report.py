@@ -73,8 +73,6 @@ def compose_task(
     # limitations of the _IN  -> or just keep it stupid...
     tasks = []
 
-    # todo: organizations that have no endpoints could get a default rating, which is much quicker
-    #  than iterating all organizations. But it does not save too much time...
     urls = (
         Url.objects.filter(
             q_configurations_to_report(),
@@ -89,15 +87,6 @@ def compose_task(
         .only("id", "organization__id")
         .values("id", "organization__id")
     )
-
-    organizations_with_urls = {url["organization__id"] for url in urls}
-    organizations_without_urls = set(organization_ids) - organizations_with_urls
-
-    # can still add an empty organization rating even though there is nothing to show.
-    # Will create an empty gray region.
-    if list(organizations_without_urls):
-        # warning: default_organization_rating has a side effect, it will rate everything if nothing is given...
-        tasks.append(default_organization_rating.si(list(organizations_without_urls)))
 
     # just once for every url
     url_ids = {url["id"] for url in urls}

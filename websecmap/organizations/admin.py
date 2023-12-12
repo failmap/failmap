@@ -520,6 +520,42 @@ class WhoisOrganizationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ]
 
 
+class OrganizationLayerUrlAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    # A view that only deals with whois fields, so they are editable and managble easily
+
+    search_fields = ["name", "country", "layers__name", "alternative_names__name"]
+    list_filter = ["country", "created_on", "is_dead", "is_dead_since", "layers__name"][::-1]
+
+    inlines = [OrgAltNameAdminInline, UrlAdminInline]
+
+    list_display = (
+        "id",
+        "name",
+        "name_details",
+        "layers_",
+        "country",
+    )
+
+    @staticmethod
+    def name_details(inst):
+        if inst.is_dead:
+            return (
+                f"✝ {inst.name}, {inst.country} ({inst.created_on.strftime('%b %Y') if inst.created_on else ''} "
+                f"- {inst.is_dead_since.strftime('%b %Y') if inst.is_dead_since else ''})"
+            )
+
+        return f"{inst.name}, {inst.country} ({inst.created_on.strftime('%b %Y')})"
+
+    def layers_(self, inst):
+        return [layer.name for layer in inst.layers.all()]
+
+    # todo: add url inline
+    fields = [
+        "name",
+        "layers",
+    ]
+
+
 def create_modeladmin(modeladmin, model, name=None):
     # This creates a proxy model so there can be a different view on organization data.
     # In this case we can create WhoisOrganization which only allows easy overview and record editing
@@ -538,6 +574,7 @@ def create_modeladmin(modeladmin, model, name=None):
 
 
 create_modeladmin(WhoisOrganizationAdmin, name="organization-registrar", model=Organization)
+create_modeladmin(OrganizationLayerUrlAdmin, name="organization-layer-urls", model=Organization)
 
 
 # https://docs.djangoproject.com/en/2.0/ref/forms/validation/
@@ -861,6 +898,177 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     timeline_debug.short_description = "🐞  Timeline"
     actions.append("timeline_debug")
+
+
+class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmin):  # pylint: disable=no-member
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = queryset.prefetch_related("endpoint_set")
+        return queryset
+
+    form = MyUrlAdminForm
+
+    list_display = (
+        "id",
+        "url",
+        "origin",
+        "in_organizations",
+        "endpoints",
+        # "sub",
+        # "domain",
+        # "tld",
+        "visit",
+        # "onboarded",
+        # "onboarding_stage",
+        "uses_dns_wildcard",
+        "dead_for",
+        "unresolvable_for",
+        "created_on",
+    )
+
+    search_fields = ("url", "computed_subdomain", "computed_domain", "computed_suffix")
+    list_filter = [
+        "is_dead",
+        "is_dead_since",
+        "is_dead_reason",
+        "not_resolvable",
+        "not_resolvable_since",
+        "not_resolvable_reason",
+        "uses_dns_wildcard",
+        "organization",
+        "onboarded",
+        "onboarding_stage",
+        "organization__layers__name",
+        "organization__country",
+        "dns_supports_mx",
+        HasEndpointScansListFilter,
+    ][::-1]
+
+    fieldsets = (
+        (None, {"fields": ("url", "organization", "internal_notes", "created_on")}),
+        (
+            "Onboarding",
+            {
+                "fields": ("onboarded", "onboarding_stage", "onboarding_stage_set_on", "onboarded_on"),
+            },
+        ),
+        (
+            "DNS",
+            {
+                "fields": (
+                    "do_not_find_subdomains",
+                    "uses_dns_wildcard",
+                    "dns_supports_mx",
+                ),
+            },
+        ),
+        (
+            "Resolvability",
+            {
+                "description": "Non resolving urls cannot be reached anymore.",
+                "fields": ("not_resolvable", "not_resolvable_since", "not_resolvable_reason"),
+            },
+        ),
+        (
+            "dead URL management",
+            {
+                "description": "Dead urls are not show on the map. They can be dead on layer 8 (for example when a "
+                "wildcard DNS is used, but not a matching TLS certificate as wildcard certificates "
+                "are rarely used due to drawbacks).",
+                "fields": ("is_dead", "is_dead_since", "is_dead_reason"),
+            },
+        ),
+        (
+            "computed",
+            {
+                "description": "These values are automatically computed on save. Do not modify them by hand.",
+                "fields": ("computed_subdomain", "computed_domain", "computed_suffix"),
+            },
+        ),
+    )
+    readonly_fields = ["created_on", "onboarded_on"]
+
+    @staticmethod
+    def in_organizations(obj):
+        return obj.organization.all().count()
+        # return (
+        #     format_html(
+        #         f"{count}<br>"
+        #         f"<a href='/admin/organizations/organization/?q={obj.url}' target='_blank'>Filter: 🔍</a>"
+        #     )
+        #     if count
+        #     else ""
+        # )
+
+    @staticmethod
+    def domain(obj):
+        return obj.computed_domain
+
+    @staticmethod
+    def tld(obj):
+        return obj.computed_suffix
+
+    @staticmethod
+    def sub(obj):
+        return obj.computed_subdomain
+
+    # save a ton of queries
+    # doesn't work with sets.
+    # https://docs.djangoproject.com/en/2.1/ref/contrib/admin/
+    # list_select_related = ('endpoint_set', )
+
+    @staticmethod
+    def endpoints(obj):
+        count = obj.endpoint_set.count()
+        return (
+            format_html(f"{count}<br>" f"<a href='/admin/scanners/endpoint/?q={obj.url}' target='_blank'>Filter: 🔍</a>")
+            if count
+            else ""
+        )
+
+    @staticmethod
+    def visit(obj: Url):
+        if not obj.endpoint_set.count():
+            return ""
+
+        string = "".join(
+            f"<a href='{endpoint.protocol}://{obj.url}:{endpoint.port}' target='_blank'>"
+            f"{endpoint.protocol}/{endpoint.port}</a><br />"
+            for endpoint in obj.endpoint_set.all()
+            if endpoint.is_dead is False
+        )
+        return format_html(string)
+
+    @staticmethod
+    def unresolvable_for(instance):
+        if instance.not_resolvable and instance.not_resolvable_since:
+            return naturaltime(instance.not_resolvable_since)
+
+        return "-"
+
+    # todo: further humanize this.
+    @staticmethod
+    def dead_for(instance):
+        if instance.is_dead and instance.is_dead_since:
+            return naturaltime(instance.is_dead_since)
+
+        return "-"
+
+    actions = []
+
+    def declare_dead(self, request, queryset):
+        for url in queryset:
+            url.is_dead = True
+            url.is_dead_reason = "Killed via admin interface"
+            url.is_dead_since = datetime.now(timezone.utc)
+            url.save()
+        self.message_user(request, "Declare dead: Done")
+
+    declare_dead.short_description = "🔪  Declare dead"
+    actions.append("declare_dead")
+
+
+create_modeladmin(SmallUrlAdmin, name="url-smoll", model=Url)
 
 
 @admin.register(UrlWhois)

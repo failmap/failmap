@@ -10,7 +10,7 @@ from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import init_dict
 from websecmap.scanners.scanner.__init__ import q_configurations_to_report
 
-from websecmap.map.report import create_organization_reports_now
+from websecmap.map.report import create_organization_reports_now, default_organization_rating
 
 log = logging.getLogger(__package__)
 
@@ -37,6 +37,8 @@ def compose_task(
     log.debug("Organizations: %s", len(organization_ids))
 
     tasks = []
+    # todo: organizations that have no endpoints could get a default rating, which is much quicker
+    #  than iterating all organizations. But it does not save too much time...
     urls = (
         Url.objects.filter(q_configurations_to_report(), organization__in=organization_ids, **urls_filter)
         .annotate(n_endpoints=Count("endpoint"))
@@ -45,5 +47,13 @@ def compose_task(
         .values("id", "organization__id")
     )
     organizations_with_urls = {url["organization__id"] for url in urls}
+    organizations_without_urls = set(organization_ids) - organizations_with_urls
+
+    # can still add an empty organization rating even though there is nothing to show.
+    # Will create an empty gray region.
+    if list(organizations_without_urls):
+        # warning: default_organization_rating has a side effect, it will rate everything if nothing is given...
+        tasks.append(default_organization_rating.si(list(organizations_without_urls)))
+
     tasks.extend(create_organization_reports_now.si([organization_id]) for organization_id in organizations_with_urls)
     return group(tasks)

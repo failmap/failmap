@@ -1880,7 +1880,9 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "organizations.organization", "label": "🏢 Organizations"},
             {"name": "organizations.alternativename", "label": "🏢 - Alt Names"},
             {"url": "/admin/organizations/organization-registrar/", "label": "🏢 - Domain Registrars"},
+            {"url": "/admin/organizations/organization-layer-urls/", "label": "🏢 - Layers and Urls"},
             {"name": "organizations.url", "label": "🖥️ Urls"},
+            {"url": "/admin/organizations/url-smoll/", "label": "🖥️ - Smoll editor"},
             {
                 "label": "🖥️ - Dubious Re-registrations",
                 "url": "/admin/organizations/urlwhois/?o=-3",
