@@ -782,15 +782,11 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     @staticmethod
     def in_organizations(obj):
-        return obj.organization.all().count()
-        # return (
-        #     format_html(
-        #         f"{count}<br>"
-        #         f"<a href='/admin/organizations/organization/?q={obj.url}' target='_blank'>Filter: 🔍</a>"
-        #     )
-        #     if count
-        #     else ""
-        # )
+        names = obj.organization.all().values_list("name", flat=True)
+        named_links = [
+            f"<a href='/admin/organizations/organization/?q={name}' target='_blank'>{name}</a>" for name in names
+        ]
+        return format_html(f"{len(names)}: {', '.join(named_links)}") if len(names) else ""
 
     @staticmethod
     def domain(obj):
@@ -990,15 +986,11 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
 
     @staticmethod
     def in_organizations(obj):
-        return obj.organization.all().count()
-        # return (
-        #     format_html(
-        #         f"{count}<br>"
-        #         f"<a href='/admin/organizations/organization/?q={obj.url}' target='_blank'>Filter: 🔍</a>"
-        #     )
-        #     if count
-        #     else ""
-        # )
+        names = obj.organization.all().values_list("name", flat=True)
+        named_links = [
+            f"<a href='/admin/organizations/organization/?q={name}' target='_blank'>{name}</a>" for name in names
+        ]
+        return format_html(f"{len(names)}: {', '.join(named_links)}") if len(names) else ""
 
     @staticmethod
     def domain(obj):
