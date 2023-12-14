@@ -25,6 +25,8 @@ def check_policy_sanity(policy: SecurityPolicy) -> bool:
     return any(
         [
             policy.common_subdomains,
+            policy.common_domains,
+            policy.common_suffixes,
             policy.common_ports,
             policy.common_ip_versions,
             policy.common_protocols,
@@ -53,6 +55,12 @@ def filter_policy_endpoints(policy: SecurityPolicy) -> List[Endpoint]:
 
     if policy.common_subdomains:
         endpoints_in_policy = endpoints_in_policy.filter(url__computed_subdomain__in=policy.common_subdomains)
+
+    if policy.common_domains:
+        endpoints_in_policy = endpoints_in_policy.filter(url__computed_domain__in=policy.common_domains)
+
+    if policy.common_suffixes:
+        endpoints_in_policy = endpoints_in_policy.filter(url__computed_suffix__in=policy.common_suffixes)
 
     if policy.common_html_front_page_content:
         endpoints_in_policy = endpoints_in_policy.filter(

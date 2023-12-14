@@ -21,8 +21,15 @@ class SecurityPolicy(models.Model):
 
     # for automatically determining default policies per endpoint
     common_subdomains = JSONField(
-        blank=True, help_text="List[str] of common subdomains where this policy applies to", default=[]
+        blank=True, help_text="List[str] of common subdomains (www) where this policy applies to", default=[]
     )
+    common_domains = JSONField(
+        blank=True, help_text="List[str] of common domains (example) where this policy applies to", default=[]
+    )
+    common_suffixes = JSONField(
+        blank=True, help_text="List[str] of common suffixes (nl,com) where this policy applies to", default=[]
+    )
+
     common_ports = JSONField(blank=True, help_text="List[int] of port numbers this policy applies to", default=[])
     common_protocols = JSONField(blank=True, help_text="List[str] of protocols this policy applies to", default=[])
     common_ip_versions = models.IntegerField(
