@@ -58,19 +58,24 @@ def get_vulnerability_graph(country, organization_type, days_back, duration: int
         if statistic.scan_type not in stats:
             stats[statistic.scan_type] = []
 
-        stats[statistic.scan_type].append(
-            {
-                "high": statistic.high,
-                "medium": statistic.medium,
-                "low": statistic.low,
-                "date": statistic.at_when.isoformat(),
-                "urls": statistic.urls,
-                "ok_urls": statistic.ok_urls,
-                "endpoints": statistic.endpoints,
-                "ok_endpoints": statistic.ok_endpoints,
-                "ok": statistic.ok,
-            }
-        )
+        total = statistic.high + statistic.medium + statistic.low + statistic.ok
+        stat = {
+            "high": statistic.high,
+            "medium": statistic.medium,
+            "low": statistic.low,
+            "ok": statistic.ok,
+            "date": statistic.at_when.isoformat(),
+            "urls": statistic.urls,
+            "ok_urls": statistic.ok_urls,
+            "endpoints": statistic.endpoints,
+            "ok_endpoints": statistic.ok_endpoints,
+            "ok_pct": round(statistic.ok / total * 100, 2) if total else 0,
+            "high_pct": round(statistic.high / total * 100, 2) if total else 0,
+            "medium_pct": round(statistic.medium / total * 100, 2) if total else 0,
+            "low_pct": round(statistic.low / total * 100, 2) if total else 0,
+        }
+
+        stats[statistic.scan_type].append(stat)
 
     return stats
 
