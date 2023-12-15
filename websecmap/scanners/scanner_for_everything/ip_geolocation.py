@@ -31,11 +31,12 @@ IP_LINK_LOCAL = "link_local"
 
 @app.task(queue="kickoff")
 def create_tasks() -> group:
-    # todo: also create a task for only new ip's, as that will be cheaper and can run every day.
     # let's hope this data is accurate enough to figure out the continent.
     # add some list somewhere of what countries have what impact
     # ips can be many of the same:
-    return group(scan_intelligently.si())
+    # todo: let's hope this is faster than 1 hour.
+    scan_intelligently.apply_async()
+    return group()
 
 
 def get_all_ips() -> List[str]:

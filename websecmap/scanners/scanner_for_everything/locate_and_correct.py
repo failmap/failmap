@@ -7,7 +7,7 @@ from websecmap.scanners.scanner_for_everything.location import create_tasks as l
 
 @app.task(queue="kickoff")
 def create_tasks() -> group:
-    return group(
+    group(
         [
             location_tasks()
             |
@@ -16,4 +16,6 @@ def create_tasks() -> group:
             # todo: the correction should be done IN the location code, not separately. This is just a workaround.
             correction_tasks()
         ]
-    )
+    ).apply_async()
+
+    return group()

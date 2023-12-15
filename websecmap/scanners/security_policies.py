@@ -5,7 +5,7 @@ from typing import List
 
 from websecmap.app import log
 from websecmap.celery import app
-from websecmap.scanners.models import Endpoint, SecurityPolicy, EndpointGenericScan
+from websecmap.scanners.models import Endpoint, SecurityPolicy, EndpointGenericScan, GeoIp
 from datetime import datetime, timezone, timedelta
 
 
@@ -79,6 +79,26 @@ def filter_policy_endpoints(policy: SecurityPolicy) -> List[Endpoint]:
     if policy.common_layers:
         endpoints_in_policy = endpoints_in_policy.filter(
             url__organization__layers__name__in=policy.common_layers,
+        )
+
+    # IP address filters cannot be done in a query, so use a slower method which uses the current result
+    # and then iterate over the results and the networks to figure out if there is a match. Faster would
+    # be having the network in the urlip table. So retrieve active ip's and then see if they are in the network
+    # one by one. Which is slow.
+    # Ranges that cloudflare publishes in https://www.cloudflare.com/ips-v4/# do not match the information
+    # we get from maxmind.
+    # the GeoIp database should contain all ip's we know, from domains and from all urls and more, with
+    # ISP and network information. So here we can filter on some things. Note the isp name is case sensitive.
+    if policy.common_isp_names:
+        valid_ips = (
+            GeoIp.objects.all()
+            .filter(isp_name__in=policy.common_isp_names, is_the_latest=True)
+            .values_list("ip_address", flat=True)
+        )
+
+        endpoints_in_policy = endpoints_in_policy.filter(
+            url__urlip__ip__in=valid_ips,
+            url__urlip__is_unused=False,
         )
 
     eps = list(endpoints_in_policy)

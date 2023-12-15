@@ -16,12 +16,17 @@ import tldextract
 
 @app.task(queue="kickoff")
 def create_tasks() -> group:
-    return group(
-        [add_domains_from_organization_urls() | add_domains_from_privacy_scan() | add_domains_from_mailserver_records()]
-    )
+    # This used to be a very long chain. Which used a lot of memory as the entire chain is saved per task
+    # and thus will crash the server. The chain is not needed, just a set of apply_asyncs per scan|store.
+    # which is called directly from these methods.
+    # [add_domains_from_organization_urls() | add_domains_from_privacy_scan() | add_domains_from_mailserver_records()]
+    add_domains_from_organization_urls()
+    add_domains_from_privacy_scan()
+    add_domains_from_mailserver_records()
+    return group()
 
 
-def add_domains_from_mailserver_records() -> group:
+def add_domains_from_mailserver_records() -> None:
     domains = set()
     for list_of_domains in DomainMX.objects.all().filter(is_the_latest=True):
         if list_of_domains.mail_server_records:
@@ -32,10 +37,12 @@ def add_domains_from_mailserver_records() -> group:
                     extract = tldextract.extract(mail_server_record["domain"])
                     if extract.fqdn:
                         domains.add(extract.fqdn)
-    return group([update_ips(domain) for domain in list(domains)])
+
+    for domain in list(domains):
+        update_ips(domain)
 
 
-def add_domains_from_privacy_scan() -> group:
+def add_domains_from_privacy_scan() -> None:
     # combine lists of external requests. There will be many, but the amount of different domains will be few.
     domains = set()
     for list_of_domains in EndpointGenericScan.objects.all().filter(
@@ -44,21 +51,25 @@ def add_domains_from_privacy_scan() -> group:
         with contextlib.suppress(JSONDecodeError):
             evidence = json.loads(list_of_domains.evidence)
             domains.update(evidence)
-    return group([update_ips(domain) for domain in list(domains)])
+    for domain in list(domains):
+        update_ips(domain)
 
 
-def add_domains_from_organization_urls() -> group:
-    return group(
-        [update_ips(url.url) for url in Url.objects.all().filter(is_dead=False, not_resolvable=False).only("url")]
-    )
+def add_domains_from_organization_urls() -> None:
+    for url in Url.objects.all().filter(is_dead=False, not_resolvable=False).only("url"):
+        update_ips(url.url)
 
 
 def update_ips(domain: str):
-    return group(get_ipv4.si(domain) | store_ip.s(domain, 4) | get_ipv6.si(domain) | store_ip.s(domain, 6))
+    # also split these tasks as they are run in separate queues and don't need to wait on each other.
+    group(get_ipv4.si(domain) | store_ip.s(domain, 4)).apply_async()
+    group(get_ipv6.si(domain) | store_ip.s(domain, 6)).apply_async()
 
 
 @app.task(queue="storage", ignore_result=True)
 def store_ip(ip: Optional[str], domain: str, ip_version: int):
+    # todo: this will make a lot of duplicates, use the functionality from resolve_ip to prevent most of these
+    #  for now it's fine.
     # take into account the by-design limitation of the length of a domain, for now. If there are many
     # longer domains incl subdomains, then change the data type to a very long type.
     data = {"ip_address": ip or None, "domain": domain[:255], "ip_version": ip_version}

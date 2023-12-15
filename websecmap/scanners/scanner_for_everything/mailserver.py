@@ -16,8 +16,9 @@ from websecmap.scanners.time_storage import abstract_time_storage
 
 @app.task(queue="kickoff")
 def create_tasks() -> group:
-    tasks = [get_mailservers.si(url.url) | store_mailserver.s(url.url) for url in Url.objects.all()]
-    return group(tasks)
+    tasks = group([get_mailservers.si(url.url) | store_mailserver.s(url.url) for url in Url.objects.all()])
+    tasks.apply_async()
+    return group([])
 
 
 @app.task(queue="database", ignore_result=True)

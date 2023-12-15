@@ -48,6 +48,10 @@ class SecurityPolicy(models.Model):
 
     common_layers = JSONField(blank=True, help_text="List[str] of common layers, case similar to layers!", default=[])
 
+    common_isp_names = JSONField(
+        blank=True, help_text="List[str] of isp name, case sensitive, eg Cloudflare", default=[]
+    )
+
     affect_explain_scoring_policy = models.ManyToManyField(
         ScanPolicy,
         blank=True,

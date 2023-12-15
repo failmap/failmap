@@ -33,11 +33,11 @@ class EndpointGenericScanInline(CompactInline):
 class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     paginator = TooManyRecordsPaginator
 
-    list_display = ("url", "ip", "rdns_name", "discovered_on", "is_unused", "is_unused_since")
+    list_display = ("url", "ip", "discovered_on", "is_unused", "is_unused_since")
     search_fields = ("url__url", "ip", "rdns_name", "discovered_on", "is_unused_since")
-    list_filter = ["url", "rdns_name", "discovered_on", "is_unused_since"][::-1]
+    list_filter = ["is_unused", "discovered_on", "is_unused_since"][::-1]
     fields = ("url", "ip", "rdns_name", "discovered_on", "is_unused", "is_unused_since", "is_unused_reason")
-    readonly_fields = ["discovered_on"]
+    readonly_fields = ["discovered_on", "url"]
 
 
 @admin.register(models.SecurityPolicy)
