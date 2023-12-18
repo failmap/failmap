@@ -59,6 +59,8 @@ urlpatterns = [
     path("cookie_plaza/", v.cookie_plaza, name="cookie_plaza"),
     path(f"{lp}/products/", v.login_plaza_products),
     path("cookies/indicators/", v.cookie_indicators),
+    path(f"{vg}_all/<c:country>/<w:days_back>/<int:duration>/", v.vulnerability_graphs_for_all_layers),
+    path(f"{vg}_all/<c:country>/<w:at_date>/<int:duration>/", v.vulnerability_graphs_for_all_layers),
     path(f"{vg}/<c:country>/<slug:organization_type>/<w:days_back>/", v.vulnerability_graphs),
     path(f"{vg}/<c:country>/<slug:organization_type>/<ymd:at_date>/", v.vulnerability_graphs),
     path(f"{vg}/<c:country>/<slug:organization_type>/<w:days_back>/<int:duration>/", v.vulnerability_graphs),

@@ -23,6 +23,17 @@ from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 log = logging.getLogger(__package__)
 
 
+def get_vulnerability_graph_for_all_layers(country, days_back, duration: int = 365, at_date: date = None):
+    # just issue 12 queries as that is pretty fast and has a low logic complexity.
+    country = get_country(country)
+    return {
+        layer: get_vulnerability_graph(country, layer, days_back, duration, at_date)
+        for layer in Configuration.objects.filter(country=country, is_displayed=True)
+        .values_list("organization_type__name", flat=True)
+        .order_by("display_order")
+    }
+
+
 def get_vulnerability_graph(country, organization_type, days_back, duration: int = 365, at_date: date = None):
     organization_type_id = get_organization_type(organization_type)
     country = get_country(country)

@@ -54,6 +54,7 @@ from websecmap.map.logic.stats_and_graphs import (
     get_stats,
     get_vulnerability_graph,
     what_to_improve,
+    get_vulnerability_graph_for_all_layers,
 )
 from websecmap.map.logic.ticker import get_ticker_data
 from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
@@ -679,6 +680,17 @@ def vulnerability_graphs(
     at_date: date = None,
 ):
     return json_response(get_vulnerability_graph(country, organization_type, days_back, duration, at_date=at_date))
+
+
+@cache_page(TEN_MINUTES)
+def vulnerability_graphs_for_all_layers(
+    request,
+    country: str = DEFAULT_COUNTRY,
+    days_back=0,
+    duration: int = 365,
+    at_date: date = None,
+):
+    return json_response(get_vulnerability_graph_for_all_layers(country, days_back, duration, at_date=at_date))
 
 
 @cache_page(TEN_MINUTES)
