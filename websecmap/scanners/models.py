@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 from taggit.managers import TaggableManager
 from statshog.defaults.django import statsd
+from django.core.files.storage import storages
 
 from websecmap.app import log
 from websecmap.organizations.models import Url
@@ -1359,8 +1360,8 @@ class CookieBanner(models.Model):
         blank=True, null=True, help_text="Unique ID for the browser session the cookie banner was found"
     )
 
-    banner_indicator = models.CharField(max_length=200, blank=True, null=True, help_text="Name of banner indicator")
-    banner_attributes = models.ManyToManyField(
+    indicator = models.CharField(max_length=200, blank=True, null=True, help_text="Name of banner indicator")
+    attributes = models.ManyToManyField(
         CookieBannerAttribute,
         blank=True,
         help_text="Attributes of the banner",
@@ -1393,4 +1394,48 @@ class ExternalResource(models.Model):
         CookiePlacement,
         blank=True,
         help_text="When in the browser session the resource was requested, eg: after consent decline",
+    )
+
+
+class PaperTrail(models.Model):
+    filename = models.CharField(max_length=200, blank=True, null=True, help_text="Filename including extension")
+    file_object = models.FileField(storage=storages["paper_trail"], upload_to="paper_trail/%Y/%m-%d/")
+
+
+class CookieScanSession(models.Model):
+    """
+    Metadata regarding a particular scan for cookies, banners and external resources
+    """
+
+    id = models.BigIntegerField(primary_key=True, help_text="Unique ID for the browser session")
+    at_when = models.DateTimeField(auto_now_add=True)
+    endpoint = models.ForeignKey(
+        Endpoint, null=True, blank=True, on_delete=models.CASCADE, help_text="Endpoint that was scanned"
+    )
+    max_depth = models.IntegerField(blank=True, null=True, help_text="Maximum depth to crawl")
+    max_crawl_time = models.IntegerField(blank=True, null=True, help_text="Maximum amount of time to spend crawling")
+
+    time_spent = models.IntegerField(blank=True, null=True, help_text="Time spent crawling")
+    pages_visited = models.IntegerField(blank=True, null=True, help_text="Nr. of pages visited")
+
+    cookies = models.ManyToManyField(
+        Cookie,
+        blank=True,
+        help_text="Cookies found in this scan session",
+    )
+    banners = models.ManyToManyField(
+        CookieBanner,
+        blank=True,
+        help_text="Cookie banners found on the site during scan session",
+    )
+    external_resources = models.ManyToManyField(
+        ExternalResource,
+        blank=True,
+        help_text="External resources found in this scan session",
+    )
+
+    paper_trails = models.ManyToManyField(
+        PaperTrail,
+        blank=True,
+        help_text="References to logs and information collected during the scan, useful for debugging.",
     )

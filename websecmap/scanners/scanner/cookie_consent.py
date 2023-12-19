@@ -9,17 +9,25 @@ Thanks to:
 """
 from typing import Any, Dict, List
 import requests
-
 from celery import group
 from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
-from websecmap.scanners.models import Cookie, CookiePlacement, Endpoint, ExternalResource
+from websecmap.scanners.models import (
+    Cookie,
+    CookiePlacement,
+    CookieBanner,
+    Endpoint,
+    ExternalResource,
+    CookieScanSession,
+    PaperTrail,
+    CookieBannerAttribute,
+)
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
-
+from django.core.files.base import ContentFile
 
 SCANNER_NAME = "cookie_consent"
 
@@ -39,7 +47,7 @@ STANDARD_ENDPOINT_FILTER = {
 @app.task(queue="kickoff", ignore_result=True)
 def plan_scan(**kwargs) -> None:
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
-    generic_plan_scan(SCANNER_NAME, "scan", filter_endpoints_only, **kwargs)
+    generic_plan_scan(SCANNER_NAME, "scan", filter_endpoints_only)
 
 
 @app.task(queue="kickoff")
@@ -73,8 +81,12 @@ def compose_scan_task(urls: List[Url]) -> group:
     tasks.extend(
         group(
             scan.si(endpoint.uri_url())
-            | store.s(endpoint.id)
-            | plannedscan.finish.si("scan", SCANNER_NAME, endpoint.url.id)
+            | group(
+                [
+                    store.s(endpoint.id) | plannedscan.finish.si("scan", SCANNER_NAME, endpoint.url.id),
+                    store_paper_trail.s(endpoint.id),
+                ]
+            )
         )
         for endpoint in https_endpoints
     )
@@ -89,16 +101,15 @@ def scan(url: str) -> Dict[str, Any]:
     # so the timeout is never reached in case all tasks turn into timeouts
     playwright_server = constance_cached_value("WEB_PRIVACY_SERVER").rstrip("/")
     depth = constance_cached_value("COOKIE_CRAWL_DEPTH")
-    maxpages = constance_cached_value("COOKIE_CRAWL_MAXPAGES")
-    crawl_time = constance_cached_value("COOKIE_CRAWL_TIME")
+    maxpages = 1  # constance_cached_value("COOKIE_CRAWL_MAXPAGES")
+    crawl_time = 10  # constance_cached_value("COOKIE_CRAWL_TIME")
     timeout = 300 + crawl_time  # add default timeout on top of crawl timeout
-    crawl_args = f"&depth={depth}&maxpages={maxpages}&timeout={crawl_time}"
-    request = f"{playwright_server}/cookieconsent?site={url}{crawl_args}"
-    log.debug(request)
+    params = {"site": url, "depth": depth, "maxpages": maxpages, "timeout": crawl_time}
+    request = f"{playwright_server}/cookieconsent"
 
     try:
-        # give request some extra timout to ensure it can respond within its own timeout
-        response = requests.get(request, timeout=timeout)
+        log.debug("url:%s params:%s timeout:%s", request, params, timeout)
+        response = requests.get(request, params=params, timeout=timeout)
     except requests.exceptions.ReadTimeout:
         log.exception("Request timed out")
         return None
@@ -124,15 +135,21 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     if not result_data:
         return
 
-    if type(result_data) == list:
-        cookies = result_data
-        external_resources = []
-    else:
-        cookies = result_data.get("cookies", [])
-        external_resources = result_data.get("external_resources", [])
+    session_id = result_data.get("meta").get("session_id")
+    endpoint = Endpoint.objects.get(pk=endpoint_id)
+
+    cookies = result_data.get("cookies", [])
+    external_resources = result_data.get("external_resources", [])
+    banners = result_data.get("banners", [])
+
+    session, created = CookieScanSession.objects.get_or_create(id=session_id, endpoint=endpoint)
+    session.max_depth = result_data.get("meta").get("max_depth")
+    session.max_crawl_time = result_data.get("meta").get("max_crawl_time")
+    session.time_spent = result_data.get("meta").get("time_spent")
+    session.pages_visited = result_data.get("meta").get("pages_visited")
+    session.save()
 
     for cookie in cookies:
-        endpoint = Endpoint.objects.get(pk=endpoint_id)
         c = Cookie.objects.create(
             endpoint=endpoint,
             session_id=cookie.get("session_id"),
@@ -140,12 +157,12 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
             url=cookie.get("url")[:200],
             cookie=cookie.get("cookie"),
         )
-        placements = [CookiePlacement.objects.get_or_create(name=name)[0] for name in cookie.get("placement", [])]
+        placements = [CookiePlacement.objects.get_or_create(name=name)[0] for name in cookie.get("placement")]
         c.placement.set(placements)
         c.save()
+        session.cookies.add(c)
 
     for resource in external_resources:
-        endpoint = Endpoint.objects.get(pk=endpoint_id)
         r = ExternalResource.objects.create(
             endpoint=endpoint,
             session_id=resource.get("session_id"),
@@ -156,6 +173,50 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
             method=resource.get("method"),
             count=resource.get("count"),
         )
-        attributes = [CookiePlacement.objects.get_or_create(name=name)[0] for name in resource.get("attributes", [])]
+        attributes = [CookiePlacement.objects.get_or_create(name=name)[0] for name in resource.get("attributes")]
         r.attributes.set(attributes)
         r.save()
+        session.external_resources.add(r)
+
+    for banner in banners:
+        cb = CookieBanner.objects.create(
+            endpoint=endpoint,
+            session_id=banner.get("session_id"),
+            indicator=banner.get("indicator"),
+        )
+        attribute = [CookieBannerAttribute.objects.get_or_create(name=name)[0] for name in banner.get("attributes")]
+        cb.attributes.set(attribute)
+        cb.save()
+
+        session.banners.add(cb)
+
+    session.save()
+
+
+@app.task(queue="storage", ignore_result=True)
+def store_paper_trail(result_data: Dict[str, Any], endpoint_id: int) -> None:
+    """Stores all paper trails from a scan in persistent long term storage (disk, S3 glacier, etc)."""
+
+    if not result_data:
+        return
+
+    session_id = result_data["meta"]["session_id"]
+    paper_trails = result_data["meta"].get("paper_trails", {})
+
+    endpoint = Endpoint.objects.get(pk=endpoint_id)
+
+    session, created = CookieScanSession.objects.get_or_create(id=session_id, endpoint=endpoint)
+
+    for filename, content in paper_trails.items():
+        try:
+            name = f"{SCANNER_NAME}/{session_id}/{filename}"
+            p = PaperTrail(filename=filename, file_object=ContentFile(content, name=name))
+            p.save()
+            session.paper_trails.add(p)
+        except Exception:
+            # log exception, but continue to next file to be saved
+            log.exception("Failed to save paper trail")
+    else:
+        log.debug("no paper trails for scansession: %s", session)
+
+    session.save()

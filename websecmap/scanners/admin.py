@@ -1159,3 +1159,60 @@ class ExternalResourceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     @admin.display(description="Attributes")
     def get_attributes(self, obj):
         return ", ".join([p.name for p in obj.attributes.all()])
+
+
+@admin.register(models.CookieBanner)
+class CookieBannerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("at_when", "endpoint", "indicator", "get_attributes")
+
+    search_fields = ("endpoint__url__url", "indicator", "attributes__name")
+
+    list_filter = ("indicator", "attributes")
+
+    @admin.display(description="Attributes")
+    def get_attributes(self, obj):
+        return ", ".join([p.name for p in obj.attributes.all()])
+
+
+@admin.register(models.CookieScanSession)
+class CookieScanSessionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = (
+        "id",
+        "at_when",
+        "endpoint",
+        "max_depth",
+        "max_crawl_time",
+        "time_spent",
+        "pages_visited",
+        "download_paper_trails",
+    )
+
+    search_fields = ("endpoint__url__url", "cookies", "banners", "external_resources")
+
+    # list_filter = ("depth", "placement")
+
+    # @admin.display(description="Attributes", )
+    def get_attributes(self, obj):
+        return ", ".join([p.name for p in obj.attributes.all()])
+
+    @admin.display(description="Download paper trails")
+    def download_paper_trails(self, obj):
+        for paper_trail in obj.paper_trails.all():
+            return format_html(f'<a href="{paper_trail.file_object.url}" download>{paper_trail.filename}</a>')
+
+
+@admin.register(models.PaperTrail)
+class PaperTrailAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("scansession", "filename", "download_paper_trail")
+
+    search_fields = ("filename",)
+
+    list_filter = ("filename",)
+
+    def scansession(self, obj):
+        return repr(obj.cookiescansession_set.all()[0])
+
+    @admin.display(description="Download file")
+    def download_paper_trail(self, obj):
+        if obj.file_object:
+            return format_html(f'<a href="{obj.file_object.url}" download>{obj.filename}</a>')

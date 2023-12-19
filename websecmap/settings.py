@@ -1454,13 +1454,13 @@ CONSTANCE_CONFIG = {
         int,
     ),
     "COOKIE_CRAWL_MAXPAGES": (
-        200,
-        "Maximum pages to visit before stopping crawling.",
+        100,
+        "Maximum pages to visit before stopping crawling (default: 100).",
         int,
     ),
     "COOKIE_CRAWL_TIME": (
         60 * 10,
-        "Maximum amount of seconds to spend crawling.",
+        "Maximum amount of seconds to spend crawling (default: 10m).",
         int,
     ),
 }
@@ -1912,8 +1912,16 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "scanners.urlgenericscan", "label": "🔬 URL Metrics"},
             {"name": "scanners.internetnlv2scan", "label": "📨 Internet.nl Scans"},
             {"name": "scanners.screenshot", "label": "📸 Screenshots"},
+        ],
+    },
+    {
+        "label": _("Playwright browser scans"),
+        "items": [
+            {"name": "scanners.cookiescansession", "label": "🧑‍💻 Scan Session"},
+            {"name": "scanners.cookiebanner", "label": "📑 Cookie Banner"},
             {"name": "scanners.cookie", "label": "🍪 Cookies"},
             {"name": "scanners.externalresource", "label": "📖 External Resources"},
+            {"name": "scanners.papertrail", "label": "🧾 Paper trails"},
         ],
     },
     {
@@ -2060,6 +2068,14 @@ STORAGES = {
     },
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+    # this is for storing all sorts of data collected during a scan (logs, command output, etc)
+    # that are to large/much to store in the database but which can help in troubleshooting scan
+    # result, for example investigating false positives
+    # ideally this is stored in S3 Glacier or something, but for now store it on disk
+    # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
+    "paper_trail": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
 }
 
