@@ -689,6 +689,17 @@ def gather_evidence_from_technical_details_on_domain(scan_type: str, technical_d
                     "securitytxt_found_host": data.get("securitytxt_found_host", ""),
                 }
 
+    # https://github.com/internetstandards/Internet.nl/blob/main/interface/batch/openapi.yaml#L827
+    if scan_type in {"internet_nl_web_appsecpriv_referrer_policy"}:
+        for ip_version in ["ipv4", "ipv6"]:
+            if data := expect(td, ["webservers", ip_version, "details"]):
+                details[ip_version] = {
+                    "referrer_policy_enabled": data.get("referrer_policy_enabled", False),
+                    "referrer_policy_values": data.get("referrer_policy_values", []),
+                    "referrer_policy_errors": data.get("referrer_policy_errors", []),
+                    "referrer_policy_recommendations": data.get("referrer_policy_recommendations", []),
+                }
+
     # no implementation yet...
     return details
 

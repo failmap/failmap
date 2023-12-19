@@ -1177,8 +1177,10 @@ def test_gather_evidence_from_technical_details():
                     "content_security_policy_enabled": False,
                     "content_security_policy_values": [],
                     "content_security_policy_errors": [],
-                    "referrer_policy_enabled": False,
+                    "referrer_policy_enabled": True,
                     "referrer_policy_values": [],
+                    "referrer_policy_errors": [{"msgid": "some_referrer_policy_error"}],
+                    "referrer_policy_recommendations": [],
                     "x_content_type_options_enabled": False,
                     "x_content_type_options_values": [],
                     "x_frame_options_enabled": False,
@@ -1201,6 +1203,18 @@ def test_gather_evidence_from_technical_details():
             "securitytxt_errors": [{"msgid": "no_security_txt_404"}],
             "securitytxt_found_host": "www.example.com",
             "securitytxt_recommendations": [],
+        }
+    }
+
+    data = gather_evidence_from_technical_details_on_domain(
+        "internet_nl_web_appsecpriv_referrer_policy", data_for_domain
+    )
+    assert data == {
+        "ipv4": {
+            "referrer_policy_enabled": True,
+            "referrer_policy_errors": [{"msgid": "some_referrer_policy_error"}],
+            "referrer_policy_values": [],
+            "referrer_policy_recommendations": [],
         }
     }
 
