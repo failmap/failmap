@@ -1413,6 +1413,10 @@ class CookieScanSession(models.Model):
         Endpoint, null=True, blank=True, on_delete=models.CASCADE, help_text="Endpoint that was scanned"
     )
 
+    stop_reason = models.CharField(
+        max_length=200, blank=True, null=True, help_text="Reason why the scansession stopped"
+    )
+
     stats = JSONField(blank=True, help_text="KV pairs with scan session statistics", default={})
 
     cookies = models.ManyToManyField(

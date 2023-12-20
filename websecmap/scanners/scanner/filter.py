@@ -62,7 +62,8 @@ def filter_endpoints_only(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> List[Url]:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level="endpoint"), **endpoints_filter)
+    endpoints = Endpoint.objects.all()
+    endpoints = endpoints.filter(q_configurations_to_scan(level="endpoint"))
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
     endpoints = endpoints.only("id", "url__url")
     endpoints = unique_and_random(endpoints)

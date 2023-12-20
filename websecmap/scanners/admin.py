@@ -1180,7 +1180,8 @@ class CookieScanSessionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "id",
         "at_when",
         "endpoint",
-        "stats",
+        "stop_reason",
+        "get_stats",
         "download_paper_trails",
     )
 
@@ -1192,11 +1193,16 @@ class CookieScanSessionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def get_attributes(self, obj):
         return ", ".join([p.name for p in obj.attributes.all()])
 
+    def get_stats(self, obj):
+        if not isinstance(obj.stats, dict):
+            return obj.stats
+        return format_html("<ul>" + "".join(f"<li>{key}: {value}</li>" for key, value in obj.stats.items()))
+
     @admin.display(description="Download paper trails")
     def download_paper_trails(self, obj):
         return format_html(
             "".join(
-                f'<a href="{paper_trail.file_object.url}" download>{paper_trail.filename}</a>'
+                f'<a href="{paper_trail.file_object.url}" download>{paper_trail.filename}</a><br>'
                 for paper_trail in obj.paper_trails.all()
             )
         )

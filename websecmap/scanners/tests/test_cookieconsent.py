@@ -5,6 +5,7 @@ from pathlib import Path
 import json
 from django.core.files.storage import storages
 from freezegun import freeze_time
+import base64
 
 
 def test_cookieconsent_store_empty(db):
@@ -59,8 +60,10 @@ def test_cookieconsent_store_paper_trail(db):
         "meta": {
             "session_id": 1232384098,
             "paper_trails": {
-                "log.txt": "info: visiting page\nwarning: did not find banner\ndebug: found cookie\n",
-                "logs.json": '{"error": "failed to scan page"}',
+                "log.txt": base64.b64encode(
+                    b"info: visiting page\nwarning: did not find banner\ndebug: found cookie\n"
+                ),
+                "logs.json": base64.b64encode(b'{"error": "failed to scan page"}'),
             },
         }
     }

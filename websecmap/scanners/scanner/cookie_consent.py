@@ -27,6 +27,7 @@ from websecmap.scanners.models import (
 )
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
+import base64
 from django.core.files.base import ContentFile
 
 SCANNER_NAME = "cookie_consent"
@@ -141,9 +142,12 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     cookies = result_data.get("cookies", [])
     external_resources = result_data.get("external_resources", [])
     banners = result_data.get("banners", [])
+    stats = result_data.get("meta", {}).get("stats", {})
+    stop_reason = result_data.get("meta", {}).get("stop_reason", None)
 
-    session, created = CookieScanSession.objects.get_or_create(id=session_id, endpoint=endpoint)
-    session.stats = result_data.get("stats", {})
+    session, created = CookieScanSession.objects.get_or_create(
+        id=session_id, endpoint=endpoint, stats=stats, stop_reason=stop_reason
+    )
     session.save()
 
     for cookie in cookies:
@@ -204,9 +208,10 @@ def store_paper_trail(result_data: Dict[str, Any], endpoint_id: int) -> None:
 
     session, created = CookieScanSession.objects.get_or_create(id=session_id, endpoint=endpoint)
 
-    for filename, content in paper_trails.items():
+    for filename, base64_content in paper_trails.items():
         try:
             name = f"{SCANNER_NAME}/{session_id}/{filename}"
+            content = base64.b64decode(base64_content)
             p = PaperTrail(filename=filename, file_object=ContentFile(content, name=name))
             p.save()
             session.paper_trails.add(p)

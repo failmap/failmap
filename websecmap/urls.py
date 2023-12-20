@@ -96,6 +96,10 @@ router = routers.DefaultRouter()
 router.register(r"coordinate", CoordinateViewSet)
 router.register(r"organization", OrganizationViewSet)
 
+if settings.DEBUG:
+    urlpatterns += staticfiles_urlpatterns()
+    # this should be above other admin urls
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # enable admin url's if this is an administrative (more secured/read-write) instance
 if settings.ADMIN:
@@ -111,10 +115,6 @@ if settings.ADMIN:
 # enable urls with interactive components that require database write access (login, url/org submit)
 if settings.ADMIN or settings.INTERACTIVE:
     urlpatterns += interactive_urls
-
-if settings.DEBUG:
-    urlpatterns += staticfiles_urlpatterns()
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # debugging
 # urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
