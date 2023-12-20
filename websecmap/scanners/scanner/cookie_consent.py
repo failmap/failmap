@@ -102,8 +102,8 @@ def scan(url: str) -> Dict[str, Any]:
     # so the timeout is never reached in case all tasks turn into timeouts
     playwright_server = constance_cached_value("WEB_PRIVACY_SERVER").rstrip("/")
     depth = constance_cached_value("COOKIE_CRAWL_DEPTH")
-    maxpages = 1  # constance_cached_value("COOKIE_CRAWL_MAXPAGES")
-    crawl_time = 10  # constance_cached_value("COOKIE_CRAWL_TIME")
+    maxpages = constance_cached_value("COOKIE_CRAWL_MAXPAGES")
+    crawl_time = constance_cached_value("COOKIE_CRAWL_TIME")
     timeout = 300 + crawl_time  # add default timeout on top of crawl timeout
     params = {"site": url, "depth": depth, "maxpages": maxpages, "timeout": crawl_time}
     request = f"{playwright_server}/cookieconsent"
