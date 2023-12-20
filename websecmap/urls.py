@@ -22,6 +22,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.template.response import TemplateResponse
 from django.urls import path, re_path
 from rest_framework import routers, serializers, viewsets
+from django.conf.urls.static import static
+
 
 # register Jet Dashboard views
 import websecmap.app.dashboard_module_views  # noqa  # pylint: disable=unused-import
@@ -112,7 +114,7 @@ if settings.ADMIN or settings.INTERACTIVE:
 
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
-
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # debugging
 # urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]

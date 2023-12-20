@@ -2060,7 +2060,7 @@ else:
 
 # Allow file uploads in datasets:
 MEDIA_ROOT = os.environ.get("MEDIA_ROOT", os.path.abspath(os.path.dirname(__file__)) + "/uploads/")
-MEDIA_URL = os.environ.get("MEDIA_URL", "/admin/media/")
+MEDIA_URL = os.environ.get("MEDIA_URL", "/admin/uploads/")
 
 # New in django 4.2:
 STORAGES = {
@@ -2075,12 +2075,7 @@ STORAGES = {
     # result, for example investigating false positives
     # ideally this is stored in S3 Glacier or something, but for now store it on disk
     # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
-    "paper_trail": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-        "OPTIONS": {
-            "base_url": "/admin/"
-        }
-    },
+    "paper_trail": {"BACKEND": "django.core.files.storage.FileSystemStorage", "OPTIONS": {"base_url": MEDIA_URL}},
 }
 
 
