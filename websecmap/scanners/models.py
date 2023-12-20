@@ -1412,11 +1412,8 @@ class CookieScanSession(models.Model):
     endpoint = models.ForeignKey(
         Endpoint, null=True, blank=True, on_delete=models.CASCADE, help_text="Endpoint that was scanned"
     )
-    max_depth = models.IntegerField(blank=True, null=True, help_text="Maximum depth to crawl")
-    max_crawl_time = models.IntegerField(blank=True, null=True, help_text="Maximum amount of time to spend crawling")
 
-    time_spent = models.IntegerField(blank=True, null=True, help_text="Time spent crawling")
-    pages_visited = models.IntegerField(blank=True, null=True, help_text="Nr. of pages visited")
+    stats = JSONField(blank=True, help_text="KV pairs with scan session statistics", default={})
 
     cookies = models.ManyToManyField(
         Cookie,

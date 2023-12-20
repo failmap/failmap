@@ -1180,10 +1180,7 @@ class CookieScanSessionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "id",
         "at_when",
         "endpoint",
-        "max_depth",
-        "max_crawl_time",
-        "time_spent",
-        "pages_visited",
+        "stats",
         "download_paper_trails",
     )
 
@@ -1197,8 +1194,12 @@ class CookieScanSessionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     @admin.display(description="Download paper trails")
     def download_paper_trails(self, obj):
-        for paper_trail in obj.paper_trails.all():
-            return format_html(f'<a href="{paper_trail.file_object.url}" download>{paper_trail.filename}</a>')
+        return format_html(
+            "".join(
+                f'<a href="{paper_trail.file_object.url}" download>{paper_trail.filename}</a>'
+                for paper_trail in obj.paper_trails.all()
+            )
+        )
 
 
 @admin.register(models.PaperTrail)

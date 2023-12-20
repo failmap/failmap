@@ -47,7 +47,7 @@ STANDARD_ENDPOINT_FILTER = {
 @app.task(queue="kickoff", ignore_result=True)
 def plan_scan(**kwargs) -> None:
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
-    generic_plan_scan(SCANNER_NAME, "scan", filter_endpoints_only)
+    generic_plan_scan(SCANNER_NAME, "scan", filter_endpoints_only, **kwargs)
 
 
 @app.task(queue="kickoff")
@@ -143,10 +143,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     banners = result_data.get("banners", [])
 
     session, created = CookieScanSession.objects.get_or_create(id=session_id, endpoint=endpoint)
-    session.max_depth = result_data.get("meta").get("max_depth")
-    session.max_crawl_time = result_data.get("meta").get("max_crawl_time")
-    session.time_spent = result_data.get("meta").get("time_spent")
-    session.pages_visited = result_data.get("meta").get("pages_visited")
+    session.stats = result_data.get("stats", {})
     session.save()
 
     for cookie in cookies:
