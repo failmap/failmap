@@ -11,6 +11,7 @@ from websecmap.scanners.scanner.__init__ import (
     endpoint_filters,
     q_configurations_to_scan,
     unique_and_random,
+    url_filters,
 )
 
 log = logging.getLogger(__name__)
@@ -61,7 +62,7 @@ def filter_endpoints_only(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> List[Url]:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    endpoints = Endpoint.objects.all()  # .filter(q_configurations_to_scan(level="endpoint"), **endpoints_filter)
+    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level="endpoint"), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
     endpoints = endpoints.only("id", "url__url")
     endpoints = unique_and_random(endpoints)
@@ -72,10 +73,9 @@ def filter_urls_only(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> List[Url]:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    urls = Url.objects.all()  # .filter(q_configurations_to_scan(level="url"), not_resolvable=False, is_dead=False)
-    # urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
-    # urls = urls.only("id", "url")
-    print(urls)
+    urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), not_resolvable=False, is_dead=False)
+    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
+    urls = urls.only("id", "url")
 
     return unique_and_random(urls)
 
