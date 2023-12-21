@@ -1134,6 +1134,11 @@ CONSTANCE_CONFIG = {
         "Where to talk to the playwright container.",
         str,
     ),
+    "WEB_COOKIE_CONSENT": (
+        os.environ.get("COOKIE_CONSENT_SERVER", "http://localhost:31337"),
+        "Where to talk to the playwright container for cookie consent.",
+        str,
+    ),
     "NUCLEI_HTTP_DISABLED_TEMPLATES": (
         '["security-txt", "robots-txt"]',
         "A valid json list, with template-ids from nuclei that should not be run. See nuclei template repo.",
@@ -1676,6 +1681,10 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         (
             "Web Privacy",
             ("WEB_PRIVACY_SERVER",),
+        ),
+        (
+            "Cookie consent",
+            ("WEB_COOKIE_CONSENT",),
         ),
         (
             "Plus",

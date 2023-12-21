@@ -100,7 +100,7 @@ def scan(url: str) -> Dict[str, Any]:
     log.debug("Scanning cookies on %s", url)
     # this is a single threaded webserver. More tasks means more waiting. So keep the amount of tasks low enough
     # so the timeout is never reached in case all tasks turn into timeouts
-    playwright_server = constance_cached_value("WEB_PRIVACY_SERVER").rstrip("/")
+    playwright_server = constance_cached_value("WEB_COOKIE_CONSENT").rstrip("/")
     depth = constance_cached_value("COOKIE_CRAWL_DEPTH")
     maxpages = constance_cached_value("COOKIE_CRAWL_MAXPAGES")
     crawl_time = constance_cached_value("COOKIE_CRAWL_TIME")
