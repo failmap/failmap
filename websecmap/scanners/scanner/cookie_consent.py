@@ -94,7 +94,7 @@ def compose_scan_task(urls: List[Url]) -> group:
     return group(tasks)
 
 
-@app.task(queue="playwright-privacy", ignore_result=True)
+@app.task(queue="cookie-consent", ignore_result=True)
 def scan(url: str) -> Dict[str, Any]:
     # just except the loudest way possible in case of exceptions.
     log.debug("Scanning cookies on %s", url)

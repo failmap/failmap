@@ -89,6 +89,7 @@ QUEUES_MATCHING_ROLES = {
         Queue("screenshot"),
         Queue("kickoff"),
         Queue("playwright-privacy"),
+        Queue("cookie-consent"),
         Queue("prefork"),
         Queue("amass"),
         Queue("bannergrab"),
@@ -203,6 +204,9 @@ QUEUES_MATCHING_ROLES = {
     ],
     "playwright-privacy": [
         Queue("playwright-privacy"),
+    ],
+    "cookie-consent": [
+        Queue("cookie-consent"),
     ],
     "amass": [
         Queue("amass"),
