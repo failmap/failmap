@@ -1356,7 +1356,7 @@ class CookieBanner(models.Model):
         on_delete=models.CASCADE,
         help_text="Endpoint where the cookie banner was found",
     )
-    session_id = models.IntegerField(
+    session_id = models.BigIntegerField(
         blank=True, null=True, help_text="Unique ID for the browser session the cookie banner was found"
     )
 

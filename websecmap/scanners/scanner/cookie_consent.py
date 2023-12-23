@@ -81,13 +81,20 @@ def compose_scan_task(urls: List[Url]) -> group:
     tasks = [plannedscan.finish.si("scan", SCANNER_NAME, url_id) for url_id in https_urls_without_endpoints]
     tasks.extend(
         group(
-            scan.si(endpoint.uri_url())
+            scan.si(endpoint.uri_url(), True)
             | group(
                 [
                     store.s(endpoint.id) | plannedscan.finish.si("scan", SCANNER_NAME, endpoint.url.id),
                     store_paper_trail.s(endpoint.id),
                 ]
-            )
+            ),
+            scan.si(endpoint.uri_url(), False)
+            | group(
+                [
+                    store.s(endpoint.id) | plannedscan.finish.si("scan", SCANNER_NAME, endpoint.url.id),
+                    store_paper_trail.s(endpoint.id),
+                ]
+            ),
         )
         for endpoint in https_endpoints
     )
@@ -95,7 +102,7 @@ def compose_scan_task(urls: List[Url]) -> group:
 
 
 @app.task(queue="cookie-consent", ignore_result=True)
-def scan(url: str) -> Dict[str, Any]:
+def scan(url: str, consent: bool) -> Dict[str, Any]:
     # just except the loudest way possible in case of exceptions.
     log.debug("Scanning cookies on %s", url)
     # this is a single threaded webserver. More tasks means more waiting. So keep the amount of tasks low enough
@@ -105,7 +112,13 @@ def scan(url: str) -> Dict[str, Any]:
     maxpages = constance_cached_value("COOKIE_CRAWL_MAXPAGES")
     crawl_time = constance_cached_value("COOKIE_CRAWL_TIME")
     timeout = 300 + crawl_time  # add default timeout on top of crawl timeout
-    params = {"site": url, "depth": depth, "maxpages": maxpages, "timeout": crawl_time}
+    params = {
+        "site": url,
+        "depth": depth,
+        "maxpages": maxpages,
+        "timeout": crawl_time,
+        "consent": "1" if consent else "0",
+    }
     request = f"{playwright_server}/cookieconsent"
 
     try:
@@ -153,7 +166,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     for cookie in cookies:
         c = Cookie.objects.create(
             endpoint=endpoint,
-            session_id=cookie.get("session_id"),
+            session_id=session_id,
             depth=cookie.get("depth"),
             url=cookie.get("url")[:200],
             cookie=cookie.get("cookie"),
@@ -166,7 +179,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     for resource in external_resources:
         r = ExternalResource.objects.create(
             endpoint=endpoint,
-            session_id=resource.get("session_id"),
+            session_id=session_id,
             depth=resource.get("depth"),
             url=resource.get("url")[:200],
             domainname=resource.get("domainname"),
@@ -182,10 +195,11 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     for banner in banners:
         cb = CookieBanner.objects.create(
             endpoint=endpoint,
-            session_id=banner.get("session_id"),
+            session_id=session_id,
             indicator=banner.get("indicator"),
         )
-        attribute = [CookieBannerAttribute.objects.get_or_create(name=name)[0] for name in banner.get("attributes")]
+
+        attribute = [CookieBannerAttribute.objects.get_or_create(name=name)[0] for name in banner.get("attributes", [])]
         cb.attributes.set(attribute)
         cb.save()
 
@@ -201,8 +215,12 @@ def store_paper_trail(result_data: Dict[str, Any], endpoint_id: int) -> None:
     if not result_data:
         return
 
-    session_id = result_data["meta"]["session_id"]
+    session_id = int(result_data["meta"]["session_id"])
     paper_trails = result_data["meta"].get("paper_trails", {})
+
+    if not paper_trails:
+        log.debug("no paper trails for scansession: %s", session_id)
+        return
 
     endpoint = Endpoint.objects.get(pk=endpoint_id)
 
@@ -218,7 +236,5 @@ def store_paper_trail(result_data: Dict[str, Any], endpoint_id: int) -> None:
         except Exception:
             # log exception, but continue to next file to be saved
             log.exception("Failed to save paper trail")
-    else:
-        log.debug("no paper trails for scansession: %s", session)
 
     session.save()
