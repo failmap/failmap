@@ -81,20 +81,22 @@ def compose_scan_task(urls: List[Url]) -> group:
     tasks = [plannedscan.finish.si("scan", SCANNER_NAME, url_id) for url_id in https_urls_without_endpoints]
     tasks.extend(
         group(
-            scan.si(endpoint.uri_url(), True)
-            | group(
-                [
-                    store.s(endpoint.id) | plannedscan.finish.si("scan", SCANNER_NAME, endpoint.url.id),
-                    store_paper_trail.s(endpoint.id),
-                ]
-            ),
-            scan.si(endpoint.uri_url(), False)
-            | group(
-                [
-                    store.s(endpoint.id) | plannedscan.finish.si("scan", SCANNER_NAME, endpoint.url.id),
-                    store_paper_trail.s(endpoint.id),
-                ]
-            ),
+            [
+                scan.si(endpoint.uri_url(), True)
+                | group(
+                    [
+                        store.s(endpoint.id) | plannedscan.finish.si("scan", SCANNER_NAME, endpoint.url.id),
+                        store_paper_trail.s(endpoint.id),
+                    ]
+                ),
+                scan.si(endpoint.uri_url(), False)
+                | group(
+                    [
+                        store.s(endpoint.id) | plannedscan.finish.si("scan", SCANNER_NAME, endpoint.url.id),
+                        store_paper_trail.s(endpoint.id),
+                    ]
+                ),
+            ]
         )
         for endpoint in https_endpoints
     )
