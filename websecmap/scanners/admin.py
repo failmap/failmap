@@ -1203,7 +1203,7 @@ class CookieScanSessionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return format_html(
             "".join(
                 f"""<a href="{paper_trail.file_object.url}"
-                {"download" if not paper_trail.filename.endswith("html") else ""}>
+                {'target="_blank"' if paper_trail.filename.endswith("html") else "download"}>
                 {paper_trail.filename}</a><br>"""
                 for paper_trail in obj.paper_trails.all()
             )
