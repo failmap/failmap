@@ -1202,7 +1202,9 @@ class CookieScanSessionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def download_paper_trails(self, obj):
         return format_html(
             "".join(
-                f'<a href="{paper_trail.file_object.url}" download>{paper_trail.filename}</a><br>'
+                f"""<a href="{paper_trail.file_object.url}"
+                {"download" if not paper_trail.filename.endswith("html") else ""}>
+                {paper_trail.filename}</a><br>"""
                 for paper_trail in obj.paper_trails.all()
             )
         )
