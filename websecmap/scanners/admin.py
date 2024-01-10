@@ -1187,7 +1187,7 @@ class CookieScanSessionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     search_fields = ("endpoint__url__url", "cookies", "banners", "external_resources")
 
-    # list_filter = ("depth", "placement")
+    list_filter = ("stop_reason",)
 
     # @admin.display(description="Attributes", )
     def get_attributes(self, obj):
