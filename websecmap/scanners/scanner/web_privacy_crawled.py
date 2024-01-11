@@ -210,7 +210,7 @@ def try_load_json(data: str):
 def store_cookies_as_regular_metrics(session: CookieScanSession):
     if "consent" not in session.stats:
         return
-    
+
     if session.stats["consent"]:
         _cookie_metric = WEB_PRIVACY_COOKIES_CRAWLED_WITH_CONSENT
     else:
