@@ -1185,7 +1185,7 @@ class CookieScanSessionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "download_paper_trails",
     )
 
-    search_fields = ("endpoint__url__url", "cookies", "banners", "external_resources")
+    search_fields = ("endpoint__url__url",)
 
     list_filter = ("stop_reason",)
 

@@ -248,8 +248,6 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
     # don't store extremely long post data, which has little value. 200 chars is already insane for a site visit.
     third_party_requests = truncate_long_post_data(third_party_requests, 200)
     third_party_domains = result_data.get("third-party-domains", [])
-    # timeless-cookies are cookies with unique components (like: value, timestamp) stripped
-    cookies = normalize_cookies(result_data.get("timeless-cookies", []))
 
     known_trackers = get_known_trackers_from_urls(third_party_domains)
 
@@ -274,6 +272,8 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         evidence=json.dumps(third_party_requests),
     )
 
+    # timeless-cookies are cookies with unique components (like: value, timestamp) stripped
+    cookies = normalize_cookies(result_data.get("timeless-cookies", []))
     products = product_meaning_from_cookies(cookies)
     cookies_product_meaning = {
         "products": products["products"],

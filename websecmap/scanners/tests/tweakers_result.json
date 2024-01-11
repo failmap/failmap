@@ -1,774 +1,777 @@
 {
-  "cookies": [
-    {
-      "url": "tweakers.net",
-      "cookie": {
-        "name": "__Secure-TnetID",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": true,
-        "sameSite": "Lax"
-      },
-      "depth": 0,
-      "session_id": 1702982696708,
-      "placement": [
-        "pre_consent"
-      ]
-    },
-    {
-      "url": "tweakers.net",
-      "cookie": {
-        "name": "ssa-did",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": true,
-        "secure": true,
-        "sameSite": "Lax"
-      },
-      "depth": 0,
-      "session_id": 1702982696708,
-      "placement": [
-        "pre_consent"
-      ]
-    },
-    {
-      "url": "tweakers.net",
-      "cookie": {
-        "name": "ssa-sid",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": true,
-        "secure": true,
-        "sameSite": "Lax"
-      },
-      "depth": 0,
-      "session_id": 1702982696708,
-      "placement": [
-        "pre_consent"
-      ]
-    },
-    {
-      "url": "tweakers.net",
-      "cookie": {
-        "name": "tbb",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": true,
-        "sameSite": "Lax"
-      },
-      "depth": 0,
-      "session_id": 1702982696708,
-      "placement": [
-        "pre_consent"
-      ]
-    },
-    {
-      "url": "tweakers.net",
-      "cookie": {
-        "name": "twk-theme",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": true,
-        "sameSite": "Lax"
-      },
-      "depth": 0,
-      "session_id": 1702982696708,
-      "placement": [
-        "pre_consent"
-      ]
-    },
-    {
-      "url": "tweakers.net",
-      "cookie": {
-        "name": "SSID",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": false,
-        "sameSite": "Lax"
-      },
-      "depth": 0,
-      "session_id": 1702982696708,
-      "placement": [
-        "subsequent_visit"
-      ]
-    },
-    {
-      "url": "tweakers.net",
-      "cookie": {
-        "name": "SSLB",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": false,
-        "sameSite": "Lax"
-      },
-      "depth": 0,
-      "session_id": 1702982696708,
-      "placement": [
-        "subsequent_visit"
-      ]
-    },
-    {
-      "url": "tweakers.net",
-      "cookie": {
-        "name": "SSOD",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": false,
-        "sameSite": "Lax"
-      },
-      "depth": 0,
-      "session_id": 1702982696708,
-      "placement": [
-        "subsequent_visit"
-      ]
-    },
-    {
-      "url": "tweakers.net",
-      "cookie": {
-        "name": "SSPV",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": false,
-        "sameSite": "Lax"
-      },
-      "depth": 0,
-      "session_id": 1702982696708,
-      "placement": [
-        "subsequent_visit"
-      ]
-    },
-    {
-      "url": "tweakers.net",
-      "cookie": {
-        "name": "SSRT",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": false,
-        "sameSite": "Lax"
-      },
-      "depth": 0,
-      "session_id": 1702982696708,
-      "placement": [
-        "subsequent_visit"
-      ]
-    },
-    {
-      "url": "tweakers.net",
-      "cookie": {
-        "name": "SSSC",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": false,
-        "sameSite": "Lax"
-      },
-      "depth": 0,
-      "session_id": 1702982696708,
-      "placement": [
-        "subsequent_visit"
-      ]
-    },
-    {
-      "url": "tweakers.net/video",
-      "cookie": {
-        "name": ".Nop.Customer",
-        "domain": "tweakersgear.net",
-        "path": "/",
-        "httpOnly": true,
-        "secure": true,
-        "sameSite": "Lax"
-      },
-      "depth": 2,
-      "session_id": 1702982696708,
-      "placement": [
-        "after_consent_accept"
-      ]
-    },
-    {
-      "url": "tweakers.net/video",
-      "cookie": {
-        "name": "ApplicationGatewayAffinity",
-        "domain": "tweakersgear.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": false,
-        "sameSite": "Lax"
-      },
-      "depth": 2,
-      "session_id": 1702982696708,
-      "placement": [
-        "after_consent_accept"
-      ]
-    },
-    {
-      "url": "tweakers.net/video",
-      "cookie": {
-        "name": "ApplicationGatewayAffinityCORS",
-        "domain": "tweakersgear.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": true,
-        "sameSite": "None"
-      },
-      "depth": 2,
-      "session_id": 1702982696708,
-      "placement": [
-        "after_consent_accept"
-      ]
-    },
-    {
-      "url": "tweakers.net/video",
-      "cookie": {
-        "name": "LastVisit",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": true,
-        "secure": true,
-        "sameSite": "Lax"
-      },
-      "depth": 2,
-      "session_id": 1702982696708,
-      "placement": [
-        "after_consent_accept"
-      ]
-    },
-    {
-      "url": "tweakers.net/video",
-      "cookie": {
-        "name": "SessionTime",
-        "domain": ".tweakers.net",
-        "path": "/",
-        "httpOnly": true,
-        "secure": true,
-        "sameSite": "Lax"
-      },
-      "depth": 2,
-      "session_id": 1702982696708,
-      "placement": [
-        "after_consent_accept"
-      ]
-    },
-    {
-      "url": "tweakers.net/video",
-      "cookie": {
-        "name": "VISITOR_INFO1_LIVE",
-        "domain": ".youtube.com",
-        "path": "/",
-        "httpOnly": true,
-        "secure": true,
-        "sameSite": "None"
-      },
-      "depth": 2,
-      "session_id": 1702982696708,
-      "placement": [
-        "after_consent_accept"
-      ]
-    },
-    {
-      "url": "tweakers.net/video",
-      "cookie": {
-        "name": "YSC",
-        "domain": ".youtube.com",
-        "path": "/",
-        "httpOnly": true,
-        "secure": true,
-        "sameSite": "None"
-      },
-      "depth": 2,
-      "session_id": 1702982696708,
-      "placement": [
-        "after_consent_accept"
-      ]
-    },
-    {
-      "url": "tweakers.net/video",
-      "cookie": {
-        "name": "_ALGOLIA",
-        "domain": "tweakersgear.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": false,
-        "sameSite": "Lax"
-      },
-      "depth": 2,
-      "session_id": 1702982696708,
-      "placement": [
-        "after_consent_accept"
-      ]
-    },
-    {
-      "url": "tweakers.net/video",
-      "cookie": {
-        "name": "ai_session",
-        "domain": "tweakersgear.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": true,
-        "sameSite": "None"
-      },
-      "depth": 2,
-      "session_id": 1702982696708,
-      "placement": [
-        "after_consent_accept"
-      ]
-    },
-    {
-      "url": "tweakers.net/video",
-      "cookie": {
-        "name": "ai_user",
-        "domain": "tweakersgear.net",
-        "path": "/",
-        "httpOnly": false,
-        "secure": true,
-        "sameSite": "None"
-      },
-      "depth": 2,
-      "session_id": 1702982696708,
-      "placement": [
-        "after_consent_accept"
-      ]
+    "cookies": [
+        {
+            "url": "tweakers.net",
+            "cookie": {
+                "name": "__Secure-TnetID",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": true,
+                "sameSite": "Lax"
+            },
+            "depth": 0,
+            "session_id": 1702982696708,
+            "placement": [
+                "pre_consent"
+            ]
+        },
+        {
+            "url": "tweakers.net",
+            "cookie": {
+                "name": "ssa-did",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": true,
+                "secure": true,
+                "sameSite": "Lax"
+            },
+            "depth": 0,
+            "session_id": 1702982696708,
+            "placement": [
+                "pre_consent"
+            ]
+        },
+        {
+            "url": "tweakers.net",
+            "cookie": {
+                "name": "ssa-sid",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": true,
+                "secure": true,
+                "sameSite": "Lax"
+            },
+            "depth": 0,
+            "session_id": 1702982696708,
+            "placement": [
+                "pre_consent"
+            ]
+        },
+        {
+            "url": "tweakers.net",
+            "cookie": {
+                "name": "tbb",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": true,
+                "sameSite": "Lax"
+            },
+            "depth": 0,
+            "session_id": 1702982696708,
+            "placement": [
+                "pre_consent"
+            ]
+        },
+        {
+            "url": "tweakers.net",
+            "cookie": {
+                "name": "twk-theme",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": true,
+                "sameSite": "Lax"
+            },
+            "depth": 0,
+            "session_id": 1702982696708,
+            "placement": [
+                "pre_consent"
+            ]
+        },
+        {
+            "url": "tweakers.net",
+            "cookie": {
+                "name": "SSID",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": false,
+                "sameSite": "Lax"
+            },
+            "depth": 0,
+            "session_id": 1702982696708,
+            "placement": [
+                "subsequent_visit"
+            ]
+        },
+        {
+            "url": "tweakers.net",
+            "cookie": {
+                "name": "SSLB",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": false,
+                "sameSite": "Lax"
+            },
+            "depth": 0,
+            "session_id": 1702982696708,
+            "placement": [
+                "subsequent_visit"
+            ]
+        },
+        {
+            "url": "tweakers.net",
+            "cookie": {
+                "name": "SSOD",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": false,
+                "sameSite": "Lax"
+            },
+            "depth": 0,
+            "session_id": 1702982696708,
+            "placement": [
+                "subsequent_visit"
+            ]
+        },
+        {
+            "url": "tweakers.net",
+            "cookie": {
+                "name": "SSPV",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": false,
+                "sameSite": "Lax"
+            },
+            "depth": 0,
+            "session_id": 1702982696708,
+            "placement": [
+                "subsequent_visit"
+            ]
+        },
+        {
+            "url": "tweakers.net",
+            "cookie": {
+                "name": "SSRT",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": false,
+                "sameSite": "Lax"
+            },
+            "depth": 0,
+            "session_id": 1702982696708,
+            "placement": [
+                "subsequent_visit"
+            ]
+        },
+        {
+            "url": "tweakers.net",
+            "cookie": {
+                "name": "SSSC",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": false,
+                "sameSite": "Lax"
+            },
+            "depth": 0,
+            "session_id": 1702982696708,
+            "placement": [
+                "subsequent_visit"
+            ]
+        },
+        {
+            "url": "tweakers.net/video",
+            "cookie": {
+                "name": ".Nop.Customer",
+                "domain": "tweakersgear.net",
+                "path": "/",
+                "httpOnly": true,
+                "secure": true,
+                "sameSite": "Lax"
+            },
+            "depth": 2,
+            "session_id": 1702982696708,
+            "placement": [
+                "after_consent_accept"
+            ]
+        },
+        {
+            "url": "tweakers.net/video",
+            "cookie": {
+                "name": "ApplicationGatewayAffinity",
+                "domain": "tweakersgear.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": false,
+                "sameSite": "Lax"
+            },
+            "depth": 2,
+            "session_id": 1702982696708,
+            "placement": [
+                "after_consent_accept"
+            ]
+        },
+        {
+            "url": "tweakers.net/video",
+            "cookie": {
+                "name": "ApplicationGatewayAffinityCORS",
+                "domain": "tweakersgear.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": true,
+                "sameSite": "None"
+            },
+            "depth": 2,
+            "session_id": 1702982696708,
+            "placement": [
+                "after_consent_accept"
+            ]
+        },
+        {
+            "url": "tweakers.net/video",
+            "cookie": {
+                "name": "LastVisit",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": true,
+                "secure": true,
+                "sameSite": "Lax"
+            },
+            "depth": 2,
+            "session_id": 1702982696708,
+            "placement": [
+                "after_consent_accept"
+            ]
+        },
+        {
+            "url": "tweakers.net/video",
+            "cookie": {
+                "name": "SessionTime",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": true,
+                "secure": true,
+                "sameSite": "Lax"
+            },
+            "depth": 2,
+            "session_id": 1702982696708,
+            "placement": [
+                "after_consent_accept"
+            ]
+        },
+        {
+            "url": "tweakers.net/video",
+            "cookie": {
+                "name": "VISITOR_INFO1_LIVE",
+                "domain": ".youtube.com",
+                "path": "/",
+                "httpOnly": true,
+                "secure": true,
+                "sameSite": "None"
+            },
+            "depth": 2,
+            "session_id": 1702982696708,
+            "placement": [
+                "after_consent_accept"
+            ]
+        },
+        {
+            "url": "tweakers.net/video",
+            "cookie": {
+                "name": "YSC",
+                "domain": ".youtube.com",
+                "path": "/",
+                "httpOnly": true,
+                "secure": true,
+                "sameSite": "None"
+            },
+            "depth": 2,
+            "session_id": 1702982696708,
+            "placement": [
+                "after_consent_accept"
+            ]
+        },
+        {
+            "url": "tweakers.net/video",
+            "cookie": {
+                "name": "_ALGOLIA",
+                "domain": "tweakersgear.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": false,
+                "sameSite": "Lax"
+            },
+            "depth": 2,
+            "session_id": 1702982696708,
+            "placement": [
+                "after_consent_accept"
+            ]
+        },
+        {
+            "url": "tweakers.net/video",
+            "cookie": {
+                "name": "ai_session",
+                "domain": "tweakersgear.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": true,
+                "sameSite": "None"
+            },
+            "depth": 2,
+            "session_id": 1702982696708,
+            "placement": [
+                "after_consent_accept"
+            ]
+        },
+        {
+            "url": "tweakers.net/video",
+            "cookie": {
+                "name": "ai_user",
+                "domain": "tweakersgear.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": true,
+                "sameSite": "None"
+            },
+            "depth": 2,
+            "session_id": 1702982696708,
+            "placement": [
+                "after_consent_accept"
+            ]
+        }
+    ],
+    "banners": [
+        {
+            "name": "#koekieBar",
+            "attributes": [
+                "simple"
+            ]
+        }
+    ],
+    "external_resources": [
+        {
+            "url": "tweakers.net",
+            "depth": 0,
+            "session_id": 1702982696708,
+            "attributes": [
+                "pre_consent"
+            ],
+            "type": "fetch",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net",
+            "depth": 0,
+            "session_id": 1702982696708,
+            "attributes": [
+                "pre_consent"
+            ],
+            "type": "fetch",
+            "method": "POST",
+            "domainname": "aa.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net",
+            "depth": 0,
+            "session_id": 1702982696708,
+            "attributes": [
+                "pre_consent"
+            ],
+            "type": "image",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net",
+            "depth": 0,
+            "session_id": 1702982696708,
+            "attributes": [
+                "subsequent_visit"
+            ],
+            "type": "fetch",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net",
+            "depth": 0,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_decline"
+            ],
+            "type": "fetch",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/nieuws/list/20231219",
+            "depth": 1,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "fetch",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/nieuws/list/20231219",
+            "depth": 1,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "fetch",
+            "method": "POST",
+            "domainname": "aa.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/reviews",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "fetch",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/reviews",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "fetch",
+            "method": "POST",
+            "domainname": "aa.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/reviews",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "image",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/pricewatch",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "fetch",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/aanbod",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "fetch",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "fetch",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "script",
+            "method": "GET",
+            "domainname": "www.youtube.com",
+            "count": 6
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "document",
+            "method": "GET",
+            "domainname": "www.youtube.com",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "stylesheet",
+            "method": "GET",
+            "domainname": "www.youtube.com",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "font",
+            "method": "GET",
+            "domainname": "fonts.gstatic.com",
+            "count": 2
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "xhr",
+            "method": "GET",
+            "domainname": "googleads.g.doubleclick.net",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "script",
+            "method": "GET",
+            "domainname": "static.doubleclick.net",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "xhr",
+            "method": "POST",
+            "domainname": "jnn-pa.googleapis.com",
+            "count": 2
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "script",
+            "method": "GET",
+            "domainname": "www.google.com",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "image",
+            "method": "GET",
+            "domainname": "i.ytimg.com",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "image",
+            "method": "GET",
+            "domainname": "yt3.ggpht.com",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "script",
+            "method": "GET",
+            "domainname": "www.gstatic.com",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/video",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "image",
+            "method": "GET",
+            "domainname": "www.youtube.com",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/info/podcast",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "fetch",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/info/podcast",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "document",
+            "method": "GET",
+            "domainname": "omny.fm",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/info/podcast",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "stylesheet",
+            "method": "GET",
+            "domainname": "omny.fm",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/info/podcast",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "script",
+            "method": "GET",
+            "domainname": "omny.fm",
+            "count": 14
+        },
+        {
+            "url": "tweakers.net/info/podcast",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "image",
+            "method": "GET",
+            "domainname": "www.omnycontent.com",
+            "count": 2
+        },
+        {
+            "url": "tweakers.net/info/podcast",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "font",
+            "method": "GET",
+            "domainname": "omny.fm",
+            "count": 3
+        },
+        {
+            "url": "tweakers.net/info/podcast",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "fetch",
+            "method": "POST",
+            "domainname": "o479328.ingest.sentry.io",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/info/podcast",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "fetch",
+            "method": "GET",
+            "domainname": "www.omnycontent.com",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/downloads",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "fetch",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        },
+        {
+            "url": "tweakers.net/it-pro",
+            "depth": 2,
+            "session_id": 1702982696708,
+            "attributes": [
+                "after_consent_accept"
+            ],
+            "type": "fetch",
+            "method": "GET",
+            "domainname": "ab.tweakers.nl",
+            "count": 1
+        }
+    ],
+    "meta": {
+        "session_id": 1702982696708,
+        "stop_reason": null,
+        "stats": {
+            "consent": false
+        }
     }
-  ],
-  "banners": [
-    {
-      "name": "#koekieBar",
-      "attributes": [
-        "simple"
-      ]
-    }
-  ],
-  "external_resources": [
-    {
-      "url": "tweakers.net",
-      "depth": 0,
-      "session_id": 1702982696708,
-      "attributes": [
-        "pre_consent"
-      ],
-      "type": "fetch",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net",
-      "depth": 0,
-      "session_id": 1702982696708,
-      "attributes": [
-        "pre_consent"
-      ],
-      "type": "fetch",
-      "method": "POST",
-      "domainname": "aa.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net",
-      "depth": 0,
-      "session_id": 1702982696708,
-      "attributes": [
-        "pre_consent"
-      ],
-      "type": "image",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net",
-      "depth": 0,
-      "session_id": 1702982696708,
-      "attributes": [
-        "subsequent_visit"
-      ],
-      "type": "fetch",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net",
-      "depth": 0,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_decline"
-      ],
-      "type": "fetch",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/nieuws/list/20231219",
-      "depth": 1,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "fetch",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/nieuws/list/20231219",
-      "depth": 1,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "fetch",
-      "method": "POST",
-      "domainname": "aa.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/reviews",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "fetch",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/reviews",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "fetch",
-      "method": "POST",
-      "domainname": "aa.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/reviews",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "image",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/pricewatch",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "fetch",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/aanbod",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "fetch",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "fetch",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "script",
-      "method": "GET",
-      "domainname": "www.youtube.com",
-      "count": 6
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "document",
-      "method": "GET",
-      "domainname": "www.youtube.com",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "stylesheet",
-      "method": "GET",
-      "domainname": "www.youtube.com",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "font",
-      "method": "GET",
-      "domainname": "fonts.gstatic.com",
-      "count": 2
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "xhr",
-      "method": "GET",
-      "domainname": "googleads.g.doubleclick.net",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "script",
-      "method": "GET",
-      "domainname": "static.doubleclick.net",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "xhr",
-      "method": "POST",
-      "domainname": "jnn-pa.googleapis.com",
-      "count": 2
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "script",
-      "method": "GET",
-      "domainname": "www.google.com",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "image",
-      "method": "GET",
-      "domainname": "i.ytimg.com",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "image",
-      "method": "GET",
-      "domainname": "yt3.ggpht.com",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "script",
-      "method": "GET",
-      "domainname": "www.gstatic.com",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/video",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "image",
-      "method": "GET",
-      "domainname": "www.youtube.com",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/info/podcast",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "fetch",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/info/podcast",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "document",
-      "method": "GET",
-      "domainname": "omny.fm",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/info/podcast",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "stylesheet",
-      "method": "GET",
-      "domainname": "omny.fm",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/info/podcast",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "script",
-      "method": "GET",
-      "domainname": "omny.fm",
-      "count": 14
-    },
-    {
-      "url": "tweakers.net/info/podcast",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "image",
-      "method": "GET",
-      "domainname": "www.omnycontent.com",
-      "count": 2
-    },
-    {
-      "url": "tweakers.net/info/podcast",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "font",
-      "method": "GET",
-      "domainname": "omny.fm",
-      "count": 3
-    },
-    {
-      "url": "tweakers.net/info/podcast",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "fetch",
-      "method": "POST",
-      "domainname": "o479328.ingest.sentry.io",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/info/podcast",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "fetch",
-      "method": "GET",
-      "domainname": "www.omnycontent.com",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/downloads",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "fetch",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    },
-    {
-      "url": "tweakers.net/it-pro",
-      "depth": 2,
-      "session_id": 1702982696708,
-      "attributes": [
-        "after_consent_accept"
-      ],
-      "type": "fetch",
-      "method": "GET",
-      "domainname": "ab.tweakers.nl",
-      "count": 1
-    }
-  ],
-  "meta": {
-    "session_id": 1702982696708,
-    "stop_reason": null
-  }
 }

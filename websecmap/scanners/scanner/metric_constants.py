@@ -32,3 +32,13 @@ WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM = "medium"
 WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_HIGH = "high"
 # in case it was not possible to create a scan etc...
 WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_ERROR = "scan_error"
+
+
+# Full Crawl results, uses the same grading as web_privacy_third_party and web_privacy_cookies, as they are
+# the same metrics only more complete. They are currently not fast enough to cover all sites and subdomains.
+WEB_PRIVACY_THIRD_PARTY_REQUESTS_CRAWLED_WITH_CONSENT = "web_privacy_third_party_requests_crawled_with_consent"
+WEB_PRIVACY_THIRD_PARTY_REQUESTS_CRAWLED_NO_CONSENT = "web_privacy_third_party_requests_crawled_no_consent"
+WEB_PRIVACY_TRACKING_CRAWLED_WITH_CONSENT = "web_privacy_tracking_crawled_with_consent"
+WEB_PRIVACY_TRACKING_CRAWLED_NO_CONSENT = "web_privacy_tracking_crawled_no_consent"
+WEB_PRIVACY_COOKIES_CRAWLED_WITH_CONSENT = "web_privacy_cookies_crawled_with_consent"
+WEB_PRIVACY_COOKIES_CRAWLED_NO_CONSENT = "web_privacy_cookies_crawled_no_consent"

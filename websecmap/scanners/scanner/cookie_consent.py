@@ -7,7 +7,7 @@ Thanks to:
 - https://codeberg.org/dataskydd.net/
 - https://github.com/PrivacyScore/privacyscanner/tree/whotracksme/privacyscanner/scanmodules
 """
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import requests
 from celery import group
 from websecmap.app import log
@@ -29,6 +29,11 @@ from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
 import base64
 from django.core.files.base import ContentFile
+
+from websecmap.scanners.scanner.web_privacy_crawled import (
+    store_third_party_requests_as_regular_metrics,
+    store_cookies_as_regular_metrics,
+)
 
 SCANNER_NAME = "cookie_consent"
 
@@ -147,7 +152,7 @@ def scan(url: str, consent: bool) -> Dict[str, Any]:
 
 
 @app.task(queue="storage", ignore_result=True)
-def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
+def store(result_data: Dict[str, Any], endpoint_id: int) -> Optional[int]:
     if not result_data:
         return
 
@@ -208,6 +213,12 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         session.banners.add(cb)
 
     session.save()
+
+    # and save the stuff as traditional metrics, as good as...
+    store_third_party_requests_as_regular_metrics(session)
+    store_cookies_as_regular_metrics(session)
+
+    return session.id
 
 
 @app.task(queue="storage", ignore_result=True)
