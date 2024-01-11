@@ -12,13 +12,19 @@ import pyexcel
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 import json
 
-from websecmap.scanners.scanner.metric_constants import WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT
+from websecmap.scanners.scanner.metric_constants import (
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT,
+    WEB_PRIVACY_COOKIES_CRAWLED_NO_CONSENT,
+    WEB_PRIVACY_COOKIES_CRAWLED_WITH_CONSENT,
+)
 from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_COOKIES
 from websecmap.scanners.scanner_for_everything.location import (
     SCAN_TYPE_LOCATION_MAIL_SERVER,
     SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
     SCAN_TYPE_LOCATION_SERVER,
     SCAN_TYPE_LOCATION_COOKIES,
+    SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT_CRAWL_WITH_CONSENT,
+    SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT_CRAWL_WITHOUT_CONSENT,
 )
 from websecmap.utils import normalize_cookie_name
 
@@ -168,10 +174,17 @@ def determine_pivot_records(scan_type: str, scan) -> List[dict[str, Any]]:
         SCAN_TYPE_LOCATION_SERVER,
         SCAN_TYPE_LOCATION_MAIL_SERVER,
         SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
+        SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT_CRAWL_WITH_CONSENT,
+        SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT_CRAWL_WITHOUT_CONSENT,
     ]:
         return pivot_location_evidence(load_possible_json(scan.evidence))
 
-    if scan_type in [WEB_PRIVACY_COOKIES, WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT]:
+    if scan_type in [
+        WEB_PRIVACY_COOKIES,
+        WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT,
+        WEB_PRIVACY_COOKIES_CRAWLED_WITH_CONSENT,
+        WEB_PRIVACY_COOKIES_CRAWLED_NO_CONSENT,
+    ]:
         # as we're now using an extensive meaning, this meaning will now be pivoted instead of the normal
         # cookie records. This means the location and product are also loaded inside the export.
         # return pivot_cookies(load_possible_json(scan.evidence)) #  <-- this is the simple record without meaning.

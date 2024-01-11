@@ -42,7 +42,11 @@ from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import GeoIp, DomainIp, DomainMX, UrlGenericScan, EndpointGenericScan
 from websecmap.scanners.scanmanager import store_url_scan_result, store_endpoint_scan_result
-from websecmap.scanners.scanner.metric_constants import WEB_PRIVACY_THIRD_PARTY_DOMAINS
+from websecmap.scanners.scanner.metric_constants import (
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_WITH_CONSENT,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_NO_CONSENT,
+)
 
 # On URL:
 SCAN_TYPE_LOCATION_SERVER = "location_server"
@@ -50,6 +54,12 @@ SCAN_TYPE_LOCATION_MAIL_SERVER = "location_mail_server"
 
 # On Endpoint:
 SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT = "location_third_party_website_content"
+SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT_CRAWL_WITH_CONSENT = (
+    "location_third_party_website_content_crawl_with_consent"
+)
+SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT_CRAWL_WITHOUT_CONSENT = (
+    "location_third_party_website_content_crawl_without_consent"
+)
 SCAN_TYPE_LOCATION_COOKIES = "location_cookies"
 
 LOCATION_HIGH = "location_high"
@@ -217,11 +227,28 @@ def scan_servers():
 
 @app.task(queue="database", ignore_result=True)
 def scan_third_party_site_content():
+    # this is just the front page
+    scan_third_party_site_content_abs(WEB_PRIVACY_THIRD_PARTY_DOMAINS, SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT)
+
+    # also do this with all resources from the site
+    scan_third_party_site_content_abs(
+        WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_WITH_CONSENT,
+        SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT_CRAWL_WITH_CONSENT,
+    )
+    scan_third_party_site_content_abs(
+        WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_NO_CONSENT,
+        SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT_CRAWL_WITHOUT_CONSENT,
+    )
+
+
+def scan_third_party_site_content_abs(
+    from_type: str = WEB_PRIVACY_THIRD_PARTY_DOMAINS, to_type: str = SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT
+):
     geo_ip_data = get_geoip_database()
     domain_ip_data = get_domain_to_ip_database()
     epgss = (
         EndpointGenericScan.objects.all()
-        .filter(type=WEB_PRIVACY_THIRD_PARTY_DOMAINS, is_the_latest_scan=True)
+        .filter(type=from_type, is_the_latest_scan=True)
         .only("endpoint_id", "evidence")
     )
     log.debug("Found %d endpoints with site content", epgss.count())
@@ -234,7 +261,7 @@ def scan_third_party_site_content():
             domains = [{"domain": domain} for domain in evidence_domains]
             worst_rating, rating_series = create_rating_series_for_domains(domains, domain_ip_data, geo_ip_data)
             store_endpoint_scan_result(
-                scan_type=SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
+                scan_type=to_type,
                 endpoint_id=epgs.endpoint.id,
                 rating=worst_rating,
                 message=worst_rating,

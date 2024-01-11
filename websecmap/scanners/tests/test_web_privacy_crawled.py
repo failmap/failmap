@@ -67,7 +67,7 @@ def test_store_session_as_regular_metrics(db, default_scan_metadata, default_pol
     # store already stores the values to the database, here there should be: tracking, third_party_request, and cookies
     # without consent.
     without_consent_session_id = store(result, endpoint.id)
-    assert EndpointGenericScan.objects.filter(endpoint_id=endpoint.id).count() == 3
+    assert EndpointGenericScan.objects.filter(endpoint_id=endpoint.id).count() == 4
     assert list(
         sorted(list(EndpointGenericScan.objects.filter(endpoint_id=endpoint.id).values_list("type", flat=True)))
     ) == list(
@@ -76,6 +76,7 @@ def test_store_session_as_regular_metrics(db, default_scan_metadata, default_pol
                 "web_privacy_third_party_requests_crawled_no_consent",
                 "web_privacy_tracking_crawled_no_consent",
                 "web_privacy_cookies_crawled_no_consent",
+                "web_privacy_third_party_domains_crawled_no_consent",
             ]
         )
     )
@@ -85,6 +86,6 @@ def test_store_session_as_regular_metrics(db, default_scan_metadata, default_pol
     store_session_as_regular_metrics(without_consent_session_id)
     store_session_as_regular_metrics(without_consent_session_id)
     store_session_as_regular_metrics(without_consent_session_id)
-    assert EndpointGenericScan.objects.filter(endpoint_id=endpoint.id).count() == 3
+    assert EndpointGenericScan.objects.filter(endpoint_id=endpoint.id).count() == 4
 
     # note that the store methods are also tested elsewhere.

@@ -37,6 +37,10 @@ from websecmap.scanners.scanner.metric_constants import (
     WEB_PRIVACY_TRACKING_ERROR,
     WEB_PRIVACY_THIRD_PARTY_ERROR,
     WEB_PRIVACY_COOKIES_ERROR,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_WITH_CONSENT,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_NO_CONSENT,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
 )
 from websecmap.scanners.scanner.web_privacy import product_meaning_from_cookies
 from websecmap.scanners.scanner.web_privacy_resources.trackers import get_known_trackers_from_urls
@@ -107,9 +111,11 @@ def store_third_party_requests_as_regular_metrics(session: CookieScanSession):
     if session.stats["consent"]:
         _third_party_request_metric = WEB_PRIVACY_THIRD_PARTY_REQUESTS_CRAWLED_WITH_CONSENT
         _tracking_metric = WEB_PRIVACY_TRACKING_CRAWLED_WITH_CONSENT
+        _domain_metric = WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_WITH_CONSENT
     else:
         _third_party_request_metric = WEB_PRIVACY_THIRD_PARTY_REQUESTS_CRAWLED_NO_CONSENT
         _tracking_metric = WEB_PRIVACY_TRACKING_CRAWLED_NO_CONSENT
+        _domain_metric = WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_NO_CONSENT
 
     if session.stop_reason == "unhandled_exception":
         store_endpoint_scan_result(
@@ -121,6 +127,14 @@ def store_third_party_requests_as_regular_metrics(session: CookieScanSession):
             session.endpoint.id,
             WEB_PRIVACY_THIRD_PARTY_ERROR,
             WEB_PRIVACY_THIRD_PARTY_ERROR,
+            evidence="{}",
+        )
+
+        store_endpoint_scan_result(
+            _domain_metric,
+            session.endpoint.id,
+            WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
+            WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
             evidence="{}",
         )
         return
@@ -143,11 +157,11 @@ def store_third_party_requests_as_regular_metrics(session: CookieScanSession):
     ]
 
     # sort the third party requests by url, so things stay the same even if the stuff is saved in a different order.
-    third_party_requests = sorted(third_party_requests, key=lambda x: x["url"])
+    third_party_requests = list(sorted(third_party_requests, key=lambda x: x["url"]))
 
     # below code looks a lot like the one on web_privacy, perhaps this can be merged. But that would make it harder
     # to understan perhaps
-    third_party_domains = [x["url"] for x in third_party_requests]
+    third_party_domains = list(sorted(list({x["url"] for x in third_party_requests})))
     known_trackers = get_known_trackers_from_urls(third_party_domains)
 
     web_privacy_tracking_rating = WEB_PRIVACY_TRACKING_TRACKERS_FOUND if known_trackers else WEB_PRIVACY_TRACKING_OK
@@ -167,6 +181,15 @@ def store_third_party_requests_as_regular_metrics(session: CookieScanSession):
         rating=web_third_party_rating,
         message=web_third_party_rating,
         evidence=json.dumps(third_party_requests),
+    )
+
+    # also add the domain thing, like usual...
+    store_endpoint_scan_result(
+        scan_type=_domain_metric,
+        endpoint_id=session.endpoint.id,
+        rating=WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
+        message=WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
+        evidence=json.dumps(third_party_domains),
     )
 
 
