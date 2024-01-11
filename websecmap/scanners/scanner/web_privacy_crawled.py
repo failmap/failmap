@@ -78,6 +78,10 @@ def get_latest_scan_sessions_per_endpoint_with_and_without_consent():
     sessions_to_process = {}
 
     for session in sessions:
+        # don't want to deal with sessions that are not complete at all...
+        if "consent" not in session.stats:
+            continue
+
         if session.endpoint.id not in sessions_to_process:
             sessions_to_process[session.endpoint.id] = {
                 "with_consent": None,
@@ -108,6 +112,9 @@ def store_session_as_regular_metrics(session_id: int):
 
 
 def store_third_party_requests_as_regular_metrics(session: CookieScanSession):
+    if "consent" not in session.stats:
+        return
+
     if session.stats["consent"]:
         _third_party_request_metric = WEB_PRIVACY_THIRD_PARTY_REQUESTS_CRAWLED_WITH_CONSENT
         _tracking_metric = WEB_PRIVACY_TRACKING_CRAWLED_WITH_CONSENT
