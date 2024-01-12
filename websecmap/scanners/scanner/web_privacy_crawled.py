@@ -50,12 +50,11 @@ def import_metrics_from_cookie_scan_sessions():
     # metrics are added after a cookie consent scan has finished, but we needed the existing data
     # to be imported as metrics as well. This solves that issue.
     scans = get_latest_scan_sessions_per_endpoint_with_and_without_consent()
-
     for endpoint, data in scans.items():
         if data["with_consent"]:
-            store_session_as_regular_metrics(endpoint["with_consent"]).apply_async()
-        else:
-            store_session_as_regular_metrics(endpoint["without_consent"]).apply_async()
+            store_session_as_regular_metrics.si(data["with_consent"]).apply_async()
+        if data["without_consent"]:
+            store_session_as_regular_metrics.si(data["without_consent"]).apply_async()
 
 
 def get_latest_scan_sessions_per_endpoint_with_and_without_consent():
