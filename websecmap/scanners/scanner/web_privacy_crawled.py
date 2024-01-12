@@ -46,6 +46,7 @@ from websecmap.scanners.scanner.metric_constants import (
 )
 from websecmap.scanners.scanner.web_privacy import product_meaning_from_cookies
 from websecmap.scanners.scanner.web_privacy_resources.trackers import get_known_trackers_from_urls
+from websecmap.utils import normalize_cookies
 
 
 def import_metrics_from_cookie_scan_sessions():
@@ -231,6 +232,7 @@ def store_cookies_as_regular_metrics(session: CookieScanSession):
         if loaded_cookie := load_cookie_from_string(cookie.cookie):
             timeless_cookies.append(loaded_cookie)
 
+    timeless_cookies = normalize_cookies(timeless_cookies)
     cookies = sorted(timeless_cookies, key=lambda x: x["name"])
 
     products = product_meaning_from_cookies(cookies)

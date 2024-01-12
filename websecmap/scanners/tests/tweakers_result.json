@@ -19,6 +19,22 @@
         {
             "url": "tweakers.net",
             "cookie": {
+                "name": "_pk_id.41a95c6b-bdda-4a56-b4d3-0e55429c635b.5fa1",
+                "domain": ".tweakers.net",
+                "path": "/",
+                "httpOnly": false,
+                "secure": true,
+                "sameSite": "Lax"
+            },
+            "depth": 0,
+            "session_id": 1702982696708,
+            "placement": [
+                "pre_consent"
+            ]
+        },
+        {
+            "url": "tweakers.net",
+            "cookie": {
                 "name": "ssa-did",
                 "domain": ".tweakers.net",
                 "path": "/",

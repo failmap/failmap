@@ -36,7 +36,7 @@ def test_cookieconsent_store_tweakers(db):
 
     store(result, endpoint.id)
 
-    assert len(Cookie.objects.all()) == 21
+    assert len(Cookie.objects.all()) == 22
     assert CookieBanner.objects.all()
     assert len(ExternalResource.objects.all()) == 35
     assert not PaperTrail.objects.all()
@@ -44,7 +44,7 @@ def test_cookieconsent_store_tweakers(db):
     session = CookieScanSession.objects.all()[0]
     assert session
 
-    assert len(session.cookies.all()) == 21
+    assert len(session.cookies.all()) == 22
     assert len(session.banners.all()) == 1
     assert len(session.external_resources.all()) == 35
 

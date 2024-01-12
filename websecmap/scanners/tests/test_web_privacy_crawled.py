@@ -99,7 +99,7 @@ def test_store_session_as_regular_metrics(db, default_scan_metadata, default_pol
     evidence = json.loads(scan.evidence)
     assert len(evidence) > 0
 
-    # evidence is stable
+    # evidence is stable, id's are normalized
     assert evidence == [
         {
             "domain": "tweakersgear.net",
@@ -168,6 +168,14 @@ def test_store_session_as_regular_metrics(db, default_scan_metadata, default_pol
             "domain": ".tweakers.net",
             "httpOnly": False,
             "name": "__Secure-TnetID",
+            "path": "/",
+            "sameSite": "Lax",
+            "secure": True,
+        },
+        {
+            "domain": ".tweakers.net",
+            "httpOnly": False,
+            "name": "_pk_id.<HASH_OR_ID>",
             "path": "/",
             "sameSite": "Lax",
             "secure": True,
