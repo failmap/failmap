@@ -7,6 +7,8 @@ from websecmap.scanners.scanner.cookie_consent import store
 from websecmap.scanners.scanner.web_privacy_crawled import (
     get_latest_scan_sessions_per_endpoint_with_and_without_consent,
     store_session_as_regular_metrics,
+    load_cookie_from_string,
+    try_load_json,
 )
 
 
@@ -89,3 +91,145 @@ def test_store_session_as_regular_metrics(db, default_scan_metadata, default_pol
     assert EndpointGenericScan.objects.filter(endpoint_id=endpoint.id).count() == 4
 
     # note that the store methods are also tested elsewhere.
+
+    # check if the cookies are also in the created metric:
+    scan = EndpointGenericScan.objects.filter(
+        endpoint_id=endpoint.id, type="web_privacy_cookies_crawled_no_consent"
+    ).first()
+    evidence = json.loads(scan.evidence)
+    assert len(evidence) > 0
+
+    # evidence is stable
+    assert evidence == [
+        {
+            "domain": "tweakersgear.net",
+            "httpOnly": True,
+            "name": ".Nop.Customer",
+            "path": "/",
+            "sameSite": "Lax",
+            "secure": True,
+        },
+        {
+            "domain": "tweakersgear.net",
+            "httpOnly": False,
+            "name": "ApplicationGatewayAffinity",
+            "path": "/",
+            "sameSite": "Lax",
+            "secure": False,
+        },
+        {
+            "domain": "tweakersgear.net",
+            "httpOnly": False,
+            "name": "ApplicationGatewayAffinityCORS",
+            "path": "/",
+            "sameSite": "None",
+            "secure": True,
+        },
+        {
+            "domain": ".tweakers.net",
+            "httpOnly": True,
+            "name": "LastVisit",
+            "path": "/",
+            "sameSite": "Lax",
+            "secure": True,
+        },
+        {"domain": ".tweakers.net", "httpOnly": False, "name": "SSID", "path": "/", "sameSite": "Lax", "secure": False},
+        {"domain": ".tweakers.net", "httpOnly": False, "name": "SSLB", "path": "/", "sameSite": "Lax", "secure": False},
+        {"domain": ".tweakers.net", "httpOnly": False, "name": "SSOD", "path": "/", "sameSite": "Lax", "secure": False},
+        {"domain": ".tweakers.net", "httpOnly": False, "name": "SSPV", "path": "/", "sameSite": "Lax", "secure": False},
+        {"domain": ".tweakers.net", "httpOnly": False, "name": "SSRT", "path": "/", "sameSite": "Lax", "secure": False},
+        {"domain": ".tweakers.net", "httpOnly": False, "name": "SSSC", "path": "/", "sameSite": "Lax", "secure": False},
+        {
+            "domain": ".tweakers.net",
+            "httpOnly": True,
+            "name": "SessionTime",
+            "path": "/",
+            "sameSite": "Lax",
+            "secure": True,
+        },
+        {
+            "domain": ".youtube.com",
+            "httpOnly": True,
+            "name": "VISITOR_INFO1_LIVE",
+            "path": "/",
+            "sameSite": "None",
+            "secure": True,
+        },
+        {"domain": ".youtube.com", "httpOnly": True, "name": "YSC", "path": "/", "sameSite": "None", "secure": True},
+        {
+            "domain": "tweakersgear.net",
+            "httpOnly": False,
+            "name": "_ALGOLIA",
+            "path": "/",
+            "sameSite": "Lax",
+            "secure": False,
+        },
+        {
+            "domain": ".tweakers.net",
+            "httpOnly": False,
+            "name": "__Secure-TnetID",
+            "path": "/",
+            "sameSite": "Lax",
+            "secure": True,
+        },
+        {
+            "domain": "tweakersgear.net",
+            "httpOnly": False,
+            "name": "ai_session",
+            "path": "/",
+            "sameSite": "None",
+            "secure": True,
+        },
+        {
+            "domain": "tweakersgear.net",
+            "httpOnly": False,
+            "name": "ai_user",
+            "path": "/",
+            "sameSite": "None",
+            "secure": True,
+        },
+        {
+            "domain": ".tweakers.net",
+            "httpOnly": True,
+            "name": "ssa-did",
+            "path": "/",
+            "sameSite": "Lax",
+            "secure": True,
+        },
+        {
+            "domain": ".tweakers.net",
+            "httpOnly": True,
+            "name": "ssa-sid",
+            "path": "/",
+            "sameSite": "Lax",
+            "secure": True,
+        },
+        {"domain": ".tweakers.net", "httpOnly": False, "name": "tbb", "path": "/", "sameSite": "Lax", "secure": True},
+        {
+            "domain": ".tweakers.net",
+            "httpOnly": False,
+            "name": "twk-theme",
+            "path": "/",
+            "sameSite": "Lax",
+            "secure": True,
+        },
+    ]
+
+
+def test_load_cookie_from_string():
+    cookie = load_cookie_from_string(
+        "{'name': 'JSESSIONID', 'domain': 'www.europaomdehoek.nl', "
+        "'path': '/', 'httpOnly': True, 'secure': True, 'sameSite': 'Strict'}"
+    )
+
+    assert cookie is not None
+    assert cookie["name"] == "JSESSIONID"
+
+
+def test_try_load_json():
+    data = try_load_json(
+        '{"name": "JSESSIONID", "domain": "www.europaomdehoek.nl", '
+        '"path": "/", "httpOnly": true, "secure": true, "sameSite": "Strict"}'
+    )
+    assert data != {}
+    assert data["name"] == "JSESSIONID"

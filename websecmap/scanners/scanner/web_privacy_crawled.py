@@ -17,7 +17,9 @@ import json
 
 from datetime import timezone, timedelta, datetime
 from json import JSONDecodeError
+from typing import Optional, Any, Dict
 
+from websecmap.app import log
 from websecmap.celery import app
 
 from websecmap.scanners.models import CookieScanSession
@@ -202,7 +204,8 @@ def store_third_party_requests_as_regular_metrics(session: CookieScanSession):
 def try_load_json(data: str):
     try:
         return json.loads(data)
-    except JSONDecodeError:
+    except JSONDecodeError as e:
+        log.error(e)
         return {}
 
 
@@ -221,13 +224,13 @@ def store_cookies_as_regular_metrics(session: CookieScanSession):
         )
 
     # reconstruct timeless cookies from cookies in the database
-    # the cookie field in the cookie object is not json, but a single quoted string. which makes auto parsing imposible
+    # the cookie field in the cookie object is not json, but a single quoted string. which makes auto parsing impossible
     # so we do a best guess by just assuming there is no double qoute in the value.
     timeless_cookies = []
     for cookie in session.cookies.all():
-        cookie_value = cookie.cookie.replace("'", '"')
-        if cookie := try_load_json(cookie_value):
-            timeless_cookies.append(cookie)
+        if loaded_cookie := load_cookie_from_string(cookie.cookie):
+            timeless_cookies.append(loaded_cookie)
+
     cookies = sorted(timeless_cookies, key=lambda x: x["name"])
 
     products = product_meaning_from_cookies(cookies)
@@ -243,3 +246,15 @@ def store_cookies_as_regular_metrics(session: CookieScanSession):
         meaning=cookies_product_meaning,
         evidence=json.dumps(cookies),
     )
+
+
+def load_cookie_from_string(cookie_value) -> Optional[Dict[str, Any]]:
+    # some fixes as this is fn python dump of an object, so True/False are also wrong and qoutes are wrong
+    cookie_value = cookie_value.replace("'", '"')
+    cookie_value = cookie_value.replace(": True,", ": true,")
+    cookie_value = cookie_value.replace(": True}", ": true}")
+    cookie_value = cookie_value.replace(": False,", ": false,")
+    cookie_value = cookie_value.replace(": False}", ": false}")
+    cookie_value = cookie_value.replace(": None,", ": null,")
+    cookie_value = cookie_value.replace(": None},", ": null}")
+    return cookie if (cookie := try_load_json(cookie_value)) else None
