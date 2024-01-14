@@ -62,7 +62,7 @@ def export_current_metrics(
     print(json.dumps(data, indent=4))
 
 
-def export_pivot(scan_types: List[str], layers: List[str]) -> str:
+def create_pivot_data(scan_types: List[str], layers: List[str]) -> List[Dict[str, Any]]:
     product = []
     for scan_type in scan_types:
         print(f"Exporting {scan_type}")
@@ -86,8 +86,15 @@ def export_pivot(scan_types: List[str], layers: List[str]) -> str:
                 for endpoint_record in endpoint_records:
                     # the endpoint record ends with arbitrary KV data, which might differ per record
                     new_record = {**endpoint_record, **scan_data, **pivot_record}
-                    product.append(new_record)
 
+                    # for some reason the stuff from other layers is still included.
+                    if new_record["layer"] in layers:
+                        product.append(new_record)
+    return product
+
+
+def export_pivot(scan_types: List[str], layers: List[str]) -> str:
+    product = create_pivot_data(scan_types, layers)
     return save_pivot(product)
 
 

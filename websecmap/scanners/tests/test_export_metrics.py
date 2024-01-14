@@ -1,10 +1,21 @@
+from datetime import timezone, datetime
+from typing import Tuple
+
+import copy
+import pyexcel
+from django.core.management import call_command
+from freezegun import freeze_time
+
+from websecmap.organizations.models import Url, Organization, OrganizationType
 from websecmap.scanners.export_metrics import (
     pivot_location_evidence,
     pivot_cookies,
     pivot_cookie_locations,
     pivot_products,
     pivot_cookie_meaning,
+    create_pivot_data,
 )
+from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
 
 def test_pivot_location_evidence():
@@ -394,3 +405,124 @@ def test_pivot_cookie_meaning():
             "cookie_purpose_rating": "",
         },
     ]
+
+
+def test_create_pivot_data(db, current_path):
+    # nothing exists and nothing should be returned, no crashes
+    data = create_pivot_data(scan_types=[], layers=[])
+    assert data == []
+    data = create_pivot_data(scan_types=["scan_type_1", "scan_type_2"], layers=["municipality", "test"])
+    assert data == []
+
+    # create two of everything to test a mix and match of everything.
+    with freeze_time("2020-01-01"):
+        lay1, org1, url1, eps1, scan1 = create_test_dataset("layer_1", "organization_name", "url_1.nl", "scan_type_1")
+        lay2, org2, url2, eps2, scan2 = create_test_dataset("layer_2", "org_2", "url_2.nl", "scan_type_2")
+    data = create_pivot_data(scan_types=["scan_type_1", "scan_type_2"], layers=["layer_1", "layer_2"])
+
+    # default 1 is just a placeholder metric which makes for easy summing of a result
+    assert len(data) == 2
+    expected_1 = [
+        {
+            "computed_domain": "url_1",
+            "computed_subdomain": "",
+            "computed_suffix": "nl",
+            "default": 1,
+            "endpoint_ip_version": 4,
+            "endpoint_port": 80,
+            "endpoint_protocol": "http",
+            "is_explained": False,
+            "layer": "layer_1",
+            "organization_country": "",
+            "organization_id": org1.id,
+            "organization_name": "organization_name",
+            "scan_rating": "0",
+            "scan_rating_determined_on": "2020-01-01T00:00:00+00:00",
+            "scan_type": "scan_type_1",
+            "url": "url_1.nl",
+        },
+    ]
+    expected_2 = [
+        {
+            "computed_domain": "url_2",
+            "computed_subdomain": "",
+            "computed_suffix": "nl",
+            "default": 1,
+            "endpoint_ip_version": 4,
+            "endpoint_port": 80,
+            "endpoint_protocol": "http",
+            "is_explained": False,
+            "layer": "layer_2",
+            "organization_country": "",
+            "organization_id": org2.id,
+            "organization_name": "org_2",
+            "scan_rating": "0",
+            "scan_rating_determined_on": "2020-01-01T00:00:00+00:00",
+            "scan_type": "scan_type_2",
+            "url": "url_2.nl",
+        },
+    ]
+    assert data == expected_1 + expected_2
+
+    # and just for one layer
+    data = create_pivot_data(scan_types=["scan_type_1"], layers=["layer_1"])
+    assert data == expected_1
+
+    # call the command and see that it also returned correctly
+    # read the data with a spreadsheet reader and see if there is only one record
+    filename = call_command("export_pivot", "scan_type_1", "layer_1")
+    exported_file = f"{current_path}/websecmap/uploads/{filename}"
+    book = pyexcel.get_dict(file_name=exported_file)
+    assert dict(book) == {
+        "computed_domain": ["url_1"],
+        "computed_subdomain": [""],
+        "computed_suffix": ["nl"],
+        "default": [1],
+        "endpoint_ip_version": [4],
+        "endpoint_port": [80],
+        "endpoint_protocol": ["http"],
+        "is_explained": [False],
+        "layer": ["layer_1"],
+        "organization_country": [""],
+        "organization_id": [org1.id],
+        "organization_name": ["organization_name"],
+        "scan_rating": ["0"],
+        "scan_rating_determined_on": ["2020-01-01T00:00:00+00:00"],
+        "scan_type": ["scan_type_1"],
+        "url": ["url_1.nl"],
+    }
+
+    # cross reference some stuff to see that these references are not exported (aka: from another layer)
+    # Org 2 is now also in layer 1, so will be exported with an export of layer 1
+    # but the metric is not called for in the next call, so it will not export anything for org 2
+    org2.layers.add(lay1)
+    url2.organization.add(org2)
+    data = create_pivot_data(scan_types=["scan_type_1"], layers=["layer_1"])
+    assert data == expected_1
+
+    expected_3 = copy.deepcopy(expected_2)
+    expected_3[0]["layer"] = "layer_1"
+
+    # org 2 has been added to layer 1 and that means scan type 2 is findable on layer 1
+    data = create_pivot_data(scan_types=["scan_type_1", "scan_type_2"], layers=["layer_1"])
+    assert data == expected_1 + expected_3
+
+    # retrieving layer 2 should never yield a layer 1. Even if organization 2 is in layer 1.
+    data = create_pivot_data(scan_types=["scan_type_2"], layers=["layer_2"])
+    assert data == expected_2
+
+
+def create_test_dataset(
+    layer_name, organization_name, url, scan_type_name
+) -> Tuple[OrganizationType, Organization, Url, Endpoint, EndpointGenericScan]:
+    # Two scans in two different layers of different types, they should be filterable on layer and type
+    layer_1 = OrganizationType.objects.create(name=layer_name)
+    org_1 = Organization.objects.create(name=organization_name)
+    org_1.layers.add(layer_1)
+    url_1 = Url.objects.create(url=url)
+    url_1.organization.add(org_1)
+    ep_1 = Endpoint.objects.create(url=url_1, port=80, protocol="http")
+    kwargs_1 = {"endpoint": ep_1, "rating_determined_on": datetime.now(timezone.utc)}
+    scan_1 = EndpointGenericScan.objects.create(type=scan_type_name, is_the_latest_scan=True, **kwargs_1)
+
+    return layer_1, org_1, url_1, ep_1, scan_1

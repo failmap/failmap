@@ -35,3 +35,5 @@ class Command(BaseCommand):
         filename = export_pivot(scan_type, layers=layers)
         print(f"Exported pivot to: {filename}")
         print("Done")
+
+        return filename
