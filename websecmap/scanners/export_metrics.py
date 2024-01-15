@@ -356,7 +356,7 @@ def pivot_generic_records(evidence: List[Dict[str, Any]]) -> List[Dict[str, Any]
         ...
     ]
     """
-    return list(evidence)
+    return evidence
 
 
 def pivot_product_record(record) -> Dict[str, Any]:
