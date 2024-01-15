@@ -209,6 +209,7 @@ def determine_pivot_records(scan_type: str, scan) -> List[dict[str, Any]]:
         WEB_PRIVACY_THIRD_PARTY_REQUESTS,
     ]:
         # todo: should the location be added?
+        # This is already a list of dicts.
         return pivot_generic_records(load_possible_json(scan.evidence))
 
     # if scan_type in [WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT]:
@@ -221,7 +222,8 @@ def determine_pivot_records(scan_type: str, scan) -> List[dict[str, Any]]:
         return pivot_cookie_locations(load_possible_json(scan.evidence))
 
     if load_possible_json(scan.evidence):
-        return pivot_generic_records(load_possible_json(scan.evidence))
+        # assume this is a single dict, and not a list of dicts...
+        return pivot_generic_records([load_possible_json(scan.evidence)])
 
     # return at least one record, so everything can be pivoted even if there is no specialized evidence.
     return [{"default": 1}]

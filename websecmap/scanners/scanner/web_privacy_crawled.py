@@ -117,29 +117,36 @@ def store_session_as_regular_metrics(session_id: int):
 def create_crawl_session_metrics():
     # creates metrics on meta level for crawl sessions, so crawls with and without consent can be compared
     scans = get_latest_scan_sessions_per_endpoint_with_and_without_consent()
-
     # This is done per url and it has one session without and one with consent in the ideal case. There can be
     # errors where one of each is not present. In that case ignore the scan for now.
     for endpoint, data in scans.items():
         if not data["with_consent"] or not data["without_consent"]:
             log.warning(f"Skipping scan for endpoint {endpoint} as it has no consent or no consent")
             continue
-
-        stats_with_consent = CookieScanSession.objects.get(id=data["with_consent"]).stats
-        stats_no_consent = CookieScanSession.objects.get(id=data["without_consent"]).stats
-
+        session_with_consent = CookieScanSession.objects.get(id=data["with_consent"])
+        session_no_consent = CookieScanSession.objects.get(id=data["without_consent"])
+        stats_with_consent = session_with_consent.stats
+        stats_no_consent = session_no_consent.stats
         if "consent" not in stats_with_consent or "consent" not in stats_no_consent:
             log.warning(f"Skipping scan for endpoint {endpoint} as it has no metadata about consent")
-
+        # add the other info from the session which can be compared
+        stats_with_consent["stop_reason"] = session_with_consent.stop_reason
+        stats_no_consent["stop_reason"] = session_no_consent.stop_reason
+        # only add the first cookie banner, only the indicator, banners are ofc optional, but if it found one
+        # we want to know
+        with_consent_banner = session_with_consent.banners.first()
+        stats_with_consent["has_cookie_banner"] = with_consent_banner is not None
+        stats_with_consent["cookie_banner_indicator"] = with_consent_banner.indicator if with_consent_banner else ""
+        no_consent_banner = session_no_consent.banners.first()
+        stats_no_consent["has_cookie_banner"] = no_consent_banner is not None
+        stats_no_consent["cookie_banner_indicator"] = no_consent_banner.indicator if no_consent_banner else ""
         # re-key the stats kv list so they can be compared next to each other.
         # add a prefix of 'with_consent' to the key of every item in the list
         evidence = {}
         for key, value in stats_with_consent.items():
             evidence[f"with_consent_{key}"] = value
-
         for key, value in stats_no_consent.items():
             evidence[f"no_consent_{key}"] = value
-
         store_endpoint_scan_result(
             "web_privacy_cookie_crawl_session_metadata",
             endpoint,
