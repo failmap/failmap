@@ -113,6 +113,42 @@ def store_session_as_regular_metrics(session_id: int):
     store_cookies_as_regular_metrics(session)
 
 
+@app.task(queue="storage", ignore_result=True)
+def create_crawl_session_metrics():
+    # creates metrics on meta level for crawl sessions, so crawls with and without consent can be compared
+    scans = get_latest_scan_sessions_per_endpoint_with_and_without_consent()
+
+    # This is done per url and it has one session without and one with consent in the ideal case. There can be
+    # errors where one of each is not present. In that case ignore the scan for now.
+    for endpoint, data in scans.items():
+        if not data["with_consent"] or not data["without_consent"]:
+            log.warning(f"Skipping scan for endpoint {endpoint} as it has no consent or no consent")
+            continue
+
+        stats_with_consent = CookieScanSession.objects.get(id=data["with_consent"]).stats
+        stats_no_consent = CookieScanSession.objects.get(id=data["without_consent"]).stats
+
+        if "consent" not in stats_with_consent or "consent" not in stats_no_consent:
+            log.warning(f"Skipping scan for endpoint {endpoint} as it has no metadata about consent")
+
+        # re-key the stats kv list so they can be compared next to each other.
+        # add a prefix of 'with_consent' to the key of every item in the list
+        evidence = {}
+        for key, value in stats_with_consent.items():
+            evidence[f"with_consent_{key}"] = value
+
+        for key, value in stats_no_consent.items():
+            evidence[f"no_consent_{key}"] = value
+
+        store_endpoint_scan_result(
+            "web_privacy_cookie_crawl_session_metadata",
+            endpoint,
+            "ok",
+            "ok",
+            evidence=json.dumps(evidence),
+        )
+
+
 def store_third_party_requests_as_regular_metrics(session: CookieScanSession):
     if "consent" not in session.stats:
         return
