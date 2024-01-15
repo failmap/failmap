@@ -8,6 +8,7 @@ import os
 import uuid
 
 import pyexcel
+from django.utils.text import slugify
 
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 import json
@@ -95,15 +96,17 @@ def create_pivot_data(scan_types: List[str], layers: List[str]) -> List[Dict[str
 
 def export_pivot(scan_types: List[str], layers: List[str]) -> str:
     product = create_pivot_data(scan_types, layers)
-    return save_pivot(product)
+    return save_pivot(product, file_name_hint=scan_types[0] if len(scan_types) == 1 else "")
 
 
-def save_pivot(product: List[Dict[str, Any]]) -> str:
+def save_pivot(product: List[Dict[str, Any]], file_name_hint="") -> str:
+    if file_name_hint:
+        file_name_hint = f"{slugify(file_name_hint)}-"
     book = pyexcel.get_book(bookdict={"source": make_data_2d(product)})
     # save the book to the media root:
     os.makedirs(os.path.join(settings.MEDIA_ROOT, "pivot"), exist_ok=True)
     # random name prevents brute-forcing if the file has been uploaded somewhere
-    filename = f"pivot/pivot-{datetime.now(timezone.utc).date()}-{uuid.uuid4()}.xlsx"
+    filename = f"pivot/pivot-{file_name_hint}{datetime.now(timezone.utc).date()}-{uuid.uuid4()}.xlsx"
     book.save_as(filename=os.path.join(settings.MEDIA_ROOT, filename))
     return filename
 
