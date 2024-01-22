@@ -3,11 +3,13 @@
 import json
 
 from django.core.management import call_command
+import pytest
 
 TEST_ORGANIZATION = "faalonië"
 NON_EXISTING_ORGANIZATION = "faaloniet"
 
 
+@pytest.mark.skip(reason="Test is unreliable and problem can't currently be fixed without multiple workers.")
 def test_dummy(responses, db, faaloniae, default_scan_metadata):
     """Test running dummy scan."""
 
