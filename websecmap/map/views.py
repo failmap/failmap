@@ -282,6 +282,7 @@ def config_content():
             "report_expert_view_certificates": configuration["SHOW_REPORT_EXPERT_VIEW_CERTIFICATES"],
             "report_expert_view_cookies": configuration["SHOW_REPORT_EXPERT_VIEW_COOKIES"],
             "thank_you": configuration["SHOW_THANK_YOU"],
+            "leaderboard": configuration["SHOW_LEADERBOARD"],
             "socials": {
                 "report": configuration["SOCIALS_SHOW_REPORT"],
                 "map": configuration["SOCIALS_SHOW_MAP"],

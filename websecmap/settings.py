@@ -1468,6 +1468,11 @@ CONSTANCE_CONFIG = {
         "Maximum amount of seconds to spend crawling (default: 10m).",
         int,
     ),
+    "SHOW_LEADERBOARD": (
+        False,
+        "Show the leaderboard feature in the main menu, which is only useful multiple maps",
+        int,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1630,6 +1635,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_GEOLOCATION_RESULTS",
                 "SHOW_REPORT_EXPERT_VIEW_CERTIFICATES",
                 "SHOW_REPORT_EXPERT_VIEW_COOKIES",
+                "SHOW_LEADERBOARD",
             ),
         ),
         (
