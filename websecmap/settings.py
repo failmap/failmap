@@ -1471,7 +1471,7 @@ CONSTANCE_CONFIG = {
     "SHOW_LEADERBOARD": (
         False,
         "Show the leaderboard feature in the main menu, which is only useful multiple maps",
-        int,
+        bool,
     ),
 }
 
