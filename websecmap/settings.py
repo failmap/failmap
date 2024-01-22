@@ -1473,6 +1473,11 @@ CONSTANCE_CONFIG = {
         "Show the leaderboard feature in the main menu, which is only useful multiple maps",
         bool,
     ),
+    "LEADERBOARD_DEFAULT_ORDER": (
+        ["government", "municipality", "province"],
+        'json list of what layers are compared by default in the leaderboard: ["government", "municipality"]',
+        "json",
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1593,6 +1598,13 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             ),
         ),
         (
+            "Leaderboard",
+            (
+                "SHOW_LEADERBOARD",
+                "LEADERBOARD_DEFAULT_ORDER",
+            ),
+        ),
+        (
             "Send in new domains button",
             (
                 "SHOW_SEND_IN_NEW_DOMAINS",
@@ -1635,7 +1647,6 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_GEOLOCATION_RESULTS",
                 "SHOW_REPORT_EXPERT_VIEW_CERTIFICATES",
                 "SHOW_REPORT_EXPERT_VIEW_COOKIES",
-                "SHOW_LEADERBOARD",
             ),
         ),
         (

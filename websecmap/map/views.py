@@ -305,6 +305,10 @@ def config_content():
             "whatsapp": configuration["RESPONSIBLE_ORGANIZATION_WHATSAPP"],
             "phone": configuration["RESPONSIBLE_ORGANIZATION_PHONE"],
         },
+        "leaderboard": {
+            "show": configuration["SHOW_LEADERBOARD"],
+            "default_order": configuration["LEADERBOARD_DEFAULT_ORDER"],
+        },
         "project": {
             "name": configuration["PROJECT_NAME"],
             "tagline": configuration["PROJECT_TAGLINE"],
