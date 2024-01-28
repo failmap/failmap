@@ -118,7 +118,7 @@ def q_configurations_to_scan(level: str = "url"):
     """
     configurations = list(Configuration.objects.all().filter(is_scanned=True).values("country", "organization_type"))
     if not configurations:
-        log.debug("No scanning configuration defined, not filtering.")
+        # log.debug("No scanning configuration defined, not filtering.")
         return Q()
 
     log.debug("Adding %s level configurations: %s" % (level, configurations))
@@ -145,6 +145,16 @@ def q_configurations_to_scan(level: str = "url"):
                 Q(
                     url__organization__layers=configuration["organization_type"],
                     url__organization__country=configuration["country"],
+                ),
+                Q.OR,
+            )
+
+    if level == "endpoint_generic_scan":
+        for configuration in configurations:
+            qs.add(
+                Q(
+                    endpoint__url__organization__layers=configuration["organization_type"],
+                    endpoint__url__organization__country=configuration["country"],
                 ),
                 Q.OR,
             )

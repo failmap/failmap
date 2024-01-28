@@ -22,6 +22,7 @@ https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
 import json
 import logging
 from datetime import datetime, timedelta, timezone
+from json import JSONDecodeError
 from multiprocessing.pool import ThreadPool
 from time import sleep
 from typing import Any, Dict, List
@@ -33,7 +34,7 @@ from tenacity import RetryError, before_log, retry, wait_fixed
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import init_dict, plannedscan
-from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
+from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad, EndpointGenericScan
 from websecmap.scanners.proxy import (
     claim_proxy,
     release_proxy,
@@ -147,35 +148,127 @@ def plan_scan(urls_filter: dict = None, **kwargs):
     )
 
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
+    log.debug(f"1: planning {len(urls)} scans that have not been scanned yet.")
     plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(urls))
 
-    # Scans for endpoints that have already been scanned:
-    # Scan the bad ones more frequently than the good ones, to reduce the amount of requests.
-    # todo: parameterize using settings in constance.
-    parameter_sets = [
-        {"exclude_urls_scanned_in_the_last_n_days": 7, "quality_levels": ["A", "A+", "A-", "trusted"]},
-        # set to 0 as the task is scheduled to perform any N days. Also works better for follow up scans on
-        # when there is a negative result.
-        {"exclude_urls_scanned_in_the_last_n_days": 0, "quality_levels": ["F", "C", "B", "not trusted"]},
+    # These are the ones you definitely need to scan to figure out what the state is.
+    # It's desired to update them as their score negatively affects their color on the site.
+    urls = Url.objects.filter(
+        q_configurations_to_scan(),
+        is_dead=False,
+        not_resolvable=False,
+        endpoint__protocol="https",
+        endpoint__port=443,
+        endpoint__is_dead=False,
+        endpoint__endpointgenericscan__is_the_latest_scan=True,
+        # an exclude filter here will not work, as you will exclude so much...
+        # as we're not using parameter sets anymore, there is no use in filtering days since last scan.
+        # endpoint__endpointgenericscan__last_scan_moment__lte=datetime.now(timezone.utc) - timedelta(days=0),
+        endpoint__endpointgenericscan__rating__in=["F", "C", "B", "not trusted"],
+        **urls_filter,
+    ).only("id", "url")
+    log.debug(f"2: planning {len(urls)} scans that are F/C/V=B or not_trusted.")
+    plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(urls))
+
+    # Now for the bit more complex part: only scan the A/A+/A- / trusted if they are about to expire.
+    # todo: you do not need to plan a scan for endpoints that are A/A+/A- or trusted every few days.
+    # So before starting a scan, check if the certificate is within 10 days of expiring. In that case start a
+    # scan. This significantly reduces the amount of requests per month. Large problem is that the evidence column
+    # is not JSON yet, meaning we have to do some trickery to get the notafter date.
+    # example evidence:
+    """
+    evidence = [
+      {
+        "subject": "CN=mijn-acc.groningen.nl",
+        "commonNames": [
+          "mijn-acc.groningen.nl"
+        ],
+        "altNames": [
+          "mijn-acc.groningen.nl"
+        ],
+        "notBefore": 1702015407000,
+        "notAfter": 1709791406000,
+        "issuerSubject": "CN=R3, O=Let's Encrypt, C=US",
+        "issuerLabel": "R3",
+        "sigAlg": "SHA256withRSA",
+        "revocationInfo": 2,
+        "crlURIs": [
+          ""
+        ],
+        "ocspURIs": [
+          "http://r3.o.lencr.org"
+        ],
+        "revocationStatus": 2,
+        "crlRevocationStatus": 4,
+        "ocspRevocationStatus": 2,
+        "sgc": 0,
+        "issues": 0,
+        "sct": true,
+        "mustStaple": 0,
+        "sha1Hash": "c1f3b82b761a15945ab991ae4900bc10e65edbd8",
+        "pinSha256": "6I/tDtpbWLgfvO5R4h05wGIj6KbRr61IwOkd9GqjkrI="
+      }
     ]
 
-    for parameter_set in parameter_sets:
-        urls = Url.objects.filter(
-            q_configurations_to_scan(),
-            is_dead=False,
-            not_resolvable=False,
-            endpoint__protocol="https",
-            endpoint__port=443,
-            endpoint__is_dead=False,
-            endpoint__endpointgenericscan__is_the_latest_scan=True,
-            # an exclude filter here will not work, as you will exclude so much...
-            endpoint__endpointgenericscan__last_scan_moment__lte=datetime.now(timezone.utc)
-            - timedelta(days=parameter_set["exclude_urls_scanned_in_the_last_n_days"]),
-            endpoint__endpointgenericscan__rating__in=parameter_set["quality_levels"],
-            **urls_filter,
-        ).only("id", "url")
+    The evidence is only stored at tls_qualys_certificate_trusted, and there are situation where the encryption quality
+    is A, A+, A-. But tls_qualys_certificate_trusted is available at every scan. Meaning just walk through those
+    and skip those which have a bad rating which would have been scanned again above.
 
-        plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(urls))
+    in this case we want to know what the rating is from the paired metric, and only if it is A+, A- or A then
+    see if it should be renewed soon, and then request a rescan.
+    """
+    epgs = EndpointGenericScan.objects.filter(
+        q_configurations_to_scan(level="endpoint_generic_scan"),
+        endpoint__url__is_dead=False,
+        endpoint__url__not_resolvable=False,
+        endpoint__protocol="https",
+        endpoint__port=443,
+        endpoint__is_dead=False,
+        is_the_latest_scan=True,
+        rating__in=["trusted"],
+    )
+    # now figure out which ones are within 10 days of expiring. Only request those to be scanned.
+    additional_urls_to_scan = set()
+    log.debug("Found %s endpoint_generic_scans", epgs.count())
+    for scan in epgs:
+        try:
+            matching_scan = (
+                EndpointGenericScan.objects.filter(
+                    endpoint=scan.endpoint,
+                    is_the_latest_scan=True,
+                    type="tls_qualys_encryption_quality",
+                )
+                .order_by("-id")
+                .first()
+            )
+            # no matching scan, which is weird, make sure to scan again.
+            if not matching_scan:
+                log.debug("No matching scan found for url id: %s", scan.endpoint.url.id)
+                raise ValueError("")
+
+            rating_of_quality_scan = matching_scan.rating
+            # all other ratings have already been requested.
+            if rating_of_quality_scan not in ["A", "A+", "A-"]:
+                log.debug("No matching scan found for url: id %s", scan.endpoint.url.id)
+                continue
+
+            # 1709791406000
+            evidence_of_trust_scan = json.loads(scan.evidence)
+            notafter = evidence_of_trust_scan[0]["notAfter"]
+            datetime_of_notafter = datetime.fromtimestamp(notafter, timezone.utc)
+            if datetime_of_notafter < datetime.now(timezone.utc) - timedelta(days=10):
+                log.debug(f"3: planning url id: {scan.endpoint.url.id} because the cert will expire within 10 days.")
+                log.debug(f" {datetime_of_notafter} {datetime.now(timezone.utc) - timedelta(days=10)}")
+                additional_urls_to_scan.add(scan.endpoint.url)
+            else:
+                log.debug(f"skipping url id: {scan.endpoint.url.id} because it is not within 10 days.")
+
+        except (JSONDecodeError, ValueError):
+            log.debug("4: Json decode error for url id: %s", scan.endpoint.url.id)
+            # failed to load, so make sure there will be a new scan with proper evidence.
+            additional_urls_to_scan.add(scan.endpoint.url)
+
+    plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(list(additional_urls_to_scan)))
 
 
 def compose_manual_scan_task(organizations_filter: dict = None, urls_filter: dict = None, **kwargs):

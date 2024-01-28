@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 from freezegun import freeze_time
+import json
 
 from websecmap.organizations.models import Organization, Url
 from websecmap.reporting.models import ScanPolicy
@@ -69,12 +70,13 @@ def create_endpoint(url, ip_version, protocol, port):
     return e
 
 
-def create_endpoint_scan(endpoint, type, rating, at_when):
+def create_endpoint_scan(endpoint, type, rating, at_when, evidence="{}"):
     egs = EndpointGenericScan()
     egs.endpoint = endpoint
     egs.is_the_latest_scan = True
     egs.rating = rating
     egs.last_scan_moment = at_when
+    egs.evidence = evidence
     egs.rating_determined_on = at_when
     egs.type = type
     egs.save()
@@ -175,7 +177,7 @@ def test_plannedscan(db, default_scan_metadata):
     assert loglines[0].line == "Url: example.com, Activity: scan, Scanner: tls_qualys, State: requested, Origin: "
 
 
-def test_plan_scans(db, default_scan_metadata):
+def test_plan_scans(db, default_scan_metadata, default_policy):
     scanner = Scanner.objects.all().get(python_name="tls_qualys")
     scanner_id = scanner.id
 
@@ -213,58 +215,98 @@ def test_plan_scans(db, default_scan_metadata):
 
         # to test what happens on endpoints that already have scans:
         reset()
+        plan_scan()
+        assert calculate_progress() == [{"activity": 3, "amount": 2, "scanner": 22, "state": 1}]
+        plan_scan()
+        plan_scan()
+        plan_scan()
+        # repeating this planning while it still doesnt have scans...
+        assert calculate_progress() == [{"activity": 3, "amount": 8, "scanner": 22, "state": 1}]
 
-        # outdated: with very recent scans no new scans will be created:
-        # scans will be created, only the planning in the schedule is in the lead of when a scan happens
-        create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", datetime.now(timezone.utc))
+        # let's give them scans, so no new scans will be created
+        # with matching scans.
+        log.debug("Testing that adding new scans does not create new scans...")
+        evidence = [
+            {
+                "subject": "CN=mijn-acc.groningen.nl",
+                "commonNames": ["mijn-acc.groningen.nl"],
+                "altNames": ["mijn-acc.groningen.nl"],
+                "notBefore": 1702015407000,
+                "notAfter": (datetime.now(timezone.utc) + timedelta(days=100)).timestamp(),
+                "issuerSubject": "CN=R3, O=Let's Encrypt, C=US",
+                "issuerLabel": "R3",
+                "sigAlg": "SHA256withRSA",
+                "revocationInfo": 2,
+                "crlURIs": [""],
+                "ocspURIs": ["http://r3.o.lencr.org"],
+                "revocationStatus": 2,
+                "crlRevocationStatus": 4,
+                "ocspRevocationStatus": 2,
+                "sgc": 0,
+                "issues": 0,
+                "sct": True,
+                "mustStaple": 0,
+                "sha1Hash": "c1f3b82b761a15945ab991ae4900bc10e65edbd8",
+                "pinSha256": "6I/tDtpbWLgfvO5R4h05wGIj6KbRr61IwOkd9GqjkrI=",
+            }
+        ]
+        create_endpoint_scan(
+            e1, "tls_qualys_certificate_trusted", "trusted", datetime.now(timezone.utc), evidence=json.dumps(evidence)
+        )
+        create_endpoint_scan(
+            e2, "tls_qualys_certificate_trusted", "trusted", datetime.now(timezone.utc), evidence=json.dumps(evidence)
+        )
+        create_endpoint_scan(e1, "tls_qualys_encryption_quality", "A", datetime.now(timezone.utc))
         create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", datetime.now(timezone.utc))
         plan_scan()
-        assert calculate_progress() == [{"activity": 3, "amount": 1, "scanner": 22, "state": 1}]
+        plan_scan()
+        plan_scan()
+        plan_scan()
+        plan_scan()
+        plan_scan()
+        # repeating this planning while it still doesnt have scans...
+        assert calculate_progress() == [{"activity": 3, "amount": 8, "scanner": 22, "state": 1}]
 
+        log.debug("Testing expired certificate")
+        # create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", datetime.now(timezone.utc))
         # this does not delete endpoints...
-        EndpointGenericScan.objects.all().delete()
 
-        # test
-        # with some older data, the scan for the bad endpoint will be requested
-        create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", datetime.now(timezone.utc) - timedelta(days=100))
-        create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", datetime.now(timezone.utc))
-
-        # make sure the endpoint is created:
-        first_egs = EndpointGenericScan.objects.last()
-        assert first_egs.endpoint == e1
-        assert EndpointGenericScan.objects.all().count() == 2
-        egs = EndpointGenericScan.objects.all().filter(rating="F").first()
-        assert egs.rating_determined_on < datetime.now(timezone.utc) - timedelta(days=4)
-        assert egs.last_scan_moment < datetime.now(timezone.utc) - timedelta(days=4)
-        assert egs.is_the_latest_scan is True
-
+        # add another scan with an expired certificate.
+        create_endpoint_scan(
+            e2,
+            "tls_qualys_certificate_trusted",
+            "trusted",
+            datetime.now(timezone.utc),
+            evidence=json.dumps(
+                [
+                    {
+                        "subject": "CN=mijn-acc.groningen.nl",
+                        "commonNames": ["mijn-acc.groningen.nl"],
+                        "altNames": ["mijn-acc.groningen.nl"],
+                        "notBefore": 1702015407000,
+                        "notAfter": (datetime.now(timezone.utc) - timedelta(days=100)).timestamp(),
+                        "issuerSubject": "CN=R3, O=Let's Encrypt, C=US",
+                        "issuerLabel": "R3",
+                        "sigAlg": "SHA256withRSA",
+                        "revocationInfo": 2,
+                        "crlURIs": [""],
+                        "ocspURIs": ["http://r3.o.lencr.org"],
+                        "revocationStatus": 2,
+                        "crlRevocationStatus": 4,
+                        "ocspRevocationStatus": 2,
+                        "sgc": 0,
+                        "issues": 0,
+                        "sct": True,
+                        "mustStaple": 0,
+                        "sha1Hash": "c1f3b82b761a15945ab991ae4900bc10e65edbd8",
+                        "pinSha256": "6I/tDtpbWLgfvO5R4h05wGIj6KbRr61IwOkd9GqjkrI=",
+                    }
+                ]
+            ),
+        )
+        assert calculate_progress() == [{"activity": 3, "amount": 8, "scanner": 22, "state": 1}]
         plan_scan()
-        assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 1 + 1
-        assert calculate_progress() == [
-            {
-                "scanner": scanner_id,
-                "activity": Activity["scan"].value,
-                "state": State["requested"].value,
-                "amount": 1 + 1,
-            }
-        ]
-
-        EndpointGenericScan.objects.all().delete()
-
-        # test
-        # with very old scans both scans will be requested
-        create_endpoint_scan(e1, "tls_qualys_encryption_quality", "F", datetime.now(timezone.utc) - timedelta(days=6))
-        create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", datetime.now(timezone.utc) - timedelta(days=100))
-        plan_scan()
-        assert PlannedScan.objects.all().filter(state=State["requested"].value).count() == 2 + 2
-        assert calculate_progress() == [
-            {
-                "scanner": scanner_id,
-                "activity": Activity["scan"].value,
-                "state": State["requested"].value,
-                "amount": 2 + 2,
-            }
-        ]
+        assert calculate_progress() == [{"activity": 3, "amount": 9, "scanner": 22, "state": 1}]
 
 
 def test_retrieve_endpoints_from_urls(db):
