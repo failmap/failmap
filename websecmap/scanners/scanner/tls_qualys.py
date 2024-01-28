@@ -254,6 +254,16 @@ def plan_scan(urls_filter: dict = None, **kwargs):
 
             # 1709791406000
             evidence_of_trust_scan = json.loads(scan.evidence)
+            if len(evidence_of_trust_scan) == 0:
+                # no evidence was saved. Rescan
+                additional_urls_to_scan.add(scan.endpoint.url)
+                continue
+
+            if "notAfter" not in evidence_of_trust_scan[0]:
+                # no correct scan data was saved. Rescan.
+                additional_urls_to_scan.add(scan.endpoint.url)
+                continue
+
             notafter = evidence_of_trust_scan[0]["notAfter"]
             datetime_of_notafter = datetime.fromtimestamp(notafter, timezone.utc)
             if datetime_of_notafter < datetime.now(timezone.utc) - timedelta(days=10):
