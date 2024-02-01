@@ -272,6 +272,9 @@ def plan_scan(urls_filter: dict = None, **kwargs):
                 additional_urls_to_scan.add(scan.endpoint.url)
             else:
                 log.debug(f"skipping url id: {scan.endpoint.url.id} because it is not within 10 days.")
+                # prevent that scan looks outdated on the map.
+                scan.last_scan_moment = datetime.now(timezone.utc)
+                scan.save(update_fields=["last_scan_moment"])
 
         except (JSONDecodeError, ValueError):
             log.debug("4: Json decode error for url id: %s", scan.endpoint.url.id)
