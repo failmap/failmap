@@ -193,6 +193,8 @@ class Organization(models.Model):
         url.organization.add(self)
         url.save()
 
+        return url
+
     def save(self, *args, **kwarg):
         # handle computed values
         self.computed_name_slug = slugify(self.name)
@@ -476,12 +478,18 @@ class Url(models.Model):
         if not subdomain:
             return None
 
-        new_url = (subdomain + "." + self.url).lower()
+        new_url = f"{subdomain}.{self.url}".lower()
+
+        if not Url.subdomain_adding_is_allowed(new_url):
+            log.debug("Not allowed to add a subdomain, an above domain prevents this: %s", new_url)
+            return None
 
         if not Url.is_valid_url(new_url):
             log.debug("Subdomain not valid: %s", new_url)
             return None
 
+        # todo: this will not work anymore as the ownership can be completely different depending
+        #  on the sub-sub domains etc.
         if Url.objects.all().filter(url=new_url, organization__in=self.organization.all()).exists():
             log.debug("Subdomain already in the database: %s", new_url)
             return None
@@ -490,6 +498,18 @@ class Url(models.Model):
             log.debug("New subdomain did not resolve on either ipv4 and ipv6: %s", new_url)
             return None
 
+        # figure out ownership of this domain on the sub sub domain level. There can be many owners and
+        # the owner of the current loaded domain might no be the owner of the subdomain.
+        # see test_add_sub_sub_domain for examples.
+        # A Url needs to have a value for field "id" before a many-to-many relationship can be used.
+        owners = Url.find_domain_owner(new_url)
+        if not owners:
+            log.warning("Domain has no owner: %s", new_url)
+            # let's still add the domain, but it will also not have owners.
+            # return None
+
+        # domain will now be added, but we need the ownership already otherwise we will check the
+        # ownership of the current domain.
         try:
             with transaction.atomic():
                 # we found something that gives the idea that transactions are not working.
@@ -505,16 +525,80 @@ class Url(models.Model):
             return None
 
         if origin:
+            log.debug("Saving new URL: %s", new_url)
             my_url.origin = origin
             my_url.save()
 
-        # A Url needs to have a value for field "id" before a many-to-many relationship can be used.
-        for organization in self.organization.all():
+        for organization in owners:
             my_url.organization.add(organization)
             my_url.save()
             log.info("Added url: %s to organization: %s", new_url, organization)
 
         return my_url
+
+    @staticmethod
+    def subdomain_adding_is_allowed(domain: str) -> bool:
+        """
+        Will split a domain by . and will try to find the current organizations that own the domain.
+        If the domain does not exist yet, it will try again for a higher level up until the second level.
+
+        a.b.c.domain.nl will try: a.b.c.domain.nl, then b.c.domain.nl, then c.domain.nl, then domain.nl
+        """
+        splitted = domain.split(".")
+
+        # not possible
+        if len(splitted) < 2:
+            return False
+
+        for i in range(len(splitted)):
+            # dont do anything with top level domains.
+            if len(splitted[i:]) == 1:
+                continue
+
+            current = ".".join(splitted[i:])
+            log.debug("checking if adding is allowed on parent domain: %s", current)
+            if Url.objects.all().filter(url=current).exists():
+                # it's possible to not have an organization, which might be by design.
+                # regular domains will have an organization.
+                if Url.objects.all().filter(url=current).first().do_not_find_subdomains:
+                    return False
+
+        return True
+
+    @staticmethod
+    def find_domain_owner(domain: str) -> List[Organization]:
+        """
+        Will split a domain by . and will try to find the current organizations that own the domain.
+        If the domain does not exist yet, it will try again for a higher level up until the second level.
+
+        a.b.c.domain.nl will try: a.b.c.domain.nl, then b.c.domain.nl, then c.domain.nl, then domain.nl
+        """
+        splitted = domain.split(".")
+
+        # not possible
+        if len(splitted) < 2:
+            log.debug("Domain is too short to be treated as such: %s. Not able to find owner.", domain)
+            return []
+
+        for i in range(len(splitted)):
+            # dont do anything with top level domains.
+            if len(splitted[i:]) == 1:
+                log.debug("splitted is too short: %s. Not able to find owner.", splitted[i:])
+                continue
+
+            current = ".".join(splitted[i:])
+            log.debug("testing domain: %s", current)
+            # todo: perhaps just find something above...
+            if Url.objects.all().filter(url=current).exists():
+                # it's possible to not have an organization, which might be by design.
+                # regular domains will have an organization.
+                log.debug("Returning owner for domain: %s", current)
+                owners = Url.objects.all().filter(url=current).first().organization.all()
+                log.debug("Owners: %s", list(owners))
+                return list(owners)
+
+        log.debug("Could not find owner for domain: %s", domain)
+        return []
 
     @staticmethod
     def is_valid_url(url: str) -> bool:

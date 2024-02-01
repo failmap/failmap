@@ -284,14 +284,14 @@ class ScannerTaskCommand(TaskCommand):
             text = "".join(options["partially_matched_url_address"])
             urls_filter = {"url__icontains": text}
 
+        apply_log_verbosity(options)
+
         log.debug(
             "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s",
             organizations_filter,
             urls_filter,
             endpoints_filter,
         )
-
-        apply_log_verbosity(options)
 
         # compose set of tasks to be executed
         return self.scanner_module.compose_manual_scan_task(
@@ -377,6 +377,8 @@ class DiscoverTaskCommand(TaskCommand):
         if options["country"]:
             # create a case-insensitive filter to match organizations by name
             organization_filter = {"country__in": options["country"]}
+
+        apply_log_verbosity(options)
 
         log.debug(
             "organizations_filter: %s, urls_filter: %s, endpoints_filter: %s", organization_filter, urls_filter, []
