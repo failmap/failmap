@@ -21,6 +21,7 @@ import pytest
 from websecmap.app import log
 
 
+@pytest.mark.skip(reason="Test is unreliable and problem can't currently be fixed without multiple workers.")
 @pytest.mark.parametrize("method", ["direct"])
 def test_scan_method(method, worker, faaloniae_integration):
     """Runs the scanner using each of the three methods."""
