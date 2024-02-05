@@ -1926,13 +1926,13 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "scanners.endpointgenericscan", "label": "🔬 Endpoint Metrics"},
             {
                 "label": "🔬 - By Last Scan Moment (newest)",
-                "url": "/admin/scanners/endpointgenericscan/?o=-5.-6",
+                "url": "/admin/scanners/endpointgenericscan/?o=-7.-8",
                 "url_blank": False,
             },
             {
                 "label": "🔬 - Possibly outdated scans",
                 "url": "/admin/scanners/endpointgenericscan/"
-                "?endpoint__is_dead__exact=0&endpoint__url__is_dead__exact=0&is_the_latest_scan__exact=1&o=5.-6",
+                "?endpoint__is_dead__exact=0&endpoint__url__is_dead__exact=0&is_the_latest_scan__exact=1&o=7.-8",
                 "url_blank": False,
             },
             {"name": "scanners.urlgenericscan", "label": "🔬 URL Metrics"},
