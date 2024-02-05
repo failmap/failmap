@@ -89,7 +89,7 @@ def create_pivot_data(scan_types: List[str], layers: List[str]) -> List[Dict[str
                     new_record = {**endpoint_record, **scan_data, **pivot_record}
 
                     # for some reason the stuff from other layers is still included.
-                    if new_record["layer"] in layers:
+                    if not layers or new_record["layer"] in layers:
                         product.append(new_record)
     return product
 
