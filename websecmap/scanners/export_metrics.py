@@ -40,10 +40,11 @@ def export_current_metrics(
 ):
     epgs = EndpointGenericScan.objects.all().filter(
         is_the_latest_scan=True,
+        endpoint__url__organization__is_dead=False,
         endpoint__url__organization__layers__name=layer,
-        endpoint__is_dead=False,
         endpoint__url__is_dead=False,
         endpoint__url__not_resolvable=False,
+        endpoint__is_dead=False,
         rating=rating,
         type=scan_type,
     )
@@ -67,8 +68,21 @@ def create_pivot_data(scan_types: List[str], layers: List[str]) -> List[Dict[str
     product = []
     for scan_type in scan_types:
         print(f"Exporting {scan_type}")
-        endpoint_scans = EndpointGenericScan.objects.all().filter(is_the_latest_scan=True, type=scan_type)
-        url_scans = UrlGenericScan.objects.all().filter(is_the_latest_scan=True, type=scan_type)
+        endpoint_scans = EndpointGenericScan.objects.all().filter(
+            is_the_latest_scan=True,
+            endpoint__url__organization__is_dead=False,
+            endpoint__url__is_dead=False,
+            endpoint__url__not_resolvable=False,
+            endpoint__is_dead=False,
+            type=scan_type,
+        )
+        url_scans = UrlGenericScan.objects.all().filter(
+            is_the_latest_scan=True,
+            url__organization__is_dead=False,
+            url__is_dead=False,
+            url__not_resolvable=False,
+            type=scan_type,
+        )
 
         if layers:
             endpoint_scans = endpoint_scans.filter(endpoint__url__organization__layers__name__in=layers)
@@ -226,6 +240,7 @@ def determine_pivot_records(scan_type: str, scan) -> List[dict[str, Any]]:
         return pivot_generic_records([load_possible_json(scan.evidence)])
 
     # return at least one record, so everything can be pivoted even if there is no specialized evidence.
+    # todo: you can at least split up rating determined on in day, month and year.
     return [{"default": 1}]
 
 
