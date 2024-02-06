@@ -68,25 +68,42 @@ def create_pivot_data(scan_types: List[str], layers: List[str]) -> List[Dict[str
     product = []
     for scan_type in scan_types:
         print(f"Exporting {scan_type}")
-        endpoint_scans = EndpointGenericScan.objects.all().filter(
-            is_the_latest_scan=True,
-            endpoint__url__organization__is_dead=False,
-            endpoint__url__is_dead=False,
-            endpoint__url__not_resolvable=False,
-            endpoint__is_dead=False,
-            type=scan_type,
+        endpoint_scans = (
+            EndpointGenericScan.objects.all()
+            .filter(
+                is_the_latest_scan=True,
+                # when adding this, there are suddenly multiple scans of the same type...
+                # sometimes even more than 2, while all data and associated information is not stored
+                # in duplicates in the database. This is a bit mysterious.
+                # will add a distinct because the carthesian layers will be added lateron still anyway...
+                # endpoint__url__organization__is_dead=False,
+                endpoint__url__is_dead=False,
+                endpoint__url__not_resolvable=False,
+                endpoint__is_dead=False,
+                type=scan_type,
+                # adding a distinct so we're sure its only one scan...
+            )
+            .distinct()
         )
-        url_scans = UrlGenericScan.objects.all().filter(
-            is_the_latest_scan=True,
-            url__organization__is_dead=False,
-            url__is_dead=False,
-            url__not_resolvable=False,
-            type=scan_type,
+        url_scans = (
+            UrlGenericScan.objects.all()
+            .filter(
+                is_the_latest_scan=True,
+                # same issue as above.
+                # url__organization__is_dead=False,
+                url__is_dead=False,
+                url__not_resolvable=False,
+                type=scan_type,
+            )
+            .distinct()
         )
 
         if layers:
             endpoint_scans = endpoint_scans.filter(endpoint__url__organization__layers__name__in=layers)
             url_scans = url_scans.filter(url__organization__layers__name__in=layers)
+
+        # this somehow delivers an carthesian product but in the wrong way.
+        # therefore filter manually if for this scan type
 
         for scan in list(endpoint_scans) + list(url_scans):
             pivot_records = determine_pivot_records(scan_type, scan)
