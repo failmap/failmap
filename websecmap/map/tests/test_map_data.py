@@ -4,11 +4,60 @@ from dateutil.relativedelta import relativedelta
 
 from websecmap.map.logic.map import get_altnames, get_cached_map_data, get_map_data
 from websecmap.map.models import MapDataCache
+from websecmap.map.report import sync_model_field_to_disk
+from websecmap.map.util import transparent_json_to_zip_storage, zip_to_json
 from websecmap.organizations.models import AlternativeName, Organization, OrganizationType
 
 
 def test_get_cached_map_data(db):
-    expected_result = {"test": "hello world"}
+    # add some data that would be compressed in multiple chunks with high compression ratio to verify that
+    # compression actually works.
+    expected_result = {
+        "test": "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+        "hello world hello world hello world hello world hello world hello world hello world hello world "
+    }
 
     ot = OrganizationType()
     ot.name = "test"
@@ -18,7 +67,8 @@ def test_get_cached_map_data(db):
     mdc.country = "NL"
     mdc.organization_type = ot
     mdc.at_when = datetime.now(timezone.utc) - relativedelta(days=8)
-    mdc.dataset = expected_result
+    mdc.dataset = None
+    mdc.dataset_file = transparent_json_to_zip_storage(expected_result)
     mdc.filters = ["all"]
     mdc.save()
 
@@ -43,3 +93,34 @@ def test_get_altnames(db):
     # organization does not exist:
     assert get_altnames(None) == ""
     assert get_altnames(1231234) == ""
+
+
+def test_sync_model_field_to_disk(db):
+    expected_result = {"test": "hello world hello world hello world hello world hello world hello"}
+
+    ot = OrganizationType()
+    ot.name = "test"
+    ot.save()
+
+    # the old situation, nothing is in dataset_file
+    mdc = MapDataCache()
+    mdc.country = "NL"
+    mdc.organization_type = ot
+    mdc.at_when = datetime.now(timezone.utc) - relativedelta(days=8)
+    mdc.dataset = expected_result
+    mdc.dataset_file = None
+    mdc.filters = ["all"]
+    mdc.save()
+
+    sync_model_field_to_disk(model=MapDataCache, json_field="dataset", file_field="dataset_file")
+
+    mdc = MapDataCache.objects.all().first()
+    assert mdc.dataset is None
+    assert zip_to_json(mdc.dataset_file) == expected_result
+
+    # running it again does not overwrite the file field with empty data(!)
+    sync_model_field_to_disk(model=MapDataCache, json_field="dataset", file_field="dataset_file")
+
+    mdc = MapDataCache.objects.all().first()
+    assert mdc.dataset is None
+    assert zip_to_json(mdc.dataset_file) == expected_result

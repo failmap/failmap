@@ -7,6 +7,7 @@ from django.utils.text import slugify
 
 from websecmap.map.logic.map_defaults import REMARK, determine_when, get_country, get_organization_type
 from websecmap.map.models import MapDataCache
+from websecmap.map.util import zip_to_json
 from websecmap.organizations.models import Organization
 from websecmap.reporting.diskreport import retrieve_report
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
@@ -57,11 +58,11 @@ def get_cached_map_data(
     if not cached:
         return False
 
-    my_dataset = MapDataCache.objects.only("id", "dataset").get(id=cached.id)
+    my_dataset = MapDataCache.objects.only("id", "dataset_file").get(id=cached.id)
     if not my_dataset:
         return False
 
-    return my_dataset.dataset
+    return zip_to_json(my_dataset.dataset_file)
 
 
 def get_map_data(

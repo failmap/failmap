@@ -12,6 +12,7 @@ from websecmap.celery import Task, app
 from websecmap.map.logic.map import get_map_data, get_reports_by_ids
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.models import HighLevelStatistic, MapDataCache, OrganizationReport, VulnerabilityStatistic
+from websecmap.map.util import transparent_json_to_zip_storage
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.reporting.diskreport import store_report
 from websecmap.reporting.report import (
@@ -448,6 +449,23 @@ def calculate_map_data_today():
     calculate_map_data.si(1).apply_async()
 
 
+def sync_model_field_to_disk(model, json_field, file_field):
+    # moves the data from .dataset (a json dumps) to a zipped storage in .dataset_file
+
+    # dataset is deferred as mysql will not load the full table into django memory etc...
+    # removed .defer(json_field) - otherwise it wont pass tests, so lets just try and see if this works...
+    for mdc in model.objects.all():
+        # you'll get a warning for this record being accessed as N+1, as we just deferred this field.
+        if not getattr(mdc, json_field):
+            # already migrated
+            continue
+
+        data = getattr(mdc, json_field)
+        setattr(mdc, json_field, None)
+        setattr(mdc, file_field, transparent_json_to_zip_storage(data))
+        mdc.save()
+
+
 @app.task(queue="reporting")
 def calculate_map_data(days: int = 366, countries: List = None, organization_types: List = None):
     from django.db import OperationalError
@@ -491,7 +509,8 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
                     cached.country = map_configuration["country"]
                     cached.filters = [scan_type]
                     cached.at_when = when
-                    cached.dataset = data
+                    cached.dataset = None
+                    cached.dataset_file = transparent_json_to_zip_storage(data)
                     cached.save()
                 except OperationalError as my_exception:
                     # The public user does not have permission to run insert statements....

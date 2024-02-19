@@ -114,6 +114,60 @@ class Configuration(models.Model):
         return f"{self.country}/{self.organization_type}"
 
 
+class MapFlow(models.Model):
+    from_layer = models.ForeignKey(
+        OrganizationType,
+        on_delete=models.CASCADE,
+        verbose_name="Layer",
+        help_text="Part of the combination shown on the map.",
+        related_name="from_layer_field",
+    )
+
+    to_layer = models.ForeignKey(
+        OrganizationType,
+        on_delete=models.CASCADE,
+        verbose_name="Layer",
+        help_text="Part of the combination shown on the map.",
+        related_name="to_layer_field",
+    )
+
+    is_enabled = models.BooleanField()
+
+    # make it clear there are different flows that can be used.
+    # move things added to this map after a number of days, for example the 2 month grace period for preview maps
+    enable_after_n_days = models.BooleanField()
+    after_n_days = models.PositiveIntegerField()
+
+    # make it possible to move all things on a specific date
+    enable_on_specific_date = models.BooleanField()
+    on_specific_date = models.DateField(blank=True, null=True)
+
+    # is it copy or move:
+    also_remove_from_original_layer = models.BooleanField(
+        help_text="Copy or move. If this is disabled the organization will appear on both layers."
+    )
+
+
+class OrganizationOnLayerOverTime(models.Model):
+    # this is used to support the 'enable_after_n_days' feature in MapFlow.
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        verbose_name="Organization",
+    )
+
+    layers = models.ManyToManyField(
+        OrganizationType,
+        verbose_name="Layers",
+    )
+
+    # abstract time storage support for what organizations are in what maps over time.
+    # not clear if AbstractTimeStorage supports ManyToManyField, which must be tested...
+    at_when = models.DateTimeField(blank=True, null=True)
+    last_scan_moment = models.DateTimeField(blank=True, null=True)
+    is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+
+
 class MapHealthReport(models.Model):
     map_configuration = models.ForeignKey(
         Configuration,
@@ -164,7 +218,12 @@ class MapDataCache(models.Model):
         max_length=767, blank=True, null=True, db_index=True, help_text="Any set of desired scan_types"
     )
 
+    # deprecated due to this storage is not compressed. This results in a 40gb table which should only be just
+    # 4 gigabyte or so. Additionally this data can be easily rebuilt so there is no huge value in storing it like this.
     dataset = JSONField()
+
+    # move data from dataset to dataset_file, which can be compressed
+    dataset_file = models.FileField(upload_to="map_data_cache/%Y/%m/%d/", default=None, blank=True, null=True)
 
     cached_on = models.DateField(auto_now_add=True, null=True, blank=True)
 
