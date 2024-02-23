@@ -6,7 +6,11 @@ from websecmap.celery import app
 class Command(TaskCommand):
     def add_arguments(self, parser):
         parser.add_argument("task", nargs=1, help="The task to run. Use 'task_list' for a list of possble tasks.")
+        parser.add_argument("task_args", nargs="*", help="Positional arguments to pass to task.")
         super().add_arguments(parser)
 
     def compose(self, *args, **options):
-        return app.tasks[options["task"][0]]
+        if options["task_args"]:
+            return app.tasks[options["task"][0]].si(*options["task_args"])
+        else:
+            return app.tasks[options["task"][0]]

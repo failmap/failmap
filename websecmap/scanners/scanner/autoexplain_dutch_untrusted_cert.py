@@ -87,6 +87,7 @@ def command_line_cert_check(url: str, port: int = 443, ip_version: int = 4):
 # prefork workers run the original tls code which works as intended and supports this edge case measurement
 @app.task(queue="prefork")
 def get_cert_chain(url, port, ip_version) -> List[str]:
+    port = int(port)
     chain = []
     log.debug("Attempting to retrieve SSL chert via %s different methods.", len(methods))
     for method, method_name in methods:
