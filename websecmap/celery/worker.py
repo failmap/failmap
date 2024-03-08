@@ -61,9 +61,9 @@ QUEUES_MATCHING_ROLES = {
     "default": [
         # doesn't care about network family, any network is fine
         Queue("internet"),
-        # only ipv4 tasks
+        # only ipv4 tasks, but this is kinda broken since this worker will run dual-stack
         Queue("ipv4"),
-        # only ipv4 tasks
+        # only ipv6 tasks, but this is kinda broken since this worker will run dual-stack
         Queue("ipv6"),
         # needs both network families to be present
         Queue("4and6"),
@@ -78,8 +78,6 @@ QUEUES_MATCHING_ROLES = {
         Queue("database_deprecate"),
         # celery internal maintenance (eg: remove expired results)
         Queue("celery"),
-        # tasks that require no network, no database. Such as calculations, parsing of datasets etc.
-        Queue("isolated"),
         # run qualys scans
         Queue("qualys"),
         Queue("claim_proxy"),
@@ -104,40 +102,30 @@ QUEUES_MATCHING_ROLES = {
         Queue("ipv6"),
         Queue("internet"),
         Queue("qualys"),
-        Queue("isolated"),
         Queue("claim_proxy"),
     ],
     "default_ipv4": [
         Queue("internet"),
         Queue("ipv4"),
         Queue("storage"),
-        Queue("isolated"),
     ],
     "default_ipv6": [
         Queue("internet"),
         Queue("ipv6"),
         Queue("storage"),
-        Queue("isolated"),
     ],
+    # workers limited to IPv4 or IPv6 traffic by configuratie and firewall
     "v4_internet": [
-        Queue("internet"),
+        # accept only tasks that need ipv4-only network
         Queue("ipv4"),
-        Queue("isolated"),
     ],
     "v6_internet": [
-        Queue("internet"),
+        # accept only tasks that need ipv6-only network
         Queue("ipv6"),
-        Queue("isolated"),
     ],
-    "alt_v4_internet": [
+    # all internet access, with ipv4 and 6 configured
+    "all_internet": [
         Queue("internet"),
-        Queue("alt_ipv4"),
-        Queue("isolated"),
-    ],
-    "alt_v6_internet": [
-        Queue("internet"),
-        Queue("alt_ipv6"),
-        Queue("isolated"),
     ],
     "storage": [
         # Queue used at the end of a task to store the results
@@ -167,21 +155,7 @@ QUEUES_MATCHING_ROLES = {
         # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might block the worker.
         # Given there is only one storage worker, blocking it doesn't help it's work.
     ],
-    "calculator": [Queue("isolated")],
     "desktop": [Queue("desktop")],
-    # universal scanner worker that has internet access for either IPv4 and IPv6 or both (you don't know)
-    "any_internet": [
-        Queue("internet"),  # tasks that requires ANY network
-        Queue("isolated"),  # no network, no database
-    ],
-    # all internet access, with ipv4 and 6 configured
-    "all_internet": [
-        Queue("internet"),
-        Queue("ipv4"),
-        Queue("ipv6"),
-        Queue("4and6"),
-        Queue("isolated"),
-    ],
     # special scanner worker for qualys rate limited tasks to not block queue for other tasks
     # and it needs a dedicated IP address, which is coded in hyper workers.
     "qualys": [

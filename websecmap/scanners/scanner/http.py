@@ -216,7 +216,7 @@ def compose_verify_task(urls):
     return tasks
 
 
-@app.task(queue="4and6")
+@app.task(queue="internet")
 def get_ips(url: str):
     ipv4 = get_ipv4(url) if settings.NETWORK_SUPPORTS_IPV4 else ""
     ipv6 = get_ipv6(url) if settings.NETWORK_SUPPORTS_IPV6 else ""
@@ -366,7 +366,7 @@ ACCEPTABLE_CONNECTION_ERRORS = [
 ]
 
 
-@app.task(queue="4and6")
+@app.task(queue="internet")
 def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str, str]:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
@@ -753,7 +753,7 @@ def kill_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
         log.info("Killed endpoint: %s, url: %s. protocol: %s", endpoint, endpoint.url.url, endpoint.protocol)
 
 
-@app.task(queue="4and6")
+@app.task(queue="internet")
 def check_network(code_location=""):
     """
     Used to see if a worker can do IPv6. Will trigger an exception when no ipv4 or ipv6 is available,
