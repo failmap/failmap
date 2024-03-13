@@ -12,12 +12,15 @@ from websecmap.scanners.scanner_for_everything import (
     ip_geolocation_correction,
     locate_and_correct,
 )
+
+# todo: iterate over scanners as tasks are often forgotten
 from websecmap.scanners.scanner import (
     autoexplain_dutch_untrusted_cert,
     autoexplain_microsoft_neighboring_services,
     autoexplain_no_https_microsoft,
     autoexplain_no_https_possible,
     autoexplain_trust_microsoft,
+    autoexplain_dane_microsoft,
     bannergrab_masscan,
     bannergrab_nmap,
     dns_clean_wildcards,
@@ -74,6 +77,7 @@ __scanners__ = [
     autoexplain_no_https_microsoft,
     autoexplain_trust_microsoft,
     autoexplain_no_https_possible,
+    autoexplain_dane_microsoft,
     resolve_ip,
     bannergrab_masscan,
     bannergrab_nmap,
