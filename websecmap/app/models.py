@@ -9,6 +9,7 @@ from django.db import models
 from jsonfield import JSONField
 from taggit.managers import TaggableManager
 
+from websecmap.app.fields import CompressedJSONField
 from websecmap.celery import app
 
 log = logging.getLogger(__name__)
@@ -34,6 +35,10 @@ def censor_sensitive_data(data):
         flags=re.MULTILINE,
     )
     return data
+
+
+class CompressedJSONFieldTest(models.Model):
+    data = CompressedJSONField(help_text="Data in this fiels is json but compressed with gzip...")
 
 
 class Job(models.Model):
