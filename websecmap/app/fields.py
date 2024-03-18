@@ -64,5 +64,6 @@ class CompressedJSONField(JSONFieldMixin, models.BinaryField):
         return gzip.compress(bytes(string, "UTF-8"), compresslevel=4)
 
     def value_to_string(self, obj):
-        string = super().value_to_string(obj)
-        return gzip.compress(bytes(string, "UTF-8"), compresslevel=4)
+        # https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.Field.value_to_string
+        # normaly serialization would work, but in this case it's just a json object.
+        return super().value_to_string(obj)

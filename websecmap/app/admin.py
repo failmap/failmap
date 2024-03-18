@@ -671,8 +671,8 @@ class TranslationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(CompressedJSONFieldTest)
 class CompressedJSONFieldTestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     # test to see if the admin interface renders this properly
-    list_display = ["id", "data"]
-    fields = ("data",)
+    list_display = ["id", "data", "old_data"]
+    fields = ("data", "old_data")
 
     # binaryfields are not editable as json. We don't care about it being editable as it's never edited by hand
     readonly_fields = ["data"]
