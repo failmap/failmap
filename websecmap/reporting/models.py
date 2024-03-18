@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 
+from websecmap.app.fields import CompressedJSONField
 from websecmap.organizations.models import Url
 
 
@@ -291,7 +292,7 @@ class UrlReport(
     url = models.ForeignKey(Url, on_delete=models.CASCADE)
 
     at_when = models.DateTimeField(db_index=True)
-    calculation = JSONField(
+    calculation = CompressedJSONField(
         help_text="Contains JSON with a calculation of all scanners at this moment. The rating can "
         "be spread out over multiple endpoints, which might look a bit confusing. Yet it "
         "is perfectly possible as some urls change their IP every five minutes and "
