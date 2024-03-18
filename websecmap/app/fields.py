@@ -6,7 +6,7 @@ from gzip import BadGzipFile
 from websecmap.app import log
 
 
-class CompressedJSONField(JSONFieldMixin, models.TextField):
+class CompressedJSONField(JSONFieldMixin, models.BinaryField):
     """
     This is exactly the same as a JSONField, except that the storage is compressed transparently with gzip.
     This saves a lot of space while the app stays functioning the way it does.
@@ -29,7 +29,14 @@ class CompressedJSONField(JSONFieldMixin, models.TextField):
             data = gzip.decompress(value)
         except (BadGzipFile, TypeError) as e:
             log.error("Unable to decompress data, using original: %s", e)
-            data = value
+            if isinstance(value, memoryview):
+                # postgresql
+                data = bytes(value).decode("utf8")
+            if isinstance(value, bytes):
+                # mysql
+                data = value.decode("utf8")
+            else:
+                data = value
         return super().to_python(data)
 
     def from_db_value(self, value, expression, connection):
@@ -41,7 +48,14 @@ class CompressedJSONField(JSONFieldMixin, models.TextField):
             data = gzip.decompress(value)
         except (BadGzipFile, TypeError) as e:
             log.error("Unable to decompress data, using original: %s", e)
-            data = value
+            if isinstance(value, memoryview):
+                # postgresql
+                data = bytes(value).decode("utf8")
+            if isinstance(value, bytes):
+                # mysql
+                data = value.decode("utf8")
+            else:
+                data = value
         return super().from_db_value(data, expression, connection)
 
     def get_prep_value(self, value):
