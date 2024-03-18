@@ -46,8 +46,8 @@ class CompressedJSONField(JSONFieldMixin, models.TextField):
 
     def get_prep_value(self, value):
         string = super().get_prep_value(value)
-        return gzip.compress(bytes(string, 'UTF-8'), compresslevel=4)
+        return gzip.compress(bytes(string, "UTF-8"), compresslevel=4)
 
     def value_to_string(self, obj):
         string = super().value_to_string(obj)
-        return gzip.compress(bytes(string, 'UTF-8'), compresslevel=4)
+        return gzip.compress(bytes(string, "UTF-8"), compresslevel=4)
