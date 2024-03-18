@@ -39,7 +39,9 @@ def censor_sensitive_data(data):
 
 class CompressedJSONFieldTest(models.Model):
     data = CompressedJSONField(help_text="Data in this fiels is json but compressed with gzip...")
-    old_data = JSONField(help_text="Some data that might or might not be upgraded!", default={"hello": "world"})
+    old_data = CompressedJSONField(
+        help_text="Some data that might or might not be upgraded!", default={"hello": "world"}
+    )
 
 
 class Job(models.Model):
