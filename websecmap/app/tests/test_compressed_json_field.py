@@ -19,7 +19,7 @@ def test_compressedjsonfield(db):
         # see if there is any compression
         assert row[0][0] != "{"
         # see if there is some compression
-        assert row[0][:4] == b"\x1f\x8b\x08\x00"
+        assert bytes(row[0][:4]) == b"\x1f\x8b\x08\x00"
 
     my_data = CompressedJSONFieldTest.objects.get(id=x.id)
     assert my_data.data == json_data

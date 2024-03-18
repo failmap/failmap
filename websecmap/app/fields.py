@@ -57,7 +57,6 @@ class CompressedJSONField(JSONFieldMixin, models.BinaryField):
                 data = value.decode("utf8")
             else:
                 data = value
-
         return super().from_db_value(data, expression, connection)
 
     def get_prep_value(self, value):
