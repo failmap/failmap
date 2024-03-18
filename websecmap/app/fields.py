@@ -32,7 +32,8 @@ class CompressedJSONField(JSONFieldMixin, models.BinaryField):
             if isinstance(value, memoryview):
                 # postgresql
                 data = bytes(value).decode("utf8")
-            if isinstance(value, bytes):
+            # memoryview is bytes, so an if statement would always be correct
+            elif isinstance(value, bytes):
                 # mysql
                 data = value.decode("utf8")
             else:
@@ -51,11 +52,12 @@ class CompressedJSONField(JSONFieldMixin, models.BinaryField):
             if isinstance(value, memoryview):
                 # postgresql
                 data = bytes(value).decode("utf8")
-            if isinstance(value, bytes):
+            elif isinstance(value, bytes):
                 # mysql
                 data = value.decode("utf8")
             else:
                 data = value
+
         return super().from_db_value(data, expression, connection)
 
     def get_prep_value(self, value):
