@@ -14,8 +14,15 @@ from websecmap.app.models import Job
 from websecmap.celery import app
 from websecmap.map import models
 from websecmap.map.logic.openstreetmap import import_from_scratch, update_coordinates
-from websecmap.map.models import HighLevelStatistic, MapDataCache, VulnerabilityStatistic
+from websecmap.map.models import (
+    HighLevelStatistic,
+    MapDataCache,
+    VulnerabilityStatistic,
+    OrganizationOnLayerOverTime,
+    MapFlow,
+)
 from websecmap.map.report import compose_task
+from websecmap.organizations.models import OrganizationType
 
 log = logging.getLogger(__package__)
 
@@ -592,3 +599,40 @@ class OrganizationReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     )
 
     save_as = True
+
+
+@admin.register(MapFlow)
+class MapFlowAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = [
+        "id",
+        "is_enabled",
+        "from_layer",
+        "to_layer",
+        "enable_after_n_days",
+        "after_n_days",
+        "enable_on_specific_date",
+        "on_specific_date",
+        "also_remove_from_original_layer",
+    ]
+
+    list_filter = ["is_enabled", "from_layer", "to_layer", "enable_after_n_days", "enable_on_specific_date"]
+    ...
+
+
+@admin.register(OrganizationOnLayerOverTime)
+class OrganizationOnLayerOverTimeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    # last_scan_moment should be last_check_moment or so, but it is what it is...
+    list_display = [
+        "organization",
+        "layers",
+        "nice_layers",
+        "at_when",
+        "days_on_map",
+        "last_scan_moment",
+        "is_the_latest",
+    ]
+    list_filter = ["organization", "layers", "at_when", "is_the_latest"]
+
+    def nice_layers(self, obj):
+        # create a visually nice representation of layers
+        return list(OrganizationType.objects.all().filter(id__in=obj.layers).values_list("name", flat=True))

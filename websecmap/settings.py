@@ -1884,8 +1884,11 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         "label": _("Configuration"),
         "items": [
             {"name": "constance.config", "label": "🎛️ Site & Scanning Configuration"},
-            {"name": "map.configuration", "label": "🌍 Displayed Countries / Areas"},
-            {"name": "map.landingpage", "label": "➡️ Landing Pages / Redirects"},
+            {"name": "map.configuration", "label": "🌍 Displayed Maps"},
+            {"name": "map.mapflow", "label": "➡️ - Map Flow"},
+            {"name": "map.organizationonlayerovertime", "label": "➡️ - Organizations on Map Stats"},
+            # don't think this is used anymore
+            # {"name": "map.landingpage", "label": "➡️ Landing Pages / Redirects"},
             {"name": "django_celery_beat.periodictask", "label": "⏰ Scheduled Scans & Tasks"},
             {"name": "reporting.scanpolicy", "label": "🈴 Scan Scoring Policy"},
             {"name": "scanners.scanproxy", "label": "🧉 TLS Scan Proxies"},

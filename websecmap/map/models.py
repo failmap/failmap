@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.safestring import mark_safe
@@ -131,20 +133,36 @@ class MapFlow(models.Model):
         related_name="to_layer_field",
     )
 
-    is_enabled = models.BooleanField()
+    is_enabled = models.BooleanField(
+        help_text="Enable at least one of the below map flows. A disabled state will never be run.",
+        null=True,
+    )
 
     # make it clear there are different flows that can be used.
     # move things added to this map after a number of days, for example the 2 month grace period for preview maps
-    enable_after_n_days = models.BooleanField()
-    after_n_days = models.PositiveIntegerField()
+    enable_after_n_days = models.BooleanField(
+        help_text="Enables the 'after N days' moving option. This moves organizations added to this map after a number "
+        "of days, for example the 2 month grace period for preview map. This is especially useful when adding"
+        " new organizations on irregular moments and have them published automatically at some point without "
+        "having to think about them anymore.",
+        null=True,
+    )
+    after_n_days = models.PositiveIntegerField(null=True)
 
     # make it possible to move all things on a specific date
-    enable_on_specific_date = models.BooleanField()
+    enable_on_specific_date = models.BooleanField(
+        help_text="Enables the 'on specific date' moving option. This moves organizations added to this map on a "
+        "predefined specific date. This is very useful when a new map will be published in the future. "
+        "You will have to publish the map manually in the displayed countries.",
+        null=True,
+    )
     on_specific_date = models.DateField(blank=True, null=True)
 
     # is it copy or move:
     also_remove_from_original_layer = models.BooleanField(
-        help_text="Copy or move. If this is disabled the organization will appear on both layers."
+        help_text="Copy or move. If this is disabled the organization will appear on both layers. This is valid for "
+        "all map flows.",
+        null=True,
     )
 
 
@@ -156,16 +174,18 @@ class OrganizationOnLayerOverTime(models.Model):
         verbose_name="Organization",
     )
 
-    layers = models.ManyToManyField(
-        OrganizationType,
-        verbose_name="Layers",
-    )
+    layers = JSONField(verbose_name="Layers", default=[])
 
     # abstract time storage support for what organizations are in what maps over time.
     # not clear if AbstractTimeStorage supports ManyToManyField, which must be tested...
     at_when = models.DateTimeField(blank=True, null=True)
     last_scan_moment = models.DateTimeField(blank=True, null=True)
     is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+
+    @property
+    def days_on_map(self):
+        # count the difference in days between now and at_when
+        return (datetime.now(timezone.utc) - self.at_when).days
 
 
 class MapHealthReport(models.Model):

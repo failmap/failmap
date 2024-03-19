@@ -20,6 +20,8 @@ class CompressedJSONField(JSONFieldMixin, models.BinaryField):
     Todo: the column needs to be bytes. How does that work in django database? -> seems to work instantly already.
     But perhaps not in postgres of mariadb. We'll see what happens during tests.
 
+    https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
+
     Also tested by hand in the admin interface.
     """
 
