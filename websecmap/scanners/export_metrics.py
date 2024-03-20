@@ -544,12 +544,17 @@ def parse_issuer_subject(data: str) -> Dict[str, Any]:
         # use this field up until the next one
         if index != len(fields) - 1:
             pattern = rf"({fields[index]})(.*), ({fields[index+1]})"
-            found_data[fieldname] = re.findall(pattern, data)[0][1]
+            results = re.findall(pattern, data)
+            if results and len(results[0]) > 1:
+                found_data[fieldname] = re.findall(pattern, data)[0][1]
+            else:
+                found_data[fieldname] = ""
 
         else:
             # the last field is just the rest of the data.
             pattern = rf"{fields[len(fields) -1]}(.*)"
-            found_data[fieldname] = re.findall(pattern, data)[0]
+            result = re.findall(pattern, data)
+            found_data[fieldname] = re.findall(pattern, data)[0] if result else ""
 
     return {
         "C": found_data.get("C", ""),
