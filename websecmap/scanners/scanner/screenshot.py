@@ -173,12 +173,13 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
     except requests.RequestException as exc:
         # cannot find service, etc, connection errors, timeouts etc...
         # while business as usual, log it for a while to see what happens
-        log.exception("HTTP error during screenshot capture")
+        error_message = exc.response.content.encode("utf8")[:100]
+        log.exception("HTTP error during screenshot capture: {error_message}")
         return {
             "screenshot": "",
             "status_code": exc.response.status_code,
             "success": False,
-            "error_message": exc.response.content,
+            "error_message": error_message,
             "url": url,
             "screenshot_service": screenshot_service,
         }
