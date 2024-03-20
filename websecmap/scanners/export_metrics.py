@@ -31,6 +31,7 @@ from websecmap.scanners.scanner_for_everything.location import (
     SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT_CRAWL_WITHOUT_CONSENT,
 )
 from websecmap.utils import normalize_cookie_name
+import re
 
 
 def export_current_metrics(
@@ -251,6 +252,9 @@ def determine_pivot_records(scan_type: str, scan) -> List[dict[str, Any]]:
 
     if scan_type in [SCAN_TYPE_LOCATION_COOKIES]:
         return pivot_cookie_locations(load_possible_json(scan.evidence))
+
+    if scan_type in {"tls_qualys_certificate_trusted"}:
+        return pivot_tls_qualys_certificate_trusted(load_possible_json(scan.evidence))
 
     if load_possible_json(scan.evidence):
         # assume this is a single dict, and not a list of dicts...
@@ -513,6 +517,183 @@ def pivot_cookie_record(record) -> Dict[str, Any]:
         "cookie_purpose": "",
         "cookie_purpose_rating": "",
     }
+
+
+def is_nth_bit_set(x: int, n: int) -> bool:
+    return bool(x & (1 << n))
+
+
+def parse_issuer_subject(data: str) -> Dict[str, Any]:
+    """
+    This is a RFC4514 string. Not going to ship the ldap3 library for this.
+
+    Issuer is a sting like this: "issuerSubject": "CN=R3, O=Let's Encrypt, C=US",
+    it can have all kinds of fields, let's get the most common ones: CN, O, C
+
+    Other examples:
+
+    https://stackoverflow.com/questions/6464129/certificate-subject-x-509
+
+    We want: CN, O, C, OU, L, ST
+    """
+    fields = re.findall(r"[A-Z]*=", data)
+    found_data = {}
+
+    for index, field in enumerate(fields):
+        fieldname = field.replace("=", "")
+        # use this field up until the next one
+        if index != len(fields) - 1:
+            pattern = rf"({fields[index]})(.*), ({fields[index+1]})"
+            found_data[fieldname] = re.findall(pattern, data)[0][1]
+
+        else:
+            # the last field is just the rest of the data.
+            pattern = rf"{fields[len(fields) -1]}(.*)"
+            found_data[fieldname] = re.findall(pattern, data)[0]
+
+    return {
+        "C": found_data.get("C", ""),
+        "O": found_data.get("O", ""),
+        "OU": found_data.get("OU", ""),
+        "Q": found_data.get("Q", ""),
+        "ST": found_data.get("ST", ""),
+        "L": found_data.get("L", ""),
+        "CN": found_data.get("CN", ""),
+    }
+
+
+def pivot_tls_qualys_certificate_trusted(records):
+    """
+    https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v3.md
+
+    [
+      {
+        "subject": "CN=academie.scopescholen.nl",
+        "commonNames": [
+          "academie.scopescholen.nl"
+        ],
+        "altNames": [
+          "academie.scopescholen.nl"
+        ],
+        "notBefore": 1710875488000,
+        "notAfter": 1718651487000,
+        "issuerSubject": "CN=R3, O=Let's Encrypt, C=US",
+        "issuerLabel": "R3",
+        "sigAlg": "SHA256withRSA",
+        "revocationInfo": 2,
+        "crlURIs": [
+          ""
+        ],
+        "ocspURIs": [
+          "http://r3.o.lencr.org"
+        ],
+        "revocationStatus": 2,
+        "crlRevocationStatus": 4,
+        "ocspRevocationStatus": 2,
+        "sgc": 0,
+        "issues": 9,
+        "sct": true,
+        "mustStaple": 0,
+        "sha1Hash": "32ca92c8e9d19ea6ead97ef91a58efb507dcddcc",
+        "pinSha256": "lntwaDy8uxvFW3DEW6/5X5jquckJj+F+rjCNv1Dve9Q=sigAlg"
+      }
+    ]
+
+    There are many convoluted fields in this data.
+    """
+
+    if records:
+        first_row = records[0]
+    else:
+        return []
+
+    issues = first_row.get("issues", -1)
+    sgc = first_row.get("sgc", 0)
+    issuerSubject = first_row.get("issuerSubject", "")
+    parsed_issuerSubject = parse_issuer_subject(issuerSubject)
+    return [
+        {
+            # plain export of values without any normalization
+            "subject": first_row.get("subject", ""),
+            "commonNames": ",".join(first_row.get("commonNames", [])),
+            "altNames": ",".join(first_row.get("altNames", [])),
+            "notBefore": first_row.get("notBefore", 0),
+            "notAfter": first_row.get("notAfter", 0),
+            "issuerSubject": first_row.get("issuerSubject", ""),
+            "issuerLabel": first_row.get("issuerLabel", ""),
+            "sigAlg": first_row.get("sigAlg", ""),
+            "revocationInfo": first_row.get("revocationInfo", 0),
+            "crlURIs": ",".join(first_row.get("crlURIs", [])),
+            "ocspURIs": ",".join(first_row.get("ocspURIs", [])),
+            "revocationStatus": first_row.get("revocationStatus", 0),
+            "crlRevocationStatus": first_row.get("crlRevocationStatus", 0),
+            "ocspRevocationStatus": first_row.get("ocspRevocationStatus", 0),
+            "sgc": first_row.get("sgc", 0),
+            "issues": first_row.get("issues", 0),
+            "sct": first_row.get("sct", False),
+            "mustStaple": first_row.get("mustStaple", 0),
+            "sha1Hash": first_row.get("sha1Hash", ""),
+            "pinSha256": first_row.get("pinSha256", ""),
+            # optional fields: N for normal
+            "validationType": first_row.get("validationType", "N"),
+            # revocation split out into several fields, which makes filtering nicer
+            # """
+            # 0 - not checked
+            # 1 - certificate revoked
+            # 2 - certificate not revoked
+            # 3 - revocation check error
+            # 4 - no revocation information
+            # 5 - internal error
+            # """
+            "revocation_not_checked": first_row.get("revocationStatus", -1) == 0,
+            "revocation_revoked": first_row.get("revocationStatus", -1) == 1,
+            "revocation_not_revoked": first_row.get("revocationStatus", -1) == 2,
+            "revocation_check_error": first_row.get("revocationStatus", -1) == 3,
+            "revocation_no_revocation_information": first_row.get("revocationStatus", -1) == 4,
+            "revocation_internal_error": first_row.get("revocationStatus", -1) == 5,
+            # """
+            # sgc - Server Gated Cryptography support; integer:
+            # bit 1 (1) - Netscape SGC
+            # bit 2 (2) - Microsoft SGC
+            # """
+            "sgc_netscape": is_nth_bit_set(sgc, 1),
+            "sgc_microsoft": is_nth_bit_set(sgc, 2),
+            # """
+            # issues - list of certificate issues, one bit per issue:
+            # bit 0 (1) - no chain of trust
+            # bit 1 (2) - not before
+            # bit 2 (4) - not after
+            # bit 3 (8) - hostname mismatch
+            # bit 4 (16) - revoked
+            # bit 5 (32) - bad common name
+            # bit 6 (64) - self-signed
+            # bit 7 (128) - blacklisted
+            # bit 8 (256) - insecure signature
+            # bit 9 (512) - insecure key
+            # """
+            "issues_no_chain_of_trust": is_nth_bit_set(issues, 1),
+            "issues_not_before": is_nth_bit_set(issues, 2),
+            "issues_not_after": is_nth_bit_set(issues, 3),
+            "issues_hostname_mismatch": is_nth_bit_set(issues, 4),
+            "issues_revoked": is_nth_bit_set(issues, 5),
+            "issues_bad_common_name": is_nth_bit_set(issues, 6),
+            "issues_self_signed": is_nth_bit_set(issues, 7),
+            "issues_blacklisted": is_nth_bit_set(issues, 8),
+            "issues_insecure_signature": is_nth_bit_set(issues, 1),
+            "issues_insecure_key": is_nth_bit_set(issues, 9),
+            # """
+            # Issuer is a sting like this: "issuerSubject": "CN=R3, O=Let's Encrypt, C=US",
+            # it can have all kinds of fields, let's get the most common ones: CN, O, C
+            # """
+            "issuerSubject_country": parsed_issuerSubject["C"],
+            "issuerSubject_organization": parsed_issuerSubject["O"],
+            "issuerSubject_organizational_unit": parsed_issuerSubject["OU"],
+            "issuerSubject_name_qualifier": parsed_issuerSubject["Q"],
+            "issuerSubject_state": parsed_issuerSubject["ST"],
+            "issuerSubject_common_name": parsed_issuerSubject["CN"],
+            "issuerSubject_locality": parsed_issuerSubject["L"],
+        }
+    ]
 
 
 def cookie_indicator_data(record):

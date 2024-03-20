@@ -14,6 +14,7 @@ from websecmap.scanners.export_metrics import (
     pivot_products,
     pivot_cookie_meaning,
     create_pivot_data,
+    parse_issuer_subject,
 )
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 
@@ -526,3 +527,85 @@ def create_test_dataset(
     scan_1 = EndpointGenericScan.objects.create(type=scan_type_name, is_the_latest_scan=True, **kwargs_1)
 
     return layer_1, org_1, url_1, ep_1, scan_1
+
+
+def test_parse_issuer_subject():
+    data = parse_issuer_subject("")
+    assert data == {
+        "C": "",
+        "O": "",
+        "OU": "",
+        "Q": "",
+        "ST": "",
+        "L": "",
+        "CN": "",
+    }
+
+    data = parse_issuer_subject("CN=Microsoft Azure RSA TLS Issuing CA 07, O=Microsoft Corporation, C=US")
+    assert data == {
+        "C": "US",
+        "O": "Microsoft Corporation",
+        "OU": "",
+        "Q": "",
+        "ST": "",
+        "L": "",
+        "CN": "Microsoft Azure RSA TLS Issuing CA 07",
+    }
+
+    # extra fields such as EMAILADDRESS are not returned
+    data = parse_issuer_subject(
+        "EMAILADDRESS=root@domain.nl, CN=sdomain.nl, OU=SomeOrganizationalUnit, " "O=org, L=city, ST=state, C=--"
+    )
+    assert data == {
+        "C": "--",
+        "O": "org",
+        "OU": "SomeOrganizationalUnit",
+        "Q": "",
+        "ST": "state",
+        "L": "city",
+        "CN": "sdomain.nl",
+    }
+
+    data = parse_issuer_subject("CN=DigiCert G2 TLS EU RSA4096 SHA384 2022 CA1, O=DigiCert Ireland Limited, C=IE")
+    assert data == {
+        "C": "IE",
+        "O": "DigiCert Ireland Limited",
+        "OU": "",
+        "Q": "",
+        "ST": "",
+        "L": "",
+        "CN": "DigiCert G2 TLS EU RSA4096 SHA384 2022 CA1",
+    }
+
+    data = parse_issuer_subject("CN=TRAEFIK DEFAULT CERT")
+    assert data == {
+        "C": "",
+        "O": "",
+        "OU": "",
+        "Q": "",
+        "ST": "",
+        "L": "",
+        "CN": "TRAEFIK DEFAULT CERT",
+    }
+
+    data = parse_issuer_subject("CN=Kubernetes Ingress Controller Fake Certificate, O=Acme Co")
+    assert data == {
+        "C": "",
+        "O": "Acme Co",
+        "OU": "",
+        "Q": "",
+        "ST": "",
+        "L": "",
+        "CN": "Kubernetes Ingress Controller Fake Certificate",
+    }
+
+    data = parse_issuer_subject("CN=GTS CA 1D4, O=Google Trust Services LLC, C=US")
+    assert data == {
+        "C": "US",
+        "O": "Google Trust Services LLC",
+        "OU": "",
+        "Q": "",
+        "ST": "",
+        "L": "",
+        "CN": "GTS CA 1D4",
+    }
