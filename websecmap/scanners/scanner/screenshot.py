@@ -43,6 +43,8 @@ log = logging.getLogger(__package__)
 SCANNER_NAME = "screenshot"
 SCANNER_ACTION = "scan"
 
+PNG_MAGIC = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
+
 
 def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
@@ -156,6 +158,7 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
 
     try:
         answer = requests.post(screenshot_service, json=message, timeout=30)
+        answer.raise_for_status()
 
         # make a serializable dict as an answer
         return {
@@ -170,18 +173,18 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
     except requests.RequestException as exc:
         # cannot find service, etc, connection errors, timeouts etc...
         # while business as usual, log it for a while to see what happens
-        log.exception(exc)
+        log.exception("HTTP error during screenshot capture")
         return {
             "screenshot": "",
-            "status_code": 0,
+            "status_code": exc.response.status_code,
             "success": False,
-            "error_message": str(exc),
+            "error_message": exc.response.content,
             "url": url,
             "screenshot_service": screenshot_service,
         }
     except Exception as exc:  # pylint: disable=broad-except
         # something weird that is not a standard network error.
-        log.exception(exc)
+        log.exception("Unexpected error during screenshot capture")
         return {
             "screenshot": "",
             "status_code": 0,
@@ -235,7 +238,7 @@ def save_screenshot(response: Dict[str, Union[str, bool, int]], endpoint_id: int
     except UnidentifiedImageError:
         log.debug("Got Unidentified Image, response: ")
         log.debug(response)
-    except Exception as my_exception:  # pylint: disable=broad-except
-        log.exception(my_exception)
+    except Exception:  # pylint: disable=broad-except
+        log.exception("Unexpected error during screenshot saving")
 
     return False
