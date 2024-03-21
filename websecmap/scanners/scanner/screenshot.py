@@ -23,6 +23,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from typing import Any, Dict, Union
+import json
 
 import requests
 from celery import Task, group
@@ -154,7 +155,7 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
         },
     }
 
-    log.debug("Sending message %s to %s", message, screenshot_service)
+    log.debug("Sending message %s to %s", json.dumps(message), screenshot_service)
 
     try:
         answer = requests.post(screenshot_service, json=message, timeout=30)
@@ -170,6 +171,17 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
             "url": url,
             "screenshot_service": screenshot_service,
         }
+    except requests.exceptions.ConnectTimeout as exc:
+        log.exception()
+        return {
+            "screenshot": "",
+            "status_code": 0,
+            "success": False,
+            "error_message": str(exc),
+            "url": url,
+            "screenshot_service": screenshot_service,
+        }
+
     except requests.RequestException as exc:
         # cannot find service, etc, connection errors, timeouts etc...
         # while business as usual, log it for a while to see what happens
