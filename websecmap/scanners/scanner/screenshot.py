@@ -155,7 +155,7 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
         },
     }
 
-    log.debug("Sending message %s to %s", json.dumps(message), screenshot_service)
+    log.debug("Doing the equivalent of: curl --fail --data '%s' %s", json.dumps(message), screenshot_service)
 
     try:
         answer = requests.post(screenshot_service, json=message, timeout=30)
