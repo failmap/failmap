@@ -171,38 +171,32 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
             "url": url,
             "screenshot_service": screenshot_service,
         }
-    except requests.exceptions.ConnectTimeout as exc:
-        log.exception()
-        return {
-            "screenshot": "",
-            "status_code": 0,
-            "success": False,
-            "error_message": str(exc),
-            "url": url,
-            "screenshot_service": screenshot_service,
-        }
-
-    except requests.RequestException as exc:
+    except requests.RequestException as e:
         # cannot find service, etc, connection errors, timeouts etc...
         # while business as usual, log it for a while to see what happens
-        error_message = exc.response.content.encode("utf8")[:100]
+        if hasattr(e, "response"):
+            error_message = e.response.content.encode("utf8")[:100]
+            status_code = e.response.status_code
+        else:
+            error_message = str(e)
+            status_code = 0
         log.exception("HTTP error during screenshot capture: {error_message}")
         return {
             "screenshot": "",
-            "status_code": exc.response.status_code,
+            "status_code": status_code,
             "success": False,
             "error_message": error_message,
             "url": url,
             "screenshot_service": screenshot_service,
         }
-    except Exception as exc:  # pylint: disable=broad-except
+    except Exception as e:  # pylint: disable=broad-except
         # something weird that is not a standard network error.
         log.exception("Unexpected error during screenshot capture")
         return {
             "screenshot": "",
             "status_code": 0,
             "success": False,
-            "error_message": str(exc),
+            "error_message": str(e),
             "url": url,
             "screenshot_service": screenshot_service,
         }
