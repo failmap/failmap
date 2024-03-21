@@ -175,7 +175,7 @@ def make_screenshot_with_browserless(screenshot_service: str, url: str) -> Dict[
         # cannot find service, etc, connection errors, timeouts etc...
         # while business as usual, log it for a while to see what happens
         if hasattr(e, "response"):
-            error_message = e.response.content.encode("utf8")[:100]
+            error_message = e.response.content.decode("utf8")[:100]
             status_code = e.response.status_code
         else:
             error_message = str(e)
