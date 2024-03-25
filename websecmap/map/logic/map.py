@@ -11,6 +11,7 @@ from websecmap.map.util import zip_to_json
 from websecmap.organizations.models import Organization
 from websecmap.reporting.diskreport import retrieve_report
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
+import re
 
 
 def get_reports_by_ids(ids: List[str]) -> Dict[str, Dict[Any, Any]]:
@@ -395,6 +396,10 @@ def extract_domains(calculation) -> str:
     for url in calculation["organization"]["urls"]:
         words += url["url"].split(".")
 
+    return " ".join(clean_words(words)).lower()
+
+
+def clean_words(words: List[str]) -> List[str]:
     # unique words only.
     words = list(sorted(list(set(words))))
 
@@ -511,7 +516,19 @@ def extract_domains(calculation) -> str:
     words = [word for word in words if word not in useless_words]
 
     # words shorter than 3 characters cannot be searched for at all
-    words = [word for word in words if len(word) >= 3]
+    words = [word for word in words if len(word) > 3]
+
+    # remove ip-address related domains
+    # if the word has only numbers or hyphens, it's not a domain.
+    words = [word for word in words if re.match(r"^[\d\-\.]+$", word) is None]
+
+    # if the words contain any of the followint, it's removed
+    # this is for large ranges of clients in subnets
+    forbidden_parts = ["kb-client"]
+    words = [word for word in words if all(part not in word for part in forbidden_parts)]
+
+    # remove system names with more than two hypens
+    words = [word for word in words if word.count("-") <= 2]
 
     # returned as a single string that can be searched through...
-    return " ".join(words).lower()
+    return words
