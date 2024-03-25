@@ -25,6 +25,7 @@ def correct():
         type="internet_nl_mail_tls", rating="failed", is_the_latest_scan=True, comply_or_explain_is_explained=False
     )
     group([correct_scan.si(scan.id) for scan in scans]).apply_async()
+    return group()
 
 
 @app.task(queue="storage", ignore_result=True)

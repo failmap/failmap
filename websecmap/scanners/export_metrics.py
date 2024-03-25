@@ -564,6 +564,9 @@ def parse_issuer_subject(data: str) -> Dict[str, Any]:
         "ST": found_data.get("ST", ""),
         "L": found_data.get("L", ""),
         "CN": found_data.get("CN", ""),
+        # this is to find Organizational Verified domains.
+        "businessCategory": found_data.get("businessCategory", ""),
+        "SERIALNUMBER": found_data.get("SERIALNUMBER", ""),
     }
 
 
@@ -614,8 +617,18 @@ def pivot_tls_qualys_certificate_trusted(records):
 
     issues = first_row.get("issues", -1)
     sgc = first_row.get("sgc", 0)
+    # subject on cert: politie.nl
+    parsed_subject = parse_issuer_subject(first_row.get("subject", ""))
+    # issuer details, like: QuoVadis Trustlink B.V.
     issuerSubject = first_row.get("issuerSubject", "")
     parsed_issuerSubject = parse_issuer_subject(issuerSubject)
+
+    validation = "Domain"
+    if parsed_subject["SERIALNUMBER"]:
+        validation = "Organization"
+    if first_row.get("validationType", "N") == "E":
+        validation = "Extended"
+
     return [
         {
             # plain export of values without any normalization
@@ -628,8 +641,9 @@ def pivot_tls_qualys_certificate_trusted(records):
             "issuerLabel": first_row.get("issuerLabel", ""),
             "sigAlg": first_row.get("sigAlg", ""),
             "revocationInfo": first_row.get("revocationInfo", 0),
-            "crlURIs": ",".join(first_row.get("crlURIs", [])),
-            "ocspURIs": ",".join(first_row.get("ocspURIs", [])),
+            # these fields cause 50% of the data for no added value in filtering etc
+            # "crlURIs": ",".join(first_row.get("crlURIs", [])),
+            # "ocspURIs": ",".join(first_row.get("ocspURIs", [])),
             "revocationStatus": first_row.get("revocationStatus", 0),
             "crlRevocationStatus": first_row.get("crlRevocationStatus", 0),
             "ocspRevocationStatus": first_row.get("ocspRevocationStatus", 0),
@@ -697,6 +711,12 @@ def pivot_tls_qualys_certificate_trusted(records):
             "issuerSubject_state": parsed_issuerSubject["ST"],
             "issuerSubject_common_name": parsed_issuerSubject["CN"],
             "issuerSubject_locality": parsed_issuerSubject["L"],
+            # subject data is available at more expensive certificates, like 'organization' validated.
+            "subject_organization": parsed_subject["O"],
+            "subject_locality": parsed_subject["L"],
+            "subject_serialnumber": parsed_subject["SERIALNUMBER"],
+            "subject_businessCategory": parsed_subject["businessCategory"],
+            "validation": validation,
         }
     ]
 

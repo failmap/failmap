@@ -1478,6 +1478,11 @@ CONSTANCE_CONFIG = {
         'json list of what layers are compared by default in the leaderboard: ["government", "municipality"]',
         "json",
     ),
+    "ENABLE_PUBLIC_SUBMISSIONS": (
+        False,
+        "enables public submissions of organiztaions and domains",
+        bool,
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1706,6 +1711,10 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         (
             "Plus",
             ("PLUS_SHOW_INFO",),
+        ),
+        (
+            "Public Submissions",
+            ("ENABLE_PUBLIC_SUBMISSIONS",),
         ),
         (
             "Data Import Preferences",

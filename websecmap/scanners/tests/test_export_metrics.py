@@ -539,6 +539,8 @@ def test_parse_issuer_subject():
         "ST": "",
         "L": "",
         "CN": "",
+        "businessCategory": "",
+        "SERIALNUMBER": "",
     }
 
     data = parse_issuer_subject("CN=Microsoft Azure RSA TLS Issuing CA 07, O=Microsoft Corporation, C=US")
@@ -550,6 +552,8 @@ def test_parse_issuer_subject():
         "ST": "",
         "L": "",
         "CN": "Microsoft Azure RSA TLS Issuing CA 07",
+        "businessCategory": "",
+        "SERIALNUMBER": "",
     }
 
     # extra fields such as EMAILADDRESS are not returned
@@ -564,6 +568,8 @@ def test_parse_issuer_subject():
         "ST": "state",
         "L": "city",
         "CN": "sdomain.nl",
+        "businessCategory": "",
+        "SERIALNUMBER": "",
     }
 
     data = parse_issuer_subject("CN=DigiCert G2 TLS EU RSA4096 SHA384 2022 CA1, O=DigiCert Ireland Limited, C=IE")
@@ -575,6 +581,8 @@ def test_parse_issuer_subject():
         "ST": "",
         "L": "",
         "CN": "DigiCert G2 TLS EU RSA4096 SHA384 2022 CA1",
+        "businessCategory": "",
+        "SERIALNUMBER": "",
     }
 
     data = parse_issuer_subject("CN=TRAEFIK DEFAULT CERT")
@@ -586,6 +594,8 @@ def test_parse_issuer_subject():
         "ST": "",
         "L": "",
         "CN": "TRAEFIK DEFAULT CERT",
+        "businessCategory": "",
+        "SERIALNUMBER": "",
     }
 
     data = parse_issuer_subject("CN=Kubernetes Ingress Controller Fake Certificate, O=Acme Co")
@@ -597,6 +607,8 @@ def test_parse_issuer_subject():
         "ST": "",
         "L": "",
         "CN": "Kubernetes Ingress Controller Fake Certificate",
+        "businessCategory": "",
+        "SERIALNUMBER": "",
     }
 
     data = parse_issuer_subject("CN=GTS CA 1D4, O=Google Trust Services LLC, C=US")
@@ -608,4 +620,6 @@ def test_parse_issuer_subject():
         "ST": "",
         "L": "",
         "CN": "GTS CA 1D4",
+        "businessCategory": "",
+        "SERIALNUMBER": "",
     }

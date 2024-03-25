@@ -305,6 +305,9 @@ def config_content():
             "whatsapp": configuration["RESPONSIBLE_ORGANIZATION_WHATSAPP"],
             "phone": configuration["RESPONSIBLE_ORGANIZATION_PHONE"],
         },
+        "public_submissions": {
+            "enabled": configuration["ENABLE_PUBLIC_SUBMISSIONS"],
+        },
         "leaderboard": {
             "show": configuration["SHOW_LEADERBOARD"],
             "default_order": configuration["LEADERBOARD_DEFAULT_ORDER"],
