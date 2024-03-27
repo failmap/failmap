@@ -239,9 +239,6 @@ def translate_zorgkaart_to_flat_organization(orglist):
     Returns:
         a list of dicts containing data that can be imported into WebSecMap.
     """
-
-    log.error(orglist)
-
     outlist = []
     for org in orglist:
         if not OrganizationType.objects.all().filter(name=org["type"].lower()).first():
@@ -249,7 +246,8 @@ def translate_zorgkaart_to_flat_organization(orglist):
 
         agb_codes = "".join(org.get("agb_codes", [])) if org.get("agb_codes", None) else ""
 
-        log.error(org)
+        # somehow all urls have an escape slash
+        sites = [site.replace("\/", "/") for site in org["websites"]] if org.get("websites", None) else []
 
         outlist.append(
             {
@@ -267,8 +265,7 @@ def translate_zorgkaart_to_flat_organization(orglist):
                 + org["addresses"][0]["country"],
                 # most likely id, the other id's are surrogates from other systems
                 "surrogate_id": "zorgkaart_" + org["id"],
-                # somehow all urls have an escape slash
-                "urls": [site.replace("\/", "/") for site in org["websites"]],
+                "urls": sites,
                 "city": org["addresses"][0]["city"],
                 "surrogate_ids": [
                     # the zorgkaart id is also a surrogate albeit the most important one
