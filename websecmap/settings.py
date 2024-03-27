@@ -960,7 +960,7 @@ CONSTANCE_CONFIG = {
     "ZORGKAART_ENDPOINT": ("https://", "Endpoint of the zorgkaart service.", str),
     "ZORGKAART_USERNAME": ("", "Username to connect to the zorgkaart service.", str),
     "ZORGKAART_PASSWORD": ("", "Password to connect to the zorgkaart service.", str),
-    "ZORGKAART_FILTER": ("{}", "Filter options, stored as string.", str),
+    "ZORGKAART_FILTER": ({"type": "ggz"}, "Filter to get an organization type.", "json"),
     "PLUS_SHOW_INFO": (False, "Show information about optional services.", bool),
     "INFO_TITLE_NL": ("", "Heading of the info page.", str),
     "INFO_HEADING_NL": ("", "Heading of the info page.", str),
@@ -1917,6 +1917,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         "items": [
             {"name": "organizations.organization", "label": "🏢 Organizations"},
             {"name": "organizations.alternativename", "label": "🏢 - Alt Names"},
+            {"name": "organizations.organizationsurrogateid", "label": "🏢 - Surrogate ID's"},
             {"url": "/admin/organizations/organization-registrar/", "label": "🏢 - Domain Registrars"},
             {"url": "/admin/organizations/organization-layer-urls/", "label": "🏢 - Layers and Urls"},
             {"name": "organizations.url", "label": "🖥️ Urls"},

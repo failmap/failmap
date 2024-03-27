@@ -1,0 +1,84 @@
+{
+    "rating_description": "Deze zorginstelling heeft te weinig waarderingen. Vanaf 30 waarderingen geeft het cijfer een betrouwbaar beeld.",
+    "items": [
+        {
+            "id": "00041237812367871014877fd599",
+            "parent": "d3bfe09541e123812361273c965",
+            "hdl_id": 513513,
+            "url": "https:\/\/www.zorgkaartnederland.nl\/zorginstelling\/example-123123123",
+            "agb_codes": [
+                "516513",
+                "5561351"
+            ],
+            "name": "Example Organization",
+            "type": "GGZ",
+            "is_organisation": false,
+            "addresses": [
+                {
+                    "address": "Example 5",
+                    "zipcode": "1337 NV",
+                    "city": "Roermond",
+                    "state": "Limburg",
+                    "country": "Nederland"
+                }
+            ],
+            "websites": [
+                "https:\/\/www.example.nl\/"
+            ],
+            "location": {
+                "latitude": 51.3924181,
+                "longitude": 5.01995
+            },
+            "score": 8.9492,
+            "nr_of_ratings": 82,
+            "registration_number": "1554131",
+            "location_number": "54651331",
+            "nickname": "EXAMPLE B.V.",
+            "brand_name1": "The Example B.V.",
+            "brand_name2": null
+        },
+        {
+            "id": "001eeeeeee22feee859d66b8a",
+            "parent": null,
+            "hdl_id": 123123,
+            "url": "https:\/\/www.zorgkaartnederland.nl\/zorginstelling\/yoloswag-123123",
+            "agb_codes": [
+                "123634"
+            ],
+            "name": "Another Organization",
+            "type": "GGZ",
+            "is_organisation": false,
+            "addresses": [
+                {
+                    "address": "AnotherOne 123",
+                    "zipcode": "1202 CD",
+                    "city": "Sliedrecht",
+                    "state": "Zuid-Holland",
+                    "country": "Nederland"
+                }
+            ],
+            "websites": [
+                "https:\/\/www.example2.nl"
+            ],
+            "location": {
+                "latitude": 52.8281444,
+                "longitude": 5.7773358
+            },
+            "score": 9.0826,
+            "nr_of_ratings": 23,
+            "registration_number": "",
+            "location_number": "000039513319",
+            "nickname": "ANOTHERONE SLIEDRECHT",
+            "brand_name1": "Another One Sliedrecht",
+            "brand_name2": ""
+        }
+    ],
+    "count": 299,
+    "page": 1,
+    "limit": 100,
+    "links": {
+        "first": "https:\/\/api.zorgkaartnederland.nl\/api\/v3.3\/externalpartners\/companies?type=ggz&page=1",
+        "next": "https:\/\/api.zorgkaartnederland.nl\/api\/v3.3\/externalpartners\/companies?type=ggz&page=2",
+        "last": "https:\/\/api.zorgkaartnederland.nl\/api\/v3.3\/externalpartners\/companies?type=ggz&page=21"
+    }
+}

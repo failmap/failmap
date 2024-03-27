@@ -32,7 +32,6 @@ create_task()
 
 import json
 import logging
-import sys
 from time import sleep
 from typing import Any, Dict, List
 
@@ -42,11 +41,12 @@ import tldextract
 from constance import config
 from django.db import transaction
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from googlemaps.exceptions import ApiError
 from iso3166 import countries_by_alpha2
 from requests.auth import HTTPBasicAuth
 
 from websecmap.celery import app
-from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
+from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url, OrganizationSurrogateId
 
 log = logging.getLogger(__package__)
 
@@ -148,11 +148,6 @@ _all_ = organization_and_url_import
 # Periodic task name
 TaskName = "zorgkaart import (hidden)"
 
-# right now we there is a page limit of 1000 and max 123000 items
-# so the the default limit of 1000 is OK but not future proof
-# raise it for all security
-sys.setrecursionlimit(10000)
-
 
 def create_task():
     """Adds scraping task to celery jobs"""
@@ -168,35 +163,44 @@ def create_task():
         log.info(f"Created Periodic Task for zorgkaart scraper with name: {TaskName}")
 
 
-def do_request(url, params={}, previous_items=[]):
+def get_zorgkaart_data(url, zorgkaart_filter: dict):
     """Internal function, performs API requests and merges paginated data"""
-    # default to max limit of API
-    if "limit" not in params.keys():
-        params["limit"] = 10000
-    # set page
-    if "page" not in params.keys():
-        params["page"] = 1
-    log.debug(f"Zorgkaart scraper request with parameters: {params}")
+    current_page = 1
 
+    received_items = []
+
+    request_filter = zorgkaart_filter
+    request_filter["page"] = current_page
+    request_filter["limit"] = 100
+
+    # get number of pages
     response = requests.get(
-        url, auth=HTTPBasicAuth(config.ZORGKAART_USERNAME, config.ZORGKAART_PASSWORD), params=params, timeout=120
+        url, auth=HTTPBasicAuth(config.ZORGKAART_USERNAME, config.ZORGKAART_PASSWORD), params=request_filter, timeout=10
     )
     response.raise_for_status()
     result = response.json()
-    # merge with results from reursions above
-    items = previous_items + result["items"]
-    # do we have everything
-    if result["count"] > result["page"] * result["limit"]:
-        # recursion because recursive programming is utterly uncomprehensible but fun
-        params["page"] += 1
-        log.debug(f"Zorgkaat scraper requesting nest page: {params['page']}")
-        items = do_request(url, params, items)
-    else:
-        if not result["count"] == len(items):
-            log.error(
-                f"Zogkaart scraper: Zorgkaart reported {result['count']} records but we recieved {len(items)} records."
+
+    received_items += result["items"]
+
+    total_pages = result["count"] // result["limit"] + 1
+    if total_pages > 1:
+        # also get the rest, with a delay
+        while current_page + 1 <= total_pages:
+            log.debug(f"Zorgkaart scraper requesting nest page: {current_page}")
+            response = requests.get(
+                url,
+                auth=HTTPBasicAuth(config.ZORGKAART_USERNAME, config.ZORGKAART_PASSWORD),
+                params=request_filter,
+                timeout=10,
             )
-    return items
+            response.raise_for_status()
+            result = response.json()
+            received_items += result["items"]
+
+            sleep(0.2)
+            current_page += 1
+
+    return received_items
 
 
 def organisations():
@@ -207,12 +211,11 @@ def organisations():
         a list of dicts, datastructure as provided by Zorgkaart
     """
     params = json.loads(config.ZORGKAART_FILTER)
-    if not type(params) == dict:
-        log.error(f"Zorgkaat scrape: invalid filter ({params}), ignoring")
+    if type(params) != dict:
+        log.error(f"Zorgkaart scrape: invalid filter ({params}), ignoring")
         params = {}
     log.debug(f"Zorgkaart scraper requesting organisations using filter: {params}")
-    items = do_request(config.ZORGKAART_ENDPOINT, params)
-    return items
+    return get_zorgkaart_data(config.ZORGKAART_ENDPOINT, params)
 
 
 def organisation_types():
@@ -222,12 +225,10 @@ def organisation_types():
     returns:
         a list of dicts with keys: 'id' (str) and 'name' (str)
     """
-    url = "https://api.zorgkaartnederland.nl/api/v1/companies/types"
-    items = do_request(url)
-    return items
+    return get_zorgkaart_data("https://api.zorgkaartnederland.nl/api/v1/companies/types", {})
 
 
-def translate(orglist):
+def translate_zorgkaart_to_flat_organization(orglist):
     """
     translates a list of organisations as provided by Zorgkaart into a list of
     organisations that can be imported into WebSecMap.
@@ -239,15 +240,21 @@ def translate(orglist):
         a list of dicts containing data that can be imported into WebSecMap.
     """
 
+    log.error(orglist)
+
     outlist = []
     for org in orglist:
-        if not OrganizationType.objects.all().filter(name=org["type"]).first():
-            OrganizationType.objects.create(name=org["type"])
+        if not OrganizationType.objects.all().filter(name=org["type"].lower()).first():
+            OrganizationType.objects.create(name=org["type"].lower())
+
+        agb_codes = "".join(org.get("agb_codes", [])) if org.get("agb_codes", None) else ""
+
+        log.error(org)
 
         outlist.append(
             {
-                "name": org["name"] + " (" + org["type"] + ")",
-                "layer": OrganizationType.objects.all().filter(name=org["type"]).first(),
+                "name": org["name"],
+                "layer": OrganizationType.objects.all().filter(name=org["type"].lower()).first().name,
                 "country": "NL",
                 "coordinate_type": "Point",
                 "coordinate_area": [org["location"]["longitude"], org["location"]["latitude"]],
@@ -258,8 +265,29 @@ def translate(orglist):
                 + org["addresses"][0]["city"]
                 + ", "
                 + org["addresses"][0]["country"],
-                "surrogate_id": org["name"] + "_" + org["type"] + "_" + org["id"],
-                "urls": org["websites"],
+                # most likely id, the other id's are surrogates from other systems
+                "surrogate_id": "zorgkaart_" + org["id"],
+                # somehow all urls have an escape slash
+                "urls": [site.replace("\/", "/") for site in org["websites"]],
+                "city": org["addresses"][0]["city"],
+                "surrogate_ids": [
+                    # the zorgkaart id is also a surrogate albeit the most important one
+                    {"id": "id", "value": org.get("id", ""), "source": "zorgkaart"},
+                    {"id": "hdl_id", "value": org.get("hdl_id", ""), "source": "zorgkaart"},
+                    {"id": "registration_number", "value": org.get("registration_number", ""), "source": "zorgkaart"},
+                    {"id": "location_number", "value": org.get("location_number", ""), "source": "zorgkaart"},
+                    {"id": "agb_codes", "value": agb_codes, "source": "zorgkaart"},
+                ],
+                # any other misc data in arbitrary field names
+                "key_value_data": {
+                    "nickname": org.get("nickname", ""),
+                    "brand_name1": org.get("brand_name1", ""),
+                    "brand_name2": org.get("brand_name2", ""),
+                    "score": org.get("score", ""),
+                    "nr_of_ratings": org.get("nr_of_ratings", ""),
+                    "is_organisation": org.get("is_organisation", ""),
+                    "parent": org.get("parent", ""),
+                },
             }
         )
     return outlist
@@ -273,9 +301,21 @@ def scrape():
     them into the database of WebSecMap.
     """
     orglist = organisations()
-    wsmlist = translate(orglist)
+    wsmlist = translate_zorgkaart_to_flat_organization(orglist)
     organization_and_url_import(wsmlist)
     log.info(f"Zorgkaart scrape updated organisations. Current organisation count: {len(orglist)}")
+
+
+def import_from_raw_input(raw_input: dict):
+    """
+    from websecmap.api.apis.zorgkaart import *
+    false = False
+    true = True
+    null = None
+    blub=
+    import_from_raw_input(blub)
+    """
+    organization_and_url_import(translate_zorgkaart_to_flat_organization(raw_input["items"]))
 
 
 def validate_flat_organization(flat_organization: Dict):
@@ -312,15 +352,32 @@ def add_flat_organization(flat_organization: Dict) -> Organization:
             "type": layer,
             "country": flat_organization["country"],
             "surrogate_id": flat_organization["surrogate_id"],
+            "arbitrary_kv_data": flat_organization.get("key_value_data", {}),
         }
     )
     o.save()
     o.layers.add(layer)
 
-    if flat_organization["coordinate_area"] == [0, 0] and flat_organization["coordinate_type"] == "Point":
-        flat_organization["coordinate_area"] = retrieve_geocode(
-            f"{flat_organization['name']}, {flat_organization.get('address', '')}"
+    # also add ALL Surrogate ID's
+    for sid in flat_organization.get("surrogate_ids", []):
+        OrganizationSurrogateId.objects.create(
+            surrogate_id_name=sid.get("id", None),
+            surrogate_id=sid.get("value", None),
+            used_in_dataset=sid.get("source", None),
+            organization=o,
         )
+
+    # some organizations really don't have coorindates set, so try to get them
+    if flat_organization["coordinate_area"] == [0, 0] and flat_organization["coordinate_type"] == "Point":
+        # log.error(f"No coordinate found for {flat_organization['name']}")
+        try:
+            flat_organization["coordinate_area"] = retrieve_geocode(
+                f"{flat_organization['name']}, {flat_organization.get('address', '')}"
+            )
+        except ApiError as e:
+            # in development its fine, just continue. The stuff should be setup in production though!
+            log.error(f"Could not retrieve coordinates for {flat_organization['name']}: {str(e)}")
+            return o
 
         # still no coordinate? then don't save one:
         if flat_organization["coordinate_area"] == [0, 0]:
@@ -380,6 +437,10 @@ def update_flat_organization(flat_organization: Dict, existing_organizations: Li
             cs.geojsontype = flat_organization["coordinate_type"]
             cs.area = flat_organization["coordinate_area"]
             cs.save()
+
+        # todo: figure out if this needs to be done. Probably urls yes, but kv's and surrogate ids?
+        # not needed right now.
+        # not saving urls, not saving kvs, not saving surrogate ids
 
 
 def add_urls_to_organizations(organizations: List[Organization], urls: List[str]) -> None:

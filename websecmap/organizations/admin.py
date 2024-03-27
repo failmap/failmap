@@ -39,6 +39,7 @@ from websecmap.organizations.models import (
     OrganizationType,
     Url,
     UrlWhois,
+    OrganizationSurrogateId,
 )
 from websecmap.reporting.models import UrlReport
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, UrlIp
@@ -324,6 +325,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = (
         "id",
         "name_details",
+        "city",
         "n_altnames",
         "layers_",
         "country",
@@ -482,6 +484,15 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
     revive_organization.short_description = "🐝  Revive Organizations"
     actions.append("revive_organization")
+
+
+@admin.register(OrganizationSurrogateId)
+class OrganizationSurrogateIdAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    ...
+    list_display = ["id", "organization", "surrogate_id", "surrogate_id_name", "used_in_dataset"]
+
+    list_filter = ["organization__type", "organization__country"]
+    search_fields = ["name", "organization__name"]
 
 
 class WhoisOrganizationAdmin(ImportExportModelAdmin, admin.ModelAdmin):

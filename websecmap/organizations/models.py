@@ -60,6 +60,20 @@ class Organization(models.Model):
         max_length=250, help_text="The written address that can be used for geocoding.", blank=True
     )
 
+    city = models.CharField(
+        # https://en.wikipedia.org/wiki/List_of_long_place_names
+        # but also keep space to allow annotations if that's needed for rare cases. So add burrough etc.
+        # like: Amsterdam (Zuid-Oost). This field is not factually correct.
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="The city is part of the natural key for humans to find the right organizations when multiple "
+        "organizations have the same name. This happens with primary schools a lot. There are even "
+        "multiple ones with the same name in the same city. If that really becomes a problem a burough "
+        "or district field should be added for further specification. For rare cases this field can just"
+        " be used to contain city and disctrict. Like: Amsterdam (Zuid-Oost).",
+    )
+
     computed_name_slug = models.SlugField(
         max_length=250,
         help_text="Computed value, a slug translation of the organization name, which can be used in urls.",
@@ -199,6 +213,26 @@ class Organization(models.Model):
         # handle computed values
         self.computed_name_slug = slugify(self.name)
         super().save(*args, **kwarg)
+
+
+class OrganizationSurrogateId(models.Model):
+    # When importing datasets there are usually more than one surrogate ID.
+    # BRIN, HDL, AGB, foreign key
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    surrogate_id = models.CharField(max_length=255, blank=True, null=True)
+    surrogate_id_name = models.CharField(
+        max_length=40,
+        blank=True,
+        null=True,
+        help_text="The name of the surrogate, e.g. id, BRIN, hdl_id, agb_codes, etc",
+    )
+    used_in_dataset = models.CharField(
+        max_length=40,
+        blank=True,
+        null=True,
+        help_text="The dataset that the surrogate comes from. This is relevant for context as the 'id' field in"
+        "one dataset is different than the 'id' in another one.",
+    )
 
 
 GEOJSON_TYPES = (

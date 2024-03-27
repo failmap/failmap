@@ -59,6 +59,7 @@ def get_organization_report_by_id(
             "name",
             "pk",
             "twitter_handle",
+            "city",
             "organizationreport__id",
             "organizationreport__high",
             "organizationreport__medium",
@@ -70,11 +71,12 @@ def get_organization_report_by_id(
 
     report_data = retrieve_report(values["organizationreport__id"], "OrganizationReport")
 
-    report = {
+    return {
         "name": values["name"],
         "slug": slugify(values["name"]),
         "id": values["pk"],
         "twitter_handle": values["twitter_handle"],
+        "city": values["city"],
         "when": values["organizationreport__at_when"].isoformat(),
         # fixing json being presented and escaped as a string, this makes it a lot slowr
         # had to do this cause we use jsonfield, not django_jsonfield, due to rendering map widgets in admin
@@ -85,5 +87,3 @@ def get_organization_report_by_id(
         "low": values["organizationreport__low"],
         "ok": values["organizationreport__ok"],
     }
-
-    return report
