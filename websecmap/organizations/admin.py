@@ -349,6 +349,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
                     "name",
                     "layers",
                     "alternative_names",
+                    "city",
                     "country",
                     "internal_notes",
                     "written_address",
