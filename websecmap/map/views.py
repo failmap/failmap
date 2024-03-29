@@ -754,7 +754,7 @@ def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type
     query = (
         Organization.objects.all()
         .filter(country=get_country(country), layers=get_organization_type(organization_type), is_dead=False)
-        .only("id", "name", "computed_name_slug")
+        .only("id", "name", "computed_name_slug", "city")
     )
 
     data = []
@@ -773,6 +773,7 @@ def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type
                 {
                     "id": record.id,
                     "name": record.name,
+                    "city": record.city,
                     "slug": record.computed_name_slug,
                     "report_available": True,
                     "urls": report.total_urls,
@@ -789,6 +790,7 @@ def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type
                 {
                     "id": record.id,
                     "name": record.name,
+                    "city": record.city,
                     "slug": record.computed_name_slug,
                     "report_available": False,
                     "urls": 0,

@@ -297,10 +297,13 @@ def login_plaza_data(country: str = None, layer: str = None):
             except KeyError:
                 prioritized = matching_tech
 
+            firstorg = scan.endpoint.url.organization.only("name", "city", "id").first()
+
             dicts.append(
                 {
-                    "organization_name": scan.endpoint.url.organization.first().name,
-                    "organization_id": scan.endpoint.url.organization.first().id,
+                    "organization_name": firstorg.name,
+                    "organization_city": firstorg.city,
+                    "organization_id": firstorg.id,
                     "url_url": scan.endpoint.url.url,
                     "subdomain": scan.endpoint.url.computed_subdomain,
                     "domain": f"{scan.endpoint.url.computed_domain}.{scan.endpoint.url.computed_suffix}",

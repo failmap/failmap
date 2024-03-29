@@ -43,7 +43,8 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", days
               total_urls,
               total_endpoints,
               organization.is_dead,
-              ok
+              ok,
+              organization.city
             FROM map_organizationreport
             INNER JOIN
               organization on organization.id = map_organizationreport.organization_id
@@ -106,7 +107,8 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", day
                 total_urls,
                 total_endpoints,
                 organization.is_dead,
-                ok
+                ok,
+                organization.city
             FROM map_organizationreport
             INNER JOIN
               organization on organization.id = map_organizationreport.organization_id
@@ -167,6 +169,7 @@ def rows_to_dataset(rows, when):
             "organization_type": i[2],
             "organization_name": i[1],
             "organization_twitter": i[5],
+            "organization_city": i[13],
             "data_from": i[4],
             "high": i[6],
             "medium": i[7],

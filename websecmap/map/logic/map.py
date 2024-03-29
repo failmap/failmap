@@ -152,7 +152,8 @@ def get_map_data(
             map_organizationreport.high_urls,
             map_organizationreport.medium_urls,
             map_organizationreport.low_urls,
-            coordinate_stack.stacked_coordinate_id
+            coordinate_stack.stacked_coordinate_id,
+            organization.city
         FROM map_organizationreport
         INNER JOIN
 
@@ -314,6 +315,7 @@ def get_map_data(
                 "high_urls": i[12],
                 "medium_urls": i[13],
                 "low_urls": i[14],
+                "organization_city": i[16],
             },
             "geometry": {
                 # the coordinate ID makes it easy to check if the geometry has changed shape/location.

@@ -55,6 +55,7 @@ def cookie_plaza_data(country: str = None, layer: str = None):
                     stats[layer.name]["organization_details"][str(organization.id)] = {
                         "id": organization.id,
                         "name": organization.name,
+                        "city": organization.city,
                         "urls_with_tracking_cookies": [],
                     }
 
@@ -68,6 +69,7 @@ def cookie_plaza_data(country: str = None, layer: str = None):
                     {
                         "organization_name": organization.name,
                         "organization_id": organization.id,
+                        "organization_city": organization.city,
                         "country": organization.country.code,
                         "layer": layer.name,
                         "url_url": scan.endpoint.url.url,
