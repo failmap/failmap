@@ -8,7 +8,7 @@ from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid im
     import_websiteregister,
     match_and_place_row,
 )
-from websecmap.organizations.models import AlternativeName, GenericFileDataset, Organization, Url
+from websecmap.organizations.models import GenericFileDataset, Organization, Url, OrganizationSurrogateId
 
 location = "websecmap/organizations/tests/nl_gov_rijkswebsiteregister/websiteregister-rijksoverheid-2022-07-28.ods"
 
@@ -34,11 +34,20 @@ def test_match_and_place_row(db, caplog):
     new_organization = Organization()
     new_organization.name = "Dienst Publiek en Communicatie (DPC/AZ)"
     new_organization.save()
-    new_organization.alternative_names.add(AlternativeName.objects.create(name="(TODO/AZ)"))
+    OrganizationSurrogateId.objects.create(
+        organization=new_organization,
+        surrogate_id="AZ DPC Online Advies",
+        surrogate_id_name="websiteregister_rijksoverheid",
+    )
+    OrganizationSurrogateId.objects.create(
+        organization=new_organization,
+        surrogate_id="AZ TODO Online Advies",
+        surrogate_id_name="websiteregister_rijksoverheid",
+    )
 
-    # This will add www. and the non-wee-wee-wee version of the domain
+    # The www domain will not be added, as it will be discovered automatically
     match_and_place_row(["http://www.rijksoverheid.nl", "Rijksoverheid", "AZ", "DPC", "Online Advies"])
-    assert Url.objects.all().count() == 2
+    assert Url.objects.all().count() == 1
 
     # The same row should not add more urls when importing another time.
     match_and_place_row(["http://www.rijksoverheid.nl", "Rijksoverheid", "AZ", "DPC", "Online Advies"])
@@ -46,14 +55,14 @@ def test_match_and_place_row(db, caplog):
 
     # adds the domain to an alternative name
     match_and_place_row(["http://basisbeveiliging.nl", "Rijksoverheid", "AZ", "TODO", "Online Advies"])
-    assert Url.objects.all().count() == 3
+    assert Url.objects.all().count() == 2
 
 
 def test_import_websiteregister(db):
     # nothing in the database
     error, success = import_websiteregister(location)
 
-    assert error[0] == "www.rijksoverheid.nl"
+    assert error[0] == "rijksoverheid.nl"
     assert len(error) > 200
     assert len(success) == 0
 
@@ -61,15 +70,22 @@ def test_import_websiteregister(db):
     new_organization.name = "Dienst Publiek en Communicatie (DPC/AZ)"
     new_organization.save()
 
+    OrganizationSurrogateId.objects.create(
+        organization=new_organization,
+        surrogate_id="AZ DPC Online Advies",
+        surrogate_id_name="websiteregister_rijksoverheid",
+    )
+
     error, success = import_websiteregister(location)
 
     # www.rijksoverheid.nl has now been added
-    assert error[0] == "www.nederlandwereldwijd.nl"
+    assert error[0] == "nederlandwereldwijd.nl"
     assert len(error) > 200
 
     # There are multiple sites managed by DPC/AZ, so multple successes
-    assert len(success) == 5
-    assert success[0] == "www.rijksoverheid.nl"
+    assert len(success) == 4
+    assert success[0] == "rijksoverheid.nl"
+    # assert success == []
 
 
 def text(filepath: str):

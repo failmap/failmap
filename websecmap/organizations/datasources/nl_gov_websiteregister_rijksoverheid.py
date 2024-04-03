@@ -11,7 +11,7 @@ from requests import RequestException
 from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
-from websecmap.organizations.models import GenericFileDataset, Organization
+from websecmap.organizations.models import GenericFileDataset, OrganizationSurrogateId
 
 
 def find_current_websiteregister_download_link() -> str:
@@ -150,7 +150,8 @@ def get_rows(file_location: str) -> List[List[str]]:
     """
 
     try:
-        data = get_data(file_location, start_column=0, column_limit=5)
+        # in 2023 or 2024 another defining column for the name has been added...
+        data = get_data(file_location, start_column=0, column_limit=6)
     except FileNotFoundError:
         log.error("Could not find spreadsheet for import on location: %s", file_location)
         return []
@@ -160,45 +161,49 @@ def get_rows(file_location: str) -> List[List[str]]:
         return []
 
     # The first and second row do not contain domains, the other rows might be useful
-    useful_rows = [row for row in data["Sheet1"] if len(row) > 1 and row[0].startswith("http")]
-
-    return useful_rows
+    return [row for row in data["Sheet1"] if len(row) > 1 and row[0].startswith("http")]
 
 
 def match_and_place_row(row: List[str]) -> Dict[str, str]:
     log.debug("Importing row: %s", row)
 
-    # Example: (DPC/AZ), including braces
-    if len(row) > 3:
-        # Example: (DPC/AZ), including braces
-        organization_key = f"({row[3].strip()}/{row[2].strip()})"
-    else:
-        # Example: (AZ), including braces
-        organization_key = f"({row[2].strip()})"
+    # 2022: The key for th eorganiztaion name was: (DPC/AZ)
+    # 2024, add a new key DPCWR, and only use an alternative name. The website register changes
+    # the names and such all the time which prevents full imports over time.
+    # This is now stored in the surrogate key field as the data in the name has little to do anymore
+    # with being human-friendly. The key will also be made smaller.
 
-    # some bug, still adds the / in front. So just remove that slash
-    if organization_key[1] == "/":
-        organization_key = "(" + organization_key[2 : len(organization_key)]
+    if len(row) > 4:
+        key = f"{row[2].strip()} {row[3].strip()} {row[4].strip()}"
+    elif len(row) > 3:
+        key = f"{row[2].strip()} {row[3].strip()}"
+    else:
+        key = f"{row[2].strip()}"
 
     domain_extract = tldextract.extract(row[0])
     domain_without_subdomain = f"{domain_extract.domain}.{domain_extract.suffix}"
-    domain_with_subdomain = domain_extract.fqdn
+
+    # the www subdomain does not add anything and only prevents other subdomains being found
+    if domain_extract.subdomain == "www":
+        domain_with_subdomain = domain_without_subdomain
+    else:
+        domain_with_subdomain = domain_extract.fqdn
 
     # There should only be one that is currently 'alive'. No there can be more, as there can be multiple maps
     # where this organization is used (and the n-n relation has not yet been implemented).
-    organizations = Organization.objects.all().filter(name__icontains=organization_key, is_dead=False)
-    if not organizations:
-        organizations = Organization.objects.all().filter(
-            alternative_names__name__icontains=organization_key, is_dead=False
-        )
+
+    surrogates = OrganizationSurrogateId.objects.all().filter(
+        surrogate_id=key, surrogate_id_name="websiteregister_rijksoverheid", organization__is_dead=False
+    )
+    organizations = [surrogate.organization for surrogate in surrogates]
 
     if not organizations:
         log.error(
             "Could not find an organization name with key %s, could not place domains %s.",
-            organization_key,
+            key,
             domain_without_subdomain,
         )
-        return {"state": "error", "domain": domain_with_subdomain, "key": organization_key}
+        return {"state": "error", "domain": domain_with_subdomain, "key": key}
 
     for organization in organizations:
         organization.add_url(domain_without_subdomain, origin="import dutch websiteregister")
@@ -206,4 +211,4 @@ def match_and_place_row(row: List[str]) -> Dict[str, str]:
         if domain_without_subdomain != domain_with_subdomain:
             organization.add_url(domain_with_subdomain, origin="import dutch websiteregister")
 
-    return {"state": "success", "domain": domain_with_subdomain, "key": organization_key}
+    return {"state": "success", "domain": domain_with_subdomain, "key": key}
