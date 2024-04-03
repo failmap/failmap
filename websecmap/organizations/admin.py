@@ -732,6 +732,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     search_fields = ("url", "computed_subdomain", "computed_domain", "computed_suffix")
     list_filter = [
+        "origin",
         "is_dead",
         "is_dead_since",
         "is_dead_reason",
