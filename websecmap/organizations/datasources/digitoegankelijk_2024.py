@@ -2,6 +2,7 @@
 # download data as CSV
 # process results
 from time import sleep
+from typing import List
 
 import requests
 import csv
@@ -14,7 +15,7 @@ from websecmap.celery import app
 
 # this does not import the metrics, as that should be in a scanner including what happens when there is no metric etc
 # todo: make task discoverable
-from websecmap.organizations.models import OrganizationSurrogateId, Organization
+from websecmap.organizations.models import OrganizationSurrogateId, Organization, Url
 
 
 @app.task(queue="storage", ignore_result=True)
@@ -22,10 +23,14 @@ def run():
     keys = OrganizationSurrogateId.objects.all().filter(
         surrogate_id_name="digitoegankelijk", organization__is_dead=False
     )
+
+    domains_that_may_be_duplicated_this_run = []
     for key in keys:
         data = scrape(key.surrogate_id)
         # this will slow down the new requests, so additional rate limiting is not needed
-        extract_new_domains(data, key.organization.id)
+        domains_that_may_be_duplicated_this_run = extract_new_domains(
+            data, key.organization.id, domains_that_may_be_duplicated_this_run
+        )
 
 
 def scrape(surrogate_id: int):
@@ -37,7 +42,9 @@ def scrape(surrogate_id: int):
     return list(data)
 
 
-def extract_new_domains(data: list, organization_id: int):
+def extract_new_domains(
+    data: list, organization_id: int, domains_that_may_be_duplicated_this_run: List[str] = None
+) -> List[str]:
     # this spreadsheet format is expected to change like 10 times a year, so this code is not rigorously tested
     # and just works for the few months it works. It's useless to expect more.
 
@@ -101,7 +108,7 @@ def extract_new_domains(data: list, organization_id: int):
 
     org = Organization.objects.all().filter(id=organization_id).first()
     if not org:
-        return
+        return domains_that_may_be_duplicated_this_run
 
     for row in data:
         if row[site_or_app_column] != "Site":
@@ -146,10 +153,27 @@ def extract_new_domains(data: list, organization_id: int):
             log.debug(f"Skipping {extract.fqdn} as that has a path. {row[address_column]}")
             continue
 
+        # Only add an url ONCE, never add a domain that already exists to organizations.
+        # WHY? This is because the digitoegankelijk datasource makes a lot of mistakes of placing domains
+        # in the wrong organization. If they do, that mistake also replicates here, while we often have made corrections
+        # for it. It's very annoying to edit a domain every import.
+        # So instead a new domain can be added per-run. This means that if a domain is new in the database it is ok
+        # to add it over more organizations. But otherwise not, digitoegankelijk is not a leading source of domains.
+        # If a domain is added to the wrong organization once, we will be notified anyway and thus it can be corrected.
+        if not Url.objects.all().filter(url=extract.fqdn).exists():
+            domains_that_may_be_duplicated_this_run.append(extract.fqdn)
+        elif extract.fqdn not in domains_that_may_be_duplicated_this_run:
+            log.warning(
+                f"Domain {extract.fqdn} already exists in the database, " f"possibly on another organization. Skipping."
+            )
+            continue
+
         if extract.subdomain == "www":
             org.add_url(f"{extract.domain}.{extract.suffix}", origin="digitoegankelijk")
 
         org.add_url(f"{extract.subdomain}.{extract.domain}.{extract.suffix}", origin="digitoegankelijk")
+
+    return domains_that_may_be_duplicated_this_run
 
 
 def list_organiztion_and_ids():
