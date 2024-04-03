@@ -161,7 +161,7 @@ def get_rows(file_location: str) -> List[List[str]]:
         return []
 
     # The first and second row do not contain domains, the other rows might be useful
-    return [row for row in data["Sheet1"] if len(row) > 1 and row[0].startswith("http")]
+    return [row for row in data["Sheet1"] if len(row) > 1 and str(row[0]).startswith("http")]
 
 
 def match_and_place_row(row: List[str]) -> Dict[str, str]:
