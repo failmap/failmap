@@ -234,6 +234,9 @@ class OrganizationSurrogateId(models.Model):
         "one dataset is different than the 'id' in another one.",
     )
 
+    def __str__(self):
+        return f"{self.surrogate_id_name}: {self.surrogate_id} for {self.organization.name} ({self.organization.id})"
+
 
 GEOJSON_TYPES = (
     ("MultiPolygon", "MultiPolygon"),
