@@ -213,6 +213,15 @@ class UrlSubmission(models.Model):
         blank=True, null=True, help_text="Automatically filled when creating a new submission."
     )
 
+    reasoning_for_decision = models.CharField(max_length=255, null=True, blank=True, help_text="Reasoning")
+
+    anonymous_submission_validation_code = models.CharField(max_length=255, null=True, blank=True)
+    anonymous_submission_validated = models.BooleanField(
+        default=False,
+        help_text="Is the submission validated. For example that the validation code has "
+        "been visited via an endpoint in the e-mail to confirm the submission.",
+    )
+
     def __str__(self):
         if self.has_been_accepted:
             return f"OK: {self.url}"
@@ -222,3 +231,13 @@ class UrlSubmission(models.Model):
     class Meta:
         verbose_name = _("url submission")
         verbose_name_plural = _("url submissions")
+
+
+class SubmissionRewardVideo(models.Model):
+    url = models.URLField(help_text="The URL of the video to display")
+    title = models.CharField(max_length=250, help_text="The title of the video", blank=True)
+    description = models.CharField(max_length=1000, help_text="The description of the video", blank=True)
+    in_rotation = models.BooleanField(default=False, help_text="Is this video in the rotation / aka: can be served")
+
+    def __str__(self):
+        return f"{self.id}: {self.title}"

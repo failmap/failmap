@@ -14,7 +14,7 @@ from jet.admin import CompactInline
 
 from websecmap.app.admin import generate_game_user
 from websecmap.app.models import GameUser
-from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
+from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission, SubmissionRewardVideo
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 from websecmap.scanners.scanner.http import resolves
 
@@ -643,14 +643,22 @@ class TeamAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append("disallow_team")
 
     # UrlSubmissionInline will make the load slow / non-loading.
-    inlines = [
-        OrganizationSubmissionInline,
-    ]
+    inlines = [OrganizationSubmissionInline, UrlSubmissionInline]
 
 
 @admin.register(UrlSubmission)
 class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("added_by_team", "for_organization", "url", "has_been_accepted", "has_been_rejected", "added_on")
+    list_display = (
+        "id",
+        "added_by_team_",
+        "for_organization",
+        "url",
+        "is_already_in_system",
+        "is_already_tied_to_this_organization",
+        "has_been_accepted",
+        "has_been_rejected",
+        "added_on",
+    )
     search_fields = ("added_by_team__name", "organization_name", "url")
 
     list_filter = (
@@ -658,6 +666,7 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "has_been_rejected",
         "added_by_team__name",
         "added_by_team__participating_in_contest__name",
+        "added_on",
     )
 
     fields = (
@@ -667,10 +676,31 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "url_in_system",
         "has_been_accepted",
         "has_been_rejected",
+        "reasoning_for_decision",
+        "anonymous_submission_validation_code",
+        "anonymous_submission_validated",
         "added_on",
     )
 
     actions = []
+
+    @staticmethod
+    def added_by_team_(obj):
+        return mark_safe(obj.added_by_team)
+
+    @staticmethod
+    def is_already_in_system(obj):
+        if Url.objects.filter(url=obj.url).exists():
+            return mark_safe('<img src="/static/admin/img/icon-yes.svg" alt="True">')
+        else:
+            return mark_safe('<img src="/static/admin/img/icon-no.svg" alt="False">')
+
+    @staticmethod
+    def is_already_tied_to_this_organization(obj):
+        if Url.objects.filter(url=obj.url, organization=obj.for_organization).exists():
+            return mark_safe('<img src="/static/admin/img/icon-yes.svg" alt="True">')
+        else:
+            return mark_safe('<img src="/static/admin/img/icon-no.svg" alt="False">')
 
     @transaction.atomic
     def reset_judgement(self, request, queryset):
@@ -686,27 +716,14 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     @transaction.atomic
     def accept(self, request, queryset):
         for urlsubmission in queryset:
-            # don't add the same thing over and over, allows to re-select the ones already added without a problem
-            # once rejected, can't be accepted via buttons: needs to be a manual action
             if urlsubmission.has_been_accepted or urlsubmission.has_been_rejected:
                 continue
 
-            # it's possible that the url already is in the system. If so, tie that to the submitted organization.
-            # could be dead etc... (stacking?)
-            url = Url.objects.all().filter(url=urlsubmission.url, is_dead=False).first()
-
-            if not url:
-                log.debug("adding new url: %s", urlsubmission.url)
-                # if it already exists, then add the url to the organization.
-                url = Url(url=urlsubmission.url)
-                url.save()
-
-            # the organization is already inside the submission and should exist in most cases.
-            url.organization.add(urlsubmission.for_organization)
-            url.save()
+            # an existing url is also interesting to tie it to another organization.
+            new_url = urlsubmission.for_organization.add_url(urlsubmission.url)
 
             # add some tracking data to the submission
-            urlsubmission.url_in_system = url
+            urlsubmission.url_in_system = new_url
             urlsubmission.has_been_accepted = True
             urlsubmission.save()
 
@@ -890,3 +907,15 @@ def check_valid_urls(urls):
             valid.append(url)
 
     return valid
+
+
+@admin.register(SubmissionRewardVideo)
+class SubmissionRewardVideoAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    search_fields = ["title", "description", "url"]
+
+    list_filter = ["in_rotation"]
+
+    list_display = ["id", "title", "open", "description", "in_rotation"]
+
+    def open(self, obj):
+        return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')

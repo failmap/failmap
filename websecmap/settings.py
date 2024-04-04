@@ -2024,26 +2024,26 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     #         {"name": "scanners.endpointgenericscanscratchpad", "label": "Endpoint Scans Debug"},
     #     ],
     # },
-    # {
-    #     "label": _("👾️ The Game (beta)"),
-    #     "items": [
-    #         {"name": "game.contest"},
-    #         {"name": "game.team"},
-    #         {"name": "game.organizationsubmission"},
-    #         {
-    #             "label": _("New organizations"),
-    #             "url": "/admin/game/organizationsubmission/?has_been_accepted__exact=0
-    #             &has_been_rejected__exact=0&o=-5",
-    #             "url_blank": False,
-    #         },
-    #         {"name": "game.urlsubmission"},
-    #         {
-    #             "label": _("New urls"),
-    #             "url": "/admin/game/urlsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-6.2.3",
-    #             "url_blank": False,
-    #         },
-    #     ],
-    # },
+    {
+        "label": _("👾️ Submissions (beta)"),
+        "items": [
+            {"name": "game.contest", "label": "🪩 Contests / Seasons"},
+            {"name": "game.team", "label": "🎉 Teams"},
+            {"name": "game.organizationsubmission", "label": "🏢 Organization Submissions"},
+            {
+                "label": _("🏢 - New organizations"),
+                "url": "/admin/game/organizationsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-5",
+                "url_blank": False,
+            },
+            {"name": "game.urlsubmission", "label": "🖥️ Url Submissions"},
+            {
+                "label": _("🖥️ - New urls"),
+                "url": "/admin/game/urlsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-6.2.3",
+                "url_blank": False,
+            },
+            {"name": "game.submissionrewardvideo", "label": "📺 Reward Videos"},
+        ],
+    },
 ]
 
 JET_SIDE_MENU_COMPACT = True
