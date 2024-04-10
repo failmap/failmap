@@ -178,8 +178,10 @@ def get_map_data(
 
         INNER JOIN
           organization on organization.id = stacked_organization_id
+      INNER JOIN
+          organization_layers ON (organization_layers.organization_id = organization.id)
         INNER JOIN
-          organizations_organizationtype on organizations_organizationtype.id = layers.organizationtype_id
+          organizations_organizationtype on organizations_organizationtype.id = organization_layers.organizationtype_id
         INNER JOIN
 
 
@@ -220,9 +222,8 @@ def get_map_data(
           ) as stacked_organizationrating
           ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
 
-        INNER JOIN organization_layers as layers ON (layers.organization_id = organization.id)
-
-        WHERE layers.organizationtype_id = '{my_organization_type}' AND organization.country= '{my_country}'
+        WHERE organization_layers.organizationtype_id = '{my_organization_type}'
+            AND organization.country= '{my_country}'
 
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY map_organizationreport.at_when ASC
