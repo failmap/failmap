@@ -49,11 +49,12 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", days
             INNER JOIN
               organization on organization.id = map_organizationreport.organization_id
             INNER JOIN
-              organizations_organizationtype on organizations_organizationtype.id = layers.organizationtype_id
+              organization_layers ON (organization_layers.organization_id = organization.id)
+            INNER JOIN
+              organizations_organizationtype on
+              organizations_organizationtype.id = organization_layers.organizationtype_id
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
-            INNER JOIN
-              organization_layers as layers ON (layers.organization_id = organization.id)
             INNER JOIN
               (
                 SELECT MAX(or2.id) as id2 FROM map_organizationreport or2
@@ -72,7 +73,7 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", days
                organization.created_on <= '{when}'
                AND organization.is_dead = 0
               ))
-              AND layers.organizationtype_id = '{my_organization_type}'
+              AND organization_layers.organizationtype_id = '{my_organization_type}'
               AND organization.country = '{my_country}'
               AND total_urls > 0
             GROUP BY organization.name
@@ -113,11 +114,12 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", day
             INNER JOIN
               organization on organization.id = map_organizationreport.organization_id
             INNER JOIN
-              organizations_organizationtype on organizations_organizationtype.id = layers.organizationtype_id
+              organization_layers ON (organization_layers.organization_id = organization.id)
+            INNER JOIN
+              organizations_organizationtype on
+              organizations_organizationtype.id = organization_layers.organizationtype_id
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
-            INNER JOIN
-              organization_layers as layers ON (layers.organization_id = organization.id)
             INNER JOIN
               (
                 SELECT MAX(or2.id) as id2 FROM map_organizationreport or2
@@ -136,7 +138,7 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", day
                organization.created_on <= '{when}'
                AND organization.is_dead = 0
               ))
-              AND layers.organizationtype_id = '{my_organization_type}'
+              AND organization_layers.organizationtype_id = '{my_organization_type}'
               AND organization.country = '{my_country}'
               AND total_urls > 0
             GROUP BY organization.name
