@@ -21,6 +21,7 @@ from jet.admin import CompactInline
 from websecmap import types
 from websecmap.app.models import Job
 from websecmap.celery import app
+from websecmap.map.models import Configuration
 from websecmap.organizations import datasources
 from websecmap.organizations.administration import force_merge_organizations
 from websecmap.organizations.datasources import dutch_government, excel
@@ -1225,12 +1226,38 @@ def format_yd(delta: timedelta) -> str:
 
 @admin.register(OrganizationType)
 class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name",)
+    list_display = ("id", "name", "description", "in_countries", "nr_orgs", "sample")
+    search_fields = ("name", "description")
     list_filter = ("name",)
-    fields = ("name",)
+    fields = ("name", "description")
+
+    @staticmethod
+    def in_countries(obj):
+        return list({conf.country for conf in Configuration.objects.filter(organization_type=obj)})
+
+    @staticmethod
+    def nr_orgs(obj):
+        return Organization.objects.filter(layers=obj).count()
+
+    @staticmethod
+    def sample(obj):
+        return list(Organization.objects.filter(layers=obj)[:10])
 
     inlines = [OrganizationAdminInline]
+
+    actions = []
+
+    def deown(self, request, queryset):
+        for layer in queryset:
+            orgs = Organization.objects.filter(layers=layer)
+            for org in orgs:
+                org.layers.remove(layer)
+                # org.save(update_fields=["layers"])
+
+        self.message_user(request, "Layer removed from organization")
+
+    deown.short_description = "⚠️ DANGER! Remove layer from all organizations ⚠️"
+    actions.append("deown")
 
 
 @admin.register(AlternativeName)

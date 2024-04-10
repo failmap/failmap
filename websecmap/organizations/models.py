@@ -18,6 +18,7 @@ log = logging.getLogger(__package__)
 
 class OrganizationType(models.Model):
     name = models.CharField(max_length=255, verbose_name=_("layer"))
+    description = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = True
