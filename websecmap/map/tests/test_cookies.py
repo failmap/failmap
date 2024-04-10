@@ -130,7 +130,7 @@ def test_cookie_plaza_data(db):
                 "layer": "layer1",
                 "organization_id": organization.id,
                 "organization_name": "test",
-                "organization_city": None,
+                "organization_city": "",
                 "rating_determined_on": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc).isoformat(),
                 "scan_id": epgs.id,
                 "subdomain": "",
@@ -146,7 +146,7 @@ def test_cookie_plaza_data(db):
                 "layer": "layer1",
                 "organization_id": organization.id,
                 "organization_name": "test",
-                "organization_city": None,
+                "organization_city": "",
                 "rating_determined_on": datetime(2022, 1, 23, 22, 0, tzinfo=timezone.utc).isoformat(),
                 "scan_id": epgs2.id,
                 "subdomain": "",
@@ -163,7 +163,7 @@ def test_cookie_plaza_data(db):
                     str(organization.id): {
                         "id": organization.id,
                         "name": organization.name,
-                        "city": None,
+                        "city": "",
                         "urls_with_tracking_cookies": ["example.nl", "example2.nl"],
                     }
                 },

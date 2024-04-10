@@ -18,9 +18,7 @@ def setup_some_data():
     ot = OrganizationType.objects.create(name="test")
     Configuration.objects.create(country="NL", organization_type=ot, is_scanned=True)
 
-    organization = Organization.objects.create(
-        name="test", type=ot, created_on=datetime.now(timezone.utc), country="NL"
-    )
+    organization = Organization.objects.create(name="test", created_on=datetime.now(timezone.utc), country="NL")
     organization.layers.add(ot)
     url = Url.objects.create(url="google.com")
     url.organization.add(organization)
@@ -140,9 +138,7 @@ def setup_test_internet_nl_web_filter_scan(db, default_scan_metadata):
     ot = OrganizationType.objects.create(name="test")
     Configuration.objects.create(country="NL", organization_type=ot, is_scanned=True)
 
-    organization = Organization.objects.create(
-        name="test", type=ot, created_on=datetime.now(timezone.utc), country="NL"
-    )
+    organization = Organization.objects.create(name="test", created_on=datetime.now(timezone.utc), country="NL")
     organization.layers.add(ot)
 
     url1 = Url.objects.create(url="google.com", is_dead=False, not_resolvable=False)
@@ -166,7 +162,7 @@ def setup_test_internet_nl_web_filter_scan(db, default_scan_metadata):
 
     # add some data that should not be retreived in either case:
     organization2 = Organization.objects.create(
-        name="test 2", type=ot, created_on=datetime.now(timezone.utc), country="NL", is_dead=True
+        name="test 2", created_on=datetime.now(timezone.utc), country="NL", is_dead=True
     )
     organization2.layers.add(ot)
     url3 = Url.objects.create(url="connected_to_dead_organization.com", is_dead=False, not_resolvable=False)

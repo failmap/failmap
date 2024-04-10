@@ -46,8 +46,6 @@ class AlternativeName(models.Model):
 class Organization(models.Model):
     country = CountryField(db_index=True)
 
-    type = models.ForeignKey(OrganizationType, on_delete=models.PROTECT, default=1)
-
     layers = models.ManyToManyField(OrganizationType, related_name="organization_on_layer")
 
     name = models.CharField(max_length=250, db_index=True)
@@ -67,7 +65,8 @@ class Organization(models.Model):
         # like: Amsterdam (Zuid-Oost). This field is not factually correct.
         max_length=150,
         blank=True,
-        null=True,
+        null=False,
+        default="",
         help_text="The city is part of the natural key for humans to find the right organizations when multiple "
         "organizations have the same name. This happens with primary schools a lot. There are even "
         "multiple ones with the same name in the same city. If that really becomes a problem a burough "

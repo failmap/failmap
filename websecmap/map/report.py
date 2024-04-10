@@ -256,7 +256,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                     INNER JOIN
                       organization on organization.id = stacked_organization_id
                     INNER JOIN
-                      organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+                      organizations_organizationtype on organizations_organizationtype.id = layers.organizationtype_id
                     INNER JOIN
 
 

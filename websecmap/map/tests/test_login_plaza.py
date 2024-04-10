@@ -79,9 +79,7 @@ def test_login_plaza_data(db):
         # Prepare the data for a typical response
         organization_type, created = OrganizationType.objects.all().get_or_create(name="municipality")
         now = datetime.now(timezone.utc)
-        organization = Organization.objects.all().create(
-            name="test", type=organization_type, country="NL", created_on=now, is_dead=False
-        )
+        organization = Organization.objects.all().create(name="test", country="NL", created_on=now, is_dead=False)
         organization.layers.add(organization_type)
         url = Url.objects.all().create(url="test.nl", created_on=now, is_dead=False, not_resolvable=False)
         url.organization.add(organization)
@@ -116,7 +114,7 @@ def test_login_plaza_data(db):
                 "domain": "test.nl",
                 "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
                 "organization_name": "test",
-                "organization_city": None,
+                "organization_city": "",
                 "portal_extracted": ["13.37"],
                 "portal_name": "Citrix ADC Gateway Login Panel",
                 "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html",
@@ -131,7 +129,7 @@ def test_login_plaza_data(db):
                 "domain": "test.nl",
                 "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
                 "organization_name": "test",
-                "organization_city": None,
+                "organization_city": "",
                 "portal_extracted": [],
                 "portal_name": "NetScaler AAA Login Panel",
                 "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html",
@@ -163,7 +161,7 @@ def test_login_plaza_data(db):
                 "domain": "test.nl",
                 "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
                 "organization_name": "test",
-                "organization_city": None,
+                "organization_city": "",
                 "portal_extracted": ["13.37"],
                 "portal_name": "Citrix ADC Gateway Login Panel",
                 "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/index.html",
@@ -181,7 +179,7 @@ def test_login_plaza_data(db):
                 "domain": "test.nl",
                 "last_scan_moment": datetime(2022, 1, 24, 0, 0, tzinfo=timezone.utc),
                 "organization_name": "test",
-                "organization_city": None,
+                "organization_city": "",
                 "portal_extracted": [],
                 "portal_name": "NetScaler AAA Login Panel",
                 "portal_url": "https://nsg1.vumc.nl:443/logon/LogonPoint/tmindex.html",

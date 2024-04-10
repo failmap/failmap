@@ -379,12 +379,6 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
                 "fields": ("created_on", "is_dead", "is_dead_since", "is_dead_reason"),
             },
         ),
-        (
-            "Deprecated",
-            {
-                "fields": ("type",),
-            },
-        ),
     )
 
     inlines = [OrgAltNameAdminInline, UrlAdminInline, CoordinateAdminInline]  #
@@ -493,7 +487,7 @@ class OrganizationSurrogateIdAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ...
     list_display = ["id", "organization", "surrogate_id", "surrogate_id_name", "used_in_dataset"]
 
-    list_filter = ["organization__type", "organization__country"]
+    list_filter = ["organization__layers", "organization__country"]
     search_fields = ["name", "organization__name"]
 
 
@@ -1243,7 +1237,7 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def sample(obj):
         return list(Organization.objects.filter(layers=obj)[:10])
 
-    inlines = [OrganizationAdminInline]
+    # inlines = [OrganizationAdminInline]
 
     actions = []
 

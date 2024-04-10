@@ -428,7 +428,7 @@ def list_outdated(published_scan_types):
     for map_configuration in filter_map_configs():
         print(f"Outdated items for {map_configuration['country']}/{map_configuration['organization_type__name']}:")
         organizations_on_map = Organization.objects.all().filter(
-            country=map_configuration["country"], type=map_configuration["organization_type"]
+            country=map_configuration["country"], layers=map_configuration["organization_type"]
         )
         # Outdated is earlier than the map_health says something is outdated. Otherwise we're always
         # one day behind with scans, and thus is always something outdated.
@@ -486,7 +486,7 @@ def plan_outdated_scans(published_scan_types):
         log.debug("Retrieving outdated scans from config: %s.", map_configuration)
 
         organizations_on_map = Organization.objects.all().filter(
-            country=map_configuration["country"], type=map_configuration["organization_type"]
+            country=map_configuration["country"], layers=map_configuration["organization_type"]
         )
 
         log.debug("There are %s organizations on this map.", len(organizations_on_map))

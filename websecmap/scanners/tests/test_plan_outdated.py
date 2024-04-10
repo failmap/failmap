@@ -23,8 +23,8 @@ def test_plan_outdated_scans(db, default_scan_metadata, default_policy):
     ot.save()
 
     o.country = "NL"
-    o.type = ot
     o.save()
+    o.layers.add(ot)
 
     m = Configuration()
     m.country = "NL"

@@ -28,7 +28,7 @@ DEFAULT_COUNTRY = "NL"
 DEFAULT_LAYER = "municipality"
 
 
-def get_organization_type(name: str):
+def get_organization_type(name: str) -> int:
     try:
         return OrganizationType.objects.get(name=name).id
     except OrganizationType.DoesNotExist:

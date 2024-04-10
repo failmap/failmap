@@ -24,7 +24,7 @@ def run_setup():
     ott.save()
     url = Url(**{"url": "example.com"})
     url.save()
-    org = Organization(**{"name": "Texel", "country": "NL", "type": ott})
+    org = Organization(**{"name": "Texel", "country": "NL"})
     org.save()
     org.layers.add(ott)
 

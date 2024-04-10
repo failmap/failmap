@@ -179,7 +179,7 @@ def get_map_data(
         INNER JOIN
           organization on organization.id = stacked_organization_id
         INNER JOIN
-          organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+          organizations_organizationtype on organizations_organizationtype.id = layers.organizationtype_id
         INNER JOIN
 
 

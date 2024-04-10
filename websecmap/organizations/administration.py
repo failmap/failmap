@@ -31,9 +31,7 @@ def insert_or_update_organization(
     # add new websites if this already exists.
     if not organization:
         log.debug("Creating new organization: %s", name)
-        organization = Organization.objects.create(
-            name=name, type=layer, created_on=datetime.now(timezone.utc), country=country
-        )
+        organization = Organization.objects.create(name=name, created_on=datetime.now(timezone.utc), country=country)
         organization.layers.add(layer)
 
     return organization
@@ -220,8 +218,8 @@ def merge_organizations(org_from: Organization, org_to: Organization):
         org_to.layers.add(layer)
 
     # also move the organization type to layer if that didn't happen yet:
-    if org_from.type:
-        org_to.layers.add(org_from.type)
+    # if org_from.type:
+    #     org_to.layers.add(org_from.type)
 
     # we don't merge the coordinates, as they should be correct in import.
     # even if the constraint is cascade, this will just restrict sometimes. Nice bugs :)

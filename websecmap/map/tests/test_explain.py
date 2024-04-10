@@ -16,9 +16,7 @@ def test_get_recent_explains(db, default_scan_metadata, default_policy):
         organization_type, created = OrganizationType.objects.all().get_or_create(name="municipality")
         now = datetime.now(timezone.utc)
 
-        organization = Organization.objects.all().create(
-            name="test", type=organization_type, country="NL", created_on=now, is_dead=False
-        )
+        organization = Organization.objects.all().create(name="test", country="NL", created_on=now, is_dead=False)
         organization.layers.add(organization_type)
 
         url = Url.objects.all().create(url="test.nl", created_on=now, is_dead=False, not_resolvable=False)

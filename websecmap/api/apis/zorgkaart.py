@@ -346,7 +346,6 @@ def add_flat_organization(flat_organization: Dict) -> Organization:
         **{
             "name": flat_organization["name"],
             "internal_notes": flat_organization.get("address", ""),
-            "type": layer,
             "country": flat_organization["country"],
             "surrogate_id": flat_organization["surrogate_id"],
             "arbitrary_kv_data": flat_organization.get("key_value_data", {}),
