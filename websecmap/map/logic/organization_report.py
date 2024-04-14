@@ -56,6 +56,7 @@ def get_organization_report_by_id(
         return {}
 
     ratings = organization.filter(organizationreport__at_when__lte=when)
+
     try:
         values = ratings.values(
             "organizationreport__at_when",
@@ -78,6 +79,8 @@ def get_organization_report_by_id(
         "name": values["name"],
         "slug": slugify(values["name"]),
         "id": values["pk"],
+        "country": organization.first().country,
+        "layer": organization.first().layers.first().name,
         "twitter_handle": values["twitter_handle"],
         "city": values["city"],
         "when": values["organizationreport__at_when"].isoformat(),
