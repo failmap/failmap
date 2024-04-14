@@ -79,7 +79,7 @@ def get_organization_report_by_id(
         "name": values["name"],
         "slug": slugify(values["name"]),
         "id": values["pk"],
-        "country": organization.first().country,
+        "country": organization.first().country.code,
         "layer": organization.first().layers.first().name,
         "twitter_handle": values["twitter_handle"],
         "city": values["city"],
