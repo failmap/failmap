@@ -22,6 +22,7 @@ lp = "login_plaza"
 ovtvn = v.organization_vulnerability_timeline_via_name
 
 org_report_by_id = v.organization_report_by_id
+org_report_only_by_id = v.organization_report_only_by_id
 org_report_by_name = v.organization_report_by_name
 
 # these urls are exposed at the /data endpoint
@@ -75,6 +76,8 @@ urlpatterns = [
     path("organizations/list/<c:country>/<slug:organization_type>/", v.organization_list),
     path("report/<c:country>/<slug:organization_type>/<oid:organization_id>/<w:days_back>/", org_report_by_id),
     path("report/<c:country>/<slug:organization_type>/<oid:organization_id>/<ymd:at_date>/", org_report_by_id),
+    path("report/<oid:organization_id>/<w:days_back>/", org_report_only_by_id),
+    path("report/<oid:organization_id>/<ymd:at_date>/", org_report_only_by_id),
     path("report/<c:country>/<slug:organization_type>/<str:organization_name>/<w:days_back>/", org_report_by_name),
     path("report/<c:country>/<slug:organization_type>/<str:organization_name>/<ymd:at_date>/", org_report_by_name),
     # updates

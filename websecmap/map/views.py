@@ -606,6 +606,16 @@ def organization_report_by_id(
 
 
 @cache_page(TEN_MINUTES)
+def organization_report_only_by_id(
+    request,
+    organization_id=None,
+    days_back=0,
+    at_date: date = None,
+):
+    return json_response(get_organization_report_by_id(organization_id, days_back=days_back, at_date=at_date))
+
+
+@cache_page(TEN_MINUTES)
 def organization_report_by_name(
     request,
     country: str = DEFAULT_COUNTRY,
