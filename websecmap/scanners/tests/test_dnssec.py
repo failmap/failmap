@@ -130,8 +130,24 @@ def test_analyze_result():
 
     result = result.splitlines()
     level, relevant = analyze_result(result)
-
     assert level == "warning"
+
+    result = """INFO [DNSSEC:BEGIN] nu.nl,
+    2.364: INFO [DNSSEC:DS_FOUND] nu.nl,
+    2.364: NOTICE [DNS:LOOKUP_ERROR] corrupt wire-format data at /usr/share/perl5/Net/DNS/Packet.pm line 119.,
+    2.364: ,
+    2.364: NOTICE [DNS:LOOKUP_ERROR] corrupt wire-format data at /usr/share/perl5/Net/DNS/Packet.pm line 119.,
+    2.364: ,
+    2.364: INFO [DNSSEC:CONSISTENT_EXTRA_PROCESSING] nu.nl,
+    2.364: INFO [DNSSEC:NSEC_FOUND] nu.nl;NSEC3,
+    2.364: INFO [DNSSEC:DNSKEY_NOT_FOUND] nu.nl,
+    2.364: ERROR [DNSSEC:INCONSISTENT_SECURITY] nu.nl,
+    2.364: INFO [DNSSEC:END] nu.nl"""
+
+    result = result.splitlines()
+    level, relevant = analyze_result(result)
+
+    assert level == "scan_error"
 
 
 def test_normalize_evidence():

@@ -105,6 +105,7 @@ def store_dnssec(result: List[str], url_id: int):
         # /failmap/map/locale/*/django.po
         # translate them and then run "failmap translate" again.
         messages = {
+            "scan_error": "An error occurred when running the scan, no data collected.",
             "error": "DNSSEC is incorrectly or not configured (errors found).",
             "warning": "DNSSEC is incorrectly configured (warnings found).",
             "info": "DNSSEC seems to be implemented sufficiently.",
@@ -182,6 +183,10 @@ def analyze_result(result: List[str]):
     :return:
     """
 
+    # scan errors are errors that are arise from system malfuction on our side. This means
+    # that the scanner does not work properly and gives erroneous results.
+    scan_errors = []
+
     errors = []
     warnings = []
     infos = []
@@ -226,6 +231,11 @@ def analyze_result(result: List[str]):
 
         if line.startswith("ERROR"):
             errors.append(line)
+
+        # NOTICE [DNS:LOOKUP_ERROR] corrupt wire-format data at /usr/share/perl5/Net/DNS/Packet.pm line 119.,
+        if "corrupt wire-format data at" in line:
+            # This is a problem with the DNSSEC scanner.
+            scan_errors.append(line)
 
         # a beautiful feature of DNSCHECK is that if there is no DNSSEC, an INFO message is given.
         # We'll upgrade the severity here:
@@ -283,7 +293,9 @@ def analyze_result(result: List[str]):
             #     log.info(line)
             #     errors.append(line)
 
-    highest_level: str = "ERROR" if errors else "WARNING" if warnings else "INFO" if infos else "NONE"
+    highest_level: str = (
+        "SCAN_ERROR" if scan_errors else "ERROR" if errors else "WARNING" if warnings else "INFO" if infos else "NONE"
+    )
 
     if highest_level == "NONE":
         raise ValueError(f"Did not correctly parse DNSSCAN result string. {result}")
@@ -297,6 +309,8 @@ def analyze_result(result: List[str]):
         relevant_strings = warnings
     if errors:
         relevant_strings = errors
+    if scan_errors:
+        relevant_strings = scan_errors
 
     # log.debug("Relevant:")
     # log.debug(relevant_strings)
