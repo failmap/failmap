@@ -8,17 +8,18 @@ from django.db import migrations, models
 
 
 def forward(apps, schema_editor):
-    OrganizationType = apps.get_model("organizations", "OrganizationType")
-    default = OrganizationType(name="municipality")
-    default.save()
-
-    Organization = apps.get_model("organizations", "Organization")
-    Organization.objects.all().update(type=default.id)
+    # OrganizationType = apps.get_model("organizations", "OrganizationType")
+    # default = OrganizationType(name="municipality")
+    # default.save()
+    # Organization = apps.get_model("organizations", "Organization")
+    # Organization.objects.all().update(type=default.id)
+    pass
 
 
 def reverse(apps, schema_editor):
-    Organization = apps.get_model("organizations", "Organization")
-    Organization.objects.all().update(type="municipality")
+    # Organization = apps.get_model("organizations", "Organization")
+    # Organization.objects.all().update(type="municipality")
+    pass
 
 
 def noop(apps, schema_editor):
