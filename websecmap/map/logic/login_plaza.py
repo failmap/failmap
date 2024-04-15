@@ -9,6 +9,7 @@ from simplejson import JSONDecodeError
 from websecmap.app import log
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.scanners.models import EndpointGenericScan, Product, ProductHierarchy, ScannerFinding
+from websecmap.reporting import time_cache
 
 MAX_RESULTS = 4000
 
@@ -38,8 +39,8 @@ def extract_version_from_nuclei_finding(nuclei_finding: dict) -> str:
 # caches empty values as well...
 # @cached(cache=TTLCache(maxsize=1024, ttl=4 * 60 * 60))
 def get_nuclei_product_mapping() -> Dict[str, List[Dict[str, Any]]]:
-    # maps scanner findings to all products related to them.
-    # the finding name lists to a number of products and related products.
+    if cached := time_cache.cache_get("login_plaza_product_mapping"):
+        return cached
 
     # product_prefetch = Prefetch("product",
     # queryset=Product.objects.filter(is_irrelevant=False), to_attr="product_set")
@@ -55,6 +56,9 @@ def get_nuclei_product_mapping() -> Dict[str, List[Dict[str, Any]]]:
                     "related_products": get_nested_products_in_an_inefficient_way(product.id),
                 }
             )
+
+    if mapping:
+        time_cache.cache_set("login_plaza_product_mapping", mapping)
 
     return mapping
 
@@ -262,7 +266,7 @@ def login_plaza_data(country: str = None, layer: str = None):
     # now we have stuff for endpoint, but we need the correct first item for this panel.
     tech = get_tech_for_endpoints(list(endpoint_ids))
 
-    # todo: use cached product mapping
+    # todo: use cached product mapping, this now takes 1 to 3 seconds.
     nuclei_product_mapping = get_nuclei_product_mapping()
 
     dicts = []
