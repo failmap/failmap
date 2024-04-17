@@ -18,7 +18,6 @@ from websecmap.scanners.scanner.autoexplain_trust_microsoft import (
 
 log = logging.getLogger(__package__)
 
-
 SCANNER = "autoexplain_no_https_microsoft"
 EXPLANATION = "service_intentionally_designed_this_way"
 
@@ -29,7 +28,16 @@ query = EndpointGenericScan.objects.all().filter(
     endpoint__is_dead=False,
     endpoint__protocol="http",
     endpoint__port=80,
-    rating="https_redirect_on_insecure_port_and_no_https_on_standard_port",
+    # a normal redirect is discovered with plain_http using and marked as
+    # https_redirect_on_insecure_port_and_no_https_on_standard_port
+    #
+    # for some reason ipv6 is marked as completely closed by the plain_http scanner
+    # but the endpoint is not dead etc. Therefore also try to add the explanation to
+    # no_https_redirect_and_no_https_on_standard_port. They are just 140 urls more, so that's fine.
+    rating__in=[
+        "https_redirect_on_insecure_port_and_no_https_on_standard_port",
+        "no_https_redirect_and_no_https_on_standard_port",
+    ],
 )
 
 
@@ -38,7 +46,10 @@ def plan_scan():
     # Only check this on the latest scans, do not alter existing explanations
     scans = query.filter(
         endpoint__url__in=Url.objects.all().filter(
-            computed_subdomain="autodiscover", not_resolvable=False, is_dead=False
+            # support autodiscover.something.something.com
+            computed_subdomain__startswith="autodiscover",
+            not_resolvable=False,
+            is_dead=False,
         )
     )
 
