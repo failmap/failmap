@@ -917,6 +917,7 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
         "url",
         "origin",
         "in_organizations",
+        "whois",
         "endpoints",
         # "sub",
         # "domain",
@@ -924,14 +925,15 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
         "visit",
         # "onboarded",
         # "onboarding_stage",
-        "uses_dns_wildcard",
-        "dead_for",
-        "unresolvable_for",
-        "created_on",
+        "wildcard",
+        "dead",
+        "unresolvable",
+        "created",
     )
 
     search_fields = ("url", "computed_subdomain", "computed_domain", "computed_suffix")
     list_filter = [
+        "origin",
         "is_dead",
         "is_dead_since",
         "is_dead_reason",
@@ -947,6 +949,17 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
         "dns_supports_mx",
         HasEndpointScansListFilter,
     ][::-1]
+
+    def wildcard(self, obj):
+        return obj.uses_dns_wildcard
+
+    def created(self, obj):
+        if obj.created_on:
+            return obj.created_on.date()
+        return "-"
+
+    def whois(self, obj):
+        return UrlWhois.objects.filter(url=obj, is_the_latest=True).latest("at_when").registrant
 
     fieldsets = (
         (None, {"fields": ("url", "organization", "internal_notes", "created_on")}),
@@ -1023,7 +1036,7 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
         return (
             format_html(f"{count}<br>" f"<a href='/admin/scanners/endpoint/?q={obj.url}' target='_blank'>Filter: 🔍</a>")
             if count
-            else ""
+            else "-"
         )
 
     @staticmethod
@@ -1040,7 +1053,7 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
         return format_html(string)
 
     @staticmethod
-    def unresolvable_for(instance):
+    def unresolvable(instance):
         if instance.not_resolvable and instance.not_resolvable_since:
             return naturaltime(instance.not_resolvable_since)
 
@@ -1048,7 +1061,7 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
 
     # todo: further humanize this.
     @staticmethod
-    def dead_for(instance):
+    def dead(instance):
         if instance.is_dead and instance.is_dead_since:
             return naturaltime(instance.is_dead_since)
 

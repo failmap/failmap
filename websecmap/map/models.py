@@ -331,3 +331,36 @@ class OrganizationReport(SeriesOfUrlsReportMixin):
         indexes = [
             models.Index(fields=["at_when", "id"]),
         ]
+
+
+class FrontPageGroup(models.Model):
+    identifier = models.SlugField(max_length=255, help_text="")
+    order = models.PositiveIntegerField(default=0, help_text="")
+
+    def __str__(self):
+        return f"{self.order}: {self.identifier}"
+
+
+class FrontPageRow(models.Model):
+    group = models.ForeignKey(FrontPageGroup, on_delete=models.CASCADE)
+    order = models.PositiveIntegerField(default=0, help_text="")
+
+    def __str__(self):
+        return f"{self.group.order}: {self.group.identifier} row: {self.order}"
+
+
+class FrontPageRowContent(models.Model):
+    row = models.ForeignKey(FrontPageRow, on_delete=models.CASCADE)
+    order = models.PositiveIntegerField(default=0, help_text="")
+
+    # perhaps this is a content field that can be changed, but that is a minimal amount of work
+    configuration = models.ForeignKey(Configuration, on_delete=models.CASCADE, help_text="")
+
+    def __str__(self):
+        return f"{self.row.group.identifier} row: {self.id} {self.order}"
+
+    # perhaps: add a flat varsion of this layout to the configuration: this is the default order that the maps will
+    #  be displayed in on for example the cookie or leaderboard (but for now just use the displayed maps order)
+    #  and perhaps the displayed maps order is good enough... but it is nice to see the same ordering in those
+    #  pages as it makes a more sensible ordering of content.
+    #  Perhaps this flat rendering is just not needed.

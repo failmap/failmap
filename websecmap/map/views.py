@@ -59,7 +59,7 @@ from websecmap.map.logic.stats_and_graphs import (
 from websecmap.map.logic.ticker import get_ticker_data
 from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
 from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
-from websecmap.map.models import Configuration, LandingPage, OrganizationReport
+from websecmap.map.models import Configuration, LandingPage, OrganizationReport, FrontPageRowContent
 from websecmap.organizations.models import Organization
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Screenshot
@@ -77,7 +77,7 @@ DEFAULT_FILE_FORMAT = "json"
 
 
 def json_response(data: dict) -> HttpResponse:
-    return HttpResponse(orjson.dumps(data), content_type="text/json", status=200)
+    return HttpResponse(orjson.dumps(data), content_type="application/json", status=200)
 
 
 def empty_response():
@@ -89,7 +89,7 @@ def generic_download(filename, data, file_type):
         "xlsx": {"content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
         "ods": {"content_type": "application/vnd.oasis.opendocument.spreadsheet"},
         "csv": {"content_type": "text/csv"},
-        "json": {"content_type": "text/json"},
+        "json": {"content_type": "application/json"},
         "mediawiki": {"content_type": "text/plain"},
         "latex": {"content_type": "text/plain"},
     }
@@ -225,6 +225,102 @@ def countries_and_layers():
     return countries
 
 
+def frontpage_layout():
+    """
+    Returns:
+    [
+        {
+          "identifier": "highlight",
+          "order": 0,
+          "rows": [
+            {
+              "order": 0,
+              "content": [
+                {
+                  "order": 0,
+                  "country": "NL",
+                  "layer": "municipality"
+                },
+                {
+                  "order": 1,
+                  "country": "NL",
+                  "layer": "cyber"
+                }
+              ]
+            }
+          ]
+        }
+    ]
+
+    # the simple one is easy to make, but probably results in disgusting front end code
+    # so let's stick with the complex one
+    """
+
+    groups = []
+
+    # the ordering is already correct, the frontpage can just render this one by one.
+    things = (
+        FrontPageRowContent.objects.all()
+        .filter(configuration__is_displayed=True)
+        .order_by("row__group__order", "row__order", "order")
+        .prefetch_related("row", "row__group")
+    )
+
+    # instead of doing all kinds of complicated state things, just loop over the data 3 times and build your nested
+    # stuff! :)
+    # the uid makes it easy to use :key in the frontend.
+    group = -1
+    for thing in things:
+        if thing.row.group.id == group:
+            continue
+        group = thing.row.group.id
+        groups.append(
+            {
+                "id": thing.row.group.id,
+                "uid": f"fp_group_{thing.row.group.id}",
+                "identifier": thing.row.group.identifier,
+                "order": thing.row.group.order,
+                "rows": [],
+            }
+        )
+
+    row = -1
+    for thing in things:
+        if thing.row.id == row:
+            continue
+        row = thing.row.id
+
+        row_data = {
+            "id": thing.row.id,
+            "uid": f"fp_row_{thing.row.id}",
+            "order": thing.row.order,
+            "content": [],
+        }
+
+        # dump it in the results
+        for group in groups:
+            if group["id"] == thing.row.group.id:
+                group["rows"].append(row_data)
+                break
+
+    # now add the content
+    for thing in things:
+        content_data = {
+            "id": thing.id,
+            "uid": f"fp_content_{thing.id}",
+            "order": thing.order,
+            "country": thing.configuration.country.code,
+            "layer": thing.configuration.organization_type.name,
+        }
+
+        for group in groups:
+            for row in group["rows"]:
+                if row["id"] == thing.row.id and group["id"] == thing.row.group.id:
+                    row["content"].append(content_data)
+
+    return groups
+
+
 def config_content():
     # This is converted to some hierarchy to make more sense, and to _not_ export things like keys
     metadata = get_backend_scanmetadata()
@@ -245,6 +341,7 @@ def config_content():
     configuration = get_all_values()
     scan_types = get_scanners_for_frontend(configuration)
     base_config = {
+        "layout": frontpage_layout(),
         "show": {
             "intro": configuration["SHOW_INTRO"],
             "multi_map_summary_table": configuration["SHOW_MULTI_MAP_SUMMARY_TABLE"],
@@ -439,7 +536,7 @@ def config_content():
 @cache_page(TEN_MINUTES)
 def config(request) -> HttpResponse:
     # return JsonResponse(config_content(), encoder=orjson.dumps)
-    return HttpResponse(orjson.dumps(config_content()), content_type="text/json", status=200)
+    return HttpResponse(orjson.dumps(config_content()), content_type="application/json", status=200)
 
 
 @cache_page(TEN_MINUTES)
@@ -827,7 +924,7 @@ def map_data(
 ):
     data = get_map_data(country, organization_type, days_back, displayed_issue, at_date=at_date)
 
-    return HttpResponse(orjson.dumps(data), content_type="text/json", status=200)
+    return HttpResponse(orjson.dumps(data), content_type="application/json", status=200)
 
 
 @cache_page(TEN_MINUTES)

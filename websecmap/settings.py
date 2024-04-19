@@ -1905,6 +1905,14 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         ],
     },
     {
+        "label": _("Front Page"),
+        "items": [
+            {"name": "map.frontpagegroup", "label": _("📺 Group")},
+            {"name": "map.frontpagerow", "label": "📺 Row"},
+            {"name": "map.frontpagerowcontent", "label": "📺 Content"},
+        ],
+    },
+    {
         "label": _("Import Data"),
         "items": [
             {"name": "map.administrativeregion", "label": _("🗺️ Open Street Map & Wikidata")},

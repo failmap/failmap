@@ -20,6 +20,9 @@ from websecmap.map.models import (
     VulnerabilityStatistic,
     OrganizationOnLayerOverTime,
     MapFlow,
+    FrontPageGroup,
+    FrontPageRow,
+    FrontPageRowContent,
 )
 from websecmap.map.report import compose_task
 from websecmap.organizations.models import OrganizationType
@@ -636,3 +639,43 @@ class OrganizationOnLayerOverTimeAdmin(ImportExportModelAdmin, admin.ModelAdmin)
     def nice_layers(self, obj):
         # create a visually nice representation of layers
         return list(OrganizationType.objects.all().filter(id__in=obj.layers).values_list("name", flat=True))
+
+
+@admin.register(FrontPageGroup)
+class FrontPageGroupAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.order_by("order")
+        return qs
+
+    list_display = [
+        "order",
+        "identifier",
+    ]
+
+
+@admin.register(FrontPageRow)
+class FrontPageRowAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.order_by("group__order", "order")
+        return qs
+
+    list_display = [
+        "group",
+        "order",
+    ]
+
+
+@admin.register(FrontPageRowContent)
+class FrontPageRowContentAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.order_by("row__group__order", "row__order", "order")
+        return qs
+
+    list_display = [
+        "row",
+        "order",
+        "configuration",
+    ]
