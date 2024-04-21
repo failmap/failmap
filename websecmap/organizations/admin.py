@@ -918,6 +918,7 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
         "origin",
         "in_organizations",
         "whois",
+        "image",
         "endpoints",
         # "sub",
         # "domain",
@@ -959,7 +960,28 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
         return "-"
 
     def whois(self, obj):
-        return UrlWhois.objects.filter(url=obj, is_the_latest=True).latest("at_when").registrant
+        url = f"{obj.computed_domain}.{obj.computed_suffix}"
+        return UrlWhois.objects.filter(url__url=url, is_the_latest=True).latest("at_when").registrant
+
+    def image(self, obj):
+        if not obj.endpoint_set.count():
+            return ""
+
+        string = ""
+        for endpoint in obj.endpoint_set.all().filter(
+            is_dead=False, protocol__in=["http", "https"], ip_version=4, port__in=[80, 443]
+        ):
+            if endpoint.is_dead:
+                continue
+            folder = f"{str(endpoint.id)[:3]}/" if len(str(endpoint.id)) > 3 else ""
+            string = (
+                f"{string}<a href='{endpoint.protocol}://{obj.url}:{endpoint.port}' "
+                f"target='_blank' rel='nofollow'>"
+                f"<img src='/screenshots/{folder}{endpoint.id}_latest.png' "
+                f"style='max-width: 220px' alt=' ' /></a>"
+            )
+
+        return mark_safe(string)
 
     fieldsets = (
         (None, {"fields": ("url", "organization", "internal_notes", "created_on")}),
