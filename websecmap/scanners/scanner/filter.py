@@ -31,6 +31,7 @@ def filter_top_level_domains(
             q_configurations_to_scan(),
             Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
             organization__in=organizations,
+            is_dead=False,
             **urls_filter,
         )
     elif endpoints_filter:
@@ -39,13 +40,17 @@ def filter_top_level_domains(
         urls = Url.objects.filter(
             q_configurations_to_scan(),
             Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+            is_dead=False,
             endpoint__in=endpoints,
             **urls_filter,
         )
     else:
         # now urls directly
         urls = Url.objects.filter(
-            q_configurations_to_scan(), Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""), **urls_filter
+            q_configurations_to_scan(),
+            Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+            is_dead=False,
+            **urls_filter,
         )
 
     # retrieve a minimal amount of data:
