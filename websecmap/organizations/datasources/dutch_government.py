@@ -12,6 +12,8 @@ https://almanak-redactie.overheid.nl/archive/
 import logging
 import xml.etree.ElementTree as ET
 
+import tldextract
+
 from websecmap.celery import app
 from websecmap.organizations.datasources import download_http_get_no_credentials, generic_dataset_import, read_data
 
@@ -61,7 +63,7 @@ def parse_data(dataset, filename):
 
         # log.debug(found)
 
-        if len(found["contact"]):
+        if found["contact"]:
             found["bezoek_adres"] = found["contact"].find("p:bezoekAdres", namespaces)
             found["adres"] = found["bezoek_adres"].find("p:adres", namespaces)
             found["straat"] = emulate_get(found["adres"], "p:straat", namespaces)
@@ -69,7 +71,7 @@ def parse_data(dataset, filename):
             found["postcode"] = emulate_get(found["adres"], "p:postcode", namespaces)
             found["plaats"] = emulate_get(found["adres"], "p:plaats", namespaces)
 
-            found["site"] = emulate_get(found["contact"], "p:internet", namespaces)
+            found["site"] = emulate_get(found["contact"], "p:internet", namespaces).strip()
 
             if not found["name"]:
                 # gemeenschappelijke regelingen has a title, not a name.
@@ -79,13 +81,18 @@ def parse_data(dataset, filename):
                 # try to find something by name... might not have an address...
                 geocoding_hint = f"{found['name']}, Nederland"
 
+            place = f'{found["straat"]} {found["huisnummer"]}'.strip()
+
+            extract = tldextract.extract(found["site"])
+
             found_organizations.append(
                 {
                     "name": f'{found["name"]} ({found["abbreviation"]})' if found["abbreviation"] else found["name"],
-                    "address": f'{found["straat"]} {found["huisnummer"]}, {found["postcode"]}, {found["plaats"]}',
+                    "address": f'{place}, {found["postcode"]}, {found["plaats"]}',
                     # make sure that the geocoder is looking at the Netherlands.
                     "geocoding_hint": geocoding_hint,
                     "websites": [found["site"]],
+                    "fqdn": extract.fqdn,
                     "country": dataset["country"],
                     "layer": dataset["layer"],
                     "lat": None,
@@ -104,7 +111,7 @@ def emulate_get(xml, element, namespaces):
     # This thus doesn't work:
     # return xml.find(element, namespaces).text if xml.find(element, namespaces) else ""
     try:
-        return xml.find(element, namespaces).text
+        return xml.find(element, namespaces).text.strip()
     except AttributeError:
         return ""
 

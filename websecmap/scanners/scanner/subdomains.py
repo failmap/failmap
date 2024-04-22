@@ -43,6 +43,11 @@ def url_by_filters(organizations_filter: dict = None, urls_filter: dict = None) 
             Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
             organization__in=organizations,
             do_not_find_subdomains=False,
+            # do not find subdomains on domains that are declared dead.
+            # it is extremely rare that a dead domain needs subdomains. Plus 'is_dead' is an administrative
+            # flag. This means that nothing should happen with the domain anymore.
+            # it differs from resolvability.
+            is_dead=False,
         )
     else:
         urls = urls.filter(Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""), do_not_find_subdomains=False)
