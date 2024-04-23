@@ -247,6 +247,11 @@ def request(activity: str, scanner: str, urls: List[int], origin: str = ""):
         log.error(f"Scan requested for {scanner}, but no such scanner registered in metadata database. Not requested.")
         return
 
+    scanner_obj = Scanner.objects.get(pk=python_scanner["id"])
+
+    activity_obj = Activity[activity].value
+    state_obj = State["requested"].value
+
     for url in urls:
         # we've removed already requestsed as it creates a lookup for every new requested scan.
         #
@@ -261,10 +266,10 @@ def request(activity: str, scanner: str, urls: List[int], origin: str = ""):
         now = datetime.now(timezone.utc)
 
         planned_scan = PlannedScan()
-        planned_scan.activity = Activity[activity].value
-        planned_scan.scanner = Scanner.objects.get(pk=python_scanner["id"])
+        planned_scan.activity = activity_obj
+        planned_scan.scanner = scanner_obj
         planned_scan.url = url
-        planned_scan.state = State["requested"].value
+        planned_scan.state = state_obj
         planned_scan.last_state_change_at = now
         planned_scan.origin = origin
         # To use the index on requested_at_when times are reduced to whole hours.
