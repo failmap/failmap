@@ -625,7 +625,9 @@ class Screenshot(models.Model):
     )
     width_pixels = models.IntegerField(default=0)
     height_pixels = models.IntegerField(default=0)
-    created_on = models.DateTimeField(auto_now_add=True, db_index=True)
+    created_on = models.DateTimeField(
+        auto_now_add=True, db_index=True, help_text="Date when screenshot is created or was updated at a later point."
+    )
 
 
 class InternetNLV2Scan(models.Model):

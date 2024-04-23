@@ -36,7 +36,7 @@ from websecmap.celery import app
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, Screenshot
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
-from websecmap.scanners.scanner.__init__ import endpoint_filters, q_configurations_to_scan, unique_and_random
+from websecmap.scanners.scanner.__init__ import endpoint_filters, q_configurations_to_scan
 from websecmap.scanners.timeout import timeout
 
 log = logging.getLogger(__package__)
@@ -60,14 +60,16 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
         url__not_resolvable=False,
         url__is_dead=False,
         protocol__in=["http", "https", "dns_a_aaaa"],
-        port__in=[80, 443, 8443, 8080, 8888, 21, 0],
+        # port 0 is for dns_a_aaaa (internetnl endpoinds)
+        port__in=[80, 443, 8443, 8080, 8888, 0],
     )
     # Without screenshot OR with a screenshot over a month ago
     endpoints = endpoints.filter((Q(screenshot__isnull=True) | Q(screenshot__created_on__lt=one_month_ago)))
 
     # It's possible to overwrite the above query also, you can add whatever you want to the normal query.
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
-    return unique_and_random([endpoint.url for endpoint in endpoints])
+    # return unique endpoints
+    return set([endpoint.url for endpoint in endpoints])
 
 
 @app.task(queue="kickoff", ignore_result=True)
@@ -93,10 +95,11 @@ def compose_manual_scan_task(
 
 def compose_scan_task(urls):
     endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(
-        urls, protocols=["http", "https", "dns_a_aaaa"], ports=[80, 443, 8443, 8080, 8888, 21, 0]
+        urls, protocols=["http", "https", "dns_a_aaaa"], ports=[80, 443, 8443, 8080, 8888, 0]
     )
 
-    endpoints = unique_and_random(endpoints)
+    # get unique endpoints
+    endpoints = set(endpoints)
 
     # remove urls that don't have the relevant endpoints anymore
     for url_id in urls_without_endpoints:
