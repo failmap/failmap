@@ -33,13 +33,15 @@ def run():
         )
 
 
+def parse(file_content: str):
+    data = csv.DictReader(file_content.splitlines())
+    return list(data)
+
+
 def scrape(surrogate_id: int):
     # use requests to download the csv file, which is parsed to a dict
     response = requests.get(f"https://dashboard.digitoegankelijk.nl/organisaties/download/{surrogate_id}")
-
-    # parse the csv file
-    data = csv.DictReader(response.text.splitlines())
-    return list(data)
+    return parse(response.text)
 
 
 def extract_new_domains(
