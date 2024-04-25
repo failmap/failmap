@@ -248,6 +248,8 @@ class ActionMixin:
     a function to perform a scan, verification or discovery. More scanners, mean more buttons.
     """
 
+    # todo: this should plan things instead of directly performing them
+    # also: this is really never used.
     # overrides the standard model class get_actions
     def get_actions(self, request):
         # using this function maker, scan functions can be generated.
@@ -919,11 +921,10 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
         "in_organizations",
         "whois",
         "image",
-        "endpoints",
         # "sub",
         # "domain",
         # "tld",
-        "visit",
+        # "visit",
         # "onboarded",
         # "onboarding_stage",
         "wildcard",
@@ -964,8 +965,13 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
         return UrlWhois.objects.filter(url__url=url, is_the_latest=True).latest("at_when").registrant
 
     def image(self, obj):
-        if not obj.endpoint_set.count():
+        count = obj.endpoint_set.count()
+
+        if not count:
             return ""
+
+        # merge these things to reduce the amount of queries.
+        eps = f"<a href='/admin/scanners/endpoint/?q={obj.url}' target='_blank'>🔍 {count} endpoints</a>"
 
         string = ""
         for endpoint in obj.endpoint_set.all().filter(
@@ -981,7 +987,7 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
                 f"style='max-width: 220px' alt=' ' /></a>"
             )
 
-        return mark_safe(string)
+        return mark_safe(string + eps)
 
     fieldsets = (
         (None, {"fields": ("url", "organization", "internal_notes", "created_on")}),
@@ -1053,28 +1059,6 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
     # list_select_related = ('endpoint_set', )
 
     @staticmethod
-    def endpoints(obj):
-        count = obj.endpoint_set.count()
-        return (
-            format_html(f"{count}<br>" f"<a href='/admin/scanners/endpoint/?q={obj.url}' target='_blank'>Filter: 🔍</a>")
-            if count
-            else "-"
-        )
-
-    @staticmethod
-    def visit(obj: Url):
-        if not obj.endpoint_set.count():
-            return ""
-
-        string = "".join(
-            f"<a href='{endpoint.protocol}://{obj.url}:{endpoint.port}' target='_blank'>"
-            f"{endpoint.protocol}/{endpoint.port}</a><br />"
-            for endpoint in obj.endpoint_set.all()
-            if endpoint.is_dead is False
-        )
-        return format_html(string)
-
-    @staticmethod
     def unresolvable(instance):
         if instance.not_resolvable and instance.not_resolvable_since:
             return naturaltime(instance.not_resolvable_since)
@@ -1101,6 +1085,17 @@ class SmallUrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedMode
 
     declare_dead.short_description = "🔪  Declare dead"
     actions.append("declare_dead")
+
+    def revive(self, request, queryset):
+        for url in queryset:
+            url.is_dead = False
+            url.is_dead_since = None
+            url.is_dead_reason = None
+            url.save()
+        self.message_user(request, "url revived")
+
+    revive.short_description = "🐝  Revive Url"
+    actions.append("revive")
 
 
 create_modeladmin(SmallUrlAdmin, name="url-smoll", model=Url)
