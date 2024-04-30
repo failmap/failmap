@@ -302,12 +302,15 @@ def save_coordinate(organization, lat, lng, address):
         # ).first()
 
 
-def save_organization(organization, organization_type):
+def save_organization(organization, organization_type: OrganizationType) -> Organization:
+    # get or create does NOT create a many to many relation, but it will select the right organization
+    # from the layer. This means that you will have to add the layer manually to make sure that the
+    # organization is in the right layer.
     try:
         failmap_organization, created = Organization.objects.all().get_or_create(
             is_dead=False,
             name=organization["name"],
-            type=organization_type,
+            layers=organization_type,
             country=organization["country"],
         )
     except Organization.MultipleObjectsReturned:
@@ -318,7 +321,7 @@ def save_organization(organization, organization_type):
             .filter(
                 is_dead=False,
                 name=organization["name"],
-                type=organization_type,
+                layers=organization_type,
                 country=organization["country"],
             )
             .first()
@@ -355,7 +358,7 @@ def save_organization(organization, organization_type):
     return failmap_organization
 
 
-def save_organization_type(name):
+def save_organization_type(name) -> OrganizationType:
     try:
         organization_type, _ = OrganizationType.objects.all().get_or_create(name=name)
     except OrganizationType.MultipleObjectsReturned:
