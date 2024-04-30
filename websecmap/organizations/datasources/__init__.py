@@ -306,26 +306,30 @@ def save_organization(organization, organization_type: OrganizationType) -> Orga
     # get or create does NOT create a many to many relation, but it will select the right organization
     # from the layer. This means that you will have to add the layer manually to make sure that the
     # organization is in the right layer.
-    try:
-        failmap_organization, created = Organization.objects.all().get_or_create(
+
+    # don't try to be smart with many to many relations and get_or_create:
+    #  just code the simple logic yourself and it will work without magic and side effects.
+    failmap_organization = (
+        Organization.objects.all()
+        .filter(
             is_dead=False,
             name=organization["name"],
             layers=organization_type,
             country=organization["country"],
         )
-    except Organization.MultipleObjectsReturned:
-        created = False
-        log.debug("Organization %s is multiple times in the database.", organization["name"])
-        failmap_organization = (
-            Organization.objects.all()
-            .filter(
-                is_dead=False,
-                name=organization["name"],
-                layers=organization_type,
-                country=organization["country"],
-            )
-            .first()
+        .first()
+    )
+
+    if not failmap_organization:
+        log.debug("Organization %s does not exist in the database.", organization["name"])
+        failmap_organization = Organization(
+            is_dead=False,
+            name=organization["name"],
+            country=organization["country"],
+            created_on=datetime.now(timezone.utc),
         )
+        failmap_organization.save()
+        failmap_organization.layers.add(organization_type)
 
     # a new organization does not have the created_on fields set. These have to be set.
     changed = False
@@ -342,11 +346,7 @@ def save_organization(organization, organization_type: OrganizationType) -> Orga
         changed = True
 
     if not failmap_organization.internal_notes:
-        failmap_organization.internal_notes = organization["dataset"]
-        changed = True
-
-    if created:
-        failmap_organization.created_on = datetime.now(timezone.utc)
+        failmap_organization.internal_notes = organization.get("dataset", "unkown")
         changed = True
 
     if changed:
