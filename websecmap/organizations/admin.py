@@ -327,7 +327,7 @@ class ActionMixin:
 class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = (
         "id",
-        "name_details",
+        "name",
         "city",
         "n_altnames",
         "layers_",
