@@ -50,7 +50,11 @@ def url_by_filters(organizations_filter: dict = None, urls_filter: dict = None) 
             is_dead=False,
         )
     else:
-        urls = urls.filter(Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""), do_not_find_subdomains=False)
+        urls = urls.filter(
+            Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+            do_not_find_subdomains=False,
+            is_dead=False,
+        )
 
     urls = unique_and_random(urls)
 
