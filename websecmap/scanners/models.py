@@ -209,6 +209,13 @@ class Endpoint(models.Model):
     # TODO Rename this here and in `save`
     @staticmethod
     def to_statsd(action, tags):
+        # statsd is ascii, so dumping unicode in here is not possible.
+        # the origin often contains unicode string, so that needs to be converted to ascii.
+        # origin contains a part of the exception that was received when the endpoint is killed.
+        # for example: ok/http_discover/('Connection aborted.', BadStatusLine('\\x00\\x00\\x06\\x04\\x00\\x00\\x00\\
+        if "origin" in tags and tags["origin"] is not None:
+            tags["origin"] = tags["origin"].encode("ascii", "ignore").decode("ascii")
+
         log.debug(f"endpoint_{action} {tags}")
         statsd.incr(f"endpoint_{action}", 1, tags=tags)
         statsd.incr("endpoint", 1, tags=tags | {action: 1})
