@@ -379,6 +379,7 @@ def config_content():
             "report_expert_view_certificates": configuration["SHOW_REPORT_EXPERT_VIEW_CERTIFICATES"],
             "report_expert_view_cookies": configuration["SHOW_REPORT_EXPERT_VIEW_COOKIES"],
             "thank_you": configuration["SHOW_THANK_YOU"],
+            "send_to_supplier": configuration["SEND_TO_SUPPLIER_SHOW"],
             "leaderboard": configuration["SHOW_LEADERBOARD"],
             "socials": {
                 "report": configuration["SOCIALS_SHOW_REPORT"],
@@ -456,6 +457,10 @@ def config_content():
                     "thank_you_subject": configuration["THANK_YOU_EMAIL_SUBJECT_EN"],
                     "thank_you_body": configuration["THANK_YOU_EMAIL_BODY_EN"],
                 },
+                "send_to_supplier": {
+                    "subject": configuration["SEND_TO_SUPPLIER_SUBJECT_EN"],
+                    "body": configuration["SEND_TO_SUPPLIER_BODY_EN"],
+                },
             },
             "nl": {
                 "landing": {
@@ -486,6 +491,10 @@ def config_content():
                     "thank_you_subject": configuration["THANK_YOU_EMAIL_SUBJECT_NL"],
                     "thank_you_body": configuration["THANK_YOU_EMAIL_BODY_NL"],
                 },
+                "send_to_supplier": {
+                    "subject": configuration["SEND_TO_SUPPLIER_SUBJECT_NL"],
+                    "body": configuration["SEND_TO_SUPPLIER_BODY_NL"],
+                },
             },
         },
         "comply_or_explain": {
@@ -515,6 +524,7 @@ def config_content():
             "logo_image": configuration["LOGO_IMAGE"],
             "favicon": configuration["FAVICON"],
             "thank_you_email_address": configuration["THANK_YOU_EMAIL_ADDRESS"],
+            "send_to_supplier_bcc_address": configuration["SEND_TO_SUPPLIER_BCC_ADDRESS"],
             "relevant_for_ui": {
                 "high": configuration["RELEVANT_FOR_UI_HIGH"],
                 "medium": configuration["RELEVANT_FOR_UI_MEDIUM"],

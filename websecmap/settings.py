@@ -1254,6 +1254,38 @@ CONSTANCE_CONFIG = {
         "E-mail adress that recieves thank you emails.",
         str,
     ),
+    "SEND_TO_SUPPLIER_SHOW": (
+        False,
+        "Shows the option to send the current issue to a supplier via mail. The mail contains the issue and "
+        "relevant information to fix and find the issue on the site.",
+        bool,
+    ),
+    "SEND_TO_SUPPLIER_BCC_ADDRESS": (
+        "",
+        "When filled in, the drafted mail contains this address as BCC, which can be used to see who "
+        "is using this feature.",
+        str,
+    ),
+    "SEND_TO_SUPPLIER_SUBJECT_EN": (
+        "",
+        "Subject of the mail sent to the supplier. You can use placeholders. In English.",
+        str,
+    ),
+    "SEND_TO_SUPPLIER_SUBJECT_NL": (
+        "",
+        "Subject of the mail sent to the supplier. You can use placeholders. In Dutch.",
+        str,
+    ),
+    "SEND_TO_SUPPLIER_BODY_EN": (
+        "",
+        "The mail that is sent to the supplier. An extra large set of placeholders is available. In English.",
+        str,
+    ),
+    "SEND_TO_SUPPLIER_BODY_NL": (
+        "",
+        "The mail that is sent to the supplier. An extra large set of placeholders is available. In Dutch.",
+        str,
+    ),
     "GEO_IP_ACCOUNT_ID": (
         "",
         "Sequence of numbers",
@@ -1733,6 +1765,17 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "THANK_YOU_WILL_FIX_EMAIL_SUBJECT_NL",
                 "THANK_YOU_WILL_FIX_EMAIL_BODY_EN",
                 "THANK_YOU_WILL_FIX_EMAIL_BODY_NL",
+            ),
+        ),
+        (
+            "Send finding to supplier",
+            (
+                "SEND_TO_SUPPLIER_SHOW",
+                "SEND_TO_SUPPLIER_BCC_ADDRESS",
+                "SEND_TO_SUPPLIER_SUBJECT_EN",
+                "SEND_TO_SUPPLIER_SUBJECT_NL",
+                "SEND_TO_SUPPLIER_BODY_EN",
+                "SEND_TO_SUPPLIER_BODY_NL",
             ),
         ),
         (
