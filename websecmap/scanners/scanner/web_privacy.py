@@ -117,9 +117,12 @@ def scan(url: str) -> Dict[str, Any]:
     log.debug("Scanning privacy on %s", url)
     # this is a single threaded webserver. More tasks means more waiting. So keep the amount of tasks low enough
     # so the timeout is never reached in case all tasks turn into timeouts
-    response = requests.get(f"{constance_cached_value('WEB_PRIVACY_SERVER')}?site={url}", timeout=300).json()
-    log.debug("Privacy metrics returned %s", response)
-    return response
+    response = requests.get(f"{constance_cached_value('WEB_PRIVACY_SERVER')}?site={url}", timeout=300)
+    # split the call to json so in case of an exception the result from the server gets logged in the stack trace
+    # don't recover from this error as this needs to work right all the time.
+    json_response = response.json()
+    log.debug("Privacy metrics returned %s", json_response)
+    return json_response
 
 
 @app.task(queue="storage", ignore_result=True)
