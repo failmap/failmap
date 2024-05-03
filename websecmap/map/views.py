@@ -947,7 +947,7 @@ def organization_autcomplete(
 ):
     # See Django Auto Complete for more info.
     qs = Organization.objects.all()
-    qs = qs.filter(type=get_organization_type(organization_type))
+    qs = qs.filter(layers=get_organization_type(organization_type))
     qs = qs.filter(country=get_country(country))
     qs = qs.filter(name__icontains=parameter).values_list("name", flat=True)
 

@@ -26,7 +26,7 @@ def get_organization_report_by_name(
     organization = Organization.objects.filter(
         computed_name_slug=slugify(organization_name),
         country=get_country(country),
-        type=get_organization_type(organization_type),
+        layers=get_organization_type(organization_type),
         is_dead=False,
     ).first()
 

@@ -64,11 +64,11 @@ def export_urls_only(country: str = "NL", organization_type="municipality"):
 
 
 def export_organizations(country: str = "NL", organization_type="municipality"):
-    columns = ["id", "name", "type", "wikidata", "wikipedia", "twitter_handle"]
+    columns = ["id", "name", "wikidata", "wikipedia", "twitter_handle"]
     query = (
         Organization.objects.all()
-        .filter(country=get_country(country), type=get_organization_type(organization_type), is_dead=False)
-        .values_list("id", "name", "type", "wikidata", "wikipedia", "twitter_handle")
+        .filter(country=get_country(country), layers=get_organization_type(organization_type), is_dead=False)
+        .values_list("id", "name", "wikidata", "wikipedia", "twitter_handle")
     )
     # values doesn't work anymore to determine what columns are relevant for the export.
     # we need to set it on the factory.
@@ -93,7 +93,7 @@ def export_organization_types():
 
 def export_coordinates(country: str = "NL", organization_type="municipality"):
     organizations = Organization.objects.all().filter(
-        country=get_country(country), type=get_organization_type(organization_type)
+        country=get_country(country), layers=get_organization_type(organization_type)
     )
 
     columns = ["id", "organization", "geojsontype", "area"]
@@ -108,7 +108,7 @@ def export_coordinates(country: str = "NL", organization_type="municipality"):
 
 def export_urls(country: str = "NL", organization_type="municipality"):
     organizations = Organization.objects.all().filter(
-        country=get_country(country), type=get_organization_type(organization_type)
+        country=get_country(country), layers=get_organization_type(organization_type)
     )
 
     columns = ["id", "url", "organization"]

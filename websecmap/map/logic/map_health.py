@@ -36,7 +36,7 @@ def update_map_health_reports(
         organization_type_id = map_configuration["organization_type"]
         country = map_configuration["country"]
 
-        organizations_on_map = Organization.objects.all().filter(country=country, type=organization_type_id)
+        organizations_on_map = Organization.objects.all().filter(country=country, layers=organization_type_id)
 
         for days_back in list(reversed(range(0, days))):
             total_outdated = []
