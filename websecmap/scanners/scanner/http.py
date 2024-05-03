@@ -612,7 +612,7 @@ def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin
         log.debug("Endpoint is already in the database, returning the existing one.")
         return ep
     else:
-        log.error(
+        log.warning(
             "Endpoint does not exists, url: %s, port: %s, protocol: %s, ip_version: %s",
             url_id,
             port,

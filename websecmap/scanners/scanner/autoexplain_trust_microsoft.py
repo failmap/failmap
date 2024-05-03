@@ -374,7 +374,7 @@ def certificate_matches_microsoft_exception_policy(
     _names = certificate.issuer.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)
     names = [name.value for name in _names]
     if not any_in_list_match(MS_TRUSTED_CERT_VENDORS + [trusted_organization], names):
-        log.error("Certificate for %s not handed out by %s but by %s. Not trusted.", url, trusted_organization, names)
+        log.warning("Certificate for %s not handed out by %s but by %s. Not trusted.", url, trusted_organization, names)
         return False
 
     # check if the issuer matches
@@ -385,7 +385,7 @@ def certificate_matches_microsoft_exception_policy(
         # if ms changed the names, we want to know.
         # this will create a list of certs we don't care about that piggy back on the same subdomain while forging the
         # certificate name. Slim chance though... This will change every so often.
-        log.error(
+        log.warning(
             "Certificate for %s not in accepted names, value: %s. %s not in %s. Not trusted.",
             url,
             names,
