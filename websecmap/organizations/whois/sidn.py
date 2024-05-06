@@ -207,9 +207,10 @@ def parse_whois_data(whois_data: str) -> Union[Optional[UrlWhois], int]:
         log.debug("Daily limit exceeded!")
         return 403
 
+    # accept non breaking spaces and other weird invisible stuff from registrants
     return UrlWhois(
         is_the_latest=True,
-        registrant=data.get("details", {}).get("registrant", ""),
+        registrant=clean_registrant(data.get("details", {}).get("registrant", "")),
         creation_date=data.get("details", {}).get("creationDate", None),
         updated_date=data.get("details", {}).get("updatedDate", None),
         admin_contact=data.get("details", {}).get("adminContact", ""),
@@ -218,6 +219,40 @@ def parse_whois_data(whois_data: str) -> Union[Optional[UrlWhois], int]:
         whois_record_data=data,
         whois_record_type="json",
     )
+
+
+def clean_registrant(registrant: str) -> str:
+    # https://unicode-explorer.com/articles/space-characters
+    # trim registrant and replace all possible weird unicode spaces with normal spaces
+    spaces = [
+        "\xA0",
+        "\u2000",
+        "\u2001",
+        "\u2002",
+        "\u2003",
+        "\u2004",
+        "\u2005",
+        "\u2006",
+        "\u2007",
+        "\u2008",
+        "\u2009",
+        "\u200a",
+        "\u202f",
+        "\u205f",
+        "\u3000",
+        "\u200B",
+        "\u200C",
+        "\u200D",
+        "\u2060",
+        "\uffef",
+        "\u180e",
+        "\u2800",
+        "\u3164",
+    ]
+    for space in spaces:
+        if space in registrant:
+            registrant = registrant.replace(space, " ")
+    return registrant.strip()
 
 
 def save_whois_data(url_id: int, new_whois_data: UrlWhois) -> None:
