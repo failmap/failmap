@@ -10,11 +10,35 @@ from celery import group
 
 from websecmap.app import log
 from websecmap.celery import app
+from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan, GeoIp, DomainIp, DomainMX
 
 explanation = "microsoft_applies_dane_from_july_2024"
 accepted_as = ["MICROSOFT-CORP-MSN-AS-BLOCK"]
+SCANNER = "autoexplain_dane_microsoft"
+
+
+# support this as a follow-up scan so this is performed per result instead of once every day (which is always
+# creating a discrepancy)
+# follow up plans a request, and this should be just performed.
+@app.task(queue="kickoff")
+def compose_planned_scan_task(**kwargs):
+    urls = plannedscan.pickup(activity="scan", scanner=SCANNER, amount=kwargs.get("amount", 25))
+
+    scans = EndpointGenericScan.objects.filter(
+        type="internet_nl_mail_tls",
+        rating="failed",
+        is_the_latest_scan=True,
+        comply_or_explain_is_explained=False,
+        endpoint__is_dead=False,
+        endpoint__url__is_dead=False,
+        endpoint__url__in=urls,
+    )
+
+    return group(
+        correct_scan.si(scan.id) | plannedscan.finish.si("scan", SCANNER, scan.endpoint.url.pk) for scan in scans
+    )
 
 
 @app.task(queue="storage", ignore_result=True)
@@ -22,7 +46,12 @@ def correct():
     # if the mailserver is in the microsoft as AND all other internet.nl mail metrics are right and only DANE
     # is not.
     scans = EndpointGenericScan.objects.filter(
-        type="internet_nl_mail_tls", rating="failed", is_the_latest_scan=True, comply_or_explain_is_explained=False
+        type="internet_nl_mail_tls",
+        rating="failed",
+        is_the_latest_scan=True,
+        comply_or_explain_is_explained=False,
+        endpoint__is_dead=False,
+        endpoint__url__is_dead=False,
     )
     group([correct_scan.si(scan.id) for scan in scans]).apply_async()
     return group()
