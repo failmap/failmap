@@ -80,6 +80,7 @@ urlpatterns = [
     path("report/<oid:organization_id>/<ymd:at_date>/", org_report_only_by_id),
     path("report/<c:country>/<slug:organization_type>/<str:organization_name>/<w:days_back>/", org_report_by_name),
     path("report/<c:country>/<slug:organization_type>/<str:organization_name>/<ymd:at_date>/", org_report_by_name),
+    path("report/url_history/<str:url>/<ymd:at_when>/", v.url_history),
     # updates
     path(f"{uoo}/<oid:organization_id>/", v.updates_on_organization),
     path(f"{uoo}_feed/<oid:organization_id>/", websecmap.map.logic.rss_feeds.UpdatesOnOrganizationFeed()),

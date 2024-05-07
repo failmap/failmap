@@ -14,7 +14,7 @@ from websecmap.map.logic.map_defaults import (
 )
 from websecmap.map.models import Configuration, HighLevelStatistic, OrganizationReport, VulnerabilityStatistic
 from websecmap.organizations.models import Organization
-from websecmap.reporting.models import ScanPolicy
+from websecmap.reporting.models import ScanPolicy, UrlReport
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners.impact import get_impact
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
@@ -89,6 +89,35 @@ def get_vulnerability_graph(country, organization_type, days_back, duration: int
         stats[statistic.scan_type].append(stat)
 
     return stats
+
+
+def get_url_history(url: str, date: date):
+    # up until 1 year to the current date.
+    return [
+        {
+            "id": report.id,
+            "date": report.at_when.date().isoformat(),
+            "high": report.url_issues_high,
+            "medium": report.url_issues_medium,
+            "low": report.url_issues_low,
+            "ok": report.url_ok,
+        }
+        for report in UrlReport.objects.all()
+        .filter(url__url=url, at_when__gte=date - timedelta(days=365), at_when__lte=date)
+        .only(
+            "id",
+            "url_issues_high",
+            "url_issues_medium",
+            "url_issues_low",
+            "url_ok",
+            "at_when",
+            "high",
+            "medium",
+            "low",
+            "ok",
+        )
+        .order_by("-at_when")
+    ]
 
 
 def get_organization_vulnerability_timeline(organization_id: int, duration: int = 365):

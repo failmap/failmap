@@ -55,6 +55,7 @@ from websecmap.map.logic.stats_and_graphs import (
     get_vulnerability_graph,
     what_to_improve,
     get_vulnerability_graph_for_all_layers,
+    get_url_history,
 )
 from websecmap.map.logic.ticker import get_ticker_data
 from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
@@ -1106,3 +1107,8 @@ def login_plaza_products(request):
 @cache_page(ONE_HOUR)
 def cookie_indicators(request):
     return json_response(get_cookie_database())
+
+
+@cache_page(ONE_HOUR)
+def url_history(request, url: str, at_when: date):
+    return json_response(get_url_history(url, at_when))
