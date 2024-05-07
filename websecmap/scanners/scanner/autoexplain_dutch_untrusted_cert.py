@@ -86,7 +86,7 @@ def command_line_cert_check(url: str, port: int = 443, ip_version: int = 4):
 # placed on the prefork worker because gevent messes with the ssl library and causes want/read errors.
 # prefork workers run the original tls code which works as intended and supports this edge case measurement
 @app.task(queue="prefork")
-def get_cert_chain(url, port, ip_version) -> List[str]:
+def get_cert_chain(url: str, port, ip_version) -> List[str]:
     port = int(port)
     chain = []
     log.debug("Attempting to retrieve SSL chert via %s different methods.", len(methods))
@@ -101,7 +101,7 @@ def get_cert_chain(url, port, ip_version) -> List[str]:
 
 
 # https://badssl.com/
-def get_cert_chain_call(url, port, ip_version, method, method_name):
+def get_cert_chain_call(url: str, port, ip_version, method, method_name):
     # https://stackoverflow.com/questions/19145097/getting-certificate-chain-with-python-3-3-ssl-module
     # Relatively new Dutch governmental sites relying on anything less < TLS 1.2 is insane.
     log.debug("Retrieving certificate chain from %s:%s via ipv%s on tls method %s.", url, port, ip_version, method_name)
@@ -114,22 +114,11 @@ def get_cert_chain_call(url, port, ip_version, method, method_name):
             # future methods only need TLS_METHOD....
             sock.settimeout(10)
             conn = SSL.Connection(context=SSL.Context(method), socket=sock)
+            # this sets the hostname so this works in SNI setups
+            conn.set_tlsext_host_name(url.encode())
             conn.connect((url, port))
             conn.setblocking(1)
             conn.do_handshake()
-            conn.set_tlsext_host_name(url.encode())
-            # Deal with WantReadError errors, probably not needed with setblocking
-            # attempts = 300
-            # attempt = 0
-            # while attempt <= attempts:
-            #     try:
-            #         attempt += 1
-            #         conn.do_handshake()
-            #     except SSL.WantReadError:
-            #         sleep(0.01)
-            #         conn.bio_read(4096)
-            #     else:
-            #         break
             chain = conn.get_peer_cert_chain()
             conn.close()
             log.debug("Dutch Untrusted Cert: chain retrieved: %s, port, %s, ip_version, %s.", url, port, ip_version)
