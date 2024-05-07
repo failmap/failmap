@@ -97,19 +97,15 @@ def get_url_history(url: str, date: date):
         {
             "id": report.id,
             "date": report.at_when.date().isoformat(),
-            "high": report.url_issues_high,
-            "medium": report.url_issues_medium,
-            "low": report.url_issues_low,
-            "ok": report.url_ok,
+            "high": report.high,
+            "medium": report.medium,
+            "low": report.low,
+            "ok": report.ok,
         }
         for report in UrlReport.objects.all()
         .filter(url__url=url, at_when__gte=date - timedelta(days=365), at_when__lte=date)
         .only(
             "id",
-            "url_issues_high",
-            "url_issues_medium",
-            "url_issues_low",
-            "url_ok",
             "at_when",
             "high",
             "medium",
