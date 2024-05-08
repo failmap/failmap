@@ -258,17 +258,20 @@ def save_websites(organization, websites: List[str]):
         website = website.lower()
         extract = tldextract.extract(website)
 
-        # has to have a valid suffix at least
+        # has to have a valid suffix at least, ip addresses do not have a suffix
         if not extract.suffix:
             continue
 
-        # also save the address with subdomain :)
-        if extract.subdomain:
-            address = f"{extract.subdomain}.{extract.domain}.{extract.suffix}"
-            save_url(address, organization)
+        # in the case of any other subdomain, only save the whole domain including the subdomain.
+        # it is usually the case that the subdomain is for a specific organization and the whole domain
+        # is owned by someone else.
+        if extract.subdomain == "www":
+            # all other subdomains such as www will be found automatically and belong to the owner of this site.
+            domain = f"{extract.domain}.{extract.suffix}"
+        else:
+            domain = extract.fqdn
 
-        address = f"{extract.domain}.{extract.suffix}"
-        save_url(address, organization)
+        save_url(domain, organization)
 
 
 def save_coordinate(organization, lat, lng, address):
