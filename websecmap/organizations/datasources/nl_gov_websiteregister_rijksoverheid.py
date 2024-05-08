@@ -11,7 +11,7 @@ from requests import RequestException
 from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
-from websecmap.organizations.models import GenericFileDataset, OrganizationSurrogateId
+from websecmap.organizations.models import GenericFileDataset, OrganizationSurrogateId, Url, Organization
 
 
 def find_current_websiteregister_download_link() -> str:
@@ -165,50 +165,54 @@ def get_rows(file_location: str) -> List[List[str]]:
 
 
 def match_and_place_row(row: List[str]) -> Dict[str, str]:
+    # 1: Do NOT add domains that are already in the database, as they are already placed to the right owner
+    # and re-importing them will place them under the wrong owner if the register is wrong.
+    # The register sometimes contains mistakes which means we have to correct this over and over again.
+    # 2: do NOT add the 2nd level domain if it has a non www. subdomain. Sudomains are placed and owned
+    # by other organizations. And many times the organization just owns this only subdomain.
+    # so: abc.rijksoverheid.nl should not also add rijksoverheid.nl to the organization.
     log.debug("Importing row: %s", row)
 
+    # calculate the surrogate key of this organization
     # 2022: The key for th eorganiztaion name was: (DPC/AZ)
     # 2024, add a new key DPCWR, and only use an alternative name. The website register changes
     # the names and such all the time which prevents full imports over time.
     # This is now stored in the surrogate key field as the data in the name has little to do anymore
     # with being human-friendly. The key will also be made smaller.
-
     if len(row) > 4:
-        key = f"{row[2].strip()} {row[3].strip()} {row[4].strip()}"
+        organization_surrogate_key = f"{row[2].strip()} {row[3].strip()} {row[4].strip()}"
     elif len(row) > 3:
-        key = f"{row[2].strip()} {row[3].strip()}"
+        organization_surrogate_key = f"{row[2].strip()} {row[3].strip()}"
     else:
-        key = f"{row[2].strip()}"
+        organization_surrogate_key = f"{row[2].strip()}"
 
+    # So first rule 2: make sure that it's either the domain listed or the domain without www.
     domain_extract = tldextract.extract(row[0])
-    domain_without_subdomain = f"{domain_extract.domain}.{domain_extract.suffix}"
-
-    # the www subdomain does not add anything and only prevents other subdomains being found
     if domain_extract.subdomain == "www":
-        domain_with_subdomain = domain_without_subdomain
+        # the www domain, as well as any other subdomain will automatically be found via another scanner
+        domain = f"{domain_extract.domain}.{domain_extract.suffix}"
     else:
-        domain_with_subdomain = domain_extract.fqdn
+        domain = domain_extract.fqdn
 
-    # There should only be one that is currently 'alive'. No there can be more, as there can be multiple maps
-    # where this organization is used (and the n-n relation has not yet been implemented).
+    # Now rule 1: make sure it's not in the database yet
+    if Url.objects.filter(url=domain).first():
+        return {"state": "already_present", "domain": domain, "key": organization_surrogate_key}
 
-    surrogates = OrganizationSurrogateId.objects.all().filter(
-        surrogate_id=key, surrogate_id_name="websiteregister_rijksoverheid", organization__is_dead=False
-    )
-    organizations = [surrogate.organization for surrogate in surrogates]
+    # find the organization that use this surrogate
+    organizations = get_organizations_by_surrogate_key(organization_surrogate_key, "websiteregister_rijksoverheid")
 
     if not organizations:
-        log.error(
-            "Could not find an organization name with key %s, could not place domains %s.",
-            key,
-            domain_without_subdomain,
-        )
-        return {"state": "error", "domain": domain_with_subdomain, "key": key}
+        log.error("Could not find an organization %s, could not place domains %s.", organization_surrogate_key, domain)
+        return {"state": "error", "domain": domain, "key": organization_surrogate_key}
 
     for organization in organizations:
-        organization.add_url(domain_without_subdomain, origin="import dutch websiteregister")
+        organization.add_url(domain, origin="import dutch websiteregister")
 
-        if domain_without_subdomain != domain_with_subdomain:
-            organization.add_url(domain_with_subdomain, origin="import dutch websiteregister")
+    return {"state": "success", "domain": domain, "key": organization_surrogate_key}
 
-    return {"state": "success", "domain": domain_with_subdomain, "key": key}
+
+def get_organizations_by_surrogate_key(key: str, scope: str = "websiteregister_rijksoverheid") -> List[Organization]:
+    surrogates = OrganizationSurrogateId.objects.all().filter(
+        surrogate_id=key, surrogate_id_name=scope, organization__is_dead=False
+    )
+    return list({surrogate.organization for surrogate in surrogates})
