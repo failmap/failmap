@@ -27,6 +27,7 @@ from websecmap.scanners.scanner.filter import (
 )
 from websecmap.scanners.scanner.http import save_endpoint, kill_endpoint
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
+import json
 
 log = logging.getLogger(__name__)
 
@@ -85,7 +86,7 @@ def compose_manual_scan_task(
         return group()
 
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
-    urls = filter_endpoints_only(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    urls = filter_endpoints_only(organizations_filter, urls_filter, **kwargs)
     return compose_scan_task(urls)
 
 
@@ -183,37 +184,38 @@ def store(result: dict, endpoint_id: int):
     :param endpoint:
 
     """
-    level = ""
+    rating = ""
     message = ""
 
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
+        # todo: shouldn't this just be a scan error? No issues made about that ever tho.
         return ParentFailed("skipping result parsing because scan failed.", cause=result)
 
     # analyze result
     if result["supports_ssl"] is True and result["supports_tls"] in [False, "Unknown"]:
-        level = "outdated"
+        rating = "outdated"
         message = "FTP Server only supports insecure SSL protocol."
 
     if result["supports_tls"] is True:
-        level = "secure"
+        rating = "secure"
         message = "FTP Server supports TLS encryption protocol."
 
     if result["supports_tls"] in [False, "Unknown"] and result["supports_ssl"] in [False, "Unknown"]:
-        level = "insecure"
+        rating = "insecure"
         message = "FTP Server does not support encrypted transport or has protocol issues."
 
     if result["supports_tls"] == "Unknown" and result["supports_ssl"] == "Unknown":
-        level = "unknown"
+        rating = "unknown"
         message = "An FTP connection could not be established properly. Not possible to verify encryption."
 
-    log.debug("Storing result: %s, for url: %s.", level, endpoint_id)
+    log.debug("Storing result: %s, for url: %s.", rating, endpoint_id)
 
     if result:
-        store_endpoint_scan_result("ftp", endpoint_id, level, message, str(result))
+        store_endpoint_scan_result("ftp", endpoint_id, rating, message, json.dumps(result))
 
     # return something informative
-    return {"status": "success", "result": level}
+    return {"status": "success", "result": rating}
 
 
 # supporting 4 and 6, whatever resolves to the FTP server is fine.
