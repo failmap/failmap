@@ -145,7 +145,7 @@ def check_running_internet_nl_scans() -> Task:
 
 
 @app.task(queue="database")
-def progress_running_scan(scan_id: int) -> Task:
+def progress_running_scan(scan_id: int, **kwargs) -> Task:
     """
     This monitors the state of an internet.nl scan. Depending on the state, it determines if an action is needed and
     gathers them. This will not handle errors.
@@ -206,11 +206,11 @@ def progress_running_scan(scan_id: int) -> Task:
         scan = InternetNLV2Scan.objects.get(id=scan_id)
         next_step = steps.get(scan.state, handle_unknown_state)
         log.debug("Internet.nl scan #%s is being progressed from %s.", scan.id, scan.state)
-        return next_step(scan.id)
+        return next_step(scan.id, **kwargs)
 
 
 @app.task(queue="database")
-def recover_and_retry(scan_id: int):
+def recover_and_retry(scan_id: int, **kwargs):
     # check the latest valid state from progress running scan, set the state to that state.
 
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
@@ -246,7 +246,7 @@ def recover_and_retry(scan_id: int):
     return group([])
 
 
-def handle_unknown_state(scan_id):
+def handle_unknown_state(scan_id, **kwargs):
     # probably nothing to be done... there are many intermediate states that hold all kinds of in between states.
 
     # we can however deal with timeouts. If an unknown state is over a certain time, the task should be tried again.
@@ -271,7 +271,7 @@ def handle_unknown_state(scan_id):
     return group([])
 
 
-def registering_scan_at_internet_nl(scan_id):
+def registering_scan_at_internet_nl(scan_id, **kwargs):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
         log.debug("Could not retrieve scan %s.", scan_id)
@@ -281,7 +281,11 @@ def registering_scan_at_internet_nl(scan_id):
 
     # todo: get some information about this installation, so we can track requests easier.
     #  For example the target county, organization running the scan.
-    scan_name = {"source": "Web Security Map", "type": scan.type}
+    if "tracking_info" in kwargs:
+        # this is a string.
+        scan_name = kwargs["tracking_info"]
+    else:
+        scan_name = json.dumps({"source": "Web Security Map", "type": scan.type})
 
     scan_types = {"mail": "mail", "mail_dashboard": "mail", "web": "web"}
 
@@ -290,12 +294,12 @@ def registering_scan_at_internet_nl(scan_id):
 
     return (
         get_relevant_urls.si(scan.pk)
-        | register.s(scan_types[scan.type], json.dumps(scan_name), create_api_settings(scan.pk))
+        | register.s(scan_types[scan.type], scan_name, create_api_settings(scan.pk))
         | registration_administration.s(scan.pk)
     )
 
 
-def running_scan(scan_id: int):
+def running_scan(scan_id: int, **kwargs):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
         log.debug("Could not retrieve scan %s.", scan_id)
@@ -309,7 +313,7 @@ def running_scan(scan_id: int):
     return status.si(scan.scan_id, create_api_settings(scan.pk)) | status_administration.s(scan.pk)
 
 
-def continue_running_scan(scan_id: int):
+def continue_running_scan(scan_id: int, **kwargs):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
         log.debug("Could not retrieve scan %s.", scan_id)
@@ -321,7 +325,7 @@ def continue_running_scan(scan_id: int):
     return status.si(scan.scan_id, create_api_settings(scan.pk)) | status_administration.s(scan.pk)
 
 
-def storing_scan_results(scan_id: int):
+def storing_scan_results(scan_id: int, **kwargs):
     scan = InternetNLV2Scan.objects.all().filter(pk=scan_id).first()
     if not scan:
         log.debug("Could not retrieve scan %s.", scan_id)
@@ -340,7 +344,7 @@ def storing_scan_results(scan_id: int):
     )
 
 
-def processing_scan_results(scan_id: int):
+def processing_scan_results(scan_id: int, **kwargs):
     # large fields are present here, so defer them to speed things up
     scan = (
         InternetNLV2Scan.objects.all()
