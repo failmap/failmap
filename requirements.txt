@@ -311,7 +311,7 @@ texttable==1.6.7
     # via pyexcel
 tldextract==3.4.4
     # via -r requirements.in
-tornado==6.4
+tornado==6.4.0
     # via flower
 typing-extensions==4.6.3
     # via
