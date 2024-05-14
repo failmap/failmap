@@ -2,7 +2,6 @@
 from datetime import datetime, timedelta, timezone
 
 from websecmap.api.models import SIDNUpload
-from websecmap.app.models import Job, create_job  # noqa  # pylint: disable=unused-import
 from websecmap.celery import app
 from websecmap.organizations.models import Dataset
 from websecmap.scanners.models import (
@@ -30,10 +29,6 @@ def clean_application_caches_and_logs(retention_days: int = 30):
 
     # todo: mapdatacache should be synced to disk. Would be faster for retrieval and storage.
     tables_to_reduce = [
-        {
-            "model": Job,
-            "time_column": "created_on",
-        },
         {
             "model": TlsQualysScratchpad,
             "time_column": "at_when",

@@ -6,11 +6,9 @@ from typing import Any, Dict
 from celery import group
 from django.contrib import admin
 from django.db import transaction
-from django.urls import reverse
 from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
-from websecmap.app.models import Job
 from websecmap.celery import app
 from websecmap.map import models
 from websecmap.map.logic.openstreetmap import import_from_scratch, update_coordinates
@@ -73,12 +71,10 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 | prepare_map.si(str(region.country), region.organization_type.pk)
             )
 
-        task_name = f"{'Import region'} ({','.join(map(str, list(queryset)))}) "
         task = group(tasks)
+        task.apply_async()
 
-        job = Job.create(task, task_name, request)
-        link = reverse("admin:app_job_change", args=(job.id,))
-        self.message_user(request, f'Job created, <a href="{link}">{task_name}</a>')
+        self.message_user(request, "Import started async")
 
     import_region.short_description = "🛃  Import region"
     actions.append(import_region)
@@ -97,13 +93,10 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 | report_country.si(organization_filter)
                 | prepare_map.si(str(region.country), region.organization_type.pk)
             )
-
-        task_name = f"{'Update region'} ({','.join(map(str, list(queryset)))}) "
         task = group(tasks)
+        task.apply_async()
 
-        job = Job.create(task, task_name, request)
-        link = reverse("admin:app_job_change", args=(job.id,))
-        self.message_user(request, f'Job created, <a href="{link}">{task_name}</a>')
+        self.message_user(request, "Updated started async")
 
     update_coordinates.short_description = "🛂  Update region"
     actions.append(update_coordinates)

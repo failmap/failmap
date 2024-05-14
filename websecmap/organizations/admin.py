@@ -11,7 +11,6 @@ from django.contrib.admin import StackedInline
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -19,7 +18,6 @@ from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 
 from websecmap import types
-from websecmap.app.models import Job
 from websecmap.celery import app
 from websecmap.map.models import Configuration
 from websecmap.organizations import datasources
@@ -315,10 +313,9 @@ class ActionMixin:
             filters["endpoints_filter"] = filters.pop("x_filter")
 
         task = task_composer(**filters)
-        task_name = f"{name} ({','.join(map(str, list(queryset)))}) "
-        job = Job.create(task, task_name, request)
-        link = reverse("admin:app_job_change", args=(job.id,))
-        self.message_user(request, f'Job created, <a href="{link}">{task_name}</a>')
+        task.apply_async()
+
+        self.message_user(request, "Task started async")
 
 
 # http://jet.readthedocs.io/en/latest/autocomplete.html?highlight=many

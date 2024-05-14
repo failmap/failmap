@@ -17,16 +17,7 @@ from django_celery_beat.models import CrontabSchedule, IntervalSchedule, Periodi
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from websecmap.app.models import GameUser, Job, Volunteer, Translation, CompressedJSONFieldTest
-
-
-class JobAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("name", "result_id", "status", "created_by", "created_on", "finished_on")
-    list_filter = ("status", "created_by")
-    readonly_fields = ("name", "task", "result_id", "result", "status", "created_on", "finished_on")
-
-
-admin.site.register(Job, JobAdmin)
+from websecmap.app.models import GameUser, Volunteer, Translation, CompressedJSONFieldTest
 
 
 class MyPeriodicTaskForm(PeriodicTaskForm):
