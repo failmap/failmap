@@ -75,6 +75,8 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     save_as = True
 
+    readonly_fields = ["calculation"]
+
 
 @admin.register(models.ScanPolicy)
 class ScanPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
