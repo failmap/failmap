@@ -223,6 +223,8 @@ def test_plan_scans(db, default_scan_metadata, default_policy):
         # repeating this planning while it still doesnt have scans...
         assert calculate_progress() == [{"activity": 3, "amount": 8, "scanner": 22, "state": 1}]
 
+    # make sure we're outside of the 14 days 'will always scan period':
+    with freeze_time("2022-01-01"):
         # let's give them scans, so no new scans will be created
         # with matching scans.
         log.debug("Testing that adding new scans does not create new scans...")

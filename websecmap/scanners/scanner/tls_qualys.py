@@ -118,34 +118,49 @@ def plan_scan(urls_filter: dict = None, **kwargs):
     if not allowed_to_scan("tls_qualys"):
         return
 
-    # fuck the django orm, for making the following more complicated than it needs to be:
-    # Plan scans for endpoints that never have been scanned
-    urls = (
-        Url.objects.filter(
-            q_configurations_to_scan(),
-            is_dead=False,
-            not_resolvable=False,
-            endpoint__protocol="https",
-            endpoint__port=443,
-            endpoint__is_dead=False,
-            **urls_filter,
-        )
-        .exclude(
-            # remove any url that has an endpoint scan on tls_qualys
-            id__in=Url.objects.filter(
-                is_dead=False,
-                not_resolvable=False,
-                endpoint__protocol="https",
-                endpoint__port=443,
-                endpoint__is_dead=False,
-                endpoint__endpointgenericscan__type__in=[
-                    "tls_qualys_encryption_quality",
-                    "tls_qualys_certificate_trusted",
-                ],
-            )
-        )
-        .only("id", "url")
+    # While technically it's possible to plan scans on endpoints/urls that have never been scanned, the query
+    # created is 100% correct and takes over 1.5 hours. Causing tasks to restart and thus creating ANOTHER
+    # query and so on. Instead of this correct query we just plan scans on urls that have been recently added.
+    # eg in the last week or so. Given this routine is called every 3 days this will cause a slight duplication.
+    # down side: when the method is not called every 3 days some urls will never be scanned for the first time.
+    urls = Url.objects.filter(
+        q_configurations_to_scan(),
+        is_dead=False,
+        not_resolvable=False,
+        endpoint__protocol="https",
+        endpoint__port=443,
+        endpoint__is_dead=False,
+        created_on__gte=datetime.now() - timedelta(days=14),
+        **urls_filter,
     )
+
+    # here is the slow and correct approach preserved for when someone thinks they can do it better :)
+    # urls = (
+    #     Url.objects.filter(
+    #         q_configurations_to_scan(),
+    #         is_dead=False,
+    #         not_resolvable=False,
+    #         endpoint__protocol="https",
+    #         endpoint__port=443,
+    #         endpoint__is_dead=False,
+    #         **urls_filter,
+    #     )
+    #     .exclude(
+    #         # remove any url that has an endpoint scan on tls_qualys
+    #         id__in=Url.objects.filter(
+    #             is_dead=False,
+    #             not_resolvable=False,
+    #             endpoint__protocol="https",
+    #             endpoint__port=443,
+    #             endpoint__is_dead=False,
+    #             endpoint__endpointgenericscan__type__in=[
+    #                 "tls_qualys_encryption_quality",
+    #                 "tls_qualys_certificate_trusted",
+    #             ],
+    #         )
+    #     )
+    #     .only("id", "url")
+    # )
 
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
     log.debug(f"1: planning {len(urls)} scans that have not been scanned yet.")
