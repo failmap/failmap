@@ -230,6 +230,8 @@ DATABASE_OPTIONS = {
     "mysql": {
         "init_command": "SET character_set_connection=utf8,"
         "collation_connection=utf8_unicode_ci,"
+        # limit maximum time a query can run in ms to 10 minutes
+        "max_execution_time=10*60*1000,"
         "sql_mode='STRICT_ALL_TABLES';"
     },
 }
