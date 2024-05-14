@@ -83,7 +83,8 @@ INSTALLED_APPS = [
     # "dal",
     # "dal_select2",
     "constance",
-    "constance.backends.database",
+    # not needed after 3.0: https://django-constance.readthedocs.io/en/latest/changes.html#v3-0-0-2023-07-27
+    # "constance.backends.database",
     "websecmap.app",
     # Allow a client to access the data:
     "corsheaders",
@@ -1487,6 +1488,11 @@ CONSTANCE_CONFIG = {
         "Used when debugging, logs all changes to planned scans to a separate table. Causes millions of records a day",
         bool,
     ),
+    "SCANNER_AUTO_PURGE_FINISHED_SCANS": (
+        False,
+        "Removes the scan record from the planned scan table, which reduces the amount of data stored.",
+        bool,
+    ),
     "COOKIE_CRAWL_DEPTH": (
         2,
         "Maximum layers to descend when crawling.",
@@ -1713,7 +1719,13 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         ),
         (
             "Scanning preferences",
-            ("SCAN_AT_ALL", "SCANNER_NAMESERVERS", "SCANNER_DEFAULT_BROWSER_USER_AGENT", "SCANNER_LOG_PLANNED_SCANS"),
+            (
+                "SCAN_AT_ALL",
+                "SCANNER_NAMESERVERS",
+                "SCANNER_DEFAULT_BROWSER_USER_AGENT",
+                "SCANNER_LOG_PLANNED_SCANS",
+                "SCANNER_AUTO_PURGE_FINISHED_SCANS",
+            ),
         ),
         (
             "Banner Grabbing",

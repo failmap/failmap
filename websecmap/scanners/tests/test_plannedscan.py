@@ -447,6 +447,38 @@ def tests_bulk_state_changes(db, default_scan_metadata, default_policy):
     assert PlannedScan.objects.all().filter(state=State["picked_up"].value).count() == 5
 
 
+def test_auto_purge_finished_scans(db, default_scan_metadata, default_policy):
+    u1 = Url.objects.create(url="example1.com")
+    request(scanner="tls_qualys", activity="scan", urls=[u1])
+    assert PlannedScan.objects.all().count() == 1
+
+    # Constance does not allow switching configs during tests. So either of these tests will work but not both
+    # in the same test or even different tests. Both situations have been tested by hand, but will not work in
+    # automated tests.
+    # https://django-constance.readthedocs.io/en/latest/testing.html
+    # with override_config(SCANNER_AUTO_PURGE_FINISHED_SCANS=True):
+    #     set_scan_state(
+    #         activity="scan",
+    #         scanner_id=22,
+    #         url_id=u1.id,
+    #         from_state="requested",
+    #         to_state="finished",
+    #         scanner_name="tls_qualys",
+    #     )
+    #     assert PlannedScan.objects.all().count() == 0
+
+    with override_config(SCANNER_AUTO_PURGE_FINISHED_SCANS=False):
+        set_scan_state(
+            activity="scan",
+            scanner_id=22,
+            url_id=u1.id,
+            from_state="requested",
+            to_state="finished",
+            scanner_name="tls_qualys",
+        )
+        assert PlannedScan.objects.all().count() == 1
+
+
 def test_retry(db, default_scan_metadata, default_policy, caplog):
     with freeze_time("2020-01-01"):
         u1 = Url.objects.create(url="example2.com")

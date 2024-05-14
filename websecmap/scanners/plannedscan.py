@@ -356,16 +356,20 @@ def set_scan_state(
         )
 
     for oldest_scan in current_scans:
-        oldest_scan.state = State[to_state].value
-        oldest_scan.last_state_change_at = datetime.now(timezone.utc)
-
-        if to_state == "finished":
-            oldest_scan.finished_at_when = datetime.now(timezone.utc)
-
-        oldest_scan.save()
+        log.debug("Altered planned scan state for %s. Changing it to %s with %s.", url_id, activity, scanner_id)
         log_planned_scan_action(activity=activity, scanner=scanner_name, url=url_id, state="finished")
 
-        log.debug("Altered planned scan state for %s. Changing it to %s with %s.", url_id, activity, scanner_id)
+        if to_state == "finished":
+            if constance_cached_value("SCANNER_AUTO_PURGE_FINISHED_SCANS") is True:
+                # this table slows things down, costs a lot of disk space and nobody asks for this data.
+                oldest_scan.delete()
+                continue
+
+            oldest_scan.finished_at_when = datetime.now(timezone.utc)
+
+        oldest_scan.state = State[to_state].value
+        oldest_scan.last_state_change_at = datetime.now(timezone.utc)
+        oldest_scan.save()
 
 
 @app.task(queue="storage", ignore_result=True)
