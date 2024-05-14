@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 
 class CompressedJSONFieldTest(models.Model):
-    data = CompressedJSONField(help_text="Data in this fiels is json but compressed with gzip...")
+    data = CompressedJSONField(help_text="Data in this fiels is json but compressed with gzip...", null=True)
     old_data = CompressedJSONField(
         help_text="Some data that might or might not be upgraded!", default={"hello": "world"}
     )

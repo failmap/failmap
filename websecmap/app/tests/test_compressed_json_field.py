@@ -39,3 +39,21 @@ def test_compressedjsonfield(db):
 
     my_data = CompressedJSONFieldTest.objects.get(id=x.id)
     assert my_data.data == "truly junk data"
+
+    # it should be able to deal with null values.
+    x = CompressedJSONFieldTest()
+    x.data = None
+    x.save()
+    assert x.data is None
+
+    x = CompressedJSONFieldTest()
+    x.data = {}
+    x.save()
+    assert x.data == {}
+
+    # and update existing nulls:
+    with connection.cursor() as cursor:
+        cursor.execute("UPDATE app_compressedjsonfieldtest SET data = null WHERE id = %s", [x.id])
+
+    my_data = CompressedJSONFieldTest.objects.get(id=x.id)
+    my_data.save()

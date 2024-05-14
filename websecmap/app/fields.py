@@ -26,6 +26,10 @@ class CompressedJSONField(JSONFieldMixin, models.BinaryField):
     """
 
     def to_python(self, value):
+        # there is a difference between "" and None, let's reduce all to None.
+        if not value:
+            return super().to_python(value)
+
         try:
             # when migrating the data may not be compressed, so fallback to returning the data as json
             data = gzip.decompress(value)
@@ -43,8 +47,8 @@ class CompressedJSONField(JSONFieldMixin, models.BinaryField):
         return super().to_python(data)
 
     def from_db_value(self, value, expression, connection):
-        if value is None:
-            return None
+        if not value:
+            return super().from_db_value(value, expression, connection)
 
         try:
             # when migrating the data may not be compressed, so fallback to returning the data as json
@@ -63,6 +67,11 @@ class CompressedJSONField(JSONFieldMixin, models.BinaryField):
 
     def get_prep_value(self, value):
         string = super().get_prep_value(value)
+
+        # fix TypeError: encoding without a string argument, gzip cannot deal with None, only with byte strings
+        if string is None:
+            return None
+
         return gzip.compress(bytes(string, "UTF-8"), compresslevel=4)
 
     def value_to_string(self, obj):
