@@ -45,7 +45,7 @@ django-countries
 django-leaflet
 jsonfield
 django-import-export
-django-constance[database]
+django-constance
 
 pyyaml
 
