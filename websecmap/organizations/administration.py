@@ -6,7 +6,14 @@ import tldextract
 
 from websecmap.app import log
 from websecmap.game.models import OrganizationSubmission
-from websecmap.organizations.models import AlternativeName, Coordinate, Organization, OrganizationType, Url
+from websecmap.organizations.models import (
+    AlternativeName,
+    Coordinate,
+    Organization,
+    OrganizationType,
+    Url,
+    OrganizationSurrogateId,
+)
 
 
 def insert_or_update_organization(
@@ -220,6 +227,9 @@ def merge_organizations(org_from: Organization, org_to: Organization):
     # also move the organization type to layer if that didn't happen yet:
     # if org_from.type:
     #     org_to.layers.add(org_from.type)
+
+    # move surrogate ID's
+    OrganizationSurrogateId.objects.all().filter(organization=org_from).update(organization=org_to)
 
     # we don't merge the coordinates, as they should be correct in import.
     # even if the constraint is cascade, this will just restrict sometimes. Nice bugs :)
