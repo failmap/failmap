@@ -1,6 +1,5 @@
 from requests.structures import CaseInsensitiveDict
 
-import websecmap
 from websecmap.scanners.scanner.security_headers import get_headers, prepare_headers_for_evidence, reduce_url
 
 
@@ -44,19 +43,6 @@ def test_get_headers(requests_mock):
             },
         }
     ]
-
-
-def fake_timeout(*args, **kwargs):
-    raise TimeoutError("Retrieving header took too long.")
-
-
-def test_get_headers_slow_download(monkeypatch, caplog):
-    # the timeout stuff is tested elsewhere, just raise the timeout and verify that things happen as planned
-    monkeypatch.setattr(websecmap.scanners.scanner.security_headers, "get_headers_timed", fake_timeout)
-
-    data = get_headers("https://example.nl", host="")
-    assert data is False
-    assert "TimeoutError" in caplog.text
 
 
 def test_prepare_headers_for_evidence():

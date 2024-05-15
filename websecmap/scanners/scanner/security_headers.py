@@ -69,7 +69,6 @@ from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configuration
 from websecmap.scanners.scanner.http import create_standard_request_headers
 from websecmap.scanners.security_policies import add_policy_by_name
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
-from websecmap.scanners.timeout import timeout
 import copy
 import json
 
@@ -653,22 +652,12 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
             )
 
 
-@app.task()
+# use timeout in case it starts downloading slow/long files. We don't want to wait.
+# Placed inside separate function because the decorator will probably not match this method
+# call / warp or distort the canvas or etc.
+# A better solution should be looked at, perhaps using HEAD requests or stopping transfer after N bytes with urllib3
+@app.task(time_limit=HEADER_RETRIEVAL_TRANSFER_TIMEOUT)
 def get_headers(uri_url: str, host: str) -> Union[List[Dict[str, Any]], bool]:
-    # wrap the get headers request in case it starts downloading slow/long files. We don't want to wait.
-    # Placed inside separate function because the decorator will probably not match this method
-    # call / warp or distort the canvas or etc.
-    # A better solution should be looked at, perhaps using HEAD requests or stopping transfer after N bytes with urllib3
-    try:
-        return get_headers_timed(uri_url, host)
-    except TimeoutError as e:
-        # Also log the culprit.
-        log.exception(e, extra={"uri_url": uri_url, "host": host})
-        return False
-
-
-@timeout(HEADER_RETRIEVAL_TRANSFER_TIMEOUT, "Retrieving header took too long.")
-def get_headers_timed(uri_url: str, host: str) -> Union[List[Dict[str, Any]], bool]:
     """
     Issue #94:
     TL;DR: The fix is to follow all redirects.
