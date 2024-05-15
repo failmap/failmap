@@ -655,6 +655,8 @@ class TranslationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "language_code", "key", "value", "sections"]
     list_filter = ["language_code", "key", "metadata_section"]
 
+    search_fields = ["key", "value"]
+
     def sections(self, obj):
         return ", ".join(o.name for o in obj.metadata_section.all())
 
