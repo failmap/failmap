@@ -53,10 +53,10 @@ pyyaml
 certifi>=2023.7.22
 
 # task processing framework
-django-celery-beat<2.2,>2
+django-celery-beat
 # limit to version 4 as 5 has conflicting requirements with available flower atm.
-celery[redis,gevent]<5
-flower<1
+celery[redis,gevent]>5
+flower
 celery-statsd
 
 # Feature usage statistics
@@ -205,3 +205,7 @@ redis>=5
 
 # Trace SQL queries in the database
 google-cloud-sqlcommenter
+
+# WIP: try newer versions of gevent and greenlet in hopes of fixing weird issues with workers hanging on http requests
+gevent>=24
+greenlet>=3

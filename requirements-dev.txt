@@ -30,8 +30,10 @@ charset-normalizer==3.1.0
     # via
     #   -c requirements.txt
     #   requests
-click==8.1.3
-    # via black
+click==8.1.7
+    # via
+    #   -c requirements.txt
+    #   black
 colorama==0.4.6
     # via
     #   -r requirements-dev.in
@@ -124,8 +126,10 @@ platformdirs==3.8.0
     #   pylint
 pluggy==1.2.0
     # via pytest
-prompt-toolkit==3.0.38
-    # via ipython
+prompt-toolkit==3.0.43
+    # via
+    #   -c requirements.txt
+    #   ipython
 ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.2
@@ -274,7 +278,9 @@ urllib3==1.26.18
     #   responses
 watchdog==3.0.0
     # via -r requirements-dev.in
-wcwidth==0.2.6
-    # via prompt-toolkit
+wcwidth==0.2.13
+    # via
+    #   -c requirements.txt
+    #   prompt-toolkit
 wrapt==1.15.0
     # via astroid
