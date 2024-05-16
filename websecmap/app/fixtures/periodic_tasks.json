@@ -939,7 +939,7 @@
   "pk": 301,
   "fields": {
     "name": "http: Schedule Discovery",
-    "task": "websecmap.scanners.scanner.http.plan_discover",
+    "task": "websecmap.scanners.scanner.http.discover_all",
     "interval": null,
     "crontab": 7,
     "solar": null,
@@ -967,7 +967,7 @@
   "pk": 302,
   "fields": {
     "name": "http: Schedule Verification",
-    "task": "websecmap.scanners.scanner.http.plan_verify",
+    "task": "websecmap.scanners.scanner.http.verify_all",
     "interval": null,
     "crontab": 35,
     "solar": null,
@@ -1387,7 +1387,7 @@
   "pk": 317,
   "fields": {
     "name": "security_headers: Schedule Scan",
-    "task": "websecmap.scanners.scanner.security_headers.plan_scan",
+    "task": "websecmap.scanners.scanner.security_headers.scan_all",
     "interval": null,
     "crontab": 4,
     "solar": null,

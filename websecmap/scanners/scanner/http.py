@@ -43,18 +43,17 @@ from requests_toolbelt.adapters import host_header_ssl
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners import init_dict, plannedscan
+from websecmap.scanners import init_dict
 from websecmap.scanners.models import Endpoint, UrlIp
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.__init__ import allowed_to_discover_endpoints, unique_and_random
 from websecmap.scanners.scanner.filter import (
     apply_organzation_or_endpoint_filter_before_url_filter,
     filter_endpoints_only,
-    generic_plan_scan,
     merge_endpoints_filter,
     merge_urls_filter,
 )
-from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
+from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES, in_chunks
 
 # suppress InsecureRequestWarning, we do those request on purpose.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -104,27 +103,35 @@ of the same stuff is re-discovered.
 """
 READ_TIMEOUT = 15
 
+CAN_CONNECT_TIME_LIMIT = CONNECT_TIMEOUT + READ_TIMEOUT
+
 SCANNER_NAME = "http"
 STANDARD_ENDPOINT_FILTER = {"protocol__in": ["https", "http"], "is_dead": False}
 STANDARD_URL_FILTER = {"is_dead": False}
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def plan_discover(**kwargs):
+def discover_all(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
-    generic_plan_scan(SCANNER_NAME, "discover", apply_organzation_or_endpoint_filter_before_url_filter, **kwargs)
+    urls = apply_organzation_or_endpoint_filter_before_url_filter(
+        organizations_filter, urls_filter, endpoints_filter, **kwargs
+    )
+    tasks = compose_discover_task(urls)
+    for task in tasks:
+        task.apply_async(**kwargs.get("task_arguments", {}))
+    return group()
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def plan_verify(**kwargs):
+def verify_all(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
-    generic_plan_scan(SCANNER_NAME, "verify", filter_endpoints_only, **kwargs)
-
-
-@app.task(queue="kickoff")
-def compose_planned_discover_task(**kwargs):
-    urls = plannedscan.pickup(activity="discover", scanner="http", amount=kwargs.get("amount", 25))
-    return compose_discover_task(urls)
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
+    urls = filter_endpoints_only(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    for chunk in in_chunks(urls, 100):
+        # done because 'retrieve endpoints from urls' is a query we don't want to make too big
+        tasks = compose_verify_task(chunk)
+        for task in tasks:
+            task.apply_async(**kwargs.get("task_arguments", {}))
 
 
 def compose_manual_discover_task(organizations_filter: dict = None, urls_filter: dict = None, **kwargs) -> Task:
@@ -141,36 +148,28 @@ def compose_manual_discover_task(organizations_filter: dict = None, urls_filter:
 
     kwargs = merge_urls_filter(STANDARD_URL_FILTER, urls_filter=urls_filter)
     urls = apply_organzation_or_endpoint_filter_before_url_filter(**kwargs)
-    return compose_discover_task(urls)
+    return group(compose_discover_task(urls))
 
 
 def compose_discover_task(urls: List[Url]):
-    tasks = []
-
-    for ip_version in [4, 6]:
-        for port in PREFERRED_PORT_ORDER:
-            for url in urls:
-                tasks.append(
-                    can_connect.si(protocol=PORT_TO_PROTOCOL[port], url=url.url, port=port, ip_version=ip_version).set(
-                        queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version]
-                    )
-                    | connect_result.s(
-                        protocol=PORT_TO_PROTOCOL[port],
-                        url_id=url.pk,
-                        port=port,
-                        ip_version=ip_version,
-                        origin="http_discover",
-                    )
-                    | plannedscan.finish.si("discover", "http", url.pk)
-                )
-
-    return group(tasks)
-
-
-@app.task(queue="kickoff")
-def compose_planned_verify_task(**kwargs):
-    urls = plannedscan.pickup(activity="verify", scanner="http", amount=kwargs.get("amount", 25))
-    return compose_verify_task(urls)
+    return (
+        can_connect.si(
+            protocol=PORT_TO_PROTOCOL[port],
+            url=url.url,
+            port=port,
+            ip_version=ip_version,
+        ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version])
+        | connect_result.s(
+            protocol=PORT_TO_PROTOCOL[port],
+            url_id=url.pk,
+            port=port,
+            ip_version=ip_version,
+            origin="http_discover",
+        )
+        for url in urls
+        for port in PREFERRED_PORT_ORDER
+        for ip_version in [4, 6]
+    )
 
 
 def compose_manual_verify_task(
@@ -185,20 +184,18 @@ def compose_manual_verify_task(
 
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
     urls = filter_endpoints_only(**kwargs)
-    return compose_verify_task(urls)
+    return group(compose_verify_task(urls))
 
 
 def compose_verify_task(urls):
-    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
+    endpoints, _ = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
     endpoints = unique_and_random(endpoints)
-
-    # remove urls that don't have the relevant endpoints anymore
-    for url_id in urls_without_endpoints:
-        plannedscan.finish("verify", "http", url_id)
-
-    tasks = group(
+    return (
         can_connect.si(
-            protocol=endpoint.protocol, url=endpoint.url.url, port=endpoint.port, ip_version=endpoint.ip_version
+            protocol=endpoint.protocol,
+            url=endpoint.url.url,
+            port=endpoint.port,
+            ip_version=endpoint.ip_version,
         ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
         | connect_result.s(
             protocol=endpoint.protocol,
@@ -207,13 +204,8 @@ def compose_verify_task(urls):
             ip_version=endpoint.ip_version,
             origin="http_verify",
         )
-        | plannedscan.finish.si("verify", "http", endpoint.url.pk)
         for endpoint in endpoints
     )
-
-    log.info("Verifying %s http/https endpoints.", len(endpoints))
-
-    return tasks
 
 
 @app.task(queue="internet")
@@ -366,7 +358,7 @@ ACCEPTABLE_CONNECTION_ERRORS = [
 ]
 
 
-@app.task(queue="internet")
+@app.task(queue="internet", time_limit=CAN_CONNECT_TIME_LIMIT)
 def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str, str]:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
@@ -537,8 +529,11 @@ def has_acceptable_error(strerror: str) -> bool:
     return acceptable
 
 
-@app.task(queue="database")
+@app.task(queue="database", ignore_result=True)
 def connect_result(result: Dict[str, str], protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
+    if isinstance(result, Exception):
+        log.exception(result)
+        return False
     if result["result"]:
         save_endpoint(protocol, url_id, port, ip_version, f"ok/{origin}/{result['error']}")
     else:
@@ -546,7 +541,7 @@ def connect_result(result: Dict[str, str], protocol: str, url_id: int, port: int
     return True
 
 
-@app.task(queue="database")
+@app.task(queue="database", ignore_result=True)
 def connect_result_simple(result: bool, protocol: str, url_id: int, port: int, ip_version: int, origin: str = ""):
     # no tracing of what went wrong where, will probably be superseeded with connect_result for tracing purposes
     if result:

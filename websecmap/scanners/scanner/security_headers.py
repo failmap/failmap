@@ -135,7 +135,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+def scan_all(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("security_headers"):
         return group()
@@ -148,9 +148,7 @@ def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpo
     # such as hitting the number of maximum parameters in a query or insane loading time as everything has to be
     # fetched. That kind of issues are easily avoided when using chunks.
     for chunk in in_chunks(urls, 100):
-        log.debug("Preparing security header scan on %s urls.", len(chunk))
         tasks = compose_scan_task(chunk)
-        log.debug("Applying security header tasks on %s urls.", len(chunk))
         for task in tasks:
             # example: {"task_arguments": {"expires": 60}}
             task.apply_async(**kwargs.get("task_arguments", {}))

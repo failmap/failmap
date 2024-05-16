@@ -111,7 +111,6 @@ DEFAULT_CRAWLERS = []
 # Beta: tls_osaft.compose_task, - is this using the outdated ssl library?
 # Beta: screenshot.compose_task, - Browser is not available in docker container
 DEFAULT_SCANNERS = [
-    security_headers.plan_scan,
     tls_qualys.plan_scan,
     ftp.plan_scan,
     plain_http.plan_scan,

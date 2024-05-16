@@ -7,8 +7,6 @@ from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.scanners.models import Endpoint, PlannedScan
 from websecmap.scanners.scanner.dnssec import plan_scan as dnssec_plan_scan
 from websecmap.scanners.scanner.ftp import plan_scan as ftp_plan_scan
-from websecmap.scanners.scanner.http import plan_discover as http_plan_discover
-from websecmap.scanners.scanner.http import plan_verify as http_plan_verify
 from websecmap.scanners.scanner.internet_nl_web import filter_scan as internet_nl_web_filter_scan
 from websecmap.scanners.scanner.plain_http import plan_scan as plain_http_plan_scan
 
@@ -90,26 +88,6 @@ def test_filter_ftp_plan_scan_endpoints(db, default_scan_metadata, setup_some_da
         url=Url.objects.all().first(), discovered_on=datetime.now(timezone.utc), port=21, protocol="ftp", ip_version=4
     )
     ftp_plan_scan()
-    assert PlannedScan.objects.count() == 1
-    yeet()
-
-
-def test_filter_http(db, default_scan_metadata, setup_some_data):
-    # see if nothing happens when there is no endpoint
-    Endpoint.objects.all().delete()
-    http_plan_verify()
-    assert PlannedScan.objects.count() == 0
-
-    # one url, so one discovery task:
-    http_plan_discover()
-    assert PlannedScan.objects.count() == 1
-    yeet()
-
-    # add an enpoint that can be verified:
-    Endpoint.objects.create(
-        url=Url.objects.all().first(), discovered_on=datetime.now(timezone.utc), port=80, protocol="http", ip_version=4
-    )
-    http_plan_verify()
     assert PlannedScan.objects.count() == 1
     yeet()
 
