@@ -61,7 +61,7 @@ from urllib.parse import urlparse
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners import init_dict, plannedscan
+from websecmap.scanners import init_dict
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
@@ -179,25 +179,10 @@ def compose_manual_scan_task(
 
 
 def compose_scan_task(urls):
-    https_endpoints, https_urls_without_endpoints = retrieve_endpoints_from_urls(
-        urls, protocols=["https"], ports=[443, 8443]
-    )
-    https_endpoints = unique_and_random(https_endpoints)
-
-    http_endpoints, http_urls_without_endpoints = retrieve_endpoints_from_urls(
-        urls, protocols=["http"], ports=[80, 8080, 8008]
-    )
-    http_endpoints = unique_and_random(http_endpoints)
-
-    all_endpoints = http_endpoints + https_endpoints
-
+    https_endpoints, _ = retrieve_endpoints_from_urls(urls, protocols=["https"], ports=[443, 8443])
+    http_endpoints, _ = retrieve_endpoints_from_urls(urls, protocols=["http"], ports=[80, 8080, 8008])
+    all_endpoints = unique_and_random(http_endpoints) + unique_and_random(https_endpoints)
     log.debug("Scanning security headers on %s endpoints, %s urls", len(all_endpoints), len(urls))
-
-    # remove urls that don't have the relevant endpoints anymore
-    for url_id in https_urls_without_endpoints + http_urls_without_endpoints:
-        log.debug("Finishing scan on %s because there are no valid endpoints anymore.", url_id)
-        plannedscan.finish("scan", "security_headers", url_id)
-
     return [
         (
             get_headers.si(endpoint.uri_url(), endpoint.host()).set(

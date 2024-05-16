@@ -152,7 +152,7 @@ def compose_manual_discover_task(organizations_filter: dict = None, urls_filter:
 
 
 def compose_discover_task(urls: List[Url]):
-    return (
+    return [
         can_connect.si(
             protocol=PORT_TO_PROTOCOL[port],
             url=url.url,
@@ -169,7 +169,7 @@ def compose_discover_task(urls: List[Url]):
         for url in urls
         for port in PREFERRED_PORT_ORDER
         for ip_version in [4, 6]
-    )
+    ]
 
 
 def compose_manual_verify_task(
@@ -190,7 +190,7 @@ def compose_manual_verify_task(
 def compose_verify_task(urls):
     endpoints, _ = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
     endpoints = unique_and_random(endpoints)
-    return (
+    return [
         can_connect.si(
             protocol=endpoint.protocol,
             url=endpoint.url.url,
@@ -205,7 +205,7 @@ def compose_verify_task(urls):
             origin="http_verify",
         )
         for endpoint in endpoints
-    )
+    ]
 
 
 @app.task(queue="internet")
