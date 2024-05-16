@@ -68,7 +68,7 @@ from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
 from websecmap.scanners.scanner.http import create_standard_request_headers
 from websecmap.scanners.security_policies import add_policy_by_name
-from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
+from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES, in_chunks
 import copy
 import json
 
@@ -130,7 +130,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     ).only("id", "port", "protocol", "ip_version", "url__id", "url__url")
 
     # unique endpoints only
-    endpoints = unique_and_random(https_endpoints) + unique_and_random(http_endpoints)
+    endpoints = list(https_endpoints) + list(http_endpoints)
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
@@ -141,13 +141,29 @@ def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpo
         return group()
 
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    plannedscan.request(activity="scan", scanner="security_headers", urls=urls)
+    # do not use planned scans for small tasks, just use expiry instead to prevent them from piling up.
+    # this saves 3 database queries per header scan, which is impacts the database a lot.
+    # because the list of urls is virtually <all urls in the database> any subquery would be ridiculously large
+    # therefore split up the list of urls in chunks of 100. Otherwise the subquery will cause all kinds of issues
+    # such as hitting the number of maximum parameters in a query or insane loading time as everything has to be
+    # fetched. That kind of issues are easily avoided when using chunks.
+    for chunk in in_chunks(urls, 100):
+        log.debug("Preparing security header scan on %s urls.", len(chunk))
+        tasks = compose_scan_task(chunk)
+        log.debug("Applying security header tasks on %s urls.", len(chunk))
+        for task in tasks:
+            # example: {"task_arguments": {"expires": 60}}
+            task.apply_async(**kwargs.get("task_arguments", {}))
+
+    # return a group for legacy reasons, other stuff expects this so it can apply things itself.
+    return group()
 
 
 @app.task(queue="kickoff")
 def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="security_headers", amount=kwargs.get("amount", 25))
-    return compose_scan_task(urls)
+    raise DeprecationWarning("This function is not planned anymore.")
+    # urls = plannedscan.pickup(activity="scan", scanner="security_headers", amount=kwargs.get("amount", 25))
+    # return compose_scan_task(urls)
 
 
 def compose_manual_scan_task(
@@ -159,8 +175,9 @@ def compose_manual_scan_task(
     if not allowed_to_scan("security_headers"):
         return group()
 
+    # this gets as large as the user requests it to be. Usually one url.
     urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    return compose_scan_task(urls)
+    return group(compose_scan_task(urls))
 
 
 def compose_scan_task(urls):
@@ -183,16 +200,15 @@ def compose_scan_task(urls):
         log.debug("Finishing scan on %s because there are no valid endpoints anymore.", url_id)
         plannedscan.finish("scan", "security_headers", url_id)
 
-    return group(
-        [
+    return [
+        (
             get_headers.si(endpoint.uri_url(), endpoint.host()).set(
-                queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version]
+                queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version],
             )
             | analyze_headers.s(endpoint.pk)
-            | plannedscan.finish.si("scan", "security_headers", endpoint.url.pk)
-            for endpoint in all_endpoints
-        ]
-    )
+        )
+        for endpoint in all_endpoints
+    ]
 
 
 def discover_service_type(headers: CaseInsensitiveDict = None):
@@ -714,7 +730,7 @@ def get_headers(uri_url: str, host: str) -> Union[List[Dict[str, Any]], bool]:
         log.debug("Could not request headers, exception: %s", my_exception)
         return False
     except BaseException as exc:
-        log.exception("After retries still could not get headers: %s", exc)
+        log.error("Could not get headers: %s", exc)
         return False
 
     # redirects are followed, this gives an indication on how many redirects are followed, and what url the

@@ -23,8 +23,7 @@ def test_security_headers(responses, db, faaloniae, default_scan_metadata):
     responses.add(responses.GET, "https://" + faaloniae["url"].url + ":443/", headers=SECURITY_HEADERS)
 
     result = json.loads(call_command("scan", "security_headers", "-v3", "-o", TEST_ORGANIZATION))
-    # the result of scan headers was {'status': 'success'} but the planned scan task has changed that to None
-    assert result[0] is None
+    assert result[0] == {"status": "success"}
 
 
 def test_security_headers_all(responses, db, faaloniae, default_scan_metadata):
@@ -33,8 +32,7 @@ def test_security_headers_all(responses, db, faaloniae, default_scan_metadata):
     responses.add(responses.GET, "https://" + faaloniae["url"].url + ":443/", headers=SECURITY_HEADERS)
 
     result = json.loads(call_command("scan", "security_headers", "-v3"))
-    print(result)
-    assert result[0] is None
+    assert result[0] == {"status": "success"}
 
 
 def test_security_headers_notfound(responses, db, faaloniae, default_scan_metadata):
@@ -53,8 +51,7 @@ def test_security_headers_failure(responses, db, faaloniae, default_scan_metadat
     responses.add(responses.GET, "https://" + faaloniae["url"].url + ":443/", status=500)
 
     result = json.loads(call_command("scan", "security_headers", "-v3", "-o", TEST_ORGANIZATION))
-    print(result)
-    assert result[0] is None
+    assert result[0] == {"status": "success"}
 
 
 def test_analyze_website_headers(db):
