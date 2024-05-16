@@ -454,6 +454,8 @@ CELERY_BROKER_URL = os.environ.get("BROKER", "redis://localhost:6379/0")
 # use separate redis DB for results to improve performance of queue statistics
 CELERY_RESULT_BACKEND = os.environ.get("RESULT_BACKEND", re.sub("/0$", "/1", CELERY_BROKER_URL))
 CELERY_ENABLE_UTC = True
+# fix redis connection leaks
+CELERY_RESULT_BACKEND_THREAD_SAFE = True
 
 # Any data transfered with pickle needs to be over tls... you can inject arbitrary objects with
 # this stuff... message signing makes it a bit better, not perfect as it peels the onion.
