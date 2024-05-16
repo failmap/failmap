@@ -266,7 +266,7 @@ def analyze_headers(headers: Union[bool, List[Dict[str, Any]]], endpoint_id):
 
     # if scan task failed, ignore the result (exception) and report failed status
     # Exceptions do not serialize.
-    if isinstance(headers, bool):
+    if isinstance(headers, (bool, Exception)):
         """
         There could be many reason the parent failed. Some issues however are created by mandated certificate use.
         In this case a "ConnectionError", "('Connection aborted.', OSError(\"(104, 'ECONNRESET')\",)) is received.
