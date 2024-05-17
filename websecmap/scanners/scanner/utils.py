@@ -1,4 +1,3 @@
-import json
 from typing import List
 
 from websecmap.app.constance import constance_cached_value
@@ -10,8 +9,8 @@ IP_QUEUES = CELERY_IP_VERSION_QUEUE_NAMES
 
 def get_nameservers() -> List[str]:
     """Allow to overwrite nameservers from config or provide empty list to fallback to system DNS."""
-    nameservers = json.loads(constance_cached_value("SCANNER_NAMESERVERS"))
-    return nameservers or []
+    nameservers = constance_cached_value("SCANNER_NAMESERVERS")
+    return nameservers or None
 
 
 def in_chunks(my_list, chunk_length):

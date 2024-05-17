@@ -591,10 +591,7 @@ CONSTANCE_ADDITIONAL_FIELDS = {
         {"widget": "django.forms.Select", "choices": ((None, "-----"), ("1", "Yes"), ("0", "No"))},
     ],
     # Todo: no validation options, that is offloaded to the widget?
-    "json": [
-        "django.forms.fields.JSONField",
-        # {"widget": "django.forms.Textarea"},
-    ],
+    "json": ["django.forms.fields.JSONField", {"required": False}],
 }
 
 CONSTANCE_CONFIG = {
@@ -943,7 +940,7 @@ CONSTANCE_CONFIG = {
         str,
     ),
     "SCANNER_NAMESERVERS": (
-        "[]",
+        None,
         "Nameservers used during scans (dns endpoints and subdomains). This string is loaded as JSON, but not validated"
         "due to limitations of this settings library. Be careful when editing(!). This information is cached and loaded"
         "only once every 10 minutes.",
