@@ -6,7 +6,6 @@ from websecmap.map.models import Configuration
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.scanners.models import Endpoint, PlannedScan
 from websecmap.scanners.scanner.dnssec import plan_scan as dnssec_plan_scan
-from websecmap.scanners.scanner.ftp import plan_scan as ftp_plan_scan
 from websecmap.scanners.scanner.internet_nl_web import filter_scan as internet_nl_web_filter_scan
 
 
@@ -75,18 +74,6 @@ def test_filter_top_level_domains_with_endpoint(db, default_scan_metadata, setup
     assert PlannedScan.objects.count() == 1
     yeet()
     dnssec_plan_scan(endpoints_filter={"ip_version": 4})
-    assert PlannedScan.objects.count() == 1
-    yeet()
-
-
-def test_filter_ftp_plan_scan_endpoints(db, default_scan_metadata, setup_some_data):
-    ftp_plan_scan()
-    assert PlannedScan.objects.count() == 0
-
-    Endpoint.objects.create(
-        url=Url.objects.all().first(), discovered_on=datetime.now(timezone.utc), port=21, protocol="ftp", ip_version=4
-    )
-    ftp_plan_scan()
     assert PlannedScan.objects.count() == 1
     yeet()
 

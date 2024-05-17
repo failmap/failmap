@@ -9,24 +9,23 @@ Scans for missing AUTH TLS / AUTH SSL options in FTP servers.
 
 import logging
 from ftplib import FTP, error_perm, error_proto, error_reply, error_temp  # nosec scanning for insecure ftp is the point
+from typing import List
 
 from celery import Task, group
 
 from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Url
-from websecmap.scanners import init_dict, plannedscan
+from websecmap.scanners import init_dict
 from websecmap.scanners.models import Endpoint
-from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, unique_and_random
+from websecmap.scanners.scanner.__init__ import allowed_to
 from websecmap.scanners.scanner.filter import (
-    filter_endpoints_only,
     filter_urls_only,
-    generic_plan_scan,
     merge_endpoints_filter,
+    filter_endpoints_only_as_endpoints,
 )
 from websecmap.scanners.scanner.http import save_endpoint, kill_endpoint
-from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
+from websecmap.scanners.scanner.utils import IP_QUEUES
 import json
 
 log = logging.getLogger(__name__)
@@ -46,73 +45,40 @@ STANDARD_ENDPOINT_FILTER = {"protocol": "ftp", "is_dead": False}
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def plan_scan(**kwargs):
+def scan_all(**kwargs):
+    if not allowed_to("scan", "ftp"):
+        return group()
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
-    generic_plan_scan(SCANNER_NAME, "scan", filter_endpoints_only, **kwargs)
-
-
-@app.task(queue="kickoff", ignore_result=True)
-def plan_verify(**kwargs):
-    kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
-    generic_plan_scan(SCANNER_NAME, "verify", filter_endpoints_only, **kwargs)
-
-
-@app.task(queue="kickoff", ignore_result=True)
-def plan_discover(**kwargs):
-    generic_plan_scan(SCANNER_NAME, "discover", filter_urls_only, **kwargs)
-
-
-@app.task(queue="kickoff")
-def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="ftp", amount=kwargs.get("amount", 25))
-    return compose_scan_task(urls)
+    endpoints = filter_endpoints_only_as_endpoints(endpoints_filter=STANDARD_ENDPOINT_FILTER)
+    for task in compose_scan_task(endpoints):
+        task.apply_async(**kwargs.get("task_arguments", {}))
+    return group()
 
 
 def compose_manual_scan_task(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
-    """
-    Todo's:
-    [X] Created allowed_to_scan permission in config.
-    [X] Implemented scanner
-    [X] Stored scan result
-    [X] Processed scan result in report
-    [X] Added risk filter on the map for this issue
-    [X] Added graphs, stats and more
-    [X] Created translations
-    """
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    if not allowed_to_scan("ftp"):
-        return group()
-
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
-    urls = filter_endpoints_only(organizations_filter, urls_filter, **kwargs)
-    return compose_scan_task(urls)
+    endpoints = filter_endpoints_only_as_endpoints(organizations_filter, urls_filter, **kwargs)
+    return group(compose_scan_task(endpoints))
 
 
-def compose_scan_task(urls):
-    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["ftp"])
-    endpoints = unique_and_random(endpoints)
-
-    # remove urls that don't have the relevant endpoints anymore
-    for url_id in urls_without_endpoints:
-        plannedscan.finish("scan", "ftp", url_id)
-
-    log.info("Scanning FTP servers on %s endpoints.", len(endpoints))
-    tasks = [
-        scan.si(endpoint.url.url, endpoint.port).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
-        | store.s(endpoint.id)
-        | plannedscan.finish.si("scan", "ftp", endpoint.url.pk)
+def compose_scan_task(endpoints: List[Endpoint]) -> List[Task]:
+    return [
+        scan.si(endpoint.url.url, endpoint.port).set(queue=IP_QUEUES[endpoint.ip_version]) | store.s(endpoint.id)
         for endpoint in endpoints
     ]
 
-    return group(tasks)
 
-
-@app.task(queue="kickoff")
-def compose_planned_discover_task(**kwargs):
-    urls = plannedscan.pickup(activity="discover", scanner="ftp", amount=kwargs.get("amount", 25))
-    return compose_discover_task(urls)
+@app.task(queue="kickoff", ignore_result=True)
+def discover_all(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
+    urls = filter_urls_only(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    tasks = compose_discover_task(urls)
+    for task in tasks:
+        task.apply_async(**kwargs.get("task_arguments", {}))
+    return group()
 
 
 def compose_manual_discover_task(
@@ -123,57 +89,42 @@ def compose_manual_discover_task(
     # ports = [21, 990, 2811, 5402, 6622, 20, 2121, 212121]  # All types different default ports.
     urls = filter_urls_only(organizations_filter, urls_filter, endpoints_filter, **kwargs)
     log.info("Discovering FTP servers on %s urls.", len(urls))
-    return compose_discover_task(urls)
+    return group(compose_discover_task(urls))
 
 
-def compose_discover_task(urls):
-    tasks = []
-    for ip_version in [4, 6]:
-        # first iterate through ports, so there is more time between different connection attempts. Which reduces load
-        # for the tested server. Also, the first port has the most hits :)
-        for port in [21]:
-            for url in urls:
-                tasks.append(
-                    discover.si(url.url, port).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version])
-                    | store_when_new_or_kill_if_gone.s(url.pk, port, "ftp", ip_version)
-                    | plannedscan.finish.si("discover", "ftp", url.pk)
-                )
-
-    return group(tasks)
+def compose_discover_task(urls) -> List[Task]:
+    return [
+        discover.si(url.url, port).set(queue=IP_QUEUES[ip_version])
+        | store_when_new_or_kill_if_gone.s(url.pk, port, "ftp", ip_version)
+        for url in urls
+        for port in [21]
+        for ip_version in [4, 6]
+    ]
 
 
-@app.task(queue="kickoff")
-def compose_planned_verify_task(**kwargs):
-    urls = plannedscan.pickup(activity="verify", scanner="ftp", amount=kwargs.get("amount", 25))
-    return compose_verify_task(urls)
+@app.task(queue="kickoff", ignore_result=True)
+def verify_all(**kwargs):
+    endpoints = filter_endpoints_only_as_endpoints(endpoints_filter=STANDARD_ENDPOINT_FILTER)
+    for task in compose_verify_task(endpoints):
+        task.apply_async(**kwargs.get("task_arguments", {}))
+    return group()
 
 
 def compose_manual_verify_task(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    urls = filter_endpoints_only(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    return compose_verify_task(urls)
+    kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
+    endpoints = filter_endpoints_only_as_endpoints(organizations_filter, urls_filter, **kwargs)
+    return group(compose_verify_task(endpoints))
 
 
-def compose_verify_task(urls):
-    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(urls, protocols=["ftp"])
-    endpoints = unique_and_random(endpoints)
-
-    log.info("Verifying FTP servers on %s endpoints.", len(endpoints))
-
-    # remove urls that don't have the relevant endpoints anymore
-    for url_id in urls_without_endpoints:
-        plannedscan.finish("verify", "ftp", url_id)
-
-    tasks = [
-        discover.si(endpoint.url.url, endpoint.port).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
+def compose_verify_task(endpoints: List[Endpoint]) -> List[Task]:
+    return [
+        discover.si(endpoint.url.url, endpoint.port).set(queue=IP_QUEUES[endpoint.ip_version])
         | store_when_new_or_kill_if_gone.s(endpoint.url.pk, endpoint.port, "ftp", endpoint.ip_version)
-        | plannedscan.finish.si("verify", "ftp", endpoint.url.pk)
         for endpoint in endpoints
     ]
-
-    return group(tasks)
 
 
 @app.task(queue="storage", ignore_result=True)
