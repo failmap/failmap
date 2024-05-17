@@ -5,8 +5,6 @@ endpoints that equal normal endpoints. Except they don't have a port and ip_vers
 
 It's not worth the while to make a new, special, 'DNS endpoint' type, as the reporting and life cycle will be just
 the same. So to save a lot of pain and trouble, we'll just fill the port and ip_version with 0.
-
-# todo: can we check if the mail is routed outside of the country somehow? Due to privacy concerns / GDPR?
 """
 
 import logging
@@ -19,9 +17,8 @@ from tenacity import before_log, retry, stop_after_attempt, wait_exponential
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners import init_dict, plannedscan
+from websecmap.scanners import init_dict
 from websecmap.scanners.models import Endpoint
-from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.__init__ import (
     add_model_filter,
     endpoint_filters,
@@ -37,7 +34,7 @@ log = logging.getLogger(__name__)
 
 def filter_discover(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
-):
+) -> List[Url]:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     default_filter = {"is_dead": False, "not_resolvable": False}
     urls_filter = {**urls_filter, **default_filter}
@@ -48,7 +45,9 @@ def filter_discover(
     return unique_and_random(urls)
 
 
-def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+def filter_verify(
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
+) -> List[Endpoint]:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     default_filter = {"protocol__in": ["dns_mx_no_cname", "dns_soa", "dns_a_aaaa"], "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
@@ -56,86 +55,81 @@ def filter_verify(organizations_filter: dict = None, urls_filter: dict = None, e
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
     endpoints = endpoints.only("id", "url__id", "url__url")
 
-    endpoints = unique_and_random(endpoints)
-    return unique_and_random([endpoint.url for endpoint in endpoints])
+    return unique_and_random(endpoints)
 
 
-def compose_new_discover_task(urls: List[Url]):
-    tasks = []
-
+def compose_new_discover_task(urls: List[Url]) -> List[Task]:
     # Endpoint life cycle helps with keeping track of scan results over time. For internet.nl scans we create a few
     # 'fake' endpoints that are used to store scan results. The fake endpoints have a default port of 25, and ipv4
     # but these could be alternative ports and ipv6 as well. That is because the internet.nl scanner summarizes things
     # mostly on the url level.
-    for url in urls:
-        tasks.append(
-            has_mx_without_cname.si(url.url)
-            | connect_result_simple.s(protocol="dns_mx_no_cname", url_id=url.pk, port=0, ip_version=0)
-            | has_soa.si(url.url)
-            | connect_result_simple.s(protocol="dns_soa", url_id=url.pk, port=0, ip_version=0)
-            | has_a_or_aaaa.si(url.url)
-            | connect_result_simple.s(protocol="dns_a_aaaa", url_id=url.pk, port=0, ip_version=0)
-            | plannedscan.finish.si("discover", "dns_endpoints", url.pk)
-        )
-
-    return group(tasks)
-
-
-def compose_new_verify_task(urls):
-    endpoints, urls_without_endpoints = retrieve_endpoints_from_urls(
-        urls, protocols=["dns_mx_no_cname", "dns_soa", "dns_a_aaaa"]
-    )
-
-    # remove urls that don't have the relevant endpoints anymore
-    for url_id in urls_without_endpoints:
-        plannedscan.finish("verify", "dns_endpoints", url_id)
-
     tasks = []
-    for endpoint in endpoints:
-        tasks.append(
-            has_mx_without_cname.si(endpoint.url.url)
-            | connect_result_simple.s(protocol="dns_mx_no_cname", url_id=endpoint.url.pk, port=0, ip_version=0)
-            | has_soa.si(endpoint.url.url)
-            | connect_result_simple.s(protocol="dns_soa", url_id=endpoint.url.pk, port=0, ip_version=0)
-            | has_a_or_aaaa.si(endpoint.url.url)
-            | connect_result_simple.s(protocol="dns_a_aaaa", url_id=endpoint.url.pk, port=0, ip_version=0)
-            | plannedscan.finish.si("verify", "dns_endpoints", endpoint.url.pk)
+    tasks.extend(
+        has_mx_without_cname.si(url.url)
+        | connect_result_simple.s(protocol="dns_mx_no_cname", url_id=url.pk, port=0, ip_version=0)
+        for url in urls
+    )
+    tasks.extend(
+        has_soa.si(url.url) | connect_result_simple.s(protocol="dns_soa", url_id=url.pk, port=0, ip_version=0)
+        for url in urls
+    )
+    tasks.extend(
+        has_a_or_aaaa.si(url.url) | connect_result_simple.s(protocol="dns_a_aaaa", url_id=url.pk, port=0, ip_version=0)
+        for url in urls
+    )
+    return tasks
+
+
+def compose_new_verify_task(endpoints: List[Endpoint]) -> List[Task]:
+    tasks = []
+    # create small chains for all individual tasks, so they can be parallelized even more :)
+    tasks.extend(
+        has_mx_without_cname.si(endpoint.url.url)
+        | connect_result_simple.s(
+            protocol="dns_mx_no_cname",
+            url_id=endpoint.url.pk,
+            port=0,
+            ip_version=0,
         )
-    return group(tasks)
+        for endpoint in endpoints
+    )
+    tasks.extend(
+        has_soa.si(endpoint.url.url)
+        | connect_result_simple.s(protocol="dns_soa", url_id=endpoint.url.pk, port=0, ip_version=0)
+        for endpoint in endpoints
+    )
+    tasks.extend(
+        has_a_or_aaaa.si(endpoint.url.url)
+        | connect_result_simple.s(protocol="dns_a_aaaa", url_id=endpoint.url.pk, port=0, ip_version=0)
+        for endpoint in endpoints
+    )
+    return tasks
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def plan_discover(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+def discover_all(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    plannedscan.request(activity="discover", scanner="dns_endpoints", urls=urls)
+    for task in compose_new_discover_task(urls):
+        task.apply_async(**kwargs.get("task_arguments", {}))
+    return group()
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def plan_verify(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+def verify_all(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    plannedscan.request(activity="verify", scanner="dns_endpoints", urls=urls)
-
-
-@app.task(queue="kickoff")
-def compose_planned_verify_task(**kwargs):
-    urls = plannedscan.pickup(activity="verify", scanner="dns_endpoints", amount=kwargs.get("amount", 25))
-    return compose_new_verify_task(urls)
-
-
-@app.task(queue="kickoff")
-def compose_planned_discover_task(**kwargs):
-    urls = plannedscan.pickup(activity="discover", scanner="dns_endpoints", amount=kwargs.get("amount", 25))
-    return compose_new_discover_task(urls)
+    endpoints = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    for task in compose_new_verify_task(endpoints):
+        task.apply_async(**kwargs.get("task_arguments", {}))
+    return group()
 
 
 def compose_manual_verify_task(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    return compose_new_verify_task(urls)
+    endpoints = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    return group(compose_new_verify_task(endpoints))
 
 
 def compose_manual_discover_task(
@@ -143,7 +137,7 @@ def compose_manual_discover_task(
 ) -> Task:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    return compose_new_discover_task(urls)
+    return group(compose_new_discover_task(urls))
 
 
 def compose_discover_task(
@@ -152,7 +146,7 @@ def compose_discover_task(
     # this method is here for backwards compatibility in the internet.nl dashboard
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_discover(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    return compose_new_discover_task(urls)
+    return group(compose_new_discover_task(urls))
 
 
 def compose_verify_task(
@@ -160,8 +154,8 @@ def compose_verify_task(
 ) -> Task:
     # this method is here for backwards compatibility in the internet.nl dashboard
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    urls = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    return compose_new_verify_task(urls)
+    endpoints = filter_verify(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    return group(compose_new_verify_task(endpoints))
 
 
 @app.task(queue="database_deprecate")
