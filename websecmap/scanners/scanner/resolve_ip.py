@@ -3,7 +3,6 @@ Retrieves IP addresses for several ip-based scans. These are stored in the UrlIp
 """
 import logging
 from datetime import datetime, timezone
-from time import sleep
 from typing import List
 
 from celery import Task, group
@@ -80,10 +79,6 @@ def refresh_ips_from_url(url_id):
         store_ip(url, is_v4=False, ip=ipv6, ips_in_dns=ips_in_dns)
     else:
         clean_ips(url, is_v4=False)
-
-    # add a little delay so the DNS server doesn't get too angry at us for asking a lot
-    # 5 second averaging over every 100*4 requests, shared over N threads.
-    sleep(0.05)
 
 
 def clean_ips(url: Url, is_v4: bool):

@@ -25,7 +25,7 @@ from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, unique
 from websecmap.scanners.scanner.http import get_ips
 
 # Include DNSRecon code from an external dependency. This is cloned recursively and placed outside the django app.
-from websecmap.scanners.scanner.utils import get_random_nameserver
+from websecmap.scanners.scanner.utils import get_nameservers
 from websecmap.scanners.timeout import timeout
 
 log = logging.getLogger(__package__)
@@ -247,7 +247,7 @@ def discover_wildcard(url: str):
     """
     log.debug("Checking for DNS wildcards on domain: %s", url)
 
-    resolver = DnsHelper(url, [get_random_nameserver()], 3)
+    resolver = DnsHelper(url, get_nameservers(), 3)
 
     # Do this test twice, there are dns servers that say NO the first time, but say yes the second (i mean wtf)
     ips_1 = resolver.get_a(f"{''.join(random.choice(string.ascii_lowercase) for _ in range(16))}.{url}")
@@ -347,7 +347,7 @@ def wordlist_scan(url: str, wordlist: List[str]):
         log.debug("The wordlist file is written as %s", tmp_wordlist.name)
         log.info("Wordlist scan on: %s", url)
 
-        resolver = DnsHelper(url, [get_random_nameserver()], 3)
+        resolver = DnsHelper(url, get_nameservers(), 3)
         # Using the filter option, only adds the addresses that don't go to the wildcard record.
         # In the logfile all dns responses are shown, but in the list of really resolving urls only the ones
         # that deviate from the wildcard IP are stored.
@@ -516,7 +516,7 @@ def nsec_scan(url: str):
 
 @timeout(120, "Took too long to nsec zone walk, possibly an infinite loop.")
 def nsec_scan_work(url: str) -> List[Dict[str, Any]]:
-    resolver = DnsHelper(url, [get_random_nameserver()], 3)
+    resolver = DnsHelper(url, get_nameservers(), 3)
     try:
         return ds_zone_walk(resolver, url, 3)
     except BadResponse:

@@ -1,5 +1,4 @@
 import json
-from random import choice  # nosec, no cryptography expected here
 from typing import List
 
 from websecmap.app.constance import constance_cached_value
@@ -8,31 +7,11 @@ CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
 # shorthand to produce nicer code
 IP_QUEUES = CELERY_IP_VERSION_QUEUE_NAMES
 
-# https://www.nic.cz/page/4219/kopie-otevrene-dnssec-validujici-resolvery/)
-DNS_CZ_NIC_V4 = ["193.17.47.1", "185.43.135.1"]
-DNS_CZ_NIC_V6 = ["2001:148f:ffff::1", "2001:148f:fffe::1"]
-
-# https://www.dns0.eu/
-DNS_ZERO_EU_v4 = ["193.110.81.0", "185.253.5.0"]
-DNS_ZERO_EU_V6 = ["2a0f:fc80::", "2a0f:fc81::"]
-
-# https://www.quad9.net/service/service-addresses-and-features/
-DNS_QUAD9_V4 = ["9.9.9.9", "149.112.112.112"]
-DNS_QUAD9_V6 = ["2620:fe::fe", "2620:fe::9"]
-
-# combines to:
-# ["193.17.47.1", "185.43.135.1", "193.110.81.0", "185.253.5.0", "9.9.9.9", "149.112.112.112", "2001:148f:ffff::1",
-# "2001:148f:fffe::1", "2a0f:fc80::", "2a0f:fc81::", "2620:fe::fe", "2620:fe::9"]
-FALLBACK_DNS_SERVERS = DNS_CZ_NIC_V4 + DNS_ZERO_EU_v4 + DNS_QUAD9_V4 + DNS_CZ_NIC_V6 + DNS_ZERO_EU_V6 + DNS_QUAD9_V6
-
 
 def get_nameservers() -> List[str]:
+    """Allow to overwrite nameservers from config or provide empty list to fallback to system DNS."""
     nameservers = json.loads(constance_cached_value("SCANNER_NAMESERVERS"))
-    return nameservers or FALLBACK_DNS_SERVERS
-
-
-def get_random_nameserver() -> str:
-    return choice(get_nameservers())
+    return nameservers or []
 
 
 def in_chunks(my_list, chunk_length):
