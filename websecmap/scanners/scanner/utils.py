@@ -10,7 +10,7 @@ IP_QUEUES = CELERY_IP_VERSION_QUEUE_NAMES
 def get_nameservers() -> List[str]:
     """Allow to overwrite nameservers from config or provide empty list to fallback to system DNS."""
     nameservers = constance_cached_value("SCANNER_NAMESERVERS")
-    return nameservers or None
+    return nameservers or []
 
 
 def in_chunks(my_list, chunk_length):
