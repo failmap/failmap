@@ -66,6 +66,10 @@ def add_model_filter(queryset, **kwargs):
 # drop constance in favor of a better, more shiny, interface when possible.
 
 
+def allowed_to(activity, scanner_name: str = ""):
+    return allowed_to_scan(scanner_name, activity)
+
+
 # simply matching config variables to modules.
 # Note that .__module__  is always celery.local :)
 def allowed_to_scan(scanner_name: str = "", activity: str = None):

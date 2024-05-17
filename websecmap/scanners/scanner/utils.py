@@ -5,7 +5,8 @@ from typing import List
 from websecmap.app.constance import constance_cached_value
 
 CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
-CELERY_IP_ALT_VERSION_QUEUE_NAMES = {4: "alt_ipv4", 6: "alt_ipv6"}
+# shorthand to produce nicer code
+IP_QUEUES = CELERY_IP_VERSION_QUEUE_NAMES
 
 # https://www.nic.cz/page/4219/kopie-otevrene-dnssec-validujici-resolvery/)
 DNS_CZ_NIC_V4 = ["193.17.47.1", "185.43.135.1"]

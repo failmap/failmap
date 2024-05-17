@@ -7,19 +7,19 @@ Further reading:
 https://stackoverflow.com/questions/20475552/python-requests-library-redirect-new-url#20475712
 """
 import logging
-from typing import Dict, Union
+from typing import Dict, Union, List
 import json
 
-from celery import group
+from celery import group, Task
 
 from websecmap.celery import app
-from websecmap.scanners import init_dict, plannedscan
+from websecmap.organizations.models import Url
+from websecmap.scanners import init_dict
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan
+from websecmap.scanners.scanner.__init__ import allowed_to
 from websecmap.scanners.scanner.filter import (
     apply_organzation_or_endpoint_filter_before_url_filter,
-    generic_plan_scan,
     merge_organizations_filter,
     merge_urls_filter,
 )
@@ -30,7 +30,7 @@ from websecmap.scanners.scanner.http import (
     resolves_on_v4,
     resolves_on_v6,
 )
-from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
+from websecmap.scanners.scanner.utils import IP_QUEUES
 import re
 
 log = logging.getLogger(__package__)
@@ -49,64 +49,49 @@ STANDARD_URL_FILTER = {"is_dead": False, "not_resolvable": False, "endpoint__pro
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def plan_scan(**kwargs):
+def scan_all(**kwargs):
+    if not allowed_to("scan", SCANNER_NAME):
+        return group()
+
     kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
-    # only if the organization is filtered... otherwise the organization filter is always triggered by the default.
-    if kwargs.get("organizations_filter", {}):
-        kwargs = merge_organizations_filter(STANDARD_ORGANIZATION_FILTER, **kwargs)
-    generic_plan_scan(SCANNER_NAME, "scan", apply_organzation_or_endpoint_filter_before_url_filter, **kwargs)
+    urls = apply_organzation_or_endpoint_filter_before_url_filter(**kwargs)
+    tasks = compose_scan_tasks(urls)
+    for task in tasks:
+        task.apply_async(**kwargs.get("task_arguments", {}))
 
-
-@app.task(queue="kickoff")
-def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner="plain_http", amount=kwargs.get("amount", 25))
-    return compose_scan_task(urls)
+    return group()
 
 
 def compose_manual_scan_task(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> group:
-    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    # We might not be allowed to scan for this at all.
-    if not allowed_to_scan("plain_http"):
-        return group()  # An empty group fits this callable's signature and does not impede celery.
+    if not allowed_to("scan", SCANNER_NAME):
+        return group()
 
+    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     kwargs = merge_urls_filter(STANDARD_URL_FILTER, urls_filter=urls_filter)
     # only if the organization is filtered... otherwise the organization filter is always triggered by the default.
     if kwargs.get("organizations_filter", {}):
         kwargs = merge_organizations_filter(STANDARD_ORGANIZATION_FILTER, **kwargs)
     urls = apply_organzation_or_endpoint_filter_before_url_filter(**kwargs)
-    return compose_scan_task(urls)
+    return group(compose_scan_tasks(urls))
 
 
-def compose_scan_task(urls):
+def compose_scan_tasks(urls: List[Url]) -> List[Task]:
     tasks = []
     for url in urls:
         complete_endpoints, incomplete_endpoints = get_endpoints_with_missing_encryption(url)
 
-        # In case all http/https endpoints have been removed from this url, the scan still has to finish.
-        # This could have happened between the request of this scan and running this scan.
-        if not any([complete_endpoints, incomplete_endpoints]):
-            tasks.append(plannedscan.finish.si("scan", "plain_http", url.pk))
-
-        tasks.extend(
-            well_done.si(complete_endpoint.pk) | plannedscan.finish.si("scan", "plain_http", url.pk)
-            for complete_endpoint in complete_endpoints
-        )
+        tasks.extend(well_done.si(complete_endpoint.pk) for complete_endpoint in complete_endpoints)
 
         tasks.extend(
             scan.si(incomplete_endpoint.ip_version, incomplete_endpoint.url.url).set(
-                queue=CELERY_IP_VERSION_QUEUE_NAMES[incomplete_endpoint.ip_version]
+                queue=IP_QUEUES[incomplete_endpoint.ip_version]
             )
             | store.s(incomplete_endpoint.pk)
-            | plannedscan.finish.si("scan", "plain_http", url.pk)
             for incomplete_endpoint in incomplete_endpoints
         )
-
-    if not tasks:
-        log.warning("Applied filters resulted in no urls, thus no plain http tasks!")
-
-    return group(tasks)
+    return tasks
 
 
 def get_endpoints_with_missing_encryption(url):
@@ -209,6 +194,11 @@ def scan(ip_version: int, url: str):
 
     # retry harder!
     can_connect_result = can_connect(protocol="https", url=url, port=443, ip_version=ip_version)
+
+    if isinstance(can_connect_result, Exception):
+        log.error(f"can_connect timed out: {can_connect_result}")
+        return False, False, False
+
     redirects_to_safety_result = None if can_connect_result["result"] else redirects_to_safety(f"http://{url}:80")
 
     return resolves, can_connect_result, redirects_to_safety_result

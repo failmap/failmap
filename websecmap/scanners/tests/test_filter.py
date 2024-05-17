@@ -8,7 +8,6 @@ from websecmap.scanners.models import Endpoint, PlannedScan
 from websecmap.scanners.scanner.dnssec import plan_scan as dnssec_plan_scan
 from websecmap.scanners.scanner.ftp import plan_scan as ftp_plan_scan
 from websecmap.scanners.scanner.internet_nl_web import filter_scan as internet_nl_web_filter_scan
-from websecmap.scanners.scanner.plain_http import plan_scan as plain_http_plan_scan
 
 
 @pytest.fixture()
@@ -90,25 +89,6 @@ def test_filter_ftp_plan_scan_endpoints(db, default_scan_metadata, setup_some_da
     ftp_plan_scan()
     assert PlannedScan.objects.count() == 1
     yeet()
-
-
-def test_filter_plain_http(db, default_scan_metadata, setup_some_data):
-    Endpoint.objects.all().delete()
-    plain_http_plan_scan()
-    assert PlannedScan.objects.count() == 0
-
-    Endpoint.objects.create(
-        url=Url.objects.all().first(), discovered_on=datetime.now(timezone.utc), port=80, protocol="http", ip_version=4
-    )
-    plain_http_plan_scan()
-    assert PlannedScan.objects.count() == 1
-    yeet()
-
-    plain_http_plan_scan(organizations_filter={"name": "not_existing"})
-    assert PlannedScan.objects.count() == 0
-
-    plain_http_plan_scan(organizations_filter={"name": "test"})
-    assert PlannedScan.objects.count() == 1
 
 
 @pytest.fixture()

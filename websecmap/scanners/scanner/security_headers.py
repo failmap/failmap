@@ -63,12 +63,11 @@ from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import init_dict
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
-from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan, unique_and_random
+from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, unique_and_random, allowed_to
 from websecmap.scanners.scanner.http import create_standard_request_headers
 from websecmap.scanners.security_policies import add_policy_by_name
-from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES, in_chunks
+from websecmap.scanners.scanner.utils import IP_QUEUES
 import copy
 import json
 
@@ -88,7 +87,9 @@ SECURITY_HEADER_SCAN_TYPES = [
 ]
 
 
-def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+def filter_scan(
+    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
+) -> List[Endpoint]:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
     # apply filter to organizations (or if no filter, all organizations)
@@ -129,39 +130,21 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
         port__in=[80, 8080, 8008],
     ).only("id", "port", "protocol", "ip_version", "url__id", "url__url")
 
-    # unique endpoints only
-    endpoints = list(https_endpoints) + list(http_endpoints)
-    return unique_and_random([endpoint.url for endpoint in endpoints])
+    return unique_and_random(list(https_endpoints) + list(http_endpoints))
 
 
 @app.task(queue="kickoff", ignore_result=True)
 def scan_all(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    if not allowed_to_scan("security_headers"):
+    if not allowed_to("scan", "security_headers"):
         return group()
 
-    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    # do not use planned scans for small tasks, just use expiry instead to prevent them from piling up.
-    # this saves 3 database queries per header scan, which is impacts the database a lot.
-    # because the list of urls is virtually <all urls in the database> any subquery would be ridiculously large
-    # therefore split up the list of urls in chunks of 100. Otherwise the subquery will cause all kinds of issues
-    # such as hitting the number of maximum parameters in a query or insane loading time as everything has to be
-    # fetched. That kind of issues are easily avoided when using chunks.
-    for chunk in in_chunks(urls, 100):
-        tasks = compose_scan_task(chunk)
-        for task in tasks:
-            # example: {"task_arguments": {"expires": 60}}
-            task.apply_async(**kwargs.get("task_arguments", {}))
+    endpoints = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    for task in compose_scan_tasks(endpoints):
+        task.apply_async(**kwargs.get("task_arguments", {}))
 
     # return a group for legacy reasons, other stuff expects this so it can apply things itself.
     return group()
-
-
-@app.task(queue="kickoff")
-def compose_planned_scan_task(**kwargs):
-    raise DeprecationWarning("This function is not planned anymore.")
-    # urls = plannedscan.pickup(activity="scan", scanner="security_headers", amount=kwargs.get("amount", 25))
-    # return compose_scan_task(urls)
 
 
 def compose_manual_scan_task(
@@ -170,27 +153,21 @@ def compose_manual_scan_task(
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
     """Compose taskset to scan specified endpoints."""
-    if not allowed_to_scan("security_headers"):
+    if not allowed_to("scan", "security_headers"):
         return group()
 
     # this gets as large as the user requests it to be. Usually one url.
-    urls = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    return group(compose_scan_task(urls))
+    endpoints = filter_scan(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    return group(compose_scan_tasks(endpoints))
 
 
-def compose_scan_task(urls):
-    https_endpoints, _ = retrieve_endpoints_from_urls(urls, protocols=["https"], ports=[443, 8443])
-    http_endpoints, _ = retrieve_endpoints_from_urls(urls, protocols=["http"], ports=[80, 8080, 8008])
-    all_endpoints = unique_and_random(http_endpoints) + unique_and_random(https_endpoints)
-    log.debug("Scanning security headers on %s endpoints, %s urls", len(all_endpoints), len(urls))
+def compose_scan_tasks(endpoints: List[Endpoint]) -> List[Task]:
     return [
         (
-            get_headers.si(endpoint.uri_url(), endpoint.host()).set(
-                queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version],
-            )
+            get_headers.si(endpoint.uri_url(), endpoint.host()).set(queue=IP_QUEUES[endpoint.ip_version])
             | analyze_headers.s(endpoint.pk)
         )
-        for endpoint in all_endpoints
+        for endpoint in endpoints
     ]
 
 

@@ -45,15 +45,14 @@ from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict
 from websecmap.scanners.models import Endpoint, UrlIp
-from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
-from websecmap.scanners.scanner.__init__ import allowed_to_discover_endpoints, unique_and_random
+from websecmap.scanners.scanner.__init__ import allowed_to_discover_endpoints
 from websecmap.scanners.scanner.filter import (
     apply_organzation_or_endpoint_filter_before_url_filter,
-    filter_endpoints_only,
     merge_endpoints_filter,
     merge_urls_filter,
+    filter_endpoints_only_as_endpoints,
 )
-from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES, in_chunks
+from websecmap.scanners.scanner.utils import IP_QUEUES
 
 # suppress InsecureRequestWarning, we do those request on purpose.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -111,11 +110,9 @@ STANDARD_URL_FILTER = {"is_dead": False}
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def discover_all(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+def discover_all(**kwargs):
     kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
-    urls = apply_organzation_or_endpoint_filter_before_url_filter(
-        organizations_filter, urls_filter, endpoints_filter, **kwargs
-    )
+    urls = apply_organzation_or_endpoint_filter_before_url_filter(**kwargs)
     tasks = compose_discover_task(urls)
     for task in tasks:
         task.apply_async(**kwargs.get("task_arguments", {}))
@@ -123,26 +120,17 @@ def discover_all(organizations_filter: dict = None, urls_filter: dict = None, en
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def verify_all(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+def verify_all(**kwargs):
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
-    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    urls = filter_endpoints_only(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    for chunk in in_chunks(urls, 100):
-        # done because 'retrieve endpoints from urls' is a query we don't want to make too big
-        tasks = compose_verify_task(chunk)
-        for task in tasks:
-            task.apply_async(**kwargs.get("task_arguments", {}))
+    endpoints = filter_endpoints_only_as_endpoints(**kwargs)
+    tasks = compose_verify_task(endpoints)
+    for task in tasks:
+        task.apply_async(**kwargs.get("task_arguments", {}))
 
 
 def compose_manual_discover_task(organizations_filter: dict = None, urls_filter: dict = None, **kwargs) -> Task:
     organizations_filter, urls_filter = init_dict(organizations_filter, urls_filter)
-    """Discovers HTTP/HTTPS endpoints by attempting to connect to them.
-
-    *This is an implementation of `compose_discover_task`.
-    For more documentation about this concept, arguments and concrete
-    examples of usage refer to `compose_discover_task` in `types.py`.*
-    """
-
+    # Discovers HTTP/HTTPS endpoints by attempting to connect to them.
     if not allowed_to_discover_endpoints("http"):
         return group()
 
@@ -158,7 +146,7 @@ def compose_discover_task(urls: List[Url]):
             url=url.url,
             port=port,
             ip_version=ip_version,
-        ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version])
+        ).set(queue=IP_QUEUES[ip_version])
         | connect_result.s(
             protocol=PORT_TO_PROTOCOL[port],
             url_id=url.pk,
@@ -175,28 +163,23 @@ def compose_discover_task(urls: List[Url]):
 def compose_manual_verify_task(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> Task:
-    """Verifies existing https and http endpoints. Is pretty quick, as it will not stumble upon non-existing services
-    as much.
-    """
-
+    # Verifies existing https and http endpoints. Is pretty quick, as it will not hang on non-existing services as much
     if not allowed_to_discover_endpoints("http"):
         return group()
 
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
-    urls = filter_endpoints_only(**kwargs)
-    return group(compose_verify_task(urls))
+    endpoints = filter_endpoints_only_as_endpoints(organizations_filter, urls_filter, **kwargs)
+    return group(compose_verify_task(endpoints))
 
 
-def compose_verify_task(urls):
-    endpoints, _ = retrieve_endpoints_from_urls(urls, protocols=["http", "https"])
-    endpoints = unique_and_random(endpoints)
+def compose_verify_task(endpoints: List[Endpoint]) -> List[Task]:
     return [
         can_connect.si(
             protocol=endpoint.protocol,
             url=endpoint.url.url,
             port=endpoint.port,
             ip_version=endpoint.ip_version,
-        ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
+        ).set(queue=IP_QUEUES[endpoint.ip_version])
         | connect_result.s(
             protocol=endpoint.protocol,
             url_id=endpoint.url.pk,

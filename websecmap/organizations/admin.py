@@ -867,14 +867,6 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     actions = []
 
-    # saved here in case we want to go back.
-    # def onboard(self, request, queryset):
-    #     onboard_urls(urls=list(queryset))
-    #     self.message_user(request,
-    #         "Onboarding task has been added. Onboarding can take a while depending on server load.")
-    # actions.append('onboard')
-    # onboard.short_description = "🔮  Onboard"
-
     def declare_dead(self, request, queryset):
         for url in queryset:
             url.is_dead = True
