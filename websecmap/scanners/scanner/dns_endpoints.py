@@ -12,7 +12,7 @@ from time import sleep
 from typing import List
 
 from celery import Task, group
-from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, Resolver, Timeout
+from dns.resolver import NXDOMAIN, NoAnswer, Resolver, Timeout
 from tenacity import before_log, retry, stop_after_attempt, wait_exponential
 
 from websecmap.celery import app
@@ -339,7 +339,9 @@ def has_a_or_aaaa(url: str) -> bool:
 )
 def get_dns_records(url: str, record_type):
     resolver = Resolver()
-    resolver.nameservers = get_nameservers()
+    nameservers = get_nameservers()
+    if nameservers:
+        resolver.nameservers = nameservers
 
     try:
         # a little delay to be friendly towards the server
@@ -352,9 +354,6 @@ def get_dns_records(url: str, record_type):
     except NXDOMAIN:
         log.debug("dns query name does not exist. %s %s", url, record_type)
         return None
-    except NoNameservers:
-        log.debug("Pausing, or add more DNS servers...")
-        sleep(20)
     except Timeout:
         # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
         log.debug("Timeout received for DNS query to %s.", url)
@@ -370,7 +369,9 @@ def get_dns_records(url: str, record_type):
 )
 def get_dns_records_accepting_no_answer(url: str, record_type):
     resolver = Resolver()
-    resolver.nameservers = get_nameservers()
+    nameservers = get_nameservers()
+    if nameservers:
+        resolver.nameservers = nameservers
 
     try:
         # a little delay to be friendly towards the server
@@ -386,9 +387,6 @@ def get_dns_records_accepting_no_answer(url: str, record_type):
     except NXDOMAIN:
         log.debug("dns query name does not exist. %s %s", url, record_type)
         return None
-    except NoNameservers:
-        log.debug("Pausing, or add more DNS servers...")
-        sleep(20)
     except Timeout:
         # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
         log.debug("Timeout received for DNS query to %s.", url)
