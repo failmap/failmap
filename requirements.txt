@@ -63,6 +63,8 @@ click-repl==0.3.0
     # via celery
 colorlog==6.7.0
     # via -r requirements.in
+cron-descriptor==1.4.3
+    # via django-celery-beat
 cryptography==41.0.7
     # via
     #   -r requirements.in
@@ -93,7 +95,7 @@ django==4.2.13
     #   django-timezone-field
     #   djangorestframework
     #   jsonfield
-django-celery-beat==2.1.0
+django-celery-beat==2.6.0
     # via -r requirements.in
 django-colorful==1.3
     # via -r requirements.in
@@ -123,7 +125,7 @@ django-statsd-mozilla==0.4.0
     # via -r requirements.in
 django-taggit==4.0.0
     # via -r requirements.in
-django-timezone-field==4.2.3
+django-timezone-field==6.1.0
     # via django-celery-beat
 djangorestframework==3.14.0
     # via -r requirements.in
@@ -268,7 +270,6 @@ python-resize-image==1.1.20
     # via -r requirements.in
 pytz==2023.3
     # via
-    #   django-timezone-field
     #   djangorestframework
     #   flower
 pyyaml==6.0
@@ -337,7 +338,9 @@ typing-extensions==4.6.3
     #   asgiref
     #   django-countries
 tzdata==2024.1
-    # via celery
+    # via
+    #   celery
+    #   django-celery-beat
 urllib3==1.26.18
     # via
     #   -r requirements.in

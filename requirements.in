@@ -53,8 +53,7 @@ pyyaml
 certifi>=2023.7.22
 
 # task processing framework
-django-celery-beat
-# limit to version 4 as 5 has conflicting requirements with available flower atm.
+django-celery-beat>=2.5
 celery[redis,gevent]>5
 flower
 celery-statsd
