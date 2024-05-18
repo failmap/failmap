@@ -23,15 +23,14 @@ import logging
 import subprocess
 from typing import List
 
-from celery import group
+from celery import group, Task
 from django.conf import settings
 
 from websecmap.celery import ParentFailed, app
-from websecmap.scanners import plannedscan
 from websecmap.scanners.models import UrlGenericScan
 from websecmap.scanners.scanmanager import store_url_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan
-from websecmap.scanners.scanner.filter import filter_top_level_domains, generic_plan_scan
+from websecmap.scanners.scanner.filter import filter_top_level_domains
 import re
 
 log = logging.getLogger(__name__)
@@ -48,14 +47,10 @@ SCANNER_NAME = "dnssec"
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def plan_scan(**kwargs):
-    generic_plan_scan(SCANNER_NAME, "scan", filter_top_level_domains, **kwargs)
-
-
-@app.task(queue="kickoff")
-def compose_planned_scan_task(**kwargs):
-    urls = plannedscan.pickup(activity="scan", scanner=SCANNER_NAME, amount=kwargs.get("amount", 25))
-    return compose_scan_task(urls)
+def scan_all(**kwargs):
+    for task in compose_scan_task(filter_top_level_domains(**kwargs)):
+        task.apply_async(**kwargs.get("task_arguments", {}))
+    return group()
 
 
 def compose_manual_scan_task(
@@ -65,10 +60,10 @@ def compose_manual_scan_task(
         return group()
 
     urls = filter_top_level_domains(organizations_filter, urls_filter, endpoints_filter, **kwargs)
-    return compose_scan_task(urls)
+    return group(compose_scan_task(urls))
 
 
-def compose_scan_task(urls) -> group:
+def compose_scan_task(urls) -> list[Task]:
     """Compose taskset to scan toplevel domains.
 
     DNSSEC is implemented on a (top level) url. It's useless to scan per-endpoint.
@@ -80,10 +75,7 @@ def compose_scan_task(urls) -> group:
     # create tasks for scanning all selected endpoints as a single managable group
     # Sending entire objects is possible. How signatures (.s and .si) work is documented:
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
-    return group(
-        scan_dnssec.si(url.url) | store_dnssec.s(url.pk) | plannedscan.finish.si("scan", SCANNER_NAME, url.pk)
-        for url in urls
-    )
+    return [scan_dnssec.si(url.url) | store_dnssec.s(url.pk) for url in urls]
 
 
 @app.task(queue="storage", ignore_result=True)
