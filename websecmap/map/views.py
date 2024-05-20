@@ -112,7 +112,7 @@ def layers(request, country):
     return JsonResponse(get_layers(country), encoder=JSEncoder, safe=False)
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def export_urls_only(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, file_format: str = DEFAULT_FILE_FORMAT
 ):
@@ -122,7 +122,7 @@ def export_urls_only(
     return generic_download(filename, data, file_format)
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def export_organizations(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, file_format: str = DEFAULT_FILE_FORMAT
 ):
@@ -131,7 +131,7 @@ def export_organizations(
     return generic_download(filename, data, file_format)
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def export_organization_types(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, file_format: str = DEFAULT_FILE_FORMAT
 ):
@@ -140,7 +140,7 @@ def export_organization_types(
     return generic_download(filename, data, file_format)
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def export_coordinates(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, file_format: str = DEFAULT_FILE_FORMAT
 ):
@@ -149,7 +149,7 @@ def export_coordinates(
     return generic_download(filename, data, file_format)
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def export_urls(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, file_format: str = DEFAULT_FILE_FORMAT
 ):
@@ -158,7 +158,7 @@ def export_urls(
     return generic_download(filename, data, file_format)
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def export_explains(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, file_format: str = DEFAULT_FILE_FORMAT
 ):
@@ -544,13 +544,13 @@ def config_content():
     return base_config
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def config(request) -> HttpResponse:
     # return JsonResponse(config_content(), encoder=orjson.dumps)
     return HttpResponse(orjson.dumps(config_content()), content_type="application/json", status=200)
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def index(request, map_configuration=None):
     initial_countries = get_initial_countries()
 
@@ -646,12 +646,12 @@ def index(request, map_configuration=None):
     )
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def robots_txt(request):
     return render(request, "map/robots.txt", content_type="text/plain")
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def security_txt(request):
     config = get_bulk_values(["SECURITY_TXT_IS_REDIRECTED", "SECURITY_TXT_REDIRECT_URL", "SECURITY_TXT_CONTENT"])
 
@@ -662,7 +662,7 @@ def security_txt(request):
     return HttpResponse(config["SECURITY_TXT_CONTENT"] + "\r\n", content_type="text/plain")
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def manifest_json(request):
     # App manifest
     # https://developer.chrome.com/apps/manifest
@@ -699,7 +699,7 @@ def manifest_json(request):
     return JsonResponse(manifest, encoder=JSEncoder)
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def organization_report_by_id(
     request,
     country: str = DEFAULT_COUNTRY,
@@ -713,7 +713,7 @@ def organization_report_by_id(
     )
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def organization_report_only_by_id(
     request,
     organization_id=None,
@@ -723,7 +723,7 @@ def organization_report_only_by_id(
     return json_response(get_organization_report_by_id(organization_id, days_back=days_back, at_date=at_date))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def organization_report_by_name(
     request,
     country: str = DEFAULT_COUNTRY,
@@ -746,21 +746,21 @@ def organization_report_by_name(
     )
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def top_fail(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, days_back=0, at_date: date = None
 ):
     return json_response(get_top_fail_data(country, organization_type, days_back, at_date=at_date))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def top_win(
     request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, days_back=0, at_date: date = None
 ):
     return json_response(get_top_win_data(country, organization_type, days_back, at_date=at_date))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def stats(
     request,
     country: str = DEFAULT_COUNTRY,
@@ -772,22 +772,22 @@ def stats(
     return json_response(get_stats(country, organization_type, days_back, duration, at_date=at_date))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def v_what_to_improve(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, issue_type=""):
     return json_response(what_to_improve(country, organization_type, issue_type))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def get_short_and_simple_stats_(request, days_back=0, at_date: date = None):
     return json_response(get_short_and_simple_stats(days_back, at_date=at_date))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def organization_vulnerability_timeline(request, organization_id: int, duration: int = 365):
     return json_response(get_organization_vulnerability_timeline(organization_id, duration=duration))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def organization_vulnerability_timeline_via_name(
     request, organization_name: str, organization_type: str = "", country: str = "", duration: int = 365
 ):
@@ -796,7 +796,7 @@ def organization_vulnerability_timeline_via_name(
     )
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def vulnerability_graphs(
     request,
     country: str = DEFAULT_COUNTRY,
@@ -808,7 +808,7 @@ def vulnerability_graphs(
     return json_response(get_vulnerability_graph(country, organization_type, days_back, duration, at_date=at_date))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def vulnerability_graphs_for_all_layers(
     request,
     country: str = DEFAULT_COUNTRY,
@@ -819,7 +819,7 @@ def vulnerability_graphs_for_all_layers(
     return json_response(get_vulnerability_graph_for_all_layers(country, days_back, duration, at_date=at_date))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def improvements(
     request,
     country: str = DEFAULT_COUNTRY,
@@ -831,7 +831,7 @@ def improvements(
     return json_response(get_improvements(country, organization_type, days_back, duration, at_date=at_date))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def ticker(
     request,
     country: str = DEFAULT_COUNTRY,
@@ -843,7 +843,7 @@ def ticker(
     return json_response(get_ticker_data(country, organization_type, days_back, duration, at_date=at_date))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def map_default(request, days_back: int = 0, displayed_issue: str = "all", at_date: date = None):
     my_defaults = (
         Configuration.objects.all()
@@ -867,7 +867,7 @@ def map_default(request, days_back: int = 0, displayed_issue: str = "all", at_da
     )
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type: str = DEFAULT_LAYER):
     query = (
         Organization.objects.all()
@@ -924,7 +924,7 @@ def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def map_data(
     request,
     country: str = DEFAULT_COUNTRY,
@@ -938,17 +938,17 @@ def map_data(
     return HttpResponse(orjson.dumps(data), content_type="application/json", status=200)
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def all_latest_scans(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER):
     return json_response(get_all_latest_scans(country, organization_type))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def explain_list(request, country, organization_type):
     return json_response(get_recent_explains(country, organization_type))
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def updates_on_organization(request, organization_id):
     return json_response(latest_updates(organization_id))
 
@@ -965,12 +965,12 @@ def organization_autcomplete(
     return JsonResponse(list(qs), encoder=JSEncoder, safe=False)
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def upcoming_and_past_scans(request):
     return json_response(get_next_and_last_scans())
 
 
-@cache_page(TEN_MINUTES)
+@cache_page(ONE_HOUR)
 def screenshot(request, endpoint_id=0):
     # get the latest screenshot from an endpoint.
 
