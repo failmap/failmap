@@ -30,6 +30,7 @@ in
   env.MYSQLCLIENT_LDFLAGS = "-L${pkgs.libmysqlclient.dev}/lib";
 
   enterShell = ''
+    export LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib/
     python_version=$(python --version)
     echo $python_version
 
