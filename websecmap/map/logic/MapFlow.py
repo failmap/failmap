@@ -47,8 +47,17 @@ def tick_map_flow():
                 is_the_latest=True,
             )
             for org_on_layer in organization_on_layer:
+                # TODO: this is a stupid and ugly fix but it is because layers is a jsonfield and
+                # the storage/stacking pattern is used here which would ideally be replaced with
+                # something else which allows for proper ORM queries without bugs
+                # Maybe using postgresql can provide a solution here as it supports 'DISTICT ON'
+                # which can be a replacement for the 'is_the_latest'
+                if flow.from_layer.id not in org_on_layer.layers:
+                    # skip organizations which have nothing to do with the mapflow
+                    continue
+
                 # already on layer, don't act. If it should have been removed, it would have.
-                if flow.to_layer in org_on_layer.layers:
+                if flow.to_layer.id in org_on_layer.layers:
                     continue
 
                 # it's not time yet

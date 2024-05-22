@@ -55,6 +55,7 @@ def test_update_organizations_over_time(db):
 def test_tick_map_flow_on_specific_date(db):
     layer1 = OrganizationType.objects.create(name="layer1")
     layer2 = OrganizationType.objects.create(name="layer2")
+    layer3 = OrganizationType.objects.create(name="layer3")
 
     mf = MapFlow.objects.create(
         from_layer=layer1,
@@ -67,6 +68,9 @@ def test_tick_map_flow_on_specific_date(db):
     organization = Organization.objects.create(name="test", country="NL")
     organization.layers.add(layer1)
 
+    organization2 = Organization.objects.create(name="test2", country="NL")
+    organization2.layers.add(layer3)
+
     # Create a map flow that moves an organization on a specific date. See that the organization is moved.
     # in the first scenario keep the organization on the same layer.
     with freeze_time("2024-01-01"):
@@ -76,7 +80,12 @@ def test_tick_map_flow_on_specific_date(db):
         tick_map_flow()
         tick_map_flow()
 
-        assert list(Organization.objects.get(id=organization.id).layers.all()) == [layer1]
+        assert list(Organization.objects.get(id=organization.id).layers.all()) == [
+            layer1
+        ], "organization not moved to new layer"
+        assert list(Organization.objects.get(id=organization2.id).layers.all()) == [
+            layer3
+        ], "unrelated organization moved to new layer when it should not have"
 
     with freeze_time("2024-02-01"):
         # the organization will be moved. The original layer stays
@@ -85,6 +94,9 @@ def test_tick_map_flow_on_specific_date(db):
         tick_map_flow()
 
         assert list(Organization.objects.get(id=organization.id).layers.all()) == [layer1, layer2]
+        assert list(Organization.objects.get(id=organization2.id).layers.all()) == [
+            layer3
+        ], "unrelated organization moved to new layer when it should not have"
 
     # prepare for the second scenario.
     Organization.objects.get(id=organization.id).layers.remove(layer2)
@@ -100,6 +112,9 @@ def test_tick_map_flow_on_specific_date(db):
         tick_map_flow()
 
         assert list(Organization.objects.get(id=organization.id).layers.all()) == [layer2]
+        assert list(Organization.objects.get(id=organization2.id).layers.all()) == [
+            layer3
+        ], "unrelated organization moved to new layer when it should not have"
 
 
 def test_tick_map_flow_enable_after_n_days(db):
@@ -112,6 +127,7 @@ def test_tick_map_flow_enable_after_n_days(db):
 
     layer1 = OrganizationType.objects.create(name="layer1")
     layer2 = OrganizationType.objects.create(name="layer2")
+    layer3 = OrganizationType.objects.create(name="layer3")
 
     # in this case a move happens after 14 days.
     mf = MapFlow.objects.create(
@@ -125,6 +141,9 @@ def test_tick_map_flow_enable_after_n_days(db):
     organization = Organization.objects.create(name="test", country="NL")
     organization.layers.add(layer1)
 
+    organization2 = Organization.objects.create(name="test2", country="NL")
+    organization2.layers.add(layer3)
+
     with freeze_time("2024-02-01"):
         # organization is now 0 days on layer 1
         update_organizations_on_map_over_time()
@@ -134,6 +153,9 @@ def test_tick_map_flow_enable_after_n_days(db):
         tick_map_flow()
         tick_map_flow()
         assert list(Organization.objects.get(id=organization.id).layers.all()) == [layer1]
+        assert list(Organization.objects.get(id=organization2.id).layers.all()) == [
+            layer3
+        ], "unrelated organization moved to new layer when it should not have"
 
     with freeze_time("2024-02-11"):
         # organization is now 10 days on layer 1
@@ -144,6 +166,9 @@ def test_tick_map_flow_enable_after_n_days(db):
         tick_map_flow()
         tick_map_flow()
         assert list(Organization.objects.get(id=organization.id).layers.all()) == [layer1]
+        assert list(Organization.objects.get(id=organization2.id).layers.all()) == [
+            layer3
+        ], "unrelated organization moved to new layer when it should not have"
 
     # now it will be added to the other layer as it's on layer 1
     with freeze_time("2024-02-15"):
@@ -153,6 +178,9 @@ def test_tick_map_flow_enable_after_n_days(db):
         tick_map_flow()
         tick_map_flow()
         assert list(Organization.objects.get(id=organization.id).layers.all()) == [layer1, layer2]
+        assert list(Organization.objects.get(id=organization2.id).layers.all()) == [
+            layer3
+        ], "unrelated organization moved to new layer when it should not have"
 
     # prepare for the second scenario.
     Organization.objects.get(id=organization.id).layers.remove(layer2)
