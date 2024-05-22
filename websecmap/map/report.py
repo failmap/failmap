@@ -11,7 +11,7 @@ from django.db.models import Count
 from websecmap.celery import Task, app
 from websecmap.map.logic.map import get_map_data, get_reports_by_ids
 from websecmap.map.map_configs import filter_map_configs
-from websecmap.map.models import HighLevelStatistic, MapDataCache, OrganizationReport, VulnerabilityStatistic
+from websecmap.map.models import HighLevelStatistic, OrganizationReport, VulnerabilityStatistic
 from websecmap.map.util import transparent_json_to_zip_storage
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.reporting.diskreport import store_report
@@ -468,8 +468,6 @@ def sync_model_field_to_disk(model, json_field, file_field):
 
 @app.task(queue="reporting")
 def calculate_map_data(days: int = 366, countries: List = None, organization_types: List = None):
-    from django.db import OperationalError
-
     metadata = get_backend_scanmetadata()
 
     log.info("calculate_map_data")
@@ -484,13 +482,6 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
             when = datetime.now(timezone.utc) - timedelta(days=days_back)
             for scan_type in scan_types:
                 # You can expect something to change each day. Therefore just store the map data each day.
-                MapDataCache.objects.all().filter(
-                    at_when=when,
-                    country=map_configuration["country"],
-                    organization_type=OrganizationType(pk=map_configuration["organization_type"]),
-                    filters=[scan_type],
-                ).delete()
-
                 log.debug(
                     "Country: %s, Organization_type: %s, day: %s, date: %s, filter: %s",
                     map_configuration["country"],
@@ -499,22 +490,11 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
                     when,
                     scan_type,
                 )
-                data = get_map_data(
+
+                # this is now auto-cached for today
+                get_map_data(
                     map_configuration["country"], map_configuration["organization_type__name"], days_back, scan_type
                 )
-
-                try:
-                    cached = MapDataCache()
-                    cached.organization_type = OrganizationType(pk=map_configuration["organization_type"])
-                    cached.country = map_configuration["country"]
-                    cached.filters = [scan_type]
-                    cached.at_when = when
-                    cached.dataset = None
-                    cached.dataset_file = transparent_json_to_zip_storage(data)
-                    cached.save()
-                except OperationalError as my_exception:
-                    # The public user does not have permission to run insert statements....
-                    log.exception(my_exception)
 
 
 @app.task(queue="reporting")

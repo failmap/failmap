@@ -125,22 +125,18 @@ def get_organization_vulnerability_timeline(organization_id: int, duration: int 
         .order_by("at_when")
     )
 
-    stats = []
-
-    for rating in ratings:
-        stats.append(
-            {
-                "date": rating.at_when.date().isoformat(),
-                "endpoints": rating.total_endpoints,
-                "urls": rating.total_urls,
-                "high": rating.url_issues_high + rating.endpoint_issues_high,
-                "medium": rating.url_issues_medium + rating.endpoint_issues_medium,
-                "low": rating.url_issues_low + rating.endpoint_issues_low,
-                "ok": rating.url_ok + rating.endpoint_ok,
-            }
-        )
-
-    return stats
+    return [
+        {
+            "date": rating.at_when.date().isoformat(),
+            "endpoints": rating.total_endpoints,
+            "urls": rating.total_urls,
+            "high": rating.url_issues_high + rating.endpoint_issues_high,
+            "medium": rating.url_issues_medium + rating.endpoint_issues_medium,
+            "low": rating.url_issues_low + rating.endpoint_issues_low,
+            "ok": rating.url_ok + rating.endpoint_ok,
+        }
+        for rating in ratings
+    ]
 
 
 def get_organization_vulnerability_timeline_via_name(
@@ -150,7 +146,7 @@ def get_organization_vulnerability_timeline_via_name(
     country = get_country(code=country) if country else get_default_country()
 
     organization = (
-        Organization.objects.all().filter(country=country, type=layer, name=organization_name, is_dead=False).first()
+        Organization.objects.all().filter(country=country, layers=layer, name=organization_name, is_dead=False).first()
     )
 
     if not organization:
