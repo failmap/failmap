@@ -457,6 +457,9 @@ CELERY_ENABLE_UTC = True
 # fix redis connection leaks
 CELERY_RESULT_BACKEND_THREAD_SAFE = True
 
+# no longer defaults to True on celery 6.0
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
 # Any data transfered with pickle needs to be over tls... you can inject arbitrary objects with
 # this stuff... message signing makes it a bit better, not perfect as it peels the onion.
 # see: https://blog.nelhage.com/2011/03/exploiting-pickle/
