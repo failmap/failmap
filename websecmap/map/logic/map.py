@@ -364,7 +364,7 @@ def cache_map_data_render(map_data, country: str, layer_id: int, scan_type: List
     from django.db import OperationalError
 
     # if the layer doesn't exist, don't magically create it.
-    layer = OrganizationType.objects.all().filter(pk=layer_id).first()
+    layer = OrganizationType.objects.all().filter(pk=layer_id)
     if not layer:
         return
 
