@@ -5,11 +5,10 @@ import simplejson as json
 from django.db import connection
 from django.utils.text import slugify
 
-from websecmap.app import log
 from websecmap.map.logic.map_defaults import REMARK, determine_when, get_country, get_organization_type
 from websecmap.map.models import MapDataCache
-from websecmap.map.util import zip_to_json, transparent_json_to_zip_storage
-from websecmap.organizations.models import Organization, OrganizationType
+from websecmap.map.util import zip_to_json
+from websecmap.organizations.models import Organization
 from websecmap.reporting.diskreport import retrieve_report
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 import re
@@ -353,40 +352,7 @@ def get_map_data(
 
         data["features"].append(dataset)
 
-    # store the render for today
-    cache_map_data_render(data, my_country, my_organization_type, filters, when.date())
-
     return data
-
-
-def cache_map_data_render(map_data, country: str, layer_id: int, scan_type: List[str], at_when: date):
-    # first calculate the new data so the time between the old record and the new one stays short
-    from django.db import OperationalError
-
-    # if the layer doesn't exist, don't magically create it.
-    layer = OrganizationType.objects.all().filter(pk=layer_id)
-    if not layer:
-        return
-
-    MapDataCache.objects.all().filter(
-        at_when=at_when,
-        country=country,
-        organization_type=layer,
-        filters=scan_type,
-    ).delete()
-
-    try:
-        cached = MapDataCache()
-        cached.organization_type = layer
-        cached.country = country
-        cached.filters = scan_type
-        cached.at_when = at_when
-        cached.dataset = None
-        cached.dataset_file = transparent_json_to_zip_storage(map_data)
-        cached.save()
-    except OperationalError as my_exception:
-        # The public user does not have permission to run insert statements....
-        log.exception(my_exception)
 
 
 def proper_coordinate(coordinate, geojsontype):
