@@ -363,7 +363,10 @@ def cache_map_data_render(map_data, country: str, layer_id: int, scan_type: List
     # first calculate the new data so the time between the old record and the new one stays short
     from django.db import OperationalError
 
-    layer = OrganizationType(pk=layer_id)
+    # if the layer doesn't exist, don't magically create it.
+    layer = OrganizationType.objects.all().filter(pk=layer_id)
+    if not layer:
+        return
 
     MapDataCache.objects.all().filter(
         at_when=at_when,
