@@ -8,7 +8,7 @@ import django_excel as excel
 import orjson
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http404
 from django.shortcuts import render
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
@@ -961,7 +961,7 @@ def map_data_by_date(
     # if no data is available return 404, 404's are not cached by django but are by nginx
     # the client can decide to get mapdata from a previous day or try again at a later time
     if not data_available:
-        return HttpResponseNotFound()
+        raise Http404("Map data not available")
 
     data = get_map_data(country, organization_type, days_back, displayed_issue, at_date=at_date)
 
