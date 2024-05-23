@@ -13,6 +13,10 @@ from websecmap.reporting.diskreport import retrieve_report
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 import re
 
+import logging
+
+log = logging.getLogger(__name__)
+
 
 def get_reports_by_ids(ids: List[str]) -> Dict[str, Dict[Any, Any]]:
     reports = {}
@@ -103,6 +107,8 @@ def get_map_data(
 
     if cached:
         return cached
+
+    log.warning("no map data cache for %s/%s %s %s/%s", country, organization_type, filters, days_back, at_date)
 
     """
     Returns a json structure containing all current map data.
