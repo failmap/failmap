@@ -3,11 +3,12 @@ import logging
 from datetime import date, datetime, timezone
 from wsgiref.util import FileWrapper
 
+from django.http.response import HttpResponseBadRequest
 import django_excel as excel
 import orjson
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseNotFound
 from django.shortcuts import render
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
@@ -73,6 +74,7 @@ ONE_HOUR = 60 * 60
 FOUR_HOURS = 60 * 60 * 4
 ONE_DAY = 24 * 60 * 60
 TEN_MINUTES = 60 * 10
+ONE_MONTH = 30 * ONE_DAY
 
 DEFAULT_FILE_FORMAT = "json"
 
@@ -922,6 +924,49 @@ def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type
             )
 
     return JsonResponse(data, encoder=JSEncoder, safe=False)
+
+
+@cache_page(ONE_MONTH)
+def map_data_by_date(
+    request,
+    country: str = DEFAULT_COUNTRY,
+    organization_type: str = DEFAULT_LAYER,
+    days_back: int = 0,
+    displayed_issue: str = "all",
+    at_date: date = None,
+):
+    """Requesting map data on a specific date will always return the same data every day every time.
+
+    So this can be cached for long time. Return 404 if report data is not ready yet or cannot be found
+    as otherwise the report for a specific date may contain data for the previous day instead and 'that'
+    will be cached for a long time, which is not what we want.
+    """
+
+    # this only works if we have an exact date, not days_back
+    if not at_date:
+        return HttpResponseBadRequest()
+
+    # determine if (cached) mapdata for date is expected to be available
+    # reports are generated at night and mapdata cache is generated early in the morning so after 7ish
+    # the data should be available
+    # TODO: ideally this should be done by acually checking if the data is there, but this simple solution
+    # should work for now
+    data_available = True
+    if at_date == date.today() and datetime.now().hour < 7:
+        data_available = False
+    # we also don't have data for dates in the future
+    if at_date > date.today():
+        data_available = False
+
+    # if no data is available return 404, 404's are not cached by django but are by nginx
+    # the client can decide to get mapdata from a previous day or try again at a later time
+    if not data_available:
+        return HttpResponseNotFound()
+
+    data = get_map_data(country, organization_type, days_back, displayed_issue, at_date=at_date)
+
+    return HttpResponse(orjson.dumps(data), content_type="application/json", status=200)
+    return cache_page(ONE_MONTH)(HttpResponse(orjson.dumps(data), content_type="application/json", status=200))
 
 
 @cache_page(ONE_HOUR)

@@ -39,9 +39,9 @@ urlpatterns = [
     path("map_default/<ymd:at_date>/", v.map_default),
     # map
     path("map/<c:country>/<slug:organization_type>/<d:days_back>/<slug:displayed_issue>/", v.map_data),
-    path("map/<c:country>/<slug:organization_type>/<ymd:at_date>/<slug:displayed_issue>/", v.map_data),
+    path("map/<c:country>/<slug:organization_type>/<ymd:at_date>/<slug:displayed_issue>/", v.map_data_by_date),
     path("map/<c:country>/<slug:organization_type>/<d:days_back>/", v.map_data),
-    path("map/<c:country>/<slug:organization_type>/<ymd:at_date>/", v.map_data),
+    path("map/<c:country>/<slug:organization_type>/<ymd:at_date>/", v.map_data_by_date),
     # top
     path("topfail/<c:country>/<slug:organization_type>/<w:days_back>/", v.top_fail),
     path("topfail/<c:country>/<slug:organization_type>/<ymd:at_date>/", v.top_fail),

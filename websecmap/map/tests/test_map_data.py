@@ -7,6 +7,7 @@ from websecmap.map.models import MapDataCache
 from websecmap.map.report import sync_model_field_to_disk
 from websecmap.map.util import transparent_json_to_zip_storage, zip_to_json
 from websecmap.organizations.models import AlternativeName, Organization, OrganizationType
+from freezegun import freeze_time
 
 
 def test_get_cached_map_data(db):
@@ -124,3 +125,49 @@ def test_sync_model_field_to_disk(db):
     mdc = MapDataCache.objects.all().first()
     assert mdc.dataset is None
     assert zip_to_json(mdc.dataset_file) == expected_result
+
+
+def test_return_not_found_if_early(db, client):
+    """if reports and map_data cache are not generated yet early in the morning we should return 404"""
+
+    MapDataCache.objects.get_or_create(
+        country="NL",
+        organization_type=OrganizationType.objects.get_or_create(name="test")[0],
+        at_when="2024-01-01",
+    )[1]
+
+    with freeze_time("2024-01-01 01:00:00"):
+        response = client.get("/data/map/NL/test/2024-01-01/")
+        assert response.status_code == 404
+        assert "expires" not in response.headers, "404's should not be cached by django"
+
+
+def test_return_not_found_if_future(db, client):
+    """don't return mapdata for future dates"""
+
+    MapDataCache.objects.get_or_create(
+        country="NL",
+        organization_type=OrganizationType.objects.get_or_create(name="test")[0],
+        at_when="2024-01-01",
+    )[1]
+
+    with freeze_time("2024-01-01 01:00:00"):
+        response = client.get("/data/map/NL/test/2024-01-02/")
+        assert response.status_code == 404
+        assert "expires" not in response.headers, "404's should not be cached by django"
+
+
+def test_return_data_if_available(db, client):
+    """available mapdata should be returned during the day"""
+
+    MapDataCache.objects.get_or_create(
+        country="NL",
+        organization_type=OrganizationType.objects.get_or_create(name="test")[0],
+        at_when="2024-01-01",
+    )[1]
+
+    with freeze_time("2024-01-01 08:00:00"):
+        response = client.get("/data/map/NL/test/2024-01-01/")
+        assert response.status_code != 404
+        assert "expires" in response.headers, "data should be cached"
+        assert response.json()
