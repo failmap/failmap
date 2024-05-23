@@ -380,11 +380,6 @@ LOGGING = {
             "handlers": ["console"],
             "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
         },
-        # log requests
-        "django.server": {
-            "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
-        },
         # We expect to be able to debug websecmap all of the time.
         "websecmap": {
             # prevent duplicate logging on workers as celery already adds a handler
