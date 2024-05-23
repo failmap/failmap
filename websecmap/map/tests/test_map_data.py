@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
-
+from django.conf import settings
 from dateutil.relativedelta import relativedelta
-
+import pytest
 from websecmap.map.logic.map import get_altnames, get_cached_map_data, get_map_data
 from websecmap.map.models import MapDataCache
 from websecmap.map.report import sync_model_field_to_disk
@@ -157,6 +157,7 @@ def test_return_not_found_if_future(db, client):
         assert "expires" not in response.headers, "404's should not be cached by django"
 
 
+@pytest.mark.skipif(settings.DB_ENGINE == "postgresql_psycopg2", reason="uses raw query not compatible with postgres")
 def test_return_data_if_available(db, client):
     """available mapdata should be returned during the day"""
 
