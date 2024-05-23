@@ -493,7 +493,7 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
                 except Exception:
                     log.exception("failed to delete old mapdatacache")
 
-                log.debug(
+                log.info(
                     "Country: %s, Organization_type: %s, day: %s, date: %s, filter: %s",
                     map_configuration["country"],
                     map_configuration["organization_type__name"],
