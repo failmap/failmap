@@ -38,7 +38,7 @@ def scan(uri, path):
             response = s.head(f"{uri}{path}", stream=True, verify=False, timeout=30, allow_redirects=True)
     except niquests.exceptions.RequestException:
         # many things can happen: timeouts, protocol errors, connection errors, you name it.
-        return {"error": True}
+        return {"uri": uri, "path": path, "error": True}
 
     # can be serialized
     return {
