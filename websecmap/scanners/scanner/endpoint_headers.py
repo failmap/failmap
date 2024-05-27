@@ -9,6 +9,9 @@ from websecmap.scanners.models import Endpoint, HttpEndpointHeaders
 
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 from websecmap.scanners.time_storage import abstract_time_storage
+import logging
+
+log = logging.getLogger(__name__)
 
 
 @app.task(queue="kickoff")
@@ -30,13 +33,20 @@ def get_content():
 @app.task()
 def scan(uri, path):
     try:
+        # TODO: used for debugging hanging issues, can be removed when they are solved
+        log.info("starting request to %s", uri)
+
         # perform HEAD request, ignore HTTPS errors, use happy eyeballs to pick the first of ipv4/6 to respond
         # follow redirect, do not wait until  all content is downloaded and timeout in 30 seconds
         # 'requests' doesn't do happy eyeballs, 'niquests' does and should be a drop in replacement
         # https://github.com/jawah/niquests/releases/tag/v3.5.5
         with niquests.Session(happy_eyeballs=True) as s:
             response = s.head(f"{uri}{path}", stream=True, verify=False, timeout=30, allow_redirects=True)
+
+        log.info("finished request to %s", uri)
     except niquests.exceptions.RequestException:
+        log.info("failed request to %s", uri)
+
         # many things can happen: timeouts, protocol errors, connection errors, you name it.
         return {"uri": uri, "path": path, "error": True}
 
