@@ -2,7 +2,6 @@ from typing import Any, Dict
 from websecmap.celery.worker import WORKER_ROLE
 import niquests
 
-from celery import group
 
 from websecmap.celery import app
 from websecmap.scanners.models import Endpoint, HttpEndpointHeaders
@@ -16,39 +15,39 @@ log = logging.getLogger(__name__)
 DISABLE_IPV6 = WORKER_ROLE == "v4_internet"
 DISABLE_IPV4 = WORKER_ROLE == "v6_internet"
 
+# maximum amount of time allowed to connect and get the headers
+TIMEOUT = 30
+
 
 @app.task(queue="kickoff")
 def get_content():
-    endpoints = Endpoint.objects.all().filter(
-        protocol__in=["http", "https"], is_dead=False, url__is_dead=False, url__not_resolvable=False
+    # using iterators improves performance, especially on postgresql:
+    # https://docs.djangoproject.com/en/5.0/ref/models/querysets/#with-server-side-cursors
+    endpoints = (
+        Endpoint.objects.all()
+        .filter(protocol__in=["http", "https"], is_dead=False, url__is_dead=False, url__not_resolvable=False)
+        .iterator()
     )
 
-    tasks = [
+    for endpoint in endpoints:
         # queue dynamically set depending if this is v4 or v6 internet
-        scan.s(endpoint.uri_url(), "/").set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
-        | store.s(endpoint.id)
-        for endpoint in endpoints
-    ]
-
-    group(tasks).apply_async()
+        (
+            scan.s(endpoint.uri_url(), "/").set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
+            | store.s(endpoint.id)
+        ).apply_async()
 
 
-@app.task()
+@app.task(time_limit=TIMEOUT * 2)
 def scan(uri, path):
     try:
-        # TODO: used for debugging hanging issues, can be removed when they are solved
-        log.info("starting request to %s", uri)
-
         # perform HEAD request, ignore HTTPS errors, disable the ip protocol that this worker does not use
         # follow redirect, do not wait until  all content is downloaded and timeout in 30 seconds
         # 'requests' doesn't do happy eyeballs, 'niquests' does and should be a drop in replacement
         # https://github.com/jawah/niquests/releases/tag/v3.5.5
         with niquests.Session(disable_ipv4=DISABLE_IPV4, disable_ipv6=DISABLE_IPV6) as s:
-            response = s.head(f"{uri}{path}", stream=True, verify=False, timeout=30, allow_redirects=True)
-
-        log.info("finished request to %s", uri)
-    except niquests.exceptions.RequestException:
-        log.exception("failed request to %s", uri)
+            response = s.head(f"{uri}{path}", stream=True, verify=False, timeout=TIMEOUT, allow_redirects=True)
+    except niquests.exceptions.RequestException as e:
+        log.warning("failed to get headers on: %s, due to error: %s", uri, str(e))
 
         # many things can happen: timeouts, protocol errors, connection errors, you name it.
         return {"uri": uri, "path": path, "error": True}
