@@ -45,7 +45,7 @@ def scan(uri, path):
 
         log.info("finished request to %s", uri)
     except niquests.exceptions.RequestException:
-        log.info("failed request to %s", uri)
+        log.exception("failed request to %s", uri)
 
         # many things can happen: timeouts, protocol errors, connection errors, you name it.
         return {"uri": uri, "path": path, "error": True}
