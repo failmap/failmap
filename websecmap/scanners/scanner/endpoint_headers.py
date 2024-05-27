@@ -1,5 +1,5 @@
 from typing import Any, Dict
-
+from websecmap.celery.worker import WORKER_ROLE
 import niquests
 
 from celery import group
@@ -12,6 +12,9 @@ from websecmap.scanners.time_storage import abstract_time_storage
 import logging
 
 log = logging.getLogger(__name__)
+
+DISABLE_IPV6 = WORKER_ROLE == "v4_internet"
+DISABLE_IPV4 = WORKER_ROLE == "v6_internet"
 
 
 @app.task(queue="kickoff")
@@ -36,11 +39,11 @@ def scan(uri, path):
         # TODO: used for debugging hanging issues, can be removed when they are solved
         log.info("starting request to %s", uri)
 
-        # perform HEAD request, ignore HTTPS errors, use happy eyeballs to pick the first of ipv4/6 to respond
+        # perform HEAD request, ignore HTTPS errors, disable the ip protocol that this worker does not use
         # follow redirect, do not wait until  all content is downloaded and timeout in 30 seconds
         # 'requests' doesn't do happy eyeballs, 'niquests' does and should be a drop in replacement
         # https://github.com/jawah/niquests/releases/tag/v3.5.5
-        with niquests.Session(happy_eyeballs=True) as s:
+        with niquests.Session(disable_ipv4=DISABLE_IPV4, disable_ipv6=DISABLE_IPV6) as s:
             response = s.head(f"{uri}{path}", stream=True, verify=False, timeout=30, allow_redirects=True)
 
         log.info("finished request to %s", uri)

@@ -20,6 +20,9 @@ from sentry_sdk import set_tag
 
 log = logging.getLogger(__name__)
 
+WORKER_ROLE = os.environ.get("WORKER_ROLE", "default")
+
+
 # list of all roles that require internet connectivity
 ROLES_REQUIRING_ANY_NETWORK = [
     "internet",  # the queue scanner accepts 4and6, 4 or 6 - so ANY network scan :)
@@ -194,15 +197,13 @@ QUEUES_MATCHING_ROLES = {
 def worker_configuration():
     """Apply specific configuration for worker depending on environment."""
 
-    role = os.environ.get("WORKER_ROLE", "default")
+    log.info("Configuring worker for role: %s", WORKER_ROLE)
 
-    log.info("Configuring worker for role: %s", role)
-
-    set_tag("worker_role", role)
+    set_tag("worker_role", WORKER_ROLE)
 
     # configure which queues should be consumed depending on assigned role for this worker
     # fall back to storage if the queue is not defined above, to prevent crashes
-    return {"task_queues": QUEUES_MATCHING_ROLES.get(role, QUEUES_MATCHING_ROLES["storage"])}
+    return {"task_queues": QUEUES_MATCHING_ROLES.get(WORKER_ROLE, QUEUES_MATCHING_ROLES["storage"])}
 
 
 @retry(tries=3, delay=5)
