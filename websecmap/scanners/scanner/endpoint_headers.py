@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-import requests
+import niquests
 
 from celery import group
 
@@ -30,13 +30,20 @@ def get_content():
 @app.task()
 def scan(uri, path):
     try:
-        response = requests.head(f"{uri}{path}", stream=True, verify=False, timeout=30, allow_redirects=True)
-    except requests.exceptions.RequestException:
+        # perform HEAD request, ignore HTTPS errors, use happy eyeballs to pick the first of ipv4/6 to respond
+        # follow redirect, do not wait until  all content is downloaded and timeout in 30 seconds
+        # 'requests' doesn't do happy eyeballs, 'niquests' does and should be a drop in replacement
+        # https://github.com/jawah/niquests/releases/tag/v3.5.5
+        with niquests.Session(happy_eyeballs=True) as s:
+            response = s.head(f"{uri}{path}", stream=True, verify=False, timeout=30, allow_redirects=True)
+    except niquests.exceptions.RequestException:
         # many things can happen: timeouts, protocol errors, connection errors, you name it.
         return {"error": True}
 
     # can be serialized
     return {
+        "uri": uri,
+        "path": path,
         "headers": dict(response.headers),
         # For technical reasons, we need to save this as a dict so the has_keys query will work. That
         # has_key does not work on lists. Servers give headers in changing orders. Sort them to create stable data.

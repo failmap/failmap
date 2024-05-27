@@ -48,7 +48,9 @@ cffi==1.15.1
 chardet==5.1.0
     # via pyexcel
 charset-normalizer==3.1.0
-    # via requests
+    # via
+    #   niquests
+    #   requests
 click==8.1.7
     # via
     #   celery
@@ -159,17 +161,24 @@ greenlet==3.0.3
     # via
     #   -r requirements.in
     #   gevent
+h11==0.14.0
+    # via urllib3-future
 humanize==4.9.0
     # via flower
 idna==3.4
     # via
+    #   niquests
     #   requests
     #   tldextract
     #   yarl
 iso3166==2.1.1
     # via -r requirements.in
+jh2==5.0.3
+    # via urllib3-future
 jsonfield==3.1.0
     # via -r requirements.in
+kiss-headers==2.4.3
+    # via niquests
 kombu==5.3.7
     # via celery
 lml==0.1.0
@@ -194,6 +203,8 @@ netaddr==0.8.0
     # via
     #   -r requirements.in
     #   dnsrecon
+niquests==3.6.6
+    # via -r requirements.in
 numpy==1.25.0
     # via
     #   -r requirements.in
@@ -276,6 +287,8 @@ pyyaml==6.0
     # via
     #   -r requirements.in
     #   tablib
+qh3==1.0.7
+    # via urllib3-future
 rdp==0.8
     # via -r requirements.in
 redis==5.0.0
@@ -346,6 +359,8 @@ urllib3==1.26.18
     #   -r requirements.in
     #   requests
     #   sentry-sdk
+urllib3-future==2.7.912
+    # via niquests
 validators==0.20.0
     # via -r requirements.in
 vine==5.1.0
@@ -353,6 +368,8 @@ vine==5.1.0
     #   amqp
     #   celery
     #   kombu
+wassima==1.1.1
+    # via niquests
 wcwidth==0.2.13
     # via prompt-toolkit
 wikidata==0.7.0

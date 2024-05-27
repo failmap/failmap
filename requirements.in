@@ -70,6 +70,8 @@ requests
 # Scanner dep needed to parse SNI: when performing raw host requests the cert hostname also needs to be correct
 # see: https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
 requests_toolbelt
+# drop in replacements for 'requests' with better feature support
+niquests
 
 # dnsrecon / DNS scanning dependencies
 dnsrecon
