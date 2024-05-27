@@ -50,12 +50,10 @@ def scan(uri, path):
         log.warning("failed to get headers on: %s, due to error: %s", uri, str(e))
 
         # many things can happen: timeouts, protocol errors, connection errors, you name it.
-        return {"uri": uri, "path": path, "error": True}
+        return {"error": True}
 
     # can be serialized
     return {
-        "uri": uri,
-        "path": path,
         "headers": dict(response.headers),
         # For technical reasons, we need to save this as a dict so the has_keys query will work. That
         # has_key does not work on lists. Servers give headers in changing orders. Sort them to create stable data.
