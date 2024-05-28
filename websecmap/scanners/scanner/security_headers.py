@@ -81,7 +81,8 @@ DISABLE_IPV6 = WORKER_ROLE == "v4_internet"
 DISABLE_IPV4 = WORKER_ROLE == "v6_internet"
 
 HEADER_RETRIEVAL_TIMEOUT = 20
-HEADER_RETRIEVAL_TRANSFER_TIMEOUT = 25
+# total timeout for task, 2x the normal timeout to account for redirects, dns/connect timeouts
+HEADER_RETRIEVAL_TRANSFER_TIMEOUT = HEADER_RETRIEVAL_TIMEOUT * 2.5
 
 SECURITY_HEADER_SCAN_TYPES = [
     "http_security_header_strict_transport_security",
@@ -723,7 +724,7 @@ def get_headers(uri_url: str, host: str, user_agent: str) -> Union[List[Dict[str
         log.debug("Could not request headers, exception: %s", my_exception)
         return False
     except BaseException:
-        log.exception("Could not get headers")
+        log.exception("Could not get headers for url: %s", uri_url)
         return False
 
     # redirects are followed, this gives an indication on how many redirects are followed, and what url the
