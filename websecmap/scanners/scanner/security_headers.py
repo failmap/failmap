@@ -58,6 +58,9 @@ from celery import Task, group
 from requests.structures import CaseInsensitiveDict
 from tldextract import tldextract
 from urllib.parse import urlparse
+from urllib.parse import urlsplit
+
+from urllib.parse import urlunsplit
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
@@ -663,6 +666,12 @@ def get_headers(uri_url: str, host: str) -> Union[List[Dict[str, Any]], bool]:
 
     :return: requests.response
     """
+    # ensure uri has a path part, otherwise this messes with responses/mock
+    url_parts = list(urlsplit(uri_url))
+    if url_parts[2] == "":
+        url_parts[2] = "/"
+        uri_url = urlunsplit(url_parts)
+
     log.debug("Getting headers for %s", uri_url)
 
     # Not passing exceptions between functions.
