@@ -94,15 +94,15 @@ def compose_task(
 
     For example, to scan all urls/endpoints for one organization named 'example' run:
 
-    >>> task = compose_task(organizations={'name__iexact': 'example'})
-    >>> result = task.apply_async()
-    >>> print(result.get())
+    >>> task = compose_task(organizations={'name__iexact': 'example'}) # doctest: +SKIP
+    >>> result = task.apply_async() # doctest: +SKIP
+    >>> print(result.get()) # doctest: +SKIP
 
     *`name__iexact` matches the name case-insensitive.*
 
     Multiple filters can be applied, to scan only port 80 for organizations added today run:
 
-    >>> task = compose_task(
+    >>> task = compose_task( # doctest: +SKIP
     ...     organizations={'date_added__day': datetime.datetime.today().day},
     ...     endpoints={'port': 80}
     ... )

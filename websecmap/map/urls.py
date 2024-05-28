@@ -1,6 +1,5 @@
 # urls for scanners, maybe in their own url files
 import proxy.views
-from constance import config
 from django.urls import path, re_path
 from django.views.i18n import JavaScriptCatalog
 
@@ -26,7 +25,6 @@ static_urlpatterns = [
     re_path(
         r"^proxy/(?P<url>https://api.mapbox.com/styles/v1/mapbox/.*./$)",
         proxy.views.proxy_view,
-        {"requests_args": {"params": {"access_token": config.MAPBOX_ACCESS_TOKEN}}},
     ),
     # translations for javascript files. Copied from the manual.
     # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/
