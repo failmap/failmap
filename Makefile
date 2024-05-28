@@ -75,7 +75,7 @@ coverage: test
 
 test: ${pysrc} ${app} ## run test suite
 	# run testsuite
-	${enable_coverage} pytest --verbose -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
+	${enable_coverage} pytest --verbose --doctest-modules --doctest-ignore-import-errors -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
 
 # all quality assurance commands before pushing new code
 qa: autofix test

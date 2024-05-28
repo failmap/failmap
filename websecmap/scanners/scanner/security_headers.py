@@ -637,6 +637,24 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
             )
 
 
+def ensure_path(uri: str) -> str:
+    """
+    Make sure uri has a path component
+
+    >>> ensure_path("http://example.com")
+    'http://example.com/'
+
+    >>> ensure_path("http://example.com/index.html")
+    'http://example.com/index.html'
+
+    """
+    url_parts = list(urlsplit(uri))
+    if url_parts[2] == "":
+        url_parts[2] = "/"
+        uri = urlunsplit(url_parts)
+    return uri
+
+
 # use timeout in case it starts downloading slow/long files. We don't want to wait.
 # Placed inside separate function because the decorator will probably not match this method
 # call / warp or distort the canvas or etc.
@@ -673,10 +691,7 @@ def get_headers(uri_url: str, host: str, user_agent: str) -> Union[List[Dict[str
     :return: niquests.response
     """
     # ensure uri has a path part, otherwise this messes with responses/mock
-    url_parts = list(urlsplit(uri_url))
-    if url_parts[2] == "":
-        url_parts[2] = "/"
-        uri_url = urlunsplit(url_parts)
+    uri_url = ensure_path(uri_url)
 
     log.debug("Getting headers for %s, ipv4:%s, ipv6:%s", uri_url, not DISABLE_IPV4, not DISABLE_IPV6)
 
