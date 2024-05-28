@@ -21,14 +21,15 @@ def test_CaseInsensitiveDict():
     assert "test2" not in z
 
 
-def test_get_headers(requests_mock):
+def test_get_headers(responses):
     # Should just work with broken headers, but now seeing an MissingHeaderBodySeparatorDefect warning
     # probably the warning is just ignored, It's not trivial to simulate.
     # https://gvo.schiedam.nl
     broken_headers = {"Access-Control-Allow-Origin : https://gvo.schiedam.nl": "", "X-XSS-Protection": "1; mode=block"}
-    requests_mock.get("", text="1", headers=broken_headers)
+    responses.add(responses.GET, "https://gvo.schiedam.nl", headers=broken_headers)
 
-    data = get_headers("https://gvo.schiedam.nl", host="gvo.schiedam.nl")
+    user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0"
+    data = get_headers("https://gvo.schiedam.nl", host="gvo.schiedam.nl", user_agent=user_agent)
 
     assert data == [
         {
@@ -36,10 +37,11 @@ def test_get_headers(requests_mock):
             "status_code": 200,
             "url": "https://gvo.schiedam.nl/",
             "protocol": "https",
-            "content_type": "unknown",
+            "content_type": "text/plain",
             "headers": {
                 "Access-Control-Allow-Origin : https://gvo.schiedam.nl": "",
                 "X-XSS-Protection": "1; mode=block",
+                "Content-Type": "text/plain",
             },
         }
     ]

@@ -52,10 +52,11 @@ Classified as: Ignored
 import logging
 from typing import Dict, Union, Any, List
 import re
+from websecmap.celery.worker import WORKER_ROLE
 
-import requests
+import niquests
 from celery import Task, group
-from requests.structures import CaseInsensitiveDict
+from niquests.structures import CaseInsensitiveDict
 from tldextract import tldextract
 from urllib.parse import urlparse
 from urllib.parse import urlsplit
@@ -68,7 +69,7 @@ from websecmap.scanners import init_dict
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, unique_and_random, allowed_to
-from websecmap.scanners.scanner.http import create_standard_request_headers
+from websecmap.scanners.scanner.http import create_standard_request_headers, get_random_user_agent
 from websecmap.scanners.security_policies import add_policy_by_name
 from websecmap.scanners.scanner.utils import IP_QUEUES
 import copy
@@ -76,8 +77,11 @@ import json
 
 log = logging.getLogger(__name__)
 
+DISABLE_IPV6 = WORKER_ROLE == "v4_internet"
+DISABLE_IPV4 = WORKER_ROLE == "v6_internet"
+
 HEADER_RETRIEVAL_TIMEOUT = 20
-HEADER_RETRIEVAL_TRANSFER_TIMEOUT = 22
+HEADER_RETRIEVAL_TRANSFER_TIMEOUT = 25
 
 SECURITY_HEADER_SCAN_TYPES = [
     "http_security_header_strict_transport_security",
@@ -165,9 +169,11 @@ def compose_manual_scan_task(
 
 
 def compose_scan_tasks(endpoints: List[Endpoint]) -> List[Task]:
+    # user agent should be determined at queue time as it is a DB call that may not run on internet workers
+    user_agent = get_random_user_agent()
     return [
         (
-            get_headers.si(endpoint.uri_url(), endpoint.host()).set(queue=IP_QUEUES[endpoint.ip_version])
+            get_headers.si(endpoint.uri_url(), endpoint.host(), user_agent).set(queue=IP_QUEUES[endpoint.ip_version])
             | analyze_headers.s(endpoint.pk)
         )
         for endpoint in endpoints
@@ -636,7 +642,7 @@ def generic_check_using_csp_fallback(endpoint_id: int, headers, header):
 # call / warp or distort the canvas or etc.
 # A better solution should be looked at, perhaps using HEAD requests or stopping transfer after N bytes with urllib3
 @app.task(time_limit=HEADER_RETRIEVAL_TRANSFER_TIMEOUT)
-def get_headers(uri_url: str, host: str) -> Union[List[Dict[str, Any]], bool]:
+def get_headers(uri_url: str, host: str, user_agent: str) -> Union[List[Dict[str, Any]], bool]:
     """
     Issue #94:
     TL;DR: The fix is to follow all redirects.
@@ -664,7 +670,7 @@ def get_headers(uri_url: str, host: str) -> Union[List[Dict[str, Any]], bool]:
     Update 17 dec 2018: some web servers require a user agent to be sent in order to give a "more correct" response.
     Given that 'humans with browsers' access these pages, it's normal to also send a user agent.
 
-    :return: requests.response
+    :return: niquests.response
     """
     # ensure uri has a path part, otherwise this messes with responses/mock
     url_parts = list(urlsplit(uri_url))
@@ -672,34 +678,37 @@ def get_headers(uri_url: str, host: str) -> Union[List[Dict[str, Any]], bool]:
         url_parts[2] = "/"
         uri_url = urlunsplit(url_parts)
 
-    log.debug("Getting headers for %s", uri_url)
+    log.debug("Getting headers for %s, ipv4:%s, ipv6:%s", uri_url, not DISABLE_IPV4, not DISABLE_IPV6)
 
     # Not passing exceptions between functions.
     # ignore wrong certificates, those are handled in a different scan.
+    # disable ipv4 or ipv6 depending on the type of scanner
+    # using niquests instead of requests as it supports disabling v4/v6
     # 10 seconds for network delay, 10 seconds for the site to respond.
     # WHEN: Failed to parse headers (url=https://gvo.schiedam.nl:443/): [MissingHeaderBodySeparatorDefect()],
     #   unparsed data: 'Access-Control-Allow-Origin : https://gvo. <-- notice space before colon
     # THEN: urllib3.exceptions.HeaderParsingError still waits the full timeout, even though headers have been received.
     #   a read timeout occurs.
     try:
-        response = requests.get(
-            uri_url,
-            timeout=HEADER_RETRIEVAL_TIMEOUT,
-            allow_redirects=True,
-            verify=False,  # nosec TLS does not have to be valid in this test, only headers do.
-            stream=True,  # don't read the message body unless it is required
-            # Redirects are allowed, so don't set the host header because that is set between requests
-            # and a redirected server will not understand that response.
-            headers=create_standard_request_headers(),
-        )
+        with niquests.Session(disable_ipv4=DISABLE_IPV4, disable_ipv6=DISABLE_IPV6) as session:
+            response = session.get(
+                uri_url,
+                timeout=HEADER_RETRIEVAL_TIMEOUT,
+                allow_redirects=True,
+                verify=False,  # nosec TLS does not have to be valid in this test, only headers do.
+                stream=True,  # don't read the message body unless it is required
+                # Redirects are allowed, so don't set the host header because that is set between requests
+                # and a redirected server will not understand that response.
+                headers=create_standard_request_headers(user_agent=user_agent),
+            )
 
         # do not raise for status, the error pages should also set headers correctly.
         # response.raise_for_status()
-    except requests.RequestException as my_exception:
+    except niquests.RequestException as my_exception:
         log.debug("Could not request headers, exception: %s", my_exception)
         return False
-    except BaseException as exc:
-        log.error("Could not get headers: %s", exc)
+    except BaseException:
+        log.exception("Could not get headers")
         return False
 
     # redirects are followed, this gives an indication on how many redirects are followed, and what url the

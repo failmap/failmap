@@ -44,8 +44,8 @@ def scan(uri, path):
         # follow redirect, do not wait until  all content is downloaded and timeout in 30 seconds
         # 'requests' doesn't do happy eyeballs, 'niquests' does and should be a drop in replacement
         # https://github.com/jawah/niquests/releases/tag/v3.5.5
-        with niquests.Session(disable_ipv4=DISABLE_IPV4, disable_ipv6=DISABLE_IPV6) as s:
-            response = s.head(f"{uri}{path}", stream=True, verify=False, timeout=TIMEOUT, allow_redirects=True)
+        with niquests.Session(disable_ipv4=DISABLE_IPV4, disable_ipv6=DISABLE_IPV6) as session:
+            response = session.head(f"{uri}{path}", stream=True, verify=False, timeout=TIMEOUT, allow_redirects=True)
     except niquests.exceptions.RequestException as e:
         log.warning("failed to get headers on: %s, due to error: %s", uri, str(e))
 

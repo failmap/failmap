@@ -480,9 +480,13 @@ def build_uri_from_components(protocol: str, url: str, port: int, ip_version: in
         return f"{protocol}://[{ip_address}]:{port}" if ip_address else None
 
 
-def create_standard_request_headers(url: str = "") -> Dict[str, str]:
+def create_standard_request_headers(url: str = "", user_agent: Optional[str] = None) -> Dict[str, str]:
+    if not user_agent:
+        # this call make a DB request
+        user_agent = get_random_user_agent()
+
     data = {
-        "User-Agent": get_random_user_agent(),
+        "User-Agent": user_agent,
         # some headers to make this look like a browser request, some domains otherwise just
         # refuse to serve:
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
