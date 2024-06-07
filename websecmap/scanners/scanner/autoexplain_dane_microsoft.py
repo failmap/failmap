@@ -125,6 +125,6 @@ def correct_scan(scan_id: int):
     ).first():
         log.debug("OK: Will add a DANE exception to %s", url)
         print(f"OK: Will add a DANE exception to {url}")
-        add_bot_explanation(scan, explanation, datetime(2024, 7, 1, tzinfo=timezone.utc) - datetime.now(timezone.utc))
+        add_bot_explanation(scan, explanation, datetime(2025, 1, 1, tzinfo=timezone.utc) - datetime.now(timezone.utc))
     else:
         log.debug("No positive DANE score is found in the latest scan: %s", url)
