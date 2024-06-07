@@ -53,7 +53,9 @@ def correct():
         endpoint__is_dead=False,
         endpoint__url__is_dead=False,
     )
-    group([correct_scan.si(scan.id) for scan in scans]).apply_async()
+    for scan in scans:
+        task = correct_scan.si(scan.id)
+        task.apply_async()
     return group()
 
 
