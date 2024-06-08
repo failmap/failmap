@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from django.contrib.sitemaps import Sitemap
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import Organization
+from websecmap.scanners.scanner import q_configurations_to_display
 
 
 class ReportSiteMap(Sitemap):
@@ -11,13 +12,22 @@ class ReportSiteMap(Sitemap):
     priority = 0.8
 
     def items(self):
-        return Organization.objects.all().filter(is_dead=False)
+        return (
+            Organization.objects.all()
+            .filter(
+                # only organizations that are actually displayed
+                q_configurations_to_display("organization"),
+                is_dead=False,
+            )
+            .order_by("id")
+        )
 
     def lastmod(self, obj):
         return datetime.now(timezone.utc).date()
 
     def location(self, obj):
-        first_layer = obj.layers.first()
+        # always the first layer, which is usually more recognizable than layers that are added later
+        first_layer = obj.layers.order_by("id").first()
         return (
             f"/report/{obj.country}/{first_layer}/{obj.id}/?slug={obj.computed_name_slug}"
             if first_layer
