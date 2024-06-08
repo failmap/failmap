@@ -7,6 +7,7 @@ from django.views.i18n import JavaScriptCatalog
 from websecmap.map import views
 from django.contrib.sitemaps.views import sitemap
 from websecmap.map import sitemaps
+from django.views.decorators.cache import cache_page
 
 # todo: organization type converter doesn't work yet... using slug as an alternative.
 
@@ -36,7 +37,7 @@ static_urlpatterns = [
     re_path(r"^jsi18n/map/$", JavaScriptCatalog.as_view(packages=["websecmap.map"]), name="javascript-catalog"),
     path(
         "sitemap.xml",
-        sitemap,
+        cache_page(86400)(sitemap),
         {
             "sitemaps": {
                 "configurations": sitemaps.ConfigurationSiteMap,
@@ -45,7 +46,7 @@ static_urlpatterns = [
                 "statistics": sitemaps.StatisticsSiteMap,
                 "static": sitemaps.StaticSiteMap,
                 "reports": sitemaps.ReportSiteMap,
-            }
+            },
         },
         name="django.contrib.sitemaps.views.sitemap",
     ),
