@@ -137,6 +137,7 @@ INSTALLED_APPS = [
     # 'silk'  # works great for debugging.
     "rest_framework",
     "django_filters",
+    "django.contrib.sitemaps",
 ]
 
 try:

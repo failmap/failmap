@@ -1,11 +1,15 @@
 # urls for scanners, maybe in their own url files
+
 import proxy.views
 from django.urls import path, re_path
 from django.views.i18n import JavaScriptCatalog
 
 from websecmap.map import views
+from django.contrib.sitemaps.views import sitemap
+from websecmap.map import sitemaps
 
 # todo: organization type converter doesn't work yet... using slug as an alternative.
+
 
 static_urlpatterns = [
     path("", views.index),
@@ -30,6 +34,21 @@ static_urlpatterns = [
     # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/
     # cache_page(86400, key_prefix='js18n')
     re_path(r"^jsi18n/map/$", JavaScriptCatalog.as_view(packages=["websecmap.map"]), name="javascript-catalog"),
+    path(
+        "sitemap.xml",
+        sitemap,
+        {
+            "sitemaps": {
+                "configurations": sitemaps.ConfigurationSiteMap,
+                "charts": sitemaps.ChartSiteMap,
+                "login-plaza": sitemaps.LoginPlazaSiteMap,
+                "statistics": sitemaps.StatisticsSiteMap,
+                "static": sitemaps.StaticSiteMap,
+                "reports": sitemaps.ReportSiteMap,
+            }
+        },
+        name="django.contrib.sitemaps.views.sitemap",
+    ),
 ]
 
 urlpatterns = static_urlpatterns
