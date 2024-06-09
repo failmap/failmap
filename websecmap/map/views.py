@@ -324,6 +324,10 @@ def frontpage_layout():
     return groups
 
 
+def jls(data):
+    return json.loads(data)
+
+
 def config_content():
     # This is converted to some hierarchy to make more sense, and to _not_ export things like keys
     metadata = get_backend_scanmetadata()
@@ -531,20 +535,46 @@ def config_content():
             "send_to_supplier_bcc_address": configuration["SEND_TO_SUPPLIER_BCC_ADDRESS"],
             "regions": {
                 "mail": {
-                    "ok_countries": json.loads(configuration["GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_OK"]),
-                    "ok_continents": json.loads(configuration["GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_OK"]),
+                    "countries": {
+                        "ok": jls(configuration["GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_OK"]),
+                        "low": jls(configuration["GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_LOW"]),
+                        "medium": jls(configuration["GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_MEDIUM"]),
+                        "high": jls(configuration["GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_HIGH"]),
+                    },
+                    "continents": {
+                        "ok": jls(configuration["GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_OK"]),
+                        "low": jls(configuration["GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_LOW"]),
+                        "medium": jls(configuration["GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_MEDIUM"]),
+                        "high": jls(configuration["GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_HIGH"]),
+                    },
                 },
                 "server": {
-                    "ok_countries": json.loads(configuration["GEOGRAPHY_SERVER_IN_COUNTRIES_OK"]),
-                    "ok_continents": json.loads(configuration["GEOGRAPHY_SERVER_IN_CONTINENT_OK"]),
+                    "countries": {
+                        "ok": jls(configuration["GEOGRAPHY_SERVER_IN_COUNTRIES_OK"]),
+                        "low": jls(configuration["GEOGRAPHY_SERVER_IN_COUNTRIES_LOW"]),
+                        "medium": jls(configuration["GEOGRAPHY_SERVER_IN_COUNTRIES_MEDIUM"]),
+                        "high": jls(configuration["GEOGRAPHY_SERVER_IN_COUNTRIES_HIGH"]),
+                    },
+                    "continents": {
+                        "ok": jls(configuration["GEOGRAPHY_SERVER_IN_CONTINENT_OK"]),
+                        "low": jls(configuration["GEOGRAPHY_SERVER_IN_CONTINENT_LOW"]),
+                        "medium": jls(configuration["GEOGRAPHY_SERVER_IN_CONTINENT_MEDIUM"]),
+                        "high": jls(configuration["GEOGRAPHY_SERVER_IN_CONTINENT_HIGH"]),
+                    },
                 },
                 "content": {
-                    "ok_countries": json.loads(
-                        configuration["GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_OK"]
-                    ),
-                    "ok_continents": json.loads(
-                        configuration["GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_OK"]
-                    ),
+                    "countries": {
+                        "ok": jls(configuration["GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_OK"]),
+                        "low": jls(configuration["GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_LOW"]),
+                        "medium": jls(configuration["GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_MEDIUM"]),
+                        "high": jls(configuration["GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_HIGH"]),
+                    },
+                    "continents": {
+                        "ok": jls(configuration["GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_OK"]),
+                        "low": jls(configuration["GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_LOW"]),
+                        "medium": jls(configuration["GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_MEDIUM"]),
+                        "high": jls(configuration["GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_HIGH"]),
+                    },
                 },
             },
             "relevant_for_ui": {
