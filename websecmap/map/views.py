@@ -368,6 +368,7 @@ def config_content():
             "report_risk_summary": configuration["SHOW_REPORT_RISK_SUMMARY"],
             "report_content": configuration["SHOW_REPORT_CONTENT"],
             "report_website_gallery": configuration["SHOW_REPORT_WEBSITE_GALLERY"],
+            "report_server_locations": configuration["SHOW_REPORT_SERVER_LOCATIONS"],
             "disclaimer": configuration["SHOW_DISCLAIMER"],
             "send_in_new_domains": configuration["SHOW_SEND_IN_NEW_DOMAINS"],
             "incorrect_finding": configuration["SHOW_INCORRECT_FINDING"],
@@ -528,6 +529,24 @@ def config_content():
             "favicon": configuration["FAVICON"],
             "thank_you_email_address": configuration["THANK_YOU_EMAIL_ADDRESS"],
             "send_to_supplier_bcc_address": configuration["SEND_TO_SUPPLIER_BCC_ADDRESS"],
+            "regions": {
+                "mail": {
+                    "ok_countries": json.loads(configuration["GEOGRAPHY_EMAIL_SERVER_IN_COUNTRIES_OK"]),
+                    "ok_continents": json.loads(configuration["GEOGRAPHY_EMAIL_SERVER_IN_CONTINENT_OK"]),
+                },
+                "server": {
+                    "ok_countries": json.loads(configuration["GEOGRAPHY_SERVER_IN_COUNTRIES_OK"]),
+                    "ok_continents": json.loads(configuration["GEOGRAPHY_SERVER_IN_CONTINENT_OK"]),
+                },
+                "content": {
+                    "ok_countries": json.loads(
+                        configuration["GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_COUNTRIES_OK"]
+                    ),
+                    "ok_continents": json.loads(
+                        configuration["GEOGRAPHY_WEBSITE_THIRD_PARTY_CONTENT_FROM_CONTINENT_OK"]
+                    ),
+                },
+            },
             "relevant_for_ui": {
                 "high": configuration["RELEVANT_FOR_UI_HIGH"],
                 "medium": configuration["RELEVANT_FOR_UI_MEDIUM"],

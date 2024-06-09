@@ -798,6 +798,11 @@ CONSTANCE_CONFIG = {
         "Shows charts inside reports",
         bool,
     ),
+    "SHOW_REPORT_SERVER_LOCATIONS": (
+        False,
+        "Show server locations in reports",
+        bool,
+    ),
     "SHOW_REPORT_RISK_SUMMARY": (
         True,
         "Shows risk summary table inside reports",
@@ -1715,6 +1720,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_REPORT_CHARTS",
                 "SHOW_REPORT_CHARTS_NETWORK",
                 "SHOW_REPORT_WEBSITE_GALLERY",
+                "SHOW_REPORT_SERVER_LOCATIONS",
                 "SHOW_REPORT_RISK_SUMMARY",
                 "SHOW_REPORT_CONTENT",
             ),
