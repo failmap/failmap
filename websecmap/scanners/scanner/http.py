@@ -354,9 +354,13 @@ def can_connect(protocol: str, url: str, port: int, ip_version: int) -> Dict[str
     As long as there is a "sort of" response we just assume there is a website there.
     """
 
+    # 20240609 removed CONTENT_FOUND_WITH_SSL_ERRORS from this list
+    # Max retries exceeded with url: /
+    #   (Caused by SSLError(SSLError(1, '[SSL: TLSV1_UNRECOGNIZED_NAME] tlsv1 unrecognized name (_ssl.c:1007)')))
+    # Removed this because it seems to be a closed / filtered port and no discernible service is running on it.
+
     ok_answers = [
         CONTENT_FOUND_WITH_ENCODING_ISSUES,
-        CONTENT_FOUND_WITH_SSL_ERRORS,
         NO_CONTENT_BUT_ERROR_INDICATES_SERVER,
         FOUND_WITH_HOSTNAME,
         FOUND_WITH_IP,
