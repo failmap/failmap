@@ -41,7 +41,7 @@ def compose_planned_scan_task(**kwargs):
     )
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="database", ignore_result=True)
 def correct():
     # if the mailserver is in the microsoft as AND all other internet.nl mail metrics are right and only DANE
     # is not.
@@ -59,7 +59,7 @@ def correct():
     return group()
 
 
-@app.task(queue="storage", ignore_result=True)
+@app.task(queue="database", ignore_result=True)
 def correct_scan(scan_id: int):
     scan = EndpointGenericScan.objects.filter(id=scan_id).first()
     if not scan:
