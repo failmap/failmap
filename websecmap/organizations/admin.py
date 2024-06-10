@@ -483,15 +483,14 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(OrganizationSurrogateId)
 class OrganizationSurrogateIdAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    ...
     list_display = ["id", "organization", "surrogate_id", "surrogate_id_name", "used_in_dataset"]
 
     list_filter = ["organization__layers", "organization__country"]
-    search_fields = ["name", "organization__name"]
+    search_fields = ["organization__name", "surrogate_id"]
 
 
 class WhoisOrganizationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    # A view that only deals with whois fields, so they are editable and managble easily
+    # A view that only deals with whois fields, so they are editable and manageable easily
     list_display = (
         "id",
         "name_details",
