@@ -88,10 +88,10 @@ def cookie_plaza_data(country: str = None, layer: str = None):
     for stat in stats:
         # sets dont have ordering?
         stats[stat]["organizations_with_tracking_cookies"] = list(
-            set(sorted(stats[stat]["organizations_with_tracking_cookies"]))
+            sorted(set(stats[stat]["organizations_with_tracking_cookies"]))
         )
         # expect multiple organizations to use the same domains several times
-        stats[stat]["urls_with_tracking_cookies"] = list(set(sorted(stats[stat]["urls_with_tracking_cookies"])))
+        stats[stat]["urls_with_tracking_cookies"] = list(sorted(set(stats[stat]["urls_with_tracking_cookies"])))
 
     # return a max of 1000 records as a hot fix, as the amount of data returned was so large (400mb unzipped, 8 zipped)
     # and the monitor would be good enough if just the last few 1000 are visible.
