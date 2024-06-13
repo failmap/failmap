@@ -5,6 +5,7 @@ from typing import Union
 from django.core.exceptions import ObjectDoesNotExist
 
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, Url, UrlGenericScan
+from django.db import transaction
 
 log = logging.getLogger(__package__)
 
@@ -57,29 +58,50 @@ def store_endpoint_scan_result(
     else:
         log.debug("Message or rating changed compared to previous scan. Saving the new scan result.")
 
-    epgs = EndpointGenericScan()
-    # very long csp headers for example
-    epgs.explanation = message[:255]
-    epgs.rating = rating
-    epgs.endpoint = Endpoint.objects.all().filter(id=endpoint_id).first()
-    epgs.type = scan_type
-    # Very long CSP headers for example take a lot of space.
-    epgs.evidence = evidence
-    epgs.meaning = meaning
-    epgs.last_scan_moment = datetime.now(timezone.utc)
-    epgs.rating_determined_on = datetime.now(timezone.utc)
-    epgs.is_the_latest_scan = True
-    epgs.save()
+    # make sure only ONE is the latest
+    with transaction.atomic():
+        new_epgs = EndpointGenericScan()
+        # very long csp headers for example
+        new_epgs.explanation = message[:255]
+        new_epgs.rating = rating
+        new_epgs.endpoint = Endpoint.objects.all().filter(id=endpoint_id).first()
+        new_epgs.type = scan_type
+        # Very long CSP headers for example take a lot of space.
+        new_epgs.evidence = evidence
+        new_epgs.meaning = meaning
+        new_epgs.last_scan_moment = datetime.now(timezone.utc)
+        new_epgs.rating_determined_on = datetime.now(timezone.utc)
+        new_epgs.is_the_latest_scan = True
 
-    # Set all the previous endpoint scans of this endpoint + type to NOT be the latest scan.
-    EndpointGenericScan.objects.all().filter(
-        endpoint=epgs.endpoint,
-        type=epgs.type,
-        # speed up by only finding the ones that are true, not all results ofc!
-        is_the_latest_scan=True,
-    ).exclude(pk=epgs.pk).update(is_the_latest_scan=False)
+        # the internet.nl evidence field does not yet contain all needed information to handle the following
+        # automatic explanation. We can't add that because it might have side effects. So a short fix instead of
+        # a longer fix is to copy an existing explanation for a metric if it's already there.
+        # this only is true for the internet.nl category metrics, as those contain the url for internet.nl reports.
+        # and people want to have the link to the latest report
+        # this explanation is valid in 99.9% of the cases. a better way to deal with this stuff is needed
+        if scan_type == "internet_nl_mail_tls":
+            if epgs.comply_or_explain_explanation == "microsoft_applies_dane_from_july_2024":
+                if datetime.now(timezone.utc) < datetime(2025, 1, 1, tzinfo=timezone.utc):
+                    # copy explanation
+                    new_epgs.comply_or_explain_is_explained = epgs.comply_or_explain_is_explained
+                    new_epgs.comply_or_explain_explanation_valid_until = epgs.comply_or_explain_explanation_valid_until
+                    new_epgs.comply_or_explain_explanation = epgs.comply_or_explain_explanation
+                    new_epgs.comply_or_explain_explained_by = epgs.comply_or_explain_explained_by
+                    new_epgs.comply_or_explain_explained_on = epgs.comply_or_explain_explained_on
+                    new_epgs.comply_or_explain_case_handled_by = epgs.comply_or_explain_case_handled_by
+                    new_epgs.comply_or_explain_case_additional_notes = epgs.comply_or_explain_case_additional_notes
 
-    return epgs
+        new_epgs.save()
+
+        # Set all the previous endpoint scans of this endpoint + type to NOT be the latest scan.
+        EndpointGenericScan.objects.all().filter(
+            endpoint=new_epgs.endpoint,
+            type=new_epgs.type,
+            # speed up by only finding the ones that are true, not all results ofc!
+            is_the_latest_scan=True,
+        ).exclude(pk=new_epgs.pk).update(is_the_latest_scan=False)
+
+    return new_epgs
 
 
 def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str, evidence: str = ""):
@@ -109,23 +131,25 @@ def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str
     else:
         # message and rating changed for this scan_type, so it's worth while to save the scan.
         log.debug("Message or rating changed: making a new generic scan.")
-        ugs = UrlGenericScan()
-        ugs.explanation = message
-        ugs.rating = rating
-        ugs.url = Url.objects.all().filter(id=url_id).first()
-        ugs.evidence = evidence
-        ugs.type = scan_type
-        ugs.last_scan_moment = datetime.now(timezone.utc)
-        ugs.rating_determined_on = datetime.now(timezone.utc)
-        ugs.is_the_latest_scan = True
-        ugs.save()
+        # make sure only ONE is the latest
+        with transaction.atomic():
+            ugs = UrlGenericScan()
+            ugs.explanation = message
+            ugs.rating = rating
+            ugs.url = Url.objects.all().filter(id=url_id).first()
+            ugs.evidence = evidence
+            ugs.type = scan_type
+            ugs.last_scan_moment = datetime.now(timezone.utc)
+            ugs.rating_determined_on = datetime.now(timezone.utc)
+            ugs.is_the_latest_scan = True
+            ugs.save()
 
-        UrlGenericScan.objects.all().filter(
-            url=ugs.url,
-            type=ugs.type,
-            # speed up by only finding the ones that are true, not all results ofc!
-            is_the_latest_scan=True,
-        ).exclude(pk=ugs.pk).update(is_the_latest_scan=False)
+            UrlGenericScan.objects.all().filter(
+                url=ugs.url,
+                type=ugs.type,
+                # speed up by only finding the ones that are true, not all results ofc!
+                is_the_latest_scan=True,
+            ).exclude(pk=ugs.pk).update(is_the_latest_scan=False)
 
         return ugs
 
