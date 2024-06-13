@@ -6,6 +6,7 @@ import tldextract
 
 from websecmap.app import log
 from websecmap.game.models import OrganizationSubmission
+from websecmap.map.models import OrganizationOnLayerOverTime
 from websecmap.organizations.models import (
     AlternativeName,
     Coordinate,
@@ -235,6 +236,10 @@ def merge_organizations(org_from: Organization, org_to: Organization):
     # even if the constraint is cascade, this will just restrict sometimes. Nice bugs :)
     # assume the newest coordinates are the best coordinates.
     Coordinate.objects.all().filter(organization=org_from).update(organization=org_to)
+
+    # the old organization does not exist anymore, so it cannot be tracked over time
+    # and its not really feasible to merge it with the existing one that is already tracked...
+    OrganizationOnLayerOverTime.objects.all().filter(organization=org_from).delete()
 
     # just kill them all and then revive the latest
     coordinates = Coordinate.objects.all().filter(organization=org_to)

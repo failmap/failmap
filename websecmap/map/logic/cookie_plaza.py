@@ -42,6 +42,7 @@ def cookie_plaza_data(country: str = None, layer: str = None):
     stats = {}
 
     # layers upon layers upon layers :)
+    # this makes ±6127 records into 25744. For example the ministry layers are all duplicates of government
     for scan in scans:
         for organization in scan.endpoint.url.organization.all():
             for layer in organization.layers.all():
@@ -87,8 +88,12 @@ def cookie_plaza_data(country: str = None, layer: str = None):
     for stat in stats:
         # sets dont have ordering?
         stats[stat]["organizations_with_tracking_cookies"] = list(
-            sorted(stats[stat]["organizations_with_tracking_cookies"])
+            set(sorted(stats[stat]["organizations_with_tracking_cookies"]))
         )
-        stats[stat]["urls_with_tracking_cookies"] = list(sorted(stats[stat]["urls_with_tracking_cookies"]))
+        # expect multiple organizations to use the same domains several times
+        stats[stat]["urls_with_tracking_cookies"] = list(set(sorted(stats[stat]["urls_with_tracking_cookies"])))
 
-    return records, stats
+    # return a max of 1000 records as a hot fix, as the amount of data returned was so large (400mb unzipped, 8 zipped)
+    # and the monitor would be good enough if just the last few 1000 are visible.
+    # another option would be to rename fields, but that might have unexpected side effects.
+    return records[:1000], stats
