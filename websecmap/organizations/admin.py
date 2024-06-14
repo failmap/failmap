@@ -1238,7 +1238,7 @@ def format_yd(delta: timedelta) -> str:
 
 @admin.register(OrganizationType)
 class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("id", "name", "description", "in_countries", "nr_orgs", "sample")
+    list_display = ("id", "name", "description", "in_countries", "nr_orgs", "nr_urls", "sample")
     search_fields = ("name", "description")
     list_filter = ("name",)
     fields = ("name", "description")
@@ -1250,6 +1250,10 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     @staticmethod
     def nr_orgs(obj):
         return Organization.objects.filter(layers=obj).count()
+
+    @staticmethod
+    def nr_urls(obj):
+        return Url.objects.filter(organization__layers=obj).count()
 
     @staticmethod
     def sample(obj):
