@@ -12,7 +12,7 @@ from time import sleep
 from typing import List
 
 from celery import Task, group
-from dns.resolver import NXDOMAIN, NoAnswer, Resolver, Timeout
+from dns.resolver import NXDOMAIN, NoAnswer, Resolver, Timeout, NoNameservers
 from tenacity import before_log, retry, stop_after_attempt, wait_exponential
 
 from websecmap.celery import app
@@ -358,6 +358,20 @@ def get_dns_records(url: str, record_type):
         # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
         log.debug("Timeout received for DNS query to %s.", url)
         return False
+    except NoNameservers:
+        # give an error because nameservers are configured by hand.
+        # This happens when all configured servers return a SERVFAIL.
+        # All nameservers failed to answer the query ylwt33.com. IN CNAME:
+        # Server 193.17.47.1 UDP port 53 answered SERVFAIL;
+        # Server 185.43.135.1 UDP port 53 answered SERVFAIL;
+        # Server 193.110.81.0 UDP port 53 answered SERVFAIL;
+        # Server 185.253.5.0 UDP port 53 answered SERVFAIL;
+        # Server 9.9.9.9 UDP port 53 answered SERVFAIL;
+        # Server 149.112.112.112 UDP port 53 answered
+        # SERVFAIL; Server 2001:148f:ffff::1 UDP port 53 answered [Errno 99] Cannot assign requested address;
+        # Server 2001:148f:fffe::1 UDP port 53 answered [Errno...
+        log.debug("No DNS nameservers found. %s %s", url, record_type)
+        return None
 
     return None
 
@@ -391,6 +405,11 @@ def get_dns_records_accepting_no_answer(url: str, record_type):
         # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
         log.debug("Timeout received for DNS query to %s.", url)
         return False
+    except NoNameservers:
+        # give an error because nameservers are configured by hand.
+        # This happens when all configured servers return a SERVFAIL.
+        log.debug("No DNS nameservers found. %s %s", url, record_type)
+        return None
 
     return None
 
