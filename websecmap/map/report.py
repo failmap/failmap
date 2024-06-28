@@ -328,6 +328,10 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                 # log.debug("Processing rating of %s " %
                 #     organizationrating.calculation["organization"].get("name", "UNKOWN"))
 
+                # perhaps a crashed or empty report.
+                if not direct_report:
+                    continue
+
                 urlratings = direct_report["organization"].get("urls", [])
 
                 number_of_urls += len(urlratings)
@@ -368,16 +372,26 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                         # if rating['type'] not in scan_types:
                         scan_types.add(rating["type"])
 
-                        measurement[rating["type"]]["high"] += rating["high"]
-                        measurement[rating["type"]]["medium"] += rating["medium"]
-                        measurement[rating["type"]]["low"] += rating["low"]
-                        measurement[rating["type"]]["ok_urls"] += rating["ok"]
+                        # if explained and explanation valid right now, then mark it down as OK so the
+                        # statistics matches the report. -> or is this always done?
                         measurement[rating["type"]]["applicable_urls"] += 1
 
-                        measurement["total"]["high"] += rating["high"]
-                        measurement["total"]["medium"] += rating["medium"]
-                        measurement["total"]["low"] += rating["low"]
-                        measurement["total"]["ok_urls"] += rating["ok"]
+                        if rating["is_explained"] and rating["comply_or_explain_valid_at_time_of_report"]:
+                            # if any other score is actually of value, then place it into ok.
+                            # in all cases this should just result into += 1
+                            # don't store explained stuff as a separate field yet
+                            measurement[rating["type"]]["ok_urls"] += rating["high"] + rating["medium"] + rating["low"]
+                            measurement["total"]["ok_urls"] += rating["high"] + rating["medium"] + rating["low"]
+                        else:
+                            measurement[rating["type"]]["high"] += rating["high"]
+                            measurement[rating["type"]]["medium"] += rating["medium"]
+                            measurement[rating["type"]]["low"] += rating["low"]
+                            measurement[rating["type"]]["ok_urls"] += rating["ok"]
+
+                            measurement["total"]["high"] += rating["high"]
+                            measurement["total"]["medium"] += rating["medium"]
+                            measurement["total"]["low"] += rating["low"]
+                            measurement["total"]["ok_urls"] += rating["ok"]
 
                     # endpoint reports
                     for endpoint in urlrating["endpoints"]:
@@ -400,16 +414,25 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                             # if rating['type'] not in scan_types:
                             scan_types.add(rating["type"])
 
-                            measurement[rating["type"]]["high"] += rating["high"]
-                            measurement[rating["type"]]["medium"] += rating["medium"]
-                            measurement[rating["type"]]["low"] += rating["low"]
-                            measurement[rating["type"]]["ok_endpoints"] += rating["ok"]
                             measurement[rating["type"]]["applicable_endpoints"] += 1
 
-                            measurement["total"]["high"] += rating["high"]
-                            measurement["total"]["medium"] += rating["medium"]
-                            measurement["total"]["low"] += rating["low"]
-                            measurement["total"]["ok_endpoints"] += rating["ok"]
+                            if rating["is_explained"] and rating["comply_or_explain_valid_at_time_of_report"]:
+                                measurement["total"]["ok_endpoints"] += (
+                                    rating["high"] + rating["medium"] + rating["low"]
+                                )
+                                measurement[rating["type"]]["ok_endpoints"] += (
+                                    rating["high"] + rating["medium"] + rating["low"]
+                                )
+                            else:
+                                measurement[rating["type"]]["high"] += rating["high"]
+                                measurement[rating["type"]]["medium"] += rating["medium"]
+                                measurement[rating["type"]]["low"] += rating["low"]
+                                measurement[rating["type"]]["ok_endpoints"] += rating["ok"]
+
+                                measurement["total"]["high"] += rating["high"]
+                                measurement["total"]["medium"] += rating["medium"]
+                                measurement["total"]["low"] += rating["low"]
+                                measurement["total"]["ok_endpoints"] += rating["ok"]
 
             # store these results per scan type, and only retrieve this per scan type...
             for scan_type in scan_types:
