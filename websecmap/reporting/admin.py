@@ -114,3 +114,13 @@ class ScanPolicyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "not_testable",
         "error_in_test",
     )
+
+
+@admin.register(models.MajorChange)
+class MajorChangeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = (
+        "at_when",
+        "change_code",
+        "change_title",
+    )
+    search_fields = ["change_code", "change_title", "change_message"]

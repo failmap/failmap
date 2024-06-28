@@ -371,6 +371,9 @@ def get_dns_records(url: str, record_type):
         # SERVFAIL; Server 2001:148f:ffff::1 UDP port 53 answered [Errno 99] Cannot assign requested address;
         # Server 2001:148f:fffe::1 UDP port 53 answered [Errno...
         log.debug("No DNS nameservers found. %s %s", url, record_type)
+        # after deliberation the conclusion is that even with servfail many
+        # tests from internet.nl can still be performed. A domain such as servfail.nl
+        # can have scores.
         return None
 
     return None

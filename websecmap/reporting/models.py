@@ -433,3 +433,21 @@ class ScanPolicy(AllIssuesCombined):
         #   \'\xf0\x9f\x8f\x85 [internet_nl_mail_ipv6 passed]\', 1, \'[{\\"added\\": {}}]\')'
         # -> (1366, "Incorrect string value: '\\xF0\\x9F\\x8F\\x85 [...' for column 'object_repr' at row 1")
         return f"{self.scan_type}: {self.conclusion} ({self.summary_text()})"
+
+
+class MajorChange(models.Model):
+    # this is used in graph annotations to explain changes. Such as major increases in domains, major policy changes
+    # such as higher or lower risks etc
+    at_when = models.DateField()
+    change_code = models.CharField(
+        max_length=128,
+        help_text="machine readable place holder, only lowercase letters, numbers, underscores. This is used "
+        "to translate the change in the frontend graphs.",
+    )
+    change_title = models.CharField(max_length=128, blank=True, help_text="For internal use")
+    change_message = models.TextField(
+        help_text="This allows policy makers to write down something about "
+        "why a conclusion results in what score... Please provide as much context and detail as possible. "
+        "For internal use.",
+        blank=True,
+    )

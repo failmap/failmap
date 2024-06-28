@@ -1965,6 +1965,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             # {"name": "map.landingpage", "label": "➡️ Landing Pages / Redirects"},
             {"name": "django_celery_beat.periodictask", "label": "⏰ Scheduled Scans & Tasks"},
             {"name": "reporting.scanpolicy", "label": "🈴 Scan Scoring Policy"},
+            {"name": "reporting.majorchange", "label": "💫 Major Changes"},
             {"name": "scanners.scanproxy", "label": "🧉 TLS Scan Proxies"},
             {"name": "auth.user", "label": "👤 Users"},
         ],

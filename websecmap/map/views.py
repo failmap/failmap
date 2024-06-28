@@ -63,6 +63,7 @@ from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
 from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
 from websecmap.map.models import Configuration, LandingPage, OrganizationReport, FrontPageRowContent
 from websecmap.organizations.models import Organization
+from websecmap.reporting.models import MajorChange
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Screenshot
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata, get_scanners_for_frontend
@@ -348,6 +349,7 @@ def config_content():
     configuration = get_all_values()
     scan_types = get_scanners_for_frontend(configuration)
     base_config = {
+        "annotations": list(MajorChange.objects.all().order_by("-at_when").values_list("at_when", "change_code")),
         "layout": frontpage_layout(),
         "show": {
             "intro": configuration["SHOW_INTRO"],
