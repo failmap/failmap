@@ -308,7 +308,7 @@ requests==2.31.0
     #   tldextract
 requests-file==1.5.1
     # via tldextract
-requests-toolbelt==1.0.0
+requests-toolbelt @ git+https://github.com/requests/toolbelt@c73ad2c204a2e0cd5617a836ac536d5e06778ab0
     # via -r requirements.in
 retry==0.9.2
     # via -r requirements.in
