@@ -10,6 +10,7 @@ import uuid
 import pyexcel
 from django.utils.text import slugify
 
+from websecmap.app import log
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 import json
 
@@ -117,7 +118,6 @@ def create_pivot_data(scan_types: List[str], layers: List[str]) -> List[Dict[str
             endpoint_records = carthesian_product_for_scan(scan)
             for pivot_record in pivot_records:
                 for endpoint_record in endpoint_records:
-                    # the endpoint record ends with arbitrary KV data, which might differ per record
                     new_record = {**endpoint_record, **scan_data, **pivot_record}
 
                     # for some reason the stuff from other layers is still included.
@@ -256,12 +256,17 @@ def determine_pivot_records(scan_type: str, scan) -> List[dict[str, Any]]:
     if scan_type in {"tls_qualys_certificate_trusted"}:
         return pivot_tls_qualys_certificate_trusted(load_possible_json(scan.evidence))
 
+    # direct scan data in evidence, nothing else
+    if scan_type in {"bannergrab"}:
+        return [{"banner": scan.evidence}]
+
     if load_possible_json(scan.evidence):
         # assume this is a single dict, and not a list of dicts...
         return pivot_generic_records([load_possible_json(scan.evidence)])
 
     # return at least one record, so everything can be pivoted even if there is no specialized evidence.
     # todo: you can at least split up rating determined on in day, month and year.
+    log.error(scan_type)
     return [{"default": 1}]
 
 
