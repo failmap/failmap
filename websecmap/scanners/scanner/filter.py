@@ -120,11 +120,13 @@ def apply_organzation_or_endpoint_filter_before_url_filter(
         urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter)
 
     # retrieve a minimal amount of data:
-    urls = urls.only("id", "url")
+    # is_dead might cause a N+1 when logging things
+    urls = urls.only("id", "url", "is_dead")
 
     # make sure all urls are unique (some are shared between organizations, or a custom query might dupe them)
     urls = unique_and_random(urls)
     log.info("Discovering HTTP endpoints for %s urls.", len(urls))
+    log.debug(urls[:10])
 
     return urls
 

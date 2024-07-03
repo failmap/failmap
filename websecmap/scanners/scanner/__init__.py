@@ -125,7 +125,7 @@ def q_configurations_to_scan(level: str = "url"):
         # log.debug("No scanning configuration defined, not filtering.")
         return Q()
 
-    log.debug("Adding %s level configurations: %s" % (level, configurations))
+    # log.debug("Adding %s level configurations: %s" % (level, configurations))
 
     qs = Q()
 
