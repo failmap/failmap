@@ -113,6 +113,7 @@ def create_pivot_data(scan_types: List[str], layers: List[str]) -> List[Dict[str
                 "scan_type": scan.type,
                 "scan_rating": scan.rating,
                 "scan_rating_determined_on": scan.rating_determined_on.isoformat(),
+                "scan_last_scan_moment": scan.last_scan_moment.isoformat(),
                 "is_explained": scan.comply_or_explain_is_explained,
             }
             endpoint_records = carthesian_product_for_scan(scan)

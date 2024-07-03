@@ -439,6 +439,7 @@ def test_create_pivot_data(db, current_path):
             "organization_name": "organization_name",
             "scan_rating": "0",
             "scan_rating_determined_on": "2020-01-01T00:00:00+00:00",
+            "scan_last_scan_moment": "2020-01-01T00:00:00+00:00",
             "scan_type": "scan_type_1",
             "url": "url_1.nl",
         },
@@ -459,6 +460,7 @@ def test_create_pivot_data(db, current_path):
             "organization_name": "org_2",
             "scan_rating": "0",
             "scan_rating_determined_on": "2020-01-01T00:00:00+00:00",
+            "scan_last_scan_moment": "2020-01-01T00:00:00+00:00",
             "scan_type": "scan_type_2",
             "url": "url_2.nl",
         },
@@ -489,6 +491,7 @@ def test_create_pivot_data(db, current_path):
         "organization_name": ["organization_name"],
         "scan_rating": ["0"],
         "scan_rating_determined_on": ["2020-01-01T00:00:00+00:00"],
+        "scan_last_scan_moment": ["2020-01-01T00:00:00+00:00"],
         "scan_type": ["scan_type_1"],
         "url": ["url_1.nl"],
     }
