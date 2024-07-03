@@ -5,10 +5,11 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Union, Any, Dict
 
 from django.db.models import Q
+from django.forms import model_to_dict
 
 from websecmap.celery import Task, app
 from websecmap.organizations.models import Organization, Url
-from websecmap.reporting.models import ScanPolicy, UrlReport
+from websecmap.reporting.models import ScanPolicy, UrlReport, LatestUrlReport
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, ScanSubject, UrlGenericScan
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
@@ -1008,6 +1009,19 @@ def save_url_report(url: Url, date: datetime, calculation, is_the_newest=False):
 
     # Make sure the new urlreport is seen as the latest, so retrieval of the last report is a direct lookup
     url_report.is_the_newest = is_the_newest
+
+    # in case this is the newest urlreport, also save it to the LatestUrlReport, which only contains the latest
+    # report.
+    if is_the_newest:
+        try:
+            LatestUrlReport.objects.all().filter(url=url).delete()  # make sure there is only one latest per url
+            new_latest = model_to_dict(url_report, exclude=["id"])  # not the id, use the database sequence
+            new_latest["url"] = url  # url has to be an url instance, which is lost on model_to_dict.
+            new_latest["calculation"] = calculation  # calculation is not exported to dict because of compression
+            LatestUrlReport.objects.create(**new_latest)
+        except BaseException as e:
+            log.error(e)
+
     # u.save()
     return url_report
 

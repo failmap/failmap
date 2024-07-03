@@ -2075,6 +2075,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "map.highlevelstatistic", "label": "📈 Organization statistics"},
             {"name": "scanners.plannedscanstatistic", "label": "📊 Planned Scans Stats"},
             {"name": "reporting.urlreport", "label": "📑 Url Reports"},
+            {"name": "reporting.latesturlreport", "label": "📑 Url Reports (latest)"},
             {"name": "map.organizationreport", "label": "📑 Organization Reports"},
             {"name": "map.maphealthreport", "label": "📑 Map Health Reports"},
             {"name": "scanners.domainip", "label": "IP Addresses (all data)"},

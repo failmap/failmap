@@ -2,11 +2,14 @@ from django.contrib import admin
 from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
+from websecmap.app.admin import TooManyRecordsPaginator
 from websecmap.reporting import models
 
 
 @admin.register(models.UrlReport)
 class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    paginator = TooManyRecordsPaginator
+
     # do NOT load the calculation field, as that will be slow.
     # https://stackoverflow.com/questions/34774028/how-to-ignore-loading-huge-fields-in-django-admin-list-display
     def get_queryset(self, request):
@@ -76,6 +79,12 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     save_as = True
 
     readonly_fields = ["calculation"]
+
+
+@admin.register(models.LatestUrlReport)
+class LatestUrlReportAdmin(UrlRatingAdmin):
+    # just 100.000 records, should be ok.
+    ...
 
 
 @admin.register(models.ScanPolicy)

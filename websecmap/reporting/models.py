@@ -314,6 +314,46 @@ class UrlReport(
         return f"{self.high},{self.medium},{self.low}  - {self.at_when.date()}"
 
 
+class LatestUrlReport(
+    AllIssuesCombined,
+    JudgedEndpoints,
+    UrlIssues,
+    EndpointIssues,
+    AllExplainedIssuesCombined,
+    ExplainedJudgedEndpoints,
+    ExplainedUrlIssues,
+    ExplainedEndpointIssues,
+):
+    # This is exactly the same as urlreport, but only the ones with 'is_the_newest' are stored in this table.
+    # The reason is that the table of UrlReport is very large: one report per day per url on average which makes
+    # any form of rapidly searching hard given the amount of disk/ram is needed to walk over the results.
+    # once cached it IS fast of course, but this table is very much out of hand.
+    # This table is created and filled when new UrlReports are made automatically and only contains the latest
+    # urlreport per url. This should make searching in + very fast. The search before this fix takes over 500 seconds
+    # for very large organizations with a lot of url reports.
+
+    # and no you cannot subclass UrlReport!
+
+    url = models.ForeignKey(Url, on_delete=models.CASCADE)
+
+    at_when = models.DateTimeField(db_index=True)
+    calculation = CompressedJSONField(
+        help_text="Contains JSON with a calculation of all scanners at this moment. The rating can "
+        "be spread out over multiple endpoints, which might look a bit confusing. Yet it "
+        "is perfectly possible as some urls change their IP every five minutes and "
+        "scans are spread out over days."
+    )
+
+    is_the_newest = models.BooleanField(
+        default=False,
+        help_text="The newest url report allows for quick retrieval of the current state, it prevents complex queries.",
+        blank=True,
+    )
+
+    class Meta:
+        managed = True
+
+
 # todo: we can make a vulnerabilitystatistic per organization type or per tag. But not per country, list etc.
 
 
