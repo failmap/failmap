@@ -822,10 +822,16 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     @staticmethod
     def visit(obj: Url):
-        if not obj.endpoint_set.count():
-            return ""
+        # also add the direct url in this data, even if there are no endpoints.
+        string = (
+            f"<a href='http://{obj.url}' target='_blank' rel='nofollow'>blind http</a> <br />"
+            f"<a href='https://{obj.url}' target='_blank' rel='nofollow'>blind https</a> <br />"
+        )
 
-        string = "".join(
+        if not obj.endpoint_set.count():
+            return format_html(string)
+
+        string += "".join(
             f"<a href='{endpoint.protocol}://{obj.url}:{endpoint.port}' target='_blank'>"
             f"{endpoint.protocol}/{endpoint.port}</a><br />"
             for endpoint in obj.endpoint_set.all()

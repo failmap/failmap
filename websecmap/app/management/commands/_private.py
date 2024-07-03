@@ -3,8 +3,10 @@ import json
 import logging
 import time
 from collections import Counter
+from typing import List
 
 import kombu.exceptions
+import tldextract
 from celery.result import AsyncResult, ResultSet
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -188,7 +190,7 @@ class GenericTaskCommand(TaskCommand):
 
         if options["url_addresses"]:
             # create a case-insensitive filter to match organizations by name
-            regex = "^(" + "|".join(options["url_addresses"]) + ")$"
+            regex = "^(" + "|".join(extract_urls(options["url_addresses"])) + ")$"
             urls_filter = {"url__iregex": regex}
 
         if options["organization_type"]:
@@ -267,7 +269,7 @@ class ScannerTaskCommand(TaskCommand):
 
         if options["url_addresses"]:
             # create a case-insensitive filter to match organizations by name
-            regex = "^(" + "|".join(options["url_addresses"]) + ")$"
+            regex = "^(" + "|".join(extract_urls(options["url_addresses"])) + ")$"
             urls_filter = {"url__iregex": regex}
 
         if options["organization_type"]:
@@ -366,7 +368,7 @@ class DiscoverTaskCommand(TaskCommand):
 
         if options["url_addresses"]:
             # create a case-insensitive filter to match organizations by name
-            regex = "^(" + "|".join(options["url_addresses"]) + ")$"
+            regex = "^(" + "|".join(extract_urls(options["url_addresses"])) + ")$"
             urls_filter = {"url__iregex": regex}
 
         if options["organization_type"]:
@@ -386,6 +388,15 @@ class DiscoverTaskCommand(TaskCommand):
 
         # compose set of tasks to be executed
         return self.scanner_module.compose_manual_discover_task(organization_filter, urls_filter)
+
+
+def extract_urls(urls: List[str]) -> List[str]:
+    extracted = []
+    for url in urls:
+        parsed = tldextract.extract(url)
+        extracted.append(parsed.fqdn)
+
+    return extracted
 
 
 class VerifyTaskCommand(TaskCommand):
@@ -422,7 +433,7 @@ class VerifyTaskCommand(TaskCommand):
 
         if options["url_addresses"]:
             # create a case-insensitive filter to match organizations by name
-            regex = "^(" + "|".join(options["url_addresses"]) + ")$"
+            regex = "^(" + "|".join(extract_urls(options["url_addresses"])) + ")$"
             urls_filter = {"url__iregex": regex}
 
         if options["country"]:
