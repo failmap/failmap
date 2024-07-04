@@ -8,6 +8,7 @@ they use fake banners, that's much more fun :)
 
 import contextlib
 import logging
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 import nmap
@@ -16,8 +17,8 @@ from celery import Task, group
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.scanners import init_dict
-from websecmap.scanners.scanner.http import get_endpoint
-from websecmap.scanners.models import EndpointGenericScan, UrlIp
+from websecmap.scanners.scanner.http import get_endpoint, force_get_endpoint, get_ipv4, kill_endpoint, get_ipv6
+from websecmap.scanners.models import EndpointGenericScan, UrlIp, Endpoint
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, unique_and_random
 from websecmap.scanners.scanner.banners.detect_version import (
@@ -287,6 +288,9 @@ def ip_version(ip: str) -> int:
 
 
 def process_result(ip: str, port: int, result: Dict[Any, Any]):
+    # todo: there are hosts missing from the input lists, those endpoints should be set to dead.
+    #  this is now worked around in verify().
+
     log.debug("processing nmap scan result on %s:%s results: %s", ip, port, result)
 
     """
@@ -359,9 +363,17 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
         if protocol == "http" and port in {443, "443", 8443, "8443"}:
             protocol = "https"
 
-        endpoint = get_endpoint(
-            url_id=url.url.id, port=port, protocol=protocol, ip_version=ip_version(ip), origin="bannergrab_nmap"
-        )
+        # for SSH this scanner is in control, so ssh can be _force_get, the rest is only get.
+        # because this scanner is in charge of SSH ports. Will also verify them in case they are not resolvable etc.
+        # tie this to 22 as the verify is also tied to that still.
+        if protocol == "ssh" and port == 22:
+            endpoint = force_get_endpoint(
+                url_id=url.url.id, port=port, protocol=protocol, ip_version=ip_version(ip), origin="bannergrab_nmap"
+            )
+        else:
+            endpoint = get_endpoint(
+                url_id=url.url.id, port=port, protocol=protocol, ip_version=ip_version(ip), origin="bannergrab_nmap"
+            )
 
         if not endpoint:
             log.warning("No endpoint found for url: %s, port: %s, protocol: %s", url.url.id, port, protocol)
@@ -446,3 +458,128 @@ def clean_all_other_ports(host, do_not_clean_these_ports):
                 evidence="",
                 message="Port not found anymore.",
             )
+
+
+def get_ssh_scans():
+    return EndpointGenericScan.objects.all().filter(
+        type="bannergrab",
+        last_scan_moment__lte=datetime.now(timezone.utc) - timedelta(days=5),
+        is_the_latest_scan=True,
+        endpoint__is_dead=False,
+        endpoint__protocol="ssh",
+    )
+
+
+@app.task(queue="storage", ignore_result=True)
+def verify():
+    # The normal scanner does not remove non-existing endpoints. This is because ip's that cannot be scanned or
+    # have no results are not in output of the all_hosts() command. Because of this mismatch very old endpoints
+    # where present in the database and their (obsolete) metrics persisted in reports.
+
+    # This code performs a verify on all hosts that have not had updated results for a while. It will do this in two
+    # steps. The first is to just see if the ip resolves at all. If not, the endpoint is killed right away.
+    # The second step will perform an ssh scan with NMAP to the specific host. If there is no output, the
+    # endpoint is killed.
+
+    # An example, extranet.poraad.nl, has an IP address but blocks traffic from unknown sources. This wasn't the case
+    # when scanning started. Possibly the scan was blocked.
+
+    # first pass, saves on NMAP scans, find all hosts that don't resolve anymore, these are easy to remove.
+    # if there are no ip's for this host, mark these endpoints as dead.
+    # otherwise they would have still been scanned and there would be no banner
+    for scan in get_ssh_scans():
+        endpoint = scan.endpoint
+        if endpoint.ip_version == 4:
+            ipv4 = get_ipv4(endpoint.url.url)
+            if not ipv4:
+                kill_endpoint(
+                    endpoint.protocol, endpoint.url.id, endpoint.port, endpoint.ip_version, "bannergrab_nmap_no_resolve"
+                )
+        if endpoint.ip_version == 6:
+            ipv6 = get_ipv6(endpoint.url.url)
+            if not ipv6:
+                kill_endpoint(
+                    endpoint.protocol, endpoint.url.id, endpoint.port, endpoint.ip_version, "bannergrab_nmap_no_resolve"
+                )
+
+    # second pass: these hosts still resolve but do not have NMAP output. Because they are missing from the output
+    # as only found hosts with results are in the output. So go over them one by one and kill the endpoint if there
+    # is no output
+    scans = get_ssh_scans()
+    for scan in scans:
+        (
+            get_nmap_result_for_one_host.s(scan.endpoint.url.url, scan.endpoint.ip_version, str(scan.endpoint.port))
+            | store_nmap_verification.s(scan.endpoint.id)
+        ).apply_async()
+
+
+@app.task(queue="bannergrab")
+def get_nmap_result_for_one_host(url: str, ip_version: int, port: str):
+    ip = get_ipv4(url) if ip_version == 4 else get_ipv6(url)
+    results = start_scanner([ip], port)
+    # make sure this is serializable by running all_hosts.
+    hosts = results.all_hosts()
+    log.debug("Found %s hosts for %s", len(hosts), url)
+    return results[hosts[0]] if hosts else ""
+
+
+@app.task(queue="storage", ignore_result=True)
+def store_nmap_verification(output, endpoint_id: int):
+    endpoint = Endpoint.objects.all().filter(id=endpoint_id).first()
+    if not endpoint:
+        return
+
+    # host seems down
+    if not output:
+        kill_endpoint(endpoint.protocol, endpoint.url.id, endpoint.port, endpoint.ip_version, "bannergrab_nmap_out")
+
+    # filtered host or something else?
+    """
+    output['185.84.143.112']
+    {
+      'hostnames': [
+        {
+          'name': '',
+          'type': ''
+        }
+      ],
+      'addresses': {
+        'ipv4': '185.84.143.112'
+      },
+      'vendor': {},
+      'status': {
+        'state': 'up',
+        'reason': 'syn-ack'
+      },
+      'tcp': {
+        22: {
+          'state': 'filtered',
+          'reason': 'no-response',
+          'name': 'ssh',
+          'product': '',
+          'version': '',
+          'extrainfo': '',
+          'conf': '3',
+          'cpe': ''
+        }
+      }
+    }
+    """
+    if "tcp" not in output:
+        kill_endpoint(endpoint.protocol, endpoint.url.id, endpoint.port, endpoint.ip_version, "bannergrab_nmap_no_tcp")
+        return
+
+    # note that ports are a string.
+    # use a separate source message in case this ever changes to an int.
+    # this SHOULD be ssh, not port 22, this ties the ssh scans to this specific port...
+    # there could be multiple ports as well, so this isn't really nicely designed.
+    if "22" not in output["tcp"]:
+        kill_endpoint(endpoint.protocol, endpoint.url.id, endpoint.port, endpoint.ip_version, "bannergrab_nmap_no_22")
+        return
+
+    # only open is fine.
+    # https://nmap.org/book/man-port-scanning-basics.html
+    if output["tcp"]["22"]["state"] in ["filtered", "closed", "open|filtered", "closed|filtered"]:
+        kill_endpoint(
+            endpoint.protocol, endpoint.url.id, endpoint.port, endpoint.ip_version, "bannergrab_nmap_not_open"
+        )
