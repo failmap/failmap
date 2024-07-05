@@ -53,6 +53,7 @@ from websecmap.scanners.scanner.filter import (
     filter_endpoints_only_as_endpoints,
 )
 from websecmap.scanners.scanner.utils import IP_QUEUES
+from django.db import transaction
 
 # suppress InsecureRequestWarning, we do those request on purpose.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -584,6 +585,8 @@ def get_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin:
     return save_endpoint(protocol, url_id, port, ip_version, origin, create=False)
 
 
+# This transaction prevents creation of multiple endpoints with the same data
+@transaction.atomic
 def save_endpoint(protocol: str, url_id: int, port: int, ip_version: int, origin: str = "", create=True) -> Endpoint:
     log.debug(
         "Endpoint save attempt: protocol: %s, url_id: %s, port: %s, ip_version: %s, origin: %s.",
