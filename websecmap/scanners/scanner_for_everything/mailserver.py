@@ -27,6 +27,10 @@ def get_mailservers(url: str) -> List:
     if not answer:
         return []
 
+    # https://github.com/internetstandards/Internet.nl-dashboard/issues/525
+    if answer is True:
+        return []
+
     # transform the rrset to something we can work with (a bit)
     # this saves the "oh, the prio 40 record is gone, check if we had that etc etc" by making it a simple list
     records = []

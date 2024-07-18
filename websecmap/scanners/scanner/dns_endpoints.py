@@ -263,6 +263,10 @@ def has_soa(url: str) -> bool:
     if answer is False:
         return False
 
+    # https://github.com/internetstandards/Internet.nl-dashboard/issues/525
+    if answer is True:
+        return True
+
     if answer.response:
         return True
 
@@ -374,7 +378,8 @@ def get_dns_records(url: str, record_type):
         # after deliberation the conclusion is that even with servfail many
         # tests from internet.nl can still be performed. A domain such as servfail.nl
         # can have scores.
-        return None
+        # accept servfail as a valid result: https://github.com/internetstandards/Internet.nl-dashboard/issues/525
+        return True
 
     return None
 
@@ -412,7 +417,8 @@ def get_dns_records_accepting_no_answer(url: str, record_type):
         # give an error because nameservers are configured by hand.
         # This happens when all configured servers return a SERVFAIL.
         log.debug("No DNS nameservers found. %s %s", url, record_type)
-        return None
+        # accept servfail as a valid result: https://github.com/internetstandards/Internet.nl-dashboard/issues/525
+        return True
 
     return None
 
@@ -506,6 +512,10 @@ def get_ips_from_dns(url: str, record_type: str = "A") -> List[str]:
         return ips
 
     if answer is False:
+        return ips
+
+    # accept servfail as a valid result: https://github.com/internetstandards/Internet.nl-dashboard/issues/525
+    if answer is True:
         return ips
 
     ips.extend(answer_line.to_text() for answer_line in answer)
