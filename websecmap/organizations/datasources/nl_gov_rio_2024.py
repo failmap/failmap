@@ -29,7 +29,6 @@ def download_all():
 
 
 def download_single(url: str):
-    log.error(f"Downloading {url}")
     response = requests.get(url, timeout=30)
 
     if response.status_code != 200:
@@ -38,7 +37,6 @@ def download_single(url: str):
     data = csv_to_dict(response.content.decode("utf-8"))
 
     for row in data:
-        log.error(row)
         surrogate = row.pop("Officiële naam organisatie")
         domain = row.pop("domeinnaamregistratie")
         metadata = row
@@ -49,7 +47,6 @@ def download_single(url: str):
 
 def csv_to_dict(data: str) -> List[Dict[str, Any]]:
     lines = data.splitlines()
-    log.error(f"Data: {lines}")
     data = csv.DictReader(lines, quotechar='"', delimiter=";", quoting=csv.QUOTE_ALL)
     return list(data)
 
