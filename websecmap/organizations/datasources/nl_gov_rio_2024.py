@@ -18,20 +18,24 @@ def download_all():
         "Agentschappen",
         "Ministeries",
         "Inspecties",
-        "Adviescolleges.",
+        "Adviescolleges",
         "Zelfstandige_bestuursorganen",
         "Politie",
         "Rechtspraak",
     ]
 
     for file in files:
-        download_single(url + file + ".csv")
+        download_single(f"{url}{file}.csv")
 
 
 def download_single(url: str):
+    log.error(f"Downloading {url}")
     response = requests.get(url, timeout=30)
 
-    data = csv_to_dict(response.text)
+    if response.status_code != 200:
+        log.error(f"Failed to download from rio {url} (status {response.status_code})")
+
+    data = csv_to_dict(response.content.decode("utf-8"))
 
     for row in data:
         log.error(row)
@@ -44,7 +48,9 @@ def download_single(url: str):
 
 
 def csv_to_dict(data: str) -> List[Dict[str, Any]]:
-    data = csv.DictReader(data.splitlines(), quotechar='"', delimiter=";", quoting=csv.QUOTE_ALL)
+    lines = data.splitlines()
+    log.error(f"Data: {lines}")
+    data = csv.DictReader(lines, quotechar='"', delimiter=";", quoting=csv.QUOTE_ALL)
     return list(data)
 
 
