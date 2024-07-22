@@ -199,7 +199,9 @@ def match_and_place_row(row: List[str]) -> Dict[str, str]:
         return {"state": "already_present", "domain": domain, "key": organization_surrogate_key}
 
     # find the organization that use this surrogate
-    organizations = get_organizations_by_surrogate_key(organization_surrogate_key, "websiteregister_rijksoverheid")
+    organizations = get_organizations_by_surrogate_key(
+        organization_surrogate_key, "websiteregister_rijksoverheid", "websiteregister_rijksoverheid"
+    )
 
     if not organizations:
         log.error("Could not find an organization %s, could not place domains %s.", organization_surrogate_key, domain)
@@ -211,8 +213,15 @@ def match_and_place_row(row: List[str]) -> Dict[str, str]:
     return {"state": "success", "domain": domain, "key": organization_surrogate_key}
 
 
-def get_organizations_by_surrogate_key(key: str, scope: str = "websiteregister_rijksoverheid") -> List[Organization]:
+def get_organizations_by_surrogate_key(
+    key: str,
+    surrogate_id_name: str = "websiteregister_rijksoverheid",
+    used_in_dataset: str = "websiteregister_rijksoverheid",
+) -> List[Organization]:
     surrogates = OrganizationSurrogateId.objects.all().filter(
-        surrogate_id=key, surrogate_id_name=scope, organization__is_dead=False
+        surrogate_id=key,
+        surrogate_id_name=surrogate_id_name,
+        used_in_dataset=used_in_dataset,
+        organization__is_dead=False,
     )
     return list({surrogate.organization for surrogate in surrogates})

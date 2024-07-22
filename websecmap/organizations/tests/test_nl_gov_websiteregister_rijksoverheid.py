@@ -38,11 +38,13 @@ def test_match_and_place_row(db, caplog):
         organization=new_organization,
         surrogate_id="AZ DPC Online Advies",
         surrogate_id_name="websiteregister_rijksoverheid",
+        used_in_dataset="websiteregister_rijksoverheid",
     )
     OrganizationSurrogateId.objects.create(
         organization=new_organization,
         surrogate_id="AZ TODO Online Advies",
         surrogate_id_name="websiteregister_rijksoverheid",
+        used_in_dataset="websiteregister_rijksoverheid",
     )
 
     # The www domain will not be added, as it will be discovered automatically
@@ -74,6 +76,7 @@ def test_import_websiteregister(db):
         organization=new_organization,
         surrogate_id="AZ DPC Online Advies",
         surrogate_id_name="websiteregister_rijksoverheid",
+        used_in_dataset="websiteregister_rijksoverheid",
     )
 
     error, success = import_websiteregister(location)

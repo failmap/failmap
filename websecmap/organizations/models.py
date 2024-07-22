@@ -12,6 +12,7 @@ from django_countries.fields import CountryField
 from jsonfield import JSONField
 from taggit.managers import TaggableManager
 from validators import domain
+import json
 
 log = logging.getLogger(__package__)
 
@@ -199,9 +200,9 @@ class Organization(models.Model):
     def altnames(self) -> List[str]:
         return list(self.alternative_names.all().values_list("name", flat=True))
 
-    def add_url(self, url: str, origin: str = ""):
+    def add_url(self, url: str, origin: str = "", metadata: dict = None):
         # add url to database with validation etc:
-        url = Url.add(url, origin=origin)
+        url = Url.add(url, origin=origin, metadata=metadata)
 
         # then add it to the organization
         url.organization.add(self)
@@ -681,7 +682,7 @@ class Url(models.Model):
         return True
 
     @staticmethod
-    def add(url: str, origin: str = "") -> Optional["Url"]:
+    def add(url: str, origin: str = "", metadata: dict = None) -> Optional["Url"]:
         # origin: where the url came from, for example the name of the scanner.
 
         # Rebuild the url based on the information present:
@@ -704,6 +705,10 @@ class Url(models.Model):
             new_url = Url(url=url)
             new_url.created_on = datetime.now(timezone.utc)
             new_url.origin = origin
+            try:
+                new_url.internal_notes = json.dumps(metadata) if metadata else ""
+            except json.JSONDecodeError:
+                log.error("Failed to dump metadata as json: %s", metadata)
             new_url.save()
             return new_url
 
