@@ -27,13 +27,14 @@ def test_check_ownership(db):
     assert UrlGenericScan.objects.all().count() == 0
 
     url = Url.objects.create(url="basisbeveiliging.nl")
-    UrlWhois.objects.create(url=url, is_the_latest=True, registrant="Gemeente Zutphen")
+    # Different case is no problem.
+    UrlWhois.objects.create(url=url, is_the_latest=True, registrant="gemeente ZUTPHEN")
     url.organization.add(org)
     check_ownership()
     first_scan = UrlGenericScan.objects.all().filter(type="whois_domain_ownership").first()
     assert first_scan.rating == "whois_internal_ownership"
     assert (
-        first_scan.evidence == '{"found_registrant": "Gemeente Zutphen", '
+        first_scan.evidence == '{"found_registrant": "gemeente ZUTPHEN", '
         '"known_acceptable_registrants": ["Gemeente Zutphen"]}'
     )
 

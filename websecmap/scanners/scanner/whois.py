@@ -58,8 +58,11 @@ def check_ownership():
             store_url_scan_result(SCANNER_NAME, url.id, "whois_unknown_ownership", "whois_unknown_ownership", evidence)
             continue
 
-        ownership = "whois_internal_ownership" if whois.registrant in registrants else "whois_external_ownership"
-        store_url_scan_result(SCANNER_NAME, url.id, ownership, ownership, evidence)
+        # comparison is done in lowercase to make obvious typos not a problem. Aka: "De Connectie" / "de CONNECTIe"
+        lc_registrants = [registrant.lower() for registrant in registrants]
+
+        owner = "whois_internal_ownership" if whois.registrant.lower() in lc_registrants else "whois_external_ownership"
+        store_url_scan_result(SCANNER_NAME, url.id, owner, owner, evidence)
 
 
 def get_registrants_for_url(url: Url) -> List[str]:
