@@ -591,6 +591,30 @@ class EndpointGenericScan(GenericScanMixin):
         blank=True,
     )
 
+    """
+    This table will become very big and most indexes will center around 'is the latest'.
+    Selecting count(*) of is the latest results in 5 million rows and takes 2.5 minutes.
+    The table is now 70 gigabyte. The table has 52.635.575 records.
+
+    KEY `scanners_endpointgenericscan_last_scan_moment_5e29c0d7` (`last_scan_moment`),
+    KEY `scanners_endpointgenericscan_type_89fad377` (`type`),
+    KEY `scanners_endpointgen_endpoint_id_b17a0f68_fk_scanners_` (`endpoint_id`),
+    KEY `scanners_endpointgenericscan_rating_02a25c13` (`rating`),
+    KEY `scanners_endpointgenericscan_rating_determined_on_763a59c3` (`rating_determined_on`),
+    KEY `scanners_en_rating__48283f_idx` (`rating_determined_on`),
+    KEY `scanners_endpointg_idx_comply_is_sca_type_rating_rating` (
+        `comply_or_explain_is_explained`,`is_the_latest_scan`,`type`,`rating`,`rating_determined_on`),
+    KEY `scanners_endpointg_idx_comply_is_sca_endpoi_type_rating` (
+        `comply_or_explain_is_explained`,`is_the_latest_scan`,`endpoint_id`,`type`,`rating_determined_on` DESC),
+
+    And even more to solve even more table scans
+    CREATE INDEX scanners_epgs_is_the_latest_scan_type ON scanners_endpointgenericscan (type, is_the_latest_scan)
+    CREATE INDEX scanners_epgs_scan_type_endpoint ON scanners_endpointgenericscan (type, endpoint_id)
+
+    Partitioning is not possible in mysql. It does not allow foreign keys (WAT) and changing the sql_mode will
+    prevent access to the data.
+    """
+
     def __str__(self):
         return f"{self.rating_determined_on.date()}: {self.type} {self.rating} on {self.endpoint}"
 
