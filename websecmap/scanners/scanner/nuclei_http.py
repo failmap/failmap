@@ -364,7 +364,7 @@ def store_verify_results(raw_nuclei_data: bin, endpoint_id: int, scan_type: str)
     """
     raw_nuclei_records = convert_nuclei_data_to_json(raw_nuclei_data)
     if not raw_nuclei_records:
-        neutralize_missing_metrics([scan_type], endpoint_id=endpoint_id)
+        neutralize_specific_metric([scan_type], endpoint_id=endpoint_id)
         return
 
     # Story anything you get back under the known category. It could be that scans have been moved to
@@ -419,6 +419,23 @@ def neutralize_missing_metrics(current_categories_of_metrics: List[str], endpoin
             is_the_latest_scan=True,
         )
         .exclude(type__in=current_categories_of_metrics)
+        .exclude(rating="clean")
+    )
+    for epgs_scan in non_relevant_scans:
+        store_endpoint_scan_result(epgs_scan.type, endpoint_id, "clean", "clean", "")
+
+
+def neutralize_specific_metric(current_categories_of_metrics: List[str], endpoint_id: int):
+    # it's not clear why one would want to use the neutralize_missing_metrics routine:
+    # - A verification is for a specific scan type. And thus exluding that same scan type from cleanup
+    #   will prevent the neutralization for that specific type will never happen(!)
+    non_relevant_scans = (
+        EndpointGenericScan.objects.all()
+        .filter(
+            endpoint_id=endpoint_id,
+            type__in=[current_categories_of_metrics],
+            is_the_latest_scan=True,
+        )
         .exclude(rating="clean")
     )
     for epgs_scan in non_relevant_scans:
