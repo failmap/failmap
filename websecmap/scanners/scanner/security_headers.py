@@ -800,4 +800,13 @@ def remove_random_identifiers(string: str) -> str:
     string = remove_guid_from_string(string)
     string = re.sub(r"jsessionid=[A-Za-z0-9]*", "jsessionid=<TOKEN_OR_ID>", string)
     string = re.sub(r"crypt=[A-Za-z0-9]*", "crypt=<TOKEN_OR_ID>", string)
+
+    # this basiscally contains all cookies, user agent and whatever dynamic data is found on the site.
+    # so this will be extremely dynamic. Just strip everything and replace it with a placeholder for the dynamic data.
+    string = re.sub(
+        r"https:\/\/region1\.google-analytics\.com/g/collect?.*",
+        "https://region1.google-analytics.com/g/collect?<TRACKING_DATA>",
+        string,
+    )
+
     return string

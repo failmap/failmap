@@ -347,3 +347,20 @@ def test_remove_random_identifiers():
 
     result = remove_random_identifiers("d32e16a3-1474-4861-a954-cc481b8aa509")
     assert result == "<GUID>"
+
+    result = remove_random_identifiers(
+        "https://region1.google-analytics.com/g/collect?v=2&tid=G-0RSX4L0ZPZ&"
+        "gtm=45je47t0v873081270z8832271741za200zb832271741&_p=1722418204159&"
+        "gcs=G101&gcd=13q3v3q2q7&npa=1&dma_cps=-&dma=1&tag_exp=95250753&ul=en&"
+        "cid=1075964602.1722418205&sr=1280x720&uaa=x86&uab=64&"
+        "uafvl=Not%252FA)Brand%3B99.0.0.0%7CHeadlessChrome%3B115.0.5790.75%7"
+        "CChromium%3B115.0.5790.75&uamb=0&uam=&uap=Linux&uapv=4.15.0&uaw=0&frm=0"
+        "&pscdl=denied&ngs=1&_s=1&sid=1722418205&sct=1&seg=0&dl=https%3A%2F%2F"
+        "www.universiteitleiden.nl%2Fen%2Fhumanities%2Finstitute-for-area-studies&"
+        "dt=Institute%20for%20Area%20Studies%3A%20Asia%20%26%20the%20Middle%20East%"
+        "20-%20Leiden%20University&en=page_view&_fv=1&_nsi=1&_ss=1&ep.faculty_name="
+        "Humanities&ep.page_type=organizationlanding&ep.cookies_accepted=false&"
+        "up.cookies_geaccepteerd=false&tfd=1730"
+    )
+
+    assert result == "https://region1.google-analytics.com/g/collect?<TRACKING_DATA>"

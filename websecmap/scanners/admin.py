@@ -9,7 +9,7 @@ from jet.filters import RelatedFieldAjaxListFilter
 from websecmap.app.admin import TooManyRecordsPaginator
 from websecmap.map.admin import ordering_actions
 from websecmap.scanners import models
-from websecmap.scanners.models import Endpoint, Product, ProductHierarchy, State, ProductCookieIndicator
+from websecmap.scanners.models import Endpoint, Product, ProductHierarchy, State, ProductCookieIndicator, SecurityImpact
 from websecmap.scanners.proxy import check_proxy
 from websecmap.scanners.scanmanager import delete_metric_and_set_previous_to_latest
 from websecmap.scanners.scanner.banners.detect_version import add_excepted_banner_to_config, clean_and_detect
@@ -861,7 +861,7 @@ class ProductAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     @staticmethod
     def impact(obj):
-        return f"T: {obj.technology_presence_security_impact} P:{obj.login_panel_presence_security_impact}"
+        return f"Tech: {obj.technology_presence_security_impact} Portal:{obj.login_panel_presence_security_impact}"
 
     def tag_list(self, obj):
         return ", ".join(o.name for o in obj.tags.all())
@@ -971,6 +971,11 @@ class ScannerFindingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 class TagProxy(taggit.models.Tag):
     class Meta:
         proxy = True
+
+
+@admin.register(SecurityImpact)
+class SecurityImpactAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("id", "name")
 
 
 @admin.register(TagProxy)

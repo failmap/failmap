@@ -2,7 +2,15 @@ from datetime import datetime, timezone
 
 from websecmap.app import log
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, PlannedScan, Scanner, ScannerFinding
+from websecmap.scanners.models import (
+    Endpoint,
+    EndpointGenericScan,
+    PlannedScan,
+    Scanner,
+    ScannerFinding,
+    Product,
+    SecurityImpact,
+)
 from websecmap.scanners.scanner.nuclei_http import (
     compose_planned_verify_task,
     convert_nuclei_data_to_json,
@@ -17,6 +25,9 @@ from websecmap.scanners.scanner.nuclei_http import (
     store_new_scan_results,
     compose_verify_task,
     create_nuclei_scan_command,
+    rate_nuclei_portal_finding,
+    evidence_to_json,
+    rerate_portal_findings,
 )
 from constance.test import override_config
 
@@ -446,12 +457,63 @@ CITRIX_SCAN_RESULTS = """[
                   "matched-at": "https:///LogonPoint/tmindex.html"}}]"""
 
 
+def test_rate_nuclei_portal_finding(db, default_scan_metadata):
+    # nothing in the database, so an 'ok' rating which is the default
+    rating = rate_nuclei_portal_finding(evidence_to_json(CITRIX_SCAN_RESULTS))
+    assert rating == "ok"
+
+    # now add the product to the database, map it to this template and set it to high impact
+    sf = ScannerFinding()
+    sf.name = "nuclei_citrix_vpn_detect"
+    sf.scanner = Scanner.objects.get(name="nuclei_http")
+    sf.save()
+
+    sf2 = ScannerFinding()
+    sf2.name = "nuclei_netscaler_aaa_login"
+    sf2.scanner = Scanner.objects.get(name="nuclei_http")
+    sf2.save()
+
+    si = SecurityImpact.objects.create(**{"name": "high"})
+    si2 = SecurityImpact.objects.create(**{"name": "medium"})
+
+    prod = Product.objects.create(**{"name": "Citrix VPN"})
+    prod.login_panel_presence_security_impact = si
+    prod.scanner_finding_name_mapping.add(sf)
+    prod.save()
+
+    prod2 = Product.objects.create(**{"name": "Netscaler"})
+    prod2.login_panel_presence_security_impact = si2
+    prod2.scanner_finding_name_mapping.add(sf2)
+    prod2.save()
+
+    # make sure it's high, not medium. Both panels are present.
+    rating = rate_nuclei_portal_finding(evidence_to_json(CITRIX_SCAN_RESULTS))
+    assert rating == "high"
+
+    # add an endpointgeneric scan with a low rating and rerate.
+    url = Url.objects.create(**{"url": "example.com"})
+    endpoint = Endpoint.objects.create(**{"url": url, "protocol": "http"})
+    EndpointGenericScan.objects.create(
+        type="nuclei_exposed_panels",
+        rating="low",
+        evidence=CITRIX_SCAN_RESULTS,
+        endpoint=endpoint,
+        is_the_latest_scan=True,
+        rating_determined_on=datetime.now(timezone.utc),
+    )
+
+    rerate_portal_findings()
+
+    # first one, so a 'get' will work :)
+    assert EndpointGenericScan.objects.get(type="nuclei_exposed_panels", is_the_latest_scan=True).rating == "high"
+
+
 def test_get_templates_from_scan_results():
-    assert list(sorted(get_templates_from_scan_results(CITRIX_SCAN_RESULTS))) == list(
+    assert list(sorted(get_templates_from_scan_results(evidence_to_json(CITRIX_SCAN_RESULTS)))) == list(
         sorted(["citrix-vpn-panel", "netscaler-aaa-login-panel"])
     )
 
-    assert get_templates_from_scan_results("""[]""") == []
+    assert get_templates_from_scan_results(evidence_to_json("""[]""")) == []
 
 
 def test_nuclei_plan_verify(db, default_scan_metadata):

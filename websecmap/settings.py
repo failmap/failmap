@@ -2062,6 +2062,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "scanners.productvendor", "label": "🏢 Vendor"},
             {"name": "scanners.productgoal", "label": "🥅 Goal"},
             {"name": "scanners.productrelationship", "label": "🧑‍🤝‍🧑 Relationship"},
+            {"name": "scanners.securityimpact", "label": "🚥️ Security Impact"},
         ],
     },
     {

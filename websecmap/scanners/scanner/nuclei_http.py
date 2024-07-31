@@ -9,7 +9,7 @@ from websecmap.app import log
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, Scanner, ScannerFinding
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, Scanner, ScannerFinding, Product
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner import allowed_to_scan, constance_json_value, unique_and_random
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
@@ -217,7 +217,7 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
         urls_rescanned.append(url_id)
 
         # when something is clean up, it will be empty. So there is a scan but no data...
-        template_ids = get_templates_from_scan_results(current_scan.evidence)
+        template_ids = get_templates_from_scan_results(evidence_to_json(current_scan.evidence))
         if not template_ids:
             tasks.append(plannedscan.finish.si("verify", SCANNER_NAME, url_id))
             continue
@@ -244,14 +244,16 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
     return group(tasks)
 
 
-def get_templates_from_scan_results(processed_nuclei_data) -> List[str]:
+def evidence_to_json(processed_nuclei_data) -> Any:
     try:
-        json_data = json.loads(processed_nuclei_data)
+        return json.loads(processed_nuclei_data)
     except json.decoder.JSONDecodeError as e:
         log.debug("Nuclei data not parseable, %s", e)
         log.debug("Nuclei data: %s", processed_nuclei_data)
         return []
 
+
+def get_templates_from_scan_results(json_data, field="template-id") -> List[str]:
     if len(json_data) == 0:
         log.debug("No nuclei records found")
         return []
@@ -260,7 +262,7 @@ def get_templates_from_scan_results(processed_nuclei_data) -> List[str]:
 
     templates = []
     for result in json_data:
-        possible_result = result.get("template-id", "unknown")
+        possible_result = result.get(field, "unknown")
         if possible_result not in disabled_templates + ["unknown"]:
             templates.append(possible_result)
 
@@ -331,10 +333,12 @@ def store_new_scan_results(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[
         try:
             endpoint_id = host_to_endpoint_mapping[host]["endpoint"]
             for category_name, data in combined_metrics.items():
+                rating = rate_nuclei_finding(category_name, data)
+
                 store_endpoint_scan_result(
                     category_name,
                     endpoint_id,
-                    data["highest-severity"],
+                    rating,
                     "",
                     # Has to be readable by the verify scanner
                     json.dumps(data["findings"]),
@@ -353,6 +357,51 @@ def store_new_scan_results(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[
                     "exception": e,
                 },
             )
+
+
+def rate_nuclei_finding(nuclei_finding_name, data):
+    if nuclei_finding_name == "nuclei_exposed_panels":
+        return rate_nuclei_portal_finding(data["findings"])
+
+    return data["highest-severity"]
+
+
+# just so we can call it from a webinterface
+@app.task(queue="storage", ignore_result=True)
+def rerate_portal_findings():
+    scans = EndpointGenericScan.objects.all().filter(type="nuclei_exposed_panels", is_the_latest_scan=True)
+
+    for scan in scans:
+        rating = rate_nuclei_portal_finding(evidence_to_json(scan.evidence))
+        scan.rating = rating
+        scan.save()
+
+
+def rate_nuclei_portal_finding(findings_data: List[Dict[str, Any]]) -> str:
+    # scan templates are already converted to products. get that product and see the portal value for severity.
+    # this also has to include some meaning. Or will we do that in the description?
+    # developer / internal management tooling
+    # internal management tooling
+
+    templates = get_templates_from_scan_results(findings_data, "finding-name")
+
+    # Done: might be valuable to have the products stuff cached to prevent a ton of queries for the same
+    # products... It's just a few thousands queries. So whatever...
+    # get all portal names, then see if that portal has an associated product and a risk
+    impacts = []
+    products = Product.objects.all().filter(scanner_finding_name_mapping__name__in=templates)
+    for product in products:
+        if product.login_panel_presence_security_impact:
+            impacts.append(product.login_panel_presence_security_impact.name)
+
+    # and here we go, already need the prioritization of the impacts...
+    prios = ["ok", "low", "medium", "high"]
+    highest_impact = 0
+    for impact in impacts:
+        if prios.index(impact) > highest_impact:
+            highest_impact = prios.index(impact)
+
+    return prios[highest_impact]
 
 
 @app.task(queue="storage", ignore_result=True)
