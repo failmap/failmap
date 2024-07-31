@@ -433,7 +433,7 @@ def neutralize_specific_metric(current_categories_of_metrics: List[str], endpoin
         EndpointGenericScan.objects.all()
         .filter(
             endpoint_id=endpoint_id,
-            type__in=[current_categories_of_metrics],
+            type__in=current_categories_of_metrics,
             is_the_latest_scan=True,
         )
         .exclude(rating="clean")
