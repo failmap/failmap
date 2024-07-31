@@ -7,7 +7,13 @@ from django.core.management import call_command
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
-from websecmap.scanners.scanner.security_headers import analyze_website_headers, measure_hsts_header, clean_csp_header
+from websecmap.scanners.scanner.security_headers import (
+    analyze_website_headers,
+    measure_hsts_header,
+    clean_csp_header,
+    remove_guid_from_string,
+    remove_random_identifiers,
+)
 
 SECURITY_HEADERS = {
     "X-XSS-Protection": "1",
@@ -316,3 +322,28 @@ def test_test_clean_csp_header():
         == "manifest-src 'self'; media-src 'self' blob:; script-src 'self' "
         "'nonce-<TOKEN_OR_ID>' "
     )
+
+
+def test_remove_guid_from_string():
+    result = remove_guid_from_string("mijnantoor.nl%2Fview%2FEGW0001&state=d32e16a3-1474-4861-a954-cc481b8aa509&logie")
+    assert result == "mijnantoor.nl%2Fview%2FEGW0001&state=<GUID>&logie"
+
+    result = remove_guid_from_string("d32e16a3-1474-4861-a954-cc481b8aa509 d32e16a3-1474-4861-a954-cc481b8aa509")
+    assert result == "<GUID> <GUID>"
+
+    result = remove_guid_from_string("d32e16a3-1474-4861-a954 -cc481b8aa509")
+    assert result == "d32e16a3-1474-4861-a954 -cc481b8aa509"
+
+
+def test_remove_random_identifiers():
+    result = remove_random_identifiers("jsessionid=node01irvw903rcwj11vvq4a24xppxp39.node0?wicket-crypt=b498kOL9W4Y&x")
+    assert result == "jsessionid=<TOKEN_OR_ID>.node0?wicket-crypt=<TOKEN_OR_ID>&x"
+
+    result = remove_random_identifiers("jsessionid=node01irvw903rcwj11vvq4a24xppxp39.node0?wicket-crypt=b498kOL9W4Y")
+    assert result == "jsessionid=<TOKEN_OR_ID>.node0?wicket-crypt=<TOKEN_OR_ID>"
+
+    result = remove_random_identifiers("jsessionid=node01irvw903rcwj11vvq4a24xppxp39.node0")
+    assert result == "jsessionid=<TOKEN_OR_ID>.node0"
+
+    result = remove_random_identifiers("d32e16a3-1474-4861-a954-cc481b8aa509")
+    assert result == "<GUID>"

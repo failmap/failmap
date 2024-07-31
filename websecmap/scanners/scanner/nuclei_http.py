@@ -13,6 +13,7 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan, Scanner, Sc
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner import allowed_to_scan, constance_json_value, unique_and_random
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
+from websecmap.scanners.scanner.security_headers import remove_random_identifiers
 from websecmap.scanners.support import kwargs_to_params
 
 """
@@ -551,7 +552,9 @@ def process_nuclei_record(n_record: Dict[str, Any]) -> Dict[str, Any]:
         # This is so much data, and nobody needs this... so please...
         # "curl-command": n_record.get("curl-command", ""),
         "extracted-results": n_record.get("extracted-results", []),
-        "matched-at": n_record.get("matched-at", ""),
+        # Remove GUIDS and other random identifiers from the url, otherwise a new
+        # evidence record is created every visit (which is a waste of space)
+        "matched-at": remove_random_identifiers(n_record.get("matched-at", "")),
     }
 
     return {

@@ -785,7 +785,19 @@ def reduce_url(url: str) -> str:
     new_url = f"{clean_url.scheme}://{clean_url.netloc}{clean_url.path}"
 
     # then remove GUIDS from that path and replace them with <GUID>
-    new_url = re.sub(r"[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}", "<GUID>", new_url)
+    new_url = remove_random_identifiers(new_url)
 
     # then make sure that an url is not longer than 255 chars, because come on...
     return new_url[:255]
+
+
+def remove_guid_from_string(string: str) -> str:
+    return re.sub(r"[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}", "<GUID>", string)
+
+
+def remove_random_identifiers(string: str) -> str:
+    # this is heuristics based
+    string = remove_guid_from_string(string)
+    string = re.sub(r"jsessionid=[A-Za-z0-9]*", "jsessionid=<TOKEN_OR_ID>", string)
+    string = re.sub(r"crypt=[A-Za-z0-9]*", "crypt=<TOKEN_OR_ID>", string)
+    return string
