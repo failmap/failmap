@@ -1255,11 +1255,11 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     @staticmethod
     def nr_orgs(obj):
-        return Organization.objects.filter(layers=obj).count()
+        return Organization.objects.filter(layers=obj, is_dead=False).count()
 
     @staticmethod
     def nr_urls(obj):
-        return Url.objects.filter(organization__layers=obj).count()
+        return Url.objects.filter(organization__layers=obj, is_dead=False, organization__is_dead=False).count()
 
     @staticmethod
     def sample(obj):
