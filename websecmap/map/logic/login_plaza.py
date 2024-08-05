@@ -7,9 +7,11 @@ from cachetools import TTLCache, cached
 from simplejson import JSONDecodeError
 
 from websecmap.app import log
+from websecmap.celery import app
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.scanners.models import EndpointGenericScan, Product, ProductHierarchy, ScannerFinding
 from websecmap.reporting import time_cache
+from websecmap.scanners.scanmanager import store_endpoint_scan_result
 
 MAX_RESULTS = 4000
 
@@ -39,6 +41,7 @@ def extract_version_from_nuclei_finding(nuclei_finding: dict) -> str:
 # caches empty values as well...
 # @cached(cache=TTLCache(maxsize=1024, ttl=4 * 60 * 60))
 def get_nuclei_product_mapping() -> Dict[str, List[Dict[str, Any]]]:
+    # This is cached as it takes 1 to 3 seconds to load this data.
     if cached := time_cache.cache_get("login_plaza_product_mapping"):
         return cached
 
@@ -96,7 +99,7 @@ def get_nested_products_in_an_inefficient_way(product_id: int, max_depth: int = 
     ]
 
 
-def get_tech_for_endpoints(endpoint_ids: List[int]) -> Dict[int, List[Dict[str, Any]]]:
+def get_tech_for_endpoints(endpoint_ids: List[int] = None) -> Dict[int, List[Dict[str, Any]]]:
     # reduces the finding to a product and a vendor
     # this is used to find what dependencies the product has
     # and also to find a cvedetails link.
@@ -108,11 +111,15 @@ def get_tech_for_endpoints(endpoint_ids: List[int]) -> Dict[int, List[Dict[str, 
     # todo: this should be retrieved from an info level item from the report,
     #  not created ad-hoc. -> this should be the method that saves the current state of the art to the report :)
     egpss = EndpointGenericScan.objects.all().filter(
-        endpoint__id__in=endpoint_ids,
         type__in=["nuclei_technologies", "nuclei_exposed_panels"],
         is_the_latest_scan=True,
         comply_or_explain_is_explained=False,
-    )[:MAX_RESULTS]
+    )
+
+    if endpoint_ids:
+        egpss = egpss.filter(endpoint__id__in=endpoint_ids)
+
+    egpss = egpss[:MAX_RESULTS]
 
     # First merge all found records per endpoint: as group_concat etc is missing. This makes it easier with
     # working with various unique products per finding: when they are all in the same list we don't need to
@@ -147,6 +154,22 @@ def get_tech_for_endpoints(endpoint_ids: List[int]) -> Dict[int, List[Dict[str, 
                     set_value_to_tech_in_tree(product_tree, product_id=product, property="version", value=version_info)
 
     return technology_per_endpoint
+
+
+@app.task(queue="storage")
+def save_get_tech_for_endpoints():
+    # get tech for ALL endpoints :)
+    tech = get_tech_for_endpoints()
+
+    for endpoint_id, endpoint_tech in tech.items():
+        store_endpoint_scan_result(
+            scan_type="technology",
+            endpoint_id=endpoint_id,
+            rating="tech_neutral",
+            message="tech_neutral",
+            evidence=json.dumps(endpoint_tech),
+            meaning={},
+        )
 
 
 def load_products_for_nuclei_findings(
@@ -243,7 +266,7 @@ def login_plaza_data(country: str = None, layer: str = None):
             type="nuclei_exposed_panels",
             is_the_latest_scan=True,
             comply_or_explain_is_explained=False,
-            rating__in=["info", "warning", "danger"],
+            rating__in=["info", "warning", "danger", "low", "medium", "high"],
             endpoint__is_dead=False,
             endpoint__url__is_dead=False,
             endpoint__url__not_resolvable=False,
@@ -266,9 +289,12 @@ def login_plaza_data(country: str = None, layer: str = None):
     # now we have stuff for endpoint, but we need the correct first item for this panel.
     tech = get_tech_for_endpoints(list(endpoint_ids))
 
-    # todo: use cached product mapping, this now takes 1 to 3 seconds.
     nuclei_product_mapping = get_nuclei_product_mapping()
 
+    return create_loging_plaza_meanings_for_scans(scans, tech, nuclei_product_mapping)
+
+
+def create_loging_plaza_meanings_for_scans(scans: List[EndpointGenericScan], tech, nuclei_product_mapping):
     dicts = []
 
     # don't include the same url over and over again...
@@ -282,44 +308,71 @@ def login_plaza_data(country: str = None, layer: str = None):
 
         for portal in portals:
             portal_url = portal.get("evidence", {}).get("matched-at", "")
-            extracted = portal.get("evidence", {}).get("extracted-results", "")
-            finding_name = portal.get("finding-name", "")
 
             if portal_url in list_of_urls:
                 continue
 
             list_of_urls.append(portal_url)
 
-            # make this tech a list (as it used to be), and make sure the prime product is the first one.
-            matching_tech = smash_trees(tech.get(scan.endpoint.id, []))
-            # prioritized on the this portal finding.
-            try:
-                if prioritized_product := nuclei_product_mapping.get(finding_name, []):
-                    prioritized = prioritize_tech(matching_tech, prioritized_product[0]["product"])
-                else:
-                    prioritized = matching_tech
-            except KeyError:
-                prioritized = matching_tech
-
             firstorg = scan.endpoint.url.organization.only("name", "city", "id").first()
 
-            dicts.append(
-                {
-                    "organization_name": firstorg.name,
-                    "organization_city": firstorg.city,
-                    "organization_id": firstorg.id,
-                    "url_url": scan.endpoint.url.url,
-                    "subdomain": scan.endpoint.url.computed_subdomain,
-                    "domain": f"{scan.endpoint.url.computed_domain}.{scan.endpoint.url.computed_suffix}",
-                    "last_scan_moment": scan.last_scan_moment,
-                    "rating_determined_on": scan.rating_determined_on,
-                    "portal_name": portal.get("name", "").replace(" - Detect", ""),
-                    "portal_url": portal_url,
-                    "portal_extracted": extracted,
-                    # make it easier to make uniques in the frontend
-                    "scan_id": scan.id,
-                    # "endpoint_id": scan.endpoint.id,
-                    "tech": prioritized,
-                }
+            meaning = create_loging_plaza_meanings_for_scans_per_scan(
+                portal, scan.endpoint.id, tech, nuclei_product_mapping
             )
+
+            login_plaza_metadata = {
+                "organization_name": firstorg.name,
+                "organization_city": firstorg.city,
+                "organization_id": firstorg.id,
+                "url_url": scan.endpoint.url.url,
+                "subdomain": scan.endpoint.url.computed_subdomain,
+                "domain": f"{scan.endpoint.url.computed_domain}.{scan.endpoint.url.computed_suffix}",
+                "last_scan_moment": scan.last_scan_moment,
+                "rating_determined_on": scan.rating_determined_on,
+                # make it easier to make uniques in the frontend
+                "scan_id": scan.id,
+            }
+
+            dicts.append({**meaning, **login_plaza_metadata})
     return dicts
+
+
+def create_loging_plaza_meanings_for_scans_per_scan(portal, endpoint_id, tech, nuclei_product_mapping):
+    portal_url = portal.get("evidence", {}).get("matched-at", "")
+    extracted = portal.get("evidence", {}).get("extracted-results", "")
+    finding_name = portal.get("finding-name", "")
+
+    # make this tech a list (as it used to be), and make sure the prime product is the first one.
+    matching_tech = smash_trees(tech.get(endpoint_id, []))
+    # prioritized on the this portal finding.
+    try:
+        if prioritized_product := nuclei_product_mapping.get(finding_name, []):
+            prioritized = prioritize_tech(matching_tech, prioritized_product[0]["product"])
+        else:
+            prioritized = matching_tech
+    except KeyError:
+        prioritized = matching_tech
+
+    return {
+        "portal_name": portal.get("name", "").replace(" - Detect", ""),
+        "portal_url": portal_url,
+        "portal_extracted": extracted,
+        # "endpoint_id": scan.endpoint.id,
+        "tech": prioritized,
+    }
+
+
+# there can be multiple portals in the evidence, which is often the case.
+def generated_login_portal_meaning_data(portal_scan_evidence, endpoint_id: int) -> List[Dict[str, Any]]:
+    # this is the important stuff that is also used in login plaza, only less... Which in turn has multiple products.
+    tech = get_tech_for_endpoints([endpoint_id])
+    nuclei_product_mapping = get_nuclei_product_mapping()
+
+    per_portal = []
+
+    for portal in portal_scan_evidence:
+        per_portal.append(
+            create_loging_plaza_meanings_for_scans_per_scan(portal, endpoint_id, tech, nuclei_product_mapping)
+        )
+
+    return per_portal

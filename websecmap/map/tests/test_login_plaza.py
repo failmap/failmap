@@ -13,6 +13,7 @@ from websecmap.map.logic.login_plaza import (
     set_value_to_tech_in_tree,
     smash_tree,
     smash_trees,
+    save_get_tech_for_endpoints,
 )
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.scanners.models import (
@@ -70,7 +71,7 @@ def create_test_product_data():
     ProductHierarchy.objects.create(product=product, related_product=product2, relationship=relationship)
 
 
-def test_login_plaza_data(db):
+def test_login_plaza_data(db, reset_time_cache):
     with freeze_time("2022-01-24"):
         # no data, no crashes
         data = login_plaza_data("NL", "municipality")
@@ -96,6 +97,12 @@ def test_login_plaza_data(db):
             is_the_latest_scan=True,
             rating="info",
         )
+
+        # create new tech metric:
+        assert EndpointGenericScan.objects.all().filter(endpoint=endpoint).count() == 1
+        save_get_tech_for_endpoints()
+        assert EndpointGenericScan.objects.all().filter(endpoint=endpoint).count() == 2
+        assert EndpointGenericScan.objects.all().filter(endpoint=endpoint, type="technology").count() == 1
 
         # retrieve a typical response based on the single metrics we have in the db.
         data = login_plaza_data("NL", "municipality")
@@ -195,7 +202,7 @@ def test_login_plaza_data(db):
         ]
 
 
-def test_get_products(db):
+def test_get_products(db, reset_time_cache):
     create_test_product_data()
     products = get_products()
 
@@ -238,7 +245,7 @@ def test_get_products(db):
     }
 
 
-def test_get_nuclei_product_mapping(db):
+def test_get_nuclei_product_mapping(db, reset_time_cache):
     create_test_product_data()
 
     first_product = Product.objects.all().first()
@@ -278,7 +285,7 @@ def test_get_nuclei_product_mapping(db):
     }
 
 
-def test_prevent_circular_references(db):
+def test_prevent_circular_references(db, reset_time_cache):
     create_test_product_data()
 
     product = Product.objects.all().first()
@@ -328,7 +335,7 @@ sample_product_tree = {
 }
 
 
-def test_set_value_to_tech_in_tree():
+def test_set_value_to_tech_in_tree(reset_time_cache):
     product_tree = copy.deepcopy(sample_product_tree)
 
     # change nothing:

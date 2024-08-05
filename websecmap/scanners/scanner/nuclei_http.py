@@ -7,6 +7,7 @@ from celery import group
 
 from websecmap.app import log
 from websecmap.celery import app
+from websecmap.map.logic.login_plaza import generated_login_portal_meaning_data
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, Scanner, ScannerFinding, Product
@@ -334,6 +335,13 @@ def store_new_scan_results(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[
             endpoint_id = host_to_endpoint_mapping[host]["endpoint"]
             for category_name, data in combined_metrics.items():
                 rating = rate_nuclei_finding(category_name, data)
+                # todo: we want to handle the 'tech' metrics first, as that creates meaning for the portal scans in
+                #  the report.
+                # todo: add meaning, so make sure tech is done first. Doesn't matter as it is cached.
+
+                meaning = {}
+                if category_name == "nuclei_exposed_panels":
+                    meaning = ({"tech": generated_login_portal_meaning_data(data["findings"], endpoint_id)},)
 
                 store_endpoint_scan_result(
                     category_name,
@@ -341,8 +349,11 @@ def store_new_scan_results(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[
                     rating,
                     "",
                     # Has to be readable by the verify scanner
-                    json.dumps(data["findings"]),
+                    # prevents a ping-pong issue with evidence, where phpMyAdmin and phpmyadmin cycle new evidence.
+                    evidence=json.dumps(data["findings"]).lower(),
+                    meaning=meaning,
                 )
+
         except KeyError as e:
             # ssl/ssl-dns-names.yaml will alter the 'host' from https://pw.tweedekamer.nl:443 to pw.tweedekamer.nl
             # and without host you don't know to what endpoint to save specifically? Perhaps a mapping can be made
@@ -359,7 +370,7 @@ def store_new_scan_results(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[
             )
 
 
-def rate_nuclei_finding(nuclei_finding_name, data):
+def rate_nuclei_finding(nuclei_finding_name: str, data: Dict[str, Any]) -> str:
     if nuclei_finding_name == "nuclei_exposed_panels":
         return rate_nuclei_portal_finding(data["findings"])
 
@@ -372,8 +383,13 @@ def rerate_portal_findings():
     scans = EndpointGenericScan.objects.all().filter(type="nuclei_exposed_panels", is_the_latest_scan=True)
 
     for scan in scans:
-        rating = rate_nuclei_portal_finding(evidence_to_json(scan.evidence))
+        ev = evidence_to_json(scan.evidence)
+        rating = rate_nuclei_portal_finding(ev)
         scan.rating = rating
+
+        # also add the meaning if we can?
+        scan.meaning = {"tech": generated_login_portal_meaning_data(ev, scan.endpoint.id)}
+
         scan.save()
 
 
@@ -419,8 +435,20 @@ def store_verify_results(raw_nuclei_data: bin, endpoint_id: int, scan_type: str)
 
     # Story anything you get back under the known category. It could be that scans have been moved to
     # different categories and such. The result is always whatever you asked to scan or a subset.
+    # todo: add meaning, so make sure tech is done first, doesn't matter, it works with cached data anyway.
+    #  this means that it can take a rescan till all the stuff is correct and some new record is written. Which is ok.
+    #  for now.
     data = force_combine_all_processed_metrics_into_one_category(raw_nuclei_records)
-    store_endpoint_scan_result(scan_type, endpoint_id, data["highest-severity"], "", json.dumps(data["findings"]))
+    rating = rate_nuclei_finding(scan_type, data)
+    store_endpoint_scan_result(
+        scan_type,
+        endpoint_id,
+        rating,
+        "",
+        evidence=json.dumps(data["findings"]).lower(),
+        # put it in some key, so other stuff can be appended to it lateron if need be
+        meaning={"tech": generated_login_portal_meaning_data(data["findings"], endpoint_id)},
+    )
 
 
 def split_nuclei_records_per_host(raw_nuclei_records) -> Dict[str, List[Dict[str, Any]]]:

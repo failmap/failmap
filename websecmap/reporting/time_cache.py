@@ -22,3 +22,7 @@ def cache_get(key):
 def cache_set(key, value):
     CACHE[key] = {"value": value, "time": datetime.now(timezone.utc).timestamp()}
     return value
+
+
+def reset():
+    CACHE = {}  # noqa

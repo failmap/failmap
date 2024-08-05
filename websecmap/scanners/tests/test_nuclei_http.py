@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+import websecmap.reporting.time_cache
 from websecmap.app import log
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import (
@@ -28,6 +29,7 @@ from websecmap.scanners.scanner.nuclei_http import (
     rate_nuclei_portal_finding,
     evidence_to_json,
     rerate_portal_findings,
+    store_verify_results,
 )
 from constance.test import override_config
 
@@ -73,7 +75,7 @@ three_example_nuclei_tests = data = (
 )
 
 
-def test_nuclei_store(db, current_path):
+def test_nuclei_store(db, current_path, reset_time_cache):
     url1 = Url.objects.create(**{"url": "basisbeveiliging.nl"})
     end1 = Endpoint.objects.create(**{"url": url1, "protocol": "https", "port": 443, "ip_version": 4})
 
@@ -90,6 +92,12 @@ def test_nuclei_store(db, current_path):
     assert EndpointGenericScan.objects.count() == 0
 
     # all categorized into the technologies area.
+    store_new_scan_results(three_example_nuclei_tests, host_to_endpoint_mapping)
+    assert EndpointGenericScan.objects.count() == 2
+
+    # results are deduplicated
+    store_new_scan_results(three_example_nuclei_tests, host_to_endpoint_mapping)
+    store_new_scan_results(three_example_nuclei_tests, host_to_endpoint_mapping)
     store_new_scan_results(three_example_nuclei_tests, host_to_endpoint_mapping)
     assert EndpointGenericScan.objects.count() == 2
 
@@ -457,7 +465,10 @@ CITRIX_SCAN_RESULTS = """[
                   "matched-at": "https:///LogonPoint/tmindex.html"}}]"""
 
 
-def test_rate_nuclei_portal_finding(db, default_scan_metadata):
+def test_rate_nuclei_portal_finding(db, default_scan_metadata, reset_time_cache):
+    # monkey patch it, perhaps reset_time_cache does not work... which is the case...
+    websecmap.reporting.time_cache.CACHE = {}
+
     # nothing in the database, so an 'ok' rating which is the default
     rating = rate_nuclei_portal_finding(evidence_to_json(CITRIX_SCAN_RESULTS))
     assert rating == "ok"
@@ -506,6 +517,35 @@ def test_rate_nuclei_portal_finding(db, default_scan_metadata):
 
     # first one, so a 'get' will work :)
     assert EndpointGenericScan.objects.get(type="nuclei_exposed_panels", is_the_latest_scan=True).rating == "high"
+
+    assert EndpointGenericScan.objects.get(type="nuclei_exposed_panels", is_the_latest_scan=True).meaning == {
+        "tech": [
+            {
+                "portal_extracted": [],
+                "portal_name": "Citrix VPN Panel",
+                "portal_url": "https:///vpn/index.html",
+                "tech": [{"product": prod.id, "version": "unknown"}, {"product": prod2.id, "version": "unknown"}],
+            },
+            {
+                "portal_extracted": [],
+                "portal_name": "NetScaler AAA Login Panel",
+                "portal_url": "https:///LogonPoint/tmindex.html",
+                "tech": [{"product": prod2.id, "version": "unknown"}, {"product": prod.id, "version": "unknown"}],
+            },
+        ]
+    }
+
+    # verification delivers the same stuff, with the same rating and tech
+    store_verify_results(three_example_nuclei_tests, endpoint.id, "nuclei_exposed_panels")
+    assert EndpointGenericScan.objects.filter(type="nuclei_exposed_panels").count() == 2
+
+    # so what has changed? -> the evidence is not stored in above tests...
+    first = EndpointGenericScan.objects.filter(type="nuclei_exposed_panels").first()
+    last = EndpointGenericScan.objects.filter(type="nuclei_exposed_panels").last()
+
+    assert first.id != last.id
+    assert first.evidence != last.evidence
+    assert evidence_to_json(last.evidence) == evidence_to_json(CITRIX_SCAN_RESULTS)
 
 
 def test_get_templates_from_scan_results():

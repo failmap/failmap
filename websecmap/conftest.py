@@ -23,3 +23,8 @@ def patch_resolve():
         return True
 
     websecmap.scanners.scanner.http.resolves = mock_resolves
+
+
+@pytest.fixture
+def reset_time_cache():
+    websecmap.reporting.time_cache.reset()
