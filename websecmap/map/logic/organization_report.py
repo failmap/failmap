@@ -16,7 +16,7 @@ from websecmap.map.logic.map_defaults import (
     get_country,
     get_organization_type,
 )
-from websecmap.organizations.models import Organization
+from websecmap.organizations.models import Organization, OrganizationType
 from websecmap.reporting.diskreport import retrieve_report
 import json
 
@@ -111,6 +111,11 @@ def convert_report_to_excel(
     if not organization:
         return []
 
+    # some validation on country and ot
+    my_ot = get_organization_type(organization_type)
+    organization_type = OrganizationType.objects.get(pk=my_ot).name
+    country = get_country(country)
+
     report_data = get_organization_report_by_id(organization_id, organization_type, country, days_back, at_date)
     if not report_data:
         return []
@@ -118,7 +123,11 @@ def convert_report_to_excel(
     # todo: add dynamic header with highs and mediums...
     # dynamic_header = create_dynamic_excel_header(report_data)
 
-    rows = report_to_excel_rows(report_data)
+    link_data = f"https://basisbeveiliging.nl/report/{country}/{organization_type}/{organization.id}"
+    # placeholders are filled in during report generation
+    link_data += "?tab=report_detail&filter_test={test}&filter_url={url}"
+
+    rows = report_to_excel_rows(report_data, link_data)
     if not rows:
         return []
 
@@ -143,10 +152,14 @@ def convert_report_to_excel(
         ws.append(list(row.values()))
 
     # add a table around the metrics, so they have a striped layout
-    tab = Table(displayName="BasisbeveiligingMetrics", ref=f"A{len(static_header)+1}:T{len(rows)+len(static_header)+1}")
+    tab = Table(displayName="BasisbeveiligingMetrics", ref=f"A{len(static_header)+1}:U{len(rows)+len(static_header)+1}")
 
     style = TableStyleInfo(
-        name="TableStyleMedium9", showFirstColumn=True, showLastColumn=True, showRowStripes=True, showColumnStripes=True
+        name="TableStyleMedium9",
+        showFirstColumn=True,
+        showLastColumn=False,
+        showRowStripes=True,
+        showColumnStripes=False,
     )
     tab.tableStyleInfo = style
     ws.add_table(tab)
@@ -225,15 +238,16 @@ def create_dynamic_excel_header(report_data):
     ...
 
 
-def report_to_excel_rows(report_data) -> List[Dict[str, Union[str, int]]]:
+def report_to_excel_rows(report_data, link_data) -> List[Dict[str, Union[str, int]]]:
+    ld = link_data
     rows = []
 
     for url in report_data["calculation"]["organization"]["urls"]:
         url_data = {"url": url["url"]}
         # some placeholder data so all rows have the same columns
         # 'endpoint': '-',
-        placeholder_endpoint_data = {"ip_version": "", "port": "", "protocol": ""}
-        rows.extend(url_data | placeholder_endpoint_data | rating_data(url_rating) for url_rating in url["ratings"])
+        placeholder_ep_data = {"ip_version": "", "port": "", "protocol": ""}
+        rows.extend(url_data | placeholder_ep_data | rating_data(url_rating, url, ld) for url_rating in url["ratings"])
 
         for ep in url["endpoints"]:
             # 'endpoint': ep['id'],
@@ -242,7 +256,7 @@ def report_to_excel_rows(report_data) -> List[Dict[str, Union[str, int]]]:
             if ep["protocol"] in ["dns_a_aaaa", "dns_mx_no_cname", "dns_soa"]:
                 epd = {"ip_version": "", "port": "", "protocol": ""}
 
-            rows.extend(url_data | epd | rating_data(endpoint_rating) for endpoint_rating in ep["ratings"])
+            rows.extend(url_data | epd | rating_data(endpoint_rating, url, ld) for endpoint_rating in ep["ratings"])
 
     # some enrichment steps here. Make sure the impact is summarized in 1 word and an emoji.
 
@@ -264,7 +278,7 @@ def report_to_excel_rows(report_data) -> List[Dict[str, Union[str, int]]]:
     return list(reversed(rows))
 
 
-def rating_data(rating):
+def rating_data(rating, url, link_data) -> Dict[str, Union[str, int]]:
     impact = (
         "explained"
         if rating["is_explained"]
@@ -323,4 +337,5 @@ def rating_data(rating):
         "error_in_test": rating["error_in_test"],
         "not_applicable": rating["not_applicable"],
         "is_explained": rating["is_explained"],
+        "link": link_data.format(test=rating["type"], url=url["url"]),
     }
