@@ -46,7 +46,11 @@ from websecmap.map.logic.map_defaults import (
     get_organization_type,
 )
 from websecmap.map.logic.map_health import get_lastest_map_health_data
-from websecmap.map.logic.organization_report import get_organization_report_by_id, get_organization_report_by_name
+from websecmap.map.logic.organization_report import (
+    get_organization_report_by_id,
+    get_organization_report_by_name,
+    convert_report_to_excel,
+)
 from websecmap.map.logic.rss_feeds import latest_updates
 from websecmap.map.logic.stats_and_graphs import (
     get_organization_vulnerability_timeline,
@@ -764,6 +768,19 @@ def organization_report_by_id(
     return json_response(
         get_organization_report_by_id(organization_id, organization_type, country, days_back, at_date=at_date)
     )
+
+
+@cache_page(ONE_HOUR)
+def _convert_report_to_excel(
+    request,
+    country: str = DEFAULT_COUNTRY,
+    organization_type: str = DEFAULT_LAYER,
+    organization_id=None,
+    days_back=0,
+    at_date: date = None,
+):
+    response = convert_report_to_excel(organization_id, organization_type, country, days_back, at_date=at_date)
+    return response or json_response({"error": "error"})
 
 
 @cache_page(ONE_HOUR)

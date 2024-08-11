@@ -1,5 +1,11 @@
 import logging
-from datetime import date
+from datetime import date, datetime
+from tempfile import NamedTemporaryFile
+from typing import Union, Dict, List
+
+from django.http import HttpResponse
+from openpyxl import Workbook
+from openpyxl.worksheet.table import Table, TableStyleInfo
 
 from django.utils.text import slugify
 
@@ -12,6 +18,7 @@ from websecmap.map.logic.map_defaults import (
 )
 from websecmap.organizations.models import Organization
 from websecmap.reporting.diskreport import retrieve_report
+import json
 
 log = logging.getLogger(__package__)
 
@@ -92,4 +99,228 @@ def get_organization_report_by_id(
         "medium": values["organizationreport__medium"],
         "low": values["organizationreport__low"],
         "ok": values["organizationreport__ok"],
+    }
+
+
+def convert_report_to_excel(
+    organization_id: int, organization_type: str = None, country: str = None, days_back: int = 0, at_date: date = None
+):
+    # PyExcel allows for richer exports with formatting. Which is nice. Other spreadsheet programs can all read excel.
+    # Todo: find a way to convert excel to other formats, instead of dealing with all formats.
+    organization = Organization.objects.filter(pk=organization_id).first()
+    if not organization:
+        return []
+
+    report_data = get_organization_report_by_id(organization_id, organization_type, country, days_back, at_date)
+    if not report_data:
+        return []
+
+    # todo: add dynamic header with highs and mediums...
+    # dynamic_header = create_dynamic_excel_header(report_data)
+
+    rows = report_to_excel_rows(report_data)
+    if not rows:
+        return []
+
+    # build the report
+    wb = Workbook()
+    # Make sure the date columns are rendered as such, which does not allow tzinfo
+    # https://openpyxl.readthedocs.io/en/stable/datetime.html
+    wb.iso_dates = True
+
+    ws = wb.active
+    dt = datetime.fromisoformat(report_data["when"])
+    ws.title = f"Basisbeveiliging Metingen {organization.name[:30]} {slugify(dt.strftime('%Y%m%d%H%M%S'))}"
+
+    static_header = create_static_excel_header(report_data, organization)
+    for row in static_header:
+        ws.append(list(row))
+
+    headers = rows[0].keys()
+    ws.append(list(headers))
+
+    for row in rows:
+        ws.append(list(row.values()))
+
+    # add a table around the metrics, so they have a striped layout
+    tab = Table(displayName="BasisbeveiligingMetrics", ref=f"A{len(static_header)+1}:T{len(rows)+len(static_header)+1}")
+
+    style = TableStyleInfo(
+        name="TableStyleMedium9", showFirstColumn=True, showLastColumn=True, showRowStripes=True, showColumnStripes=True
+    )
+    tab.tableStyleInfo = style
+    ws.add_table(tab)
+
+    # add some filtering on certain columns, so interesting values can be easily spotted
+    # https://openpyxl.readthedocs.io/en/stable/filters.html
+    # not supported in numbers it seems.
+    # filters = ws.auto_filter
+    # filters.ref = "A1:B15"
+    # col = FilterColumn(colId=0)  # for column A
+    # col.filters = Filters(filter=["Kiwi", "Apple", "Mango"])  # add selected values
+    # filters.filterColumn.append(col)  # add filter to the worksheet
+    # ws.auto_filter.add_sort_condition("B2:B15")
+
+    # for awesomeness, add some charts... but no need to rebuild the web interface really.
+    # https://openpyxl.readthedocs.io/en/stable/usage.html
+    # https://openpyxl.readthedocs.io/en/stable/charts/introduction.html
+    # https://openpyxl.readthedocs.io/en/stable/charts/bar.html
+
+    # set for convenient printing, add some headers & footers :)
+    # https://openpyxl.readthedocs.io/en/stable/print_settings.html
+
+    # Set a column lock. when the table is in the right place...
+    # Calculate the freeze pane. Is this not supported in numbers with the import.
+    ws.freeze_panes = ws[f"B{len(static_header)+2}"]
+
+    # custom props are not supported, or the documentation is outdated.
+    # all security features against unwanted editing are implemented terribly with modals etc, so don't do that.
+
+    # todo: add a logo
+    # https://openpyxl.readthedocs.io/en/stable/images.html
+
+    # todo: autofit scan type width, but not all other columns.
+    # Or make an educated guess at the width.
+    ws.column_dimensions["A"].width = "40"
+    ws.column_dimensions["F"].width = "4"
+    ws.column_dimensions["G"].width = "40"
+    ws.column_dimensions["H"].width = "20"
+    ws.column_dimensions["I"].width = "20"
+    ws.column_dimensions["J"].width = "40"
+    ws.column_dimensions["K"].width = "40"
+
+    # todo: match column designs to field names, so if the order changes or etc the design stays the same.
+    # Currently it's a mess with every change...
+
+    # hide the columns that show high, medium, low etc as the impact would be enough:
+    for col in ["M", "N", "O", "P", "Q", "R", "S", "T"]:
+        ws.column_dimensions[col].hidden = True
+
+    # offer it as a django download
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        tmp.seek(0)
+        response = HttpResponse(tmp.read())
+        response["Content-Disposition"] = f"attachment; filename={slugify(ws.title)}.xlsx"
+        response["Content-type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        return response
+
+
+def create_static_excel_header(report_data, organization: Organization):
+    # todo: how does this work with markup? Perhaps this has to be done inline.
+    return [
+        [f"Security Metrics Report for {organization.name}", ""],
+        ["Downloaded from:", f"https://basisbeveiliging.nl/report/{organization.id}/"],
+        ["Generated by:", "Web-Sec-Map / Internet Cleanup Foundation"],
+        ["Generated on:", report_data["when"]],
+        ["", ""],
+        ["This report is made available by participants of the Internet Cleanup Foundation", ""],
+        ["Become a participant and support a secure country at https://internetcleanup.foundation/ ", ""],
+        ["", ""],
+    ]
+
+
+def create_dynamic_excel_header(report_data):
+    # returns rows for the header. The length of rows can be used to position the content.
+    ...
+
+
+def report_to_excel_rows(report_data) -> List[Dict[str, Union[str, int]]]:
+    rows = []
+
+    for url in report_data["calculation"]["organization"]["urls"]:
+        url_data = {"url": url["url"]}
+        # some placeholder data so all rows have the same columns
+        # 'endpoint': '-',
+        placeholder_endpoint_data = {"ip_version": "", "port": "", "protocol": ""}
+        rows.extend(url_data | placeholder_endpoint_data | rating_data(url_rating) for url_rating in url["ratings"])
+
+        for ep in url["endpoints"]:
+            # 'endpoint': ep['id'],
+            epd = {"ip_version": ep["ip_version"], "port": ep["port"], "protocol": ep["protocol"]}
+            # internet.nl metrics do not show on an endpoint.
+            if ep["protocol"] in ["dns_a_aaaa", "dns_mx_no_cname", "dns_soa"]:
+                epd = {"ip_version": "", "port": "", "protocol": ""}
+
+            rows.extend(url_data | epd | rating_data(endpoint_rating) for endpoint_rating in ep["ratings"])
+
+    # some enrichment steps here. Make sure the impact is summarized in 1 word and an emoji.
+
+    # sort the rows by issue severity, issue name.
+    rows.sort(
+        key=lambda x: (
+            -x["is_explained"],
+            x["high"],
+            x["medium"],
+            x["low"],
+            x["ok"],
+            x["not_testable"],
+            x["not_applicable"],
+            x["error_in_test"],
+            x["url"],
+            x["test"],
+        )
+    )
+    return list(reversed(rows))
+
+
+def rating_data(rating):
+    impact = (
+        "explained"
+        if rating["is_explained"]
+        else "not_tested"
+        if rating["not_testable"] or rating["not_applicable"]
+        else "error"
+        if rating["error_in_test"]
+        else "high"
+        if rating["high"]
+        else "medium"
+        if rating["medium"]
+        else "low"
+        if rating["low"]
+        else "ok"
+    )
+    empoji = {
+        "explained": "💬",
+        "high": "❌",
+        "medium": "⚠️",
+        "low": "🟩",
+        "ok": "✅",
+        "error": "⚡️",
+        "not_tested": "〰️",
+    }
+
+    # Excel does not support timezones in datetimes. The tzinfo in the datetime/time object must be set to None.
+    last_scan = datetime.fromisoformat(rating.get("last_scan", ""))
+    last_scan = last_scan.replace(tzinfo=None)
+
+    since = datetime.fromisoformat(rating.get("since", ""))
+    since = since.replace(tzinfo=None)
+
+    meaning = json.dumps(rating.get("meaning", {}))
+    if meaning == "{}":
+        meaning = ""
+
+    evidence = rating.get("evidence", "{}")
+    if evidence == "{}":
+        evidence = ""
+
+    return {
+        "impact": impact,
+        "emoji": empoji.get(impact, ""),
+        "test": rating["type"],
+        "last_scan": last_scan,
+        "since": since,
+        "evidence": evidence,
+        # don't show {} noise
+        "meaning": meaning,
+        "scan_id": rating.get("scan", ""),
+        "high": rating["high"],
+        "medium": rating["medium"],
+        "low": rating["low"],
+        "ok": rating["ok"],
+        "not_testable": rating["not_testable"],
+        "error_in_test": rating["error_in_test"],
+        "not_applicable": rating["not_applicable"],
+        "is_explained": rating["is_explained"],
     }
