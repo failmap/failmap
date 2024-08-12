@@ -1,3 +1,4 @@
+import itertools
 import logging
 from datetime import date, datetime
 from tempfile import NamedTemporaryFile
@@ -108,6 +109,7 @@ def convert_report_to_excel(
 ):
     # PyExcel allows for richer exports with formatting. Which is nice. Other spreadsheet programs can all read excel.
     # Todo: find a way to convert excel to other formats, instead of dealing with all formats.
+    log.debug("Input validation")
     organization = Organization.objects.filter(pk=organization_id).first()
     if not organization:
         return []
@@ -117,6 +119,7 @@ def convert_report_to_excel(
     organization_type = OrganizationType.objects.get(pk=my_ot).name
     country = get_country(country)
 
+    log.debug("Data retrieval")
     report_data = get_organization_report_by_id(organization_id, organization_type, country, days_back, at_date)
     if not report_data:
         return []
@@ -142,6 +145,7 @@ def convert_report_to_excel(
     dt = datetime.fromisoformat(report_data["when"])
     ws.title = f"Basisbeveiliging Metingen {organization.name[:30]} {slugify(dt.strftime('%Y%m%d%H%M%S'))}"
 
+    log.debug("Adding report header")
     static_header = create_static_excel_header(report_data, organization)
     for row in static_header:
         ws.append(list(row))
@@ -152,16 +156,29 @@ def convert_report_to_excel(
     headers = rows[0].keys()
     ws.append(list(headers))
 
+    log.debug("Adding data to workbook")
     for row in rows:
         ws.append(list(row.values()))
 
-    # make all the last column links clickable :)
-    for cell in ws["U"]:
-        cell.style = "Hyperlink"
-        cell.hyperlink = cell.value
+    # This is making saving intensely slower, so only add links to high, medium and low.
+    # As the range documentation is lacking, just use a savage
+    # 90's era counter and break the loop after the amount of highs+mediums+lows have been reached :)
+    limit = report_data["high"] + report_data["medium"] + report_data["low"] + len(static_header)
+    i = 0
+    for cell in ws["G"]:
+        i += 1
 
+        if i > len(static_header) + 1:
+            cell.style = "Hyperlink"
+            cell.hyperlink = cell.value
+            cell.value = "view report"
+
+        if i > limit:
+            break
+
+    log.debug("Creating a table")
     # add a table around the metrics, so they have a striped layout
-    tab = Table(displayName="BasisbeveiligingMetrics", ref=f"A{len(static_header)+1}:U{len(rows)+len(static_header)+1}")
+    tab = Table(displayName="BasisbeveiligingMetrics", ref=f"A{len(static_header)+1}:N{len(rows)+len(static_header)+1}")
 
     style = TableStyleInfo(
         name="TableStyleMedium9",
@@ -193,6 +210,7 @@ def convert_report_to_excel(
 
     # Set a column lock. when the table is in the right place...
     # Calculate the freeze pane. Is this not supported in numbers with the import.
+    log.debug("Freezing pane")
     ws.freeze_panes = ws[f"B{len(static_header)+2}"]
 
     # custom props are not supported, or the documentation is outdated.
@@ -203,13 +221,15 @@ def convert_report_to_excel(
 
     # todo: autofit scan type width, but not all other columns.
     # Or make an educated guess at the width.
+    log.debug("Resizing columns")
     ws.column_dimensions["A"].width = "40"
     ws.column_dimensions["F"].width = "4"
-    ws.column_dimensions["G"].width = "40"
-    ws.column_dimensions["H"].width = "20"
-    ws.column_dimensions["I"].width = "20"
-    ws.column_dimensions["J"].width = "40"
+    ws.column_dimensions["G"].width = "10"
+    ws.column_dimensions["H"].width = "40"
+    ws.column_dimensions["I"].width = "10"
+    ws.column_dimensions["J"].width = "10"
     ws.column_dimensions["K"].width = "40"
+    ws.column_dimensions["L"].width = "40"
 
     # todo: match column designs to field names, so if the order changes or etc the design stays the same.
     # Currently it's a mess with every change...
@@ -217,8 +237,10 @@ def convert_report_to_excel(
     # add links:
 
     # hide the columns that show high, medium, low etc as the impact would be enough:
-    for col in ["M", "N", "O", "P", "Q", "R", "S", "T"]:
-        ws.column_dimensions[col].hidden = True
+    # these can be completely removed, it doubles the data and the impact already summarizes this perfectly.
+    # log.debug("Reticulating splines")
+    # for col in ["N", "O", "P", "Q", "R", "S", "T", "U"]:
+    #     ws.column_dimensions[col].hidden = True
 
     # add some hyperlinks:
     ws["B7"].style = "Hyperlink"
@@ -228,9 +250,12 @@ def convert_report_to_excel(
     ws["A1"].font = Font(bold=True)
 
     # offer it as a django download
+    log.debug("Offering download")
     with NamedTemporaryFile() as tmp:
+        log.debug("Writing file")
         wb.save(tmp.name)
         tmp.seek(0)
+        log.debug("Creating http response")
         response = HttpResponse(tmp.read())
         response["Content-Disposition"] = f"attachment; filename={slugify(ws.title)}.xlsx"
         response["Content-type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -251,30 +276,28 @@ def create_static_excel_header(report_data, organization: Organization):
     ]
 
 
-def create_dynamic_excel_header(report_data):
-    # returns rows for the header. The length of rows can be used to position the content.
-    ...
-
-
 def report_to_excel_rows(report_data, link_data) -> List[Dict[str, Union[str, int]]]:
     ld = link_data
     rows = []
 
-    for url in report_data["calculation"]["organization"]["urls"]:
-        url_data = {"url": url["url"]}
-        # some placeholder data so all rows have the same columns
-        # 'endpoint': '-',
-        placeholder_ep_data = {"ip_version": "", "port": "", "protocol": ""}
-        rows.extend(url_data | placeholder_ep_data | rating_data(url_rating, url, ld) for url_rating in url["ratings"])
+    for i in range(100):
+        for url in report_data["calculation"]["organization"]["urls"]:
+            url_data = {"url": url["url"]}
+            # some placeholder data so all rows have the same columns
+            # 'endpoint': '-',
+            placeholder_ep_data = {"ip_version": "", "port": "", "protocol": ""}
+            rows.extend(
+                url_data | placeholder_ep_data | rating_data(url_rating, url, ld) for url_rating in url["ratings"]
+            )
 
-        for ep in url["endpoints"]:
-            # 'endpoint': ep['id'],
-            epd = {"ip_version": ep["ip_version"], "port": ep["port"], "protocol": ep["protocol"]}
-            # internet.nl metrics do not show on an endpoint.
-            if ep["protocol"] in ["dns_a_aaaa", "dns_mx_no_cname", "dns_soa"]:
-                epd = {"ip_version": "", "port": "", "protocol": ""}
+            for ep in url["endpoints"]:
+                # 'endpoint': ep['id'],
+                epd = {"ip_version": ep["ip_version"], "port": ep["port"], "protocol": ep["protocol"]}
+                # internet.nl metrics do not show on an endpoint.
+                if ep["protocol"] in ["dns_a_aaaa", "dns_mx_no_cname", "dns_soa"]:
+                    epd = {"ip_version": "", "port": "", "protocol": ""}
 
-            rows.extend(url_data | epd | rating_data(endpoint_rating, url, ld) for endpoint_rating in ep["ratings"])
+                rows.extend(url_data | epd | rating_data(endpoint_rating, url, ld) for endpoint_rating in ep["ratings"])
 
     # some enrichment steps here. Make sure the impact is summarized in 1 word and an emoji.
 
@@ -293,6 +316,14 @@ def report_to_excel_rows(report_data, link_data) -> List[Dict[str, Union[str, in
             x["test"],
         )
     )
+
+    # remove the high, medium, low, ok, not_testable, error_in_test, not_applicable and is_explained fields to
+    # speed up the export even more...
+    # these fields are not used in the export, so they don't need to be included in the final output.
+    remove = ["high", "medium", "low", "ok", "not_testable", "error_in_test", "not_applicable", "is_explained"]
+    for row, rem in itertools.product(rows, remove):
+        del row[rem]
+
     return list(reversed(rows))
 
 
@@ -324,10 +355,10 @@ def rating_data(rating, url, link_data) -> Dict[str, Union[str, int]]:
 
     # Excel does not support timezones in datetimes. The tzinfo in the datetime/time object must be set to None.
     last_scan = datetime.fromisoformat(rating.get("last_scan", ""))
-    last_scan = last_scan.replace(tzinfo=None)
+    last_scan = last_scan.replace(tzinfo=None).date()
 
     since = datetime.fromisoformat(rating.get("since", ""))
-    since = since.replace(tzinfo=None)
+    since = since.replace(tzinfo=None).date()
 
     meaning = json.dumps(rating.get("meaning", {}))
     if meaning in ["{}", "[]", "-"]:
@@ -340,6 +371,7 @@ def rating_data(rating, url, link_data) -> Dict[str, Union[str, int]]:
     return {
         "impact": impact,
         "emoji": empoji.get(impact, ""),
+        "documentation": link_data.format(test=rating["type"], url=url["url"]),
         "test": rating["type"],
         "last_scan": last_scan,
         "since": since,
@@ -355,5 +387,4 @@ def rating_data(rating, url, link_data) -> Dict[str, Union[str, int]]:
         "error_in_test": rating["error_in_test"],
         "not_applicable": rating["not_applicable"],
         "is_explained": rating["is_explained"],
-        "link": link_data.format(test=rating["type"], url=url["url"]),
     }

@@ -1,2 +1,7 @@
 User-Agent: *
+# allow everything!
 Disallow:
+
+# If you want the data, just use the json reports. That's much quicker, and it's also documented with sample code how
+# to request that stuff in an instant. Downloading all spreadsheets is just slower and much clunkier to work with.
+Disallow: /data/report_export/
