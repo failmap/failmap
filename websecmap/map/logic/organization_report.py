@@ -280,24 +280,21 @@ def report_to_excel_rows(report_data, link_data) -> List[Dict[str, Union[str, in
     ld = link_data
     rows = []
 
-    for i in range(100):
-        for url in report_data["calculation"]["organization"]["urls"]:
-            url_data = {"url": url["url"]}
-            # some placeholder data so all rows have the same columns
-            # 'endpoint': '-',
-            placeholder_ep_data = {"ip_version": "", "port": "", "protocol": ""}
-            rows.extend(
-                url_data | placeholder_ep_data | rating_data(url_rating, url, ld) for url_rating in url["ratings"]
-            )
+    for url in report_data["calculation"]["organization"]["urls"]:
+        url_data = {"url": url["url"]}
+        # some placeholder data so all rows have the same columns
+        # 'endpoint': '-',
+        placeholder_ep_data = {"ip_version": "", "port": "", "protocol": ""}
+        rows.extend(url_data | placeholder_ep_data | rating_data(url_rating, url, ld) for url_rating in url["ratings"])
 
-            for ep in url["endpoints"]:
-                # 'endpoint': ep['id'],
-                epd = {"ip_version": ep["ip_version"], "port": ep["port"], "protocol": ep["protocol"]}
-                # internet.nl metrics do not show on an endpoint.
-                if ep["protocol"] in ["dns_a_aaaa", "dns_mx_no_cname", "dns_soa"]:
-                    epd = {"ip_version": "", "port": "", "protocol": ""}
+        for ep in url["endpoints"]:
+            # 'endpoint': ep['id'],
+            epd = {"ip_version": ep["ip_version"], "port": ep["port"], "protocol": ep["protocol"]}
+            # internet.nl metrics do not show on an endpoint.
+            if ep["protocol"] in ["dns_a_aaaa", "dns_mx_no_cname", "dns_soa"]:
+                epd = {"ip_version": "", "port": "", "protocol": ""}
 
-                rows.extend(url_data | epd | rating_data(endpoint_rating, url, ld) for endpoint_rating in ep["ratings"])
+            rows.extend(url_data | epd | rating_data(endpoint_rating, url, ld) for endpoint_rating in ep["ratings"])
 
     # some enrichment steps here. Make sure the impact is summarized in 1 word and an emoji.
 
@@ -323,6 +320,8 @@ def report_to_excel_rows(report_data, link_data) -> List[Dict[str, Union[str, in
     remove = ["high", "medium", "low", "ok", "not_testable", "error_in_test", "not_applicable", "is_explained"]
     for row, rem in itertools.product(rows, remove):
         del row[rem]
+
+    # Perhaps remove the lines that are OK/erroneous and so on to reduce the amount of data.
 
     return list(reversed(rows))
 
