@@ -271,7 +271,7 @@ def create_static_excel_header(report_data, organization: Organization):
         ["Generated on:", report_data["when"]],
         ["", ""],
         ["This Excel export was made possible with funding from participants of the Internet Cleanup Foundation", ""],
-        ["Become a participant today for more features:", "https://internetcleanup.foundation/"],
+        ["Read here why your organization should participate:", "https://internetcleanup.foundation/deelnemerschap/"],
         ["", ""],
     ]
 
@@ -321,7 +321,15 @@ def report_to_excel_rows(report_data, link_data) -> List[Dict[str, Union[str, in
     for row, rem in itertools.product(rows, remove):
         del row[rem]
 
-    # Perhaps remove the lines that are OK/erroneous and so on to reduce the amount of data.
+    # Removing lines changes the file from a compliance report to a to do list. This is not a great reduction.
+    # todo: find other ways to speed up spreadsheet report generation.
+    # # remove the rows where there is just a normal OK rating. Only for really large data sets...
+    # if len(rows) > 2000:
+    #     filtered_rows = [row for row in rows if not row["ok"]]
+    #     removed_records = len(rows) - len(filtered_rows)
+    # else:
+    #     filtered_rows = rows
+    #     removed_records = 0
 
     return list(reversed(rows))
 
