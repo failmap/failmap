@@ -1,7 +1,7 @@
 """Import modules containing tasks that need to be auto-discovered by Django Celery."""
 import logging
 
-from websecmap.scanners import plannedscan, proxy
+from websecmap.scanners import plannedscan, proxy, progress_regress_results
 from websecmap.scanners.scanner_for_everything import (
     domain_to_ip,
     ip_geolocation,
@@ -89,7 +89,15 @@ __scanners__ = [
     blocked_endpoint,
 ]
 
-__everything__ = [domain_to_ip, ip_geolocation, location, mailserver, ip_geolocation_correction, locate_and_correct]
+__everything__ = [
+    domain_to_ip,
+    ip_geolocation,
+    location,
+    mailserver,
+    ip_geolocation_correction,
+    locate_and_correct,
+    progress_regress_results,
+]
 
 __others__ = [
     proxy,

@@ -511,8 +511,60 @@ class State(models.IntegerChoices):
     timeout = 5, "timeout"  # pylint: disable=invalid-name
 
 
+class RatingOptions(models.IntegerChoices):
+    HIGH = 0, "high"
+    MEDIUM = 1, "medium"
+    LOW = 2, "low"
+    OK = 3, "ok"
+    NOT_APPLICABLE = 4, "not_applicable"
+    NOT_TESTABLE = 5, "not_testable"
+    ERROR_IN_TEST = 6, "error_in_test"
+
+
+class ProgressRegressResult(models.Model):
+    """
+    A test model that tries to assist in showing how much progress was made.
+    After careful consideration the following fields have been chosen for this first trial
+
+    This is added on every metric. The data is filled based on the current policy and should be overwritable when
+    the policy changes / database cleanups etc. It should be fillable in parallel with some simple queries.
+
+    It's added on the current metric, as we want to know WHEN progress was made without deducation.
+
+    The 'was_previously' is used to have the value of the previous rating, so we can say: 10 highs have been solved.
+    The 'was_previously' is also used to propagate the past correctly run test. So in case the test has an error after
+    the first test, it will just say medium until the error was resolved.
+
+    Using this we can answer the questions:
+    - how much progress was made in a month for an organization on all metrics?
+    - how much progress was made in a year for a specific metric?
+    - what is the adoption rate over time of a certain metric, aka security.txt?
+    - how many high risk issues have been solved in the past month for all organizations?
+
+    The regressions and progressions can be summed up in case of bouncing metrics.
+
+    All of these questions can be answered with a single simple query. Probably all fields need an index for this.
+
+    # is an improvement also all dead endpoints for example? When there where several problematic endpoints with
+    # management portals for example. If those have been gone offline, how do we know or visualize that?
+    # perhaps: when the endpoint died all metrics are set to ok?
+
+    """
+
+    prr_is_progress = models.BooleanField(default=False, db_index=True)
+    prr_is_regression = models.BooleanField(default=False, db_index=True)
+    prr_was_previously = models.PositiveSmallIntegerField(
+        choices=RatingOptions.choices,
+        default=RatingOptions.OK,
+        db_index=True,
+    )
+
+    class Meta:
+        abstract = True
+
+
 # https://docs.djangoproject.com/en/dev/topics/db/models/#id6
-class GenericScanMixin(ExplainMixin, LatestScanMixin):
+class GenericScanMixin(ExplainMixin, LatestScanMixin, ProgressRegressResult):
     """
     This is a fact, a point in time.
     """

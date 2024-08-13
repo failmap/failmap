@@ -9,7 +9,15 @@ from jet.filters import RelatedFieldAjaxListFilter
 from websecmap.app.admin import TooManyRecordsPaginator
 from websecmap.map.admin import ordering_actions
 from websecmap.scanners import models
-from websecmap.scanners.models import Endpoint, Product, ProductHierarchy, State, ProductCookieIndicator, SecurityImpact
+from websecmap.scanners.models import (
+    Endpoint,
+    Product,
+    ProductHierarchy,
+    State,
+    ProductCookieIndicator,
+    SecurityImpact,
+    RatingOptions,
+)
 from websecmap.scanners.proxy import check_proxy
 from websecmap.scanners.scanmanager import delete_metric_and_set_previous_to_latest
 from websecmap.scanners.scanner.banners.detect_version import add_excepted_banner_to_config, clean_and_detect
@@ -205,6 +213,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "comply_or_explain_is_explained",
         "explain",
         "is_the_latest_scan",
+        "progression",
     )
     search_fields = ("endpoint__url__url",)
 
@@ -225,7 +234,15 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "endpoint__is_dead",
         "comply_or_explain_is_explained",
         "is_the_latest_scan",
+        "prr_is_progress",
+        "prr_is_regression",
     ][::-1]
+
+    def progression(self, obj):
+        if obj.prr_is_progress:
+            return f"☺️ was {RatingOptions(obj.prr_was_previously).label}"
+        if obj.prr_is_regression:
+            return f"😭 was {RatingOptions(obj.prr_was_previously).label}"
 
     fieldsets = (
         (
