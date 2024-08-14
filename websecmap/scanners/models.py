@@ -554,6 +554,8 @@ class ProgressRegressResult(models.Model):
     prr_is_progress = models.BooleanField(default=False, db_index=True)
     prr_is_regression = models.BooleanField(default=False, db_index=True)
     prr_was_previously = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
         choices=RatingOptions.choices,
         default=RatingOptions.OK,
         db_index=True,
