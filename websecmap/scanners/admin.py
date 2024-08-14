@@ -240,9 +240,9 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     def progression(self, obj):
         if obj.prr_is_progress:
-            return f"☺️ was {RatingOptions(obj.prr_was_previously).label}"
+            return f"🎉️ was {RatingOptions(obj.prr_was_previously).label}"
         if obj.prr_is_regression:
-            return f"😭 was {RatingOptions(obj.prr_was_previously).label}"
+            return f"💀 was {RatingOptions(obj.prr_was_previously).label}"
 
     fieldsets = (
         (
@@ -341,6 +341,7 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "explain",
         "is_the_latest_scan",
         "short_evidence",
+        "progression",
     )
     search_fields = ("url__url", "type", "rating", "explanation", "last_scan_moment", "rating_determined_on")
     list_filter = [
@@ -352,7 +353,15 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "rating_determined_on",
         "comply_or_explain_is_explained",
         "is_the_latest_scan",
+        "prr_is_progress",
+        "prr_is_regression",
     ][::-1]
+
+    def progression(self, obj):
+        if obj.prr_is_progress:
+            return f"🎉️ was {RatingOptions(obj.prr_was_previously).label}"
+        if obj.prr_is_regression:
+            return f"💀 was {RatingOptions(obj.prr_was_previously).label}"
 
     @staticmethod
     def url_(obj):
