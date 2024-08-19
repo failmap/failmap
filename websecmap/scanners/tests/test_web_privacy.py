@@ -233,12 +233,13 @@ def test_get_all_third_party_requests(settings, current_path, db):
     ddiff = DeepDiff(
         trackers,
         [
-            {
-                "Category": "Content",
-                "Company": "Adobe",
-                "Platform": "https://typekit.com",
-                "Tracking Url": "use.typekit.net",
-            },
+            # removed as this is not in disconnect me
+            # {
+            #     "Category": "Content",
+            #     "Company": "Adobe",
+            #     "Platform": "https://typekit.com",
+            #     "Tracking Url": "use.typekit.net",
+            # },
             {
                 "Category": "Disconnect",
                 "Company": "Google",

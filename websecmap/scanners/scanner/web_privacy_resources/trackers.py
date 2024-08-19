@@ -23,9 +23,10 @@ def get_known_trackers_from_urls(urls: List[str]):
         if info := get_tracker_info_from_disconnectme(url):
             known_trackers.append(info)
 
-        if not info:
-            if info := get_tracker_info_from_websecmap(url):
-                known_trackers.append(info)
+        # currently no known trackers
+        # if not info:
+        #     if info := get_tracker_info_from_websecmap(url):
+        #         known_trackers.append(info)
 
     return known_trackers
 
@@ -78,12 +79,13 @@ def get_tracker_info_from_websecmap(url: str) -> Dict[str, str]:
         #     "Tracking Url": "tracking.monsido.com",
         # },
         # missing in the disconnectme set
-        "use.typekit.net": {
-            "Category": "Content",
-            "Company": "Adobe",
-            "Platform": "https://typekit.com",
-            "Tracking Url": "use.typekit.net",
-        },
+        # Adobe says to not track using this domain.
+        # "use.typekit.net": {
+        #     "Category": "Content",
+        #     "Company": "Adobe",
+        #     "Platform": "https://typekit.com",
+        #     "Tracking Url": "use.typekit.net",
+        # },
         # https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net
         # We do not use cookies or similar tracking technologies to track your activity on our Service.
         # We never associate any gathered data with specific users or try to track their usage at any point and ...
