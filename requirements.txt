@@ -359,7 +359,7 @@ urllib3==1.26.18
     #   -r requirements.in
     #   requests
     #   sentry-sdk
-urllib3-future==2.7.912
+urllib3-future==2.8.907
     # via niquests
 validators==0.20.0
     # via -r requirements.in
