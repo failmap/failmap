@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
-from typing import Optional
+from typing import Optional, Set
 
 from django.db.models import QuerySet
 
@@ -11,22 +11,42 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan, RatingOptio
 
 
 @app.task(queue="storage", ignore_result=True)
-def calculate_progress_and_regression():
-    # metrics = ScanType.objects.all().filter(include_in_report=True, show_in_frontend=True)
+def calculate_progress_and_regression(organization_id: int = None) -> None:
+    enabled_metrics = set(
+        ScanType.objects.all().filter(include_in_report=True, show_in_frontend=True).values_list("name", flat=True)
+    )
 
-    # now only run on things that didn't die, which misses a lot probably. Database really neads a cleanup...
-    eps = Endpoint.objects.all().filter(is_dead=False, url__is_dead=False, url__not_resolvable=False)
+    # this is only for things that are currently visible in reports, not everything else.
+    # now only run on things that didn't die, which misses a lot probably. Database really needs a cleanup...
+    eps = Endpoint.objects.all().filter(is_dead=False, url__is_dead=False, url__not_resolvable=False).only("id")
+    urls = Url.objects.all().filter(is_dead=False, not_resolvable=False).only("id")
+    if organization_id:
+        eps = eps.filter(url__organization__id=organization_id)
+        urls = urls.filter(organization__id=organization_id)
+
     for endpoint in eps:
-        # this might be gruesomely slow... and better just to still iterate all available metrics with some heuristcs
-        metrics = EndpointGenericScan.objects.all().filter(endpoint=endpoint).values_list("type", flat=True).distinct()
-        for metric in metrics:
-            calculate_for_metric_on_endpoint.s(endpoint.id, metric).apply_async()
+        calculate_historical_progression_per_endpoint(endpoint.id, enabled_metrics)
 
-    urls = Url.objects.all().filter(is_dead=False, not_resolvable=False)
     for url in urls:
-        metrics = UrlGenericScan.objects.all().filter(url=url).values_list("type", flat=True).distinct()
-        for metric in metrics:
-            calculate_for_metric_on_url.s(url.id, metric).apply_async()
+        calculate_historical_progression_per_url(url.id, enabled_metrics)
+
+
+def calculate_historical_progression_per_endpoint(endpoint_id: int, enabled_metrics: Set[str]) -> None:
+    scanned_metrics = (
+        EndpointGenericScan.objects.all()
+        .filter(endpoint=Endpoint(id=endpoint_id))
+        .values_list("type", flat=True)
+        .distinct()
+    )
+    # only use metrics that are in enabled_metrics and in scanned_metrics, that's the fastest
+    for metric in set(enabled_metrics).intersection(set(scanned_metrics)):
+        calculate_for_metric_on_endpoint.s(endpoint_id, metric).apply_async()
+
+
+def calculate_historical_progression_per_url(url_id: int, enabled_metrics: Set[str]) -> None:
+    scanned_metrics = UrlGenericScan.objects.all().filter(url=Url(id=url_id)).values_list("type", flat=True).distinct()
+    for metric in set(enabled_metrics).intersection(set(scanned_metrics)):
+        calculate_for_metric_on_url.s(url_id, metric).apply_async()
 
 
 def prr_impact(severity, previous_value: Optional[str]) -> Optional[str]:
@@ -53,7 +73,7 @@ def prr_impact(severity, previous_value: Optional[str]) -> Optional[str]:
 
 @app.task(queue="storage", ignore_result=True)
 def calculate_for_metric_on_endpoint(endpoint_id: int, metric_name: str):
-    endpoint = Endpoint.objects.all().filter(id=endpoint_id).first()
+    endpoint = Endpoint.objects.all().filter(id=endpoint_id).only("id").first()
     if not endpoint:
         return
 
@@ -63,7 +83,7 @@ def calculate_for_metric_on_endpoint(endpoint_id: int, metric_name: str):
 
 @app.task(queue="storage", ignore_result=True)
 def calculate_for_metric_on_url(url_id: int, metric_name: str):
-    url = Url.objects.all().filter(id=url_id).first()
+    url = Url.objects.all().filter(id=url_id).only("id").first()
     if not url:
         return
 
@@ -148,6 +168,7 @@ def demo_progress_per_metric_per_layer_per_month():
 
 
 def reset_progress():
+    # this is for development purposes only, this doesn't really work on the live database :)
     EndpointGenericScan.objects.update(
         prr_is_progress=False, prr_is_regression=False, prr_was_previously=RatingOptions.OK
     )
