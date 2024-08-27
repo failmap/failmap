@@ -2,6 +2,7 @@
 import json
 import logging
 import random
+from itertools import islice, chain
 from json import JSONDecodeError
 from typing import Any, List
 
@@ -294,3 +295,11 @@ def finish_those_that_wont_be_scanned(scanner: str, scans: List[EndpointGenericS
     for not_scanned_id in will_not_be_scanned:
         log.debug("Not going to scan %s, as there is nothing to scan for this url anymore.", not_scanned_id)
         plannedscan.finish("scan", scanner, not_scanned_id)
+
+
+def chunks_generator(iterable, size=100):
+    # more efficient chunks
+    # https://stackoverflow.com/questions/24527006/split-a-generator-into-chunks-without-pre-walking-it
+    iterator = iter(iterable)
+    for first in iterator:
+        yield chain([first], islice(iterator, size - 1))

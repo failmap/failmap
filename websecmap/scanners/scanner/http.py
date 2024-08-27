@@ -45,7 +45,7 @@ from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict
 from websecmap.scanners.models import Endpoint, UrlIp
-from websecmap.scanners.scanner.__init__ import allowed_to_discover_endpoints
+from websecmap.scanners.scanner.__init__ import allowed_to_discover_endpoints, chunks_generator
 from websecmap.scanners.scanner.filter import (
     apply_organzation_or_endpoint_filter_before_url_filter,
     merge_endpoints_filter,
@@ -115,8 +115,11 @@ def discover_all(**kwargs):
     kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
     urls = apply_organzation_or_endpoint_filter_before_url_filter(**kwargs)
     tasks = compose_discover_task(urls)
-    for task in tasks:
-        task.apply_async(**kwargs.get("task_arguments", {}))
+    # a million tasks are created, which takes 1.5 hours to put on the queue.
+    # a solution is chunks, but it seems it requires some rewrite of spreading those chains, which i can't figure out
+    # so instead just generate small groups of 100 tasks to reduce just put 15.000 tasks on the queue.
+    for task in chunks_generator(tasks, 100):
+        group(task).apply_async(**kwargs.get("task_arguments", {}))
     return group()
 
 
@@ -125,8 +128,8 @@ def verify_all(**kwargs):
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
     endpoints = filter_endpoints_only_as_endpoints(**kwargs)
     tasks = compose_verify_task(endpoints)
-    for task in tasks:
-        task.apply_async(**kwargs.get("task_arguments", {}))
+    for task in chunks_generator(tasks, 100):
+        group(task).apply_async(**kwargs.get("task_arguments", {}))
 
 
 def compose_manual_discover_task(organizations_filter: dict = None, urls_filter: dict = None, **kwargs) -> Task:
