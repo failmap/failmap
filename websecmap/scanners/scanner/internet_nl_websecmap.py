@@ -234,6 +234,15 @@ def recover_and_retry(scan_id: int, **kwargs):
     # get the latest valid state from the scan log:
     latest_valid = InternetNLV2StateLog.objects.all().filter(scan=scan, state__in=valid_states).order_by("-id").first()
 
+    # in case logging has been cleared, prevent from going into an infinite loop and crashes etc:
+    if not latest_valid:
+        update_state(
+            scan.pk,
+            STATE_REQUESTED,
+            "Rolled back from error state without recovery/rollback data present. Re-initiating scan.",
+        )
+        return group([])
+
     log.debug(
         "Internet.nl scan #%s is rolled back to retry from '%s' to '%s'.", scan.id, scan.state, latest_valid.state
     )

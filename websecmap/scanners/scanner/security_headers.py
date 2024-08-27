@@ -49,6 +49,8 @@ What referrer should be allowed to access the resource. Security on referrer hea
 'Referrer-Policy':
 Classified as: Ignored
 """
+
+import contextlib
 import logging
 from typing import Dict, Union, Any, List
 import re
@@ -64,7 +66,7 @@ from urllib.parse import urlsplit
 from urllib.parse import urlunsplit
 
 from websecmap.celery import app
-from websecmap.organizations.models import Organization, Url
+from websecmap.organizations.models import Organization, Url, OrganizationType
 from websecmap.scanners import init_dict
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
@@ -810,3 +812,132 @@ def remove_random_identifiers(string: str) -> str:
     )
 
     return string
+
+
+def get_hsts_chain_impression():
+    layer = OrganizationType.objects.get(name="municipality")
+    scans = (
+        EndpointGenericScan.objects.all()
+        .filter(
+            type="http_security_header_strict_transport_security",
+            is_the_latest_scan=True,
+            endpoint__is_dead=False,
+            endpoint__url__is_dead=False,
+            endpoint__url__not_resolvable=False,
+            endpoint__url__organization__is_dead=False,
+            endpoint__url__organization__layers=layer,
+        )
+        .only("id", "endpoint", "evidence")
+        .order_by("id")
+    )
+    for scan in scans:
+        with contextlib.suppress(Exception):
+            invalid_redirects = hsts_chain_validate(json.loads(scan.evidence))
+            if invalid_redirects:
+                print(scan.endpoint)
+                print(invalid_redirects)
+
+
+def hsts_chain_validate(hsts_chain: List[Dict[str, Union[str, int]]]) -> List[Any]:
+    """
+    HSTS has to first upgrade on the _SAME_DOMAIN_ and then redirect to another domain.
+    It's not allowed to redirect to another domain from HSTS.
+    "een bezoeker wordt doorverwezen naar de HTTPS-versie op de bezochte domeinnaam voordat naar andere
+    domeinnamen wordt doorverwezen overeenkomstig maatregel 5 bij beveiligingsrichtlijn U/WA.05 van de
+    Webapplicatie-richtlijnen; "
+    "bezochte domeinnaam, dus niet subdomeinenaam! ook niet poort"
+    [
+        {"request": 1, "url": "https://educator.windesheim.nl:443/", "protocol": "https", "status_code": 302,
+            "content_type": "unknown", "headers": {"location": "", "strict-transport-security": "max-age=31536000"}},
+        {"request": 2, "url": "https://educator.windesheim.nl:443/home", "protocol": "https", "status_code": 302,
+            "content_type": "unknown", "headers": {"location": "", "strict-transport-security": "max-age=31536000"}},
+        {"request": 3, "url": "https://educator.windesheim.nl:443/login", "protocol": "https", "status_code": 302,
+            "content_type": "unknown", "headers": {"location": "", "strict-transport-security": "max-age=31536000"}},
+        {"request": 4, "url": "https://educator.windesheim.nl:443/saml/login", "protocol": "https", "status_code": 302,
+            "content_type": "unknown", "headers": {"location": "https://sts.windesheim.nl/adfs/ls/",
+            "strict-transport-security": "max-age=31536000"}},
+        {"request": 5, "url": "https://sts.windesheim.nl/adfs/ls/", "protocol": "https", "status_code": 200,
+            "content_type": "text/html; charset=utf-8", "headers": {}}]
+    """
+    invalid_forwards = []
+    previous_request = None
+    for request in hsts_chain:
+        if not previous_request:
+            previous_request = request
+            continue
+        previous_extract = tldextract.extract(previous_request["url"])
+        current_extract = tldextract.extract(request["url"])
+        if previous_request["protocol"] == "http" and previous_extract.domain not in current_extract.domain:
+            invalid_forwards.append({"from": previous_extract.fqdn, "to": current_extract.fqdn})
+        previous_request = request
+    return invalid_forwards
+
+
+def get_suggested_sites():
+    # from websecmap.scanners.scanner.security_headers import *
+    # import contextlib
+    # from pprint import pprint
+    # pprint(sug)
+    # it results not just in nice redirects but also sites that are obviously wrong :)
+    # these are suppliers
+    useless_subdomain = [
+        "accounts.google.com",
+        "login.windows.net",
+        "outlook.office365.com",
+        "login.microsoftonline.com",
+        "sentby.spotler.com",
+        "m.youtube.com",
+    ]
+    vendor_domain = [
+        "simiam.nl",
+        "digid.nl",
+        "outlook.com",
+        "eherkenning.nl",
+        "somtoday.nl",
+        "vmwareidentity.de",
+        "sharepoint.com",
+        "surfconext.nl",
+        "leefbaarometer.nl",
+        "overheid.nl",
+        "b2clogin.com",
+        "azurewebsites.net",
+        "moo.nl",
+        "akamai-access.com",
+        "youtube.com",
+        "signhost.com",
+        "rvig.nl",
+        "rijksoverheid.nl",
+        "meierijstad.nl",
+    ]
+    scans = (
+        EndpointGenericScan.objects.all()
+        .filter(
+            type="http_security_header_strict_transport_security",
+            is_the_latest_scan=True,
+            endpoint__is_dead=False,
+            # prevent tons of duplicates:
+            # endpoint__port=443,
+            # endpoint__ip_version=4,
+            endpoint__url__is_dead=False,
+            endpoint__url__not_resolvable=False,
+        )
+        .only("id", "endpoint", "evidence", "endpoint__url__url")
+        .order_by("-id")
+    )
+    suggestions = {}
+    for scan in scans:
+        with contextlib.suppress(Exception):
+            hsts_chain = json.loads(scan.evidence)
+            for request in hsts_chain:
+                current_extract = tldextract.extract(request["url"])
+                if current_extract.fqdn in useless_subdomain:
+                    continue
+                if f"{current_extract.domain}.{current_extract.suffix}" in vendor_domain:
+                    continue
+                orig = tldextract.extract(scan.endpoint.url.url)
+                if current_extract.domain != orig.domain:
+                    print(f"Suggested site: {current_extract.fqdn} for {scan.endpoint.url.url}")
+                    if current_extract.fqdn not in suggestions:
+                        suggestions[current_extract.fqdn] = set()
+                    suggestions[current_extract.fqdn].add(scan.endpoint.id)
+    return suggestions

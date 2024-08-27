@@ -1298,7 +1298,7 @@ class HttpEndpointHeaders(models.Model):
 
     at_when = models.DateTimeField(blank=True, null=True)
     last_scan_moment = models.DateTimeField(blank=True, null=True)
-    is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+    is_the_latest = models.BooleanField(default=False, null=True, blank=True, db_index=True)
 
 
 class DomainIp(models.Model):
@@ -1311,7 +1311,7 @@ class DomainIp(models.Model):
 
     at_when = models.DateTimeField(blank=True, null=True)
     last_scan_moment = models.DateTimeField(blank=True, null=True)
-    is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+    is_the_latest = models.BooleanField(default=False, null=True, blank=True, db_index=True)
 
 
 class DomainMX(models.Model):
@@ -1333,7 +1333,7 @@ class DomainMX(models.Model):
     # time dimension
     at_when = models.DateTimeField(blank=True, null=True)
     last_scan_moment = models.DateTimeField(blank=True, null=True)
-    is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+    is_the_latest = models.BooleanField(default=False, null=True, blank=True, db_index=True)
 
 
 class GeoIp(models.Model):
@@ -1381,7 +1381,7 @@ class GeoIp(models.Model):
     # over time
     at_when = models.DateTimeField(blank=True, null=True)
     last_scan_moment = models.DateTimeField(blank=True, null=True)
-    is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+    is_the_latest = models.BooleanField(default=False, null=True, blank=True, db_index=True)
 
 
 class GeoIpCorrection(models.Model):
@@ -1397,7 +1397,7 @@ class GeoIpCorrection(models.Model):
 
     at_when = models.DateTimeField(blank=True, null=True)
     last_scan_moment = models.DateTimeField(blank=True, null=True)
-    is_the_latest = models.BooleanField(default=False, null=True, blank=True)
+    is_the_latest = models.BooleanField(default=False, null=True, blank=True, db_index=True)
 
 
 class CookiePlacement(models.Model):
