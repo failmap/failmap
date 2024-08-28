@@ -471,7 +471,6 @@ def sync_model_field_to_disk(model, json_field, file_field):
         mdc.save()
 
 
-@app.task(queue="reporting")
 def calculate_map_data(days: int = 366, countries: List = None, organization_types: List = None):
     metadata = get_backend_scanmetadata()
 
@@ -526,7 +525,6 @@ def calculate_map_data_specific(map_configuration, when, scan_type):
         log.exception(my_exception)
 
 
-@app.task(queue="reporting")
 def calculate_high_level_stats(days: int = 1, countries: List = None, organization_types: List = None) -> List[Task]:
     log.info("Creating high_level_stats")
 
@@ -541,7 +539,6 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
     return tasks
 
 
-@app.task(queue="reporting")
 def calculate_vulnerability_statistics(days: int = 366, countries: List = None, organization_types: List = None):
     log.info("Calculation vulnerability graphs")
 

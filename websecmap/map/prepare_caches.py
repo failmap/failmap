@@ -8,7 +8,7 @@ from websecmap.map.report import (
 from websecmap.map.logic.map_health import update_map_health_reports
 
 
-@app.task(queue="storage")
+@app.task(queue="kickoff")
 def prepare_daily_caches_for_everything():
     metadata = get_backend_scanmetadata()
     tasks = []

@@ -27,7 +27,6 @@ This grade gets stored inside a model related to a certain map, so the metric ca
 """
 
 
-@app.task(queue="reporting")
 def update_map_health_reports(
     published_scan_types, days: int = 366, countries: List = None, organization_types: List = None
 ):
