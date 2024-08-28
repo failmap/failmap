@@ -52,6 +52,8 @@ def test_update_map_health_reports(db):
     Organization.objects.create(country="NL", created_on=datetime(2020, 1, 1))
 
     # make sure it doesn't crash on the type field
-    update_map_health_reports("test", 1, ["NL"], ["municipality"])
+    tasks = update_map_health_reports("test", 1, ["NL"], ["municipality"])
+    for task in tasks:
+        task.apply()
 
     assert MapHealthReport.objects.all().count() == 1

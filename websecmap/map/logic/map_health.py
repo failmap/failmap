@@ -32,51 +32,60 @@ def update_map_health_reports(
     published_scan_types, days: int = 366, countries: List = None, organization_types: List = None
 ):
     map_configurations = filter_map_configs(countries=countries, organization_types=organization_types)
+    tasks = []
     for map_configuration in map_configurations:
-        organization_type_id = map_configuration["organization_type"]
-        country = map_configuration["country"]
+        tasks.extend(
+            update_map_health_reports_specific.si(map_configuration, days_back, published_scan_types)
+            for days_back in list(reversed(range(days)))
+        )
+    return tasks
 
-        organizations_on_map = Organization.objects.all().filter(country=country, layers=organization_type_id)
 
-        for days_back in list(reversed(range(0, days))):
-            total_outdated = []
-            total_good = []
-            old_date = datetime.now(timezone.utc) - timedelta(days=days_back)
+@app.task(queue="reporting")
+def update_map_health_reports_specific(map_configuration, days_back, published_scan_types):
+    organization_type_id = map_configuration["organization_type"]
+    country = map_configuration["country"]
 
-            log.debug("Creating health report of %s days back.", days_back)
-            for organization in organizations_on_map:
-                # log.debug(f"Creating health report of {organization} at {old_date}.")
-                latest_report = get_latest_report_of_organization(organization, old_date)
-                if not latest_report:
-                    continue
+    organizations_on_map = Organization.objects.all().filter(country=country, layers=organization_type_id)
 
-                # log.debug(f"The latest report of {organization} at {old_date} is from {latest_report.at_when}.")
+    total_outdated = []
+    total_good = []
+    old_date = datetime.now(timezone.utc) - timedelta(days=days_back)
 
-                ratings_outdated, ratings_good = split_ratings_between_good_and_bad(latest_report, OUTDATED_HOURS)
-                total_outdated += ratings_outdated
-                total_good += ratings_good
+    log.debug("Creating health report of %s days back.", days_back)
+    for organization in organizations_on_map:
+        # log.debug(f"Creating health report of {organization} at {old_date}.")
+        latest_report = get_latest_report_of_organization(organization, old_date)
+        if not latest_report:
+            continue
 
-            report = create_health_report(total_outdated, total_good, published_scan_types)
-            # Update reports of a certain day. For example when the report for a single day is re-generated.
-            health_report = (
-                MapHealthReport.objects.all()
-                .filter(
-                    map_configuration=retrieve(country, organization_type_id),
-                    at_when__year=old_date.year,
-                    at_when__month=old_date.month,
-                    at_when__day=old_date.day,
-                )
-                .first()
-            )
-            if not health_report:
-                health_report = MapHealthReport()
-            health_report.map_configuration = retrieve(country, organization_type_id)
-            health_report.at_when = old_date
-            health_report.percentage_up_to_date = report["percentage_up_to_date"]
-            health_report.percentage_out_of_date = report["percentage_out_of_date"]
-            health_report.outdate_period_in_hours = report["outdate_period_in_hours"]
-            health_report.detailed_report = report
-            health_report.save()
+        # log.debug(f"The latest report of {organization} at {old_date} is from {latest_report.at_when}.")
+
+        ratings_outdated, ratings_good = split_ratings_between_good_and_bad(latest_report, OUTDATED_HOURS)
+        total_outdated += ratings_outdated
+        total_good += ratings_good
+
+    report = create_health_report(total_outdated, total_good, published_scan_types)
+    # Update reports of a certain day. For example when the report for a single day is re-generated.
+    health_report = (
+        MapHealthReport.objects.all()
+        .filter(
+            map_configuration=retrieve(country, organization_type_id),
+            at_when__year=old_date.year,
+            at_when__month=old_date.month,
+            at_when__day=old_date.day,
+        )
+        .first()
+    )
+    if not health_report:
+        health_report = MapHealthReport()
+    health_report.map_configuration = retrieve(country, organization_type_id)
+    health_report.at_when = old_date
+    health_report.percentage_up_to_date = report["percentage_up_to_date"]
+    health_report.percentage_out_of_date = report["percentage_out_of_date"]
+    health_report.outdate_period_in_hours = report["outdate_period_in_hours"]
+    health_report.detailed_report = report
+    health_report.save()
 
 
 def get_outdated_ratings(
