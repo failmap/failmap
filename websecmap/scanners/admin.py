@@ -36,6 +36,9 @@ class EndpointGenericScanInline(CompactInline):
     extra = 0
     show_change_link = True
 
+    # a lot of scans means a giant form, slow loading times and no possibility to save anyway
+    readonly_fields = [f.name for f in model._meta.get_fields()]
+
 
 @admin.register(models.UrlIp)
 class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -144,7 +147,7 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         ),
     )
 
-    readonly_fields = ["discovered_on", "origin"]
+    readonly_fields = ["discovered_on", "origin", "url"]
 
     @staticmethod
     def sec_policy(obj):
