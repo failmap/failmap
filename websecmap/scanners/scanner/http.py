@@ -111,7 +111,7 @@ STANDARD_URL_FILTER = {"is_dead": False}
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def discover_all(**kwargs):
+def discover_all(**kwargs) -> List:
     kwargs = merge_urls_filter(STANDARD_URL_FILTER, **kwargs)
     urls = apply_organzation_or_endpoint_filter_before_url_filter(**kwargs)
     tasks = compose_discover_task(urls)
@@ -120,6 +120,8 @@ def discover_all(**kwargs):
     # so instead just generate small groups of 100 tasks to reduce just put 15.000 tasks on the queue.
     for task in chunks_generator(tasks, 100):
         group(task).apply_async(**kwargs.get("task_arguments", {}))
+
+    return []
 
 
 @app.task(queue="kickoff", ignore_result=True)
