@@ -120,7 +120,6 @@ def discover_all(**kwargs):
     # so instead just generate small groups of 100 tasks to reduce just put 15.000 tasks on the queue.
     for task in chunks_generator(tasks, 100):
         group(task).apply_async(**kwargs.get("task_arguments", {}))
-    return group()
 
 
 @app.task(queue="kickoff", ignore_result=True)
@@ -145,7 +144,7 @@ def compose_manual_discover_task(organizations_filter: dict = None, urls_filter:
 
 
 def compose_discover_task(urls: List[Url]):
-    return [
+    return (
         can_connect.si(
             protocol=PORT_TO_PROTOCOL[port],
             url=url.url,
@@ -162,7 +161,7 @@ def compose_discover_task(urls: List[Url]):
         for url in urls
         for port in PREFERRED_PORT_ORDER
         for ip_version in [4, 6]
-    ]
+    )
 
 
 def compose_manual_verify_task(
