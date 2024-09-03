@@ -31,7 +31,7 @@ from websecmap.scanners.plannedscan import (
     retry,
 )
 from websecmap.scanners.scanner.autoexplain_no_https_possible import scan
-from websecmap.scanners.scanner.tls_qualys import plan_scan
+from websecmap.scanners.scanner.tls_qualys import plan_scan, plan_scan_optimized
 from constance.test.pytest import override_config
 
 log = logging.getLogger("websecmap")
@@ -260,12 +260,12 @@ def test_plan_scans(db, default_scan_metadata, default_policy):
         )
         create_endpoint_scan(e1, "tls_qualys_encryption_quality", "A", datetime.now(timezone.utc))
         create_endpoint_scan(e2, "tls_qualys_encryption_quality", "A", datetime.now(timezone.utc))
-        plan_scan()
-        plan_scan()
-        plan_scan()
-        plan_scan()
-        plan_scan()
-        plan_scan()
+        plan_scan_optimized()
+        plan_scan_optimized()
+        plan_scan_optimized()
+        plan_scan_optimized()
+        plan_scan_optimized()
+        plan_scan_optimized()
         # repeating this planning while it still doesnt have scans...
         assert calculate_progress() == [{"activity": 3, "amount": 8, "scanner": 22, "state": 1}]
 
@@ -307,7 +307,7 @@ def test_plan_scans(db, default_scan_metadata, default_policy):
             ),
         )
         assert calculate_progress() == [{"activity": 3, "amount": 8, "scanner": 22, "state": 1}]
-        plan_scan()
+        plan_scan_optimized()
         assert calculate_progress() == [{"activity": 3, "amount": 9, "scanner": 22, "state": 1}]
 
 
@@ -490,3 +490,29 @@ def test_retry(db, default_scan_metadata, default_policy, caplog):
         retry()
 
     assert "Retried 1 planned scans for tls_qualys" in caplog.text
+
+
+def test_plan_scans_urls_filter(db, default_scan_metadata, default_policy):
+    """Using URL filter on plan_scan should not result in other urls being scanned"""
+    scanner = Scanner.objects.all().get(python_name="tls_qualys")
+    scanner_id = scanner.id
+
+    with freeze_time("2020-01-01"):
+        o = create_organization("Test")
+        u1 = create_url("example.com")
+        create_endpoint(u1, 4, "https", 443)
+        link_url_to_organization(u1, o)
+        u2 = create_url("example2.com")
+        create_endpoint(u2, 4, "https", 443)
+        link_url_to_organization(u2, o)
+
+        # plan scans on endpoints that have never been scanned.
+        plan_scan(urls_filter={"url__iregex": "^example.com$"})
+        assert calculate_progress() == [
+            {
+                "scanner": scanner_id,
+                "activity": Activity["scan"].value,
+                "state": State["requested"].value,
+                "amount": 1,
+            }
+        ]

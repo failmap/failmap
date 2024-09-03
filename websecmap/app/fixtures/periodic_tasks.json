@@ -1163,7 +1163,7 @@
   "pk": 315,
   "fields": {
     "name": "tls_qualys: Schedule Scan",
-    "task": "websecmap.scanners.scanner.tls_qualys.plan_scan",
+    "task": "websecmap.scanners.scanner.tls_qualys.plan_scan_optimized",
     "interval": null,
     "crontab": 11,
     "solar": null,

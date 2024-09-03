@@ -94,7 +94,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def plan_scan_new(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
+def plan_scan(organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs):
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     if not allowed_to_scan("tls_qualys"):
         return group()
@@ -105,14 +105,12 @@ def plan_scan_new(organizations_filter: dict = None, urls_filter: dict = None, e
 
 
 @app.task(queue="kickoff", ignore_result=True)
-def plan_scan(urls_filter: dict = None, **kwargs):
-    urls_filter = init_dict(urls_filter)
+def plan_scan_optimized():
     """
     There are all kinds of optimizations in this task due to scanning as few urls as possible.
     - Scanning once every 7 days if everything was OK and scanning once every 3 days in case of errors.
     - This increases complexity and causes confusion for requesting re-scans.
 
-    Use plan_scan_new to bypass all of those.
     """
 
     if not allowed_to_scan("tls_qualys"):
@@ -131,7 +129,6 @@ def plan_scan(urls_filter: dict = None, **kwargs):
         endpoint__port=443,
         endpoint__is_dead=False,
         created_on__gte=datetime.now() - timedelta(days=14),
-        **urls_filter,
     )
 
     # here is the slow and correct approach preserved for when someone thinks they can do it better :)
@@ -180,7 +177,6 @@ def plan_scan(urls_filter: dict = None, **kwargs):
         # as we're not using parameter sets anymore, there is no use in filtering days since last scan.
         # endpoint__endpointgenericscan__last_scan_moment__lte=datetime.now(timezone.utc) - timedelta(days=0),
         endpoint__endpointgenericscan__rating__in=["F", "C", "B", "not trusted"],
-        **urls_filter,
     ).only("id", "url")
     log.debug(f"2: planning {len(urls)} scans that are F/C/V=B or not_trusted.")
     plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(urls))
