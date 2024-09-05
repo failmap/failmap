@@ -1,3 +1,6 @@
+from django.urls import reverse
+from websecmap.app.constance import constance_cached_value
+
 import logging
 from datetime import datetime, timezone
 from typing import Union
@@ -50,6 +53,14 @@ def store_endpoint_scan_result(
         log.debug("Scan had the same rating, message and evidence, updating last_scan_moment only.")
         epgs.last_scan_moment = datetime.now(timezone.utc)
         epgs.save(update_fields=["last_scan_moment"])
+
+        log.debug(
+            "URL result saved as: %s, %s/%s",
+            epgs.id,
+            constance_cached_value("PROJECT_WEBSITE").rstrip("/"),
+            reverse("admin:%s_%s_change" % (epgs._meta.app_label, epgs._meta.model_name), args=[epgs.id]),
+        )
+
         return
 
     # message and rating changed for this scan_type, so it's worth while to save the scan.
@@ -101,6 +112,13 @@ def store_endpoint_scan_result(
             is_the_latest_scan=True,
         ).exclude(pk=new_epgs.pk).update(is_the_latest_scan=False)
 
+        log.debug(
+            "URL result saved as: %s, %s/%s",
+            new_epgs.id,
+            constance_cached_value("PROJECT_WEBSITE").rstrip("/"),
+            reverse("admin:%s_%s_change" % (new_epgs._meta.app_label, new_epgs._meta.model_name), args=[new_epgs.id]),
+        )
+
     return new_epgs
 
 
@@ -150,6 +168,13 @@ def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str
                 # speed up by only finding the ones that are true, not all results ofc!
                 is_the_latest_scan=True,
             ).exclude(pk=ugs.pk).update(is_the_latest_scan=False)
+
+        log.debug(
+            "URL result saved as: %s, %s/%s",
+            ugs.id,
+            constance_cached_value("PROJECT_WEBSITE").rstrip("/"),
+            reverse("admin:%s_%s_change" % (ugs._meta.app_label, ugs._meta.model_name), args=[ugs.id]),
+        )
 
         return ugs
 
