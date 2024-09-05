@@ -315,14 +315,16 @@ def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None, incl
 
 
 @app.task(queue="storage", ignore_result=True)
-def store_new_scan_results(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[str, Dict[str, int]]) -> None:
+def store_new_scan_results(raw_nuclei_data: bytes, host_to_endpoint_mapping: Dict[str, Dict[str, int]]) -> None:
     """
     In a new nuclei scan, you do not know what categories are scanned and what metrics are actually returned:
     nuclei only returns data if a scan was successful. So you might get less categories than you requested etc.
     In a new scan just dump whatever you find to the database: the scan types are derived from the scan data.
     """
     raw_nuclei_records = convert_nuclei_data_to_json(raw_nuclei_data)
+    log.debug("Raw nuclei records: %s", raw_nuclei_data)
     results_per_host = split_nuclei_records_per_host(raw_nuclei_records)
+    log.debug("Nuclei results per host: %s", json.dumps(results_per_host, indent=2))
 
     # todo: what if raw_nuclei_records is empty? what host exactly should then be cleaned?
     # at verify the nr of hosts/endpoints is always 1. So that should then be cleaned if there
@@ -360,7 +362,7 @@ def store_new_scan_results(raw_nuclei_data: bin, host_to_endpoint_mapping: Dict[
             # so there are fallback hosts / urls etc.
             # monitor exceptions for a while
             log.exception(
-                "Could not host from nuclei report in host-endpoint-mapping",
+                "Could not find host from nuclei report in host-endpoint-mapping",
                 extra={
                     "host": host,
                     "endpoint_id": host_to_endpoint_mapping,
@@ -421,7 +423,7 @@ def rate_nuclei_portal_finding(findings_data: List[Dict[str, Any]]) -> str:
 
 
 @app.task(queue="storage", ignore_result=True)
-def store_verify_results(raw_nuclei_data: bin, endpoint_id: int, scan_type: str) -> None:
+def store_verify_results(raw_nuclei_data: bytes, endpoint_id: int, scan_type: str) -> None:
     """
     A verify scan knows what scan has been performed. Nuclei does not return data in case it has not found anything,
     in that case we just neutralize a missing if it exists for that category.
@@ -594,6 +596,28 @@ def clean_nuclei_record(record):
     return record
 
 
+def categories_from_template(template: str) -> str:
+    """Get (sub)categories from template name path.
+
+    >>> categories_from_template("http/exposed-panels/phpmyadmin-panel.yaml")
+    'exposed-panels'
+
+    >>> categories_from_template('technologies/tech-detect.yaml')
+    'technologies'
+
+    >>> categories_from_template('unknown/')
+    'unknown'
+    """
+
+    # because exposed-panels and technologies used to be subcatogories of their own but since last year not anymore
+    # remove the http/ prefix from template paths so we don't have to refactor everything right now in regards of
+    # template names to endpointgenericscan type (eg nuclei_exposed_panels, nuclei_technologies)
+    backward_compatible_template = template.removeprefix("http/")
+    category = backward_compatible_template[: backward_compatible_template.find("/")]
+
+    return category
+
+
 def process_nuclei_record(n_record: Dict[str, Any]) -> Dict[str, Any]:
     # Just the raw nuclei data, not combined at all. These might not be really helpful.
     # template_id is ambiguous. The matcher name makes it unique.
@@ -612,8 +636,10 @@ def process_nuclei_record(n_record: Dict[str, Any]) -> Dict[str, Any]:
     # Which support things like exposed-panels, iot, token-sprak, takeover, fuzzing, exposures, default-logins,
     # technologies, network, misconfiguration, miscellaneous. We can merge the findings per category so there
     # are just ±20 new metrics instead of many thousands.
+    # nuclei templates have 2 layers of directories in which templates are contained, we are interested in the
+    # second directory
     template = n_record.get("template", "unknown/")
-    category = template[: template.find("/")]
+    category = categories_from_template(template)
 
     # Reduce the amount of metadata to save on storage. This _DOES_ remove some credits where credits are due, so
     # that has to be solved somehow. If we DO add it now, the people reading these findings will try to contact
