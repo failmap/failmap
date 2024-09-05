@@ -1,3 +1,4 @@
+import json
 import taggit
 from django.contrib import admin
 from django.utils.html import format_html
@@ -257,7 +258,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                     "rating",
                     "meaning",
                     "explanation",
-                    "evidence",
+                    "evidence_formatted",
                     "last_scan_moment",
                     "rating_determined_on",
                     "is_the_latest_scan",
@@ -286,7 +287,14 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def explain(self, instance):
         return format_html("<a href='./{}/change/#/tab/module_1/'>Explain</a>", instance.pk)
 
-    readonly_fields = ["last_scan_moment", "meaning"]
+    readonly_fields = ["last_scan_moment", "meaning", "evidence_formatted"]
+
+    @staticmethod
+    def evidence_formatted(obj):
+        try:
+            return json.dumps(obj.evidence, indent=2)
+        except TypeError:
+            return obj.evidence
 
     actions = []
 
