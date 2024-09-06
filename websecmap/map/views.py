@@ -441,91 +441,15 @@ def config_content():
         },
         # admin managed translations, this will replace the constance translations(!)
         "translation": get_translations(),
-        "translations": {
-            "en": {
-                "landing": {
-                    "title": configuration["INTRO_TITLE_HTML_EN"],
-                    "leader": configuration["INTRO_LEADER_HTML_EN"],
-                    "side_wide_search": configuration["SIDE_WIDE_SEARCH_TITLE_EN"],
-                },
-                "info": {
-                    "title": configuration["INFO_TITLE_EN"],
-                    "heading": configuration["INFO_HEADING_EN"],
-                    "title_1": configuration["INFO_TITLE_1_EN"],
-                    "content_1": configuration["INFO_CONTENT_1_EN"],
-                    "title_2": configuration["INFO_TITLE_2_EN"],
-                    "content_2": configuration["INFO_CONTENT_2_EN"],
-                    "title_3": configuration["INFO_TITLE_3_EN"],
-                    "content_3": configuration["INFO_CONTENT_3_EN"],
-                    "title_4": configuration["INFO_TITLE_4_EN"],
-                    "content_4": configuration["INFO_CONTENT_4_EN"],
-                    "title_5": configuration["INFO_TITLE_5_EN"],
-                    "content_5": configuration["INFO_CONTENT_5_EN"],
-                },
-                "footer": {
-                    "content": configuration["FOOTER_CONTENT_HTML_EN"],
-                },
-                "thank_you_email": {
-                    "will_fix_subject": configuration["THANK_YOU_WILL_FIX_EMAIL_SUBJECT_EN"],
-                    "will_fix_body": configuration["THANK_YOU_WILL_FIX_EMAIL_BODY_EN"],
-                    "thank_you_subject": configuration["THANK_YOU_EMAIL_SUBJECT_EN"],
-                    "thank_you_body": configuration["THANK_YOU_EMAIL_BODY_EN"],
-                },
-                "send_to_supplier": {
-                    "subject": configuration["SEND_TO_SUPPLIER_SUBJECT_EN"],
-                    "body": configuration["SEND_TO_SUPPLIER_BODY_EN"],
-                },
-            },
-            "nl": {
-                "landing": {
-                    "title": configuration["INTRO_TITLE_HTML_NL"],
-                    "leader": configuration["INTRO_LEADER_HTML_NL"],
-                    "side_wide_search": configuration["SIDE_WIDE_SEARCH_TITLE_NL"],
-                },
-                "info": {
-                    "title": configuration["INFO_TITLE_NL"],
-                    "heading": configuration["INFO_HEADING_NL"],
-                    "title_1": configuration["INFO_TITLE_1_NL"],
-                    "content_1": configuration["INFO_CONTENT_1_NL"],
-                    "title_2": configuration["INFO_TITLE_2_NL"],
-                    "content_2": configuration["INFO_CONTENT_2_NL"],
-                    "title_3": configuration["INFO_TITLE_3_NL"],
-                    "content_3": configuration["INFO_CONTENT_3_NL"],
-                    "title_4": configuration["INFO_TITLE_4_NL"],
-                    "content_4": configuration["INFO_CONTENT_4_NL"],
-                    "title_5": configuration["INFO_TITLE_5_NL"],
-                    "content_5": configuration["INFO_CONTENT_5_NL"],
-                },
-                "footer": {
-                    "content": configuration["FOOTER_CONTENT_HTML_NL"],
-                },
-                "thank_you_email": {
-                    "will_fix_subject": configuration["THANK_YOU_WILL_FIX_EMAIL_SUBJECT_NL"],
-                    "will_fix_body": configuration["THANK_YOU_WILL_FIX_EMAIL_BODY_NL"],
-                    "thank_you_subject": configuration["THANK_YOU_EMAIL_SUBJECT_NL"],
-                    "thank_you_body": configuration["THANK_YOU_EMAIL_BODY_NL"],
-                },
-                "send_to_supplier": {
-                    "subject": configuration["SEND_TO_SUPPLIER_SUBJECT_NL"],
-                    "body": configuration["SEND_TO_SUPPLIER_BODY_NL"],
-                },
-            },
-        },
         "comply_or_explain": {
             "forum_link": configuration["COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK"],
             "email_address": configuration["COMPLY_OR_EXPLAIN_EMAIL_ADDRESS"],
-            "email_subject": configuration["COMPLY_OR_EXPLAIN_EMAIL_SUBJECT"],
-            "email_body": configuration["COMPLY_OR_EXPLAIN_EMAIL_BODY"],
         },
         "send_in_new_domains": {
             "email_address": configuration["NEW_DOMAINS_EMAIL_ADDRESS"],
-            "email_subject": configuration["NEW_DOMAINS_EMAIL_SUBJECT"],
-            "email_body": configuration["NEW_DOMAINS_EMAIL_BODY"],
         },
         "incorrect_finding": {
             "email_address": configuration["INCORRECT_FINDING_EMAIL_ADDRESS"],
-            "email_subject": configuration["INCORRECT_FINDING_EMAIL_SUBJECT"],
-            "email_body": configuration["INCORRECT_FINDING_EMAIL_BODY"],
         },
         "debug": bool(settings.DEBUG),
         "admin": settings.ADMIN,
@@ -533,6 +457,7 @@ def config_content():
         "google_maps_api_key": configuration["GOOGLE_MAPS_API_KEY"],
         "grading_policy": configuration["GRADING_POLICY"],
         "app": {
+            "supported_locales": configuration["SUPPORTED_LOCALES"],
             "menu": configuration["MENU"],
             "custom_css": configuration["CUSTOM_CSS"],
             "logo_image": configuration["LOGO_IMAGE"],
@@ -669,8 +594,6 @@ def index(request, map_configuration=None):
             "COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK",
             "COMPLY_OR_EXPLAIN_EMAIL_ADDRESS",
             "MAPBOX_ACCESS_TOKEN",
-            "GITTER_CHAT_ENABLE",
-            "GITTER_CHAT_CHANNEL",
             "ANNOUNCEMENT",
         ]
     )

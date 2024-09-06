@@ -117,6 +117,9 @@ class EndpointGenericScanInline(nested_admin.NestedTabularInline):  # pylint: di
         "comply_or_explain_explanation",
         "comply_or_explain_explained_by",
         "meaning",
+        "prr_is_progress",
+        "prr_is_regression",
+        "prr_was_previously",
     ]
 
     # this is purely informational, to save clicks when debugging.
@@ -177,6 +180,9 @@ class UrlGenericScanAdminInline(CompactInline):
         "comply_or_explain_explanation",
         "comply_or_explain_explained_by",
         "domain",
+        "prr_is_progress",
+        "prr_is_regression",
+        "prr_was_previously",
     ]
 
     readonly_fields = (

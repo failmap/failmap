@@ -873,38 +873,10 @@ CONSTANCE_CONFIG = {
         str,
     ),
     "COMPLY_OR_EXPLAIN_EMAIL_ADDRESS": ("", "E-mail where to receive explanations.", str),
-    "COMPLY_OR_EXPLAIN_EMAIL_SUBJECT": ("Explanation of finding", "Standard subject for explanations.", str),
-    "COMPLY_OR_EXPLAIN_EMAIL_BODY": (
-        "Hi!,\n\nI would like to explain the below finding.\n\nAddress: {0}\nScan Type"
-        ": {1}\nScan ID: {2}\nImpact: High: {3}, Medium {4},"
-        " Low: {5}.\n\nI believe the finding to be incorrect. This is why:\n[... "
-        "please enter your explanation for review here ...]\n\nI acknowledge that this "
-        "finding will be published together with my organizations name.\n\ntip: please "
-        "refer to documentation or standards where possible. Be aware that an "
-        "explanation is valid for one year by default.\n\nKind regards,\n",
-        "Standard mail content for explanations",
-        str,
-    ),
     "SHOW_SEND_IN_NEW_DOMAINS": (False, "Show button that opens an e-mail to send in new domains.", bool),
     "NEW_DOMAINS_EMAIL_ADDRESS": ("", "E-mail where to receive new domains.", str),
-    "NEW_DOMAINS_EMAIL_SUBJECT": ("New subdomains for ...", "Standard email subject.", str),
-    "NEW_DOMAINS_EMAIL_BODY": (
-        "Dear,\n\nPlease add the following domains to the map:\n\nTip: send a "
-        "zonefile with all domains if possible.\n\nKind regards,\n\n",
-        "Standard email body.",
-        str,
-    ),
     "SHOW_INCORRECT_FINDING": (False, "Show button that opens an e-mail to report incorrect findings.", bool),
     "INCORRECT_FINDING_EMAIL_ADDRESS": ("", "E-mail where to receive incorrect findings.", str),
-    "INCORRECT_FINDING_EMAIL_SUBJECT": ("Incorrect finding on {0}", "Standard email subject.", str),
-    "INCORRECT_FINDING_EMAIL_BODY": (
-        "Notice: be aware that everything is scanned and updated routinely. This can take a few days.\n\n\n"
-        "Dear,\n\nIt seems there is some incorrect data on the map, the following is incorrect:\n\n1: ...\n2: ..."
-        "\n3: ...\n\n\n Tip: include an explanation why the measurement is wrong, to speed up resolving this issue."
-        "\n\n\nKind regards,\n",
-        "Standard email body.",
-        str,
-    ),
     "SCAN_AT_ALL": (
         True,
         "This quickly enables or disabled all scans. Note that scans in the scan queue will still be processed.",
@@ -937,17 +909,6 @@ CONSTANCE_CONFIG = {
         "what kind of scans it can do. Enter an address that you own or manage.",
         str,
     ),
-    "GITTER_CHAT_ENABLE": (
-        False,
-        "Show a chat button on the bottom-right of the website. This chat uses Gitter Chat.",
-        bool,
-    ),
-    "GITTER_CHAT_CHANNEL": (
-        "internet-cleanup-foundation/support",
-        "Name of the channel chat takes place. You might need to create a channel on gitter."
-        'You can do so, <a href="https://gitter.im" target="_blank">here</a>.',
-        str,
-    ),
     "SCANNER_NAMESERVERS": (
         None,
         "Nameservers used during scans (dns endpoints and subdomains). This string is loaded as JSON, but not validated"
@@ -972,30 +933,6 @@ CONSTANCE_CONFIG = {
     "ZORGKAART_PASSWORD": ("", "Password to connect to the zorgkaart service.", str),
     "ZORGKAART_FILTER": ({"type": "ggz"}, "Filter to get an organization type.", "json"),
     "PLUS_SHOW_INFO": (False, "Show information about optional services.", bool),
-    "INFO_TITLE_NL": ("", "Heading of the info page.", str),
-    "INFO_HEADING_NL": ("", "Heading of the info page.", str),
-    "INFO_TITLE_1_NL": ("", "Title 1 of the info page.", str),
-    "INFO_CONTENT_1_NL": ("", "Content 1 of the info page.", str),
-    "INFO_TITLE_2_NL": ("", "Title 2 of the info page.", str),
-    "INFO_CONTENT_2_NL": ("", "Content 2 of the info page.", str),
-    "INFO_TITLE_3_NL": ("", "Title 3 of the info page.", str),
-    "INFO_CONTENT_3_NL": ("", "Content 3 of the info page.", str),
-    "INFO_TITLE_4_NL": ("", "Title 4 of the info page.", str),
-    "INFO_CONTENT_4_NL": ("", "Content 4 of the info page.", str),
-    "INFO_TITLE_5_NL": ("", "Title 5 of the info page.", str),
-    "INFO_CONTENT_5_NL": ("", "Content 5 of the info page.", str),
-    "INFO_TITLE_EN": ("", "Heading of the info page.", str),
-    "INFO_HEADING_EN": ("", "Heading of the info page.", str),
-    "INFO_TITLE_1_EN": ("", "Title 1 of the info page.", str),
-    "INFO_CONTENT_1_EN": ("", "Content 1 of the info page.", str),
-    "INFO_TITLE_2_EN": ("", "Title 2 of the info page.", str),
-    "INFO_CONTENT_2_EN": ("", "Content 2 of the info page.", str),
-    "INFO_TITLE_3_EN": ("", "Title 3 of the info page.", str),
-    "INFO_CONTENT_3_EN": ("", "Content 3 of the info page.", str),
-    "INFO_TITLE_4_EN": ("", "Title 4 of the info page.", str),
-    "INFO_CONTENT_4_EN": ("", "Content 4 of the info page.", str),
-    "INFO_TITLE_5_EN": ("", "Title 5 of the info page.", str),
-    "INFO_CONTENT_5_EN": ("", "Content 5 of the info page.", str),
     "GRADING_POLICY": (
         "",
         "Translation prefix for grading labels such as 'high', 'medium', 'low', 'good'. This allows "
@@ -1017,20 +954,6 @@ CONSTANCE_CONFIG = {
         "A way to recognize the ods file for download on that page.",
         str,
     ),
-    "INTRO_TITLE_HTML_EN": ("Web Security Map", "English heading of the intro/hero-box on the front page.", str),
-    "INTRO_LEADER_HTML_EN": (
-        "This is a placeholder text that describes the content of this website to the target "
-        "audience. For example: ",
-        "Lead paragraph on the into/hero-box on the front page.",
-        str,
-    ),
-    "INTRO_TITLE_HTML_NL": ("Web Security Map", "Dutch heading of the intro/hero-box on the front page.", str),
-    "INTRO_LEADER_HTML_NL": (
-        "Dit is een voorbeeld tekst, hier moet een omschrijving komen te staan over"
-        "de inhoud van de website gericht op de doelgroep.",
-        "Lead paragraph on the into/hero-box on the front page.",
-        str,
-    ),
     "CUSTOM_CSS": ("", "Keep things simple", str),
     "LOGO_IMAGE": ("", "SVG Application logo, aim for 50 pixels high.", str),
     "FAVICON": ("websecmap", "Choose your pre-shipped from the favicons directory.", str),
@@ -1038,8 +961,6 @@ CONSTANCE_CONFIG = {
     "RELEVANT_FOR_UI_MEDIUM": (True, "If MEDIUM should be shown in best/worst, statistics", bool),
     "RELEVANT_FOR_UI_LOW": (True, "If LOW should be shown in best/worst, statistics", bool),
     "RELEVANT_FOR_UI_GOOD": (True, "If GOOD should be shown in best/worst, statistics", bool),
-    "FOOTER_CONTENT_HTML_EN": ("", "Links and other html stuff on the footer of the page. HTML in a container.", str),
-    "FOOTER_CONTENT_HTML_NL": ("", "Links and other html stuff on the footer of the page. HTML in a container.", str),
     "SECURITY_TXT_IS_REDIRECTED": (False, "When a redirect is used, it will not show the content anymore.", bool),
     "SECURITY_TXT_REDIRECT_URL": ("", "The url where security.txt resides", str),
     "SECURITY_TXT_CONTENT": ("", "The content of the security.txt file, located at .well-known/security.txt", str),
@@ -1210,8 +1131,6 @@ CONSTANCE_CONFIG = {
         "Adds a page to the organization where maps over time are shown",
         bool,
     ),
-    "SIDE_WIDE_SEARCH_TITLE_NL": ("Bekijk de basisbeveiliging van", "Heading of the site wide search search bar.", str),
-    "SIDE_WIDE_SEARCH_TITLE_EN": ("View the baseline security of", "Heading of the site wide search search bar.", str),
     "SHOW_THANK_YOU": (
         False,
         "Shows thank you buttons and perhaps other stuff that allows visitors to thank this project via e-mail. This is"
@@ -1220,46 +1139,6 @@ CONSTANCE_CONFIG = {
         bool,
     ),
     "THANK_YOU_EMAIL_ADDRESS": (
-        "",
-        "E-mail adress that recieves thank you emails.",
-        str,
-    ),
-    "THANK_YOU_EMAIL_SUBJECT_EN": (
-        "",
-        "E-mail adress that recieves thank you emails.",
-        str,
-    ),
-    "THANK_YOU_EMAIL_SUBJECT_NL": (
-        "",
-        "E-mail adress that recieves thank you emails.",
-        str,
-    ),
-    "THANK_YOU_EMAIL_BODY_EN": (
-        "",
-        "E-mail adress that recieves thank you emails.",
-        str,
-    ),
-    "THANK_YOU_EMAIL_BODY_NL": (
-        "",
-        "E-mail adress that recieves thank you emails.",
-        str,
-    ),
-    "THANK_YOU_WILL_FIX_EMAIL_SUBJECT_EN": (
-        "",
-        "E-mail adress that recieves thank you emails.",
-        str,
-    ),
-    "THANK_YOU_WILL_FIX_EMAIL_SUBJECT_NL": (
-        "",
-        "E-mail adress that recieves thank you emails.",
-        str,
-    ),
-    "THANK_YOU_WILL_FIX_EMAIL_BODY_EN": (
-        "",
-        "E-mail adress that recieves thank you emails.",
-        str,
-    ),
-    "THANK_YOU_WILL_FIX_EMAIL_BODY_NL": (
         "",
         "E-mail adress that recieves thank you emails.",
         str,
@@ -1274,26 +1153,6 @@ CONSTANCE_CONFIG = {
         "",
         "When filled in, the drafted mail contains this address as BCC, which can be used to see who "
         "is using this feature.",
-        str,
-    ),
-    "SEND_TO_SUPPLIER_SUBJECT_EN": (
-        "",
-        "Subject of the mail sent to the supplier. You can use placeholders. In English.",
-        str,
-    ),
-    "SEND_TO_SUPPLIER_SUBJECT_NL": (
-        "",
-        "Subject of the mail sent to the supplier. You can use placeholders. In Dutch.",
-        str,
-    ),
-    "SEND_TO_SUPPLIER_BODY_EN": (
-        "",
-        "The mail that is sent to the supplier. An extra large set of placeholders is available. In English.",
-        str,
-    ),
-    "SEND_TO_SUPPLIER_BODY_NL": (
-        "",
-        "The mail that is sent to the supplier. An extra large set of placeholders is available. In Dutch.",
         str,
     ),
     "GEO_IP_ACCOUNT_ID": (
@@ -1530,6 +1389,11 @@ CONSTANCE_CONFIG = {
         "enables public submissions of organiztaions and domains",
         bool,
     ),
+    "SUPPORTED_LOCALES": (
+        ["en"],
+        "List of 2 letter languages codes that the application supports. Default is ['en']",
+        "json",
+    ),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
@@ -1544,6 +1408,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_DISCLAIMER",
                 "DISCLAIMER_HTML",
                 "GRADING_POLICY",
+                "SUPPORTED_LOCALES",
             ),
         ),
         (
@@ -1600,36 +1465,6 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             ),
         ),
         (
-            "Info page content",
-            (
-                "INFO_TITLE_EN",
-                "INFO_TITLE_NL",
-                "INFO_HEADING_EN",
-                "INFO_HEADING_NL",
-                "INFO_TITLE_1_EN",
-                "INFO_TITLE_1_NL",
-                "INFO_CONTENT_1_EN",
-                "INFO_CONTENT_1_NL",
-                "INFO_TITLE_2_EN",
-                "INFO_TITLE_2_NL",
-                "INFO_CONTENT_2_EN",
-                "INFO_CONTENT_2_NL",
-                "INFO_TITLE_3_EN",
-                "INFO_TITLE_3_NL",
-                "INFO_CONTENT_3_EN",
-                "INFO_CONTENT_3_NL",
-                "INFO_TITLE_4_EN",
-                "INFO_TITLE_4_NL",
-                "INFO_CONTENT_4_EN",
-                "INFO_CONTENT_4_NL",
-                "INFO_TITLE_5_EN",
-                "INFO_TITLE_5_NL",
-                "INFO_CONTENT_5_EN",
-                "INFO_CONTENT_5_NL",
-            ),
-        ),
-        ("Chat and support options (using gitter)", ("GITTER_CHAT_ENABLE", "GITTER_CHAT_CHANNEL")),
-        (
             "Responsible disclosure policy",
             (
                 "SHOW_RESPONSIBLE_DISCLOSURE_POLICY",
@@ -1645,8 +1480,6 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_COMPLY_OR_EXPLAIN_DISCUSS",
                 "COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK",
                 "COMPLY_OR_EXPLAIN_EMAIL_ADDRESS",
-                "COMPLY_OR_EXPLAIN_EMAIL_SUBJECT",
-                "COMPLY_OR_EXPLAIN_EMAIL_BODY",
             ),
         ),
         (
@@ -1661,8 +1494,6 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             (
                 "SHOW_SEND_IN_NEW_DOMAINS",
                 "NEW_DOMAINS_EMAIL_ADDRESS",
-                "NEW_DOMAINS_EMAIL_SUBJECT",
-                "NEW_DOMAINS_EMAIL_BODY",
             ),
         ),
         (
@@ -1670,8 +1501,6 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             (
                 "SHOW_INCORRECT_FINDING",
                 "INCORRECT_FINDING_EMAIL_ADDRESS",
-                "INCORRECT_FINDING_EMAIL_SUBJECT",
-                "INCORRECT_FINDING_EMAIL_BODY",
             ),
         ),
         (
@@ -1701,18 +1530,6 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
                 "SHOW_REPORT_EXPERT_VIEW_COOKIES",
             ),
         ),
-        (
-            "Intro text, translated into supported languages",
-            (
-                "INTRO_TITLE_HTML_EN",
-                "INTRO_LEADER_HTML_EN",
-                "INTRO_TITLE_HTML_NL",
-                "INTRO_LEADER_HTML_NL",
-                "SIDE_WIDE_SEARCH_TITLE_NL",
-                "SIDE_WIDE_SEARCH_TITLE_EN",
-            ),
-        ),
-        ("Footer", ("FOOTER_CONTENT_HTML_EN", "FOOTER_CONTENT_HTML_NL")),
         (
             "What to show on the reporting page",
             (
@@ -1776,29 +1593,11 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
         ),
         (
             "Thank You",
-            (
-                "SHOW_THANK_YOU",
-                "THANK_YOU_EMAIL_ADDRESS",
-                "THANK_YOU_EMAIL_SUBJECT_EN",
-                "THANK_YOU_EMAIL_SUBJECT_NL",
-                "THANK_YOU_EMAIL_BODY_EN",
-                "THANK_YOU_EMAIL_BODY_NL",
-                "THANK_YOU_WILL_FIX_EMAIL_SUBJECT_EN",
-                "THANK_YOU_WILL_FIX_EMAIL_SUBJECT_NL",
-                "THANK_YOU_WILL_FIX_EMAIL_BODY_EN",
-                "THANK_YOU_WILL_FIX_EMAIL_BODY_NL",
-            ),
+            ("SHOW_THANK_YOU", "THANK_YOU_EMAIL_ADDRESS"),
         ),
         (
             "Send finding to supplier",
-            (
-                "SEND_TO_SUPPLIER_SHOW",
-                "SEND_TO_SUPPLIER_BCC_ADDRESS",
-                "SEND_TO_SUPPLIER_SUBJECT_EN",
-                "SEND_TO_SUPPLIER_SUBJECT_NL",
-                "SEND_TO_SUPPLIER_BODY_EN",
-                "SEND_TO_SUPPLIER_BODY_NL",
-            ),
+            ("SEND_TO_SUPPLIER_SHOW", "SEND_TO_SUPPLIER_BCC_ADDRESS"),
         ),
         (
             "App",

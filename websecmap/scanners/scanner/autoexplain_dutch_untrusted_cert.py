@@ -73,12 +73,18 @@ methods = [
     (SSL.TLSv1_1_METHOD, "SSL.TLSv1_1_METHOD"),
     (SSL.TLSv1_METHOD, "SSL.TLSv1_METHOD"),
     (SSL.SSLv23_METHOD, "SSL.SSLv23_METHOD"),
+    # https://www.pyopenssl.org/en/stable/api/ssl.html
+    # New code should only use TLS_METHOD, TLS_SERVER_METHOD, or TLS_CLIENT_METHOD.
+    (SSL.TLS_METHOD, "SSL.TLS_METHOD")
     # (SSL.SSLv3_METHOD, "SSL.SSLv3_METHOD"), not supported by openssl anymore
     # (SSL.SSLv2_METHOD, "SSL.SSLv2_METHOD"), not supported by openssl anymore
 ]
 
 
 def command_line_cert_check(url: str, port: int = 443, ip_version: int = 4):
+    # for debugging:
+    # from websecmap.scanners.scanner.autoexplain_dutch_untrusted_cert import *
+    # log.setLevel(logging.DEBUG)
     chain = get_cert_chain(url=url, port=port, ip_version=ip_version)
     return certificate_chain_contains_trusted_untrusted_certificate(chain)
 

@@ -331,7 +331,8 @@ ACCEPTABLE_CONNECTION_ERRORS = [
     #  should be called 'has open port' or 'runs a service'. while we can't connect there is
     #  definitely a service running there, which means scans should take place.
     #  -> this will move 'missing https' endpoint warnings to 'could not test' errors.
-    "connection aborted",
+    #
+    # "connection aborted",
     "tlsv13_alert_certificate_required",
     "unexpected_eof_while_reading",
     "tlsv1_unrecognized_name",
