@@ -104,7 +104,9 @@ urlpatterns = [
     path("export/explains/<c:country>/<slug:organization_type>/<slug:file_format>/", v.export_explains),
     # metadata for external users, to give some insight in what is going on
     path("upcoming_and_past_scans/", v.upcoming_and_past_scans),
-    path("all_latest_scans/<c:country>/<slug:organization_type>/", v.all_latest_scans),
+    # disabled all latest scans as it is very slow, updated very frequently and it has no real value except for
+    # some scans are being performed. The database hits meanwhile are plenty with a lot of slow queries.
+    # path("all_latest_scans/<c:country>/<slug:organization_type>/", v.all_latest_scans),
     path("planned_scan_progress/", v.planned_scan_progress),
     path("map_health/<c:country>/<slug:organization_type>/", v.map_health),
     # admin features
