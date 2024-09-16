@@ -64,3 +64,13 @@ pywatchman
 
 # pin for security updates
 gitpython>=3.1.32
+
+pytest-httpserver
+
+celery-types
+types-requests
+
+python-lsp-server[all]
+django-stubs
+basedpyright
+types-urllib3

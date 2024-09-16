@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 from django.db.models import Q
 
@@ -76,7 +76,10 @@ def filter_endpoints_only(
 
 
 def filter_endpoints_only_as_endpoints(
-    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
+    organizations_filter: Optional[dict] = None,
+    urls_filter: Optional[dict] = None,
+    endpoints_filter: Optional[dict] = None,
+    **kwargs,
 ) -> List[Endpoint]:
     # this is a copy of the filter_endpoints_only which is usually creating an extra layer of work as the urls
     # then will again be filtered to endpoints.
@@ -90,7 +93,10 @@ def filter_endpoints_only_as_endpoints(
 
 
 def filter_urls_only(
-    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
+    organizations_filter: Optional[dict] = None,
+    urls_filter: Optional[dict] = None,
+    endpoints_filter: Optional[dict] = None,
+    **kwargs,
 ) -> List[Url]:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), not_resolvable=False, is_dead=False)
@@ -101,7 +107,10 @@ def filter_urls_only(
 
 
 def apply_organzation_or_endpoint_filter_before_url_filter(
-    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
+    organizations_filter: Optional[dict] = None,
+    urls_filter: Optional[dict] = None,
+    endpoints_filter: Optional[dict] = None,
+    **kwargs,
 ):
     # ignore administratively dead domains by default.
 
