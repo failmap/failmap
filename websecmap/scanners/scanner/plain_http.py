@@ -149,7 +149,7 @@ def well_done(endpoint_id):
 
 # Task is written to work both on v4 and v6, but the network conf of the machine differs.
 @app.task()
-def scan(ip_version: int, url: str):
+def scan(ip_version: int, url: str, user_agent: str):
     """
     Using an incomplete endpoint
 
@@ -193,7 +193,7 @@ def scan(ip_version: int, url: str):
     # all edge cases of HTTP.
 
     # retry harder!
-    can_connect_result = can_connect(protocol="https", url=url, port=443, ip_version=ip_version)
+    can_connect_result = can_connect(protocol="https", url=url, port=443, ip_version=ip_version, user_agent=user_agent)
 
     if isinstance(can_connect_result, Exception):
         log.error(f"can_connect timed out: {can_connect_result}")

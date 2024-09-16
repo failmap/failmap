@@ -122,7 +122,9 @@ livereload==2.6.3
 markdown-it-py==3.0.0
     # via rich
 markupsafe==2.1.3
-    # via jinja2
+    # via
+    #   jinja2
+    #   werkzeug
 matplotlib-inline==0.1.6
     # via ipython
 mccabe==0.7.0
@@ -219,6 +221,8 @@ pytest==7.4.0
 pytest-cov==4.1.0
     # via -r requirements-dev.in
 pytest-django==4.5.2
+    # via -r requirements-dev.in
+pytest-httpserver==1.1.0
     # via -r requirements-dev.in
 pytest-logging==2015.11.4
     # via -r requirements-dev.in
