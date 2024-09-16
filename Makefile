@@ -73,9 +73,14 @@ coverage: test
 	# generate coverage report
 	coverage report
 
+tests ?= .
+
 test: ${pysrc} ${app} ## run test suite
 	# run testsuite
-	${enable_coverage} pytest --verbose --doctest-modules --doctest-ignore-import-errors -vv -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
+	${enable_coverage} pytest --verbose --doctest-modules --doctest-ignore-import-errors -vv -ra -k 'not integration_celery and not integration_scanners and not system and ${tests}' ${testargs}
+
+doctest: testargs=./websecmap
+doctest: test
 
 # all quality assurance commands before pushing new code
 qa: autofix test

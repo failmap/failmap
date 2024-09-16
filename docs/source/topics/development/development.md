@@ -89,6 +89,10 @@ To run only a specific test use:
 
     make test testargs="-k test_name"
 
+or
+
+    make test tests=test_name
+
 To only run a specific test suite use for example:
 
     make test testargs=tests/scanners/test_dummy.py
