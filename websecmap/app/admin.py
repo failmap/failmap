@@ -660,6 +660,8 @@ class TranslationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def sections(self, obj):
         return ", ".join(o.name for o in obj.metadata_section.all())
 
+    save_as = True
+
 
 @admin.register(CompressedJSONFieldTest)
 class CompressedJSONFieldTestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
