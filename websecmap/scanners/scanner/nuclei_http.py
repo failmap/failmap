@@ -301,7 +301,7 @@ def create_nuclei_scan_command(
     return command
 
 
-@app.task(queue="ipv4")
+@app.task(queue="nucleiv4")
 def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None, include_disabled: bool = False) -> bin:
     # This reduces the standard number of requests from ±1000 to ±700.
     # There will be 2000 templates instead of 4000.

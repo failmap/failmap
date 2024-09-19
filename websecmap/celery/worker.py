@@ -126,6 +126,14 @@ QUEUES_MATCHING_ROLES = {
         # accept only tasks that need ipv6-only network
         Queue("ipv6"),
     ],
+    "v4_nuclei": [
+        # accept only tasks that need ipv4-only network
+        Queue("nucleiv4"),
+    ],
+    "v6_nuclei": [
+        # accept only tasks that need ipv6-only network
+        Queue("nucleiv6"),
+    ],
     # all internet access, with ipv4 and 6 configured
     "all_internet": [
         Queue("internet"),
