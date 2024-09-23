@@ -12,9 +12,11 @@ from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, Scanner, ScannerFinding, Product
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner import allowed_to_scan, constance_json_value, unique_and_random
+from websecmap.scanners.scanner import allowed_to_scan, constance_json_value, unique_and_random, \
+    q_configurations_to_scan
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
 from websecmap.scanners.scanner.security_headers import remove_random_identifiers
+from websecmap.scanners.scanner.utils import in_chunks
 from websecmap.scanners.support import kwargs_to_params
 
 """
@@ -59,10 +61,33 @@ STANDARD_ENDPOINT_FILTER = {
     "port": 443,
 }
 
+# this saves about 3000 scans mostly on microsoft environments.
+excluded_subdomains = [
+    "autodiscover", "sip", "lyncdiscover", "adfs", "enterpriseenrollment", "enterpriseregistration",
+]
+
+
+def plan_scan(**kwargs):
+    # simple version of scanning that just dumps tasks on the queue. It needs the full configuration
+    # of the scanning thing, not the planning thing. This version saves several layers of abstraction/complexity.
+    endpoints = Endpoint.objects.all().filter(
+        q_configurations_to_scan(level="endpoint"),
+        **STANDARD_ENDPOINT_FILTER
+    ).exclude(url__computed_subdomain__in=excluded_subdomains).only("id", "ip_version", "protocol", "port", "url__url")
+
+    # scan up to kwargs amount in batches. You want to know what host and endpoints connect so you don't have to
+    # look that up later to save queries. It's actually less efficient to do it this way as it increases complexity.
+    # maybe there was another reason as well...
+    for endpoint_chunk in in_chunks(unique_and_random(endpoints), kwargs.get("amount", 25)):
+        host_to_endpoint_mapping = {ep.uri_url(): {"endpoint": ep.id, "url": ep.url.id} for ep in endpoint_chunk}
+        hosts = list(host_to_endpoint_mapping)
+        scan.s(hosts, **kwargs) | store_new_scan_results.s(host_to_endpoint_mapping).apply_async()
+
 
 # todo: move below code into abstraction:
 @app.task(queue="kickoff", ignore_result=True)
-def plan_scan(**kwargs) -> None:
+def plan_scan_plannedscan(**kwargs) -> None:
+    # uses plannedscan table for queueing
     kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
     generic_plan_scan(SCANNER_NAME, SCANNER_ACTION, filter_endpoints_only, **kwargs)
 
