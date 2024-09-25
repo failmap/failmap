@@ -8,19 +8,12 @@ alabaster==0.7.13
     # via sphinx
 appnope==0.1.3
     # via ipython
-asgiref==3.7.2
-    # via
-    #   -c requirements.txt
-    #   django
-    #   django-stubs
 astroid==2.15.5
     # via pylint
 asttokens==2.2.1
     # via stack-data
 autoflake==2.2.0
     # via -r requirements-dev.in
-autopep8==2.0.4
-    # via python-lsp-server
 babel==2.12.1
     # via sphinx
 backcall==0.2.0
@@ -61,19 +54,10 @@ decorator==5.1.1
     #   ipython
 dill==0.3.6
     # via pylint
-django==4.2.13
-    # via
-    #   -c requirements.txt
-    #   django-stubs
-    #   django-stubs-ext
 django-coverage==1.2.4
     # via -r requirements-dev.in
-django-stubs==5.0.0
+django-types==0.19.1
     # via -r requirements-dev.in
-django-stubs-ext==5.0.4
-    # via django-stubs
-docstring-to-markdown==0.15
-    # via python-lsp-server
 docutils==0.18.1
     # via
     #   recommonmark
@@ -83,8 +67,6 @@ exceptiongroup==1.1.1
     # via pytest
 executing==1.2.0
     # via stack-data
-flake8==6.0.0
-    # via python-lsp-server
 freezegun==1.2.2
     # via -r requirements-dev.in
 gitdb==4.0.10
@@ -101,8 +83,6 @@ idna==3.4
     #   requests
 imagesize==1.4.1
     # via sphinx
-importlib-metadata==8.5.0
-    # via yapf
 iniconfig==2.0.0
     # via pytest
 ipython==8.14.0
@@ -110,9 +90,7 @@ ipython==8.14.0
 isort==5.12.0
     # via pylint
 jedi==0.18.2
-    # via
-    #   ipython
-    #   python-lsp-server
+    # via ipython
 jinja2==3.1.2
     # via sphinx
 lazy-object-proxy==1.9.0
@@ -129,10 +107,8 @@ matplotlib-inline==0.1.6
     # via ipython
 mccabe==0.7.0
     # via
-    #   flake8
     #   pylama
     #   pylint
-    #   python-lsp-server
 mdurl==0.1.2
     # via markdown-it-py
 mypy-extensions==1.0.0
@@ -143,7 +119,6 @@ packaging==23.1
     # via
     #   black
     #   pytest
-    #   pytoolconfig
     #   sphinx
 parso==0.8.3
     # via jedi
@@ -159,12 +134,8 @@ platformdirs==3.8.0
     # via
     #   black
     #   pylint
-    #   pytoolconfig
-    #   yapf
 pluggy==1.2.0
-    # via
-    #   pytest
-    #   python-lsp-server
+    # via pytest
 prompt-toolkit==3.0.43
     # via
     #   -c requirements.txt
@@ -178,21 +149,13 @@ py==1.11.0
     #   -c requirements.txt
     #   -r requirements-dev.in
 pycodestyle==2.10.0
-    # via
-    #   autopep8
-    #   flake8
-    #   pylama
-    #   python-lsp-server
+    # via pylama
 pydocstyle==6.3.0
-    # via
-    #   pylama
-    #   python-lsp-server
+    # via pylama
 pyflakes==3.0.1
     # via
     #   autoflake
-    #   flake8
     #   pylama
-    #   python-lsp-server
 pygments==2.15.1
     # via
     #   ipython
@@ -205,7 +168,6 @@ pylint==2.17.4
     #   -r requirements-dev.in
     #   pylint-django
     #   pylint-plugin-utils
-    #   python-lsp-server
 pylint-django==2.5.3
     # via -r requirements-dev.in
 pylint-plugin-utils==0.8.2
@@ -234,12 +196,6 @@ python-dateutil==2.8.2
     # via
     #   -c requirements.txt
     #   freezegun
-python-lsp-jsonrpc==1.1.2
-    # via python-lsp-server
-python-lsp-server[all]==1.7.4
-    # via -r requirements-dev.in
-pytoolconfig[global]==1.3.0
-    # via rope
 pywatchman==1.4.1
     # via -r requirements-dev.in
 pyyaml==6.0
@@ -262,8 +218,6 @@ responses==0.23.1
     # via pytest-responses
 rich==13.4.2
     # via bandit
-rope==1.13.0
-    # via python-lsp-server
 six==1.16.0
     # via
     #   -c requirements.txt
@@ -302,10 +256,6 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-sqlparse==0.4.4
-    # via
-    #   -c requirements.txt
-    #   django
 stack-data==0.6.2
     # via ipython
 stevedore==5.1.0
@@ -313,14 +263,10 @@ stevedore==5.1.0
 tomli==2.0.1
     # via
     #   autoflake
-    #   autopep8
     #   black
     #   coverage
-    #   django-stubs
     #   pylint
     #   pytest
-    #   pytoolconfig
-    #   yapf
 tomlkit==0.11.8
     # via pylint
 tornado==6.4
@@ -331,10 +277,10 @@ traitlets==5.9.0
     # via
     #   ipython
     #   matplotlib-inline
+types-psycopg2==2.9.21.20240819
+    # via django-types
 types-pyyaml==6.0.12.10
-    # via
-    #   django-stubs
-    #   responses
+    # via responses
 types-requests==2.31.0.6
     # via -r requirements-dev.in
 types-urllib3==1.26.25.14
@@ -344,15 +290,8 @@ types-urllib3==1.26.25.14
 typing-extensions==4.6.3
     # via
     #   -c requirements.txt
-    #   asgiref
     #   astroid
     #   celery-types
-    #   django-stubs
-    #   django-stubs-ext
-ujson==5.10.0
-    # via
-    #   python-lsp-jsonrpc
-    #   python-lsp-server
 urllib3==1.26.18
     # via
     #   -c requirements.txt
@@ -366,14 +305,5 @@ wcwidth==0.2.13
     #   prompt-toolkit
 werkzeug==3.0.4
     # via pytest-httpserver
-whatthepatch==1.0.6
-    # via python-lsp-server
 wrapt==1.15.0
     # via astroid
-yapf==0.40.2
-    # via python-lsp-server
-zipp==3.20.2
-    # via importlib-metadata
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools

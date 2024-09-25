@@ -60,10 +60,14 @@ setup: ${app}	## setup development environment and application
 	fi)
 
 # install application and all its (python) dependencies
-${app}: ${VIRTUAL_ENV}/.requirements.installed | ${pip}
+${app}: .venv ${VIRTUAL_ENV}/.requirements.installed | ${pip}
 	# install project and its dependencies
 	${pip} install --no-deps --editable .
 	@test -f $@ && touch $@  # update timestamp, do not create empty file
+
+# link virtual env into project directory for editor/lsp
+.venv: ${VIRTUAL_ENV}/.requirements.installed
+	ln -fs $(dir $<) $@
 
 # run tests with coverage, and generate coverage report
 coverage: enable_coverage=coverage run -m
@@ -205,6 +209,7 @@ clean:  ## cleanup build artifacts, caches, databases, etc.
 clean_virtualenv:  ## cleanup virtualenv and installed app/dependencies
 	# remove virtualenv
 	-rm -fr ${VIRTUAL_ENV}/
+	-rm .venv
 
 mrproper: clean clean_virtualenv ## thorough cleanup, also removes virtualenv
 

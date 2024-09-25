@@ -56,3 +56,4 @@ crawl-data.sqlite
 websecmap/__version__.py
 
 websecmap/uploads/
+.venv
