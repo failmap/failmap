@@ -1,4 +1,5 @@
 """Management command base classes."""
+import argparse
 import json
 import logging
 import time
@@ -46,26 +47,33 @@ class TaskCommand(BaseCommand):
     mutual_group = None
     interval = None
 
-    def _add_arguments(self, parser):
+    def _add_arguments(self, parser) -> None:
         """Method to allow subclasses to add command specific arguments."""
 
     def add_arguments(self, parser):
         """Add common argument for Celery tasks."""
         self.mutual_group = parser.add_mutually_exclusive_group()
 
-        parser.add_argument(
+        _ = parser.add_argument(
             "-m",
             "--method",
             default="direct",
-            choices=["direct", "sync", "async"],
-            help="Execute the task directly or on workers.",
+            choices=["direct", "sync", "async", "print"],
+            help="Execute the task directly, on workers, on workers in the background or just print the task (def).",
         )
 
-        parser.add_argument(
+        _ = parser.add_argument(
             "-i", "--interval", default=5, type=int, help="Interval between status reports (sync only)."
         )
 
-        self.mutual_group.add_argument(
+        _ = parser.add_argument(
+            "-f",
+            "--force",
+            action=argparse.BooleanOptionalAction,
+            help="Run scans regardless of scanner configuration.",
+        )
+
+        _ = self.mutual_group.add_argument(
             "-t", "--task_id", default="", help="Report status for task ID and return result (if available)."
         )
 
@@ -121,6 +129,12 @@ class TaskCommand(BaseCommand):
 
             # if async return taskid to allow query for status later on
             return [r.id for r in task_id.results]
+
+        if options["method"] == "print":
+            if isinstance(self.task, dict):
+                return dict(self.task)
+            else:
+                return list(self.task)
 
         # By default execute the task directly without involving celery or a broker.
         # Return all results without raising exceptions.
@@ -286,6 +300,11 @@ class ScannerTaskCommand(TaskCommand):
             text = "".join(options["partially_matched_url_address"])
             urls_filter = {"url__icontains": text}
 
+        if options["force"]:
+            force = True
+        else:
+            force = False
+
         apply_log_verbosity(options)
 
         log.debug(
@@ -297,7 +316,10 @@ class ScannerTaskCommand(TaskCommand):
 
         # compose set of tasks to be executed
         return self.scanner_module.compose_manual_scan_task(
-            organizations_filter=organizations_filter, urls_filter=urls_filter, endpoints_filter=endpoints_filter
+            organizations_filter=organizations_filter,
+            urls_filter=urls_filter,
+            endpoints_filter=endpoints_filter,
+            force=force,
         )
 
 
