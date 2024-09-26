@@ -1,21 +1,25 @@
 import datetime
 
+from celery.result import ResultBase
 import simplejson
+import logging
+
+log = logging.getLogger(__name__)
+
 
 # Note that the variable "o" is mandatory
-
-
 class ResultEncoder(simplejson.JSONEncoder):
     """JSON encoder that serializes results from celery tasks."""
 
-    def default(self, o):
-        if isinstance(o, Exception):
-            error = {"error": o.__class__.__name__, "message": str(o)}
-            if o.__cause__:
-                error["cause"] = self.default(o.__cause__)
+    def default(self, result: ResultBase | BaseException):
+        if isinstance(result, Exception):
+            log.debug("Result is exception:", exc_info=True)
+            error = {"error": result.__class__.__name__, "message": str(result)}
+            if result.__cause__:
+                error["cause"] = self.default(result.__cause__)
             return error
 
-        return super().default(o)
+        return super().default(result)
 
 
 class JSEncoder(simplejson.JSONEncoder):
