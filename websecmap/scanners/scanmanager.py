@@ -3,7 +3,7 @@ from websecmap.app.constance import constance_cached_value
 
 import logging
 from datetime import datetime, timezone
-from typing import Union
+from typing import TypeAlias, Union
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -12,17 +12,20 @@ from django.db import transaction
 
 log = logging.getLogger(__package__)
 
+# TODO: this is ugly, but for to not go to deep
+Meaning: TypeAlias = dict[str, "Meaning"] | list["Meaning"] | str | int | float | bool | None
+
 
 def store_endpoint_scan_result(
-    scan_type: str, endpoint_id: int, rating: str, message: str, evidence: str = "", meaning: Union[dict, list] = {}
-):
+    scan_type: str, endpoint_id: int, rating: str, message: str, evidence: str = "", meaning: Meaning | None = None
+) -> EndpointGenericScan:
     log.debug(
         "Storage requested for scan type %s, endpoint_id %s, rating: %s, message: %s, meaning: %s",
         scan_type,
         endpoint_id,
         rating,
         message,
-        meaning,
+        str(meaning),
     )
 
     # perform some normalization to prevent " present" and "present" causing separate metrics
@@ -55,7 +58,7 @@ def store_endpoint_scan_result(
         epgs.save(update_fields=["last_scan_moment"])
 
         log.debug(
-            "URL result saved as: %s, %s/%s",
+            "URL result saved as: %s, %s%s",
             epgs.id,
             constance_cached_value("PROJECT_WEBSITE").rstrip("/"),
             reverse("admin:%s_%s_change" % (epgs._meta.app_label, epgs._meta.model_name), args=[epgs.id]),

@@ -4,7 +4,7 @@ import logging
 import random
 from itertools import islice, chain
 from json import JSONDecodeError
-from typing import Any, List
+from typing import Any, Iterable, List
 
 from constance import config
 from django.db.models import Q
@@ -273,7 +273,8 @@ def chunks2(my_list, chunk_size):
         yield my_list[i : i + chunk_size]
 
 
-def unique_and_random(items: List) -> List[Any]:
+# def unique_and_random[T](items: Iterable[T]) -> List[T]:
+def unique_and_random(items: Iterable[Any]) -> Iterable[Any]:
     items = list(set(items))
     random.shuffle(items)
     return items

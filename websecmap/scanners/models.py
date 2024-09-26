@@ -91,6 +91,9 @@ class Endpoint(models.Model):
     ports, protocols, ip-addresses and more of that.
     """
 
+    # make id explicit for type inference
+    id = models.AutoField(primary_key=True)
+
     # imported using a string, to avoid circular imports, which happens in complexer models
     # https://stackoverflow.com/questions/4379042/django-circular-model-import-issue
     url = models.ForeignKey(Url, null=True, blank=True, on_delete=models.CASCADE)
@@ -570,6 +573,9 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin, ProgressRegressResult):
     """
     This is a fact, a point in time.
     """
+
+    # make id explicit for type inference
+    id = models.AutoField(primary_key=True)
 
     type = models.CharField(
         max_length=60,

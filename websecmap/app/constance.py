@@ -45,7 +45,7 @@ def get_bulk_values_starting_with(starts_with: str):
     return {key: values[key] for key in values if key.startswith(starts_with)}
 
 
-def constance_cached_value(key):
+def constance_cached_value(key: str) -> str | list[str]:
     """
     Tries to minimize access to the database for constance. Every time you want a value, you'll get the latest value.
     This, without running memcached, or using a django cache. The django in memory cache (what this is) is not

@@ -4,7 +4,10 @@
 # default_app_config = "websecmap.scanners.apps.ScannersConfig"
 
 
-def init_dict(*args):
+ObjectFilter = dict[str, str]
+
+
+def init_dict(*args: ObjectFilter) -> tuple[ObjectFilter, ObjectFilter, ObjectFilter]:
     # To deal with the well known issues with mutable arguments in methods.
     # Initialize to empty dicts, so they can be used as kwargs and other constructs without having to deal with None
     # values all the time.

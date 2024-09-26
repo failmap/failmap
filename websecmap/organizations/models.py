@@ -325,6 +325,9 @@ class Coordinate(models.Model):
 
 
 class Url(models.Model):
+    # make id explicit for type inference
+    id = models.AutoField(primary_key=True)
+
     organization = models.ManyToManyField(Organization, related_name="u_many_o_upgrade")
 
     url = models.CharField(

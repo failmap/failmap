@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, Iterable
 
 from websecmap.app.constance import constance_cached_value
 
@@ -7,13 +7,13 @@ CELERY_IP_VERSION_QUEUE_NAMES = {4: "ipv4", 6: "ipv6"}
 IP_QUEUES = CELERY_IP_VERSION_QUEUE_NAMES
 
 
-def get_nameservers() -> List[str]:
+def get_nameservers() -> list[str]:
     """Allow to overwrite nameservers from config or provide empty list to fallback to system DNS."""
     nameservers = constance_cached_value("SCANNER_NAMESERVERS")
     return nameservers or []
 
 
-def in_chunks(my_list, chunk_length):
+def in_chunks(my_list: list[Any], chunk_length: int) -> Iterable[Any]:
     # Example: chunks = list(chunks(urls, 25))
     # creates list of lists containing N items.
     # For item i in a range that is a length of l,

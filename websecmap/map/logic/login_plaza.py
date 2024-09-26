@@ -1,6 +1,6 @@
 import copy
 from collections import defaultdict
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List
 
 import simplejson as json
 from cachetools import TTLCache, cached
@@ -363,7 +363,9 @@ def create_loging_plaza_meanings_for_scans_per_scan(portal, endpoint_id, tech, n
 
 
 # there can be multiple portals in the evidence, which is often the case.
-def generated_login_portal_meaning_data(portal_scan_evidence, endpoint_id: int) -> List[Dict[str, Any]]:
+def generated_login_portal_meaning_data(
+    portal_scan_evidence: Iterable[dict[str, str]], endpoint_id: int
+) -> list[dict[str, str]]:
     # this is the important stuff that is also used in login plaza, only less... Which in turn has multiple products.
     tech = get_tech_for_endpoints([endpoint_id])
     nuclei_product_mapping = get_nuclei_product_mapping()
