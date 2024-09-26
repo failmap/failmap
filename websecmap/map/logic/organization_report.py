@@ -143,7 +143,8 @@ def convert_report_to_excel(
 
     ws = wb.active
     dt = datetime.fromisoformat(report_data["when"])
-    ws.title = f"Basisbeveiliging Metingen {organization.name[:30]} {slugify(dt.strftime('%Y%m%d%H%M%S'))}"
+    normalized_organization_name: str = organization.name[:30].replace("/", " ")
+    ws.title = f"Basisbeveiliging Metingen {normalized_organization_name} {slugify(dt.strftime('%Y%m%d%H%M%S'))}"
 
     log.debug("Adding report header")
     static_header = create_static_excel_header(report_data, organization)
