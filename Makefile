@@ -194,6 +194,13 @@ test_postgres:
 	DJANGO_DATABASE=production DB_ENGINE=postgresql_psycopg2 DB_USER=root DB_HOST=127.0.0.1 \
 		$(MAKE) test; e=$$?; docker stop postgres; exit $$e
 
+loaddata_testdata: db.sqlite3 | ${app}  ## load enough data to give a working websecmap instance
+	${app} migrate
+	${app} loaddata testdata
+
+dumpdata_testdata: | ${app}
+	${app} dumpdata  dumpdata organizations scanners map reporting --indent 2 > websecmap/organizations/fixtures/testdata.json
+
 clean:  ## cleanup build artifacts, caches, databases, etc.
 	# remove python cache files
 	-find * -name __pycache__ -print0 | xargs -0 rm -rf
