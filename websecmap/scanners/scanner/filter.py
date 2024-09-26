@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List, Optional
+from typing import Callable, Iterable, Optional
 
 from django.db.models import Q
 
@@ -16,11 +16,13 @@ from websecmap.scanners.scanner.__init__ import (
 
 log = logging.getLogger(__name__)
 
+ObjectFilter = dict[str, str]
+
 
 # this one is special, it can filter on all levels, but it will make sure that the result is only a top level.
 def filter_top_level_domains(
-    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
-) -> List[Url]:
+    organizations_filter: ObjectFilter, urls_filter: ObjectFilter, endpoints_filter: ObjectFilter, **kwargs
+) -> list[Url]:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     # DNSSEC only works on top level urls
 
@@ -64,14 +66,24 @@ def filter_top_level_domains(
 
 
 def filter_endpoints_only(
-    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
-) -> List[Url]:
+    organizations_filter: ObjectFilter, urls_filter: ObjectFilter, endpoints_filter: ObjectFilter
+) -> Iterable[Url]:
+    """Return a unique and randomized list of endpoint URLs with all filters applied."""
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
+
     endpoints = Endpoint.objects.all()
-    endpoints = endpoints.filter(q_configurations_to_scan(level="endpoint"))
+    log.debug("Got %s endpoints", len(endpoints))
+    configurations_filter = q_configurations_to_scan(level="endpoint")
+    endpoints = endpoints.filter(configurations_filter)
+    log.debug("Got %s endpoints after applying configurations filter %s", len(endpoints), configurations_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+    log.debug(
+        "Got %s endpoints after applying organization, url and endpoint filters: %s",
+        len(endpoints),
+        (organizations_filter, urls_filter, endpoints_filter),
+    )
     endpoints = endpoints.only("id", "url__url")
-    endpoints = unique_and_random(endpoints)
+
     return unique_and_random([endpoint.url for endpoint in endpoints])
 
 
@@ -80,7 +92,7 @@ def filter_endpoints_only_as_endpoints(
     urls_filter: Optional[dict] = None,
     endpoints_filter: Optional[dict] = None,
     **kwargs,
-) -> List[Endpoint]:
+) -> list[Endpoint]:
     # this is a copy of the filter_endpoints_only which is usually creating an extra layer of work as the urls
     # then will again be filtered to endpoints.
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
@@ -97,7 +109,7 @@ def filter_urls_only(
     urls_filter: Optional[dict] = None,
     endpoints_filter: Optional[dict] = None,
     **kwargs,
-) -> List[Url]:
+) -> list[Url]:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = Url.objects.all().filter(q_configurations_to_scan(level="url"), not_resolvable=False, is_dead=False)
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
@@ -144,9 +156,9 @@ def generic_plan_scan(
     scanner_name: str = "",
     activity: str = "scan",
     filter_method: Callable = None,
-    organizations_filter: dict = None,
-    urls_filter: dict = None,
-    endpoints_filter: dict = None,
+    organizations_filter: ObjectFilter = None,
+    urls_filter: ObjectFilter = None,
+    endpoints_filter: ObjectFilter = None,
     **kwargs,
 ):
     if not allowed_to_scan(scanner_name, activity):
