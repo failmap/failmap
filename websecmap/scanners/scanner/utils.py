@@ -1,3 +1,4 @@
+from itertools import islice
 from typing import Any, Iterable
 
 from websecmap.app.constance import constance_cached_value
@@ -20,3 +21,15 @@ def in_chunks(my_list: list[Any], chunk_length: int) -> Iterable[Any]:
     for i in range(0, len(my_list), chunk_length):
         # Create an index range for l of n items:
         yield my_list[i : i + chunk_length]
+
+
+# TODO: python 3.12
+# def dict_chunks[T](my_dict: dict[str, T], chunk_length: int) -> Iterable[dict[str, T]]:
+def dict_chunks(my_dict: dict[str, Any], chunk_length: int) -> Iterable[Any]:
+    """
+    >>> list(dict_chunks({'a':1, 'b':2, 'c':3}, 2))
+    [{'a': 1, 'b': 2}, {'c': 3}]
+    """
+    keys = iter(my_dict)
+    for _ in range(0, len(my_dict), chunk_length):
+        yield {k: my_dict[k] for k in islice(keys, chunk_length)}

@@ -1,3 +1,5 @@
 inputs:
   nixpkgs:
     url: github:NixOS/nixpkgs/nixpkgs-unstable
+  nixpkgs-nuclei:
+    url: github:NixOS/nixpkgs/f8eef72dfde2f697a9eb2961ea66fe22fbb48537

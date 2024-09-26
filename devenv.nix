@@ -1,7 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 let
   python = pkgs.python310;
+  pkgs-nuclei = import inputs.nixpkgs-nuclei { system = pkgs.stdenv.system; };
 in
 {
   packages = [
@@ -20,6 +21,9 @@ in
 
     # additional tools
     pkgs.shellcheck
+
+    # scanner dependencies
+    pkgs-nuclei.nuclei
   ];
 
   env.DEBUG = 1;
@@ -28,6 +32,7 @@ in
   env.DJANGO_SETTINGS_MODULE = "websecmap.settings";
   env.MYSQLCLIENT_CFLAGS = "-I${pkgs.libmysqlclient.dev}/include/mysql";
   env.MYSQLCLIENT_LDFLAGS = "-L${pkgs.libmysqlclient.dev}/lib";
+  env.NUCLEI_BIN = "${pkgs-nuclei.nuclei}/bin/nuclei";
 
   enterShell = ''
     export LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib/
@@ -51,4 +56,3 @@ in
     broker.exec = "redis-server";
   };
 }
-

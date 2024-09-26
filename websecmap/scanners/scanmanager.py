@@ -64,7 +64,7 @@ def store_endpoint_scan_result(
             reverse("admin:%s_%s_change" % (epgs._meta.app_label, epgs._meta.model_name), args=[epgs.id]),
         )
 
-        return
+        return epgs
 
     # message and rating changed for this scan_type, so it's worth while to save the scan.
     if not exists:

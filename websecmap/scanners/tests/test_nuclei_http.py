@@ -708,6 +708,7 @@ def test_nuclei_compose_verify_task(db):
 def test_create_nuclei_scan_command(db):
     command = create_nuclei_scan_command(
         ["test.nl"],
+        "/usr/local/bin/nuclei",
         {
             "args": [
                 {"name": "silent", "type": "no-value"},

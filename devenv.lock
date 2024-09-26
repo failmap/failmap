@@ -88,6 +88,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-nuclei": {
+      "locked": {
+        "lastModified": 1683887443,
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "f8eef72dfde2f697a9eb2961ea66fe22fbb48537",
+        "treeHash": "8c60e83f71b2607fac49d52b84e87a476eac99a9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "f8eef72dfde2f697a9eb2961ea66fe22fbb48537",
+        "type": "github"
+      }
+    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1715668745,
@@ -132,6 +148,7 @@
       "inputs": {
         "devenv": "devenv",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-nuclei": "nixpkgs-nuclei",
         "pre-commit-hooks": "pre-commit-hooks"
       }
     },

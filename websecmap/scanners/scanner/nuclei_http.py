@@ -1,22 +1,33 @@
+import logging
+import os
 import copy
 import json
 import subprocess
-from typing import Any, Dict, List, Union
+from typing import Any, Iterable, TypedDict
+import typing
 
-from celery import group
+from celery import Signature, group
 
-from websecmap.app import log
 from websecmap.celery import app
 from websecmap.map.logic.login_plaza import generated_login_portal_meaning_data
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, Scanner, ScannerFinding, Product
-from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner import allowed_to_scan, constance_json_value, unique_and_random, \
-    q_configurations_to_scan
-from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
+from websecmap.scanners.scanmanager import Meaning, store_endpoint_scan_result
+from websecmap.scanners.scanner import (
+    allowed_to_scan,
+    constance_json_value,
+    unique_and_random,
+    q_configurations_to_scan,
+)
+from websecmap.scanners.scanner.filter import (
+    ObjectFilter,
+    filter_endpoints_only,
+    generic_plan_scan,
+    merge_endpoints_filter,
+)
 from websecmap.scanners.scanner.security_headers import remove_random_identifiers
-from websecmap.scanners.scanner.utils import in_chunks
+from websecmap.scanners.scanner.utils import dict_chunks, in_chunks
 from websecmap.scanners.support import kwargs_to_params
 
 """
@@ -39,6 +50,9 @@ DONE: Remove even more useless templates and make results more easily understand
 DONE: Add sub-scanners based on this scanner with just a set of templates, to lower the amount of requests.
 """
 
+log = logging.getLogger(__name__)
+
+NUCLEI_BIN = os.environ.get("NUCLEI_BIN", "/usr/local/bin/nuclei")
 
 # They use unknown as highest severity, which is plausible since it might be anything.
 # Yet that does not mean anything to an end user, so let's set it to the most trivial level and see
@@ -62,26 +76,95 @@ STANDARD_ENDPOINT_FILTER = {
 }
 
 # this saves about 3000 scans mostly on microsoft environments.
-excluded_subdomains = [
-    "autodiscover", "sip", "lyncdiscover", "adfs", "enterpriseenrollment", "enterpriseregistration",
+EXCLUDED_SUBDOMAINS = [
+    "autodiscover",
+    "sip",
+    "lyncdiscover",
+    "adfs",
+    "enterpriseenrollment",
+    "enterpriseregistration",
 ]
 
+DEFAULT_CHUNK_SIZE = 25
 
-def plan_scan(**kwargs):
+NUCLEI_ARGUMENTS = {
+    "panels_and_tech": {
+        "args": [
+            {"name": "silent", "type": "no-value"},
+            {"name": "disable-update-check", "type": "no-value"},
+            # TODO: this should be configurable more dynamically
+            {"name": "rate-limit", "type": "single-argument", "value": "10"},
+            {"name": "config-directory", "type": "single-argument", "value": "/tmp"},
+            {"name": "type", "type": "list-to-duplicate-arguments", "value": ["http"]},
+            {
+                "name": "include-templates",
+                "type": "list-to-duplicate-arguments",
+                "value": ["exposed-panels", "technologies"],
+            },
+            {
+                "name": "exclude-templates",
+                "type": "list-to-duplicate-arguments",
+                "value": [
+                    "cnvd",
+                    "cves",
+                    "default-logins",
+                    "dns",
+                    "exposures",
+                    "file",
+                    "fuzzing",
+                    "headless",
+                    "iot",
+                    "miscellaneous",
+                    "misconfiguration",
+                    "network",
+                    "ssl",
+                    "takeovers",
+                    "token-spray",
+                    "vulnerabilities",
+                    "workflows",
+                ],
+            },
+            # TODO: user agent should come from central config
+            {
+                "name": "header",
+                "type": "single-argument",
+                "value": (
+                    "User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P)"
+                    " AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36"
+                    " (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)"
+                ),
+            },
+            {
+                "name": "exclude-severity",
+                "type": "list-to-duplicate-arguments",
+                "value": ["high", "critical", "medium"],
+            },
+            {"name": "exclude-id", "type": "list-to-single-csv-argument", "value": ["robots-txt", "security-txt"]},
+        ],
+        # this should be configurable
+        "amount": DEFAULT_CHUNK_SIZE,
+    }
+}
+DEFAULT_NUCLEI_ARGUMENTS = "panels_and_tech"
+
+
+def scan_all(amount: int = DEFAULT_CHUNK_SIZE):
     # simple version of scanning that just dumps tasks on the queue. It needs the full configuration
     # of the scanning thing, not the planning thing. This version saves several layers of abstraction/complexity.
-    endpoints = Endpoint.objects.all().filter(
-        q_configurations_to_scan(level="endpoint"),
-        **STANDARD_ENDPOINT_FILTER
-    ).exclude(url__computed_subdomain__in=excluded_subdomains).only("id", "ip_version", "protocol", "port", "url__url")
+    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level="endpoint"), **STANDARD_ENDPOINT_FILTER)
 
-    # scan up to kwargs amount in batches. You want to know what host and endpoints connect so you don't have to
+    log.debug("Excluding domains: %s", EXCLUDED_SUBDOMAINS)
+    endpoints = endpoints.exclude(url__computed_subdomain__in=EXCLUDED_SUBDOMAINS).only(
+        "id", "ip_version", "protocol", "port", "url__url"
+    )
+
+    # scan up to amount in batches. You want to know what host and endpoints connect so you don't have to
     # look that up later to save queries. It's actually less efficient to do it this way as it increases complexity.
     # maybe there was another reason as well...
-    for endpoint_chunk in in_chunks(unique_and_random(endpoints), kwargs.get("amount", 25)):
+    for endpoint_chunk in typing.cast(list[list[Endpoint]], in_chunks(unique_and_random(endpoints), amount)):
         host_to_endpoint_mapping = {ep.uri_url(): {"endpoint": ep.id, "url": ep.url.id} for ep in endpoint_chunk}
         hosts = list(host_to_endpoint_mapping)
-        scan.s(hosts, **kwargs) | store_new_scan_results.s(host_to_endpoint_mapping).apply_async()
+        (scan.s(hosts) | store_new_scan_results.s(host_to_endpoint_mapping)).apply_async()
 
 
 # todo: move below code into abstraction:
@@ -141,6 +224,48 @@ def compose_planned_scan_task(**kwargs) -> group:
     return compose_scan_task(urls, kwargs)
 
 
+def compose_manual_scan_task(
+    organizations_filter: ObjectFilter, urls_filter: ObjectFilter, endpoints_filter: ObjectFilter, force: bool = False
+) -> Iterable[Signature[None]]:
+    if not allowed_to_scan(SCANNER_NAME) and not force:
+        return []
+
+    urls = filter_endpoints_only(organizations_filter, urls_filter, endpoints_filter)
+    return group(compose_scan_task(urls, scanner_keyword_arguments={}))
+
+
+def compose_scan_task(
+    urls: Iterable[Url], scanner_keyword_arguments: dict[str, Any], amount: int = DEFAULT_CHUNK_SIZE
+) -> Iterable[Signature[None]]:
+    endpoints = Endpoint.objects.all().filter(url__in=urls, **STANDARD_ENDPOINT_FILTER)
+    log.debug("Got %s endpoints after standard filter: %s", len(endpoints), STANDARD_ENDPOINT_FILTER)
+
+    # make a mapping between endpoint_ids and urls that are being scanned...
+
+    host_to_endpoint_mapping: dict[str, dict[str, int]] = {
+        ep.uri_url(): {"endpoint": ep.id, "url": ep.url.id} for ep in endpoints if ep.url
+    }
+
+    log.debug("Got %s unique hosts", len(host_to_endpoint_mapping))
+
+    if not host_to_endpoint_mapping:
+        log.debug("No hosts selected for nuclei scan.")
+        return
+
+    if not scanner_keyword_arguments:
+        scanner_keyword_arguments = NUCLEI_ARGUMENTS[DEFAULT_NUCLEI_ARGUMENTS]
+        log.debug("No nuclei arguments specified, using default '%s'", DEFAULT_NUCLEI_ARGUMENTS)
+    log.debug("Nuclei arguments: %s", scanner_keyword_arguments)
+
+    # Split list of hosts into chunks, so one scan tasks can run multiple scans in parallel using it's own threading
+    # logic. This saves time and resources
+    for chunk in dict_chunks(host_to_endpoint_mapping, amount):
+        yield (
+            scan.s(urls=list(chunk), scanner_keyword_arguments=scanner_keyword_arguments)
+            | store_new_scan_results.s(host_to_endpoint_mapping=chunk)
+        )
+
+
 @app.task(queue="kickoff")
 def compose_planned_verify_task(**kwargs) -> group:
     # 25 matches the bulk size of nuclei
@@ -149,50 +274,14 @@ def compose_planned_verify_task(**kwargs) -> group:
 
 
 def compose_manual_verify_task(
-    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
+    organizations_filter: ObjectFilter, urls_filter: ObjectFilter, endpoints_filter: ObjectFilter, **kwargs
 ) -> group:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    urls = filter_endpoints_only(organizations_filter, urls_filter, endpoints_filter, **kwargs)
+    urls = filter_endpoints_only(organizations_filter, urls_filter, endpoints_filter)
     return compose_verify_task(urls)
 
 
-def compose_manual_scan_task(
-    organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
-) -> group:
-    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    if not allowed_to_scan(SCANNER_NAME):
-        return group()
-
-    kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
-    urls = filter_endpoints_only(organizations_filter, urls_filter, **kwargs)
-    # don't scan more than 10, would take far too long otherwise. Scanning by hna dwould not be smart.
-    return compose_scan_task(urls[:10])
-
-
-def compose_scan_task(urls: List[Url], scanner_keyword_arguments: Dict[str, Any] = None) -> group:
-    # make a mapping between endpoint_ids and urls that are being scanned...
-    relevant_endpoints = Endpoint.objects.all().filter(url__in=urls, **STANDARD_ENDPOINT_FILTER)
-
-    host_to_endpoint_mapping = {ep.uri_url(): {"endpoint": ep.id, "url": ep.url.id} for ep in relevant_endpoints}
-    hosts = list(host_to_endpoint_mapping)
-
-    if not hosts:
-        log.debug("No hosts selected for nuclei scan.")
-        return group()
-
-    log.debug("Scanning the following hosts: %s", hosts)
-
-    return group(
-        scan.s(hosts, scanner_keyword_arguments)
-        | store_new_scan_results.s(host_to_endpoint_mapping)
-        | group(
-            plannedscan.finish.si(SCANNER_ACTION, SCANNER_NAME, mapping["url"])
-            for url, mapping in host_to_endpoint_mapping.items()
-        )
-    )
-
-
-def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, Any] = None) -> group:
+def compose_verify_task(urls: list[Url], scanner_keyword_arguments: dict[str, Any] = None) -> group:
     # re-scan an endpoint only using the templates used in the results. This saves a few hundred requests every time.
     # The templates are named explicitly in the results.
     current_scans = (
@@ -234,8 +323,8 @@ def compose_verify_task(urls: List[Url], scanner_keyword_arguments: Dict[str, An
 
     # there might be some scans, but not for all urls, which means those urls will be left over and never finished
     # so figure out what urls have scans and finish the rest after this.
-    all_urls: List[int] = [url.id for url in urls]  # finish goes via the name of the url not the id.
-    urls_rescanned: List[int] = []
+    all_urls: list[int] = [url.id for url in urls]  # finish goes via the name of the url not the id.
+    urls_rescanned: list[int] = []
 
     tasks = []
     for current_scan in current_scans:
@@ -279,7 +368,7 @@ def evidence_to_json(processed_nuclei_data) -> Any:
         return []
 
 
-def get_templates_from_scan_results(json_data, field="template-id") -> List[str]:
+def get_templates_from_scan_results(json_data, field="template-id") -> list[str]:
     if len(json_data) == 0:
         log.debug("No nuclei records found")
         return []
@@ -298,14 +387,18 @@ def get_templates_from_scan_results(json_data, field="template-id") -> List[str]
 
 
 def create_nuclei_scan_command(
-    urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None, include_disabled: bool = False
+    urls: list[str],
+    nuclei_bin: str = NUCLEI_BIN,
+    scanner_keyword_arguments: dict[str, Any] = None,
+    include_disabled: bool = False,
 ):
+    # TODO: get rid of db access
     disabled_templates = [] if include_disabled else constance_json_value("NUCLEI_HTTP_DISABLED_TEMPLATES")
 
     # probably call a container instead of running this directly?
     # the string[] documentation is vague.
     command = [
-        "/usr/local/bin/nuclei",
+        nuclei_bin,
         "-jsonl",
     ]
 
@@ -322,38 +415,55 @@ def create_nuclei_scan_command(
     for url in urls:
         command += ["-u", url]
 
-    log.debug("Starting nuclei scan with command: %s", " ".join(command))
     return command
 
 
 @app.task(queue="nucleiv4")
-def scan(urls: List[str], scanner_keyword_arguments: Dict[str, Any] = None, include_disabled: bool = False) -> bin:
+def scan(urls: list[str], scanner_keyword_arguments: dict[str, Any]) -> bytes:
     # This reduces the standard number of requests from ±1000 to ±700.
     # There will be 2000 templates instead of 4000.
 
-    command = create_nuclei_scan_command(urls, scanner_keyword_arguments)
-    nuc = subprocess.Popen(command, stdout=subprocess.PIPE, cwd="/tmp")
-    output = nuc.communicate()
+    command = create_nuclei_scan_command(urls, scanner_keyword_arguments=scanner_keyword_arguments)
+    log.debug("Starting nuclei scan with command: %s", " ".join(command))
+    nuc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd="/tmp")
+    stdout, stderr = nuc.communicate()
+    if logging.DEBUG >= logging.root.level:
+        for line in stderr:
+            log.debug("nuclei stderr: %r", line)
+
+    log.debug("Finished nuclei scan with command: %s, output: %s...", " ".join(command), stdout[:32])
 
     # Data is returned in jsonl format, binary
-    return output[0]
+    return stdout
 
 
-@app.task(queue="storage", ignore_result=True)
-def store_new_scan_results(raw_nuclei_data: bytes, host_to_endpoint_mapping: Dict[str, Dict[str, int]]) -> None:
+class StorageResult(TypedDict, total=False):
+    success: bool
+    endpointgenericscan_ids: list[int]
+    # TODO: python3.10 make NotRequired
+    endpoints_killed: int
+    endpoints_saved: int
+
+
+@app.task(queue="storage")
+def store_new_scan_results(
+    raw_nuclei_data: bytes, host_to_endpoint_mapping: dict[str, dict[str, int]]
+) -> StorageResult:
     """
     In a new nuclei scan, you do not know what categories are scanned and what metrics are actually returned:
     nuclei only returns data if a scan was successful. So you might get less categories than you requested etc.
     In a new scan just dump whatever you find to the database: the scan types are derived from the scan data.
     """
+
     raw_nuclei_records = convert_nuclei_data_to_json(raw_nuclei_data)
-    log.debug("Raw nuclei records: %s", raw_nuclei_data)
     results_per_host = split_nuclei_records_per_host(raw_nuclei_records)
     log.debug("Nuclei results per host: %s", json.dumps(results_per_host, indent=2))
 
     # todo: what if raw_nuclei_records is empty? what host exactly should then be cleaned?
     # at verify the nr of hosts/endpoints is always 1. So that should then be cleaned if there
     # are no records?
+
+    saved_endpoint_ids: list[int] = list()
 
     for host, nuclei_records_per_host in results_per_host.items():
         combined_metrics = prepare_nuclei_results_for_storage(nuclei_records_per_host)
@@ -366,11 +476,11 @@ def store_new_scan_results(raw_nuclei_data: bytes, host_to_endpoint_mapping: Dic
                 #  the report.
                 # todo: add meaning, so make sure tech is done first. Doesn't matter as it is cached.
 
-                meaning = {}
+                meaning: Meaning = {}
                 if category_name == "nuclei_exposed_panels":
-                    meaning = ({"tech": generated_login_portal_meaning_data(data["findings"], endpoint_id)},)
+                    meaning = {"tech": generated_login_portal_meaning_data(data["findings"], endpoint_id)}
 
-                store_endpoint_scan_result(
+                saved_endpoint = store_endpoint_scan_result(
                     category_name,
                     endpoint_id,
                     rating,
@@ -380,6 +490,7 @@ def store_new_scan_results(raw_nuclei_data: bytes, host_to_endpoint_mapping: Dic
                     evidence=json.dumps(data["findings"]).lower(),
                     meaning=meaning,
                 )
+                saved_endpoint_ids.append(saved_endpoint.id)
 
         except KeyError as e:
             # ssl/ssl-dns-names.yaml will alter the 'host' from https://pw.tweedekamer.nl:443 to pw.tweedekamer.nl
@@ -390,14 +501,16 @@ def store_new_scan_results(raw_nuclei_data: bytes, host_to_endpoint_mapping: Dic
                 "Could not find host from nuclei report in host-endpoint-mapping",
                 extra={
                     "host": host,
-                    "endpoint_id": host_to_endpoint_mapping,
+                    "ndpoint_id": host_to_endpoint_mapping,
                     "combined_metrics": combined_metrics,
                     "exception": e,
                 },
             )
 
+    return {"success": True, "endpointgenericscan_ids": saved_endpoint_ids}
 
-def rate_nuclei_finding(nuclei_finding_name: str, data: Dict[str, Any]) -> str:
+
+def rate_nuclei_finding(nuclei_finding_name: str, data: dict[str, str | None]) -> str:
     if nuclei_finding_name == "nuclei_exposed_panels":
         return rate_nuclei_portal_finding(data["findings"])
 
@@ -420,7 +533,7 @@ def rerate_portal_findings():
         scan.save()
 
 
-def rate_nuclei_portal_finding(findings_data: List[Dict[str, Any]]) -> str:
+def rate_nuclei_portal_finding(findings_data: list[dict[str, Any]]) -> str:
     # scan templates are already converted to products. get that product and see the portal value for severity.
     # this also has to include some meaning. Or will we do that in the description?
     # developer / internal management tooling
@@ -478,7 +591,7 @@ def store_verify_results(raw_nuclei_data: bytes, endpoint_id: int, scan_type: st
     )
 
 
-def split_nuclei_records_per_host(raw_nuclei_records) -> Dict[str, List[Dict[str, Any]]]:
+def split_nuclei_records_per_host(raw_nuclei_records) -> dict[str, list[dict[str, str]]]:
     # Split results per host, match them to endpoint. Host in the result echos what you throw in to the letter.
     # so: https://example.nl:443 is different from https://example.nl or https://example.nl:443/
     results_per_host = {}
@@ -490,22 +603,30 @@ def split_nuclei_records_per_host(raw_nuclei_records) -> Dict[str, List[Dict[str
     return results_per_host
 
 
-def prepare_nuclei_results_for_storage(raw_nuclei_records: bin) -> Dict[str, Any]:
+def prepare_nuclei_results_for_storage(raw_nuclei_records: list[dict[str, str]]) -> dict[str, dict[str, str | None]]:
     processed_nuclei_records = [process_nuclei_record(record) for record in raw_nuclei_records]
     return combine_processed_nuclei_records(processed_nuclei_records)
 
 
-def convert_nuclei_data_to_json(data: Union[bytes, str]) -> List[Dict[str, Any]]:
-    decoded = data.decode("utf-8") if isinstance(data, bytes) else data
-    decoded = decoded.replace("\n", ",")
-    # remove last comma
-    decoded = f"{decoded[:-1]}"
-    # add to a list
-    listed = f"[{decoded}]"
-    return json.loads(listed)
+def convert_nuclei_data_to_json(data: bytes | str) -> list[dict[str, str | None]]:
+    try:
+        decoded = data.decode("utf-8") if isinstance(data, bytes) else data
+        decoded = decoded.strip()
+        decoded = decoded.replace("\n", ",")
+        # remove last comma
+        decoded = decoded.rstrip(",")
+        # add to a list
+        listed = f"[{decoded}]"
+        result = typing.cast(list[dict[str, str | None]], json.loads(listed))
+    except Exception:
+        log.debug("Raw nuclei data: %s", data)
+        log.exception("Error during converting nuclei data to JSON")
+        raise
+
+    return result
 
 
-def neutralize_missing_metrics(current_categories_of_metrics: List[str], endpoint_id: int):
+def neutralize_missing_metrics(current_categories_of_metrics: list[str], endpoint_id: int):
     # Add an empty rating to all categories that are in the database, but not in the list.
     non_relevant_scans = (
         EndpointGenericScan.objects.all()
@@ -530,7 +651,7 @@ def neutralize_missing_metrics(current_categories_of_metrics: List[str], endpoin
         store_endpoint_scan_result(epgs_scan.type, endpoint_id, "clean", "clean", "")
 
 
-def neutralize_specific_metric(current_categories_of_metrics: List[str], endpoint_id: int):
+def neutralize_specific_metric(current_categories_of_metrics: list[str], endpoint_id: int):
     # it's not clear why one would want to use the neutralize_missing_metrics routine:
     # - A verification is for a specific scan type. And thus exluding that same scan type from cleanup
     #   will prevent the neutralization for that specific type will never happen(!)
@@ -553,7 +674,7 @@ def get_higher_severity(current_severity: str, new_severity: str) -> str:
     return new_severity if new > current else current_severity
 
 
-def combine_processed_nuclei_records(processed_records) -> Dict[str, Any]:
+def combine_processed_nuclei_records(processed_records) -> dict[str, dict[str, str | None]]:
     """
     Combined metrics based on category. Adding all into one. This results into just a few categories for
     nuclei, instead of a ridiculously large number of findings that will have all to be displayed, translated,
@@ -567,7 +688,7 @@ def combine_processed_nuclei_records(processed_records) -> Dict[str, Any]:
         "findings": [... list of relevant processed records ...]
     }
     """
-    combined_metrics: Dict[str, Any] = {}
+    combined_metrics: dict[str, Any] = {}
     for record in processed_records:
         category = f'nuclei_{record["category"].replace("-", "_")}'
         if category not in combined_metrics:
@@ -643,7 +764,7 @@ def categories_from_template(template: str) -> str:
     return category
 
 
-def process_nuclei_record(n_record: Dict[str, Any]) -> Dict[str, Any]:
+def process_nuclei_record(n_record: dict[str, Any]) -> dict[str, Any]:
     # Just the raw nuclei data, not combined at all. These might not be really helpful.
     # template_id is ambiguous. The matcher name makes it unique.
 
