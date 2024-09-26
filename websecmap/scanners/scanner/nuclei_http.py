@@ -18,7 +18,6 @@ from websecmap.scanners.scanner import (
     allowed_to_scan,
     constance_json_value,
     unique_and_random,
-    q_configurations_to_scan,
 )
 from websecmap.scanners.scanner.filter import (
     ObjectFilter,
@@ -27,7 +26,7 @@ from websecmap.scanners.scanner.filter import (
     merge_endpoints_filter,
 )
 from websecmap.scanners.scanner.security_headers import remove_random_identifiers
-from websecmap.scanners.scanner.utils import dict_chunks, in_chunks
+from websecmap.scanners.scanner.utils import dict_chunks
 from websecmap.scanners.support import kwargs_to_params
 
 """
@@ -148,25 +147,6 @@ NUCLEI_ARGUMENTS = {
 DEFAULT_NUCLEI_ARGUMENTS = "panels_and_tech"
 
 
-def scan_all(amount: int = DEFAULT_CHUNK_SIZE):
-    # simple version of scanning that just dumps tasks on the queue. It needs the full configuration
-    # of the scanning thing, not the planning thing. This version saves several layers of abstraction/complexity.
-    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level="endpoint"), **STANDARD_ENDPOINT_FILTER)
-
-    log.debug("Excluding domains: %s", EXCLUDED_SUBDOMAINS)
-    endpoints = endpoints.exclude(url__computed_subdomain__in=EXCLUDED_SUBDOMAINS).only(
-        "id", "ip_version", "protocol", "port", "url__url"
-    )
-
-    # scan up to amount in batches. You want to know what host and endpoints connect so you don't have to
-    # look that up later to save queries. It's actually less efficient to do it this way as it increases complexity.
-    # maybe there was another reason as well...
-    for endpoint_chunk in typing.cast(list[list[Endpoint]], in_chunks(unique_and_random(endpoints), amount)):
-        host_to_endpoint_mapping = {ep.uri_url(): {"endpoint": ep.id, "url": ep.url.id} for ep in endpoint_chunk}
-        hosts = list(host_to_endpoint_mapping)
-        (scan.s(hosts) | store_new_scan_results.s(host_to_endpoint_mapping)).apply_async()
-
-
 # todo: move below code into abstraction:
 @app.task(queue="kickoff", ignore_result=True)
 def plan_scan_plannedscan(**kwargs) -> None:
@@ -224,6 +204,23 @@ def compose_planned_scan_task(**kwargs) -> group:
     return compose_scan_task(urls, kwargs)
 
 
+@app.task(queue="kickoff", ignore_result=True)
+def scan_all(amount: int = DEFAULT_CHUNK_SIZE):
+    """This function is executed at a regular interval by the scheduler to perform scans
+    on all endpoints for all organizations for all layers for all countries."""
+
+    if not allowed_to_scan(SCANNER_NAME):
+        return
+
+    # get all endpoints without filters applied
+    urls = filter_endpoints_only({}, {}, {})
+
+    # TODO: allow passing scanner arguments from schedule
+    for task in compose_scan_task(urls, scanner_keyword_arguments={}, amount=amount):
+        log.debug("Enqueueing task: %s", task)
+        task.apply_async()
+
+
 def compose_manual_scan_task(
     organizations_filter: ObjectFilter, urls_filter: ObjectFilter, endpoints_filter: ObjectFilter, force: bool = False
 ) -> Iterable[Signature[None]]:
@@ -240,8 +237,12 @@ def compose_scan_task(
     endpoints = Endpoint.objects.all().filter(url__in=urls, **STANDARD_ENDPOINT_FILTER)
     log.debug("Got %s endpoints after standard filter: %s", len(endpoints), STANDARD_ENDPOINT_FILTER)
 
-    # make a mapping between endpoint_ids and urls that are being scanned...
+    endpoints = endpoints.exclude(url__computed_subdomain__in=EXCLUDED_SUBDOMAINS).only(
+        "id", "ip_version", "protocol", "port", "url__url"
+    )
+    log.debug("Got %s endpoints after excluding domains: %s", len(endpoints), EXCLUDED_SUBDOMAINS)
 
+    # make a mapping between endpoint_ids and urls that are being scanned...
     host_to_endpoint_mapping: dict[str, dict[str, int]] = {
         ep.uri_url(): {"endpoint": ep.id, "url": ep.url.id} for ep in endpoints if ep.url
     }

@@ -1997,5 +1997,33 @@
     "date_changed": "2022-11-29T09:16:30.652Z",
     "description": ""
   }
+},
+{
+  "model": "django_celery_beat.periodictask",
+  "pk": 349,
+  "fields": {
+    "name": "nuclei_http: Schedule Scan",
+    "task": "websecmap.scanners.scanner.nuclei_http.scan_all",
+    "interval": null,
+    "crontab": 10,
+    "solar": null,
+    "clocked": null,
+    "args": "[]",
+    "kwargs": "{}",
+    "queue": null,
+    "exchange": null,
+    "routing_key": null,
+    "headers": "{}",
+    "priority": null,
+    "expires": null,
+    "expire_seconds": null,
+    "one_off": false,
+    "start_time": null,
+    "enabled": false,
+    "last_run_at": null,
+    "total_run_count": 0,
+    "date_changed": "2020-08-07T09:54:04.385Z",
+    "description": ""
+  }
 }
 ]
