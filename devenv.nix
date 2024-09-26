@@ -33,6 +33,7 @@ in
   env.MYSQLCLIENT_CFLAGS = "-I${pkgs.libmysqlclient.dev}/include/mysql";
   env.MYSQLCLIENT_LDFLAGS = "-L${pkgs.libmysqlclient.dev}/lib";
   env.NUCLEI_BIN = "${pkgs-nuclei.nuclei}/bin/nuclei";
+  env.PROJECT_WEBSITE = "http://localhost:8000";
 
   enterShell = ''
     export LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib/

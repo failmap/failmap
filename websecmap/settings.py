@@ -632,7 +632,7 @@ CONSTANCE_CONFIG = {
         str,
     ),
     "PROJECT_WEBSITE": (
-        "",
+        os.environ.get("PROJECT_WEBSITE", ""),
         "The url where this site is located. Without trailing slash. Eg: https://example.com."
         "<br><br> This is used in a couple of places on the website, in RSS feeds and other locations that need to "
         "point to the url of this site. The URL of this website cannot be determined automatically, unfortunately,"
