@@ -88,8 +88,9 @@ def compose_manual_scan_task(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
 ) -> group:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
-    urls = filter_endpoints_only(organizations_filter, urls_filter, **kwargs)
+    # in this order the user can overwrite any part of the filter as this is last in the below merger
+    # why was **kwargs['endpoint_filter'] used in merge_endpoint_filter, as it is also passed directly from the call.
+    urls = filter_endpoints_only(organizations_filter, urls_filter, STANDARD_ENDPOINT_FILTER | endpoints_filter)
     log.debug("Scanning privacy on %s", urls)
     return compose_scan_task(urls)
 
