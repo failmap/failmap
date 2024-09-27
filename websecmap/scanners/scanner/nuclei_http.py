@@ -92,7 +92,7 @@ NUCLEI_ARGUMENTS = {
             {"name": "silent", "type": "no-value"},
             {"name": "disable-update-check", "type": "no-value"},
             # TODO: this should be configurable more dynamically
-            {"name": "rate-limit", "type": "single-argument", "value": "10"},
+            {"name": "rate-limt", "type": "single-argument", "value": "10"},
             {"name": "config-directory", "type": "single-argument", "value": "/tmp"},
             {"name": "type", "type": "list-to-duplicate-arguments", "value": ["http"]},
             {
@@ -128,9 +128,9 @@ NUCLEI_ARGUMENTS = {
                 "name": "header",
                 "type": "single-argument",
                 "value": (
-                    "User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P)"
+                    "'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P)"
                     " AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36"
-                    " (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)"
+                    " (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'"
                 ),
             },
             {
@@ -433,11 +433,11 @@ def scan(
         urls, scanner_keyword_arguments=scanner_keyword_arguments, disabled_templates=disabled_templates
     )
     log.debug("Starting nuclei scan with command: %s", " ".join(command))
+
     nuc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd="/tmp")
     stdout, stderr = nuc.communicate()
-    if logging.DEBUG >= logging.root.level:
-        for line in stderr:
-            log.debug("nuclei stderr: %r", line)
+    for line in stderr:
+        log.error("nuclei stderr: %r", line)
 
     log.debug("Finished nuclei scan with command: %s, output: %s...", " ".join(command), stdout[:32])
 
