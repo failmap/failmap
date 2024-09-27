@@ -32,7 +32,6 @@ from websecmap.scanners.scanner.nuclei_http import (
     rerate_portal_findings,
     store_verify_results,
 )
-from constance.test import override_config
 
 three_example_nuclei_tests = data = (
     b'{"template":"technologies/metatag-cms.yaml","template-url":"https://github.com/projectdiscovery/nuclei-template'
@@ -704,7 +703,6 @@ def test_nuclei_compose_verify_task(db):
     assert 1 == out.count("httptwomnibuzznl443  apachedetect favicondetect wafdetect")  # noqa
 
 
-@override_config(NUCLEI_HTTP_DISABLED_TEMPLATES='["robots-txt", "security-txt"]')
 def test_create_nuclei_scan_command(db):
     command = create_nuclei_scan_command(
         ["test.nl"],
@@ -722,6 +720,7 @@ def test_create_nuclei_scan_command(db):
                 },
             ]
         },
+        disabled_templates=["robots-txt", "security-txt"],
     )
     assert command == [
         "/usr/local/bin/nuclei",

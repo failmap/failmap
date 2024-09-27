@@ -258,11 +258,16 @@ def compose_scan_task(
         log.debug("No nuclei arguments specified, using default '%s'", DEFAULT_NUCLEI_ARGUMENTS)
     log.debug("Nuclei arguments: %s", scanner_keyword_arguments)
 
+    disabled_templates: list[str] = constance_json_value("NUCLEI_HTTP_DISABLED_TEMPLATES")
     # Split list of hosts into chunks, so one scan tasks can run multiple scans in parallel using it's own threading
     # logic. This saves time and resources
     for chunk in dict_chunks(host_to_endpoint_mapping, amount):
         yield (
-            scan.s(urls=list(chunk), scanner_keyword_arguments=scanner_keyword_arguments)
+            scan.s(
+                urls=list(chunk),
+                scanner_keyword_arguments=scanner_keyword_arguments,
+                disabled_templates=disabled_templates,
+            )
             | store_new_scan_results.s(host_to_endpoint_mapping=chunk)
         )
 
@@ -390,12 +395,9 @@ def get_templates_from_scan_results(json_data, field="template-id") -> list[str]
 def create_nuclei_scan_command(
     urls: list[str],
     nuclei_bin: str = NUCLEI_BIN,
-    scanner_keyword_arguments: dict[str, Any] = None,
-    include_disabled: bool = False,
+    scanner_keyword_arguments: dict[str, Any] | None = None,
+    disabled_templates: list[str] | None = None,
 ):
-    # TODO: get rid of db access
-    disabled_templates = [] if include_disabled else constance_json_value("NUCLEI_HTTP_DISABLED_TEMPLATES")
-
     # probably call a container instead of running this directly?
     # the string[] documentation is vague.
     command = [
@@ -406,12 +408,13 @@ def create_nuclei_scan_command(
     if scanner_keyword_arguments:
         command += kwargs_to_params(scanner_keyword_arguments, prefix="-")
 
-    if disabled_string := ",".join(list(sorted(list(set(disabled_templates))))):
-        command += [
-            # do not scan redundant stuff that we already get elsewhere
-            "-exclude-id",
-            disabled_string,
-        ]
+    if disabled_templates:
+        if disabled_string := ",".join(disabled_templates):
+            command += [
+                # do not scan redundant stuff that we already get elsewhere
+                "-exclude-id",
+                disabled_string,
+            ]
 
     for url in urls:
         command += ["-u", url]
@@ -420,11 +423,15 @@ def create_nuclei_scan_command(
 
 
 @app.task(queue="nucleiv4")
-def scan(urls: list[str], scanner_keyword_arguments: dict[str, Any]) -> bytes:
+def scan(
+    urls: list[str], scanner_keyword_arguments: dict[str, Any], disabled_templates: list[str] | None = None
+) -> bytes:
     # This reduces the standard number of requests from ±1000 to ±700.
     # There will be 2000 templates instead of 4000.
 
-    command = create_nuclei_scan_command(urls, scanner_keyword_arguments=scanner_keyword_arguments)
+    command = create_nuclei_scan_command(
+        urls, scanner_keyword_arguments=scanner_keyword_arguments, disabled_templates=disabled_templates
+    )
     log.debug("Starting nuclei scan with command: %s", " ".join(command))
     nuc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd="/tmp")
     stdout, stderr = nuc.communicate()
