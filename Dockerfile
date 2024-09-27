@@ -103,8 +103,8 @@ RUN ln -s /pyenv/bin/dnssec.pl /usr/local/bin/
 
 COPY --from=nuclei /go/bin/nuclei /go/bin/nuclei
 
-# add nuclei user
-RUN useradd --create-home nuclei
+# add nuclei useruser
+RUN useradd --create-home nuclei --uid 9001
 RUN echo 'nobody ALL=(nuclei) NOPASSWD: /go/bin/nuclei' >> /etc/sudoers
 
 # wrap nuclei command so it is run as nuclei user
