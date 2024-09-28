@@ -92,7 +92,7 @@ NUCLEI_ARGUMENTS = {
             {"name": "silent", "type": "no-value"},
             {"name": "disable-update-check", "type": "no-value"},
             # TODO: this should be configurable more dynamically
-            {"name": "rate-limt", "type": "single-argument", "value": "10"},
+            {"name": "rate-limit", "type": "single-argument", "value": "10"},
             {"name": "config-directory", "type": "single-argument", "value": "/tmp"},
             {"name": "type", "type": "list-to-duplicate-arguments", "value": ["http"]},
             {
