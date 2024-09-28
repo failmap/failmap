@@ -235,19 +235,19 @@ def compose_scan_task(
     urls: Iterable[Url], scanner_keyword_arguments: dict[str, Any], amount: int = DEFAULT_CHUNK_SIZE
 ) -> Iterable[Signature[None]]:
     endpoints = Endpoint.objects.all().filter(url__in=urls, **STANDARD_ENDPOINT_FILTER)
-    log.debug("Got %s endpoints after standard filter: %s", len(endpoints), STANDARD_ENDPOINT_FILTER)
+    # log.debug("Got %s endpoints after standard filter: %s", len(endpoints), STANDARD_ENDPOINT_FILTER)
 
     endpoints = endpoints.exclude(url__computed_subdomain__in=EXCLUDED_SUBDOMAINS).only(
         "id", "ip_version", "protocol", "port", "url__url"
     )
-    log.debug("Got %s endpoints after excluding domains: %s", len(endpoints), EXCLUDED_SUBDOMAINS)
+    # log.debug("Got %s endpoints after excluding domains: %s", len(endpoints), EXCLUDED_SUBDOMAINS)
 
     # make a mapping between endpoint_ids and urls that are being scanned...
     host_to_endpoint_mapping: dict[str, dict[str, int]] = {
         ep.uri_url(): {"endpoint": ep.id, "url": ep.url.id} for ep in endpoints if ep.url
     }
 
-    log.debug("Got %s unique hosts", len(host_to_endpoint_mapping))
+    # log.debug("Got %s unique hosts", len(host_to_endpoint_mapping))
 
     if not host_to_endpoint_mapping:
         log.debug("No hosts selected for nuclei scan.")
