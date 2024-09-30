@@ -263,12 +263,12 @@ def compose_scan_task(
     # logic. This saves time and resources
     for chunk in dict_chunks(host_to_endpoint_mapping, amount):
         yield (
-            scan.s(
+            scan_batch.s(
                 urls=list(chunk),
                 scanner_keyword_arguments=scanner_keyword_arguments,
                 disabled_templates=disabled_templates,
             )
-            | store_new_scan_results.s(host_to_endpoint_mapping=chunk)
+            | store_scan_batch.s(host_to_endpoint_mapping=chunk)
         )
 
 
@@ -353,7 +353,7 @@ def compose_verify_task(urls: list[Url], scanner_keyword_arguments: dict[str, An
             params = {"args": [scan_these_templates]}
 
         tasks.append(
-            scan.s([current_scan.endpoint.uri_url()], params)
+            scan_batch.s([current_scan.endpoint.uri_url()], params)
             | store_verify_results.s(current_scan.endpoint.id, current_scan.type)
             | plannedscan.finish.si("verify", SCANNER_NAME, url_id)
         )
@@ -423,7 +423,7 @@ def create_nuclei_scan_command(
 
 
 @app.task(queue="nucleiv4")
-def scan(
+def scan_batch(
     urls: list[str], scanner_keyword_arguments: dict[str, Any], disabled_templates: list[str] | None = None
 ) -> bytes:
     # This reduces the standard number of requests from ±1000 to ±700.
@@ -454,9 +454,7 @@ class StorageResult(TypedDict, total=False):
 
 
 @app.task(queue="storage")
-def store_new_scan_results(
-    raw_nuclei_data: bytes, host_to_endpoint_mapping: dict[str, dict[str, int]]
-) -> StorageResult:
+def store_scan_batch(raw_nuclei_data: bytes, host_to_endpoint_mapping: dict[str, dict[str, int]]) -> StorageResult:
     """
     In a new nuclei scan, you do not know what categories are scanned and what metrics are actually returned:
     nuclei only returns data if a scan was successful. So you might get less categories than you requested etc.
