@@ -439,7 +439,13 @@ def scan_batch(
     for line in stderr:
         log.error("nuclei stderr: %r", line)
 
-    log.debug("Finished nuclei scan with command: %s, output: %s...", " ".join(command), stdout[:32])
+    exit_code = nuc.returncode
+    if exit_code != 0:
+        log.error("Nuclei finished with non-zero exit code: %s", exit_code)
+
+    log.debug(
+        "Finished nuclei scan with command: %s, exit code: %s, output: %s...", " ".join(command), exit_code, stdout[:32]
+    )
 
     # Data is returned in jsonl format, binary
     return stdout
