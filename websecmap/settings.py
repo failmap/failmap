@@ -461,6 +461,20 @@ CELERY_RESULT_BACKEND_THREAD_SAFE = True
 # no longer defaults to True on celery 6.0
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
+# this is the time after which a picked up will be put on the queue again, regardless of if it is
+# still being executed on a worker
+# tasks should not exceed this timeout as it means they will be forever repeated
+# this timeout is currently set to the average maximum time a nuclei_http tasks takes to scan 25
+# domains, this should be tweaked so this time can be brought down to 1 hour or less as it applies
+# to all tasks, not just nuclei tasks
+CELERY_TASK_VISIBILITY_TIMEOUT = 3600 * 2
+
+CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": CELERY_TASK_VISIBILITY_TIMEOUT}
+# set task default timeout to the same as visibility timeout, this will fail tasks that might have completed
+# in just a few minutes past 2 hours, but this is better and fails more explicit than requeueing these tasks
+CELERY_TASK_TIME_LIMIT = CELERY_TASK_VISIBILITY_TIMEOUT
+
+
 # Any data transfered with pickle needs to be over tls... you can inject arbitrary objects with
 # this stuff... message signing makes it a bit better, not perfect as it peels the onion.
 # see: https://blog.nelhage.com/2011/03/exploiting-pickle/
