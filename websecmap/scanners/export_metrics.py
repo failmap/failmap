@@ -129,6 +129,10 @@ def create_pivot_data(scan_types: List[str], layers: List[str]) -> List[Dict[str
 
 def export_pivot(scan_types: List[str], layers: List[str]) -> str:
     product = create_pivot_data(scan_types, layers)
+    print(product)
+    from pprint import pprint
+
+    pprint(product)
     return save_pivot(product, file_name_hint=scan_types[0] if len(scan_types) == 1 else "")
 
 
@@ -224,6 +228,9 @@ def determine_pivot_records(scan_type: str, scan) -> List[dict[str, Any]]:
         SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT_CRAWL_WITHOUT_CONSENT,
     ]:
         return pivot_location_evidence(load_possible_json(scan.evidence))
+
+    if scan_type in {"nuclei_exposed_panels"}:
+        return pivot_nuclei_panel_evidence(scan.meaning)
 
     if scan_type in [
         WEB_PRIVACY_COOKIES,
@@ -383,6 +390,25 @@ def pivot_cookie_locations(evidence: List[Dict[str, Any]]) -> List[Dict[str, Any
             cr = pivot_cookie_record(cookie)
             per_cookie_record.append({**per_location_record, **cr})
     return per_cookie_record
+
+
+def pivot_nuclei_panel_evidence(evidence: Dict[str, Any]):
+    """
+    {'tech': [{'portal_name': 'phpMyAdmin Panel', 'portal_url':
+    'https://pop.andrema39.thirtynine.axc.nl:443/phpMyAdmin/', 'portal_extracted': ['5.2.1'], 'tech':
+    [{'product': 28, 'version': '5.2.1'}, {'product': 1, 'version': 'unknown'}, {'product': 172, 'version': '2'},
+    {'product': 35, 'version': 'unknown'}, {'product': 43, 'version': 'unknown'}]}]}
+
+    """
+    print(evidence)
+    techs = evidence.get("tech", {"portal_name": ""})
+    # prevent ValueError: Cannot convert [] to Excel.
+    for tech in techs:
+        tech["portal_extracted"] = " ".join(tech.get("portal_extracted", []))
+        # don't add the entire series of products, those are a lot of records.
+        tech["tech"] = None
+
+    return techs
 
 
 def pivot_generic_records(evidence: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
