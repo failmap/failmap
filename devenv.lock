@@ -90,17 +90,17 @@
     },
     "nixpkgs-nuclei": {
       "locked": {
-        "lastModified": 1683887443,
+        "lastModified": 1685381779,
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "f8eef72dfde2f697a9eb2961ea66fe22fbb48537",
-        "treeHash": "8c60e83f71b2607fac49d52b84e87a476eac99a9",
+        "rev": "8549e57eceb5428c44b6b6e8cfe25d11a8715bfe",
+        "treeHash": "400e8af32078620b08dafcbf6766df37d172f07e",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "f8eef72dfde2f697a9eb2961ea66fe22fbb48537",
+        "rev": "8549e57eceb5428c44b6b6e8cfe25d11a8715bfe",
         "type": "github"
       }
     },
