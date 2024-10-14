@@ -129,10 +129,6 @@ def create_pivot_data(scan_types: List[str], layers: List[str]) -> List[Dict[str
 
 def export_pivot(scan_types: List[str], layers: List[str]) -> str:
     product = create_pivot_data(scan_types, layers)
-    print(product)
-    from pprint import pprint
-
-    pprint(product)
     return save_pivot(product, file_name_hint=scan_types[0] if len(scan_types) == 1 else "")
 
 
@@ -400,8 +396,15 @@ def pivot_nuclei_panel_evidence(evidence: Dict[str, Any]):
     {'product': 35, 'version': 'unknown'}, {'product': 43, 'version': 'unknown'}]}]}
 
     """
-    print(evidence)
-    techs = evidence.get("tech", {"portal_name": ""})
+
+    # there is some malformed data in the database, in that situation just return no pivot results.
+    if evidence == "{}":
+        return []
+
+    if isinstance(evidence, str):
+        return []
+
+    techs = evidence.get("tech", [])
     # prevent ValueError: Cannot convert [] to Excel.
     for tech in techs:
         tech["portal_extracted"] = " ".join(tech.get("portal_extracted", []))
