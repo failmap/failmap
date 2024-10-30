@@ -50,7 +50,7 @@ def compose_manual_scan_task(
     if not allowed_to_scan(SCANNER_NAME):
         return group()
 
-    return grab_tasks(urls_filter=urls_filter)
+    return group(grab_tasks(urls_filter=urls_filter))
 
 
 @app.task(queue="storage", ignore_result=True)
@@ -112,8 +112,8 @@ def start_scanner(ips, ports):
     # "If you are on a decent broadband or ethernet connection, I would recommend always using -T4" = aggressive
     # T4 results in tcpwrapped responses too much it seems, so slow down and go to T3 instead of T4.
     nm.scan(ip_argument, ports, arguments="-sV --host-timeout=5m -T3 --script=banner")
-    log.debug(nm.command_line())
-    log.debug(nm.scaninfo())
+    log.debug("command line: %s", nm.command_line())
+    log.debug("scaninfo: %s", nm.scaninfo())
     return nm
 
 
@@ -301,7 +301,7 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
     # todo: there are hosts missing from the input lists, those endpoints should be set to dead.
     #  this is now worked around in verify().
 
-    log.debug("processing nmap scan result on %s:%s results: %s", ip, port, result)
+    log.info("processing nmap scan result on %s:%s results: %s", ip, port, result)
 
     """
     Result:
