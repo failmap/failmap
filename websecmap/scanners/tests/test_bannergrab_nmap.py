@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import EndpointGenericScan, UrlIp, Endpoint
-from websecmap.scanners.scanner.bannergrab_nmap import store_results
+from websecmap.scanners.models import EndpointGenericScan, Scanner, UrlIp, Endpoint
+from websecmap.scanners.scanner.bannergrab_nmap import compose_manual_scan_task, store_results
 from websecmap.scanners.scanner.banners.detect_version import re_evaluate_bannergrab_versions
 
 generic_data = {
@@ -191,3 +191,13 @@ def test_re_evaluate_bannergrab_versions(db):
     epgs.evidence = "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5"
     epgs.save()
     assert re_evaluate_bannergrab_versions() == 1
+
+
+def test_bannergrab_urlfilter(db):
+    """When calling manual scan task from `websecmap scan` cli url filters should work"""
+    url = Url.objects.create(url="basisbeveiliging.nl")
+    UrlIp.objects.create(url=url, ip="127.0.0.1", is_v4=True, discovered_on=datetime.now(timezone.utc))
+    Scanner(python_name="bannergrab_nmap", enabled=True).save()
+
+    assert len(compose_manual_scan_task(urls_filter={"url__iregex": "^(basisbeveiliging.nl)$"})) == 1
+    assert len(compose_manual_scan_task(urls_filter={"url__iregex": "^(faalkaart.nl)$"})) == 0

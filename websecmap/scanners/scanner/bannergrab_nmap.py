@@ -12,7 +12,8 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 import nmap
-from celery import Task, group
+
+from celery import Signature, group
 
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
@@ -40,12 +41,16 @@ log = logging.getLogger(__name__)
 
 def compose_manual_scan_task(
     organizations_filter: dict = None, urls_filter: dict = None, endpoints_filter: dict = None, **kwargs
-) -> Task:
+) -> list[Signature]:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
+
+    if organizations_filter or endpoints_filter:
+        raise NotImplementedError("Organization or endpoints filter not supported")
+
     if not allowed_to_scan(SCANNER_NAME):
         return group()
 
-    return group(grab_tasks())
+    return grab_tasks(urls_filter=urls_filter)
 
 
 @app.task(queue="storage", ignore_result=True)
@@ -56,12 +61,17 @@ def grab_banners():
     group(grab_tasks()).apply_async()
 
 
-def get_all_ip_addresses(is_v4=True):
-    return list(UrlIp.objects.all().filter(is_unused=False, is_v4=is_v4).values_list("ip", flat=True))
+def get_all_ip_addresses(is_v4=True, urls_filter=None):
+    urls = UrlIp.objects.all()
+    if urls_filter:
+        urls_filter = {k.replace("url__iregex", "url__url__iregex"): v for k, v in urls_filter.items()}
+        urls = urls.filter(**urls_filter)
+    ip_addresses = urls.filter(is_unused=False, is_v4=is_v4).values_list("ip", flat=True)
+    return list(ip_addresses)
 
 
-def get_ips_to_be_scanned(is_v4) -> List[str]:
-    ips = get_all_ip_addresses(is_v4)
+def get_ips_to_be_scanned(is_v4, urls_filter=None) -> List[str]:
+    ips = get_all_ip_addresses(is_v4, urls_filter=urls_filter)
     # randomize the order to distribute load of scans
     return unique_and_random(ips)
 
@@ -70,13 +80,13 @@ def get_ports_to_be_scanned() -> str:
     return ",".join(str(x) for x in constance_cached_value("BANNERGRAB_STANDARD_PORTS").split(","))
 
 
-def grab_tasks():
+def grab_tasks(urls_filter=None) -> list[Signature]:
     hosts_per_scan = IPS_PER_SCAN
 
     ports = get_ports_to_be_scanned()
     tasks = []
 
-    ipv4_ips = get_ips_to_be_scanned(is_v4=True)
+    ipv4_ips = get_ips_to_be_scanned(is_v4=True, urls_filter=urls_filter)
     ipv4_chunks = in_chunks(ipv4_ips, hosts_per_scan)
     tasks += [grab_task.si(chunk, ports) | store_results_task.s() for chunk in ipv4_chunks]
 
