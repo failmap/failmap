@@ -391,8 +391,9 @@ def process_result(ip: str, port: int, result: Dict[Any, Any]):
 
         # clean the banner if there was one in the past. Adds a banner if there is a new one / something has changed.
         if not banner and endpoint_has_scans("bannergrab", endpoint.id) or banner:
+            evidence = f"{banner} ({ip})"
             store_endpoint_scan_result(
-                scan_type="bannergrab", endpoint_id=endpoint.id, rating=conclusion, evidence=banner, message=banner
+                scan_type="bannergrab", endpoint_id=endpoint.id, rating=conclusion, evidence=evidence, message=banner
             )
 
         store_cpe_data(endpoint, "product_name", product)
