@@ -318,7 +318,7 @@ def compose_verify_task(
         # append/override default arguments with template arguments
         params = {**scanner_keyword_arguments, **scan_these_templates}
 
-        yield scan_batch.s([current_scan.endpoint.uri_url()], params) | store_verify_results.s(
+        yield scan.s([current_scan.endpoint.uri_url()], params) | store_verify_results.s(
             current_scan.endpoint.id, current_scan.type
         )
 
