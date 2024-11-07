@@ -7,7 +7,7 @@ import time
 from collections import Counter
 from typing import List
 
-from celery import Signature
+from celery import Signature, group
 import kombu.exceptions
 import tldextract
 from celery.result import AsyncResult, ResultSet
@@ -118,7 +118,13 @@ class TaskCommand(BaseCommand):
                     settings.CELERY_BROKER_URL,
                 )
 
-            task_id = self.task.apply_async(args=self.args, kwargs=self.kwargs)
+            if isinstance(self.task, Signature):
+                task_id = self.task.apply_async(args=self.args, kwargs=self.kwargs)
+            elif isinstance(self.task, Iterable):
+                task_id = group(self.task).apply_async(args=self.args, kwargs=self.kwargs)
+            else:
+                raise NotImplementedError()
+
             log.info("Task scheduled for execution.")
             log.debug("Task ID: %s", task_id.id)
 
