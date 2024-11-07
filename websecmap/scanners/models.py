@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
-from typing import List
+from typing import Any, List
+from typing_extensions import TypeAlias
 
 from django.db import models
 from django.forms import model_to_dict
@@ -566,6 +567,9 @@ class ProgressRegressResult(models.Model):
 
     class Meta:
         abstract = True
+
+
+JSONData: TypeAlias = Any
 
 
 # https://docs.djangoproject.com/en/dev/topics/db/models/#id6

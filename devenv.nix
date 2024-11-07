@@ -23,7 +23,8 @@ in
     pkgs.shellcheck
 
     # scanner dependencies
-    pkgs-nuclei.nuclei
+    pkgs.nuclei
+    pkgs.nuclei-templates
   ];
 
   env.DEBUG = 1;

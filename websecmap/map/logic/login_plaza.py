@@ -1,6 +1,6 @@
 import copy
 from collections import defaultdict
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, List
 
 import simplejson as json
 from cachetools import TTLCache, cached
@@ -11,7 +11,7 @@ from websecmap.celery import app
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.scanners.models import EndpointGenericScan, Product, ProductHierarchy, ScannerFinding
 from websecmap.reporting import time_cache
-from websecmap.scanners.scanmanager import store_endpoint_scan_result
+from websecmap.scanners.scanmanager import Meaning, store_endpoint_scan_result
 
 MAX_RESULTS = 4000
 
@@ -363,9 +363,7 @@ def create_loging_plaza_meanings_for_scans_per_scan(portal, endpoint_id, tech, n
 
 
 # there can be multiple portals in the evidence, which is often the case.
-def generated_login_portal_meaning_data(
-    portal_scan_evidence: Iterable[dict[str, str]], endpoint_id: int
-) -> list[dict[str, str]]:
+def generated_login_portal_meaning_data(portal_scan_evidence: Any, endpoint_id: int) -> Meaning:
     # this is the important stuff that is also used in login plaza, only less... Which in turn has multiple products.
     tech = get_tech_for_endpoints([endpoint_id])
     nuclei_product_mapping = get_nuclei_product_mapping()

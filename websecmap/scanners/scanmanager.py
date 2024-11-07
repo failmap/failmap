@@ -3,7 +3,7 @@ from websecmap.app.constance import constance_cached_value
 
 import logging
 from datetime import datetime, timezone
-from typing import TypeAlias, Union
+from typing import Any, TypeAlias, Union
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -13,7 +13,7 @@ from django.db import transaction
 log = logging.getLogger(__package__)
 
 # TODO: this is ugly, but for to not go to deep
-Meaning: TypeAlias = dict[str, "Meaning"] | list["Meaning"] | str | int | float | bool | None
+Meaning: TypeAlias = Any
 
 
 def store_endpoint_scan_result(

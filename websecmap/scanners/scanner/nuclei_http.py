@@ -2,28 +2,25 @@ import logging
 import os
 import copy
 import json
+import re
 import subprocess
 from typing import Any, Iterable, TypedDict
 import typing
 
-from celery import Signature, group
+from celery import Signature
 
 from websecmap.celery import app
 from websecmap.map.logic.login_plaza import generated_login_portal_meaning_data
 from websecmap.organizations.models import Url
-from websecmap.scanners import init_dict, plannedscan
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, Scanner, ScannerFinding, Product
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, JSONData, Scanner, ScannerFinding, Product
 from websecmap.scanners.scanmanager import Meaning, store_endpoint_scan_result
 from websecmap.scanners.scanner import (
     allowed_to_scan,
     constance_json_value,
-    unique_and_random,
 )
 from websecmap.scanners.scanner.filter import (
     ObjectFilter,
     filter_endpoints_only,
-    generic_plan_scan,
-    merge_endpoints_filter,
 )
 from websecmap.scanners.scanner.security_headers import remove_random_identifiers
 from websecmap.scanners.scanner.utils import dict_chunks
@@ -146,62 +143,7 @@ NUCLEI_ARGUMENTS = {
 }
 DEFAULT_NUCLEI_ARGUMENTS = "panels_and_tech"
 
-
-# todo: move below code into abstraction:
-@app.task(queue="kickoff", ignore_result=True)
-def plan_scan_plannedscan(**kwargs) -> None:
-    # uses plannedscan table for queueing
-    kwargs = merge_endpoints_filter(STANDARD_ENDPOINT_FILTER, **kwargs)
-    generic_plan_scan(SCANNER_NAME, SCANNER_ACTION, filter_endpoints_only, **kwargs)
-
-
-@app.task(queue="kickoff", ignore_result=True)
-def plan_verify() -> None:
-    scans = (
-        EndpointGenericScan.objects.all()
-        .filter(
-            type__in=[
-                "nuclei_exposed_panels",
-                "nuclei_exposures",
-                "nuclei_http",
-                "nuclei_miscellaneous",
-                "nuclei_misconfiguration",
-                "nuclei_technologies",
-                "nuclei_unknown",
-                "nuclei_vulnerabilities",
-            ],
-            is_the_latest_scan=True,
-            endpoint__url__not_resolvable=False,
-            endpoint__url__is_dead=False,
-            endpoint__is_dead=False,
-        )
-        # you cannot verify clean endpoints because it is not clear what templates need to be used for
-        # rescan. If there is something new there, it will pop up in the next large sweep scan.
-        .exclude(rating="clean")
-        .select_related("endpoint", "endpoint__url")
-        .only(
-            "endpoint__url",
-            "rating_determined_on",
-            "type",
-            "rating",
-            "endpoint__is_dead",
-            "endpoint__ip_version",
-            "endpoint__port",
-            "endpoint__protocol",
-        )
-        # disable default ordering because it is expensive and doesn't matter in this case
-        .order_by()
-    )
-
-    urls = unique_and_random([scan.endpoint.url for scan in scans])
-    plannedscan.request(activity="verify", scanner=SCANNER_NAME, urls=urls)
-
-
-@app.task(queue="kickoff")
-def compose_planned_scan_task(**kwargs) -> group:
-    # 25 matches the bulk size of nuclei
-    urls = plannedscan.pickup(activity=SCANNER_ACTION, scanner=SCANNER_NAME, amount=kwargs.get("amount", 25))
-    return compose_scan_task(urls, kwargs)
+ANSI_ESCAPE = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 
 
 @app.task(queue="kickoff", ignore_result=True)
@@ -217,7 +159,19 @@ def scan_all(amount: int = DEFAULT_CHUNK_SIZE):
 
     # TODO: allow passing scanner arguments from schedule
     for task in compose_scan_task(urls, scanner_keyword_arguments={}, amount=amount):
-        log.debug("Enqueueing task: %s", task)
+        task.apply_async()
+
+
+@app.task(queue="kickoff", ignore_result=True)
+def verify_all():
+    """This function is executed at a regular interval by the scheduler to perform scans
+    on all endpoints for all organizations for all layers for all countries."""
+
+    if not allowed_to_scan(SCANNER_NAME):
+        return
+
+    # TODO: allow passing scanner arguments from schedule
+    for task in compose_verify_task(urls_filter={}, scanner_keyword_arguments={}):
         task.apply_async()
 
 
@@ -228,7 +182,7 @@ def compose_manual_scan_task(
         return []
 
     urls = filter_endpoints_only(organizations_filter, urls_filter, endpoints_filter)
-    return group(compose_scan_task(urls, scanner_keyword_arguments={}))
+    return compose_scan_task(urls, scanner_keyword_arguments={})
 
 
 def compose_scan_task(
@@ -272,75 +226,84 @@ def compose_scan_task(
         )
 
 
-@app.task(queue="kickoff")
-def compose_planned_verify_task(**kwargs) -> group:
-    # 25 matches the bulk size of nuclei
-    urls = plannedscan.pickup(activity="verify", scanner=SCANNER_NAME, amount=kwargs.get("amount", 25))
-    return compose_verify_task(urls, kwargs)
-
-
 def compose_manual_verify_task(
-    organizations_filter: ObjectFilter, urls_filter: ObjectFilter, endpoints_filter: ObjectFilter, **kwargs
-) -> group:
-    organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
-    urls = filter_endpoints_only(organizations_filter, urls_filter, endpoints_filter)
-    return compose_verify_task(urls)
+    organizations_filter: ObjectFilter, urls_filter: ObjectFilter, endpoints_filter: ObjectFilter
+) -> Iterable[Signature[None]]:
+    if endpoints_filter or organizations_filter:
+        raise NotImplementedError("Endpoint or organization filters not yet implemented.")
+
+    return compose_verify_task(urls_filter, scanner_keyword_arguments={})
 
 
-def compose_verify_task(urls: list[Url], scanner_keyword_arguments: dict[str, Any] = None) -> group:
+def compose_verify_task(
+    urls_filter: ObjectFilter, scanner_keyword_arguments: dict[str, Any]
+) -> Iterable[Signature[None]]:
     # re-scan an endpoint only using the templates used in the results. This saves a few hundred requests every time.
     # The templates are named explicitly in the results.
-    current_scans = (
-        EndpointGenericScan.objects.all()
-        .filter(
-            type__in=[
-                "nuclei_exposed_panels",
-                "nuclei_exposures",
-                "nuclei_http",
-                "nuclei_miscellaneous",
-                "nuclei_misconfiguration",
-                "nuclei_technologies",
-                "nuclei_unknown",
-                "nuclei_vulnerabilities",
-            ],
-            is_the_latest_scan=True,
-            endpoint__url__not_resolvable=False,
-            endpoint__url__is_dead=False,
-            endpoint__is_dead=False,
-            endpoint__url__url__in=urls,
-        )
-        .select_related("endpoint", "endpoint__url")
-        .only(
-            "evidence",
-            "type",
-            "endpoint__url__url",
-            "endpoint__id",
-            "endpoint__url__id",
-            "endpoint__port",
-            "endpoint__protocol",
-            "endpoint__ip_version",
-        )
+
+    all_scan = EndpointGenericScan.objects.all()
+    urls_filter_on_endpoint = {"endpoint__url__" + k: v for k, v in urls_filter.items()}
+    only_selected = all_scan.filter(**urls_filter_on_endpoint)
+    only_nuclei = only_selected.filter(
+        type__in=[
+            "nuclei_exposed_panels",
+            "nuclei_exposures",
+            "nuclei_http",
+            "nuclei_miscellaneous",
+            "nuclei_misconfiguration",
+            "nuclei_technologies",
+            "nuclei_unknown",
+            "nuclei_vulnerabilities",
+        ],
     )
-    if not len(current_scans):
-        # why is there a difference between what has been planned to verify and the query here?
-        # anyway: no scans means that we can finish these tasks...
-        # perhaps the url died?
-        return group([plannedscan.finish.si("verify", SCANNER_NAME, url.id) for url in urls])
+    only_relevant = only_nuclei.filter(
+        is_the_latest_scan=True,
+        endpoint__url__not_resolvable=False,
+        endpoint__url__is_dead=False,
+        endpoint__is_dead=False,
+    )
+    # you cannot verify clean endpoints because it is not clear what templates need to be used for
+    # rescan. If there is something new there, it will pop up in the next large sweep scan.
+    only_unclean = only_relevant.exclude(rating="clean")
+    with_related_objects = only_unclean.select_related("endpoint", "endpoint__url").only(
+        "endpoint__url",
+        "rating_determined_on",
+        "type",
+        "rating",
+        "endpoint__is_dead",
+        "endpoint__ip_version",
+        "endpoint__port",
+        "endpoint__protocol",
+        "evidence",
+    )
+    # log.debug(
+    #     [
+    #         len(all_scan),
+    #         len(only_selected),
+    #         len(only_unclean),
+    #         len(only_relevant),
+    #         len(only_unclean),
+    #         len(with_related_objects),
+    #     ]
+    # )
 
-    # there might be some scans, but not for all urls, which means those urls will be left over and never finished
-    # so figure out what urls have scans and finish the rest after this.
-    all_urls: list[int] = [url.id for url in urls]  # finish goes via the name of the url not the id.
-    urls_rescanned: list[int] = []
+    if not scanner_keyword_arguments:
+        scanner_keyword_arguments = NUCLEI_ARGUMENTS[DEFAULT_NUCLEI_ARGUMENTS]
+        log.debug("No nuclei arguments specified, using default '%s'", DEFAULT_NUCLEI_ARGUMENTS)
+    log.debug("Nuclei arguments: %s", scanner_keyword_arguments)
 
-    tasks = []
-    for current_scan in current_scans:
-        url_id = current_scan.endpoint.url.id
-        urls_rescanned.append(url_id)
+    # disable default ordering because it is expensive and doesn't matter in this case
+    scans_to_verify = with_related_objects.order_by()
 
-        # when something is clean up, it will be empty. So there is a scan but no data...
+    for current_scan in scans_to_verify:
+        if not current_scan.endpoint or not current_scan.endpoint.url:
+            log.error("Scan object %s incomplete", current_scan.id)
+            continue
+
         template_ids = get_templates_from_scan_results(evidence_to_json(current_scan.evidence))
+        # when something is clean up, it will be empty. So there is a scan but no data...
         if not template_ids:
-            tasks.append(plannedscan.finish.si("verify", SCANNER_NAME, url_id))
+            log.debug("No templates in scan object")
             continue
 
         scan_these_templates = {"name": "template-id", "type": "list-to-duplicate-arguments", "value": template_ids}
@@ -352,17 +315,16 @@ def compose_verify_task(urls: list[Url], scanner_keyword_arguments: dict[str, An
         else:
             params = {"args": [scan_these_templates]}
 
-        tasks.append(
-            scan_batch.s([current_scan.endpoint.uri_url()], params)
-            | store_verify_results.s(current_scan.endpoint.id, current_scan.type)
-            | plannedscan.finish.si("verify", SCANNER_NAME, url_id)
+        # append/override default arguments with template arguments
+        params = {**scanner_keyword_arguments, **scan_these_templates}
+
+        yield scan_batch.s([current_scan.endpoint.uri_url()], params) | store_verify_results.s(
+            current_scan.endpoint.id, current_scan.type
         )
 
-    # figure out non-rescanned urls, finish them as well:
-    missing = list(set(all_urls) - set(urls_rescanned))
-    tasks.extend(plannedscan.finish.si("verify", SCANNER_NAME, url_id) for url_id in missing)
-
-    return group(tasks)
+    else:
+        log.debug("No hosts selected for nuclei verify after applying all filters.")
+        return []
 
 
 def evidence_to_json(processed_nuclei_data) -> Any:
@@ -417,9 +379,18 @@ def create_nuclei_scan_command(
             ]
 
     for url in urls:
-        command += ["-u", url]
+        command += ["-target", url]
 
     return command
+
+
+test: int = ""
+
+
+@app.task(queue="nucleiv4")
+def scan(url: str, scanner_keyword_arguments: dict[str, Any], disabled_templates: list[str] | None = None) -> bytes:
+    """Single scan is just a batch scan with a list of one."""
+    return scan_batch([url], scanner_keyword_arguments=scanner_keyword_arguments, disabled_templates=disabled_templates)
 
 
 @app.task(queue="nucleiv4")
@@ -436,7 +407,8 @@ def scan_batch(
 
     nuc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd="/tmp")
     stdout, stderr = nuc.communicate()
-    for line in stderr:
+    # remove color from nuclei output because it doesn't respect the -no-color flag
+    for line in ANSI_ESCAPE.sub("", stderr.decode()).splitlines():
         log.error("nuclei stderr: %r", line)
 
     exit_code = nuc.returncode
@@ -454,6 +426,7 @@ def scan_batch(
 class StorageResult(TypedDict, total=False):
     success: bool
     endpointgenericscan_ids: list[int]
+    endpointgenericscan_ids_neutralized: list[int]
     # TODO: python3.10 make NotRequired
     endpoints_killed: int
     endpoints_saved: int
@@ -489,7 +462,7 @@ def store_scan_batch(raw_nuclei_data: bytes, host_to_endpoint_mapping: dict[str,
                 # todo: add meaning, so make sure tech is done first. Doesn't matter as it is cached.
 
                 meaning: Meaning = {}
-                if category_name == "nuclei_exposed_panels":
+                if category_name == "nuclei_exposed_panels" and data["findings"]:
                     meaning = {"tech": generated_login_portal_meaning_data(data["findings"], endpoint_id)}
 
                 saved_endpoint = store_endpoint_scan_result(
@@ -522,7 +495,7 @@ def store_scan_batch(raw_nuclei_data: bytes, host_to_endpoint_mapping: dict[str,
     return {"success": True, "endpointgenericscan_ids": saved_endpoint_ids}
 
 
-def rate_nuclei_finding(nuclei_finding_name: str, data: dict[str, str | None]) -> str:
+def rate_nuclei_finding(nuclei_finding_name: str, data: dict[str, str]) -> str:
     if nuclei_finding_name == "nuclei_exposed_panels":
         return rate_nuclei_portal_finding(data["findings"])
 
@@ -540,12 +513,13 @@ def rerate_portal_findings():
         scan.rating = rating
 
         # also add the meaning if we can?
-        scan.meaning = {"tech": generated_login_portal_meaning_data(ev, scan.endpoint.id)}
+        if scan.endpoint:
+            scan.meaning = typing.cast(JSONData, {"tech": generated_login_portal_meaning_data(ev, scan.endpoint.id)})
 
         scan.save()
 
 
-def rate_nuclei_portal_finding(findings_data: list[dict[str, Any]]) -> str:
+def rate_nuclei_portal_finding(findings_data: Any) -> str:
     # scan templates are already converted to products. get that product and see the portal value for severity.
     # this also has to include some meaning. Or will we do that in the description?
     # developer / internal management tooling
@@ -573,7 +547,7 @@ def rate_nuclei_portal_finding(findings_data: list[dict[str, Any]]) -> str:
 
 
 @app.task(queue="storage", ignore_result=True)
-def store_verify_results(raw_nuclei_data: bytes, endpoint_id: int, scan_type: str) -> None:
+def store_verify_results(raw_nuclei_data: bytes, endpoint_id: int, scan_type: str) -> StorageResult:
     """
     A verify scan knows what scan has been performed. Nuclei does not return data in case it has not found anything,
     in that case we just neutralize a missing if it exists for that category.
@@ -583,7 +557,7 @@ def store_verify_results(raw_nuclei_data: bytes, endpoint_id: int, scan_type: st
     raw_nuclei_records = convert_nuclei_data_to_json(raw_nuclei_data)
     if not raw_nuclei_records:
         neutralize_specific_metric([scan_type], endpoint_id=endpoint_id)
-        return
+        return {"success": True, "endpointgenericscan_ids_neutralized": [endpoint_id]}
 
     # Story anything you get back under the known category. It could be that scans have been moved to
     # different categories and such. The result is always whatever you asked to scan or a subset.
@@ -592,7 +566,8 @@ def store_verify_results(raw_nuclei_data: bytes, endpoint_id: int, scan_type: st
     #  for now.
     data = force_combine_all_processed_metrics_into_one_category(raw_nuclei_records)
     rating = rate_nuclei_finding(scan_type, data)
-    store_endpoint_scan_result(
+
+    saved_endpoint = store_endpoint_scan_result(
         scan_type,
         endpoint_id,
         rating,
@@ -601,6 +576,7 @@ def store_verify_results(raw_nuclei_data: bytes, endpoint_id: int, scan_type: st
         # put it in some key, so other stuff can be appended to it lateron if need be
         meaning={"tech": generated_login_portal_meaning_data(data["findings"], endpoint_id)},
     )
+    return {"success": True, "endpointgenericscan_ids": [saved_endpoint.id]}
 
 
 def split_nuclei_records_per_host(raw_nuclei_records) -> dict[str, list[dict[str, str]]]:
@@ -615,7 +591,7 @@ def split_nuclei_records_per_host(raw_nuclei_records) -> dict[str, list[dict[str
     return results_per_host
 
 
-def prepare_nuclei_results_for_storage(raw_nuclei_records: list[dict[str, str]]) -> dict[str, dict[str, str | None]]:
+def prepare_nuclei_results_for_storage(raw_nuclei_records: list[dict[str, str]]) -> dict[str, dict[str, str]]:
     processed_nuclei_records = [process_nuclei_record(record) for record in raw_nuclei_records]
     return combine_processed_nuclei_records(processed_nuclei_records)
 
@@ -686,7 +662,7 @@ def get_higher_severity(current_severity: str, new_severity: str) -> str:
     return new_severity if new > current else current_severity
 
 
-def combine_processed_nuclei_records(processed_records) -> dict[str, dict[str, str | None]]:
+def combine_processed_nuclei_records(processed_records) -> dict[str, dict[str, str]]:
     """
     Combined metrics based on category. Adding all into one. This results into just a few categories for
     nuclei, instead of a ridiculously large number of findings that will have all to be displayed, translated,

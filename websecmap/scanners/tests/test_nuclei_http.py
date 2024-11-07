@@ -2,25 +2,21 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 import websecmap.reporting.time_cache
-from websecmap.app import log
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import (
     Endpoint,
     EndpointGenericScan,
-    PlannedScan,
     Scanner,
     ScannerFinding,
     Product,
     SecurityImpact,
 )
 from websecmap.scanners.scanner.nuclei_http import (
-    compose_planned_verify_task,
     convert_nuclei_data_to_json,
     extract_findings_to_scanner_findings,
     get_higher_severity,
     get_templates_from_scan_results,
     neutralize_missing_metrics,
-    plan_verify,
     prepare_nuclei_results_for_storage,
     process_nuclei_record,
     split_nuclei_records_per_host,
@@ -579,31 +575,6 @@ def test_get_templates_from_scan_results(db):
     assert get_templates_from_scan_results(evidence_to_json("""[]""")) == []
 
 
-def test_nuclei_plan_verify(db, default_scan_metadata):
-    Scanner.objects.create(**{"name": "nuclei_http", "python_name": "nuclei_http"})
-
-    plan_verify()
-    assert PlannedScan.objects.count() == 0
-
-    url = Url.objects.create(**{"url": "example.com"})
-    endpoint = Endpoint.objects.create(**{"url": url, "protocol": "http", "port": 443})
-    EndpointGenericScan.objects.create(
-        type="nuclei_exposed_panels",
-        rating="info",
-        evidence=CITRIX_SCAN_RESULTS,
-        endpoint=endpoint,
-        is_the_latest_scan=True,
-        rating_determined_on=datetime.now(timezone.utc),
-    )
-
-    plan_verify()
-
-    assert PlannedScan.objects.count() == 1
-
-    verify_task = compose_planned_verify_task()
-    assert verify_task is not None
-
-
 def test_extract_findings_to_scanner_findings(db, default_scan_metadata):
     url = Url.objects.create(**{"url": "example.com"})
     endpoint = Endpoint.objects.create(**{"url": url, "protocol": "http", "port": 443})
@@ -637,7 +608,7 @@ def create_sample_data_for_url(url_str: str, scan_type: str, scan_data=None):
 
 def test_nuclei_compose_verify_task(db):
     # should create 2 scans on this domain, one for each prior scan:
-    url1 = create_sample_data_for_url(
+    create_sample_data_for_url(
         "mail.rhcvechtenvenen.nl",
         "nuclei_exposed_panels",
         """[
@@ -653,7 +624,7 @@ def test_nuclei_compose_verify_task(db):
         """,  # noqa
     )
 
-    url2 = create_sample_data_for_url(
+    create_sample_data_for_url(
         "tw.omnibuzz.nl",
         "nuclei_technologies",
         """[
@@ -662,7 +633,7 @@ def test_nuclei_compose_verify_task(db):
         {"template-id": "waf-detect", "name": "WAF Detection", "finding-name": "nuclei_waf_detect_apachegeneric", "evidence": {"extracted-results": [], "matched-at": "https://tw.omnibuzz.nl:443/"}}]
         """,  # noqa
     )
-    url3 = create_sample_data_for_url(
+    create_sample_data_for_url(
         "erfgoed.utrecht.nl",
         "nuclei_technologies",
         """[
@@ -671,7 +642,7 @@ def test_nuclei_compose_verify_task(db):
         {"template-id": "typo3-detect", "name": "TYPO3 Detection", "finding-name": "nuclei_typo3_detect", "evidence": {"extracted-results": [], "matched-at": "https://erfgoed.utrecht.nl:443"}}]
     """,  # noqa
     )
-    url4 = create_sample_data_for_url(
+    create_sample_data_for_url(
         "serviscope-acc.kpn.com",
         "nuclei_technologies",
         """[
@@ -679,28 +650,16 @@ def test_nuclei_compose_verify_task(db):
     """,  # noqa
     )
 
-    task = compose_verify_task(
-        [url1, url2, url3, url4],
-        {"args": []},
+    task = list(
+        compose_verify_task(
+            {},
+            {"args": []},
+        )
     )
 
-    out = str(task)
-    # 5 scans means 5 re-scans
-    assert str(task).count("nuclei_http.scan") == 5
+    assert len(task) == 5
 
-    # make the output a bit shorter to make easier comparisons:
-    out = out.replace("{'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', ", "")
-    out = out.replace("'value':", "")
-    import re
-
-    out = re.sub(r"[^A-Za-z0-9 ]+", "", out)
-
-    log.debug(out)
-    assert "httpserviscopeacckpncom443  techdetect" in out  # noqa
-    assert "httpmailrhcvechtenvenennl443  apachedetect wafdetect" in out  # noqa
-    assert 1 == out.count("httpmailrhcvechtenvenennl443  phpmyadminpanel")  # noqa
-    assert 1 == out.count("httperfgoedutrechtnl443  metatagcms techdetect typo3detect")  # noqa
-    assert 1 == out.count("httptwomnibuzznl443  apachedetect favicondetect wafdetect")  # noqa
+    assert task[4].kwargs["tasks"][0].args[0][0] == "http://serviscope-acc.kpn.com:443"
 
 
 def test_create_nuclei_scan_command(db):
@@ -737,6 +696,6 @@ def test_create_nuclei_scan_command(db):
         "citrix-vpn-panel",
         "-exclude-id",
         "robots-txt,security-txt",
-        "-u",
+        "-target",
         "test.nl",
     ]

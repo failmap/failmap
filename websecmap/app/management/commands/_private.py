@@ -1,11 +1,13 @@
 """Management command base classes."""
 import argparse
+from collections.abc import Iterable
 import json
 import logging
 import time
 from collections import Counter
 from typing import List
 
+from celery import Signature
 import kombu.exceptions
 import tldextract
 from celery.result import AsyncResult, ResultSet
@@ -45,7 +47,7 @@ class TaskCommand(BaseCommand):
     kwargs = {}
     # attempt to solve Attribute 'mutual_group'  (attribute-defined-outside-init)
     mutual_group = None
-    interval = None
+    interval: int
 
     def _add_arguments(self, parser) -> None:
         """Method to allow subclasses to add command specific arguments."""
@@ -138,8 +140,13 @@ class TaskCommand(BaseCommand):
 
         # By default execute the task directly without involving celery or a broker.
         # Return all results without raising exceptions.
-        log.info("Executing task directly.")
-        return self.task.apply(*self.args, **self.kwargs).get(propagate=False)
+        log.info("Executing task(s) directly.")
+        if isinstance(self.task, Signature):
+            return self.task.apply(*self.args, **self.kwargs).get(propagate=False)
+        elif isinstance(self.task, Iterable):
+            return [task.apply(*self.args, **self.kwargs).get(propagate=False) for task in self.task]
+        else:
+            raise NotImplementedError()
 
     def wait_for_result(self, task_id):
         """Wait for all (sub)tasks to complete and return result."""
