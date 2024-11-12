@@ -6,5 +6,5 @@
 #
 django-uwsgi==0.2.2
     # via -r requirements-deploy.in
-uwsgi==2.0.22
+uwsgi==2.0.28
     # via -r requirements-deploy.in
