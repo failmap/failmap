@@ -1,4 +1,5 @@
 """Management command base classes."""
+
 import argparse
 from collections.abc import Iterable
 import json

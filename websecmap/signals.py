@@ -1,4 +1,5 @@
 """This module is imported by failmap.__init__ to register Signal hooks."""
+
 import logging
 import os
 import platform

@@ -211,7 +211,7 @@ def organisations():
         a list of dicts, datastructure as provided by Zorgkaart
     """
     params = json.loads(config.ZORGKAART_FILTER)
-    if type(params) != dict:
+    if not isinstance(params, dict):
         log.error(f"Zorgkaart scrape: invalid filter ({params}), ignoring")
         params = {}
     log.debug(f"Zorgkaart scraper requesting organisations using filter: {params}")

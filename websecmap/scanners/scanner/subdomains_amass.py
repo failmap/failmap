@@ -188,6 +188,7 @@ Usage: amass enum [options] -d DOMAIN
   -wm value
         "hashcat-style" wordlist masks for DNS brute forcing
 """
+
 import subprocess
 import tempfile
 from typing import Any, Dict, List

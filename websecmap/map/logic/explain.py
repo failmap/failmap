@@ -89,9 +89,9 @@ def get_explanation(url_or_endpoint, scan):
 
     if url_or_endpoint == "endpoint":
         this_explain["organizations"] = list(scan.endpoint.url.organization.all().values("id", "name"))
-        this_explain[
-            "subject"
-        ] = f"{scan.endpoint.url} - {scan.endpoint.protocol}/{scan.endpoint.port} - IPv{scan.endpoint.ip_version}"
+        this_explain["subject"] = (
+            f"{scan.endpoint.url} - {scan.endpoint.protocol}/{scan.endpoint.port} - IPv{scan.endpoint.ip_version}"
+        )
 
     return this_explain
 

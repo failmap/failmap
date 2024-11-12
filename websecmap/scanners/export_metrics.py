@@ -765,4 +765,5 @@ def cookie_indicator_data(record):
 
 
 def web_privacy_cookie_products_no_consent_record(record):
+    # using ... without any comments creates two statements on a single line which is not like by other linters.
     ...

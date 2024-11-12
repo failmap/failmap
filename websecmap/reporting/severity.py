@@ -4,6 +4,7 @@ Business logic that determines what points and calculations are stored.
 This file contains (or should) verbose explantion of why points are given.
 
 """
+
 import json
 import logging
 from datetime import datetime, timezone
@@ -134,9 +135,9 @@ def get_severity(scan: Union[EndpointGenericScan, UrlGenericScan]) -> Dict[str, 
         calculation["comply_or_explain_explained_on"] = ""
 
     if scan.comply_or_explain_explanation_valid_until:
-        calculation[
-            "comply_or_explain_explanation_valid_until"
-        ] = scan.comply_or_explain_explanation_valid_until.isoformat()
+        calculation["comply_or_explain_explanation_valid_until"] = (
+            scan.comply_or_explain_explanation_valid_until.isoformat()
+        )
     else:
         calculation["comply_or_explain_explanation_valid_until"] = ""
 

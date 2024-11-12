@@ -49,21 +49,13 @@ class UpdatesOnOrganizationFeed(Feed):
         rating = (
             _("Perfect")
             if not any([item["high"], item["medium"], item["low"]])
-            else _("High")
-            if item["high"]
-            else _("Medium")
-            if item["medium"]
-            else _("Low")
+            else _("High") if item["high"] else _("Medium") if item["medium"] else _("Low")
         )
 
         badge = (
             "✅"
             if not any([item["high"], item["medium"], item["low"]])
-            else "🔴"
-            if item["high"]
-            else "🔶"
-            if item["medium"]
-            else "🍋"
+            else "🔴" if item["high"] else "🔶" if item["medium"] else "🍋"
         )
 
         return f"{badge} {rating} - {item['url']}: {item['service']}"
@@ -133,21 +125,13 @@ class LatestScanFeed(Feed):
         rating = (
             _("Perfect")
             if not any([calculation["high"], calculation["medium"], calculation["low"]])
-            else _("High")
-            if calculation["high"]
-            else _("Medium")
-            if calculation["medium"]
-            else _("Low")
+            else _("High") if calculation["high"] else _("Medium") if calculation["medium"] else _("Low")
         )
 
         badge = (
             "✅"
             if not any([calculation["high"], calculation["medium"], calculation["low"]])
-            else "🔴"
-            if calculation["high"]
-            else "🔶"
-            if calculation["medium"]
-            else "🍋"
+            else "🔴" if calculation["high"] else "🔶" if calculation["medium"] else "🍋"
         )
 
         if item.type in metadata["url_scan_types"]:

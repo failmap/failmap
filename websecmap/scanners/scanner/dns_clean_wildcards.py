@@ -10,6 +10,7 @@ select computed_domain, computed_suffix, count(*) amount from url where is_dead 
 
     websecmap scan dns_clean_wildcards --url=... -v3
 """
+
 import logging
 import random
 import string

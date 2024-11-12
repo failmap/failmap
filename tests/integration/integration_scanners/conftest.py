@@ -1,4 +1,5 @@
 """Shared fixtures used by different tests."""
+
 import logging
 import os
 import signal

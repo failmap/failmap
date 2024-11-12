@@ -2,6 +2,7 @@
 scan_using_known_data should be run every day, as this costs no API credits. The create_tasks should be run
 every 14 days or so. It is already optimized to no call the API twice if the network is known.
 """
+
 import ipaddress
 from typing import Any, Dict, List, Optional
 

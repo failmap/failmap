@@ -1,6 +1,7 @@
 """
 Retrieves IP addresses for several ip-based scans. These are stored in the UrlIp table.
 """
+
 import logging
 from datetime import datetime, timezone
 from typing import List

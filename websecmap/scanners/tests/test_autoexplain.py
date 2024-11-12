@@ -148,7 +148,7 @@ def generate_certificate(failure_mode: str = ""):
 
     one_day = timedelta(1, 0, 0)
     # weak key size, to make test faster
-    private_key = rsa.generate_private_key(public_exponent=65537, key_size=512, backend=default_backend())
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=1024, backend=default_backend())
     public_key = private_key.public_key()
     builder = x509.CertificateBuilder()
 
@@ -187,7 +187,7 @@ def generate_certificate(failure_mode: str = ""):
 def generate_specific_certificate(subject="", issuer=""):
     one_day = timedelta(1, 0, 0)
     # weak key size, to make test faster
-    private_key = rsa.generate_private_key(public_exponent=65537, key_size=512, backend=default_backend())
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=1024, backend=default_backend())
     public_key = private_key.public_key()
     builder = x509.CertificateBuilder()
     builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, subject)]))

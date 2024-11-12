@@ -2,7 +2,6 @@
 Checks if an endpoint has blocked us by attempting to visit the endpoint via different routes.
 """
 
-
 import contextlib
 import logging
 from typing import Dict, Any

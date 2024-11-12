@@ -185,12 +185,14 @@ def rows_to_dataset(rows, when):
             "ok_div_endpoints": f"{ceil((int(i[12]) / int(i[10])) * 100)}" if i[10] else 0,
             # Add all percentages, which is sort of an indication how bad / well the organization is doing overall.
             "relative": (
-                ceil((int(i[6]) / int(i[10])) * 1000)
-                + ceil((int(i[7]) / int(i[10])) * 100)
-                + ceil((int(i[8]) / int(i[10])) * 10)
-            )
-            if i[10]
-            else 0,
+                (
+                    ceil((int(i[6]) / int(i[10])) * 1000)
+                    + ceil((int(i[7]) / int(i[10])) * 100)
+                    + ceil((int(i[8]) / int(i[10])) * 10)
+                )
+                if i[10]
+                else 0
+            ),
         }
         rank = rank + 1
 

@@ -853,11 +853,13 @@ class ScanTypeScanTypeDocumentationLink(ImportExportModelAdmin, admin.ModelAdmin
 
 @admin.register(models.ScanTypeCategory)
 class ScanTypeCategoryAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    # using ... without any comments creates two statements on a single line which is not like by other linters.
     ...
 
 
 @admin.register(models.ScannerActivity)
 class ScannerActivityAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    # using ... without any comments creates two statements on a single line which is not like by other linters.
     ...
 
 

@@ -7,6 +7,7 @@ Thanks to:
 - https://codeberg.org/dataskydd.net/
 - https://github.com/PrivacyScore/privacyscanner/tree/whotracksme/privacyscanner/scanmodules
 """
+
 from typing import Any, Dict, List, Optional
 import requests
 from celery import group

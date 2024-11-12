@@ -738,11 +738,7 @@ def update_feature(feature, scan):
     color = (
         "red"
         if feature["properties"]["high"]
-        else "orange"
-        if feature["properties"]["medium"]
-        else "yellow"
-        if feature["properties"]["low"]
-        else "green"
+        else "orange" if feature["properties"]["medium"] else "yellow" if feature["properties"]["low"] else "green"
     )
 
     feature["properties"]["color"] = color
@@ -852,11 +848,7 @@ def make_new_feature(organization, scan):
     color = (
         "red"
         if calculation["high"]
-        else "orange"
-        if calculation["medium"]
-        else "yellow"
-        if calculation["low"]
-        else "green"
+        else "orange" if calculation["medium"] else "yellow" if calculation["low"] else "green"
     )
 
     from websecmap.organizations.models import Coordinate

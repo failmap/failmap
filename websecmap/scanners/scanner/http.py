@@ -24,6 +24,7 @@ HTTP: 80, 280, 591, 593, 2480, 4444, 4445, 4567, 5000, 5104, 5800, 5988, 7001, 8
 Likely: 80, 8080, 8008, 8888, 8088
 
 """
+
 import ipaddress
 import logging
 import socket

@@ -4,6 +4,7 @@ Reports are stored to disk and retrieved from disk transparently using the faste
 Reports can be stored in various formats, where the "original" is the original from websecmap. A variant might be
 added without detailed findings for example.
 """
+
 from json import JSONDecodeError
 
 import gzip

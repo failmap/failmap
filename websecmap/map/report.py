@@ -79,7 +79,7 @@ def compose_task(
         Url.objects.filter(
             q_configurations_to_report(),
             organization__in=organization_ids,
-            **urls_filter
+            **urls_filter,
             # To save time, only acccept urls that have at least one endpoint.
             # which is wrong, since there could be only url ratings, and it's extremely rare?
             # : also include deleted urls, so to stabilize reporting over time

@@ -821,7 +821,9 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     def endpoints(obj):
         count = obj.endpoint_set.count()
         return (
-            format_html(f"{count}<br>" f"<a href='/admin/scanners/endpoint/?q={obj.url}' target='_blank'>Filter: 🔍</a>")
+            format_html(
+                f"{count}<br>" f"<a href='/admin/scanners/endpoint/?q={obj.url}' target='_blank'>Filter: 🔍</a>"
+            )
             if count
             else ""
         )
@@ -1265,8 +1267,9 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     @staticmethod
     def nr_urls(obj):
-        return Url.objects.filter(organization__layers=obj, is_dead=False, not_resolvable=False,
-                                  organization__is_dead=False).count()
+        return Url.objects.filter(
+            organization__layers=obj, is_dead=False, not_resolvable=False, organization__is_dead=False
+        ).count()
 
     @staticmethod
     def sample(obj):

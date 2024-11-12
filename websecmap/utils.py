@@ -1,4 +1,5 @@
 """Utility functions that can work outside of Django"""
+
 import sys
 import re
 

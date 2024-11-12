@@ -19,6 +19,7 @@ This scanner will be replaced with the O-Saft scanner when ready.
 API Documentation:
 https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
 """
+
 import json
 import logging
 from datetime import datetime, timedelta, timezone

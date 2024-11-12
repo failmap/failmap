@@ -4,6 +4,7 @@ In maart dit jaar een Public Preview en vanaf Juli 2024 pas General Available.
 https://techcommunity.microsoft.com/t5/exchange-team-blog/
     implementing-inbound-smtp-dane-with-dnssec-for-exchange-online/ba-p/3939694
 """
+
 from datetime import datetime, timezone
 
 from celery import group

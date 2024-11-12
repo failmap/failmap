@@ -7,6 +7,7 @@ Thanks to:
 - https://codeberg.org/dataskydd.net/
 - https://github.com/PrivacyScore/privacyscanner/tree/whotracksme/privacyscanner/scanmodules
 """
+
 from json import JSONDecodeError
 from typing import Any, Dict, List
 import re

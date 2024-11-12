@@ -13,6 +13,7 @@ only without the 'get the latest sessions per endpoint etc' code.
 Todo: if time add some extra metric that compares the consent / no consent variants on meta level. Like pages
 # visited etc...
 """
+
 import json
 
 from datetime import timezone, timedelta, datetime

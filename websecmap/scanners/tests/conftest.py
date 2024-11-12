@@ -1,4 +1,5 @@
 """Shared fixtures used by different tests."""
+
 import pytest
 
 from websecmap.organizations.models import Organization, Url

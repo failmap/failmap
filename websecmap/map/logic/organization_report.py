@@ -339,17 +339,15 @@ def rating_data(rating, url, link_data) -> Dict[str, Union[str, int]]:
     impact = (
         "explained"
         if rating["is_explained"]
-        else "not_tested"
-        if rating["not_testable"] or rating["not_applicable"]
-        else "error"
-        if rating["error_in_test"]
-        else "high"
-        if rating["high"]
-        else "medium"
-        if rating["medium"]
-        else "low"
-        if rating["low"]
-        else "ok"
+        else (
+            "not_tested"
+            if rating["not_testable"] or rating["not_applicable"]
+            else (
+                "error"
+                if rating["error_in_test"]
+                else "high" if rating["high"] else "medium" if rating["medium"] else "low" if rating["low"] else "ok"
+            )
+        )
     )
     empoji = {
         "explained": "💬",

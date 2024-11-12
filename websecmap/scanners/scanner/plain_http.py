@@ -6,6 +6,7 @@ Browsers first connect to http, not https when entering a domain. That will be c
 Further reading:
 https://stackoverflow.com/questions/20475552/python-requests-library-redirect-new-url#20475712
 """
+
 import logging
 from typing import Dict, Union, List
 import json

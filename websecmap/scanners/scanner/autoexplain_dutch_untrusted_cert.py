@@ -75,7 +75,7 @@ methods = [
     (SSL.SSLv23_METHOD, "SSL.SSLv23_METHOD"),
     # https://www.pyopenssl.org/en/stable/api/ssl.html
     # New code should only use TLS_METHOD, TLS_SERVER_METHOD, or TLS_CLIENT_METHOD.
-    (SSL.TLS_METHOD, "SSL.TLS_METHOD")
+    (SSL.TLS_METHOD, "SSL.TLS_METHOD"),
     # (SSL.SSLv3_METHOD, "SSL.SSLv3_METHOD"), not supported by openssl anymore
     # (SSL.SSLv2_METHOD, "SSL.SSLv2_METHOD"), not supported by openssl anymore
 ]

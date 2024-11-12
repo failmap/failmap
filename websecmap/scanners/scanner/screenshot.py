@@ -17,6 +17,7 @@ Which defaults to:
 http://screenshot_v4:1337
 http://screenshot_v6:1337
 """
+
 import base64
 import logging
 import os

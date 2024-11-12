@@ -1,6 +1,7 @@
 """
 Helps cleanup the database of non-normalized records of scanners that had non-normalized results.
 """
+
 from datetime import datetime, timezone
 from typing import Union
 

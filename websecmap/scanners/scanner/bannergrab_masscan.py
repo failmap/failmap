@@ -32,7 +32,6 @@ http is by far the most interesting stuff, it's basically a mess
 
 """
 
-
 import logging
 
 import masscan

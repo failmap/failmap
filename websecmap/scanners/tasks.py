@@ -1,4 +1,5 @@
 """Import modules containing tasks that need to be auto-discovered by Django Celery."""
+
 import logging
 
 from websecmap.scanners import plannedscan, proxy, progress_regress_results
