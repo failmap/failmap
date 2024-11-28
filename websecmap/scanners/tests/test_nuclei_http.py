@@ -659,7 +659,7 @@ def test_nuclei_compose_verify_task(db):
 
     assert len(task) == 5
 
-    assert task[4].kwargs["tasks"][0].args[0][0] == "http://serviscope-acc.kpn.com:443"
+    assert task[4].kwargs["tasks"][0].args[0] == "http://serviscope-acc.kpn.com:443"
 
 
 def test_create_nuclei_scan_command(db):
