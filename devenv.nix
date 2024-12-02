@@ -15,6 +15,8 @@ in
 
     # required for building MySQL Python package
     pkgs.libmysqlclient.dev
+    pkgs.postgresql
+
     # required for running dev environment
     pkgs.redis
     pkgs.nmap

@@ -72,5 +72,4 @@ types-requests
 
 #python-lsp-server[all]
 django-types
-basedpyright
 types-urllib3

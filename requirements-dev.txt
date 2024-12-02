@@ -20,8 +20,6 @@ babel==2.16.0
     # via sphinx
 bandit==1.7.10
     # via -r requirements-dev.in
-basedpyright==1.21.0
-    # via -r requirements-dev.in
 black==24.10.0
     # via -r requirements-dev.in
 celery-types==0.22.0
@@ -116,8 +114,6 @@ mdurl==0.1.2
     # via markdown-it-py
 mypy-extensions==1.0.0
     # via black
-nodejs-wheel-binaries==22.11.0
-    # via basedpyright
 packaging==24.2
     # via
     #   black
