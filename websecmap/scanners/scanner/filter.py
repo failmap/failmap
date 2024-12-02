@@ -2,7 +2,6 @@ import logging
 from typing import Callable, Iterable, Optional
 
 from django.db.models import Q
-
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint
@@ -21,8 +20,11 @@ ObjectFilter = dict[str, str]
 
 # this one is special, it can filter on all levels, but it will make sure that the result is only a top level.
 def filter_top_level_domains(
-    organizations_filter: ObjectFilter, urls_filter: ObjectFilter, endpoints_filter: ObjectFilter, **kwargs
-) -> list[Url]:
+    organizations_filter: Optional[ObjectFilter] = None,
+    urls_filter: Optional[ObjectFilter] = None,
+    endpoints_filter: Optional[ObjectFilter] = None,
+    **kwargs,
+) -> Iterable[Url]:
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     # DNSSEC only works on top level urls
 
@@ -61,7 +63,6 @@ def filter_top_level_domains(
     # Optimize: only required values, unique and randomized
     urls = unique_and_random(urls)
 
-    log.debug("Filtering top level domains resulten in %s urls", len(urls))
     return urls
 
 
