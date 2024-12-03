@@ -562,7 +562,7 @@ if SENTRY_DSN:
     # new sentry_sdk implementation, with hopes to also get exceptions from workers.
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[CeleryIntegration(), DjangoIntegration()],
+        integrations=[CeleryIntegration(monitor_beat_tasks=True), DjangoIntegration()],
         release=__version__,
         send_default_pii=False,
     )
