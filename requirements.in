@@ -95,7 +95,8 @@ colorlog
 django-proxy
 
 # sentry client
-sentry-sdk
+# https://github.com/getsentry/sentry-python/issues/291, issues with catching celery worker exceptions in prefork (kickoff worker) fixed?
+sentry-sdk>=2.19.0
 
 # allow recursive comparison of dictionaries
 deepdiff
