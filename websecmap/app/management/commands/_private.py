@@ -1,5 +1,6 @@
 """Management command base classes."""
 
+from collections import defaultdict
 import argparse
 from collections.abc import Iterable
 import json
@@ -173,6 +174,7 @@ class GenericTaskCommand(TaskCommand):
     """Generic Task Command for scanners."""
 
     scanner_module = None
+    scanner_arguments = defaultdict
 
     def _add_arguments(self, parser):
         """Add command specific arguments."""
@@ -328,12 +330,15 @@ class ScannerTaskCommand(TaskCommand):
             endpoints_filter,
         )
 
+        log.debug("calling: %s, with: %s", self.scanner_module, self.scanner_arguments)
+
         # compose set of tasks to be executed
         return self.scanner_module.compose_manual_scan_task(
             organizations_filter=organizations_filter,
             urls_filter=urls_filter,
             endpoints_filter=endpoints_filter,
             force=force,
+            **self.scanner_arguments,
         )
 
 

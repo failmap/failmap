@@ -176,7 +176,11 @@ def verify_all():
 
 
 def compose_manual_scan_task(
-    organizations_filter: ObjectFilter, urls_filter: ObjectFilter, endpoints_filter: ObjectFilter, force: bool = False
+    organizations_filter: ObjectFilter,
+    urls_filter: ObjectFilter,
+    endpoints_filter: ObjectFilter,
+    force: bool = False,
+    amount: int = DEFAULT_CHUNK_SIZE,
 ) -> Iterable[Signature[None]]:
     if not allowed_to_scan(SCANNER_NAME) and not force:
         return []
