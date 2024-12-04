@@ -186,7 +186,7 @@ def compose_manual_scan_task(
         return []
 
     urls = filter_endpoints_only(organizations_filter, urls_filter, endpoints_filter)
-    return compose_scan_task(urls, scanner_keyword_arguments={})
+    return compose_scan_task(urls, scanner_keyword_arguments={}, amount=amount)
 
 
 def compose_scan_task(
