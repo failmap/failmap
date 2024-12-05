@@ -697,14 +697,14 @@ def test_nuclei_compose_verify_task(db):
     assert (
         str(task[0]["kwargs"]["tasks"][0])
         == "websecmap.scanners.scanner.nuclei_http.scan('http://mail.rhcvechtenvenen.nl:443', {'args': ["
-           "{'name': 'silent', 'type': 'no-value'}, {'name': 'disable-update-check', 'type': 'no-value'}, "
-           "{'name': 'disable-unsigned-templates', 'type': 'no-value'}, "
-           "{'name': 'rate-limit', 'type': 'single-argument', 'value': '10'}, "
-           "{'name': 'config-directory', 'type': 'single-argument', 'value': '/tmp'}, "
-           "{'name': 'tags', 'type': 'list-to-duplicate-arguments', 'value': ['panel', 'tech']}, "
-           "{'name': 'header', 'type': 'single-argument', 'value': \"'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36 (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'\"}, "  # noqa
-           "{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['phpmyadmin-panel']}"
-           "], 'amount': 25})"  # noqa
+        "{'name': 'silent', 'type': 'no-value'}, {'name': 'disable-update-check', 'type': 'no-value'}, "
+        "{'name': 'disable-unsigned-templates', 'type': 'no-value'}, "
+        "{'name': 'rate-limit', 'type': 'single-argument', 'value': '10'}, "
+        "{'name': 'config-directory', 'type': 'single-argument', 'value': '/tmp'}, "
+        "{'name': 'tags', 'type': 'list-to-duplicate-arguments', 'value': ['panel', 'tech']}, "
+        "{'name': 'header', 'type': 'single-argument', 'value': \"'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36 (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'\"}, "  # noqa
+        "{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['phpmyadmin-panel']}"
+        "], 'amount': 25})"  # noqa
     )
 
 
