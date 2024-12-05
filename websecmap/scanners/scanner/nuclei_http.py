@@ -192,6 +192,9 @@ def compose_manual_scan_task(
 def compose_scan_task(
     urls: Iterable[Url], scanner_keyword_arguments: dict[str, Any], amount: int = DEFAULT_CHUNK_SIZE
 ) -> Iterable[Signature[None]]:
+    if not amount > 0:
+        raise ValueError("Invalid value for amount: %s", amount)
+
     endpoints = Endpoint.objects.all().filter(url__in=urls, **STANDARD_ENDPOINT_FILTER)
     # log.debug("Got %s endpoints after standard filter: %s", len(endpoints), STANDARD_ENDPOINT_FILTER)
 

@@ -9,6 +9,10 @@ class ActionCommand(TaskCommand):
 
     scanners = {}
 
+    def add_arguments(self, parser):
+        parser.add_argument("scanner", nargs=1, help="The scanner you want to use.", choices=self.scanners)
+        super().add_arguments(parser)
+
     def handle(self, *args, **options):
         try:
             scanner_name = options["scanner"][0]

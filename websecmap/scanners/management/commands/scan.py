@@ -15,8 +15,6 @@ class Command(ScannerTaskCommand, ActionCommand):
     scanners_arguments = defaultdict(list)
 
     def add_arguments(self, parser):
-        parser.add_argument("scanner", nargs=1, help="The scanner you want to use.", choices=self.scanners)
-
         for name, scanner in self.scanners.items():
             sig = signature(scanner.compose_manual_scan_task)
 
