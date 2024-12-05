@@ -1,6 +1,6 @@
 ARG PYTHON_VERSION=3.10
-ARG NUCLEI_VERSION=2.9.5
-ARG GOLANG_VERSION=1.20
+ARG NUCLEI_VERSION=3.3.7
+ARG GOLANG_VERSION=1.23
 ARG AMASS_VERSION=3.23.1
 
 # create Python virtualenv with Python dependencies
@@ -44,7 +44,7 @@ FROM golang:${GOLANG_VERSION} AS nuclei
 # import variable
 ARG NUCLEI_VERSION
 
-RUN go install -v "github.com/projectdiscovery/nuclei/v2/cmd/nuclei@v${NUCLEI_VERSION}"
+RUN go install -v "github.com/projectdiscovery/nuclei/v3/cmd/nuclei@v${NUCLEI_VERSION}"
 
 FROM golang:${GOLANG_VERSION} AS amass
 
