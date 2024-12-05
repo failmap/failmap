@@ -662,27 +662,35 @@ def test_nuclei_compose_verify_task(db):
 
     assert len(task) == 5
 
+    # The order of the records does not matter. No loops are used as that makes this even more complex.
+    task_1 = str(task[0]["kwargs"]["tasks"][0])
+    task_2 = str(task[1]["kwargs"]["tasks"][0])
+    task_3 = str(task[2]["kwargs"]["tasks"][0])
+    task_4 = str(task[3]["kwargs"]["tasks"][0])
+    task_5 = str(task[4]["kwargs"]["tasks"][0])
+    tasks = [task_1, task_2, task_3, task_4, task_5]
+
     # check that 'args' is set correctly, so only the right template id's are used in verification, otherwise all
     # scans will be performed on all levels
     assert (
-        str(task[0]["kwargs"]["tasks"][0])
-        == "websecmap.scanners.scanner.nuclei_http.scan('http://mail.rhcvechtenvenen.nl:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['phpmyadmin-panel']}]})"  # noqa
+        "websecmap.scanners.scanner.nuclei_http.scan('http://mail.rhcvechtenvenen.nl:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['phpmyadmin-panel']}]})"  # noqa
+        in tasks
     )
     assert (
-        str(task[1]["kwargs"]["tasks"][0])
-        == "websecmap.scanners.scanner.nuclei_http.scan('http://mail.rhcvechtenvenen.nl:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['apache-detect', 'waf-detect']}]})"  # noqa
+        "websecmap.scanners.scanner.nuclei_http.scan('http://mail.rhcvechtenvenen.nl:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['apache-detect', 'waf-detect']}]})"  # noqa
+        in tasks
     )
     assert (
-        str(task[2]["kwargs"]["tasks"][0])
-        == "websecmap.scanners.scanner.nuclei_http.scan('http://tw.omnibuzz.nl:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['apache-detect', 'favicon-detect', 'waf-detect']}]})"  # noqa
+        "websecmap.scanners.scanner.nuclei_http.scan('http://tw.omnibuzz.nl:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['apache-detect', 'favicon-detect', 'waf-detect']}]})"  # noqa
+        in tasks
     )
     assert (
-        str(task[3]["kwargs"]["tasks"][0])
-        == "websecmap.scanners.scanner.nuclei_http.scan('http://erfgoed.utrecht.nl:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['metatag-cms', 'tech-detect', 'typo3-detect']}]})"  # noqa
+        "websecmap.scanners.scanner.nuclei_http.scan('http://erfgoed.utrecht.nl:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['metatag-cms', 'tech-detect', 'typo3-detect']}]})"  # noqa
+        in tasks
     )
     assert (
-        str(task[4]["kwargs"]["tasks"][0])
-        == "websecmap.scanners.scanner.nuclei_http.scan('http://serviscope-acc.kpn.com:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['tech-detect']}]})"  # noqa
+        "websecmap.scanners.scanner.nuclei_http.scan('http://serviscope-acc.kpn.com:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['tech-detect']}]})"  # noqa
+        in tasks
     )
 
     # see if args are merged correctly, which is usual for normal verification:
@@ -694,9 +702,15 @@ def test_nuclei_compose_verify_task(db):
         )
     )
 
+    task_1 = str(task[0]["kwargs"]["tasks"][0])
+    task_2 = str(task[1]["kwargs"]["tasks"][0])
+    task_3 = str(task[2]["kwargs"]["tasks"][0])
+    task_4 = str(task[3]["kwargs"]["tasks"][0])
+    task_5 = str(task[4]["kwargs"]["tasks"][0])
+    tasks = [task_1, task_2, task_3, task_4, task_5]
+
     assert (
-        str(task[0]["kwargs"]["tasks"][0])
-        == "websecmap.scanners.scanner.nuclei_http.scan('http://mail.rhcvechtenvenen.nl:443', {'args': ["
+        "websecmap.scanners.scanner.nuclei_http.scan('http://mail.rhcvechtenvenen.nl:443', {'args': ["
         "{'name': 'silent', 'type': 'no-value'}, {'name': 'disable-update-check', 'type': 'no-value'}, "
         "{'name': 'disable-unsigned-templates', 'type': 'no-value'}, "
         "{'name': 'rate-limit', 'type': 'single-argument', 'value': '10'}, "
@@ -704,7 +718,7 @@ def test_nuclei_compose_verify_task(db):
         "{'name': 'tags', 'type': 'list-to-duplicate-arguments', 'value': ['panel', 'tech']}, "
         "{'name': 'header', 'type': 'single-argument', 'value': \"'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36 (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'\"}, "  # noqa
         "{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['phpmyadmin-panel']}"
-        "], 'amount': 25})"  # noqa
+        "], 'amount': 25})" in tasks
     )
 
 
