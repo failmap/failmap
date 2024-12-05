@@ -1,5 +1,6 @@
 ARG PYTHON_VERSION=3.10
 ARG NUCLEI_VERSION=3.3.7
+ARG NUCLEI_TEMPLATES_VERSION=10.0.4
 ARG GOLANG_VERSION=1.23
 ARG AMASS_VERSION=3.23.1
 
@@ -112,7 +113,8 @@ RUN echo '#!/bin/sh\nsudo -u nuclei /go/bin/nuclei "$@"' > /usr/local/bin/nuclei
 RUN chmod a+x /usr/local/bin/nuclei
 
 # update templates
-RUN /usr/local/bin/nuclei -update-templates
+ARG NUCLEI_TEMPLATES_VERSION
+RUN git clone https://github.com/projectdiscovery/nuclei-templates --branch v${NUCLEI_TEMPLATES_VERSION} --depth=1 /home/nuclei/nuclei-templates
 
 COPY --from=amass /go/bin/amass /usr/local/bin/amass
 
