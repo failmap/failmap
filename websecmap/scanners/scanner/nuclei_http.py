@@ -88,38 +88,47 @@ NUCLEI_ARGUMENTS = {
         "args": [
             {"name": "silent", "type": "no-value"},
             {"name": "disable-update-check", "type": "no-value"},
+            # There is now support for signed templates, so we know for sure no 'random' template is included.
+            # We'll have to figure out what to do with custom loaded templates in the future.
+            {"name": "disable-unsigned-templates", "type": "no-value"},
             # TODO: this should be configurable more dynamically
             {"name": "rate-limit", "type": "single-argument", "value": "10"},
             {"name": "config-directory", "type": "single-argument", "value": "/tmp"},
-            {"name": "type", "type": "list-to-duplicate-arguments", "value": ["http"]},
+            # type is not needed anymore as panel and tech detection are clear enough
+            # {"name": "type", "type": "list-to-duplicate-arguments", "value": ["http"]},
+            # include-templates does not work when the project refactors the template directories, which
+            # happens once in a while. The best way to filter in on tag, which has no reflection on the directory
+            # structure. The default include-tags is called tags for some reason.
             {
-                "name": "include-templates",
+                "name": "tags",
                 "type": "list-to-duplicate-arguments",
-                "value": ["exposed-panels", "technologies"],
+                "value": ["panel", "tech"],
             },
-            {
-                "name": "exclude-templates",
-                "type": "list-to-duplicate-arguments",
-                "value": [
-                    "cnvd",
-                    "cves",
-                    "default-logins",
-                    "dns",
-                    "exposures",
-                    "file",
-                    "fuzzing",
-                    "headless",
-                    "iot",
-                    "miscellaneous",
-                    "misconfiguration",
-                    "network",
-                    "ssl",
-                    "takeovers",
-                    "token-spray",
-                    "vulnerabilities",
-                    "workflows",
-                ],
-            },
+            # when using tags, all the rest is automatically excluded. But we want to be sure
+            # that there is no template selected that uses 'panel' AND xss for example...
+            # looking at the panel code this does not happen, so this can be removed.
+            # {
+            #     "name": "exclude-tags",
+            #     "type": "list-to-duplicate-arguments",
+            #     "value": [
+            #         "cve",
+            #         "xss",
+            #         "sql",
+            #         # "wp-plugin",
+            #         "osint",
+            #         "lfi",
+            #         "misconfig",
+            #         "file",
+            #         "cloud",
+            #         "workflows",
+            #         "code",
+            #         "network",
+            #         "javascript",
+            #         "ssl",
+            #         "dast",
+            #         "dns",
+            #     ],
+            # },
             # TODO: user agent should come from central config
             {
                 "name": "header",
@@ -130,12 +139,14 @@ NUCLEI_ARGUMENTS = {
                     " (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'"
                 ),
             },
-            {
-                "name": "exclude-severity",
-                "type": "list-to-duplicate-arguments",
-                "value": ["high", "critical", "medium"],
-            },
-            {"name": "exclude-id", "type": "list-to-single-csv-argument", "value": ["robots-txt", "security-txt"]},
+            # any login panel except VPN logins should be removed, so don't filter out certain panels
+            # {
+            #     "name": "exclude-severity",
+            #     "type": "list-to-duplicate-arguments",
+            #     "value": ["high", "critical", "medium"],
+            # },
+            # These are already not included in the selection
+            # {"name": "exclude-id", "type": "list-to-single-csv-argument", "value": ["robots-txt", "security-txt"]},
         ],
         # this should be configurable
         "amount": DEFAULT_CHUNK_SIZE,
