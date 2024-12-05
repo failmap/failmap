@@ -30,7 +30,8 @@ from websecmap.scanners.scanner.nuclei_http import (
 )
 
 three_example_nuclei_tests = data = (
-    b'{"template":"technologies/metatag-cms.yaml","template-url":"https://github.com/projectdiscovery/nuclei-template'
+    b'{"template":"http/technologies/metatag-cms.yaml","template-url":"https://github.com/projectdiscovery/'
+    b"nuclei-template"
     b's/blob/master/technologies/metatag-cms.yaml","template-id":"metatag-cms","template-path":"nuclei-'
     b'templates/technologies/metatag-cms.yaml","info":{"name":"Metatag CMS Detection","author":["dadevel"],"tags":["t'
     b'ech","cms"],"description":"Generic CMS Detection using html meta generator tag","reference":["https://www.w3sch'
@@ -39,7 +40,8 @@ three_example_nuclei_tests = data = (
     b',"ip":"185.71.61.127","timestamp":"2023-02-15T10:16:25.200938Z","curl-command":"curl -X \'GET\' -d \'\' -H \'Ac'
     b"cept: */*' -H 'Accept-Language: en' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWeb"
     b"Kit/537.36 (KHTML, like Gecko) Chrome/54.0.2866.71 Safari/537.36' 'https://basisbeveiliging.nl'\",\"matcher-st"
-    b'atus":true,"matched-line":null}\n{"template":"technologies/tech-detect.yaml","template-url":"https://github.com'
+    b'atus":true,"matched-line":null}\n{"template":"http/technologies/tech-detect.yaml","template-url":'
+    b'"https://github.com'
     b'/projectdiscovery/nuclei-templates/blob/master/technologies/tech-detect.yaml","template-id":"tech-detect","temp'
     b'late-path":"nuclei-templates/technologies/tech-detect.yaml","info":{"name":"Wappalyzer Technology'
     b' Detection","author":["hakluke"],"tags":["tech"],"reference":null,"severity":"info"},"matcher-name":"nginx","ty'
@@ -47,7 +49,8 @@ three_example_nuclei_tests = data = (
     b",\"timestamp\":\"2023-02-15T10:16:25.206073Z\",\"curl-command\":\"curl -X 'GET' -d '' -H 'Accept: */*' -H 'Acce"
     b"pt-Language: en' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.36 (KHTML, li"
     b'ke Gecko) Chrome/54.0.2866.71 Safari/537.36\' \'https://basisbeveiliging.nl\'","matcher-status":true,"matched-l'
-    b'ine":null}\n{"template":"technologies/waf-detect.yaml","template-url":"https://github.com/projectdiscovery/nucl'
+    b'ine":null}\n{"template":"http/technologies/waf-detect.yaml","template-url":"https://github.com/'
+    b"projectdiscovery/nucl"
     b'ei-templates/blob/master/technologies/waf-detect.yaml","template-id":"waf-detect","template-path":"'
     b'nuclei-templates/technologies/waf-detect.yaml","info":{"name":"WAF Detection","author":["dwisiswant0","lu4nx"'
     b'],"tags":["waf","tech","misc"],"description":"A web application firewall was detected.","reference":["https://g'
@@ -57,7 +60,7 @@ three_example_nuclei_tests = data = (
     b"03cscript\\u003ealert(1)\\u003c/script\\u003e' -H 'Content-Type: application/x-www-form-urlencoded' -H 'Hos"
     b"t: basisbeveiliging.nl' -H 'User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like G"
     b'ecko) Chrome/41.0.2225.0 Safari/537.36\' \'https://basisbeveiliging.nl/\'","matcher-status":true,"matched-line"'
-    b':null}\n{"template":"technologies/waf-detect.yaml","template-url":"https://github.com/projectdiscovery/nucl'
+    b':null}\n{"template":"http/technologies/waf-detect.yaml","template-url":"https://github.com/projectdiscovery/nucl'
     b'ei-templates/blob/master/technologies/waf-detect.yaml","template-id":"waf-detect","template-path":"'
     b'nuclei-templates/technologies/waf-detect.yaml","info":{"name":"WAF Detection","author":["dwisiswant0","lu4nx"'
     b'],"tags":["waf","tech","misc"],"description":"A web application firewall was detected.","reference":["https://g'
@@ -139,7 +142,7 @@ def test_convert_nuclei_data_to_json():
             "matched-at": "https://basisbeveiliging.nl",
             "matched-line": None,
             "matcher-status": True,
-            "template": "technologies/metatag-cms.yaml",
+            "template": "http/technologies/metatag-cms.yaml",
             "template-id": "metatag-cms",
             "template-path": "nuclei-templates/technologies/metatag-cms.yaml",
             "template-url": "https://github.com/projectdiscovery/nuclei-templates/blob/master/"
@@ -166,7 +169,7 @@ def test_convert_nuclei_data_to_json():
             "matched-line": None,
             "matcher-name": "nginx",
             "matcher-status": True,
-            "template": "technologies/tech-detect.yaml",
+            "template": "http/technologies/tech-detect.yaml",
             "template-id": "tech-detect",
             "template-path": "nuclei-templates/technologies/tech-detect.yaml",
             "template-url": "https://github.com/projectdiscovery/nuclei-templates/blob/master/"
@@ -196,7 +199,7 @@ def test_convert_nuclei_data_to_json():
             "matched-line": None,
             "matcher-name": "nginxgeneric",
             "matcher-status": True,
-            "template": "technologies/waf-detect.yaml",
+            "template": "http/technologies/waf-detect.yaml",
             "template-id": "waf-detect",
             "template-path": "nuclei-templates/technologies/waf-detect.yaml",
             "template-url": "https://github.com/projectdiscovery/nuclei-templates/blob/master/"
@@ -226,7 +229,7 @@ def test_convert_nuclei_data_to_json():
             "matched-line": None,
             "matcher-name": "nginxgeneric",
             "matcher-status": True,
-            "template": "technologies/waf-detect.yaml",
+            "template": "http/technologies/waf-detect.yaml",
             "template-id": "waf-detect",
             "template-path": "nuclei-templates/technologies/waf-detect.yaml",
             "template-url": "https://github.com/projectdiscovery/nuclei-templates/blob/master/"
@@ -261,7 +264,7 @@ def test_process_nuclei_record():
             "matched-line": None,
             "matcher-name": "nginxgeneric",
             "matcher-status": True,
-            "template": "technologies/waf-detect.yaml",
+            "template": "http/technologies/waf-detect.yaml",
             "template-id": "waf-detect",
             "template-path": "nuclei-templates/technologies/waf-detect.yaml",
             "template-url": "https://github.com/projectdiscovery/nuclei-templates/blob/master/"
@@ -311,7 +314,7 @@ def test_process_nuclei_record():
             "matched-line": None,
             "matcher-name": "nginx",
             "matcher-status": True,
-            "template": "technologies/tech-detect.yaml",
+            "template": "http/technologies/tech-detect.yaml",
             "template-id": "tech-detect",
             "template-path": "nuclei-templates/technologies/tech-detect.yaml",
             "template-url": "https://github.com/projectdiscovery/nuclei-templates/blob/master/"
@@ -659,7 +662,50 @@ def test_nuclei_compose_verify_task(db):
 
     assert len(task) == 5
 
-    assert task[4].kwargs["tasks"][0].args[0] == "http://serviscope-acc.kpn.com:443"
+    # check that 'args' is set correctly, so only the right template id's are used in verification, otherwise all
+    # scans will be performed on all levels
+    assert (
+        str(task[0]["kwargs"]["tasks"][0])
+        == "websecmap.scanners.scanner.nuclei_http.scan('http://mail.rhcvechtenvenen.nl:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['phpmyadmin-panel']}]})"  # noqa
+    )
+    assert (
+        str(task[1]["kwargs"]["tasks"][0])
+        == "websecmap.scanners.scanner.nuclei_http.scan('http://mail.rhcvechtenvenen.nl:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['apache-detect', 'waf-detect']}]})"  # noqa
+    )
+    assert (
+        str(task[2]["kwargs"]["tasks"][0])
+        == "websecmap.scanners.scanner.nuclei_http.scan('http://tw.omnibuzz.nl:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['apache-detect', 'favicon-detect', 'waf-detect']}]})"  # noqa
+    )
+    assert (
+        str(task[3]["kwargs"]["tasks"][0])
+        == "websecmap.scanners.scanner.nuclei_http.scan('http://erfgoed.utrecht.nl:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['metatag-cms', 'tech-detect', 'typo3-detect']}]})"  # noqa
+    )
+    assert (
+        str(task[4]["kwargs"]["tasks"][0])
+        == "websecmap.scanners.scanner.nuclei_http.scan('http://serviscope-acc.kpn.com:443', {'args': [{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['tech-detect']}]})"  # noqa
+    )
+
+    # see if args are merged correctly, which is usual for normal verification:
+    # this includes headers, template tags and such.
+    task = list(
+        compose_verify_task(
+            {},
+            {},
+        )
+    )
+
+    assert (
+        str(task[0]["kwargs"]["tasks"][0])
+        == "websecmap.scanners.scanner.nuclei_http.scan('http://mail.rhcvechtenvenen.nl:443', {'args': ["
+           "{'name': 'silent', 'type': 'no-value'}, {'name': 'disable-update-check', 'type': 'no-value'}, "
+           "{'name': 'disable-unsigned-templates', 'type': 'no-value'}, "
+           "{'name': 'rate-limit', 'type': 'single-argument', 'value': '10'}, "
+           "{'name': 'config-directory', 'type': 'single-argument', 'value': '/tmp'}, "
+           "{'name': 'tags', 'type': 'list-to-duplicate-arguments', 'value': ['panel', 'tech']}, "
+           "{'name': 'header', 'type': 'single-argument', 'value': \"'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36 (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'\"}, "  # noqa
+           "{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['phpmyadmin-panel']}"
+           "], 'amount': 25})"  # noqa
+    )
 
 
 def test_create_nuclei_scan_command(db):

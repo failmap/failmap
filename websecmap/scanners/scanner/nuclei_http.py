@@ -99,11 +99,7 @@ NUCLEI_ARGUMENTS = {
             # include-templates does not work when the project refactors the template directories, which
             # happens once in a while. The best way to filter in on tag, which has no reflection on the directory
             # structure. The default include-tags is called tags for some reason.
-            {
-                "name": "tags",
-                "type": "list-to-duplicate-arguments",
-                "value": ["panel", "tech"],
-            },
+            {"name": "tags", "type": "list-to-duplicate-arguments", "value": ["panel", "tech"]},
             # when using tags, all the rest is automatically excluded. But we want to be sure
             # that there is no template selected that uses 'panel' AND xss for example...
             # looking at the panel code this does not happen, so this can be removed.
@@ -324,6 +320,7 @@ def compose_verify_task(
             log.debug("No templates in scan object")
             continue
 
+        # make sure that 'args' are added to args...
         scan_these_templates = {"name": "template-id", "type": "list-to-duplicate-arguments", "value": template_ids}
         # merge scanner params with the templates that need to be used for the rescan
         if scanner_keyword_arguments and "args" in scanner_keyword_arguments:
@@ -332,9 +329,6 @@ def compose_verify_task(
             params = args_copy
         else:
             params = {"args": [scan_these_templates]}
-
-        # append/override default arguments with template arguments
-        params = {**scanner_keyword_arguments, **scan_these_templates}
 
         yield scan.s(current_scan.endpoint.uri_url(), params) | store_verify_results.s(
             current_scan.endpoint.id, current_scan.type
