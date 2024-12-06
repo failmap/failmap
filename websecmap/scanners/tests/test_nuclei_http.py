@@ -1,3 +1,5 @@
+import pytest
+
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -27,6 +29,7 @@ from websecmap.scanners.scanner.nuclei_http import (
     evidence_to_json,
     rerate_portal_findings,
     store_verify_results,
+    scan_batch,
 )
 
 three_example_nuclei_tests = data = (
@@ -723,24 +726,34 @@ def test_nuclei_compose_verify_task(db):
 
 
 def test_create_nuclei_scan_command(db):
+    scan_params = {
+        "args": [
+            {"name": "silent", "type": "no-value"},
+            {"name": "disable-update-check", "type": "no-value"},
+            {"name": "rate-limit", "type": "single-argument", "value": "10"},
+            {"name": "config-directory", "type": "single-argument", "value": "/tmp"},
+            {
+                "name": "template-id",
+                "type": "list-to-duplicate-arguments",
+                "value": ["netscaler-aaa-login-panel", "citrix-vpn-panel"],
+            },
+        ]
+    }
+
+    # expect an exception as tags are not specified
+    with pytest.raises(ValueError) as excinfo:
+        scan_batch(["test.nl"], scan_params)
+    assert "Cannot start a nuclei scan without -tags as that would scan too much" in str(excinfo.value)
+
+    scan_params["args"].append({"name": "tags", "type": "list-to-duplicate-arguments", "value": ["panel", "tech"]})
+
     command = create_nuclei_scan_command(
         ["test.nl"],
         "/usr/local/bin/nuclei",
-        {
-            "args": [
-                {"name": "silent", "type": "no-value"},
-                {"name": "disable-update-check", "type": "no-value"},
-                {"name": "rate-limit", "type": "single-argument", "value": "10"},
-                {"name": "config-directory", "type": "single-argument", "value": "/tmp"},
-                {
-                    "name": "template-id",
-                    "type": "list-to-duplicate-arguments",
-                    "value": ["netscaler-aaa-login-panel", "citrix-vpn-panel"],
-                },
-            ]
-        },
+        scan_params,
         disabled_templates=["robots-txt", "security-txt"],
     )
+
     assert command == [
         "/usr/local/bin/nuclei",
         "-jsonl",
@@ -754,6 +767,10 @@ def test_create_nuclei_scan_command(db):
         "netscaler-aaa-login-panel",
         "-template-id",
         "citrix-vpn-panel",
+        "-tags",
+        "panel",
+        "-tags",
+        "tech",
         "-exclude-id",
         "robots-txt,security-txt",
         "-target",

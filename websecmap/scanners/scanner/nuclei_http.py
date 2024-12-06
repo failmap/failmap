@@ -412,6 +412,10 @@ def scan_batch(
     command = create_nuclei_scan_command(
         urls, scanner_keyword_arguments=scanner_keyword_arguments, disabled_templates=disabled_templates
     )
+
+    if "-tags" not in command:
+        raise ValueError("Cannot start a nuclei scan without -tags as that would scan too much! Command: %s", command)
+
     log.debug("Starting nuclei scan with command: %s", " ".join(command))
 
     nuc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd="/tmp")
