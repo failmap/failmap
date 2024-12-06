@@ -103,9 +103,9 @@ def _read_json_from_gzip(location):
         return {}
     except JSONDecodeError:
         # this is weird, should not happen. Don't crash.
-        log.error(f"Report does not contain valid json, {location}.", location)
+        log.error("Report does not contain valid json, %s.", location)
         return {}
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         # Possibly corrupted gzip file, this might happen for whatever reason.
         # Error -3 while decompressing data: invalid stored block lengths
         log.exception("Other error occurred when reading report from %s: %s", location, e)

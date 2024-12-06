@@ -58,7 +58,7 @@ def strip_policy_data(policy: ScanPolicy) -> Dict[str, Any]:
     return data
 
 
-def standard_calculation(
+def standard_calculation(  # pylint: disable=too-many-positional-arguments
     scan: Union[EndpointGenericScan, UrlGenericScan],
     explanation: str,
     high: int = 0,

@@ -54,7 +54,7 @@ def check_ripe_for_uncorrected_network(uncorrected_network):
     country_code = parse_ripe_api_response(response)
 
     if country_code == "--":
-        log.error(f"Could not get country code for network {uncorrected_network}. Ripe Response: {response}.")
+        log.error("Could not get country code for network %s. Ripe Response: %s.", uncorrected_network, response)
 
     data = {"network": uncorrected_network, "country_code": country_code, "source": "ripe", "response": response}
 
@@ -127,7 +127,7 @@ def call_ripe_api(network: str):
         f"https://rest.db.ripe.net/search.json?query-string={network}&type-filter=inetnum,inet6num"
         f"&flags=no-referenced&flags=no-irt&source=RIPE"
     )
-    response = requests.get(url)
+    response = requests.get(url, timeout=30)
     return response.json()
 
 

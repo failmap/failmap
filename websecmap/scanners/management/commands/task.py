@@ -12,5 +12,5 @@ class Command(TaskCommand):
     def compose(self, *args, **options):
         if options["task_args"]:
             return app.tasks[options["task"][0]].si(*options["task_args"])
-        else:
-            return app.tasks[options["task"][0]]
+
+        return app.tasks[options["task"][0]]

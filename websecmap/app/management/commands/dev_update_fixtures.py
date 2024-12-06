@@ -19,7 +19,7 @@ class Command(BaseCommand):
         This fixture makes it possible to use this same database in tests.
         """
         sysout = sys.stdout
-        sys.stdout = open("websecmap/scanners/fixtures/scanmetadata.json", "wt")
+        sys.stdout = open("websecmap/scanners/fixtures/scanmetadata.json", "wt", encoding="utf-8")
         call_command(
             "dumpdata",
             "scanners.scantypesecondopinionlink",
@@ -38,14 +38,15 @@ class Command(BaseCommand):
         ScanPolicy is a summary of all possible results of all scans types.
         """
         sysout = sys.stdout
-        sys.stdout = open("websecmap/reporting/fixtures/default_policy.json", "wt")
-        call_command("dumpdata", "reporting.scanpolicy", "--indent", 2),
+        sys.stdout = open("websecmap/reporting/fixtures/default_policy.json", "wt", encoding="utf-8")
+        #  is assigned to nothing (expression-not-assigned)
+        _ = call_command("dumpdata", "reporting.scanpolicy", "--indent", 2)
         sys.stdout = sysout
 
         """
         Periodic tasks like scanning and such are handled in celery beat.
         """
         sysout = sys.stdout
-        sys.stdout = open("websecmap/app/fixtures/periodic_tasks.json", "wt")
-        call_command("dumpdata", "django_celery_beat", "--indent", 2)
+        sys.stdout = open("websecmap/app/fixtures/periodic_tasks.json", "wt", encoding="utf-8")
+        _ = call_command("dumpdata", "django_celery_beat", "--indent", 2)
         sys.stdout = sysout

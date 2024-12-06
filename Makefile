@@ -89,7 +89,7 @@ doctest: test
 # all quality assurance commands before pushing new code
 qa: autofix test
 
-check: check_py check_migrations check_sh  ## code quality checks
+check: check_py check_migrations check_sh lint  ## code quality checks
 check_py: ${pysrc} ${app}
 	# check code quality
 	# TOML file config are ignored since 8.4.1 so use direct params :(

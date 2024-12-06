@@ -42,7 +42,7 @@ def convert_disconnectme_to_tracker_info():
         return cached
 
     # Make On operation an O1 operation:
-    with open(PRIVACY_DISCONNECTME_ENTITIES_FILE) as f:
+    with open(PRIVACY_DISCONNECTME_ENTITIES_FILE, encoding="UTF-8") as f:
         data = json.load(f)
 
     structured_data: Dict[str, Dict[str, str]] = {}

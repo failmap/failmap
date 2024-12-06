@@ -35,7 +35,7 @@ def clean_http_security_header_strict_transport_security():
     # removes all the headers except for location and strict-transport-security for every request
     # reduces the url to only the url and path. Afterwards remove duplicates using the existing methods.
     scans = get_scans("http_security_header_strict_transport_security")
-    log.debug(f"Cleaning {len(scans)} hsts scans.")
+    log.debug("Cleaning %s hsts scans.", len(scans))
     parallelize(something_something_hsts, scans, 25)
     log.debug("Done cleaning up")
 

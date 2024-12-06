@@ -101,7 +101,7 @@ def get_older_duplicate_endpoint(endpoint: Endpoint, within_days: int = 60):
 
     # there can be years between creation date, but between deletion and creation is very short
     log.debug(
-        "Do we have a similar endpoint for %s that has been deleted within %s days before" "creation of this endpoint?",
+        "Do we have a similar endpoint for %s that has been deleted within %s days before creation of this endpoint?",
         endpoint,
         within_days,
     )
@@ -125,6 +125,8 @@ def get_older_duplicate_endpoint(endpoint: Endpoint, within_days: int = 60):
 
     if by_deletion_date:
         return by_deletion_date
+
+    return None
 
 
 def deduplicate_all_scans_sequentially():

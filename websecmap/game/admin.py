@@ -126,7 +126,8 @@ class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     # todo: generate a printout for teams and this contest, to hand out.
     def show_printout(self, request, queryset):
         for contest in queryset:
-            from django.http import HttpResponse
+            # todo: fix mix of httpresponses inside admin...
+            from django.http import HttpResponse  # pylint: disable=import-outside-toplevel
 
             content = ""
             content += create_printout(contest)
@@ -692,15 +693,15 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def is_already_in_system(obj):
         if Url.objects.filter(url=obj.url).exists():
             return mark_safe('<img src="/static/admin/img/icon-yes.svg" alt="True">')
-        else:
-            return mark_safe('<img src="/static/admin/img/icon-no.svg" alt="False">')
+
+        return mark_safe('<img src="/static/admin/img/icon-no.svg" alt="False">')
 
     @staticmethod
     def is_already_tied_to_this_organization(obj):
         if Url.objects.filter(url=obj.url, organization=obj.for_organization).exists():
             return mark_safe('<img src="/static/admin/img/icon-yes.svg" alt="True">')
-        else:
-            return mark_safe('<img src="/static/admin/img/icon-no.svg" alt="False">')
+
+        return mark_safe('<img src="/static/admin/img/icon-no.svg" alt="False">')
 
     @transaction.atomic
     def reset_judgement(self, request, queryset):

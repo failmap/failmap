@@ -25,13 +25,13 @@ class ReportSiteMap(Sitemap):
     def lastmod(self, obj):
         return datetime.now(timezone.utc).date()
 
-    def location(self, obj):
+    def location(self, item):
         # always the first layer, which is usually more recognizable than layers that are added later
-        first_layer = obj.layers.order_by("id").first()
+        first_layer = item.layers.order_by("id").first()
         return (
-            f"/report/{obj.country}/{first_layer}/{obj.id}/?slug={obj.computed_name_slug}"
+            f"/report/{item.country}/{first_layer}/{item.id}/?slug={item.computed_name_slug}"
             if first_layer
-            else f"/report/{obj.id}/?slug={obj.computed_name_slug}"
+            else f"/report/{item.id}/?slug={item.computed_name_slug}"
         )
 
 
@@ -45,23 +45,23 @@ class ConfigurationSiteMap(Sitemap):
     def lastmod(self, obj):
         return datetime.now(timezone.utc).date()
 
-    def location(self, obj):
-        return f"/map/{obj.country}/{obj.organization_type.name}/"
+    def location(self, item):
+        return f"/map/{item.country}/{item.organization_type.name}/"
 
 
 class ChartSiteMap(ConfigurationSiteMap):
-    def location(self, obj):
-        return f"/charts/{obj.country}/{obj.organization_type.name}/"
+    def location(self, item):
+        return f"/charts/{item.country}/{item.organization_type.name}/"
 
 
 class LoginPlazaSiteMap(ConfigurationSiteMap):
-    def location(self, obj):
-        return f"/login-plaza/{obj.country}/{obj.organization_type.name}/"
+    def location(self, item):
+        return f"/login-plaza/{item.country}/{item.organization_type.name}/"
 
 
 class StatisticsSiteMap(ConfigurationSiteMap):
-    def location(self, obj):
-        return f"/statistics/{obj.country}/{obj.organization_type.name}/"
+    def location(self, item):
+        return f"/statistics/{item.country}/{item.organization_type.name}/"
 
 
 class StaticSiteMap(Sitemap):
@@ -71,7 +71,7 @@ class StaticSiteMap(Sitemap):
     def items(self):
         return ["home", "about", "contact", "faq", "privacy", "terms"]
 
-    def location(self, obj):
+    def location(self, item):
         return {
             "tracking-cookies": "/tracking-cookies/",
             "leaderboard": "/leaderboard/",
@@ -79,7 +79,7 @@ class StaticSiteMap(Sitemap):
             "home": "/",
             "datasets": "/datasets/",
             "": "/",
-        }.get(obj, "")
+        }.get(item, "")
 
     def lastmod(self, obj):
         return datetime.now(timezone.utc).date()

@@ -25,4 +25,6 @@ def cache_set(key, value):
 
 
 def reset():
+    # don't know how to do this otherwise for now. Using a singleton class perhaps?
+    global CACHE  # pylint: disable=global-statement
     CACHE = {}  # noqa

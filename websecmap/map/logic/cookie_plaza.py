@@ -45,24 +45,24 @@ def cookie_plaza_data(country: str = None, layer: str = None):
     # this makes ±6127 records into 25744. For example the ministry layers are all duplicates of government
     for scan in scans:
         for organization in scan.endpoint.url.organization.all():
-            for layer in organization.layers.all():
-                if layer.name not in stats:
-                    stats[layer.name] = {
+            for my_layer in organization.layers.all():
+                if my_layer.name not in stats:
+                    stats[my_layer.name] = {
                         "organizations_with_tracking_cookies": set(),
                         "urls_with_tracking_cookies": set(),
                         "organization_details": {},
                     }
-                if organization.id not in stats[layer.name]["organizations_with_tracking_cookies"]:
-                    stats[layer.name]["organization_details"][str(organization.id)] = {
+                if organization.id not in stats[my_layer.name]["organizations_with_tracking_cookies"]:
+                    stats[my_layer.name]["organization_details"][str(organization.id)] = {
                         "id": organization.id,
                         "name": organization.name,
                         "city": organization.city,
                         "urls_with_tracking_cookies": [],
                     }
 
-                stats[layer.name]["organizations_with_tracking_cookies"].add(organization.id)
-                stats[layer.name]["urls_with_tracking_cookies"].add(scan.endpoint.url.url)
-                stats[layer.name]["organization_details"][str(organization.id)]["urls_with_tracking_cookies"].append(
+                stats[my_layer.name]["organizations_with_tracking_cookies"].add(organization.id)
+                stats[my_layer.name]["urls_with_tracking_cookies"].add(scan.endpoint.url.url)
+                stats[my_layer.name]["organization_details"][str(organization.id)]["urls_with_tracking_cookies"].append(
                     scan.endpoint.url.url
                 )
 
@@ -72,7 +72,7 @@ def cookie_plaza_data(country: str = None, layer: str = None):
                         "organization_id": organization.id,
                         "organization_city": organization.city,
                         "country": organization.country.code,
-                        "layer": layer.name,
+                        "layer": my_layer.name,
                         "url_url": scan.endpoint.url.url,
                         "subdomain": scan.endpoint.url.computed_subdomain,
                         "domain": f"{scan.endpoint.url.computed_domain}.{scan.endpoint.url.computed_suffix}",
@@ -85,7 +85,8 @@ def cookie_plaza_data(country: str = None, layer: str = None):
                 )
 
     # stats cannot be sets as those cannot be serialized
-    for stat in stats:
+    # for py linting: too complex and risky to rewrite now
+    for stat in stats:  # pylint: disable=consider-using-dict-items
         # sets dont have ordering?
         stats[stat]["organizations_with_tracking_cookies"] = list(
             sorted(set(stats[stat]["organizations_with_tracking_cookies"]))

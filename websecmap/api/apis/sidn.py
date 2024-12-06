@@ -113,12 +113,12 @@ def sidn_process_upload(amount: int = 25):
 
 @app.task(queue="reporting")
 def sidn_handle_domain_upload(upload_id: int):
-    log.debug(f"Processing sidn data from {upload_id}")
+    log.debug("Processing sidn data from %s", upload_id)
 
     upload = SIDNUpload.objects.all().filter(id=upload_id).first()
 
     if not upload:
-        log.debug(f"Could not find upload {upload_id}.")
+        log.debug("Could not find upload %s.", upload_id)
         return
 
     added = set(process_SIDN_row(row) for row in csv.reader(StringIO(upload.posted_data), delimiter=","))
@@ -134,14 +134,14 @@ def sidn_handle_domain_upload(upload_id: int):
 def process_SIDN_row(row):
     if len(row) < 4:
         log.debug("Row does not have the correct length.")
-        return
+        return None
 
     # skip header row
     if row[FIELD_SECOND_LEVEL] == "2ndlevel":
         log.debug("Ignoring header field.")
-        return
+        return None
 
-    log.debug(f"Processing {row[FIELD_QNAME]}.")
+    log.debug("Processing %s.", row[FIELD_QNAME])
 
     # We only care about the qname, field, which can be a very long domain
     # it might also not match the 2nd level in case of old domains.
@@ -151,11 +151,11 @@ def process_SIDN_row(row):
 
     if not extracted.subdomain:
         log.debug("No subdomain found in query. Skipping.")
-        return
+        return None
 
     if "*" in extracted.subdomain:
         log.debug("Found wildcard in subdomain. Not adding this.")
-        return
+        return None
 
     second_level_domain = f"{extracted.domain}.{extracted.suffix}"
     existing_second_level_url = (
@@ -173,10 +173,10 @@ def process_SIDN_row(row):
     )
 
     if not existing_second_level_url:
-        log.debug(f"Url '{second_level_domain}' is not in the database yet, so cannot add a subdomain.")
-        return
+        log.debug("Url '%s' is not in the database yet, so cannot add a subdomain.", second_level_domain)
+        return None
 
-    log.debug(f"Attempting to add {extracted.subdomain} as a subdomain of {second_level_domain}.")
+    log.debug("Attempting to add %s as a subdomain of %s.", extracted.subdomain, second_level_domain)
     return existing_second_level_url.add_subdomain(extracted.subdomain, origin="added via SIDN")
 
 

@@ -612,7 +612,6 @@ class MapFlowAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ]
 
     list_filter = ["is_enabled", "from_layer", "to_layer", "enable_after_n_days", "enable_on_specific_date"]
-    ...
 
 
 @admin.register(OrganizationOnLayerOverTime)

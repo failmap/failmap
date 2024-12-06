@@ -306,7 +306,8 @@ def calculate_vulnerability_statistics_specific(map_configuration, days_back):
 
     reports = get_reports_by_ids(needed_reports)
 
-    direct_reports = [reports[report] for report in reports]
+    # don't know the .items statement too well to actually do this right
+    direct_reports = [reports[report] for report in reports]  # pylint: disable=consider-using-dict-items
     number_of_endpoints = 0
     number_of_urls = 0
     # log.debug(sql)

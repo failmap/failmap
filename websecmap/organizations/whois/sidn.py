@@ -41,11 +41,11 @@ def update_whois_data(**kwargs):
     amount_of_proxies = ScanProxy.objects.all().count()
     if amount_of_proxies == 0:
         # use the classic direct way to get whois data, MAX_WHOIS_PER_IP per day
-        log.warning(f"Can only fetch {MAX_WHOIS_PER_IP} whois records per day without proxies.")
+        log.warning("Can only fetch %s whois records per day without proxies.", MAX_WHOIS_PER_IP)
         get_stuff(urls_to_process, sleep_time)
         return
 
-    log.debug(f"Found {amount_of_proxies} proxies, spreading whois queries over proxies.")
+    log.debug("Found %s proxies, spreading whois queries over proxies.", amount_of_proxies)
 
     # with proxies spread the load over various proxies each up until the daily limit
     # this limit is purely artifical to prevent commercial vendors from selling the data etc / their abuse policy
@@ -181,7 +181,7 @@ def parse_whois_data(whois_data: str) -> Union[Optional[UrlWhois], int]:
         ],
         "optOut": false,
         "domicile": false,
-        "copyright": "Copyright notice No part of this publication may be reproduced, published, stored in a retrieval system, or transmitted, in any form or by any means, electronic, mechanical, recording, or otherwise, without prior permission of the Foundation for Internet Domain Registration in the Netherlands (SIDN). These restrictions apply equally to registrars, except in that reproductions and publications are permitted insofar as they are reasonable, necessary and solely in the context of the registration activities referred to in the General Terms and Conditions for .nl Registrars. Any use of this material for advertising, targeting commercial offers or similar activities is explicitly forbidden and liable to result in legal action. Anyone who is aware or suspects that such activities are taking place is asked to inform the Foundation for Internet Domain Registration in the Netherlands. ©The Foundation for Internet Domain Registration in the Netherlands (SIDN) Dutch Copyright Act, protection of authors' rights (Section 10, subsection 1, clause 1)."  # noqa
+        "copyright": "Copyright notice No part of this ..."
       },
       "_links": {
         "self": {

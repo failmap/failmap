@@ -57,7 +57,9 @@ def compare_urls(old: str, new: str) -> bool:
 
         return compare_qsl_keys(parsed_old.query, parsed_new.query)
     except Exception as e:
-        log.debug(f"failed to compare urls: {old} vs {new}: {e}")
+        # we're testing all types of data, including bytes, so this is needed to avoid a crash in logging
+        # normal logging does NOT work
+        log.debug(f"failed to compare urls: {old} vs {new}: {e}")  # pylint: disable=logging-fstring-interpolation
         return False
 
 
@@ -74,9 +76,11 @@ def compare_qsl_keys(old: str, new: str) -> bool:
         keys_old_data = list(sorted(old_data.keys()))
         keys_new_data = list(sorted(new_data.keys()))
 
-        log.debug(f"keys_old_data: {keys_old_data}")
+        log.debug("keys_old_data: %s", keys_old_data)
 
         return keys_old_data == keys_new_data
     except Exception as e:
-        log.debug(f"failed to compare qsl keys: {old} vs {new}: {e}")
+        # we're testing all types of data, including bytes, so this is needed to avoid a crash in logging
+        # normal logging does NOT work
+        log.debug(f"failed to compare urls: {old} vs {new}: {e}")  # pylint: disable=logging-fstring-interpolation
         return False

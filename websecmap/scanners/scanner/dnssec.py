@@ -122,7 +122,7 @@ def store_dnssec(result: List[str], url_id: int):
     expires=EXPIRES,
     task_time_limit=120,
 )
-def scan_dnssec(self, url: str):
+def scan_dnssec(self, url: str):  # pylint: disable=inconsistent-return-statements
     """
     Uses the dnssec scanner of dotse, which works pretty well.
 

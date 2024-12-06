@@ -110,29 +110,29 @@ def get_region(country: str = "NL", organization_type: str = "municipality"):
 # better to validate that the region doesn't exist and then add it...
 # @transaction.atomic
 @app.task(queue="storage", ignore_result=True)
-def import_from_scratch(countries: List[str] = None, organization_types: List[str] = None, when=None):
+def import_from_scratch(my_countries: List[str] = None, organization_types: List[str] = None, when=None):
     """
     Run this when you have nothing on the organization type in that country. It will help bootstrapping a
     certain region.
 
-    :param countries: uppercase list of 2-letter country codes.
+    :param my_countries: uppercase list of 2-letter country codes.
     :param organization_types: the types you want to import.
     :param when:
     :return:
     """
 
-    log.info("Countries: %s", countries)
+    log.info("Countries: %s", my_countries)
     log.info("Region(s): %s", organization_types)
 
-    if not countries or countries == [None]:
-        countries = ["NL"]
+    if not my_countries or my_countries == [None]:
+        my_countries = ["NL"]
 
     # paramter hate causes organization_types == [None]
     if not organization_types or organization_types == [None]:
         log.info("Going to get all existing organization types, and try to import them all.")
         organization_types = list(OrganizationType.objects.all().values_list("name", flat=True))
 
-    for country in sorted(countries):
+    for country in sorted(my_countries):
         for organization_type in sorted(organization_types):
             if not get_region(country, organization_type):
                 log.info("The combination of %s and %s does not exist in OSM. Skipping.", country, organization_type)
@@ -194,8 +194,8 @@ def store_import_message(country, organization_type, message):
 
 # @transaction.atomic
 @app.task(queue="storage", ignore_result=True)
-def update_coordinates(countries: List[str] = None, organization_types: List[str] = None, when=None):
-    for country in sorted(countries):
+def update_coordinates(my_countries: List[str] = None, organization_types: List[str] = None, when=None):
+    for country in sorted(my_countries):
         for organization_type in sorted(organization_types):
             log.info("Attempting to update coordinates for: %s %s.", country, organization_type)
 
@@ -210,7 +210,7 @@ def update_coordinates(countries: List[str] = None, organization_types: List[str
                 store_import_message.apply_async([country, organization_type, ex])
                 return
 
-            log.info("Received coordinate data. Starting with: %s", json.dumps(data)[0:200])
+            log.info("Received coordinate data. Starting with: %s", json.dumps(data)[:200])
 
             log.info("Parsing features:")
             for index, feature in enumerate(data["features"]):
@@ -571,7 +571,7 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
 def country_to_osm_number(country):
     # returns the country code osm-boundaries needs:
     # list taken from: https://osm-boundaries.com/
-    countries = {
+    my_countries = {
         "Afghanistan": -303427,
         "Albania": -53292,
         "Algeria": -192756,
@@ -795,7 +795,7 @@ def country_to_osm_number(country):
         "Zimbabwe": -195272,
     }
 
-    country = countries.get(country.name, countries.get(country.apolitical_name, None))
+    country = my_countries.get(country.name, my_countries.get(country.apolitical_name, None))
     if not country:
         raise ValueError(f"Country not found by name {country.name}.")
     return country

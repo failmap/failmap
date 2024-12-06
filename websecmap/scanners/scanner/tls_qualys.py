@@ -161,7 +161,7 @@ def plan_scan_optimized():
     # )
 
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
-    log.debug(f"1: planning {len(urls)} scans that have not been scanned yet.")
+    log.debug("1: planning %s scans that have not been scanned yet.", len(urls))
     plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(urls))
 
     # These are the ones you definitely need to scan to figure out what the state is.
@@ -179,7 +179,7 @@ def plan_scan_optimized():
         # endpoint__endpointgenericscan__last_scan_moment__lte=datetime.now(timezone.utc) - timedelta(days=0),
         endpoint__endpointgenericscan__rating__in=["F", "C", "B", "not trusted"],
     ).only("id", "url")
-    log.debug(f"2: planning {len(urls)} scans that are F/C/V=B or not_trusted.")
+    log.debug("2: planning %s scans that are F/C/V=B or not_trusted.", len(urls))
     plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(urls))
 
     # Now for the bit more complex part: only scan the A/A+/A- / trusted if they are about to expire.
@@ -279,11 +279,11 @@ def plan_scan_optimized():
             notafter = evidence_of_trust_scan[0]["notAfter"]
             datetime_of_notafter = datetime.fromtimestamp(notafter, timezone.utc)
             if datetime_of_notafter < datetime.now(timezone.utc) - timedelta(days=10):
-                log.debug(f"3: planning url id: {scan.endpoint.url.id} because the cert will expire within 10 days.")
-                log.debug(f" {datetime_of_notafter} {datetime.now(timezone.utc) - timedelta(days=10)}")
+                log.debug("3: planning url id: %s because the cert will expire within 10 days.", scan.endpoint.url.id)
+                log.debug(" %s %s", datetime_of_notafter, datetime.now(timezone.utc) - timedelta(days=10))
                 additional_urls_to_scan.add(scan.endpoint.url)
             else:
-                log.debug(f"skipping url id: {scan.endpoint.url.id} because it is not within 10 days.")
+                log.debug("skipping url id: %s because it is not within 10 days.", scan.endpoint.url.id)
                 # prevent that scan looks outdated on the map.
                 scan.last_scan_moment = datetime.now(timezone.utc)
                 scan.save(update_fields=["last_scan_moment"])

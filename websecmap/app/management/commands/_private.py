@@ -143,18 +143,18 @@ class TaskCommand(BaseCommand):
         if options["method"] == "print":
             if isinstance(self.task, dict):
                 return dict(self.task)
-            else:
-                return list(self.task)
+
+            return list(self.task)
 
         # By default execute the task directly without involving celery or a broker.
         # Return all results without raising exceptions.
         log.info("Executing task(s) directly.")
         if isinstance(self.task, Signature):
             return self.task.apply(*self.args, **self.kwargs).get(propagate=False)
-        elif isinstance(self.task, Iterable):
+        if isinstance(self.task, Iterable):
             return [task.apply(*self.args, **self.kwargs).get(propagate=False) for task in self.task]
-        else:
-            raise NotImplementedError()
+
+        raise NotImplementedError()
 
     def wait_for_result(self, task_id):
         """Wait for all (sub)tasks to complete and return result."""
@@ -316,10 +316,7 @@ class ScannerTaskCommand(TaskCommand):
             text = "".join(options["partially_matched_url_address"])
             urls_filter = {"url__icontains": text}
 
-        if options["force"]:
-            force = True
-        else:
-            force = False
+        force = bool(options["force"])
 
         apply_log_verbosity(options)
 

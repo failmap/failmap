@@ -26,8 +26,8 @@ class OrganizationType(models.Model):
         verbose_name = _("layer")
         verbose_name_plural = _("layers")
 
-    def __str__(self):
-        return self.name
+    def __str__(self) -> str:
+        return str(self.name)
 
 
 def validate_twitter(value):
@@ -514,7 +514,8 @@ class Url(models.Model):
     @transaction.atomic
     def add_subdomain(self, subdomain, origin: str = "") -> Optional["Url"]:
         # import here to prevent circular/cyclic imports, this module imports Url.
-        from websecmap.scanners.scanner.http import resolves  # pylint: disable=import-outside-toplevel
+        # pylint sees this, but python does not it seems.
+        from websecmap.scanners.scanner.http import resolves  # pylint: disable=import-outside-toplevel, cyclic-import
 
         if not subdomain:
             return None
@@ -578,14 +579,14 @@ class Url(models.Model):
         return my_url
 
     @staticmethod
-    def subdomain_adding_is_allowed(domain: str) -> bool:
+    def subdomain_adding_is_allowed(input_domain: str) -> bool:
         """
         Will split a domain by . and will try to find the current organizations that own the domain.
         If the domain does not exist yet, it will try again for a higher level up until the second level.
 
         a.b.c.domain.nl will try: a.b.c.domain.nl, then b.c.domain.nl, then c.domain.nl, then domain.nl
         """
-        splitted = domain.split(".")
+        splitted = input_domain.split(".")
 
         # not possible
         if len(splitted) < 2:
@@ -607,18 +608,18 @@ class Url(models.Model):
         return True
 
     @staticmethod
-    def find_domain_owner(domain: str) -> List[Organization]:
+    def find_domain_owner(input_domain: str) -> List[Organization]:
         """
         Will split a domain by . and will try to find the current organizations that own the domain.
         If the domain does not exist yet, it will try again for a higher level up until the second level.
 
         a.b.c.domain.nl will try: a.b.c.domain.nl, then b.c.domain.nl, then c.domain.nl, then domain.nl
         """
-        splitted = domain.split(".")
+        splitted = input_domain.split(".")
 
         # not possible
         if len(splitted) < 2:
-            log.debug("Domain is too short to be treated as such: %s. Not able to find owner.", domain)
+            log.debug("Domain is too short to be treated as such: %s. Not able to find owner.", input_domain)
             return []
 
         for i in range(len(splitted)):
@@ -638,7 +639,7 @@ class Url(models.Model):
                 log.debug("Owners: %s", list(owners))
                 return list(owners)
 
-        log.debug("Could not find owner for domain: %s", domain)
+        log.debug("Could not find owner for domain: %s", input_domain)
         return []
 
     @staticmethod

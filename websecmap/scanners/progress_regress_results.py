@@ -1871,7 +1871,7 @@ def demo_progress_per_metric_per_layer_per_month():
     pointer = datetime(2026, 1, 1, **default_time)
     for metric in metrics:
         values = metric_layer_lookup[metric.name].values()
-        tmp = min([v for v in values if v is not None], default=pointer)
+        tmp = min((v for v in values if v is not None), default=pointer)
         if tmp and tmp < pointer:
             pointer = tmp
 

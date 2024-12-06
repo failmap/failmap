@@ -633,13 +633,13 @@ def robots_txt(request):
 
 @cache_page(ONE_HOUR)
 def security_txt(request):
-    config = get_bulk_values(["SECURITY_TXT_IS_REDIRECTED", "SECURITY_TXT_REDIRECT_URL", "SECURITY_TXT_CONTENT"])
+    conf = get_bulk_values(["SECURITY_TXT_IS_REDIRECTED", "SECURITY_TXT_REDIRECT_URL", "SECURITY_TXT_CONTENT"])
 
-    if config["SECURITY_TXT_IS_REDIRECTED"]:
-        return HttpResponseRedirect(config["SECURITY_TXT_REDIRECT_URL"])
+    if conf["SECURITY_TXT_IS_REDIRECTED"]:
+        return HttpResponseRedirect(conf["SECURITY_TXT_REDIRECT_URL"])
 
     # constance trims data stored in the database, the standard says it needs to end in CRLF.
-    return HttpResponse(config["SECURITY_TXT_CONTENT"] + "\r\n", content_type="text/plain")
+    return HttpResponse(conf["SECURITY_TXT_CONTENT"] + "\r\n", content_type="text/plain")
 
 
 @cache_page(ONE_HOUR)
@@ -957,7 +957,7 @@ def map_data_by_date(
     data = get_map_data(country, organization_type, days_back, displayed_issue, at_date=at_date)
 
     return HttpResponse(orjson.dumps(data), content_type="application/json", status=200)
-    return cache_page(ONE_MONTH)(HttpResponse(orjson.dumps(data), content_type="application/json", status=200))
+    # return cache_page(ONE_MONTH)(HttpResponse(orjson.dumps(data), content_type="application/json", status=200))
 
 
 @cache_page(ONE_HOUR)

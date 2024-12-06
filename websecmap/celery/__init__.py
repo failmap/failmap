@@ -33,9 +33,9 @@ else:
     app.conf.result_backend = app.conf.broker_url.replace("amqp://", "rpc://")
 
 
-def eligible_app(app: str):
+def eligible_app(my_app: str):
     # log.debug("Checking if app %s is eligible for celery", app)
-    return app.startswith("dashboard") or app.startswith("websecmap")
+    return my_app.startswith("dashboard") or my_app.startswith("websecmap")
 
 
 # autodiscover all celery tasks in tasks.py files inside websecmap modules
@@ -149,7 +149,7 @@ def status():
         # https://github.com/mher/flower/blob/master/flower/utils/broker.py
         # 'solves': RuntimeError: There is no current event loop in thread 'Thread-3'.
         try:
-            import asyncio
+            import asyncio  # pylint: disable=import-outside-toplevel
 
             asyncio.set_event_loop(asyncio.new_event_loop())
         except BaseException:  # pylint: disable=broad-except

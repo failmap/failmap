@@ -221,7 +221,7 @@ class Endpoint(models.Model):
         if "origin" in tags and tags["origin"] is not None:
             tags["origin"] = tags["origin"].encode("ascii", "ignore").decode("ascii")
 
-        log.debug(f"endpoint_{action} {tags}")
+        log.debug("endpoint_%s %s", action, tags)
         statsd.incr(f"endpoint_{action}", 1, tags=tags)
         statsd.incr("endpoint", 1, tags=tags | {action: 1})
 
@@ -1050,7 +1050,7 @@ class SecurityImpact(models.Model):
     name = models.SlugField(max_length=30, blank=True)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class ScannerFinding(models.Model):
@@ -1064,7 +1064,7 @@ class ScannerFinding(models.Model):
         super().save(*args, **kwarg)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class ProductGoal(models.Model):
@@ -1079,7 +1079,7 @@ class ProductGoal(models.Model):
         super().save(*args, **kwarg)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class ProductVendor(models.Model):
@@ -1091,7 +1091,7 @@ class ProductVendor(models.Model):
         super().save(*args, **kwarg)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Product(models.Model):
@@ -1182,7 +1182,7 @@ class ProductRelationship(models.Model):
         super().save(*args, **kwarg)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class PortalPublishingReason(models.Model):
@@ -1190,7 +1190,7 @@ class PortalPublishingReason(models.Model):
     name = models.SlugField(max_length=200)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class ProductWithPortal(models.Model):
@@ -1237,7 +1237,7 @@ class CookiePurpose(models.Model):
     name = models.SlugField(max_length=200, blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class ProductCookieIndicator(models.Model):
@@ -1414,7 +1414,7 @@ class CookiePlacement(models.Model):
     name = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Cookie(models.Model):

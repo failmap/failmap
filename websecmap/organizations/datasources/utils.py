@@ -17,7 +17,7 @@ def download_dataset_file(
     layer: str = "",
     origin: str = "",
 ) -> GenericFileDataset:
-    log.debug(f"Downloading dataset {download_link} into {layer}")
+    log.debug("Downloading dataset %s into %s", download_link, layer)
 
     # if already downloaded and not imported, retry the import:
     if (
@@ -88,5 +88,5 @@ def load_parser_info(dataset: GenericFileDataset) -> Dict[str, Any]:
     try:
         return json.loads(dataset.parser_info)
     except json.JSONDecodeError:
-        log.warning(f"Could not parse data from generic file dataset: {dataset}")
+        log.warning("Could not parse data from generic file dataset: %s", dataset)
         return {}

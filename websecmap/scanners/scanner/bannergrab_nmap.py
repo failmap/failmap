@@ -94,13 +94,13 @@ def grab_tasks(urls_filter=None) -> list[Signature]:
     ipv6_chunks = in_chunks(ipv6_ips, hosts_per_scan)
     tasks += [grab_task.si(chunk, ports) | store_results_task.s() for chunk in ipv6_chunks]
 
-    log.debug(f"Created {len(tasks)} bannergrab_nmap tasks.")
+    log.debug("Created %s bannergrab_nmap tasks.", len(tasks))
 
     return tasks
 
 
 def start_scanner(ips, ports):
-    log.debug(f"Starting nmap scanner on {len(ips)} ips, on ports {ports}.")
+    log.debug("Starting nmap scanner on %s ips, on ports %s.", len(ips), ports)
 
     # targets is space separated
     # ports is comma separated
@@ -136,7 +136,7 @@ def grab_manually(is_v4: bool = True):
     # can be used for inspection from the command line
     ips = get_ips_to_be_scanned(is_v4)
     ports = get_ports_to_be_scanned()
-    log.debug(f"Going to scan {len(ips)} ips in batches of {IPS_PER_SCAN}.")
+    log.debug("Going to scan %s ips in batches of %s.", len(ips), IPS_PER_SCAN)
     chunks = in_chunks(ips, IPS_PER_SCAN)
     # could reuse the nm object
     for chunk in chunks:
@@ -525,8 +525,8 @@ def verify():
 
 
 @app.task(queue="bannergrab")
-def get_nmap_result_for_one_host(url: str, ip_version: int, port: str):
-    ip = get_ipv4(url) if ip_version == 4 else get_ipv6(url)
+def get_nmap_result_for_one_host(url: str, my_ip_version: int, port: str):
+    ip = get_ipv4(url) if my_ip_version == 4 else get_ipv6(url)
     results = start_scanner([ip], port)
     # make sure this is serializable by running all_hosts.
     hosts = results.all_hosts()

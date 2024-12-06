@@ -51,7 +51,7 @@ def remove_unwired_map_data_cache():
 def what_to_remove(file_paths_in_db: List[str], file_paths_on_disk: List[str]):
     if not file_paths_in_db or not file_paths_on_disk:
         print("No files to remove. Or it would remove everything, which is not what you want.")
-        return
+        return []
     not_in_db = list(sorted(list(set(file_paths_on_disk) - set(file_paths_in_db))))
     print("Want to remove {len(not_in_db} files from disk:")
     for file in not_in_db:

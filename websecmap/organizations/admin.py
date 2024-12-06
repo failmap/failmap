@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 import importlib
 import logging
 from datetime import datetime, timezone, timedelta
@@ -11,6 +12,7 @@ from django.contrib.admin import StackedInline
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+from django.http import HttpResponse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -451,7 +453,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
         # okay, no domains? then perhaps try all domains as they might only be subdomains. These can be longer so
         # a shorter list is returned
-        if not len(domains):
+        if not domains:
             domains = [url.url for url in Url.objects.all().filter(organization=inst.id)[:4]]
 
         return domains
@@ -892,9 +894,11 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     actions.append("declare_dead")
 
     def timeline_debug(self, _, queryset):
-        from django.http import HttpResponse
-
-        from websecmap.reporting.report import create_timeline, inspect_timeline
+        # this debugging method should be cleaned perhaps. Importing here to prevent a circular import.
+        from websecmap.reporting.report import (  # pylint: disable=import-outside-toplevel
+            create_timeline,
+            inspect_timeline,
+        )
 
         content = "<pre>"
         for url in queryset:
@@ -1139,10 +1143,12 @@ class UrlWhoisAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def age(self, obj):
         if obj.creation_date:
             return f"{format_yd(datetime.now(timezone.utc).date() - obj.creation_date)}"
+        return "?"
 
     def last_update(self, obj):
         if obj.updated_date:
             return f"{format_yd(datetime.now(timezone.utc).date() - obj.updated_date)}"
+        return "?"
 
     def info(self, obj):
         return mark_safe(

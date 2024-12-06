@@ -330,7 +330,7 @@ def retrieve_certificate(url: str, port: int = 443) -> [x509.Certificate, None]:
 
 
 def certificate_matches_microsoft_exception_policy(
-    certificate: x509.Certificate, url: str, subdomain: str, applicable_subdomains, trusted_organization
+    certificate: x509.Certificate, url: str, subdomain: str, my_applicable_subdomains, trusted_organization
 ) -> bool:
     """
     It's possible to fake all checks with a self signed certificate. The reason we _still_ do it like this, is that
@@ -340,7 +340,7 @@ def certificate_matches_microsoft_exception_policy(
 
     :param certificate:
     :param scan:
-    :param applicable_subdomains:
+    :param my_applicable_subdomains:
     :param trusted_organization:
     :return:
     """
@@ -366,7 +366,7 @@ def certificate_matches_microsoft_exception_policy(
         microsoft_service = subdomain
 
     # for non-microsoft services that are called with this scanner
-    if microsoft_service not in applicable_subdomains:
+    if microsoft_service not in my_applicable_subdomains:
         log.debug("Subdomain is not applicable for comply or explain %s.", microsoft_service)
         return False
 
@@ -381,7 +381,7 @@ def certificate_matches_microsoft_exception_policy(
     # <Name(C=US,ST=Washington,L=Redmond,O=Microsoft Corporation,OU=Microsoft IT,CN=Microsoft IT TLS CA 5)>
     _names = certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
     names = [name.value for name in _names]
-    if try_parse_first_name(names[0]) not in applicable_subdomains[microsoft_service]:
+    if try_parse_first_name(names[0]) not in my_applicable_subdomains[microsoft_service]:
         # if ms changed the names, we want to know.
         # this will create a list of certs we don't care about that piggy back on the same subdomain while forging the
         # certificate name. Slim chance though... This will change every so often.
@@ -390,7 +390,7 @@ def certificate_matches_microsoft_exception_policy(
             url,
             names,
             try_parse_first_name(names[0]),
-            applicable_subdomains[microsoft_service],
+            my_applicable_subdomains[microsoft_service],
         )
         return False
 

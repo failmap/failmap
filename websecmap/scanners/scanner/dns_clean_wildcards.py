@@ -141,7 +141,7 @@ def content_is_stable(url: str):
             return False
         match = SequenceMatcher(None, first_run, second_run)
         ratio = match.ratio()
-        log.debug(f"Similarity between content is: {round(ratio * 100, 2)}%")
+        log.debug("Similarity between content is: %s pct", round(ratio * 100, 2))
         if ratio < SIMILAR_CONTENT:
             return False
     return True

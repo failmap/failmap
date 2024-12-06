@@ -316,7 +316,7 @@ def log_quota_warning(data_dict: Dict[str, Any]) -> None:
     queryies_remaining = data_dict.get("maxmind", {}).get("queries_remaining", 0)
     # don't trigger every query, but every 100.
     if queryies_remaining < 1001 and queryies_remaining % 100 == 0:
-        log.error(f"Geo to IP limit reached: {queryies_remaining} queries remaining. Buy more credits.")
+        log.error("Geo to IP limit reached: %s queries remaining. Buy more credits.", queryies_remaining)
 
 
 def reduce_maxmind_data(data_dict: Dict[str, Any]) -> Dict:

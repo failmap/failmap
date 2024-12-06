@@ -42,8 +42,8 @@ def extract_version_from_nuclei_finding(nuclei_finding: dict) -> str:
 # @cached(cache=TTLCache(maxsize=1024, ttl=4 * 60 * 60))
 def get_nuclei_product_mapping() -> Dict[str, List[Dict[str, Any]]]:
     # This is cached as it takes 1 to 3 seconds to load this data.
-    if cached := time_cache.cache_get("login_plaza_product_mapping"):
-        return cached
+    if my_cached := time_cache.cache_get("login_plaza_product_mapping"):
+        return my_cached
 
     # product_prefetch = Prefetch("product",
     # queryset=Product.objects.filter(is_irrelevant=False), to_attr="product_set")
@@ -151,7 +151,9 @@ def get_tech_for_endpoints(endpoint_ids: List[int] = None) -> Dict[int, List[Dic
             for product in products:
                 product = product["product"]
                 for product_tree in technology_per_endpoint[endpoint_id]:
-                    set_value_to_tech_in_tree(product_tree, product_id=product, property="version", value=version_info)
+                    set_value_to_tech_in_tree(
+                        product_tree, product_id=product, my_property="version", value=version_info
+                    )
 
     return technology_per_endpoint
 
@@ -201,24 +203,24 @@ def load_json(data: str):
         return []
 
 
-def set_value_to_tech_in_tree(product_tree: Dict[Any, Any], product_id: int, property: str, value: Any):
-    if property in product_tree and product_tree["product"] == product_id:
-        if product_tree[property] not in ["unknown", "", value]:
+def set_value_to_tech_in_tree(product_tree: Dict[Any, Any], product_id: int, my_property: str, value: Any):
+    if my_property in product_tree and product_tree["product"] == product_id:
+        if product_tree[my_property] not in ["unknown", "", value]:
             log.warning(
                 "Tyring to set %s to %s, but %s already set to %s. Conflicting findings?",
                 value,
-                property,
-                property,
-                product_tree[property],
+                my_property,
+                my_property,
+                product_tree[my_property],
             )
 
-        product_tree[property] = value
+        product_tree[my_property] = value
 
     if "related_products" not in product_tree:
         return
 
     for related_product in product_tree["related_products"]:
-        set_value_to_tech_in_tree(related_product, product_id, property, value)
+        set_value_to_tech_in_tree(related_product, product_id, my_property, value)
 
 
 def smash_trees(product_trees: List[Dict[Any, Any]]) -> List[Dict[str, Any]]:

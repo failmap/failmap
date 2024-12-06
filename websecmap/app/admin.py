@@ -624,9 +624,8 @@ admin.site.register(Group, GroupAdmin)
 
 
 class CustomConfigForm(ConstanceForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # ... do stuff to make your settings form nice ...
+    # some comment preventing multiple statements on one line error while linting...
+    ...
 
 
 class ConfigAdmin(ConstanceAdmin):
@@ -642,8 +641,11 @@ class TooManyRecordsPaginator(Paginator):
     def __init__(self, object_list, per_page, something, darkside):
         super().__init__(object_list, per_page, something, darkside)
 
-    @property
-    def count(self):
+    # count is seen as an int in django jet, so it's overwritten as a property here.
+    # '<=' not supported between instances of 'method' and 'int'
+    # therefore the override is valid.
+    @property  # pylint: disable=invalid-overridden-method
+    def count(self):  # pylint: disable=invalid-overridden-method
         return 13374223
 
 

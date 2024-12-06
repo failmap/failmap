@@ -393,7 +393,7 @@ def create_timeline(url: Url):
 
     moments, happenings = significant_moments(urls=[url], reported_scan_types=scan_types)
 
-    log.debug(f"Found {len(moments)} significant moments for {url.url}")
+    log.debug("Found %s significant moments for %s", len(moments), url.url)
 
     timeline = {}
 
@@ -867,10 +867,12 @@ def statistics_over_url_calculation(calculation, at_when: datetime = None):
                 calculation["endpoints"][i]["low"] += rating["low"]
                 calculation["endpoints"][i]["ok"] += rating["ok"]
 
-        amount_of_issues, judgement_issues = judge(
+        # _ was judgement_issues
+        amount_of_issues, _ = judge(
             amount_of_issues, clean_issues_for_judgement, "endpoint", [amount_of_issues["endpoint"]]
         )
-        amount_of_issues, explained_judgement_issues = judge(
+        # _ was explained_judgement_issues
+        amount_of_issues, _ = judge(
             amount_of_issues, clean_issues_for_judgement, "endpoint_explained", [amount_of_issues["endpoint_explained"]]
         )
 
@@ -1406,7 +1408,7 @@ def attach_ultimate_report_to_everything_in_database():
 
 
 def attach_ultimate_report(url: Url, endpoint: Endpoint):
-    log.debug(f"Attaching ultimate report to {url}, endpoint: {endpoint}.")
+    log.debug("Attaching ultimate report to %s, endpoint: %s.", url, endpoint)
     now = datetime.now(timezone.utc)
     metadata = get_backend_scanmetadata()
 

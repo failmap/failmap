@@ -19,7 +19,7 @@ from django.views.decorators.cache import cache_page
 from websecmap.app.common import JSEncoder
 from websecmap.game.forms import ContestForm, OrganisationSubmissionForm, TeamForm, UrlSubmissionForm
 from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
-from websecmap.organizations.models import Organization, OrganizationType, Url
+from websecmap.organizations.models import Organization, OrganizationType, Url, Coordinate
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
@@ -850,8 +850,6 @@ def make_new_feature(organization, scan):
         if calculation["high"]
         else "orange" if calculation["medium"] else "yellow" if calculation["low"] else "green"
     )
-
-    from websecmap.organizations.models import Coordinate
 
     # only one multipoint or multipolygon. Unfortunately one query per organization :((((((((((((
     coordinate = Coordinate.objects.all().filter(organization=organization).order_by("-created_on").first()

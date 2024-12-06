@@ -54,7 +54,8 @@ def import_metrics_from_cookie_scan_sessions():
     # metrics are added after a cookie consent scan has finished, but we needed the existing data
     # to be imported as metrics as well. This solves that issue.
     scans = get_latest_scan_sessions_per_endpoint_with_and_without_consent()
-    for endpoint, data in scans.items():
+    # _ was endpoint
+    for _, data in scans.items():
         if data["with_consent"]:
             store_session_as_regular_metrics.si(data["with_consent"]).apply_async()
         if data["without_consent"]:
@@ -122,14 +123,14 @@ def create_crawl_session_metrics():
     # errors where one of each is not present. In that case ignore the scan for now.
     for endpoint, data in scans.items():
         if not data["with_consent"] or not data["without_consent"]:
-            log.warning(f"Skipping scan for endpoint {endpoint} as it has no consent or no consent")
+            log.warning("Skipping scan for endpoint %s as it has no consent or no consent", endpoint)
             continue
         session_with_consent = CookieScanSession.objects.get(id=data["with_consent"])
         session_no_consent = CookieScanSession.objects.get(id=data["without_consent"])
         stats_with_consent = session_with_consent.stats
         stats_no_consent = session_no_consent.stats
         if "consent" not in stats_with_consent or "consent" not in stats_no_consent:
-            log.warning(f"Skipping scan for endpoint {endpoint} as it has no metadata about consent")
+            log.warning("Skipping scan for endpoint %s as it has no metadata about consent", endpoint)
         # add the other info from the session which can be compared
         stats_with_consent["stop_reason"] = session_with_consent.stop_reason
         stats_no_consent["stop_reason"] = session_no_consent.stop_reason

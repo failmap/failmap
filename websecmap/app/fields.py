@@ -74,7 +74,9 @@ class CompressedJSONField(JSONFieldMixin, models.BinaryField):
 
         return gzip.compress(bytes(string, "UTF-8"), compresslevel=4)
 
-    def value_to_string(self, obj):
+    # disabled useless-super-delegation due to not knowing what super class is called exactly. This code
+    # might be just be removed and it could work fine, but no test for that is written yet. So no confidence in removing
+    def value_to_string(self, obj):  # pylint: disable=useless-super-delegation
         # https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.Field.value_to_string
         # normaly serialization would work, but in this case it's just a json object.
         return super().value_to_string(obj)

@@ -20,7 +20,7 @@ class Command(BaseCommand):
         parser.add_argument("layers", nargs="*")
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # pylint: disable=inconsistent-return-statements
         scan_type = options.get("scan_type")
         if scan_type is None:
             print("Please specify a scan type")
@@ -36,4 +36,5 @@ class Command(BaseCommand):
         print(f"Exported pivot to: {filename}")
         print("Done")
 
+        # returning a filename for testing purposes
         return filename

@@ -32,7 +32,7 @@ def download_single(url: str):
     response = requests.get(url, timeout=30)
 
     if response.status_code != 200:
-        log.error(f"Failed to download from rio {url} (status {response.status_code})")
+        log.error("Failed to download from rio %s (status %s)", url, response.status_code)
 
     data = csv_to_dict(response.content.decode("utf-8"))
 

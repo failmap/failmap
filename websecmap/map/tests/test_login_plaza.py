@@ -340,14 +340,14 @@ def test_set_value_to_tech_in_tree(reset_time_cache):
 
     # change nothing:
     unaltered = copy.deepcopy(sample_product_tree)
-    set_value_to_tech_in_tree(product_tree, product_id=100, property="version", value="1.2.3")
+    set_value_to_tech_in_tree(product_tree, product_id=100, my_property="version", value="1.2.3")
     assert product_tree == unaltered
 
-    set_value_to_tech_in_tree(product_tree, product_id=1, property="version", value="1.2.3")
-    set_value_to_tech_in_tree(product_tree, product_id=2, property="version", value="2.3.4")
-    set_value_to_tech_in_tree(product_tree, product_id=3, property="version", value="3.2.1")
-    set_value_to_tech_in_tree(product_tree, product_id=4, property="version", value="4.3.2")
-    set_value_to_tech_in_tree(product_tree, product_id=5, property="version", value="5.4.3")
+    set_value_to_tech_in_tree(product_tree, product_id=1, my_property="version", value="1.2.3")
+    set_value_to_tech_in_tree(product_tree, product_id=2, my_property="version", value="2.3.4")
+    set_value_to_tech_in_tree(product_tree, product_id=3, my_property="version", value="3.2.1")
+    set_value_to_tech_in_tree(product_tree, product_id=4, my_property="version", value="4.3.2")
+    set_value_to_tech_in_tree(product_tree, product_id=5, my_property="version", value="5.4.3")
 
     assert product_tree == {
         "product": 1,

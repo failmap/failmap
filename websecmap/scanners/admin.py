@@ -30,6 +30,7 @@ from websecmap.scanners.security_policies import (
     remove_affects,
 )
 from django_countries import countries
+from constance import config
 
 
 class EndpointGenericScanInline(CompactInline):
@@ -247,6 +248,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             return f"🎉️ was {RatingOptions(obj.prr_was_previously).label}"
         if obj.prr_is_regression:
             return f"💀 was {RatingOptions(obj.prr_was_previously).label}"
+        return ""
 
     fieldsets = (
         (
@@ -373,6 +375,7 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             return f"🎉️ was {RatingOptions(obj.prr_was_previously).label}"
         if obj.prr_is_regression:
             return f"💀 was {RatingOptions(obj.prr_was_previously).label}"
+        return ""
 
     @staticmethod
     def url_(obj):
@@ -478,8 +481,6 @@ class InternetNLV2ScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     @staticmethod
     def online(obj):
-        from constance import config
-
         return mark_safe(  # nosec not the best way to render html in the admin, but one that's in full admin control
             f"<a href='{config.INTERNET_NL_API_USERNAME}:{config.INTERNET_NL_API_PASSWORD}"
             f"@{config.INTERNET_NL_API_URL}/requests/{obj.scan_id}' target='_blank'>online</a>"
@@ -821,9 +822,9 @@ class ScanTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 new_number = item_exists.display_order + 1
 
                 moveup = models.ScanType.objects.all().filter(display_order__gte=new_number).order_by("-display_order")
-                for config in moveup:
-                    config.display_order += 1
-                    config.save()
+                for my_config in moveup:
+                    my_config.display_order += 1
+                    my_config.save()
 
                 obj.display_order = item_exists.display_order + 1
                 super().save_model(request, obj, form, change)
@@ -848,7 +849,6 @@ class ScanTypeSecondOpinionLinkAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.ScanTypeDocumentationLink)
 class ScanTypeScanTypeDocumentationLink(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ("provider", "friendly_name", "url")
-    ...
 
 
 @admin.register(models.ScanTypeCategory)
@@ -1269,3 +1269,4 @@ class PaperTrailAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def download_paper_trail(self, obj):
         if obj.file_object:
             return format_html(f'<a href="{obj.file_object.url}" download>{obj.filename}</a>')
+        return ""

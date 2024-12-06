@@ -79,13 +79,13 @@ def allowed_to_scan(scanner_name: str = "", activity: str = None):
     # activity is the name of the plannable activity in text, such as "scan" "verify" "discover"
 
     if not config.SCAN_AT_ALL:
-        log.error(f"Scanner {scanner_name} is not allowed to start: all scanning has been disabled.")
+        log.error("Scanner %s is not allowed to start: all scanning has been disabled.", scanner_name)
         return False
 
     # Is this scanner enabled?
     scan_data = Scanner.objects.all().filter(python_name=scanner_name, enabled=True).first()
     if not scan_data:
-        log.error(f"Scanner {scanner_name} is not allowed to start: no scan data defined.")
+        log.error("Scanner %s is not allowed to start: no scan data defined.", scanner_name)
         return False
 
     # No specific activity? And it was enabled above? Lfg
@@ -96,7 +96,7 @@ def allowed_to_scan(scanner_name: str = "", activity: str = None):
     if enabled_activity:
         return True
 
-    log.debug(f"Scanner {scanner_name} is not allowed to start {activity}.")
+    log.debug("Scanner %s is not allowed to start %s.", scanner_name, activity)
     return False
 
 

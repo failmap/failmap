@@ -160,7 +160,7 @@ def create_task():
             }
         )
         p.save()
-        log.info(f"Created Periodic Task for zorgkaart scraper with name: {TaskName}")
+        log.info("Created Periodic Task for zorgkaart scraper with name: %s", TaskName)
 
 
 def get_zorgkaart_data(url, zorgkaart_filter: dict):
@@ -186,7 +186,7 @@ def get_zorgkaart_data(url, zorgkaart_filter: dict):
     if total_pages > 1:
         # also get the rest, with a delay
         while current_page + 1 <= total_pages:
-            log.debug(f"Zorgkaart scraper requesting nest page: {current_page}")
+            log.debug("Zorgkaart scraper requesting nest page: %s", current_page)
             response = requests.get(
                 url,
                 auth=HTTPBasicAuth(config.ZORGKAART_USERNAME, config.ZORGKAART_PASSWORD),
@@ -212,9 +212,9 @@ def organisations():
     """
     params = json.loads(config.ZORGKAART_FILTER)
     if not isinstance(params, dict):
-        log.error(f"Zorgkaart scrape: invalid filter ({params}), ignoring")
+        log.error("Zorgkaart scrape: invalid filter (%s), ignoring", params)
         params = {}
-    log.debug(f"Zorgkaart scraper requesting organisations using filter: {params}")
+    log.debug("Zorgkaart scraper requesting organisations using filter: %s", params)
     return get_zorgkaart_data(config.ZORGKAART_ENDPOINT, params)
 
 
@@ -247,7 +247,11 @@ def translate_zorgkaart_to_flat_organization(orglist):
         agb_codes = "".join(org.get("agb_codes", [])) if org.get("agb_codes", None) else ""
 
         # somehow all urls have an escape slash
-        sites = [site.replace("\/", "/") for site in org["websites"]] if org.get("websites", None) else []
+        sites = (
+            [site.replace("\/", "/") for site in org["websites"]]  # pylint: disable=anomalous-backslash-in-string
+            if org.get("websites", None)
+            else []
+        )
 
         outlist.append(
             {
@@ -300,7 +304,7 @@ def scrape():
     orglist = organisations()
     wsmlist = translate_zorgkaart_to_flat_organization(orglist)
     organization_and_url_import(wsmlist)
-    log.info(f"Zorgkaart scrape updated organisations. Current organisation count: {len(orglist)}")
+    log.info("Zorgkaart scrape updated organisations. Current organisation count: %s", len(orglist))
 
 
 def import_from_raw_input(raw_input: dict):
@@ -330,7 +334,7 @@ def validate_flat_organization(flat_organization: Dict):
 
     if flat_organization.get("coordinate_type", None) not in ["Point", "MultiPolygon", "Polygon"]:
         raise ValueError(
-            "Geojsontype not supported yet, or invalid geojson type. Valid are: " "['Point', 'MultiPolygon', 'Polygon']"
+            "Geojsontype not supported yet, or invalid geojson type. Valid are: ['Point', 'MultiPolygon', 'Polygon']"
         )
 
     if flat_organization.get("id", None) and flat_organization.get("surrogate_id", None):
@@ -372,7 +376,7 @@ def add_flat_organization(flat_organization: Dict) -> Organization:
             )
         except ApiError as e:
             # in development its fine, just continue. The stuff should be setup in production though!
-            log.error(f"Could not retrieve coordinates for {flat_organization['name']}: {str(e)}")
+            log.error("Could not retrieve coordinates for %s: %s", flat_organization["name"], str(e))
             return o
 
         # still no coordinate? then don't save one:

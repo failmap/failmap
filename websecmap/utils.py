@@ -81,7 +81,7 @@ def normalize_cookie_name(cookie_name: str) -> str:
 def normalize_cookies(cookies: list[dict]) -> list[dict]:
     """Remove unique hashes/id's from cookie names to make them easier to dedupe."""
 
-    new_cookies = list()
+    new_cookies = []
     for cookie in cookies:
         new_cookies.append({**cookie, "name": normalize_cookie_name(cookie["name"])})
 

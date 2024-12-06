@@ -199,8 +199,8 @@ def compose_manual_scan_task(
 def compose_scan_task(
     urls: Iterable[Url], scanner_keyword_arguments: dict[str, Any], amount: int = DEFAULT_CHUNK_SIZE
 ) -> Iterable[Signature[None]]:
-    if not amount > 0:
-        raise ValueError("Invalid value for amount: %s", amount)
+    if amount <= 0:
+        raise ValueError(f"Invalid value for amount: {amount}")
 
     endpoints = Endpoint.objects.all().filter(url__in=urls, **STANDARD_ENDPOINT_FILTER)
     # log.debug("Got %s endpoints after standard filter: %s", len(endpoints), STANDARD_ENDPOINT_FILTER)
@@ -333,10 +333,10 @@ def compose_verify_task(
         yield scan.s(current_scan.endpoint.uri_url(), params) | store_verify_results.s(
             current_scan.endpoint.id, current_scan.type
         )
-
-    else:
-        log.debug("No hosts selected for nuclei verify after applying all filters.")
-        return []
+    # useless else on loop, because there is no break statement above...
+    # else:
+    #     log.debug("No hosts selected for nuclei verify after applying all filters.")
+    #     return []
 
 
 def evidence_to_json(processed_nuclei_data) -> Any:
@@ -414,7 +414,7 @@ def scan_batch(
     )
 
     if "-tags" not in command:
-        raise ValueError("Cannot start a nuclei scan without -tags as that would scan too much! Command: %s", command)
+        raise ValueError(f"Cannot start a nuclei scan without -tags as that would scan too much! Command: {command}")
 
     log.debug("Starting nuclei scan with command: %s", " ".join(command))
 
@@ -461,7 +461,7 @@ def store_scan_batch(raw_nuclei_data: bytes, host_to_endpoint_mapping: dict[str,
     # at verify the nr of hosts/endpoints is always 1. So that should then be cleaned if there
     # are no records?
 
-    saved_endpoint_ids: list[int] = list()
+    saved_endpoint_ids: list[int] = []
 
     for host, nuclei_records_per_host in results_per_host.items():
         combined_metrics = prepare_nuclei_results_for_storage(nuclei_records_per_host)
@@ -520,16 +520,18 @@ def rate_nuclei_finding(nuclei_finding_name: str, data: dict[str, str]) -> str:
 def rerate_portal_findings():
     scans = EndpointGenericScan.objects.all().filter(type="nuclei_exposed_panels", is_the_latest_scan=True)
 
-    for scan in scans:
-        ev = evidence_to_json(scan.evidence)
+    for my_scan in scans:
+        ev = evidence_to_json(my_scan.evidence)
         rating = rate_nuclei_portal_finding(ev)
-        scan.rating = rating
+        my_scan.rating = rating
 
         # also add the meaning if we can?
-        if scan.endpoint:
-            scan.meaning = typing.cast(JSONData, {"tech": generated_login_portal_meaning_data(ev, scan.endpoint.id)})
+        if my_scan.endpoint:
+            my_scan.meaning = typing.cast(
+                JSONData, {"tech": generated_login_portal_meaning_data(ev, my_scan.endpoint.id)}
+            )
 
-        scan.save()
+        my_scan.save()
 
 
 def rate_nuclei_portal_finding(findings_data: Any) -> str:
@@ -553,8 +555,7 @@ def rate_nuclei_portal_finding(findings_data: Any) -> str:
     prios = ["ok", "low", "medium", "high"]
     highest_impact = 0
     for impact in impacts:
-        if prios.index(impact) > highest_impact:
-            highest_impact = prios.index(impact)
+        highest_impact = max(highest_impact, prios.index(impact))
 
     return prios[highest_impact]
 
@@ -704,7 +705,7 @@ def combine_processed_nuclei_records(processed_records) -> dict[str, dict[str, s
 
     # sort the findings on template-id, name and finding-name, otherwise they will be stored again and again
     # in different orders
-    for category in combined_metrics:
+    for category in combined_metrics:  # pylint: disable=consider-using-dict-items
         combined_metrics[category]["findings"] = sorted(
             combined_metrics[category]["findings"],
             key=lambda k: (k.get("template-id", None), k.get("name", None), k.get("finding-name", None)),

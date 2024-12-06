@@ -45,6 +45,6 @@ class Command(BaseCommand):
             verify_unresolvable,
         ]:
             for planning_method in ["plan_discover", "plan_verify", "plan_scan"]:
-                method = getattr(scanner, planning_method, None)
-                if method is not False:
-                    method()
+                if method := getattr(scanner, planning_method, None):
+                    # probably this code is never used anyway, so we might trim it...
+                    method()  # pylint: disable=not-callable

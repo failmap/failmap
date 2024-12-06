@@ -156,7 +156,7 @@ def get_rows(file_location: str) -> List[List[str]]:
         log.error("Could not find spreadsheet for import on location: %s", file_location)
         return []
     # Plethora of possible exceptions, for malformed data, io issues, and whatnot.
-    except BaseException as exc:  # noqa  # pylint: disable=broad-exception
+    except BaseException as exc:  # noqa  # pylint: disable=broad-except
         log.error("Unexpected error importing spreadsheet on location: %s, error: %s", file_location, str(exc))
         return []
 

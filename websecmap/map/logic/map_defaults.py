@@ -1,5 +1,6 @@
 from datetime import date, datetime, timedelta, timezone
 
+import re
 import iso3166
 from constance import config
 from dateutil.relativedelta import relativedelta
@@ -44,8 +45,6 @@ def get_organization_type(name: str) -> int:
 
 
 def get_country(code: str):
-    import re
-
     # existing countries. Yes, you can add fictional countries if you would like to, that will be handled below.
     if code in COUNTRIES:
         return code

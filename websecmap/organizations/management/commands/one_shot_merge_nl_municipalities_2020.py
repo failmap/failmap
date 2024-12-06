@@ -163,7 +163,7 @@ class Command(BaseCommand):
             country="NL",
         )
 
-        update_coordinates(countries=["NL"], organization_types=["municipality"], when=merge_date)
+        update_coordinates(my_countries=["NL"], organization_types=["municipality"], when=merge_date)
 
         organizations = Organization.objects.all().filter(
             name__in=[

@@ -164,7 +164,7 @@ def generic_plan_scan(
 ):
     if not allowed_to_scan(scanner_name, activity):
         log.debug("Not allowed to perform %s with scanner %s.", activity, scanner_name)
-        return []
+        return
 
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
     urls = filter_method(organizations_filter, urls_filter, endpoints_filter, **kwargs)

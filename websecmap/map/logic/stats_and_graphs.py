@@ -91,7 +91,7 @@ def get_vulnerability_graph(country, organization_type, days_back, duration: int
     return stats
 
 
-def get_url_history(url: str, date: date):
+def get_url_history(url: str, my_date: date):
     # up until 1 year to the current date.
     return [
         {
@@ -103,7 +103,7 @@ def get_url_history(url: str, date: date):
             "ok": report.ok,
         }
         for report in UrlReport.objects.all()
-        .filter(url__url=url, at_when__gte=date - timedelta(days=365), at_when__lte=date)
+        .filter(url__url=url, at_when__gte=my_date - timedelta(days=365), at_when__lte=my_date)
         .only(
             "id",
             "at_when",

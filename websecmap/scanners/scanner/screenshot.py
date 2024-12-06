@@ -70,7 +70,7 @@ def filter_scan(organizations_filter: dict = None, urls_filter: dict = None, end
     # It's possible to overwrite the above query also, you can add whatever you want to the normal query.
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
     # return unique endpoints
-    return set([endpoint.url for endpoint in endpoints])
+    return {endpoint.url for endpoint in endpoints}
 
 
 @app.task(queue="kickoff", ignore_result=True)

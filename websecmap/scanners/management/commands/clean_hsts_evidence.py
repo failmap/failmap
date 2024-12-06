@@ -9,5 +9,4 @@ log = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        ...
         clean_http_security_header_strict_transport_security()

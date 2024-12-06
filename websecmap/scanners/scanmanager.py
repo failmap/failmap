@@ -61,7 +61,7 @@ def store_endpoint_scan_result(
             "URL result saved as: %s, %s%s",
             epgs.id,
             constance_cached_value("PROJECT_WEBSITE").rstrip("/"),
-            reverse("admin:%s_%s_change" % (epgs._meta.app_label, epgs._meta.model_name), args=[epgs.id]),
+            reverse(f"admin:{epgs._meta.app_label}_{epgs._meta.model_name}_change", args=[epgs.id]),
         )
 
         return epgs
@@ -119,13 +119,15 @@ def store_endpoint_scan_result(
             "URL result saved as: %s, %s/%s",
             new_epgs.id,
             constance_cached_value("PROJECT_WEBSITE").rstrip("/"),
-            reverse("admin:%s_%s_change" % (new_epgs._meta.app_label, new_epgs._meta.model_name), args=[new_epgs.id]),
+            reverse(f"admin:{new_epgs._meta.app_label}_{new_epgs._meta.model_name}_change", args=[new_epgs.id]),
         )
 
     return new_epgs
 
 
-def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str, evidence: str = ""):
+def store_url_scan_result(  # pylint: disable=inconsistent-return-statements
+    scan_type: str, url_id: int, rating: str, message: str, evidence: str = ""
+):
     # Check if the latest scan has the same rating or not:
     try:
         ugs = (
@@ -176,13 +178,13 @@ def store_url_scan_result(scan_type: str, url_id: int, rating: str, message: str
             "URL result saved as: %s, %s/%s",
             ugs.id,
             constance_cached_value("PROJECT_WEBSITE").rstrip("/"),
-            reverse("admin:%s_%s_change" % (ugs._meta.app_label, ugs._meta.model_name), args=[ugs.id]),
+            reverse(f"admin:{ugs._meta.app_label}_{ugs._meta.model_name}_change", args=[ugs.id]),
         )
 
         return ugs
 
 
-def endpoint_has_scans(scan_type: str, endpoint_id: int):
+def endpoint_has_scans(scan_type: str, endpoint_id: int):  # pylint: disable=inconsistent-return-statements
     """
     Used for data deduplication. Don't save a scan that had zero points, but you can upgrade
     to zero (or another rating)

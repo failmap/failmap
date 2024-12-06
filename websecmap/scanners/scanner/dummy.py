@@ -180,7 +180,7 @@ class SomeError(Exception):
     retry_kwargs={"max_retries": MAX_RETRIES},
     expires=EXPIRES,
 )
-def scan(self, uri_url):
+def scan(self, uri_url):  # pylint: disable=inconsistent-return-statements
     """
 
     Before committing your scanner, verify the following:

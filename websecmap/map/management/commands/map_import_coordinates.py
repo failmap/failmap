@@ -50,7 +50,7 @@ class Command(BaseCommand):
 
         else:
             import_from_scratch(
-                countries=[options["country"]], organization_types=[options["region"]], when=options["date"]
+                my_countries=[options["country"]], organization_types=[options["region"]], when=options["date"]
             )
 
 

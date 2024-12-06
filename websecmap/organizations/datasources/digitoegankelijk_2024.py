@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 # look at surrogate key
 # download data as CSV
 # process results
@@ -40,7 +41,7 @@ def parse(file_content: str):
 
 def scrape(surrogate_id: int):
     # use requests to download the csv file, which is parsed to a dict
-    response = requests.get(f"https://dashboard.digitoegankelijk.nl/organisaties/download/{surrogate_id}")
+    response = requests.get(f"https://dashboard.digitoegankelijk.nl/organisaties/download/{surrogate_id}", timeout=30)
     return parse(response.text)
 
 
@@ -152,7 +153,7 @@ def extract_new_domains(
         # determining the organization. In that case ownership is centralized.
         # +9 is used for https:// ____ /
         if len(extract.fqdn) + 9 < len(row[address_column]):
-            log.debug(f"Skipping {extract.fqdn} as that has a path. {row[address_column]}")
+            log.debug("Skipping %s as that has a path. %s", extract.fqdn, row[address_column])
             continue
 
         # Only add an url ONCE, never add a domain that already exists to organizations.
@@ -166,7 +167,7 @@ def extract_new_domains(
             domains_that_may_be_duplicated_this_run.append(extract.fqdn)
         elif extract.fqdn not in domains_that_may_be_duplicated_this_run:
             log.warning(
-                f"Domain {extract.fqdn} already exists in the database, " f"possibly on another organization. Skipping."
+                "Domain %s already exists in the database, possibly on another organization. Skipping.", extract.fqdn
             )
             continue
 
@@ -180,7 +181,7 @@ def extract_new_domains(
 
 def list_organiztion_and_ids():
     for i in range(1, 1400):
-        response = requests.get(f"https://dashboard.digitoegankelijk.nl/organisaties/{i}")
+        response = requests.get(f"https://dashboard.digitoegankelijk.nl/organisaties/{i}", timeout=30)
         soup = BeautifulSoup(response.text, "html.parser")
         title = soup.title.string.strip()
         # Zó digitoegankelijk is GGD Twente | Dashboard DigiToegankelijk
@@ -1600,22 +1601,22 @@ def automap_ids():
         1398: "Gemeenschappelijke regeling Regionaal Historisch Centrum Vecht en Venen",
         1399: "Gemeenschappelijke regeling Regionaal Reinigingsbedrijf Avalex",
     }
-    for id, name in mapping.items():
+    for my_id, name in mapping.items():
         organization = Organization.objects.all().filter(name=name).first()
         if not organization:
             organization = Organization.objects.all().filter(alternative_names__name=name).first()
         if not organization:
-            print(f"Could not find {id}: {name}")
+            print(f"Could not find {my_id}: {name}")
             continue
         print(f"Automapped {name}!")
-        if OrganizationSurrogateId.objects.filter(organization=organization, surrogate_id=id).first():
-            print(f"- Skipping {id} to {name} as it already mapped")
+        if OrganizationSurrogateId.objects.filter(organization=organization, surrogate_id=my_id).first():
+            print(f"- Skipping {my_id} to {name} as it already mapped")
             continue
         OrganizationSurrogateId.objects.create(
             organization=organization,
-            surrogate_id=id,
+            surrogate_id=my_id,
             surrogate_id_name="digitoegankelijk",
             used_in_dataset="digitoegankelijk",
         )
-        print(f"- Added {id} to {name}")
+        print(f"- Added {my_id} to {name}")
         continue

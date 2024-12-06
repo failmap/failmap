@@ -96,20 +96,20 @@ def parse_data(dataset, filename):
 
 def validate_record(record):
     if not record.get("Name", ""):
-        ValueError('Missing "Name" column or column was empty.')
+        raise ValueError('Missing "Name" column or column was empty.')
 
     if not record.get("Address", ""):
-        ValueError('Missing "Address" column or column was empty.')
+        raise ValueError('Missing "Address" column or column was empty.')
 
     # not mandatory in favor of getting all organizations from datasets in...
     # if not record.get("Websites (csv)", ""):
     #     ValueError('Missing "Websites (csv)" column or column was empty.')
 
     if not record.get("Countrycode", ""):
-        ValueError('Missing "Countrycode" column or column was empty.')
+        raise ValueError('Missing "Countrycode" column or column was empty.')
 
     if not record.get("Layer", ""):
-        ValueError('Missing "Layer" column or column was empty.')
+        raise ValueError('Missing "Layer" column or column was empty.')
 
     if record["Countrycode"] not in iso3166.countries_by_alpha2:
         raise ValueError("Countrycode is not a valid 3166 country code.")

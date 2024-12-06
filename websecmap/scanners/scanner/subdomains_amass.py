@@ -300,7 +300,8 @@ def call_amass(command: List[str]) -> str:
             data = amass.communicate()
             log.debug(data)
 
-        with open(f"{tmpdirname}/tmpfile.json", "r") as f:
+        # todo: encoding might be wrong
+        with open(f"{tmpdirname}/tmpfile.json", "r", encoding="UTF-8") as f:
             json_lines = f.read()
 
     return json_lines

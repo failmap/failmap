@@ -11,15 +11,15 @@ log = logging.getLogger(__name__)
 class ResultEncoder(simplejson.JSONEncoder):
     """JSON encoder that serializes results from celery tasks."""
 
-    def default(self, result: ResultBase | BaseException):
-        if isinstance(result, Exception):
+    def default(self, o: ResultBase | BaseException):
+        if isinstance(o, Exception):
             log.debug("Result is exception:", exc_info=True)
-            error = {"error": result.__class__.__name__, "message": str(result)}
-            if result.__cause__:
-                error["cause"] = self.default(result.__cause__)
+            error = {"error": o.__class__.__name__, "message": str(o)}
+            if o.__cause__:
+                error["cause"] = self.default(o.__cause__)
             return error
 
-        return super().default(result)
+        return super().default(o)
 
 
 class JSEncoder(simplejson.JSONEncoder):

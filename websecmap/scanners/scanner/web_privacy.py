@@ -351,9 +351,11 @@ def worse_rating(rating_a, rating_b):
     return rating_b
 
 
-def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
+def product_meaning_from_cookies(cookies=None) -> dict[str:Any]:
     """Generate list of products determined from cookies."""
-    cookie_indicators = list()
+    if cookies is None:
+        cookies = []
+    cookie_indicators = []
 
     worst_rating = WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK
 
@@ -362,7 +364,7 @@ def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
     for indicator in ProductCookieIndicator.objects.all().prefetch_related(
         "product", "product__vendor", "most_significant_purpose"
     ):
-        matchers = dict()
+        matchers = {}
         if indicator.match_name:
             matchers["name"] = re.compile(f"^{indicator.match_name}$")
         if indicator.match_domain:
@@ -371,7 +373,7 @@ def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
             matchers["path"] = re.compile(f"^{indicator.match_path}$")
         cookie_indicators.append((matchers, indicator))
 
-    products = defaultdict(lambda: dict([["cookies", list()]]))
+    products = defaultdict(lambda: dict([["cookies", list()]]))  # pylint: disable=use-list-literal
     for cookie in cookies:
         for matchers, indicator in cookie_indicators:
             if all(matcher.match(cookie[field]) for field, matcher in matchers.items()):
@@ -406,7 +408,7 @@ def product_meaning_from_cookies(cookies: list = []) -> dict[str:Any]:
 
                 break
         else:
-            log.debug(f"No product match for cookie: {cookie}")
+            log.debug("No product match for cookie: %s", cookie)
 
     # todo: get the worst rating for this cookie and add that as well.
     return {"products": list(products.values()), "worst_purpose_rating": worst_rating}
@@ -429,15 +431,15 @@ def privacy_counters(add_urls: bool = False) -> None:
     keys = ["Company", "Platform", "Tracking Url"]
     for key in keys:
         companies = {}
-        for scan in scans:
+        for my_scan in scans:
             try:
-                evidence = json.loads(scan.evidence.replace("'", '"'))
+                evidence = json.loads(my_scan.evidence.replace("'", '"'))
                 for tracker in evidence:
                     if tracker[key] not in companies:
                         companies[tracker[key]] = {"amount": 0, "urls": []}
                     companies[tracker[key]]["amount"] += 1
                     if add_urls:
-                        companies[tracker[key]]["urls"].append(scan.endpoint.url.url)
+                        companies[tracker[key]]["urls"].append(my_scan.endpoint.url.url)
             except JSONDecodeError:
                 pass
         print(key)

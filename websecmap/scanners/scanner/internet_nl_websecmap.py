@@ -290,11 +290,8 @@ def registering_scan_at_internet_nl(scan_id, **kwargs):
 
     # todo: get some information about this installation, so we can track requests easier.
     #  For example the target county, organization running the scan.
-    if "tracking_info" in kwargs:
-        # this is a string.
-        scan_name = kwargs["tracking_info"]
-    else:
-        scan_name = json.dumps({"source": "Web Security Map", "type": scan.type})
+    default_tracking_info = json.dumps({"source": "Web Security Map", "type": scan.type})
+    scan_name = kwargs.get("tracking_info", default_tracking_info)
 
     scan_types = {"mail": "mail", "mail_dashboard": "mail", "web": "web"}
 

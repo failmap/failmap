@@ -55,7 +55,7 @@ class Command(BaseCommand):
             )
 
             # Update the coordinates for all organizations that are now in the database: their shapes will have altered.
-            update_coordinates(countries=["NL"], organization_types=["municipality"], when=merge_date)
+            update_coordinates(my_countries=["NL"], organization_types=["municipality"], when=merge_date)
 
             # Create new reports that point to these new coordinates.
             rebuild_reports(["Eemsdelta", "Boxtel", "Oisterwijk", "Vucht", "Tilburg"])

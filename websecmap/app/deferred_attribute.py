@@ -9,7 +9,8 @@ attrs_seen = set()
 
 def _DeferredAttribute_get(self, instance, cls=None):
     # taken from https://suor.github.io/blog/2023/03/26/ban-1-plus-n-in-django/
-    from django.conf import settings  # monkeys go early, settings might not be available yet
+    # monkeys go early, settings might not be available yet
+    from django.conf import settings  # pylint: disable=import-outside-toplevel
 
     if instance is None:
         return self
@@ -31,9 +32,9 @@ def _DeferredAttribute_get(self, instance, cls=None):
         # Using LookupError instead of AttributeError here to prevent higher level "handling" this.
         if settings.DEBUG or "PYTEST_CURRENT_TEST" in os.environ:
             raise LookupError(message)
-        else:
-            # make sure this ends up in Sentry
-            logger.exception(message)
+
+        # make sure this ends up in Sentry
+        logger.exception(message)
 
     # Proceed normally
     return _DA_get_original(self, instance, cls)

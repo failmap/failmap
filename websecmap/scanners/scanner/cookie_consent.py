@@ -155,7 +155,7 @@ def scan(url: str, consent: bool) -> Dict[str, Any]:
 @app.task(queue="storage", ignore_result=True)
 def store(result_data: Dict[str, Any], endpoint_id: int) -> Optional[int]:
     if not result_data:
-        return
+        return None
 
     session_id = result_data.get("meta").get("session_id")
     endpoint = Endpoint.objects.get(pk=endpoint_id)
@@ -166,7 +166,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> Optional[int]:
     stats = result_data.get("meta", {}).get("stats", {})
     stop_reason = result_data.get("meta", {}).get("stop_reason", None)
 
-    session, created = CookieScanSession.objects.get_or_create(
+    session, _ = CookieScanSession.objects.get_or_create(
         id=session_id, endpoint=endpoint, stats=stats, stop_reason=stop_reason
     )
     session.save()
@@ -238,7 +238,7 @@ def store_paper_trail(result_data: Dict[str, Any], endpoint_id: int) -> None:
 
     endpoint = Endpoint.objects.get(pk=endpoint_id)
 
-    session, created = CookieScanSession.objects.get_or_create(id=session_id, endpoint=endpoint)
+    session, _ = CookieScanSession.objects.get_or_create(id=session_id, endpoint=endpoint)
 
     for filename, base64_content in paper_trails.items():
         try:
@@ -247,7 +247,7 @@ def store_paper_trail(result_data: Dict[str, Any], endpoint_id: int) -> None:
             p = PaperTrail(filename=filename, file_object=ContentFile(content, name=name))
             p.save()
             session.paper_trails.add(p)
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             # log exception, but continue to next file to be saved
             log.exception("Failed to save paper trail")
 

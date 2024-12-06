@@ -221,7 +221,6 @@ def example_llm_api_implementation(question, expected_output: str = None) -> str
     }
     """
 
-    ...
     # This implementation was for openai. Each library has a different approach. This is left here for inspiration.
 
     # log.debug("> WebSecMap: %s", question)

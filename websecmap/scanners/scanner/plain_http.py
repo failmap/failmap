@@ -194,10 +194,12 @@ def scan(ip_version: int, url: str, user_agent: str):
     # all edge cases of HTTP.
 
     # retry harder!
-    can_connect_result = can_connect(protocol="https", url=url, port=443, ip_version=ip_version, user_agent=user_agent)
+    can_connect_result = can_connect(
+        protocol="https", hostname=url, port=443, ip_version=ip_version, user_agent=user_agent
+    )
 
     if isinstance(can_connect_result, Exception):
-        log.error(f"can_connect timed out: {can_connect_result}")
+        log.error("can_connect timed out: %s", can_connect_result)
         return False, False, False
 
     redirects_to_safety_result = None if can_connect_result["result"] else redirects_to_safety(f"http://{url}:80")

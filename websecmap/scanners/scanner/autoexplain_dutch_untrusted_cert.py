@@ -267,7 +267,7 @@ def cert_matches(certificate1: OpenSSL.crypto.X509, certificate2: AcceptableCert
 def cert_notafter_match(certificate: OpenSSL.crypto.X509, expected_notafter: bytes) -> bool:
     # Date in UTC, not in dutch time :)
     if certificate.get_notAfter() == expected_notafter:
-        log.debug(f"Dutch Untrusted Cert: match on expected_notafter: {expected_notafter}.")
+        log.debug("Dutch Untrusted Cert: match on expected_notafter: %s.", expected_notafter)
         return True
     log.debug("Dutch Untrusted Cert: No cert match on expected expiration date.")
     return False
@@ -275,7 +275,7 @@ def cert_notafter_match(certificate: OpenSSL.crypto.X509, expected_notafter: byt
 
 def cert_digest_match(certificate: OpenSSL.crypto.X509, expected_digest: bytes) -> bool:
     if certificate.digest("sha1") == expected_digest:
-        log.debug(f"Dutch Untrusted Cert: match on expected digest: {expected_digest}.")
+        log.debug("Dutch Untrusted Cert: match on expected digest: %s.", expected_digest)
         return True
     log.debug("Dutch Untrusted Cert: No cert match on digest.")
     return False
@@ -283,7 +283,7 @@ def cert_digest_match(certificate: OpenSSL.crypto.X509, expected_digest: bytes) 
 
 def cert_serial_match(certificate: OpenSSL.crypto.X509, expected_serial: int) -> bool:
     if certificate.get_serial_number() == expected_serial:
-        log.debug(f"Dutch Untrusted Cert: match on expected serial: {expected_serial}.")
+        log.debug("Dutch Untrusted Cert: match on expected serial: %s.", expected_serial)
         return True
     log.debug("Dutch Untrusted Cert: No cert match on serial.")
     return False
@@ -294,7 +294,7 @@ def cert_issuer_match(certificate: OpenSSL.crypto.X509, expected_issuer: str) ->
         f"/{name.decode():s}={value.decode():s}" for name, value in certificate.get_issuer().get_components()
     )
     if issuer == expected_issuer:
-        log.debug(f"Dutch Untrusted Cert: match on expected serial: {expected_issuer}.")
+        log.debug("Dutch Untrusted Cert: match on expected serial: %s.", expected_issuer)
         return True
     log.debug("Dutch Untrusted Cert: No cert match on issuer.")
     return False
@@ -305,7 +305,7 @@ def cert_subject_match(certificate: OpenSSL.crypto.X509, expected_subject: str) 
         f"/{name.decode():s}={value.decode():s}" for name, value in certificate.get_subject().get_components()
     )
     if subject == expected_subject:
-        log.debug(f"Dutch Untrusted Cert: match on expected serial: {expected_subject}.")
+        log.debug("Dutch Untrusted Cert: match on expected serial: %s.", expected_subject)
         return True
     log.debug("Dutch Untrusted Cert: No cert match on subject.")
     return False

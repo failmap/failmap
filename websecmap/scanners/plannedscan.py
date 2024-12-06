@@ -165,7 +165,7 @@ def pickup(activity: str, scanner: str, amount: int = 10) -> List[Url]:
 
     python_scanner = metadata["scanners_by_python_name"].get(scanner, None)
     if not python_scanner:
-        log.error(f"Scan requested for {scanner}, but no such scanner registered in metadata database. Not picked up.")
+        log.error("Scan requested for %s, but no such scanner registered in metadata database. Not picked up.", scanner)
         return []
 
     # Do not pickup more if there are already 500 items picked up. Having more than 500 items picked up means
@@ -244,7 +244,7 @@ def request(activity: str, scanner: str, urls: List[int], origin: str = ""):
 
     python_scanner = metadata["scanners_by_python_name"].get(scanner, None)
     if not python_scanner:
-        log.error(f"Scan requested for {scanner}, but no such scanner registered in metadata database. Not requested.")
+        log.error("Scan requested for %s, but no such scanner registered in metadata database. Not requested.", scanner)
         return
 
     scanner_obj = Scanner.objects.get(pk=python_scanner["id"])
@@ -320,7 +320,7 @@ def finish(activity: str, scanner: str, url_id: int):
     py_scanner = metadata["scanners_by_python_name"].get(scanner, None)
     if not py_scanner:
         log_planned_scan_action(activity=activity, scanner=scanner, url=url_id, state="finished (no scanner)")
-        log.debug(f"Scanner {py_scanner} was not found, ignoring.")
+        log.debug("Scanner %s was not found, ignoring.", py_scanner)
         return
 
     set_scan_state(
@@ -348,7 +348,7 @@ def set_scan_state(
 
     if current_scans.count() > 1:
         log.warning(
-            "Progressiong %s %s %s scans to %s. Some tasks have been requested " "before the old ones where done.",
+            "Progressiong %s %s %s scans to %s. Some tasks have been requested before the old ones where done.",
             current_scans.count(),
             activity,
             scanner_name,

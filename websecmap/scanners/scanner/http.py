@@ -414,10 +414,10 @@ def build_uri_from_components(protocol: str, hostname: str, port: int, ip_versio
     if ip_version == 4:
         ip_address = get_ipv4(hostname)
         return f"{protocol}://{ip_address}:{port}" if ip_address else None
-    else:
-        ip_address = get_ipv6(hostname)
-        # note the brackets in ipv6 addresses!
-        return f"{protocol}://[{ip_address}]:{port}" if ip_address else None
+
+    ip_address = get_ipv6(hostname)
+    # note the brackets in ipv6 addresses!
+    return f"{protocol}://[{ip_address}]:{port}" if ip_address else None
 
 
 def can_connect_on_socket(uri: str, port: int, ip_version: int) -> CanConnectResult:
@@ -430,8 +430,8 @@ def can_connect_on_socket(uri: str, port: int, ip_version: int) -> CanConnectRes
     try:
         s.connect((hostname, port))
         result: CanConnectResult = {"result": True, "error": "connect_on_socket"}
-    except Exception as e:
-        log.debug(f"Failed to connect to {hostname}:{port}: {str(e)}")
+    except Exception as e:  # pylint: disable=broad-except
+        log.debug("Failed to connect to %s:%s: %s", hostname, port, str(e))
         result = {"result": False, "error": str(e)}
     finally:
         s.close()
@@ -463,7 +463,7 @@ def can_connect_on_http(protocol: str, hostname: str, uri: str, port: int, user_
 
     log.debug("Attempting connect via ip on: %s", hostname)
     answer, message, response_text = request_via_ip(uri=uri, hostname=hostname)
-    log.debug(f"- Answer: {answer}, exc: {message}")
+    log.debug("- Answer: %s, exc: %s", answer, message)
     if answer in ok_answers or message in ok_answers:
         log.debug("Got an ok answer, so we can connect, but not easily...")
         return connection_answer(True, message, response_text)
@@ -474,7 +474,7 @@ def can_connect_on_http(protocol: str, hostname: str, uri: str, port: int, user_
     answer, message, response_text = request_via_hostname(
         protocol=protocol, hostname=hostname, port=port, user_agent=user_agent
     )
-    log.debug(f"- Answer: {answer}, exc: {message}")
+    log.debug("- Answer: %s, exc: %s", answer, message)
     if answer in ok_answers or message in ok_answers:
         return connection_answer(True, message, response_text)
 
@@ -670,16 +670,16 @@ def save_endpoint(
         if ep := endpoint_exists(url_id, port, protocol, ip_version):
             log.debug("Endpoint is already in the database, returning the existing one.")
             return ep
-        else:
-            log.warning(
-                "Endpoint does not exists, url: %s, port: %s, protocol: %s, ip_version: %s",
-                url_id,
-                port,
-                protocol,
-                ip_version,
-            )
-            if not create:
-                return None
+
+        log.warning(
+            "Endpoint does not exists, url: %s, port: %s, protocol: %s, ip_version: %s",
+            url_id,
+            port,
+            protocol,
+            ip_version,
+        )
+        if not create:
+            return None
 
         if similar := get_similar_dead_endpoint_in_last_n_days(
             url_id, port, protocol, ip_version, days=ENDPOINT_REVIVAL_PERIOD_DAYS
@@ -884,7 +884,7 @@ def redirects_to_safety(url: str) -> Tuple[bool, List[Dict[str, str]]]:
             return _follow_history_up_until_safety(response)
         log.debug("Request was not redirected, so not going to a safe url.")
         return False, []
-    except Exception as my_exception:  # noqa  # pylint: disable=broad-except
+    except Exception:  # noqa  # pylint: disable=broad-except
         # Replaces basically everything, it's just a plethora of stuff that can go wrong which is outside of our usecase
         # ConnectTimeout,
         # HTTPError,
