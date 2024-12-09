@@ -213,8 +213,10 @@ def compose_scan_task(
     host_to_endpoint_mapping: dict[str, dict[str, int]] = {}
     for ep in endpoints:
         if ep.url:
-            # add one entry with and without protocol prefix
+            # add one entry without protocol and port, one with just port, and one with protocol and port
+            # as nuclei output can container all of these
             host_to_endpoint_mapping[ep.url.url] = {"endpoint": ep.id, "url": ep.url.id}
+            host_to_endpoint_mapping[f"{ep.url.url}:{ep.port}"] = {"endpoint": ep.id, "url": ep.url.id}
             host_to_endpoint_mapping[ep.uri_url()] = {"endpoint": ep.id, "url": ep.url.id}
 
     # log.debug("Got %s unique hosts", len(host_to_endpoint_mapping))

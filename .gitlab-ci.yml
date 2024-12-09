@@ -13,7 +13,6 @@ variables:
 
 stages:
   - test_build
-  - production
 
 .test_template: &test_template
   stage: test_build
@@ -235,9 +234,9 @@ build_test:
     - tags
   retry: 1
 
-# after all tests have passed, publish newly build image on Docker Hub
+# publish image directly, this assumes all tests have already run and passed in the MR
 publish:
-  stage: production
+  stage: test_build
 
   image: $DOCKER_CI_IMAGE
 
