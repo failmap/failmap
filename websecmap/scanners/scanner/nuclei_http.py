@@ -210,9 +210,12 @@ def compose_scan_task(
     # log.debug("Got %s endpoints after excluding domains: %s", len(endpoints), EXCLUDED_SUBDOMAINS)
 
     # make a mapping between endpoint_ids and urls that are being scanned...
-    host_to_endpoint_mapping: dict[str, dict[str, int]] = {
-        ep.uri_url(): {"endpoint": ep.id, "url": ep.url.id} for ep in endpoints if ep.url
-    }
+    host_to_endpoint_mapping: dict[str, dict[str, int]] = {}
+    for ep in endpoints:
+        if ep.url:
+            # add one entry with and without protocol prefix
+            host_to_endpoint_mapping[ep.url.url] = {"endpoint": ep.id, "url": ep.url.id}
+            host_to_endpoint_mapping[ep.uri_url()] = {"endpoint": ep.id, "url": ep.url.id}
 
     # log.debug("Got %s unique hosts", len(host_to_endpoint_mapping))
 
@@ -489,7 +492,7 @@ def store_scan_batch(raw_nuclei_data: bytes, host_to_endpoint_mapping: dict[str,
                 )
                 saved_endpoint_ids.append(saved_endpoint.id)
 
-        except KeyError as e:
+        except KeyError:
             # ssl/ssl-dns-names.yaml will alter the 'host' from https://pw.tweedekamer.nl:443 to pw.tweedekamer.nl
             # and without host you don't know to what endpoint to save specifically? Perhaps a mapping can be made
             # so there are fallback hosts / urls etc.
@@ -498,9 +501,7 @@ def store_scan_batch(raw_nuclei_data: bytes, host_to_endpoint_mapping: dict[str,
                 "Could not find host from nuclei report in host-endpoint-mapping",
                 extra={
                     "host": host,
-                    "ndpoint_id": host_to_endpoint_mapping,
-                    "combined_metrics": combined_metrics,
-                    "exception": e,
+                    "endpoint_id": host_to_endpoint_mapping,
                 },
             )
 
