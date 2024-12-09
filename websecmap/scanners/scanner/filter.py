@@ -73,16 +73,16 @@ def filter_endpoints_only(
     organizations_filter, urls_filter, endpoints_filter = init_dict(organizations_filter, urls_filter, endpoints_filter)
 
     endpoints = Endpoint.objects.all()
-    log.debug("Got %s endpoints", len(endpoints))
+    # log.debug("Got %s endpoints", len(endpoints))
     configurations_filter = q_configurations_to_scan(level="endpoint")
     endpoints = endpoints.filter(configurations_filter)
-    log.debug("Got %s endpoints after applying configurations filter %s", len(endpoints), configurations_filter)
+    # log.debug("Got %s endpoints after applying configurations filter %s", len(endpoints), configurations_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
-    log.debug(
-        "Got %s endpoints after applying organization, url and endpoint filters: %s",
-        len(endpoints),
-        (organizations_filter, urls_filter, endpoints_filter),
-    )
+    # log.debug(
+    #     "Got %s endpoints after applying organization, url and endpoint filters: %s",
+    #     len(endpoints),
+    #     (organizations_filter, urls_filter, endpoints_filter),
+    # )
     endpoints = endpoints.only("id", "url__url")
 
     return unique_and_random([endpoint.url for endpoint in endpoints])
