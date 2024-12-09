@@ -717,7 +717,6 @@ def test_nuclei_compose_verify_task(db):
         "{'name': 'silent', 'type': 'no-value'}, {'name': 'disable-update-check', 'type': 'no-value'}, "
         "{'name': 'disable-unsigned-templates', 'type': 'no-value'}, "
         "{'name': 'rate-limit', 'type': 'single-argument', 'value': '10'}, "
-        "{'name': 'config-directory', 'type': 'single-argument', 'value': '/tmp'}, "
         "{'name': 'tags', 'type': 'list-to-duplicate-arguments', 'value': ['panel', 'tech']}, "
         "{'name': 'header', 'type': 'single-argument', 'value': \"'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36 (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'\"}, "  # noqa
         "{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['phpmyadmin-panel']}"
@@ -731,7 +730,6 @@ def test_create_nuclei_scan_command(db):
             {"name": "silent", "type": "no-value"},
             {"name": "disable-update-check", "type": "no-value"},
             {"name": "rate-limit", "type": "single-argument", "value": "10"},
-            {"name": "config-directory", "type": "single-argument", "value": "/tmp"},
             {
                 "name": "template-id",
                 "type": "list-to-duplicate-arguments",
@@ -761,8 +759,6 @@ def test_create_nuclei_scan_command(db):
         "-disable-update-check",
         "-rate-limit",
         "10",
-        "-config-directory",
-        "/tmp",
         "-template-id",
         "netscaler-aaa-login-panel",
         "-template-id",

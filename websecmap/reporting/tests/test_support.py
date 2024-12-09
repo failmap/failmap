@@ -8,7 +8,6 @@ def test_kwargs_to_params():
             {"name": "silent", "type": "no-value"},
             {"name": "disable-update-check", "type": "no-value"},
             {"name": "rate-limit", "type": "single-argument", "value": 25},
-            {"name": "config-directory", "type": "single-argument", "value": "/tmp"},
             {"name": "type", "type": "list-to-duplicate-arguments", "value": ["http"]},
             {
                 "name": "exclude-severity",
@@ -26,8 +25,6 @@ def test_kwargs_to_params():
         "--disable-update-check",
         "--rate-limit",
         25,
-        "--config-directory",
-        "/tmp",
         "--type",
         "http",
         "--exclude-severity",

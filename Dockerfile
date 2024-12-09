@@ -115,6 +115,7 @@ RUN chmod a+x /usr/local/bin/nuclei
 # update templates
 ARG NUCLEI_TEMPLATES_VERSION
 RUN git clone https://github.com/projectdiscovery/nuclei-templates --branch v${NUCLEI_TEMPLATES_VERSION} --depth=1 /home/nuclei/nuclei-templates
+ENV NUCLEI_CONFIG_DIR=/tmp
 
 COPY --from=amass /go/bin/amass /usr/local/bin/amass
 
