@@ -578,12 +578,13 @@ def test_generated_login_portal_meaning_data(db, reset_time_cache):
                     "product": w_product.id,
                     "version": "unknown",
                 },
+                # sorted by id:
                 {
-                    "product": p_product.id,
+                    "product": c_product.id,
                     "version": "unknown",
                 },
                 {
-                    "product": c_product.id,
+                    "product": p_product.id,
                     "version": "unknown",
                 },
             ],

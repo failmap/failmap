@@ -238,7 +238,10 @@ def smash_trees(product_trees: List[Dict[Any, Any]]) -> List[Dict[str, Any]]:
 
     # now reduce the list to uniques
     # https://stackoverflow.com/questions/11092511/list-of-unique-dictionaries
-    return list({v["product"]: v for v in techs}.values())
+    my_techs = list({v["product"]: v for v in techs}.values())
+
+    # and make sure they are sorted by product id
+    return sorted(my_techs, key=lambda x: x["product"])
 
 
 def smash_tree(product_tree: Dict[Any, Any], technologies: List[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
@@ -255,8 +258,9 @@ def smash_tree(product_tree: Dict[Any, Any], technologies: List[Dict[str, Any]] 
     return technologies
 
 
-def prioritize_tech(list_of_techs: List[Dict[str, Any]], product_id) -> List[Dict[str, Any]]:
+def prioritize_tech(list_of_techs: List[Dict[str, Any]], product_id: int) -> List[Dict[str, Any]]:
     my_list_of_techs = copy.deepcopy(list_of_techs)
+
     # pull product with product id to the front.
     for tech in my_list_of_techs:
         if tech["product"] == product_id:
@@ -359,6 +363,8 @@ def create_loging_plaza_meanings_for_scans_per_scan(portal, endpoint_id, tech, n
         if prioritized_product := nuclei_product_mapping.get(finding_name, []):
             prioritized = prioritize_tech(matching_tech, prioritized_product[0]["product"])
         else:
+            # if priority doesn't matter, then just make sure the list is sorted so the results are always in the
+            # same order. The smash trees makes sure the order is sorted.
             prioritized = matching_tech
     except KeyError:
         prioritized = matching_tech
