@@ -14,6 +14,9 @@ from websecmap.map.logic.login_plaza import (
     smash_tree,
     smash_trees,
     save_get_tech_for_endpoints,
+    generated_login_portal_meaning_data,
+    create_loging_plaza_meanings_for_scans_per_scan,
+    get_tech_for_endpoints,
 )
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.scanners.models import (
@@ -418,3 +421,171 @@ def test_prioritize_tech():
     assert prioritize_tech(list_of_techs, 2) == [{"product": 2, "version": "2.2.2"}, {"product": 1, "version": "1.1.1"}]
 
     assert prioritize_tech(list_of_techs, 2) != list_of_techs
+
+
+def test_generated_login_portal_meaning_data(db, reset_time_cache):
+    # monkey patch the time cache, otherwise the test will fail due to cached stuff
+    # make sure to use the time_cache from login_plaza(!)
+    # this does not work, so we set freeze_time on this test to make sure the cache is expiredf.
+    # time_cache.cache_set("login_plaza_product_mapping", {})
+    # also freeze_time does not work. for some reason. So better rewrite time cache to do what it supposed to.
+
+    # the problem was that the prioritized tech did not appear and that the order of the techs was random
+    # and therefore a new meaning was generated each time, resulting a new database record.
+    now = datetime.now(timezone.utc)
+    url = Url.objects.all().create(url="test.nl", created_on=now, is_dead=False, not_resolvable=False)
+    url.save()
+    endpoint = Endpoint.objects.create(url=url, port=443, protocol="https")
+
+    evidence = [
+        {
+            "template-id": "wordpress-login",
+            "name": "wordpress login panel - detect",
+            "finding-name": "nuclei_wordpress_login",
+            "evidence": {
+                # usually the version number
+                "extracted-results": [],
+                "matched-at": "https://www.bezoekerscentrum.rijkswaterstaat.nl:443/wp-login.php",
+            },
+        }
+    ]
+
+    # make sure there is a nice product tree for wordpress, php and some other related techs.
+
+    # make the example hierarchy:
+    # wordpress -> php -> c
+    c_vendor = ProductVendor.objects.create(name="c-company")
+    c_goal = ProductGoal.objects.create(name="c-ing")
+    c_product = Product.objects.create(
+        name="C",
+        vendor=c_vendor,
+        goal=c_goal,
+        intended_use_case_description="something",
+        is_open_source=True,
+        common_execution_environment="Server",
+        is_irrelevant=False,
+    )
+
+    p_vendor = ProductVendor.objects.create(name="php-company")
+    p_goal = ProductGoal.objects.create(name="php-ing")
+    p_product = Product.objects.create(
+        name="PHP",
+        vendor=p_vendor,
+        goal=p_goal,
+        intended_use_case_description="something",
+        is_open_source=True,
+        common_execution_environment="Server",
+        is_irrelevant=False,
+    )
+
+    w_vendor = ProductVendor.objects.create(name="wordpress-company")
+    w_goal = ProductGoal.objects.create(name="wordpress-ing")
+    w_product = Product.objects.create(
+        name="Wordpress",
+        vendor=w_vendor,
+        goal=w_goal,
+        intended_use_case_description="something",
+        is_open_source=True,
+        common_execution_environment="Server",
+        is_irrelevant=False,
+    )
+
+    finding_1 = ScannerFinding.objects.create(name="nuclei_wordpress_login")
+    w_product.scanner_finding_name_mapping.add(finding_1)
+
+    relationship = ProductRelationship.objects.create(name="is written in")
+    # onderwerp, leidend voorwerp / subject, object
+    ProductHierarchy.objects.create(product=w_product, related_product=p_product, relationship=relationship)
+    ProductHierarchy.objects.create(product=p_product, related_product=c_product, relationship=relationship)
+
+    assert Product.objects.count() == 3
+    assert ProductHierarchy.objects.count() == 2
+
+    # see if the hierarchy has been stored correctly.
+    # make sure the cacheing is gone from the get_nested_products_in_an_inefficient_way method, othrewise youll
+    # get old stuff: This method is added via the TTLCache stuff.
+    get_nested_products_in_an_inefficient_way.cache_clear()
+
+    nuclei_product_mapping = get_nuclei_product_mapping(use_cache=False)
+    sample_product_tree = [
+        {
+            "product": w_product.id,
+            "related_products": [
+                {
+                    "product": p_product.id,
+                    "related_products": [
+                        {
+                            "product": c_product.id,
+                            "related_products": [],
+                            "relationship": "is-written-in",
+                            "version": "unknown",
+                        },
+                    ],
+                    "relationship": "is-written-in",
+                    "version": "unknown",
+                },
+            ],
+            "version": "unknown",
+        },
+    ]
+
+    assert nuclei_product_mapping == {"nuclei_wordpress_login": sample_product_tree}
+
+    # this is a weakness in the portal scanning, it uses 'get tech' which is based on the currently available
+    # tech that is in the database. If there is none, there will be no techs. Therefore if the tech is stored
+    # _after_ the login portal is stored, this will be one record behind the portal.
+    # --- this order might have been correctly... todo: check if the order of storage is correct.
+    # -- todo: perhaps this is not really relevant. But make sure that tech is in the same order.
+
+    # add some technologies and apparently also the previous portals... this cannot be right in this context.
+    # but let's not rework the architecture and go with the flow. This will cause issues though as old data is reused.
+    # before storing the new one...
+
+    # both use the sample wordpress finding-name, this should result in a unique tree, even though there are multiple
+    # hits. Other products are not matched and thus no tree is created for them.
+    EndpointGenericScan.objects.create(
+        is_the_latest_scan=True,
+        rating_determined_on=now,
+        endpoint=endpoint,
+        type="nuclei_exposed_panels",
+        evidence="""[{"template-id": "plesk-onyx-login", "name": "plesk login panel - detect", "finding-name": "nuclei_wordpress_login", "evidence": {"extracted-results": [], "matched-at": "https://mail.nieuwegeinsewijken.nl/login_up.php"}}]""",  # noqa
+    )
+
+    EndpointGenericScan.objects.create(
+        is_the_latest_scan=True,
+        rating_determined_on=now,
+        endpoint=endpoint,
+        type="nuclei_technologies",
+        evidence="""[{"template-id": "tech-detect", "name": "wappalyzer technology detection", "finding-name": "nuclei_wordpress_login", "evidence": {"extracted-results": [], "matched-at": "https://www.bezoekerscentrum.rijkswaterstaat.nl:443"}}, {"template-id": "waf-detect", "name": "waf detection", "finding-name": "nuclei_waf_detect_nginxgeneric", "evidence": {"extracted-results": [], "matched-at": "https://www.bezoekerscentrum.rijkswaterstaat.nl:443"}}, {"template-id": "wordpress-contact-form-7", "name": "contact form 7 detection", "finding-name": "nuclei_wordpress_contact_form_7_outdated_version", "evidence": {"extracted-results": ["5.9.8"], "matched-at": "https://www.bezoekerscentrum.rijkswaterstaat.nl:443/wp-content/plugins/contact-form-7/readme.txt"}}, {"template-id": "wordpress-cookie-notice", "name": "cookie notice & compliance for gdpr / ccpa detection", "finding-name": "nuclei_wordpress_cookie_notice", "evidence": {"extracted-results": ["2.4.18"], "matched-at": "https://www.bezoekerscentrum.rijkswaterstaat.nl:443/wp-content/plugins/cookie-notice/readme.txt"}}, {"template-id": "wordpress-detect", "name": "wordpress detect", "finding-name": "nuclei_wordpress_detect", "evidence": {"extracted-results": [], "matched-at": "https://bezoekerscentrum.rijkswaterstaat.nl/schipholamsterdamalmere/"}}, {"template-id": "wordpress-really-simple-ssl", "name": "really simple security \u2013 simple and performant security (formerly really simple ssl) detection", "finding-name": "nuclei_wordpress_really_simple_ssl", "evidence": {"extracted-results": ["9.1.2"], "matched-at": "https://www.bezoekerscentrum.rijkswaterstaat.nl:443/wp-content/plugins/really-simple-ssl/readme.txt"}}, {"template-id": "wordpress-w3-total-cache", "name": "w3 total cache detection", "finding-name": "nuclei_wordpress_w3_total_cache_outdated_version", "evidence": {"extracted-results": ["2.7.6"], "matched-at": "https://www.bezoekerscentrum.rijkswaterstaat.nl:443/wp-content/plugins/w3-total-cache/readme.txt"}}, {"template-id": "wordpress-wordpress-seo", "name": "yoast seo detection", "finding-name": "nuclei_wordpress_wordpress_seo_outdated_version", "evidence": {"extracted-results": ["23.6"], "matched-at": "https://www.bezoekerscentrum.rijkswaterstaat.nl:443/wp-content/plugins/wordpress-seo/readme.txt"}}]""",  # noqa
+    )
+    tech = get_tech_for_endpoints([endpoint.id])
+    assert tech == {endpoint.id: sample_product_tree}
+
+    # changing the order of the scans should not impact techs.
+    create_loging_plaza_meanings_for_scans_per_scan(evidence[0], endpoint.id, tech, nuclei_product_mapping)
+
+    # this should have techs which are consistent over each call...
+    meaning = generated_login_portal_meaning_data(evidence, endpoint.id)
+
+    # the meaning should be consistent per portal and the wordpress product should be the first one...
+    assert meaning == [
+        {
+            "portal_extracted": [],
+            "portal_name": "wordpress login panel - detect",
+            "portal_url": "https://www.bezoekerscentrum.rijkswaterstaat.nl:443/wp-login.php",
+            "tech": [
+                {
+                    "product": w_product.id,
+                    "version": "unknown",
+                },
+                {
+                    "product": p_product.id,
+                    "version": "unknown",
+                },
+                {
+                    "product": c_product.id,
+                    "version": "unknown",
+                },
+            ],
+        },
+    ]

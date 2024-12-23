@@ -40,10 +40,11 @@ def extract_version_from_nuclei_finding(nuclei_finding: dict) -> str:
 
 # caches empty values as well...
 # @cached(cache=TTLCache(maxsize=1024, ttl=4 * 60 * 60))
-def get_nuclei_product_mapping() -> Dict[str, List[Dict[str, Any]]]:
+def get_nuclei_product_mapping(use_cache: bool = True) -> Dict[str, List[Dict[str, Any]]]:
     # This is cached as it takes 1 to 3 seconds to load this data.
-    if my_cached := time_cache.cache_get("login_plaza_product_mapping"):
-        return my_cached
+    if use_cache:
+        if my_cached := time_cache.cache_get("login_plaza_product_mapping"):
+            return my_cached
 
     # product_prefetch = Prefetch("product",
     # queryset=Product.objects.filter(is_irrelevant=False), to_attr="product_set")
@@ -60,8 +61,9 @@ def get_nuclei_product_mapping() -> Dict[str, List[Dict[str, Any]]]:
                 }
             )
 
-    if mapping:
-        time_cache.cache_set("login_plaza_product_mapping", mapping)
+    if use_cache:
+        if mapping:
+            time_cache.cache_set("login_plaza_product_mapping", mapping)
 
     return mapping
 
@@ -110,10 +112,16 @@ def get_tech_for_endpoints(endpoint_ids: List[int] = None) -> Dict[int, List[Dic
 
     # todo: this should be retrieved from an info level item from the report,
     #  not created ad-hoc. -> this should be the method that saves the current state of the art to the report :)
-    egpss = EndpointGenericScan.objects.all().filter(
-        type__in=["nuclei_technologies", "nuclei_exposed_panels"],
-        is_the_latest_scan=True,
-        comply_or_explain_is_explained=False,
+    egpss = (
+        EndpointGenericScan.objects.all()
+        .filter(
+            type__in=["nuclei_technologies", "nuclei_exposed_panels"],
+            is_the_latest_scan=True,
+            comply_or_explain_is_explained=False,
+            # use ordering, otherwise the evidence might look changed while only the order is changed.
+            # if a new record is inserted with other evidence etc. This can create a ping pong effect.
+        )
+        .order_by("type")
     )
 
     if endpoint_ids:
