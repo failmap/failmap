@@ -23,7 +23,7 @@ from websecmap.scanners.scanner.filter import (
     filter_endpoints_only,
 )
 from websecmap.scanners.scanner.security_headers import remove_random_identifiers
-from websecmap.scanners.scanner.utils import dict_chunks
+from websecmap.scanners.scanner.utils import in_chunks
 from websecmap.scanners.support import kwargs_to_params
 
 """
@@ -209,19 +209,7 @@ def compose_scan_task(
     )
     # log.debug("Got %s endpoints after excluding domains: %s", len(endpoints), EXCLUDED_SUBDOMAINS)
 
-    # make a mapping between endpoint_ids and urls that are being scanned...
-    host_to_endpoint_mapping: dict[str, dict[str, int]] = {}
-    for ep in endpoints:
-        if ep.url:
-            # add one entry without protocol and port, one with just port, and one with protocol and port
-            # as nuclei output can container all of these
-            host_to_endpoint_mapping[ep.url.url] = {"endpoint": ep.id, "url": ep.url.id}
-            host_to_endpoint_mapping[f"{ep.url.url}:{ep.port}"] = {"endpoint": ep.id, "url": ep.url.id}
-            host_to_endpoint_mapping[ep.uri_url()] = {"endpoint": ep.id, "url": ep.url.id}
-
-    # log.debug("Got %s unique hosts", len(host_to_endpoint_mapping))
-
-    if not host_to_endpoint_mapping:
+    if not endpoints:
         log.debug("No hosts selected for nuclei scan.")
         return
 
@@ -233,14 +221,33 @@ def compose_scan_task(
     disabled_templates: list[str] = constance_json_value("NUCLEI_HTTP_DISABLED_TEMPLATES")
     # Split list of hosts into chunks, so one scan tasks can run multiple scans in parallel using it's own threading
     # logic. This saves time and resources
-    for chunk in dict_chunks(host_to_endpoint_mapping, amount):
+    for chunk in in_chunks(endpoints, amount):
+        # select id from scanners_endpoint where url_id = null; -> no results, removed the if ep.url check.
+        # add one entry without protocol and port, one with just port, and one with protocol and port
+        # as nuclei output can contain all of these. This saves a query on storage time, which might be
+        # the easier thing to understand instead of creating this complex mapping. Yet: not all nuclei results seem
+        # to be complete enough to be connected to the right endpoint. So keep on working with this solution.
+        verbose_hosts_in_chunk = [ep.uri_url() for ep in chunk]
+        relevant_host_spellings_in_chunk = {}
+        for ep in chunk:
+            # make a mapping between endpoint_ids and urls that are being scanned. Nuclei has several ways of writing
+            # this. Also prevent that this mapping is converted to separate scan targets, as nuclei will happily scan
+            # each of these targets even if they are 'the same'. Such as:
+            # nuclei -jsonl ...
+            #  -target mail.nieuwegeinsewijken.nl
+            #  -target mail.nieuwegeinsewijken.nl:443
+            #  -target https://mail.nieuwegeinsewijken.nl:443
+            relevant_host_spellings_in_chunk[ep.url.url] = {"endpoint": ep.id, "url": ep.url.id}
+            relevant_host_spellings_in_chunk[f"{ep.url.url}:{ep.port}"] = {"endpoint": ep.id, "url": ep.url.id}
+            relevant_host_spellings_in_chunk[ep.uri_url()] = {"endpoint": ep.id, "url": ep.url.id}
+
         yield (
             scan_batch.s(
-                urls=list(chunk),
+                urls=verbose_hosts_in_chunk,
                 scanner_keyword_arguments=scanner_keyword_arguments,
                 disabled_templates=disabled_templates,
             )
-            | store_scan_batch.s(host_to_endpoint_mapping=chunk)
+            | store_scan_batch.s(host_to_endpoint_mapping=relevant_host_spellings_in_chunk)
         )
 
 
@@ -458,12 +465,12 @@ def store_scan_batch(raw_nuclei_data: bytes, host_to_endpoint_mapping: dict[str,
     """
 
     raw_nuclei_records = convert_nuclei_data_to_json(raw_nuclei_data)
+    # note: this doesn't split hosts correctly when multiple spellings of the hosts are used as different targets.
+    #  but that has been fixed by reducing the number of targets to one instead of one per spelling.
     results_per_host = split_nuclei_records_per_host(raw_nuclei_records)
     log.debug("Nuclei results per host: %s", json.dumps(results_per_host, indent=2))
 
-    # todo: what if raw_nuclei_records is empty? what host exactly should then be cleaned?
-    # at verify the nr of hosts/endpoints is always 1. So that should then be cleaned if there
-    # are no records?
+    # this scanner does _not_ clean any hosts. The verify scanner can do this.
 
     saved_endpoint_ids: list[int] = []
 

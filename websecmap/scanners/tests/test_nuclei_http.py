@@ -30,6 +30,7 @@ from websecmap.scanners.scanner.nuclei_http import (
     rerate_portal_findings,
     store_verify_results,
     scan_batch,
+    compose_scan_task,
 )
 
 three_example_nuclei_tests = data = (
@@ -772,3 +773,40 @@ def test_create_nuclei_scan_command(db):
         "-target",
         "test.nl",
     ]
+
+
+def test_nuclei_compose_scan_task(db, current_path, reset_time_cache):
+    url1 = Url.objects.create(**{"url": "basisbeveiliging.nl"})
+
+    # without an endpoint no scan task is created
+    # ep = Endpoint.objects.create(**{"url": url1, "protocol": "https", "port": 443, "ip_version": 4})
+
+    # make sure that there are various host spellings but only one host is scanned in the scan command,
+    # which is the most specific host, with protocol.
+    scan_task = compose_scan_task([url1], {})
+    with pytest.raises(StopIteration):
+        assert next(scan_task)
+
+    # so add the endpoint and see that the scan is created with only one host and several spellings in the mapping.
+    # also make sure the endpoint id's are dynamic.
+    ep1 = Endpoint.objects.create(**{"url": url1, "protocol": "https", "port": 443, "ip_version": 4})
+    scan_task = compose_scan_task([url1], {})
+    assert str(
+        next(scan_task)
+    ) == """websecmap.scanners.scanner.nuclei_http.scan_batch(urls=['https://basisbeveiliging.nl:443'], scanner_keyword_arguments={'args': [{'name': 'silent', 'type': 'no-value'}, {'name': 'disable-update-check', 'type': 'no-value'}, {'name': 'disable-unsigned-templates', 'type': 'no-value'}, {'name': 'rate-limit', 'type': 'single-argument', 'value': '10'}, {'name': 'tags', 'type': 'list-to-duplicate-arguments', 'value': ['panel', 'tech']}, {'name': 'header', 'type': 'single-argument', 'value': "'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36 (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'"}], 'amount': 25}, disabled_templates=['security-txt', 'robots-txt']) | store_scan_batch(host_to_endpoint_mapping={'basisbeveiliging.nl': {'endpoint': %(e)s, 'url': %(u)s}, 'basisbeveiliging.nl:443': {'endpoint': %(e)s, 'url': %(u)s}, 'https://basisbeveiliging.nl:443': {'endpoint': %(e)s, 'url': %(u)s}})""" % {  # noqa
+        "u": url1.id,
+        "e": ep1.id,
+    }
+
+    # create the command with multiple urls, just to make sure that that works.
+    url2 = Url.objects.create(**{"url": "example.nl"})
+    ep2 = Endpoint.objects.create(**{"url": url2, "protocol": "https", "port": 443, "ip_version": 4})
+    scan_task = compose_scan_task([url1, url2], {})
+    assert str(
+        next(scan_task)
+    ) == """websecmap.scanners.scanner.nuclei_http.scan_batch(urls=['https://basisbeveiliging.nl:443', 'https://example.nl:443'], scanner_keyword_arguments={'args': [{'name': 'silent', 'type': 'no-value'}, {'name': 'disable-update-check', 'type': 'no-value'}, {'name': 'disable-unsigned-templates', 'type': 'no-value'}, {'name': 'rate-limit', 'type': 'single-argument', 'value': '10'}, {'name': 'tags', 'type': 'list-to-duplicate-arguments', 'value': ['panel', 'tech']}, {'name': 'header', 'type': 'single-argument', 'value': "'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36 (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'"}], 'amount': 25}, disabled_templates=['security-txt', 'robots-txt']) | store_scan_batch(host_to_endpoint_mapping={'basisbeveiliging.nl': {'endpoint': %(e)s, 'url': %(u)s}, 'basisbeveiliging.nl:443': {'endpoint': %(e)s, 'url': %(u)s}, 'https://basisbeveiliging.nl:443': {'endpoint': %(e)s, 'url': %(u)s}, 'example.nl': {'endpoint': %(e2)s, 'url': %(u2)s}, 'example.nl:443': {'endpoint': %(e2)s, 'url': %(u2)s}, 'https://example.nl:443': {'endpoint': %(e2)s, 'url': %(u2)s}})""" % {  # noqa
+        "u": url1.id,
+        "e": ep1.id,
+        "u2": url2.id,
+        "e2": ep2.id,
+    }
