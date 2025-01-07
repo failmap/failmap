@@ -6,6 +6,8 @@ from websecmap.scanners.scanner.whois import (
     check_ownership,
     get_registrants_for_url,
     regenerate_registrant_statistics_for_all_organizations,
+    check_ownership_per_url,
+    regenerate_registrant_statistics_per_organizations,
 )
 
 
@@ -30,7 +32,7 @@ def test_check_ownership(db):
     # Different case is no problem.
     UrlWhois.objects.create(url=url, is_the_latest=True, registrant="gemeente ZUTPHEN")
     url.organization.add(org)
-    check_ownership()
+    check_ownership_per_url(url.id)
     first_scan = UrlGenericScan.objects.all().filter(type="whois_domain_ownership").first()
     assert first_scan.rating == "whois_internal_ownership"
     assert (
@@ -39,18 +41,21 @@ def test_check_ownership(db):
     )
 
     # now check a domain that has a different organization
-    url = Url.objects.create(url="nonlegit_basisbeveiliging.nl")
-    UrlWhois.objects.create(url=url, is_the_latest=True, registrant="Non Legit Hoster 2")
-    url.organization.add(org)
-    check_ownership()
+    url2 = Url.objects.create(url="nonlegit_basisbeveiliging.nl")
+    UrlWhois.objects.create(url=url2, is_the_latest=True, registrant="Non Legit Hoster 2")
+    url2.organization.add(org)
+    check_ownership_per_url(url.id)
+    check_ownership_per_url(url2.id)
     last_scan = UrlGenericScan.objects.all().filter(type="whois_domain_ownership").first()
     assert last_scan.rating == "whois_external_ownership"
 
     # and a domain where there is no registrant information, which is dubious
-    url = Url.objects.create(url="hidden_basisbeveiliging.nl")
-    UrlWhois.objects.create(url=url, is_the_latest=True, registrant="")
-    url.organization.add(org)
-    check_ownership()
+    url3 = Url.objects.create(url="hidden_basisbeveiliging.nl")
+    UrlWhois.objects.create(url=url3, is_the_latest=True, registrant="")
+    url3.organization.add(org)
+    check_ownership_per_url(url.id)
+    check_ownership_per_url(url2.id)
+    check_ownership_per_url(url3.id)
     last_scan = UrlGenericScan.objects.all().filter(type="whois_domain_ownership").first()
     assert last_scan.rating == "whois_unknown_ownership"
 
@@ -74,7 +79,7 @@ def test_regenerate_registrant_statistics_for_all_organizations(db):
     url.organization.add(org)
     UrlWhois.objects.create(url=url, is_the_latest=True, registrant="Non Legit Hoster")
 
-    regenerate_registrant_statistics_for_all_organizations()
+    regenerate_registrant_statistics_per_organizations(org.id)
 
     org = Organization.objects.get(name="Gemeente Zutphen")
     assert org.computed_domain_registrant_statistics == {

@@ -25,6 +25,10 @@ def scan():
     #
     # this is not implemented as a scanner-per-url because it's an quick database-level formality which isn't worth the
     # administrative overhead of scan management.
+    # It will happen that not all regenerate_registrant_statistics_for_all_organizations are done but check_ownership
+    # is already running. Given this sequence is performed daily (or faster) this will not lead into real world issues
+    # as it's also ok to have the right data the next day. And regenerate is run more often than once a day so in
+    # many cases this should be fine.
     tasks = group([regenerate_registrant_statistics_for_all_organizations.si(), check_ownership.si()])
     tasks.apply_async()
 
@@ -36,33 +40,44 @@ def check_ownership():
     # if it's not, then there is an issue.
     urls = Url.objects.all().filter(is_dead=False, not_resolvable=False, computed_subdomain="")
     for url in urls:
-        # gather all allowed registrants.
-        registrants = get_registrants_for_url(url)
-        if not registrants:
-            # if there is no registrant information, judging will be unfair
-            continue
+        # split this query into separate tasks to distribute the workload preventing a single slow task.
+        check_ownership_per_url.si(url.id).apply_async()
 
-        whois = UrlWhois.objects.all().filter(url=url, is_the_latest=True).first()
-        if not whois:
-            # can't judge if there is no whois info, so don't...
-            continue
 
-        evidence = json.dumps(
-            {
-                "found_registrant": whois.registrant,
-                "known_acceptable_registrants": registrants,
-            }
-        )
-        # It's dubious when a registration from the government cannot be seen/verified
-        if whois.registrant == "":
-            store_url_scan_result(SCANNER_NAME, url.id, "whois_unknown_ownership", "whois_unknown_ownership", evidence)
-            continue
+@app.task(queue="storage", ignore_result=True)
+def check_ownership_per_url(url_id: int) -> None:
 
-        # comparison is done in lowercase to make obvious typos not a problem. Aka: "De Connectie" / "de CONNECTIe"
-        lc_registrants = [registrant.lower() for registrant in registrants]
+    url = Url.objects.all().filter(id=url_id).first()
+    if not url:
+        return
 
-        owner = "whois_internal_ownership" if whois.registrant.lower() in lc_registrants else "whois_external_ownership"
-        store_url_scan_result(SCANNER_NAME, url.id, owner, owner, evidence)
+    # gather all allowed registrants.
+    registrants = get_registrants_for_url(url)
+    if not registrants:
+        # if there is no registrant information, judging will be unfair
+        return
+
+    whois = UrlWhois.objects.all().filter(url=url, is_the_latest=True).first()
+    if not whois:
+        # can't judge if there is no whois info, so don't...
+        return
+
+    evidence = json.dumps(
+        {
+            "found_registrant": whois.registrant,
+            "known_acceptable_registrants": registrants,
+        }
+    )
+    # It's dubious when a registration from the government cannot be seen/verified
+    if whois.registrant == "":
+        store_url_scan_result(SCANNER_NAME, url.id, "whois_unknown_ownership", "whois_unknown_ownership", evidence)
+        return
+
+    # comparison is done in lowercase to make obvious typos not a problem. Aka: "De Connectie" / "de CONNECTIe"
+    lc_registrants = [registrant.lower() for registrant in registrants]
+
+    owner = "whois_internal_ownership" if whois.registrant.lower() in lc_registrants else "whois_external_ownership"
+    store_url_scan_result(SCANNER_NAME, url.id, owner, owner, evidence)
 
 
 def get_registrants_for_url(url: Url) -> List[str]:
@@ -79,36 +94,46 @@ def regenerate_registrant_statistics_for_all_organizations():
     # get all registrant data from urls of this organization, then count the number of domains per registrant
     organizations = Organization.objects.all().filter(is_dead=False)
     for organization in organizations:
-        log.debug("Regenerating registrant statistics for organization %s", organization)
-        registrant_stats = {}
-        urls = Url.objects.all().filter(
-            organization=organization, is_dead=False, not_resolvable=False, computed_subdomain=""
-        )
-        for url in urls:
-            log.debug("Regenerating registrant statistics for url %s", url)
+        regenerate_registrant_statistics_per_organizations.si(organization.id).apply_async()
 
-            if whois := UrlWhois.objects.all().filter(url=url, is_the_latest=True).first():
-                if whois.registrant not in registrant_stats:
-                    registrant_stats[whois.registrant] = {"urls": [], "amount": 0}
 
-                log.debug("Registrant statistics for url %s: %s", url, whois)
-                registrant_stats[whois.registrant]["amount"] += 1
-                registrant_stats[whois.registrant]["urls"].append(url.url)
+@app.task(queue="storage", ignore_result=True)
+def regenerate_registrant_statistics_per_organizations(organization_id: int) -> None:
 
-        log.debug("Registrant statistics for organization %s: %s", organization, registrant_stats)
-        organization.computed_domain_registrant_statistics = registrant_stats
-        # it's easier to delete stuff than add stuff, so just add all new keys as being legit
-        if not organization.acceptable_domain_registrants:
-            all_registrants = list(registrant_stats.keys())
-            # never allow the empty registrant
-            if "" in all_registrants:
-                all_registrants.remove("")
+    organization = Organization.objects.all().filter(pk=organization_id).first()
+    if not organization:
+        return
 
-            # remove all not allowed registrants:
-            leftover = list(set(all_registrants) - set(organization.not_allowed_registrant_names))
+    log.debug("Regenerating registrant statistics for organization %s", organization)
+    registrant_stats = {}
+    urls = Url.objects.all().filter(
+        organization=organization, is_dead=False, not_resolvable=False, computed_subdomain=""
+    )
+    for url in urls:
+        log.debug("Regenerating registrant statistics for url %s", url)
 
-            organization.acceptable_domain_registrants = leftover
-        organization.save()
+        if whois := UrlWhois.objects.all().filter(url=url, is_the_latest=True).first():
+            if whois.registrant not in registrant_stats:
+                registrant_stats[whois.registrant] = {"urls": [], "amount": 0}
+
+            log.debug("Registrant statistics for url %s: %s", url, whois)
+            registrant_stats[whois.registrant]["amount"] += 1
+            registrant_stats[whois.registrant]["urls"].append(url.url)
+
+    log.debug("Registrant statistics for organization %s: %s", organization, registrant_stats)
+    organization.computed_domain_registrant_statistics = registrant_stats
+    # it's easier to delete stuff than add stuff, so just add all new keys as being legit
+    if not organization.acceptable_domain_registrants:
+        all_registrants = list(registrant_stats.keys())
+        # never allow the empty registrant
+        if "" in all_registrants:
+            all_registrants.remove("")
+
+        # remove all not allowed registrants:
+        leftover = list(set(all_registrants) - set(organization.not_allowed_registrant_names))
+
+        organization.acceptable_domain_registrants = leftover
+    organization.save()
 
 
 def remove_not_allowed_registrants_from_acceptable_domain_registrants():
