@@ -717,7 +717,7 @@ def test_nuclei_compose_verify_task(db):
         "websecmap.scanners.scanner.nuclei_http.scan('http://mail.rhcvechtenvenen.nl:443', {'args': ["
         "{'name': 'silent', 'type': 'no-value'}, {'name': 'disable-update-check', 'type': 'no-value'}, "
         "{'name': 'disable-unsigned-templates', 'type': 'no-value'}, "
-        "{'name': 'rate-limit', 'type': 'single-argument', 'value': '10'}, "
+        "{'name': 'rate-limit', 'type': 'single-argument', 'value': '75'}, "
         "{'name': 'tags', 'type': 'list-to-duplicate-arguments', 'value': ['panel', 'tech']}, "
         "{'name': 'header', 'type': 'single-argument', 'value': \"'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36 (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'\"}, "  # noqa
         "{'name': 'template-id', 'type': 'list-to-duplicate-arguments', 'value': ['phpmyadmin-panel']}"
@@ -730,7 +730,7 @@ def test_create_nuclei_scan_command(db):
         "args": [
             {"name": "silent", "type": "no-value"},
             {"name": "disable-update-check", "type": "no-value"},
-            {"name": "rate-limit", "type": "single-argument", "value": "10"},
+            {"name": "rate-limit", "type": "single-argument", "value": "75"},
             {
                 "name": "template-id",
                 "type": "list-to-duplicate-arguments",
@@ -759,7 +759,7 @@ def test_create_nuclei_scan_command(db):
         "-silent",
         "-disable-update-check",
         "-rate-limit",
-        "10",
+        "75",
         "-template-id",
         "netscaler-aaa-login-panel",
         "-template-id",
@@ -793,7 +793,7 @@ def test_nuclei_compose_scan_task(db, current_path, reset_time_cache):
     scan_task = compose_scan_task([url1], {})
     assert str(
         next(scan_task)
-    ) == """websecmap.scanners.scanner.nuclei_http.scan_batch(urls=['https://basisbeveiliging.nl:443'], scanner_keyword_arguments={'args': [{'name': 'silent', 'type': 'no-value'}, {'name': 'disable-update-check', 'type': 'no-value'}, {'name': 'disable-unsigned-templates', 'type': 'no-value'}, {'name': 'rate-limit', 'type': 'single-argument', 'value': '10'}, {'name': 'tags', 'type': 'list-to-duplicate-arguments', 'value': ['panel', 'tech']}, {'name': 'header', 'type': 'single-argument', 'value': "'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36 (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'"}], 'amount': 25}, disabled_templates=['security-txt', 'robots-txt']) | store_scan_batch(host_to_endpoint_mapping={'basisbeveiliging.nl': {'endpoint': %(e)s, 'url': %(u)s}, 'basisbeveiliging.nl:443': {'endpoint': %(e)s, 'url': %(u)s}, 'https://basisbeveiliging.nl:443': {'endpoint': %(e)s, 'url': %(u)s}})""" % {  # noqa
+    ) == """websecmap.scanners.scanner.nuclei_http.scan_batch(urls=['https://basisbeveiliging.nl:443'], scanner_keyword_arguments={'args': [{'name': 'silent', 'type': 'no-value'}, {'name': 'disable-update-check', 'type': 'no-value'}, {'name': 'disable-unsigned-templates', 'type': 'no-value'}, {'name': 'rate-limit', 'type': 'single-argument', 'value': '75'}, {'name': 'tags', 'type': 'list-to-duplicate-arguments', 'value': ['panel', 'tech']}, {'name': 'header', 'type': 'single-argument', 'value': "'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36 (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'"}], 'amount': 25}, disabled_templates=['security-txt', 'robots-txt']) | store_scan_batch(host_to_endpoint_mapping={'basisbeveiliging.nl': {'endpoint': %(e)s, 'url': %(u)s}, 'basisbeveiliging.nl:443': {'endpoint': %(e)s, 'url': %(u)s}, 'https://basisbeveiliging.nl:443': {'endpoint': %(e)s, 'url': %(u)s}})""" % {  # noqa
         "u": url1.id,
         "e": ep1.id,
     }
@@ -804,7 +804,7 @@ def test_nuclei_compose_scan_task(db, current_path, reset_time_cache):
     scan_task = compose_scan_task([url1, url2], {})
     assert str(
         next(scan_task)
-    ) == """websecmap.scanners.scanner.nuclei_http.scan_batch(urls=['https://basisbeveiliging.nl:443', 'https://example.nl:443'], scanner_keyword_arguments={'args': [{'name': 'silent', 'type': 'no-value'}, {'name': 'disable-update-check', 'type': 'no-value'}, {'name': 'disable-unsigned-templates', 'type': 'no-value'}, {'name': 'rate-limit', 'type': 'single-argument', 'value': '10'}, {'name': 'tags', 'type': 'list-to-duplicate-arguments', 'value': ['panel', 'tech']}, {'name': 'header', 'type': 'single-argument', 'value': "'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36 (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'"}], 'amount': 25}, disabled_templates=['security-txt', 'robots-txt']) | store_scan_batch(host_to_endpoint_mapping={'basisbeveiliging.nl': {'endpoint': %(e)s, 'url': %(u)s}, 'basisbeveiliging.nl:443': {'endpoint': %(e)s, 'url': %(u)s}, 'https://basisbeveiliging.nl:443': {'endpoint': %(e)s, 'url': %(u)s}, 'example.nl': {'endpoint': %(e2)s, 'url': %(u2)s}, 'example.nl:443': {'endpoint': %(e2)s, 'url': %(u2)s}, 'https://example.nl:443': {'endpoint': %(e2)s, 'url': %(u2)s}})""" % {  # noqa
+    ) == """websecmap.scanners.scanner.nuclei_http.scan_batch(urls=['https://basisbeveiliging.nl:443', 'https://example.nl:443'], scanner_keyword_arguments={'args': [{'name': 'silent', 'type': 'no-value'}, {'name': 'disable-update-check', 'type': 'no-value'}, {'name': 'disable-unsigned-templates', 'type': 'no-value'}, {'name': 'rate-limit', 'type': 'single-argument', 'value': '75'}, {'name': 'tags', 'type': 'list-to-duplicate-arguments', 'value': ['panel', 'tech']}, {'name': 'header', 'type': 'single-argument', 'value': "'User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.62 Mobile Safari/537.36 (compatible; ICF-Basisbeveiliging/1.0; +https://internetcleanup.foundation/scaninfo)'"}], 'amount': 25}, disabled_templates=['security-txt', 'robots-txt']) | store_scan_batch(host_to_endpoint_mapping={'basisbeveiliging.nl': {'endpoint': %(e)s, 'url': %(u)s}, 'basisbeveiliging.nl:443': {'endpoint': %(e)s, 'url': %(u)s}, 'https://basisbeveiliging.nl:443': {'endpoint': %(e)s, 'url': %(u)s}, 'example.nl': {'endpoint': %(e2)s, 'url': %(u2)s}, 'example.nl:443': {'endpoint': %(e2)s, 'url': %(u2)s}, 'https://example.nl:443': {'endpoint': %(e2)s, 'url': %(u2)s}})""" % {  # noqa
         "u": url1.id,
         "e": ep1.id,
         "u2": url2.id,

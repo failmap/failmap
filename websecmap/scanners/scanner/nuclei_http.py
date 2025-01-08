@@ -92,7 +92,7 @@ NUCLEI_ARGUMENTS = {
             # We'll have to figure out what to do with custom loaded templates in the future.
             {"name": "disable-unsigned-templates", "type": "no-value"},
             # TODO: this should be configurable more dynamically
-            {"name": "rate-limit", "type": "single-argument", "value": "10"},
+            {"name": "rate-limit", "type": "single-argument", "value": "75"},
             # type is not needed anymore as panel and tech detection are clear enough
             # {"name": "type", "type": "list-to-duplicate-arguments", "value": ["http"]},
             # include-templates does not work when the project refactors the template directories, which
