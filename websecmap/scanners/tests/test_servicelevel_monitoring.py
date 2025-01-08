@@ -22,8 +22,25 @@ def test_metric_to_statsd():
         assert logged == {
             "type": "web_privacy_cookies",
             "rating": "web_privacy_cookies_neutral",
-            "rating_determined_on_days_ago": 4,
-            "last_scan_moment_days_ago": 1,
+            "rating_determined_on_days": 4,
+            "last_scan_moment_days": 1,
+            "kind": "endpoint",
+        }
+
+        logged = metric_to_statsd(
+            metric_type="web_privacy_cookies",
+            rating="web_privacy_cookies_neutral",
+            rating_determined_on=datetime.now(timezone.utc) - timedelta(days=900),
+            last_scan_moment=datetime.now(timezone.utc) - timedelta(days=900),
+            kind="endpoint",
+        )
+
+        # limit to max 60 days.
+        assert logged == {
+            "type": "web_privacy_cookies",
+            "rating": "web_privacy_cookies_neutral",
+            "rating_determined_on_days": 60,
+            "last_scan_moment_days": 60,
             "kind": "endpoint",
         }
 

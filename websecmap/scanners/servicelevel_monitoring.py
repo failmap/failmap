@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 
 @app.task(queue="storage", ignore_result=True)
 def export_metric_metadata_to_statsd():
+    # plan this every 10 minutes... or once per hour
     endpoint_metrics = (
         EndpointGenericScan.objects.all()
         .filter(
@@ -39,12 +40,10 @@ def dump_metrics(metrics, kind):
     # the "kind" helps explaining the difference in amounts of metrics. there are many more endpoints than urls...
     for metric in metrics:
         log.debug("Exporting metric metadata to statsd: %s - %s", metric.type, metric.rating)
-        metric_to_statsd.si(
-            metric.type, metric.rating, metric.last_scan_moment, metric.rating_determined_on, kind
-        ).apply_async()
+        # direct call, no celery, as statsd is cheap...
+        metric_to_statsd(metric.type, metric.rating, metric.last_scan_moment, metric.rating_determined_on, kind)
 
 
-@app.task(queue="storage", ignore_result=True)
 def metric_to_statsd(metric_type, rating, last_scan_moment, rating_determined_on, kind):
     """
     The dashboard needed:
@@ -70,20 +69,26 @@ def metric_to_statsd(metric_type, rating, last_scan_moment, rating_determined_on
     # -> this should have pretty high numbers in the past, if there are new numbers probably the metric / evidence
     # or other data is not cleaned up / reduced correctly.
 
+    # this also stores old records and things out of sight of the scanmanager. The scanmanager only sees things that are
+    current, not polluted or old or wasted data that is here.
+
     """
     now = datetime.now(timezone.utc)
 
+    # limit to 60 days to not create too many dimensions... a lot of determined on will/should be older than 60.
+    last_scan_moment_days_ago = min((now - last_scan_moment).days, 60)
+    rating_determined_on_days_ago = min((now - rating_determined_on).days, 60)
+
     tags = {
-        # how many days old is this metric?
-        "last_scan_moment_days_ago": (now - last_scan_moment).days,
-        "rating_determined_on_days_ago": (now - rating_determined_on).days,
+        "last_scan_moment_days": last_scan_moment_days_ago,
+        "rating_determined_on_days": rating_determined_on_days_ago,
         "type": metric_type,
         "rating": rating,
         "kind": kind,
     }
 
     # here you know the amount of metrics. When sending this data in once a day you know how many metrics there are.
-    statsd.incr("metric", 1, tags=tags)
+    statsd.incr("scan_result_days_ago_count", 1, tags=tags)
 
     # for testing purposes, this will normally be ignored.
     return tags
