@@ -2,7 +2,7 @@
 
 import logging
 
-from websecmap.scanners import plannedscan, proxy, progress_regress_results, servicelevel_monitoring
+from websecmap.scanners import plannedscan, proxy, progress_regress_results
 from websecmap.scanners.scanner_for_everything import (
     domain_to_ip,
     ip_geolocation,
@@ -98,7 +98,6 @@ __everything__ = [
     ip_geolocation_correction,
     locate_and_correct,
     progress_regress_results,
-    servicelevel_monitoring,
 ]
 
 __others__ = [
