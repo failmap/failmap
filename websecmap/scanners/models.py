@@ -640,13 +640,36 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin, ProgressRegressResult):
         ordering = [
             "-rating_determined_on",
         ]
-        indexes = [models.Index(fields=["rating_determined_on"])]
+        indexes = [
+            models.Index(fields=["rating_determined_on"]),
+        ]
 
 
 class EndpointGenericScan(GenericScanMixin):
     """
     Only changes are saved as a scan.
     """
+
+    class Meta:
+        """
+        From the docs:
+
+        Django does make one adjustment to the Meta class of an abstract base class: before installing the Meta
+        attribute, it sets abstract=False. This means that children of abstract base classes don’t automatically
+        become abstract classes themselves. Of course, you can make an abstract base class that inherits from
+        another abstract base class. You just need to remember to explicitly set abstract=True each time.
+        """
+
+        ordering = [
+            "-rating_determined_on",
+        ]
+        indexes = [
+            models.Index(fields=["rating_determined_on"]),
+            # this greatly improves performance on metrics sla queries (see query-exporter)
+            models.Index(
+                fields=["endpoint", "is_the_latest_scan", "type", "rating", "last_scan_moment", "rating_determined_on"]
+            ),
+        ]
 
     endpoint = models.ForeignKey(
         Endpoint,
