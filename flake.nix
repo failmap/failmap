@@ -58,7 +58,7 @@
             if test "$(uname -s)" = "Darwin";then
                 export VIRTUAL_ENV=~/Library/Caches/virtualenvs/$(basename $PWD)-''${python_version/\ /_}
             else
-                export VIRTUAL_ENV=$\{XDG_CACHE_HOME:-~/.cache\}/virtualenvs/$(basename $PWD)-''${python_version/\ /_}
+                export VIRTUAL_ENV=''${XDG_CACHE_HOME:-~/.cache}/virtualenvs/$(basename $PWD)-''${python_version/\ /_}
             fi
             echo "Virtualenv: $VIRTUAL_ENV"
 
