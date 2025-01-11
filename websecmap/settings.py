@@ -138,6 +138,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "django.contrib.sitemaps",
+    "storages",
 ]
 
 try:
@@ -2004,6 +2005,12 @@ STORAGES = {
     # ideally this is stored in S3 Glacier or something, but for now store it on disk
     # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
     "paper_trail": {"BACKEND": "django.core.files.storage.FileSystemStorage", "OPTIONS": {"base_url": MEDIA_URL}},
+    "screenshots": {
+        # authentication and other settings are configured using environment variables:
+        # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#authentication-settings
+        # otherwise these end op in migration files
+        "BACKEND": "storages.backends.s3.S3Storage",
+    },
 }
 
 

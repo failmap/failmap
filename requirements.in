@@ -213,3 +213,7 @@ google-cloud-sqlcommenter
 # WIP: try newer versions of gevent and greenlet in hopes of fixing weird issues with workers hanging on http requests
 gevent>=24
 greenlet>=3
+
+# s3 buckets support for screenshots, etc
+django-storages[s3]
+boto3
