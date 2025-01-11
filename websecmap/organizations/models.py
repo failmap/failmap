@@ -13,6 +13,7 @@ from jsonfield import JSONField
 from taggit.managers import TaggableManager
 from validators import domain
 import json
+import re
 
 log = logging.getLogger(__package__)
 
@@ -442,6 +443,20 @@ class Url(models.Model):
         help_text="Information on what has added this url. For example: what scanner.",
     )
 
+    subdomain_iregexes_to_ignore = JSONField(
+        blank=True,
+        help_text="List[str] of iregex filters that will prevent a certain subdomain to be "
+        "added. Note that this is applies for adding subdomains, not complete new urls "
+        "which might include subdomains (that may be done later). Example iregex: "
+        "vps[0-9]{1,6} ignores vps1243 and vps5231. Use this feature in case the "
+        "do-not-add-subdomains flag cannot be set on a certain subdomain as that would also "
+        "prevent important domains of this organizations to be added. Hosters often dump "
+        "vm's and vps subdomains next to their own infrastructure under the same second "
+        "level domain. Such as vps123.example.nl next to management.example.nl. In that case "
+        "we _do_ want to have the management subdomain but not the vps123 subdomain.",
+        default=[],
+    )
+
     class Meta:
         managed = True
         db_table = "url"
@@ -511,6 +526,17 @@ class Url(models.Model):
             return True
         return False
 
+    def subdomain_should_be_ignored(self, subdomain: str) -> bool:
+        if not self.subdomain_iregexes_to_ignore:
+            return False
+
+        for regex in list(self.subdomain_iregexes_to_ignore):
+            if re.fullmatch(regex, subdomain):
+                log.debug("Not adding subdomain due to regex: %s", regex)
+                return True
+
+        return False
+
     @transaction.atomic
     def add_subdomain(self, subdomain, origin: str = "") -> Optional["Url"]:
         # import here to prevent circular/cyclic imports, this module imports Url.
@@ -534,6 +560,11 @@ class Url(models.Model):
         #  on the sub-sub domains etc.
         if Url.objects.all().filter(url=new_url, organization__in=self.organization.all()).exists():
             log.debug("Subdomain already in the database: %s", new_url)
+            return None
+
+        # todo: also add this to add_url? -> that code should check if it's a subdomain and if the domain exists etc
+        #  in that case it would fall back to this check. In the future...
+        if self.subdomain_should_be_ignored(subdomain):
             return None
 
         if not resolves(new_url):

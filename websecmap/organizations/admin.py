@@ -765,6 +765,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
                     "do_not_find_subdomains",
                     "uses_dns_wildcard",
                     "dns_supports_mx",
+                    "subdomain_iregexes_to_ignore",
                 ),
             },
         ),

@@ -84,6 +84,20 @@ def test_add_sub_sub_domain(db, patch_resolve):
     should_be_owned_by_a = a_domain.add_subdomain(subdomain="should_be_owned_by_a.d_domain.b_domain")
     assert should_be_owned_by_a.organization.all().first() == org_a
 
+    # assert that regex filters work that will prevent adding of certain subdomains that we don't need:
+    a_domain.subdomain_iregexes_to_ignore = ["vps[0-9]{1,6}", "vm[0-9]{1,6}", "host[0-9]{1,6}"]
+    a_domain.save()
+    assert a_domain.add_subdomain(subdomain="vps123") is None
+    assert a_domain.add_subdomain(subdomain="vm1") is None
+    assert a_domain.add_subdomain(subdomain="host101010") is None
+    # intentionally a too long thing that would fall outside of the patterns.
+    assert a_domain.add_subdomain(subdomain="host10101010").computed_subdomain == "host10101010"
+
+    assert a_domain.subdomain_should_be_ignored("host101010") is True
+    assert a_domain.subdomain_should_be_ignored("host10101010") is False
+    assert a_domain.subdomain_should_be_ignored("host") is False
+    assert a_domain.subdomain_should_be_ignored("10host") is False
+
 
 def test_find_domain_owner(db):
     # garbage yields to nothing
