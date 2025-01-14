@@ -49,6 +49,7 @@ from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_conf
 # There is a balance between network timeout and qualys result cache.
 # This is relevant, since the results are not kept in cache for hours. More like 15 minutes.
 from websecmap.scanners.scanner.http import force_get_endpoint
+from statshog.defaults.django import statsd
 
 API_NETWORK_TIMEOUT = 30
 API_SERVER_TIMEOUT = 30
@@ -117,6 +118,7 @@ def plan_scan_optimized():
     if not allowed_to_scan("tls_qualys"):
         return
 
+    # NEW urls
     # While technically it's possible to plan scans on endpoints/urls that have never been scanned, the query
     # created is 100% correct and takes over 1.5 hours. Causing tasks to restart and thus creating ANOTHER
     # query and so on. Instead of this correct query we just plan scans on urls that have been recently added.
@@ -129,7 +131,8 @@ def plan_scan_optimized():
         endpoint__protocol="https",
         endpoint__port=443,
         endpoint__is_dead=False,
-        created_on__gte=datetime.now() - timedelta(days=14),
+        # this was every 14 days
+        created_on__gte=datetime.now() - timedelta(days=45),
     )
 
     # here is the slow and correct approach preserved for when someone thinks they can do it better :)
@@ -177,7 +180,8 @@ def plan_scan_optimized():
         # an exclude filter here will not work, as you will exclude so much...
         # as we're not using parameter sets anymore, there is no use in filtering days since last scan.
         # endpoint__endpointgenericscan__last_scan_moment__lte=datetime.now(timezone.utc) - timedelta(days=0),
-        endpoint__endpointgenericscan__rating__in=["F", "C", "B", "not trusted"],
+        # also allow scan errors to be re-tested, as that most of the time _does_ have a valid https...
+        endpoint__endpointgenericscan__rating__in=["F", "C", "B", "not trusted", "scan_error"],
     ).only("id", "url")
     log.debug("2: planning %s scans that are F/C/V=B or not_trusted.", len(urls))
     plannedscan.request(activity="scan", scanner="tls_qualys", urls=unique_and_random(urls))
@@ -742,6 +746,9 @@ def save_scan(url: str, data: Any):
             # does exist. So perhaps they blocked the qualys scanner, which is perfectly possible of course.
             store_endpoint_scan_result("tls_qualys_certificate_trusted", failmap_endpoint.pk, "scan_error", message)
             store_endpoint_scan_result("tls_qualys_encryption_quality", failmap_endpoint.pk, "scan_error", message)
+
+            # track how many scan errors are returned, and what errors are returned exactly
+            statsd.incr("tls_qualys_scan_error_amount", 1, tags={"message": message})
             continue
 
         if message not in ["Ready"]:
