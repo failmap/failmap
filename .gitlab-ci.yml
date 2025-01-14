@@ -9,7 +9,7 @@
 variables:
   CI_IMAGE: python:3.10
   DOCKER_CI_IMAGE: websecmap/ci:docker-git
-  DOCKER_SERVICE_VERSION: 24.0.5-dind
+  DOCKER_SERVICE_VERSION: 20.10.16-dind
 
 stages:
   - test_build
@@ -192,8 +192,7 @@ image_test:
     - DOCKER_BUILDKIT=1 time docker buildx build --cache-from $IMAGE --cache-from $MR_CACHE_IMAGE --cache-from $MASTER_CACHE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg VERSION=$(cat version) --target release --tag $IMAGE --tag $MR_CACHE_IMAGE --push .
 
     # run system tests against image
-    # TODO: disabled until we can fix docker in docker on custom runners, or gold plan gets restored
-    # - IMAGE=$IMAGE time make test_system
+    - IMAGE=$IMAGE time make test_system
 
   # run on merge request to determine if build will not break on master
   except: [master]
@@ -205,9 +204,8 @@ build_test:
 
   image: $DOCKER_CI_IMAGE
 
-  # TODO: disabled until we can fix docker in docker on custom runners, or gold plan gets restored
-  # services:
-  #   - docker:$DOCKER_SERVICE_VERSION
+  services:
+    - docker:$DOCKER_SERVICE_VERSION
 
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
@@ -230,8 +228,7 @@ build_test:
     - DOCKER_BUILDKIT=1 docker buildx build --cache-from $CACHE_IMAGE --cache-from $MASTER_CACHE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg VERSION=$(cat version) --target release --tag $IMAGE --tag $CACHE_IMAGE --tag $MASTER_CACHE_IMAGE --push .
 
     # run system tests against image
-    # TODO: disabled until we can fix docker in docker on custom runners, or gold plan gets restored
-    # - IMAGE=$IMAGE time make test_system
+    - IMAGE=$IMAGE time make test_system
 
   only:
     - master
