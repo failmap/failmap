@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, Url, UrlGenericScan
 from django.db import transaction
+from statshog.defaults.django import statsd
 
 log = logging.getLogger(__package__)
 
@@ -56,6 +57,7 @@ def store_endpoint_scan_result(
         log.debug("Scan had the same rating, message and evidence, updating last_scan_moment only.")
         epgs.last_scan_moment = datetime.now(timezone.utc)
         epgs.save(update_fields=["last_scan_moment"])
+        statsd.incr("scanmanager_endpoint_metric_update_amount", 1, tags={"type": scan_type})
 
         log.debug(
             "URL result saved as: %s, %s%s",
@@ -106,6 +108,7 @@ def store_endpoint_scan_result(
                     new_epgs.comply_or_explain_case_additional_notes = epgs.comply_or_explain_case_additional_notes
 
         new_epgs.save()
+        statsd.incr("scanmanager_endpoint_metric_create_amount", 1, tags={"type": scan_type})
 
         # Set all the previous endpoint scans of this endpoint + type to NOT be the latest scan.
         EndpointGenericScan.objects.all().filter(
@@ -151,6 +154,7 @@ def store_url_scan_result(  # pylint: disable=inconsistent-return-statements
         log.debug("Scan had the same rating and message, updating last_scan_moment only.")
         ugs.last_scan_moment = datetime.now(timezone.utc)
         ugs.save(update_fields=["last_scan_moment"])
+        statsd.incr("scanmanager_url_metric_update_amount", 1, tags={"type": scan_type})
     else:
         # message and rating changed for this scan_type, so it's worth while to save the scan.
         log.debug("Message or rating changed: making a new generic scan.")
@@ -166,6 +170,7 @@ def store_url_scan_result(  # pylint: disable=inconsistent-return-statements
             ugs.rating_determined_on = datetime.now(timezone.utc)
             ugs.is_the_latest_scan = True
             ugs.save()
+            statsd.incr("scanmanager_url_metric_create_amount", 1, tags={"type": scan_type})
 
             UrlGenericScan.objects.all().filter(
                 url=ugs.url,
