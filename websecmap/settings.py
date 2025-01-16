@@ -135,7 +135,6 @@ INSTALLED_APPS = [
     # 'mapwidgets',  no gdal available yet, try again later
     # 'cachalot',  # query cache, is not faster.
     # 'silk'  # works great for debugging.
-    "rest_framework",
     "django_filters",
     "django.contrib.sitemaps",
     "storages",
@@ -2056,13 +2055,6 @@ Reports are JSON blobs. They are not stored in the database because it requires 
 they cannot be easily compressed or handled.
 """
 REPORT_STORAGE_DIR = os.environ.get("REPORT_STORAGE_DIR", MEDIA_ROOT + "diskreports/")
-
-REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAdminUser"],
-    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
-}
 
 
 # Django 3.2

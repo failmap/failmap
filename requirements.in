@@ -167,7 +167,6 @@ numpy>=1.21.0
 django-cors-headers
 
 # map management
-djangorestframework
 django-filter
 
 # watchmedo

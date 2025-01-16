@@ -22,7 +22,6 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.template.response import TemplateResponse
 from django.urls import path, re_path
-from rest_framework import routers, serializers, viewsets
 from django.conf.urls.static import static
 
 
@@ -31,7 +30,6 @@ import websecmap.app.dashboard_module_views  # noqa  # pylint: disable=unused-im
 
 # Django 1.10 http://stackoverflow.com/questions/38744285/
 # django-urls-error-view-must-be-a-callable-or-a-list-tuple-in-the-case-of-includ#38744286
-from websecmap.organizations.models import Coordinate, Organization
 from . import __version__
 
 admin.site.site_header = f"Web Security Map Admin {__version__}"
@@ -69,34 +67,6 @@ interactive_urls = [
 urlpatterns = frontend_urls.copy()
 
 
-class OrganizationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Organization
-        fields = ["id", "name"]
-
-
-class CoordinateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Coordinate
-        fields = ["organization", "geojsontype", "area"]
-
-
-# ViewSets define the view behavior.
-class CoordinateViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
-    queryset = Coordinate.objects.all().filter(geojsontype="Point", is_dead=False)
-    serializer_class = CoordinateSerializer
-
-
-class OrganizationViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
-    queryset = Organization.objects.all()
-    serializer_class = OrganizationSerializer
-
-
-# Routers provide an easy way of automatically determining the URL conf.
-router = routers.DefaultRouter()
-router.register(r"coordinate", CoordinateViewSet)
-router.register(r"organization", OrganizationViewSet)
-
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
     # this should be above other admin urls
@@ -105,13 +75,6 @@ if settings.DEBUG:
 # enable admin url's if this is an administrative (more secured/read-write) instance
 if settings.ADMIN:
     urlpatterns += admin_urls
-
-    # While rest framework is already secured with "IsAdminUser", not exposing anything
-    # to normal users is better security, as it increases the attack surface (hugely).
-    urlpatterns += [
-        path("data/api/", include(router.urls)),
-        path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
-    ]
 
 # enable urls with interactive components that require database write access (login, url/org submit)
 if settings.ADMIN or settings.INTERACTIVE:
