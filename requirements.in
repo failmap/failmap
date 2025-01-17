@@ -216,3 +216,6 @@ greenlet>=3
 # s3 buckets support for screenshots, etc
 django-storages[s3]
 boto3
+
+# nicer public api without the djrf complexities
+django-ninja

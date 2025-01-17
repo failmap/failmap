@@ -4,6 +4,8 @@ from django.urls import path, register_converter
 import websecmap.map.logic.rss_feeds
 from websecmap import converters
 from websecmap.map import views as v
+from websecmap.map.views import api
+from django.conf import settings
 
 register_converter(converters.OrganizationTypeConverter, "ot")
 register_converter(converters.WeeksConverter, "w")
@@ -121,3 +123,8 @@ urlpatterns = [
     path("admin/organization/move_coordinate/", v.v_move_coordinate),
     path("admin/organization/delete_coordinate/", v.v_delete_coordinate),
 ]
+
+# only add API stuff for development use, we're in transition now to this way of working.
+# the API should not be publicly documented as we don't support it.
+if settings.DEBUG:
+    urlpatterns += [path("api/", api.urls)]
