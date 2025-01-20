@@ -1863,6 +1863,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
             {"name": "scanners.securitypolicy", "label": "🚥️ Security Policies"},
             {"name": "scanners.httpendpointheaders", "label": "📖 HTTP headers"},
             {"name": "scanners.httpendpointcontent", "label": "📖 HTTP endpoint content"},
+            {"name": "scanners.urlreduction", "label": "📖 Url Reductions"},
         ],
     },
     {

@@ -20,7 +20,7 @@ from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
-from websecmap.scanners.comperators import third_party_request_is_present
+from websecmap.scanners.comperators import third_party_request_is_present, remove_randomization_from_url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, ProductCookieIndicator, CookieIndicatorFields
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
@@ -243,6 +243,8 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         return
 
     third_party_requests = result_data.get("third-party-requests-structured", [])
+    # clean up third party requests, this removes a ton of data.
+    third_party_requests = remove_random_data_from_third_party_requests(third_party_requests)
     # it's easy to have more than 9000 characters with third party stuff. there make this shorter
     # This removes urls with the same parameters but different content. As that's just more of the same.
     third_party_requests = remove_duplicate_third_party_requests(third_party_requests)
@@ -268,6 +270,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
 
     # happens a lot, due to easiest path of development / culture
     # todo: to avoid duplicate findings ignore content of parameters, only check for parameters and addresses
+    #  see comparators.py
     web_third_party_rating = WEB_PRIVACY_THIRD_PARTY_FOUND if third_party_requests else WEB_PRIVACY_THIRD_PARTY_OK
     store_endpoint_scan_result(
         scan_type=WEB_PRIVACY_THIRD_PARTY_REQUESTS,
@@ -464,6 +467,51 @@ def truncate_long_post_data(third_party_requests: List[Dict[str, str]], max_char
             request["post_data"] = request["post_data"][:max_chars] + "... truncated " + str(truncated) + " characters"
 
     return third_party_requests
+
+
+def remove_random_data_from_third_party_requests(third_party_requests: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    for request in third_party_requests:
+        request["url"] = remove_randomization_from_url(request["url"])
+    return third_party_requests
+
+
+def remove_random_data_from_existing_third_party_requests(run_in_parallel: bool = False) -> None:
+    # this cleans up historical data, this probably needs to run once.
+    # afterwards use the endpointscan reduction commands to remove the duplicates that now exist.
+    # note that duplicate third party requests now have likely happened in the same call, so also reduce those
+    # load up all third party requests, then apply this method to all 4 million records.
+    # as there are so many records this should happen in parallel.
+    scans = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_THIRD_PARTY_REQUESTS)
+    for epgs in scans:
+        if run_in_parallel:
+            remove_random_data_from_existing_third_party_request.s(epgs.id, epgs.evidence).apply_async()
+        else:
+            print(f"Removing random data from scan {epgs.id}")
+            remove_random_data_from_existing_third_party_request(epgs.id, epgs.evidence)
+
+
+@app.task(queue="database", ignore_result=True)
+def remove_random_data_from_existing_third_party_request(scan_id: int, evidence: str):
+    if not evidence:
+        return
+
+    try:
+        third_party_requests = json.loads(evidence)
+    except JSONDecodeError:
+        return
+
+    third_party_requests = remove_random_data_from_third_party_requests(third_party_requests)
+    third_party_requests = remove_duplicate_third_party_requests(third_party_requests)
+
+    # sort the request by url
+    third_party_requests.sort(key=lambda x: x["url"])
+
+    my_scan = EndpointGenericScan.objects.filter(pk=scan_id).first()
+    if not my_scan:
+        log.error("Could not find endpointgenericscan with id %d", scan_id)
+        return
+    my_scan.evidence = json.dumps(third_party_requests)
+    my_scan.save(update_fields=["evidence"])
 
 
 def remove_duplicate_third_party_requests(third_party_requests: List[Dict[str, str]]) -> List[Dict[str, str]]:

@@ -500,7 +500,7 @@ def test_reduce_url():
         "apzf%2fzd90eb%2bnjrg%2bgd4ssvehswgmiswi9zhkj28dp4%3d"
     )
 
-    assert data == "https://gwz.helloid.com/relayservice/redirect/<GUID>"
+    assert data == "https://gwz.helloid.com/relayservice/redirect/GUID"
 
     # and error situations
     assert reduce_url("https://") == "https://"

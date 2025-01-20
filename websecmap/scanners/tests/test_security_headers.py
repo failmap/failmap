@@ -13,6 +13,7 @@ from websecmap.scanners.scanner.security_headers import (
     clean_csp_header,
     remove_guid_from_string,
     remove_random_identifiers,
+    remove_timestamp_from_end_of_string,
 )
 
 SECURITY_HEADERS = {
@@ -326,13 +327,40 @@ def test_test_clean_csp_header():
 
 def test_remove_guid_from_string():
     result = remove_guid_from_string("mijnantoor.nl%2Fview%2FEGW0001&state=d32e16a3-1474-4861-a954-cc481b8aa509&logie")
-    assert result == "mijnantoor.nl%2Fview%2FEGW0001&state=<GUID>&logie"
+    assert result == "mijnantoor.nl%2Fview%2FEGW0001&state=GUID&logie"
 
     result = remove_guid_from_string("d32e16a3-1474-4861-a954-cc481b8aa509 d32e16a3-1474-4861-a954-cc481b8aa509")
-    assert result == "<GUID> <GUID>"
+    assert result == "GUID GUID"
 
     result = remove_guid_from_string("d32e16a3-1474-4861-a954 -cc481b8aa509")
     assert result == "d32e16a3-1474-4861-a954 -cc481b8aa509"
+    # Other typeof guid? ->                               d32e16a3-1474-4861-a954-cc481b8aa509
+    result = remove_guid_from_string(
+        "https://example.com/a70b84b3-958e-00b0-08f0-9a2526e8360b/d32e16a3-1474-4861-a954-cc481b8aa509/2.jpg"
+    )
+    assert result == "https://example.com/GUID/GUID/2.jpg"
+
+    # and another wrong one: f460367f-32cd-b82f-f0ef-f630d2e72ef4
+    result = remove_guid_from_string("test f460367f-32cd-b82f-f0ef-f630d2e72ef4 string")
+    assert result == "test GUID string"
+
+    # Also support mixed-case guids:
+    result = remove_guid_from_string("test D32E16A3-1474-4861-A954-CC481b8aa509 string")
+    assert result == "test GUID string"
+
+
+def test_remove_timestamp_from_end_of_string():
+    # only at the end of the string, as that is the usual place for it to be.
+    result = remove_timestamp_from_end_of_string("https://example.com/page.html?a=b&t=1629237157")
+    assert result == "https://example.com/page.html?a=b&t=TIMESTAMP"
+
+    # not from the middle parameters
+    result = remove_timestamp_from_end_of_string("https://example.com/page.html?timestamp=1629237157&foo=bar")
+    assert result == "https://example.com/page.html?timestamp=1629237157&foo=bar"
+
+    # not as part of a path
+    result = remove_timestamp_from_end_of_string("https://example.com/1629237157/test")
+    assert result == "https://example.com/1629237157/test"
 
 
 def test_remove_random_identifiers():
@@ -346,7 +374,7 @@ def test_remove_random_identifiers():
     assert result == "jsessionid=<TOKEN_OR_ID>.node0"
 
     result = remove_random_identifiers("d32e16a3-1474-4861-a954-cc481b8aa509")
-    assert result == "<GUID>"
+    assert result == "GUID"
 
     result = remove_random_identifiers(
         "https://region1.google-analytics.com/g/collect?v=2&tid=G-0RSX4L0ZPZ&"

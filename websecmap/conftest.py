@@ -18,6 +18,11 @@ def default_policy():
 
 
 @pytest.fixture
+def urlreduction_sample_data():
+    call_command("loaddata", "urlreduction_sample_data", verbosity=0)
+
+
+@pytest.fixture
 def patch_resolve():
     def mock_resolves(param):
         return True

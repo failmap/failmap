@@ -1566,3 +1566,29 @@ class CookieScanSession(models.Model):
         blank=True,
         help_text="References to logs and information collected during the scan, useful for debugging.",
     )
+
+
+class UrlReduction(models.Model):
+
+    # Do *not* use regular expressions here, as running 200+ regular expressions on large datasets is very, very slow.
+    # and for all intents and purposes just use this good-enough approach will service almost all use cases causing
+    # a reduction of about 95% of the data. When maintained about once a year or so, adding more strings this is enough.
+    # todo: add UrlReduction to the backup
+    search_for = models.CharField(max_length=150, blank=True, null=True, help_text="Search string, not regex")
+    # can be at start, end or center. Center is the most expensive.
+    search_location = models.CharField(
+        max_length=10, blank=True, null=True, default="start", help_text="start, end or center in the input"
+    )
+    replace_with = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="Replacement, where variable content is marked with the word TOKEN.",
+    )
+    motivation = models.CharField(
+        max_length=200, blank=True, null=True, help_text="Some indication of why the normalization is needed."
+    )
+    example_input = models.CharField(max_length=350, blank=True, null=True, help_text="Example input URL")
+
+    def __str__(self):
+        return str(f"{self.id} {self.search_for}")

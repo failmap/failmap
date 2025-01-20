@@ -1270,3 +1270,12 @@ class PaperTrailAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         if obj.file_object:
             return format_html(f'<a href="{obj.file_object.url}" download>{obj.filename}</a>')
         return ""
+
+
+@admin.register(models.UrlReduction)
+class UrlReductionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ("id", "search_for", "search_location", "replace_with", "motivation")
+
+    search_fields = ("search_for", "replace_with", "motivation")
+
+    list_filter = ("search_location",)

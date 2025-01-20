@@ -794,7 +794,19 @@ def reduce_url(url: str) -> str:
 
 
 def remove_guid_from_string(string: str) -> str:
-    return re.sub(r"[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}", "<GUID>", string)
+    # does not work with
+    # this:       d32e16a3-1474 4861         a954            cc481b8aa509
+    # The guid regex below might only match "legit" guids, but there are enough sites that DO NOT use real guids
+    # so the regex has been simplified to match any hex sequence without the special cases
+    # original regex: r"[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+    # While official guids don't have uppercase characters, that's now how you find them on the internet
+    return re.sub(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}", "GUID", string)
+
+
+def remove_timestamp_from_end_of_string(string: str) -> str:
+    # Any timestamp between 2016 and 2042 is a number between 1451606400 and 2272147200
+    # timestamps are used usually in urls to invalidate or bypass caching and appended to a url.
+    return re.sub(r"[1-2][0-9]{9}$", "TIMESTAMP", string)
 
 
 def remove_random_identifiers(string: str) -> str:

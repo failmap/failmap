@@ -21,6 +21,7 @@ from websecmap.scanners.scanner.web_privacy import (
     product_meaning_from_cookies,
     update_meaning_of_location_and_products_at_web_privacy_cookies,
     worse_rating,
+    remove_random_data_from_existing_third_party_requests,
 )
 
 from websecmap.scanners.scanner.web_privacy_resources.trackers import (
@@ -34,6 +35,8 @@ from ..scanner.metric_constants import (
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM,
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK,
 )
+import os
+import json
 
 
 def test_get_tracker_info():
@@ -785,3 +788,68 @@ def test_web_privacy_scan_update(db, requests_mock, current_path, caplog):
         .meaning["products"]
         != []
     )
+
+
+def test_remove_random_data_from_existing_third_party_requests(db, current_path):
+    # load the json export file into the database
+
+    with open(os.path.join(current_path, "websecmap/scanners/tests/web_privacy/third_party_requests.json")) as f:
+        data = json.load(f)
+
+    url = Url.objects.create(url="zutphen.nl")
+    ep = Endpoint.objects.create(
+        url=url, discovered_on=datetime.now(timezone.utc), port=443, protocol="https", ip_version=4
+    )
+
+    for row in data:
+        # you can't **row this, it will give a useless error
+        # ['“” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ] format.']
+        EndpointGenericScan.objects.create(
+            id=row["id"],
+            endpoint=ep,
+            evidence=row["evidence"],
+            rating_determined_on=row["rating_determined_on"],
+            type=row["type"],
+        )
+    assert EndpointGenericScan.objects.all().count() == 4
+
+    remove_random_data_from_existing_third_party_requests()
+
+    # urls are sorted, parameters are empty and ordered alphabetically
+    assert json.loads(EndpointGenericScan.objects.get(id=81940019).evidence) == [
+        {"url": "https://a.tile.osm.org/7/62/64.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {"url": "https://a.tile.osm.org/7/63/63.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {"url": "https://a.tile.osm.org/7/65/64.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {"url": "https://a.tile.osm.org/7/66/63.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {"url": "https://b.tile.osm.org/7/61/63.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {"url": "https://b.tile.osm.org/7/63/64.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {"url": "https://b.tile.osm.org/7/64/63.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {"url": "https://b.tile.osm.org/7/66/64.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {"url": "https://c.tile.osm.org/7/61/64.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {"url": "https://c.tile.osm.org/7/62/63.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {"url": "https://c.tile.osm.org/7/64/64.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {"url": "https://c.tile.osm.org/7/65/63.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {
+            "url": "https://matomo.internetcleanup.foundation/matomo.js",
+            "resource_type": "script",
+            "method": "GET",
+            "post_data": None,
+        },
+        {
+            "url": "https://matomo.internetcleanup.foundation/matomo.php?_id&_idn&_refts&action_name&cookie&h&idsite&m&pf_dm1&pf_net&pf_srv&pf_tfr&pv_id&r&rec&res&s&send_image&uadata&url",  # noqa pylint: disable=line-too-long
+            "resource_type": "ping",
+            "method": "POST",
+            "post_data": None,
+        },
+    ]
+
+    # example with a time parameter somewhere.
+    assert json.loads(EndpointGenericScan.objects.get(id=82183760).evidence) == [
+        {
+            "method": "GET",
+            "post_data": None,
+            "resource_type": "script",
+            # the double https:// is a configuration mistake
+            "url": "https://https//wordpress.internetcleanup.foundation/?action&back&blogid&dm&siteid&t",
+        },
+    ]
