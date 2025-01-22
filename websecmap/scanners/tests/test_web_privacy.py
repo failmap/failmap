@@ -22,6 +22,7 @@ from websecmap.scanners.scanner.web_privacy import (
     update_meaning_of_location_and_products_at_web_privacy_cookies,
     worse_rating,
     remove_random_data_from_existing_third_party_requests,
+    remove_random_data_from_third_party_requests,
 )
 
 from websecmap.scanners.scanner.web_privacy_resources.trackers import (
@@ -428,7 +429,7 @@ def test_truncate_long_post_data():
     ]
 
 
-def test_remove_duplicate_third_party_requestss():
+def test_remove_duplicate_third_party_requestss(db):
     requests = [
         {
             "url": "https://logging.simanalytics.nl/piwik.js",
@@ -473,7 +474,12 @@ def test_remove_duplicate_third_party_requestss():
         },
     ]
 
-    deduplicated_requests = remove_duplicate_third_party_requests(requests)
+    # note that randomization has to be removed from these urls to make duplicate removal fast
+    requests = remove_random_data_from_third_party_requests(requests)
+
+    # having 100+ resources on a page is not really strange, so just add more duplicates just to make sure the
+    # comparison is reasonably fast. 1k takes 9s test. 100k took 11 seconds. With the newer code it still takes 9s :)
+    deduplicated_requests = remove_duplicate_third_party_requests(requests * 100000)
     assert deduplicated_requests == [
         {
             "url": "https://logging.simanalytics.nl/piwik.js",
@@ -482,22 +488,14 @@ def test_remove_duplicate_third_party_requestss():
             "post_data": None,
         },
         {
-            "url": "https://logging.simanalytics.nl/piwik.php?action_name=www.brabantsedelta.nl%2FHome%20%7C%20Brabants"
-            "e%20Delta&idsite=818&rec=1&r=134959&h=23&m=10&s=11&url=https%3A%2F%2Fwww.brabantsedelta.nl%2F&_id=9"
-            "2a4d58c16ebffa3&_idn=1&send_image=0&_refts=0&cookie=1&res=1280x720&dimension1=landing_page&cvar=%7B"
-            "%221%22%3A%5B%22ContentType%22%2C%22landing_page%22%5D%7D&pv_id=pxKG5y&pf_net=108&pf_srv=53&pf_tfr="
-            "19&pf_dm1=358&uadata=%7B%22fullVersionList%22%3A%5B%7B%22brand%22%3A%22Not%2FA)Brand%22%2C%22versio"
-            "n%22%3A%2299.0.0.0%22%7D%2C%7B%22brand%22%3A%22HeadlessChrome%22%2C%22version%22%3A%22115.0.5790.24"
-            "%22%7D%2C%7B%22brand%22%3A%22Chromium%22%2C%22version%22%3A%22115.0.5790.24%22%7D%5D%2C%22mobile%22"
-            "%3Afalse%2C%22model%22%3A%22%22%2C%22platform%22%3A%22Linux%22%2C%22platformVersion%22%3A%224.15.0%"
-            "22%7D",
+            "url": "https://logging.simanalytics.nl/piwik.php?_id&_idn&_refts&action_name&cookie&cvar&dimension1&h&"
+            "idsite&m&pf_dm1&pf_net&pf_srv&pf_tfr&pv_id&r&rec&res&s&send_image&uadata&url",
             "resource_type": "ping",
             "method": "POST",
             "post_data": None,
         },
         {
-            "url": "https://logging.simanalytics.nl/plugins/HeatmapSessionRecording/configs.php?idsite=818&trackerid=We"
-            "4is6&url=https%3A%2F%2Fwww.brabantsedelta.nl%2F",
+            "url": "https://logging.simanalytics.nl/plugins/HeatmapSessionRecording/configs.php?idsite&trackerid&url",
             "resource_type": "script",
             "method": "GET",
             "post_data": None,

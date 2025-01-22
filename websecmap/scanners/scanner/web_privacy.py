@@ -20,7 +20,7 @@ from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
-from websecmap.scanners.comperators import third_party_request_is_present, remove_randomization_from_url
+from websecmap.scanners.url_reduction import remove_randomization_from_url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, ProductCookieIndicator, CookieIndicatorFields
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
@@ -136,6 +136,10 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         "https://aa.tweakers.nl/json",
         ...
       ],
+      "third-party-requests-structured": [
+        {"url": "https://a.tile.osm.org/7/62/64.png", "resource_type": "image", "method": "GET", "post_data": None},
+        {"url": "https://a.tile.osm.org/7/63/63.png", "resource_type": "image", "method": "GET", "post_data": None},
+      ],
       "third-party-domains": [
         "ab.tweakers.nl",
         "aa.tweakers.nl"
@@ -243,7 +247,7 @@ def store(result_data: Dict[str, Any], endpoint_id: int) -> None:
         return
 
     third_party_requests = result_data.get("third-party-requests-structured", [])
-    # clean up third party requests, this removes a ton of data.
+    # clean up third party requests, this removes a ton of records in the database.
     third_party_requests = remove_random_data_from_third_party_requests(third_party_requests)
     # it's easy to have more than 9000 characters with third party stuff. there make this shorter
     # This removes urls with the same parameters but different content. As that's just more of the same.
@@ -476,18 +480,32 @@ def remove_random_data_from_third_party_requests(third_party_requests: List[Dict
 
 
 def remove_random_data_from_existing_third_party_requests(run_in_parallel: bool = False) -> None:
+    # todo: also apply the reductions to the new metrics.
+
     # this cleans up historical data, this probably needs to run once.
     # afterwards use the endpointscan reduction commands to remove the duplicates that now exist.
     # note that duplicate third party requests now have likely happened in the same call, so also reduce those
     # load up all third party requests, then apply this method to all 4 million records.
     # as there are so many records this should happen in parallel.
-    scans = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_THIRD_PARTY_REQUESTS)
-    for epgs in scans:
-        if run_in_parallel:
-            remove_random_data_from_existing_third_party_request.s(epgs.id, epgs.evidence).apply_async()
-        else:
-            print(f"Removing random data from scan {epgs.id}")
-            remove_random_data_from_existing_third_party_request(epgs.id, epgs.evidence)
+    total_scans = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_THIRD_PARTY_REQUESTS).count()
+
+    # Doing this in a single query will not work, it will just time out with 4 million records given it's a lot of data.
+    # 'Query execution was interrupted, maximum statement execution time exceeded', therefore the loop and limits.
+    # range takes no keyword arguments: start, stop, step
+    for i in range(0, total_scans, 1000):
+        start_index = i
+        end_index = min(i + 1000, total_scans)
+        scans = (
+            EndpointGenericScan.objects.all()
+            .filter(type=WEB_PRIVACY_THIRD_PARTY_REQUESTS)
+            .only("id", "evidence")[start_index:end_index]
+        )
+        for epgs in scans:
+            if run_in_parallel:
+                remove_random_data_from_existing_third_party_request.s(epgs.id, epgs.evidence).apply_async()
+            else:
+                print(f"Removing random data from scan {epgs.id}")
+                remove_random_data_from_existing_third_party_request(epgs.id, epgs.evidence)
 
 
 @app.task(queue="database", ignore_result=True)
@@ -515,22 +533,26 @@ def remove_random_data_from_existing_third_party_request(scan_id: int, evidence:
 
 
 def remove_duplicate_third_party_requests(third_party_requests: List[Dict[str, str]]) -> List[Dict[str, str]]:
+
+    # This used to be complex, but as urls now have their randomization reduced and their values removed we don't
+    # need to parse the query strings and so on anymore. We can just use a classic dictionary comparison like
+    #
+
     # Removes urls that have the same set of parameters but with different values. Urls themselves on face value
     # are already unique, but ignoring the parameters can make them not be unique.
     # This only works when urls are still in-tact. It might be possible that urls are not compliant with the uri schema
-    #
+    return sorted([dict(t) for t in {tuple(d.items()) for d in third_party_requests}], key=lambda x: x["url"])
 
-    new_list = []
-    for request in third_party_requests:
-        if not third_party_request_is_present(request, new_list):
-            new_list.append(request)
-    return new_list
+    # new_list = []
+    # for request in third_party_requests:
+    #     if not third_party_request_is_present(request, new_list):
+    #         new_list.append(request)
+    # return new_list
 
 
 @app.task(queue="database", ignore_result=True)
 def update_meaning_of_location_and_products_at_web_privacy_cookies():
     """Update existing endpointgenericscan objects to add location or product meaning."""
-
     geo_ip_data = get_geoip_database()
     domain_ip_data = get_domain_to_ip_database()
 
