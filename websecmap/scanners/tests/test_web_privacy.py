@@ -335,7 +335,7 @@ def test_web_privacy_scan(db, requests_mock, current_path, caplog):
             },
             "rating": "location_medium",
         },
-        # TODO: there is something weird with this testsuite that cuases the result below to not be
+        # TODO: there is something weird with this testsuite that causes the result below to not be
         # exist when running this test isolated, maybe something with the time_cache stuff??
         {
             "applicable_cookies": [
@@ -478,7 +478,9 @@ def test_remove_duplicate_third_party_requestss(db):
     requests = remove_random_data_from_third_party_requests(requests)
 
     # having 100+ resources on a page is not really strange, so just add more duplicates just to make sure the
-    # comparison is reasonably fast. 1k takes 9s test. 100k took 11 seconds. With the newer code it still takes 9s :)
+    # comparison is reasonably fast. But with large numbers it crumbled. The method has been rewritten to be faster
+    # Old: 1k*4 requests was 9 seconds, 100k*4 was 11 seconds. New: 100k*4 is 9 seconds as elaborate comparison
+    # has been removed
     deduplicated_requests = remove_duplicate_third_party_requests(requests * 100000)
     assert deduplicated_requests == [
         {

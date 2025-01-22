@@ -8,6 +8,7 @@ Thanks to:
 - https://github.com/PrivacyScore/privacyscanner/tree/whotracksme/privacyscanner/scanmodules
 """
 
+import contextlib
 from json import JSONDecodeError
 from typing import Any, Dict, List
 import re
@@ -439,7 +440,7 @@ def privacy_counters(add_urls: bool = False) -> None:
     for key in keys:
         companies = {}
         for my_scan in scans:
-            try:
+            with contextlib.suppress(JSONDecodeError):
                 evidence = json.loads(my_scan.evidence.replace("'", '"'))
                 for tracker in evidence:
                     if tracker[key] not in companies:
@@ -447,8 +448,6 @@ def privacy_counters(add_urls: bool = False) -> None:
                     companies[tracker[key]]["amount"] += 1
                     if add_urls:
                         companies[tracker[key]]["urls"].append(my_scan.endpoint.url.url)
-            except JSONDecodeError:
-                pass
         print(key)
         print(json.dumps(companies, indent=4))
 
@@ -480,8 +479,6 @@ def remove_random_data_from_third_party_requests(third_party_requests: List[Dict
 
 
 def remove_random_data_from_existing_third_party_requests(run_in_parallel: bool = False) -> None:
-    # todo: also apply the reductions to the new metrics.
-
     # this cleans up historical data, this probably needs to run once.
     # afterwards use the endpointscan reduction commands to remove the duplicates that now exist.
     # note that duplicate third party requests now have likely happened in the same call, so also reduce those
@@ -533,21 +530,10 @@ def remove_random_data_from_existing_third_party_request(scan_id: int, evidence:
 
 
 def remove_duplicate_third_party_requests(third_party_requests: List[Dict[str, str]]) -> List[Dict[str, str]]:
-
     # This used to be complex, but as urls now have their randomization reduced and their values removed we don't
     # need to parse the query strings and so on anymore. We can just use a classic dictionary comparison like
-    #
-
-    # Removes urls that have the same set of parameters but with different values. Urls themselves on face value
-    # are already unique, but ignoring the parameters can make them not be unique.
-    # This only works when urls are still in-tact. It might be possible that urls are not compliant with the uri schema
+    # https://stackoverflow.com/questions/9427163/remove-duplicate-dict-in-list-in-python
     return sorted([dict(t) for t in {tuple(d.items()) for d in third_party_requests}], key=lambda x: x["url"])
-
-    # new_list = []
-    # for request in third_party_requests:
-    #     if not third_party_request_is_present(request, new_list):
-    #         new_list.append(request)
-    # return new_list
 
 
 @app.task(queue="database", ignore_result=True)
