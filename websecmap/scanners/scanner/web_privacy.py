@@ -483,26 +483,36 @@ def remove_random_data_from_existing_third_party_requests(run_in_parallel: bool 
     # afterwards use the endpointscan reduction commands to remove the duplicates that now exist.
     # note that duplicate third party requests now have likely happened in the same call, so also reduce those
     # load up all third party requests, then apply this method to all 4 million records.
-    # as there are so many records this should happen in parallel.
+    # as there are so many records this should happen in parallel. So stop the periodic task while running this.
     total_scans = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_THIRD_PARTY_REQUESTS).count()
-
     # Doing this in a single query will not work, it will just time out with 4 million records given it's a lot of data.
     # 'Query execution was interrupted, maximum statement execution time exceeded', therefore the loop and limits.
     # range takes no keyword arguments: start, stop, step
     for i in range(0, total_scans, 1000):
         start_index = i
         end_index = min(i + 1000, total_scans)
-        scans = (
-            EndpointGenericScan.objects.all()
-            .filter(type=WEB_PRIVACY_THIRD_PARTY_REQUESTS)
-            .only("id", "evidence")[start_index:end_index]
-        )
-        for epgs in scans:
-            if run_in_parallel:
-                remove_random_data_from_existing_third_party_request.s(epgs.id, epgs.evidence).apply_async()
-            else:
-                print(f"Removing random data from scan {epgs.id}")
-                remove_random_data_from_existing_third_party_request(epgs.id, epgs.evidence)
+        if not run_in_parallel:
+            print(f"Processing batch {start_index} to {end_index}")
+            remove_random_data_from_some_existing_third_party_requests(start_index, end_index)
+        else:
+            remove_random_data_from_some_existing_third_party_requests.s(start_index, end_index).apply_async()
+
+
+@app.task(queue="database", ignore_result=True)
+def remove_random_data_from_some_existing_third_party_requests(start_index: int = 0, end_index: int = 1000) -> None:
+    # parallelize in batches of 1k or so, to not create millions of slow tasks.
+    # putting tasks on the queue should not take hours.
+
+    # of course the [limit] ranges will change over time as more records are added. So there will be
+    # very small leaks of non-updated records this way. But not splitting these queries is not
+    # an option as they time out.
+    scans = (
+        EndpointGenericScan.objects.all()
+        .filter(type=WEB_PRIVACY_THIRD_PARTY_REQUESTS)
+        .only("id", "evidence")[start_index:end_index]
+    )
+    for epgs in scans:
+        remove_random_data_from_existing_third_party_request(epgs.id, epgs.evidence)
 
 
 @app.task(queue="database", ignore_result=True)
