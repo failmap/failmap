@@ -71,4 +71,4 @@ def clean_application_caches_and_logs(retention_days: int = 30):
     ]
 
     for info in tables_to_reduce:
-        info["model"].objects.all().filter(**{f"{info['time_column']}__lte": days_back}).delete()
+        info["model"].objects.filter(**{f"{info['time_column']}__lte": days_back}).only("id").delete()
