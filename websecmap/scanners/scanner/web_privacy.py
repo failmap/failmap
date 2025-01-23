@@ -479,62 +479,39 @@ def remove_random_data_from_third_party_requests(third_party_requests: List[Dict
 
 
 def remove_random_data_from_existing_third_party_requests(run_in_parallel: bool = False) -> None:
-    # this cleans up historical data, this probably needs to run once.
-    # afterwards use the endpointscan reduction commands to remove the duplicates that now exist.
-    # note that duplicate third party requests now have likely happened in the same call, so also reduce those
-    # load up all third party requests, then apply this method to all 4 million records.
-    # as there are so many records this should happen in parallel. So stop the periodic task while running this.
-    total_scans = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_THIRD_PARTY_REQUESTS).count()
-    # Doing this in a single query will not work, it will just time out with 4 million records given it's a lot of data.
-    # 'Query execution was interrupted, maximum statement execution time exceeded', therefore the loop and limits.
-    # range takes no keyword arguments: start, stop, step
-    for i in range(0, total_scans, 1000):
-        start_index = i
-        end_index = min(i + 1000, total_scans)
-        if not run_in_parallel:
-            print(f"Processing batch {start_index} to {end_index}")
-            remove_random_data_from_some_existing_third_party_requests(start_index, end_index)
+    # This is the third approach to cleaning up this table.
+    # A: Using limit/offset does not work. (so updating batches of 10k) it did work, but was very slow causing timeouts
+    # B: Using a select id, evidence query does not work as that also caused timeouts
+    # C: Using ID and then create a new task that just updates that record will probably work.
+    #  - Direct access to an ID is instant
+    #  - The query to get all 4 million id's takes 2.47 seconds
+    scans = EndpointGenericScan.objects.all().filter(type=WEB_PRIVACY_THIRD_PARTY_REQUESTS).only("id")
+    for my_scan in scans:
+        if run_in_parallel:
+            remove_random_data_from_existing_third_party_request.s(my_scan.id).apply_async()
         else:
-            remove_random_data_from_some_existing_third_party_requests.s(start_index, end_index).apply_async()
+            print(f"Processing scan {my_scan.id}")
+            remove_random_data_from_existing_third_party_request(my_scan.id)
 
 
 @app.task(queue="database", ignore_result=True)
-def remove_random_data_from_some_existing_third_party_requests(start_index: int = 0, end_index: int = 1000) -> None:
-    # parallelize in batches of 1k or so, to not create millions of slow tasks.
-    # putting tasks on the queue should not take hours.
-
-    # of course the [limit] ranges will change over time as more records are added. So there will be
-    # very small leaks of non-updated records this way. But not splitting these queries is not
-    # an option as they time out.
-    scans = (
-        EndpointGenericScan.objects.all()
-        .filter(type=WEB_PRIVACY_THIRD_PARTY_REQUESTS)
-        .only("id", "evidence")[start_index:end_index]
-    )
-    for epgs in scans:
-        remove_random_data_from_existing_third_party_request(epgs.id, epgs.evidence)
-
-
-@app.task(queue="database", ignore_result=True)
-def remove_random_data_from_existing_third_party_request(scan_id: int, evidence: str):
-    if not evidence:
-        return
-
-    try:
-        third_party_requests = json.loads(evidence)
-    except JSONDecodeError:
-        return
-
-    third_party_requests = remove_random_data_from_third_party_requests(third_party_requests)
-    third_party_requests = remove_duplicate_third_party_requests(third_party_requests)
-
-    # sort the request by url
-    third_party_requests.sort(key=lambda x: x["url"])
-
-    my_scan = EndpointGenericScan.objects.filter(pk=scan_id).first()
+def remove_random_data_from_existing_third_party_request(scan_id: int):
+    my_scan = EndpointGenericScan.objects.filter(pk=scan_id).only("id", "evidence", "type").first()
     if not my_scan:
         log.error("Could not find endpointgenericscan with id %d", scan_id)
         return
+    # not added in the query as that will make the query slower :)
+    if my_scan.type != WEB_PRIVACY_THIRD_PARTY_REQUESTS:
+        log.error("Endpointgenericscan has the wrong scan type, with id %d", scan_id)
+        return
+    if not my_scan.evidence:
+        return
+    try:
+        third_party_requests = json.loads(my_scan.evidence)
+    except JSONDecodeError:
+        return
+    third_party_requests = remove_random_data_from_third_party_requests(third_party_requests)
+    third_party_requests = remove_duplicate_third_party_requests(third_party_requests)
     my_scan.evidence = json.dumps(third_party_requests)
     my_scan.save(update_fields=["evidence"])
 

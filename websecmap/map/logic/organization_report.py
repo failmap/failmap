@@ -232,6 +232,8 @@ def convert_report_to_excel(
     ws.column_dimensions["K"].width = "40"
     ws.column_dimensions["L"].width = "40"
 
+    # todo: add second level domain -> ondern welke root wordt dat uitgegeven.
+
     # todo: match column designs to field names, so if the order changes or etc the design stays the same.
     # Currently it's a mess with every change...
 
