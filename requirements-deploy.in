@@ -1,7 +1,0 @@
-# dependencies not required during development
-
-# make sure there are no version conflicts with requirements.txt
--c requirements.txt
-
-uwsgi>=2.0.22
-django-uwsgi

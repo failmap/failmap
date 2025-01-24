@@ -226,7 +226,7 @@ ${VIRTUAL_ENV}/.requirements.installed: requirements.txt requirements-dev.txt| $
 	${pip-sync} $^
 	@touch $@  # update timestamp
 
-requirements = requirements.txt requirements-dev.txt requirements-deploy.txt
+requirements = requirements.txt requirements-dev.txt
 requirements: ${requirements}
 
 # perform 'pip freeze' on first class requirements in .in files.
@@ -236,27 +236,20 @@ requirements.txt: requirements.in | ${pip-compile}
 requirements-dev.txt: requirements-dev.in requirements.in | ${pip-compile}
 	${pip-compile} ${pip_compile_args} --resolver=backtracking --output-file $@ $<
 
-requirements-deploy.txt: requirements-deploy.in requirements.in | ${pip-compile}
-	${pip-compile} ${pip_compile_args} --resolver=backtracking --output-file $@ $<
-
 pip-sync:
 	# synchronizes the .venv with the state of requirements.txt
 	python3 -m piptools sync requirements.txt requirements-dev.txt
 
 update_requirements: pip_compile_args=--upgrade --resolver=backtracking
-update_requirements: _mark_outdated requirements.txt requirements-dev.txt requirements-deploy.txt _commit_update
+update_requirements: _mark_outdated requirements.txt requirements-dev.txt _commit_update
 
 upgrade_package: | ${pip-compile} ## upgrade a single Python package in requirements.txt
-	@if [ -z "${package}"];then echo "Usage: make upgrade_package package=package-name"; exit 1; fi
+	@if [ -z "${package}" ];then echo "Usage: make upgrade_package package=package-name"; exit 1; fi
 	${pip-compile} requirements.in --upgrade-package ${package}
 
 upgrade_dev_package: | ${pip-compile} ## upgrade a single Python package in requirments-dev.txt
-	@if [ -z "${package}"];then echo "Usage: make upgrade_dev_package package=package-name"; exit 1; fi
+	@if [ -z "${package}" ];then echo "Usage: make upgrade_dev_package package=package-name"; exit 1; fi
 	${pip-compile} requirements-dev.in --upgrade-package ${package}
-
-upgrade_deploy_package: | ${pip-compile} ## upgrade a single Python package in requirements-deploy.txt
-	@if [ -z "${package}"];then echo "Usage: make upgrade_deploy_package package=package-name"; exit 1; fi
-	${pip-compile} requirements-deploy.in --upgrade-package ${package}
 
 _mark_outdated:
 	touch requirements*.in

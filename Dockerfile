@@ -12,8 +12,6 @@ ENV VIRTUAL_ENV = /pyenv
 ENV PATH=/pyenv/bin:$PATH
 ENV CRYPTOGRAPHY_DONT_BUILD_RUST 1
 
-COPY requirements-deploy.txt /source/
-RUN --mount=type=cache,target=/root/.cache pip install --quiet --requirement /source/requirements-deploy.txt
 COPY requirements.txt /source/
 RUN --mount=type=cache,target=/root/.cache pip install --quiet --requirement /source/requirements.txt
 

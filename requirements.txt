@@ -142,6 +142,8 @@ django-taggit==6.1.0
     # via -r requirements.in
 django-timezone-field==7.0
     # via django-celery-beat
+django-uwsgi==0.2.2
+    # via -r requirements.in
 dnspython==2.7.0
     # via
     #   -r requirements.in
@@ -379,6 +381,8 @@ urllib3==1.26.20
     #   sentry-sdk
 urllib3-future==2.11.910
     # via niquests
+uwsgi==2.0.28
+    # via -r requirements.in
 validators==0.34.0
     # via -r requirements.in
 vine==5.1.0

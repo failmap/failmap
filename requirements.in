@@ -5,11 +5,9 @@
 # Compiling:
 # pip-compile --output-file=requirements.txt requirements.in
 # pip-compile --output-file=requirements-dev.txt requirements-dev.in
-# pip-compile --output-file=requirements-deploy.txt requirements-deploy.in
 # upgrading a package:
 # pip-compile --output-file=requirements.txt requirements.in --upgrade-package django --resolver=backtracking
 # pip-compile --output-file=requirements-dev.txt requirements-dev.in --upgrade-package django --resolver=backtracking
-# pip-compile --output-file=requirements-deploy.txt requirements-deploy.in --upgrade-package django --resolver=backtracking
 
 # Please also refer to: https://gitlab.com/internet-cleanup-foundation/web-security-map/blob/master/docs/source/topics/development/development.md#python-dependencies-managment
 
@@ -219,3 +217,6 @@ boto3
 
 # nicer public api without the djrf complexities
 django-ninja
+
+uwsgi>=2.0.22
+django-uwsgi
