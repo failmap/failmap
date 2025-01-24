@@ -22,6 +22,14 @@ minversion = "6.0"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 testpaths = ["tests","websecmap"]
 norecursedirs = ["*fixtures*", "*locale*", "*migrations*", "*static*", "*uploads*", "resources", "*templates*", "*.devenv*", "*.pytest_cache*", "*htmlcov*", "*tools*", "*vendor*"]
+filterwarnings = [
+    # ignoring warnings which we can do nothing about
+    # https://docs.python.org/3/library/warnings.html#warning-filter
+    # has deprecated version classes, not fixed upstream yet
+    "ignore::DeprecationWarning:django_excel",
+    # django-ninja has deprecated pydantic config: https://github.com/vitalik/django-ninja/issues/1093
+    "ignore:Support for class-based `config` is deprecated",
+]
 
 [tool.black]
 line-length = 120

@@ -46,7 +46,7 @@ shsrc = $(shell find * ! -path vendor\* -name \*.sh)
 .PHONY: test check check_migrations setup run fix autofix clean mrproper test_integration
 
 # default action to run
-all: setup coverage test check
+all: setup test check
 
 # setup entire dev environment
 setup: ${app}	## setup development environment and application

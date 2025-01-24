@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from websecmap.scanners.autoexplain import autoexplain
+from websecmap.scanners.autoexplain import autoexplain_pki_subdomain
 
 log = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            autoexplain()
+            autoexplain_pki_subdomain()
             log.info("Autoexplain finished!")
 
         except KeyboardInterrupt:

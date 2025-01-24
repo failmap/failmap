@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import tldextract
 
 from websecmap.app import log
-from websecmap.game.models import OrganizationSubmission
 from websecmap.map.models import OrganizationOnLayerOverTime
 from websecmap.organizations.models import (
     AlternativeName,
@@ -248,9 +247,6 @@ def merge_organizations(org_from: Organization, org_to: Organization):
 
     if newest_coordinates := Coordinate.objects.all().filter(organization=org_to).last():
         newest_coordinates.revive()
-
-    # Also move all game submissions, which is a bit easier...
-    OrganizationSubmission.objects.all().filter(organization_in_system=org_from).update(organization_in_system=org_to)
 
     # move fields if not empty:
     fields = ["internal_notes", "twitter_handle", "wikidata", "wikipedia", "surrogate_id", "written_address"]

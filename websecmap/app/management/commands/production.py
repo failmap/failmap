@@ -5,8 +5,7 @@ import sys
 
 from django.core.management import call_command
 
-# uwasgi is a production dependency, as it caused issues during development on M1 macs
-from django_uwsgi.management.commands.runuwsgi import Command as RunserverCommand  # pylint: disable=import-error
+from django_uwsgi.management.commands.runuwsgi import Command as RunserverCommand
 
 log = logging.getLogger(__name__)
 

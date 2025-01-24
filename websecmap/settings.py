@@ -103,11 +103,6 @@ INSTALLED_APPS = [
     "websecmap.scanners",
     "websecmap.reporting",
     "websecmap.map",
-    "websecmap.game",
-    # disable game as it has not been maintained for a while.
-    # the front-end needs to be re-written in a modern approach to make it work better
-    # removing this reduces the need for components like select2, crispy forms and similar
-    # "websecmap.game",
     "websecmap.api",
     "django_countries",
     "django.contrib.admindocs",
@@ -1914,26 +1909,6 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     #         {"name": "scanners.endpointgenericscanscratchpad", "label": "Endpoint Scans Debug"},
     #     ],
     # },
-    {
-        "label": _("👾️ Submissions (beta)"),
-        "items": [
-            {"name": "game.contest", "label": "🪩 Contests / Seasons"},
-            {"name": "game.team", "label": "🎉 Teams"},
-            {"name": "game.organizationsubmission", "label": "🏢 Organization Submissions"},
-            {
-                "label": _("🏢 - New organizations"),
-                "url": "/admin/game/organizationsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-5",
-                "url_blank": False,
-            },
-            {"name": "game.urlsubmission", "label": "🖥️ Url Submissions"},
-            {
-                "label": _("🖥️ - New urls"),
-                "url": "/admin/game/urlsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-6.2.3",
-                "url_blank": False,
-            },
-            {"name": "game.submissionrewardvideo", "label": "📺 Reward Videos"},
-        ],
-    },
 ]
 
 JET_SIDE_MENU_COMPACT = True

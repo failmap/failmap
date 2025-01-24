@@ -3,7 +3,6 @@ import logging
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from websecmap.map.models import OrganizationReport
 from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url
 from websecmap.reporting.models import UrlReport
@@ -80,9 +79,3 @@ def and_its_gone():
     Coordinate.objects.all().delete()
     Organization.objects.all().delete()
     OrganizationType.objects.all().delete()
-
-    # game
-    UrlSubmission.objects.all().delete()
-    OrganizationSubmission.objects.all().delete()
-    Team.objects.all().delete()
-    Contest.objects.all().delete()
