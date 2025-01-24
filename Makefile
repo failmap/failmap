@@ -81,7 +81,7 @@ tests ?= .
 
 test: ${pysrc} ${app} ## run test suite
 	# run testsuite
-	${enable_coverage} pytest --verbose --doctest-modules --doctest-ignore-import-errors -vv -ra -k 'not integration_celery and not integration_scanners and not system and ${tests}' ${testargs}
+	${enable_coverage} pytest --verbose --doctest-modules --doctest-ignore-import-errors --nomigrations -vv -ra -k 'not integration_celery and not integration_scanners and not system and ${tests}' ${testargs}
 
 doctest: testargs=./websecmap
 doctest: test
@@ -100,6 +100,8 @@ check_py: ${pysrc} ${app}
 check_migrations: ${pysrc} ${app}
 	# ensure no model updates are commited without migrations
 	${app} makemigrations --check
+	# check if all migrations apply cleanly
+	DB_NAME=:memory: ${app} migrate --verbosity=0
 
 check_sh: ${shsrc}
 	# shell script checks (if installed)
