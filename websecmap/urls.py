@@ -25,9 +25,6 @@ from django.urls import path, re_path
 from django.conf.urls.static import static
 
 
-# register Jet Dashboard views
-import websecmap.app.dashboard_module_views  # noqa  # pylint: disable=unused-import
-
 # Django 1.10 http://stackoverflow.com/questions/38744285/
 # django-urls-error-view-must-be-a-callable-or-a-list-tuple-in-the-case-of-includ#38744286
 from . import __version__

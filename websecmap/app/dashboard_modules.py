@@ -13,9 +13,3 @@ class RebuildRatings(DashboardModule):
     title_url = "Rebuild Ratings"
 
     template = "admin/rebuild_ratings.html"
-
-
-class TaskProcessing(DashboardModule):
-    title = "Task Processing Status"
-    title_url = "Task Processing Status"
-    template = "admin/task_processing_status.html"

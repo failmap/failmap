@@ -6,7 +6,6 @@ from jet.dashboard import modules
 from jet.dashboard.dashboard import Dashboard
 from jet.dashboard.models import UserDashboardModule
 
-from websecmap.app import dashboard_modules
 
 log = logging.getLogger(__name__)
 
@@ -67,10 +66,7 @@ class CustomIndexDashboard(ResetUserWidgetConfiguration):
         self.children.append(
             modules.AppList(
                 _("Content"),
-                exclude=(
-                    "auth.*",
-                    "django_celery_beat.*",
-                ),
+                exclude=("auth.*", "django_celery_beat.*", "constance.*"),
                 column=1,
                 order=0,
             )
@@ -80,10 +76,7 @@ class CustomIndexDashboard(ResetUserWidgetConfiguration):
         self.children.append(
             modules.AppList(
                 _("Administration"),
-                models=(
-                    "auth.*",
-                    "django_celery_beat.*",
-                ),
+                models=("auth.*", "django_celery_beat.*", "constance.*"),
                 column=2,
                 order=0,
             )
@@ -92,31 +85,42 @@ class CustomIndexDashboard(ResetUserWidgetConfiguration):
         # append a recent actions module
         self.children.append(modules.RecentActions(_("Recent Actions"), 10, column=0, order=1))
 
-        self.children.append(dashboard_modules.TaskProcessing(_("Task Processing Status (WIP)"), column=0, order=0))
-
         self.children.append(
             modules.LinkList(
                 _("Failmap resources"),
                 children=[
                     {
                         "title": _("Gitlab Repository"),
-                        "url": "https://gitlab.com/failmap/",
+                        "url": "https://gitlab.com/internet-cleanup-foundation/web-security-map/",
                         "external": True,
                     },
                     {
-                        "title": _("Admin repository"),
-                        "url": "https://gitlab.com/failmap/failmap",
-                        "external": True,
-                    },
-                    {
-                        "title": _("Failmap Website"),
-                        "url": "https://faalkaart.nl",
+                        "title": _("Monitoring"),
+                        "url": "https://monitoring.internetcleanup.foundation",
                         "external": True,
                     },
                 ],
-                column=2,
+                column=0,
                 order=2,
             ),
+        )
+
+        self.children.append(
+            modules.ModelList(
+                _("Quicklinks"),
+                models=(
+                    "organizations.OrganizationType"
+                    "organizations.Organization"
+                    "organizations.Url"
+                    "scanners.Endpoint"
+                    "scanners.EndpointGenericScan"
+                    "scanners.UrlGenericScan"
+                    "scanners.Scanner"
+                    "scanners.ScanType"
+                ),
+                column=0,
+                order=3,
+            )
         )
 
 

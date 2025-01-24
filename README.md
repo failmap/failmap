@@ -188,7 +188,8 @@ make
 After completing successfully Web Security Map development server is available to run:
 
 ```bash
-devenv up
+websecmap loaddata testdata
+make run
 ```
 
 Now visit the [map website](http://127.0.0.1:8000/) and/or the
