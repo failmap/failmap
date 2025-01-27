@@ -360,7 +360,8 @@ def test_categorize_nuclei_record(db):
     """Correct category for template should be fetched from records in
     output (after nuclie added subcategories (eg: http, dns, etc)"""
 
-    nuclei_data = open(Path(__file__).parent / "nuclei_output.bin", "rb").read()
+    with open(Path(__file__).parent / "nuclei_output.bin", "rb") as nuclei_output:
+        nuclei_data = nuclei_output.read()
 
     assert nuclei_data
 
@@ -379,7 +380,8 @@ def test_categorize_nuclei_record(db):
 def test_categorize_nuclei_record_old_templates(db):
     """Correct category for template should be fetched from records in output (before nuclie added subcategories"""
 
-    data = open(Path(__file__).parent / "nuclei_output_old.bin", "rb").read()
+    with open(Path(__file__).parent / "nuclei_output_old.bin", "rb") as nuclei_output:
+        data = nuclei_output.read()
 
     raw_nuclei_records = convert_nuclei_data_to_json(data)
     output = prepare_nuclei_results_for_storage(raw_nuclei_records)

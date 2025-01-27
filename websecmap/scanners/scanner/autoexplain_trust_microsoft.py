@@ -348,12 +348,12 @@ def certificate_matches_microsoft_exception_policy(
         log.debug("Could not retrieve certificate for %s.", url)
         return False
 
-    if certificate.not_valid_before.astimezone(timezone.utc) > datetime.now(timezone.utc):
-        log.debug("Certificate for %s is not valid before %s. Not trusted.", url, certificate.not_valid_before)
+    if certificate.not_valid_before_utc.astimezone(timezone.utc) > datetime.now(timezone.utc):
+        log.debug("Certificate for %s is not valid before %s. Not trusted.", url, certificate.not_valid_before_utc)
         return False
 
-    if datetime.now(timezone.utc) > certificate.not_valid_after.astimezone(timezone.utc):
-        log.debug("Certificate for %s has expired  %s. Not trusted.", url, certificate.not_valid_after)
+    if datetime.now(timezone.utc) > certificate.not_valid_after_utc.astimezone(timezone.utc):
+        log.debug("Certificate for %s has expired  %s. Not trusted.", url, certificate.not_valid_after_utc)
         return False
 
     # Likely subdomain:

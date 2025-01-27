@@ -165,7 +165,7 @@ def test_return_data_if_available(db, client):
         country="NL",
         organization_type=OrganizationType.objects.get_or_create(name="test")[0],
         at_when="2024-01-01",
-    )[1]
+    )
 
     with freeze_time("2024-01-01 08:00:00"):
         response = client.get("/data/map/NL/test/2024-01-01/")

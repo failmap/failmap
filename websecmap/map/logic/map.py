@@ -64,10 +64,12 @@ def get_cached_map_data(
         return False
 
     my_dataset = MapDataCache.objects.only("id", "dataset_file").get(id=cached.id)
+
     if not my_dataset:
         return False
 
-    return zip_to_json(my_dataset.dataset_file)
+    with my_dataset.dataset_file as dataset_file:
+        return zip_to_json(dataset_file)
 
 
 def get_map_data(

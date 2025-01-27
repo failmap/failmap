@@ -1,3 +1,4 @@
+import pytz
 from datetime import datetime
 
 from websecmap.map.logic.map_health import update_map_health_reports
@@ -49,7 +50,7 @@ def test_filter_map_configs(db):
 def test_update_map_health_reports(db):
     municipality = OrganizationType.objects.create(name="municipality")
     Configuration.objects.create(country="NL", organization_type=municipality, is_reported=True)
-    Organization.objects.create(country="NL", created_on=datetime(2020, 1, 1))
+    Organization.objects.create(country="NL", created_on=datetime(2020, 1, 1, tzinfo=pytz.UTC))
 
     # make sure it doesn't crash on the type field
     tasks = update_map_health_reports("test", 1, ["NL"], ["municipality"])

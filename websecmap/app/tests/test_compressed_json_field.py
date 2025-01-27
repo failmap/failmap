@@ -1,7 +1,9 @@
 from websecmap.app.models import CompressedJSONFieldTest
 from django.db import connection
+import pytest
 
 
+@pytest.mark.filterwarnings("ignore:app.CompressedJSONFieldTest.data failed to load invalid json")
 def test_compressedjsonfield(db):
     json_data = {"hello": "world", "2": 2, "nested": {"hello": "world"}, "none": None}
 

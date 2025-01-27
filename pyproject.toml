@@ -23,6 +23,9 @@ python_files = ["tests.py", "test_*.py", "*_tests.py"]
 testpaths = ["tests","websecmap"]
 norecursedirs = ["*fixtures*", "*locale*", "*migrations*", "*static*", "*uploads*", "resources", "*templates*", "*.devenv*", "*.pytest_cache*", "*htmlcov*", "*tools*", "*vendor*"]
 filterwarnings = [
+    # uncommenting this line will help in finding where warnings happen during pytest runs
+    # "error",
+
     # ignoring warnings which we can do nothing about
     # https://docs.python.org/3/library/warnings.html#warning-filter
     # has deprecated version classes, not fixed upstream yet

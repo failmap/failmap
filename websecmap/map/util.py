@@ -14,18 +14,21 @@ def json_to_zip(data: Any):
     zip_buffer = io.BytesIO()
 
     # 4kb to 160 bytes, seems to compress things...
-    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
-        zip_file.writestr("data.json", dumped)
+    zip_file = zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False)
+    zip_file.writestr("data.json", dumped)
+    zip_file.close()
 
     return zip_buffer.getvalue()
 
 
 def zip_to_json(file_pointer: Any):
-    input_zip = zipfile.ZipFile(file_pointer)
-    things = {name: input_zip.read(name) for name in input_zip.namelist()}
-    return json.loads(things["data.json"])
+    with zipfile.ZipFile(file_pointer) as input_zip:
+        things = {name: input_zip.read(name) for name in input_zip.namelist()}
+
+        return json.loads(things["data.json"])
 
 
 def transparent_json_to_zip_storage(data: Any):
     # data needs to be a json serializable python data structure (like a dict)
-    return ContentFile(json_to_zip(data), "data.json.zip")
+    with ContentFile(json_to_zip(data), "data.json.zip") as contentfile:
+        return contentfile

@@ -201,6 +201,8 @@ def test_can_connect_socket_closed_port(httpserver: HTTPServer, monkeypatch):
 
     assert not can_connect("http", "localhost", port, 4, user_agent="example")["result"]
 
+    sock.close()
+
 
 def test_can_connect_unresolvable(httpserver: HTTPServer, monkeypatch):
     """A unresolvable address should return false."""

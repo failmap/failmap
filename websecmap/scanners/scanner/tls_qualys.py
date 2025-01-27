@@ -132,7 +132,7 @@ def plan_scan_optimized():
         endpoint__port=443,
         endpoint__is_dead=False,
         # this was every 14 days
-        created_on__gte=datetime.now() - timedelta(days=45),
+        created_on__gte=datetime.now(timezone.utc) - timedelta(days=45),
     )
 
     # here is the slow and correct approach preserved for when someone thinks they can do it better :)

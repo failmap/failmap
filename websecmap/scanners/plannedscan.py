@@ -648,7 +648,7 @@ def generic_retry_watcher(scanner_name: str, activity: int, minutes: int = 30):
     # resets them to requested. At that moment the next scan can be picked up. Expecting a timeout of 30 minutes.
     # which should be way than more than enough to finish a scan on a domain.
 
-    scan_too_old = datetime.now() - timedelta(minutes=minutes)
+    scan_too_old = datetime.now(timezone.utc) - timedelta(minutes=minutes)
 
     scanner = Scanner.objects.all().filter(python_name=scanner_name).first()
     if not scanner:
