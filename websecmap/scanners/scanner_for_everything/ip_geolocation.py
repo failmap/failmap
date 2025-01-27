@@ -4,7 +4,7 @@ every 14 days or so. It is already optimized to no call the API twice if the net
 """
 
 import ipaddress
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterator, Optional
 
 import netaddr
 from django.forms import model_to_dict
@@ -40,20 +40,16 @@ def create_tasks() -> group:
     return group()
 
 
-def get_all_ips() -> List[str]:
+def get_all_ips() -> Iterator[str]:
     ips = (
         DomainIp.objects.all()
         .filter(is_the_latest=True)
         .exclude(ip_address__isnull=True)
+        .distinct()
         .values_list("ip_address", flat=True)
     )
-    # distinct:
-    ips = list(sorted(list(set(ips))))
-    if "" in ips:
-        ips.remove("")
-    if "-" in ips:
-        ips.remove("-")
-    return ips
+
+    return (i for i in ips if i and "-" not in i)
 
 
 @app.task(queue="database", ignore_result=True)
@@ -111,7 +107,7 @@ def scan_using_known_data():
 
     # then check if the ip is in one of the known networks and if so then store this.
     all_ips = get_all_ips()
-    log.debug("We know %d IPs", len(all_ips))
+    # log.debug("We know %d IPs", len(all_ips))
     for ip in all_ips:
         if ip in known_ips:
             continue
