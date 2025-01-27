@@ -4,6 +4,7 @@ from datetime import date, datetime
 from tempfile import NamedTemporaryFile
 from typing import Union, Dict, List
 
+import tldextract
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
@@ -161,12 +162,12 @@ def convert_report_to_excel(
     for row in rows:
         ws.append(list(row.values()))
 
-    # This is making saving intensely slower, so only add links to high, medium and low.
+    # This is making saving intensely slower, so only add links to high, medium and low(!)
     # As the range documentation is lacking, just use a savage
     # 90's era counter and break the loop after the amount of highs+mediums+lows have been reached :)
     limit = report_data["high"] + report_data["medium"] + report_data["low"] + len(static_header)
     i = 0
-    for cell in ws["G"]:
+    for cell in ws["H"]:
         i += 1
 
         if i > len(static_header) + 1:
@@ -224,13 +225,13 @@ def convert_report_to_excel(
     # Or make an educated guess at the width.
     log.debug("Resizing columns")
     ws.column_dimensions["A"].width = "40"
-    ws.column_dimensions["F"].width = "4"
-    ws.column_dimensions["G"].width = "10"
-    ws.column_dimensions["H"].width = "40"
-    ws.column_dimensions["I"].width = "10"
+    ws.column_dimensions["G"].width = "4"
+    ws.column_dimensions["H"].width = "10"
+    ws.column_dimensions["I"].width = "40"
     ws.column_dimensions["J"].width = "10"
-    ws.column_dimensions["K"].width = "40"
+    ws.column_dimensions["K"].width = "10"
     ws.column_dimensions["L"].width = "40"
+    ws.column_dimensions["M"].width = "40"
 
     # todo: add second level domain -> ondern welke root wordt dat uitgegeven.
 
@@ -284,7 +285,8 @@ def report_to_excel_rows(report_data, link_data) -> List[Dict[str, Union[str, in
     rows = []
 
     for url in report_data["calculation"]["organization"]["urls"]:
-        url_data = {"url": url["url"]}
+        extract = tldextract.extract(url["url"])
+        url_data = {"url": url["url"], "2nd_level": f"{extract.domain}.{extract.suffix}"}
         # some placeholder data so all rows have the same columns
         # 'endpoint': '-',
         placeholder_ep_data = {"ip_version": "", "port": "", "protocol": ""}
