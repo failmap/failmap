@@ -20,10 +20,11 @@ We strongly recomend using the docker approach.
 """
 
 import logging
+import re
 import subprocess
 from typing import List
 
-from celery import group, Task
+from celery import Task, group
 from django.conf import settings
 
 from websecmap.celery import ParentFailed, app
@@ -31,7 +32,6 @@ from websecmap.scanners.models import UrlGenericScan
 from websecmap.scanners.scanmanager import store_url_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan
 from websecmap.scanners.scanner.filter import filter_top_level_domains
-import re
 
 log = logging.getLogger(__name__)
 

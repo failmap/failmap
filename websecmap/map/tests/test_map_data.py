@@ -1,13 +1,15 @@
 from datetime import datetime, timezone
-from django.conf import settings
-from dateutil.relativedelta import relativedelta
+
 import pytest
+from dateutil.relativedelta import relativedelta
+from django.conf import settings
+from freezegun import freeze_time
+
 from websecmap.map.logic.map import get_altnames, get_cached_map_data, get_map_data
 from websecmap.map.models import MapDataCache
 from websecmap.map.report import sync_model_field_to_disk
 from websecmap.map.util import transparent_json_to_zip_storage, zip_to_json
 from websecmap.organizations.models import AlternativeName, Organization, OrganizationType
-from freezegun import freeze_time
 
 
 def test_get_cached_map_data(db):

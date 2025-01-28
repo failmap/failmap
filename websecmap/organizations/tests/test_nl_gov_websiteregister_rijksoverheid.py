@@ -8,7 +8,7 @@ from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid im
     import_websiteregister,
     match_and_place_row,
 )
-from websecmap.organizations.models import GenericFileDataset, Organization, Url, OrganizationSurrogateId
+from websecmap.organizations.models import GenericFileDataset, Organization, OrganizationSurrogateId, Url
 
 location = "websecmap/organizations/tests/nl_gov_rijkswebsiteregister/websiteregister-rijksoverheid-2022-07-28.ods"
 

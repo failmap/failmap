@@ -1,27 +1,21 @@
-import logging
-import os
 import copy
 import json
+import logging
+import os
 import re
 import subprocess
-from typing import Any, Iterable, TypedDict
 import typing
+from typing import Any, Iterable, TypedDict
 
 from celery import Signature
 
 from websecmap.celery import app
 from websecmap.map.logic.login_plaza import generated_login_portal_meaning_data
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, JSONData, Scanner, ScannerFinding, Product
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, JSONData, Product, Scanner, ScannerFinding
 from websecmap.scanners.scanmanager import Meaning, store_endpoint_scan_result
-from websecmap.scanners.scanner import (
-    allowed_to_scan,
-    constance_json_value,
-)
-from websecmap.scanners.scanner.filter import (
-    ObjectFilter,
-    filter_endpoints_only,
-)
+from websecmap.scanners.scanner import allowed_to_scan, constance_json_value
+from websecmap.scanners.scanner.filter import ObjectFilter, filter_endpoints_only
 from websecmap.scanners.scanner.security_headers import remove_random_identifiers
 from websecmap.scanners.scanner.utils import in_chunks
 from websecmap.scanners.support import kwargs_to_params

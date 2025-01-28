@@ -10,6 +10,7 @@ from websecmap.scanners.scanner.internet_nl_websecmap import (
     add_calculation,
     calculate_forum_standaardisatie_views_mail,
     calculate_forum_standaardisatie_views_web,
+    gather_evidence_from_technical_details_on_domain,
     initialize_scan,
     is_subdomain,
     lowest_value_in_results,
@@ -18,7 +19,6 @@ from websecmap.scanners.scanner.internet_nl_websecmap import (
     reuse_last_fields_and_set_them_to_error,
     store_domain_scan_results,
     update_state,
-    gather_evidence_from_technical_details_on_domain,
 )
 
 log = logging.getLogger("websecmap")

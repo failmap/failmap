@@ -8,33 +8,37 @@ Thanks to:
 - https://github.com/PrivacyScore/privacyscanner/tree/whotracksme/privacyscanner/scanmodules
 """
 
+import logging
 from typing import Any, Dict, List, Optional
+
 import requests
 from celery import group
-from websecmap.app import log
+
+import base64
+
+from django.core.files.base import ContentFile
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import (
     Cookie,
-    CookiePlacement,
     CookieBanner,
+    CookieBannerAttribute,
+    CookiePlacement,
+    CookieScanSession,
     Endpoint,
     ExternalResource,
-    CookieScanSession,
     PaperTrail,
-    CookieBannerAttribute,
 )
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
-import base64
-from django.core.files.base import ContentFile
-
 from websecmap.scanners.scanner.web_privacy_crawled import (
-    store_third_party_requests_as_regular_metrics,
     store_cookies_as_regular_metrics,
+    store_third_party_requests_as_regular_metrics,
 )
+
+log = logging.getLogger(__name__)
 
 SCANNER_NAME = "cookie_consent"
 

@@ -1,14 +1,14 @@
 from time import sleep
 
+from websecmap.scanners.models import DomainIp, GeoIp
 from websecmap.scanners.scanner_for_everything.ip_geolocation import (
-    reduce_maxmind_data,
-    log_quota_warning,
-    store,
-    scan,
     has_known_network,
+    log_quota_warning,
+    reduce_maxmind_data,
+    scan,
     scan_using_known_data,
+    store,
 )
-from websecmap.scanners.models import GeoIp, DomainIp
 
 
 def test_log_quota_warning(caplog):

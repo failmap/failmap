@@ -6,7 +6,8 @@
 # from celery import group
 # from django.db import OperationalError
 #
-# from websecmap.app import log
+# import logging
+# log = logging.getLogger(__name__)
 # from websecmap.celery import app
 # from websecmap.scanners.models import HttpEndpointContent, Endpoint
 # import hashlib

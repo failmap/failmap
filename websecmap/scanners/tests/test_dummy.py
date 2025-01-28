@@ -2,8 +2,8 @@
 
 import json
 
-from django.core.management import call_command
 import pytest
+from django.core.management import call_command
 
 TEST_ORGANIZATION = "faalonië"
 NON_EXISTING_ORGANIZATION = "faaloniet"

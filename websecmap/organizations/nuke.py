@@ -1,8 +1,10 @@
 import json
+import logging
 from typing import List
 
-from websecmap.app import log
 from websecmap.organizations.models import Url
+
+log = logging.getLogger(__name__)
 
 
 def nuke_url(domain: str, suffix: str = "", excluded_subdomains: List[str] = None):

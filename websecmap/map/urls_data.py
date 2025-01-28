@@ -1,11 +1,11 @@
 # urls for scanners, maybe in their own url files
+from django.conf import settings
 from django.urls import path, register_converter
 
 import websecmap.map.logic.rss_feeds
 from websecmap import converters
 from websecmap.map import views as v
 from websecmap.map.views import api
-from django.conf import settings
 
 register_converter(converters.OrganizationTypeConverter, "ot")
 register_converter(converters.WeeksConverter, "w")

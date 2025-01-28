@@ -1,8 +1,7 @@
-from datetime import timezone, datetime
+from datetime import datetime, timezone
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, SecurityPolicy
-
 from websecmap.scanners.security_policies import add_policy_by_name, check_policy_sanity
 
 

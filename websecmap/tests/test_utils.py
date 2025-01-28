@@ -1,4 +1,5 @@
 import pytest
+
 from websecmap.utils import normalize_cookies
 
 

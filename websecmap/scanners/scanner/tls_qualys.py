@@ -30,12 +30,13 @@ from typing import Any, Dict, List
 
 import requests
 from celery import Task, group
+from statshog.defaults.django import statsd
 from tenacity import RetryError, before_log, retry, wait_fixed
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import init_dict, plannedscan
-from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad, EndpointGenericScan
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, ScanProxy, TlsQualysScratchpad
 from websecmap.scanners.proxy import (
     claim_proxy,
     release_proxy,
@@ -49,7 +50,6 @@ from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_conf
 # There is a balance between network timeout and qualys result cache.
 # This is relevant, since the results are not kept in cache for hours. More like 15 minutes.
 from websecmap.scanners.scanner.http import force_get_endpoint
-from statshog.defaults.django import statsd
 
 API_NETWORK_TIMEOUT = 30
 API_SERVER_TIMEOUT = 30

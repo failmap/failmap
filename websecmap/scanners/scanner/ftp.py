@@ -7,6 +7,7 @@ Scans for missing AUTH TLS / AUTH SSL options in FTP servers.
 # AUTH https://stackoverflow.com/questions/37256862/how-to-check-if-ftp-server-offers-tls-support-in-python
 """
 
+import json
 import logging
 from ftplib import FTP, error_perm, error_proto, error_reply, error_temp  # nosec scanning for insecure ftp is the point
 from typing import List
@@ -20,13 +21,12 @@ from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to
 from websecmap.scanners.scanner.filter import (
+    filter_endpoints_only_as_endpoints,
     filter_urls_only,
     merge_endpoints_filter,
-    filter_endpoints_only_as_endpoints,
 )
-from websecmap.scanners.scanner.http import save_endpoint, kill_endpoint
+from websecmap.scanners.scanner.http import kill_endpoint, save_endpoint
 from websecmap.scanners.scanner.utils import IP_QUEUES
-import json
 
 log = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
-from websecmap.celery import app
 from django.core.management.base import BaseCommand
+
+from websecmap.celery import app
 
 
 # don't know if the taskcommand stuff clashes

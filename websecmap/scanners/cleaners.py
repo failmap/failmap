@@ -1,10 +1,12 @@
 import json
+import logging
 from multiprocessing.pool import ThreadPool
 
-from websecmap.app import log
 from websecmap.scanners.models import EndpointGenericScan
 from websecmap.scanners.scanner.plain_http import clean_can_connect_result_evidence
 from websecmap.scanners.scanner.security_headers import reduce_url
+
+log = logging.getLogger(__name__)
 
 
 def get_scans(scan_type: str):

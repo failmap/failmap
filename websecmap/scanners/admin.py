@@ -1,8 +1,11 @@
 import json
+
 import taggit
+from constance import config
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django_countries import countries
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 from jet.filters import RelatedFieldAjaxListFilter
@@ -13,24 +16,22 @@ from websecmap.scanners import models
 from websecmap.scanners.models import (
     Endpoint,
     Product,
-    ProductHierarchy,
-    State,
     ProductCookieIndicator,
-    SecurityImpact,
+    ProductHierarchy,
     RatingOptions,
+    SecurityImpact,
+    State,
 )
 from websecmap.scanners.proxy import check_proxy
 from websecmap.scanners.scanmanager import delete_metric_and_set_previous_to_latest
 from websecmap.scanners.scanner.banners.detect_version import add_excepted_banner_to_config, clean_and_detect
 from websecmap.scanners.scanner.internet_nl_websecmap import progress_running_scan, recover_and_retry
 from websecmap.scanners.security_policies import (
-    apply_security_policy,
-    remove_security_policy,
     apply_affects,
+    apply_security_policy,
     remove_affects,
+    remove_security_policy,
 )
-from django_countries import countries
-from constance import config
 
 
 class EndpointGenericScanInline(CompactInline):

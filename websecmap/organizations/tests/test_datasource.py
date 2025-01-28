@@ -1,5 +1,5 @@
 from websecmap.organizations.datasources import save_organization
-from websecmap.organizations.models import OrganizationType, Organization
+from websecmap.organizations.models import Organization, OrganizationType
 
 
 def test_save_organization(db):

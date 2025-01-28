@@ -1,9 +1,6 @@
 # Perform different types of dummy scanner runs from a user level (using websecmap command)
 
 import json
-from subprocess import check_output
-
-import pytest
 
 # The following error will happen if you run a worker while running tests, using the same broker: different databases
 # will be used and there will be exceptions like this one, the tests will hang forever.
@@ -18,7 +15,12 @@ import pytest
 # tests/integration/integration_scanners/test_dummy.py::test_scan_method[eventlet-sync]
 # also removed the sync test, as we never use sync. This will probably cause problems down the road, but there
 # is no time or budget to fix it now.
-from websecmap.app import log
+import logging
+from subprocess import check_output
+
+import pytest
+
+log = logging.getLogger(__name__)
 
 
 @pytest.mark.skip(reason="Test is unreliable and problem can't currently be fixed without multiple workers.")

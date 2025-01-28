@@ -1,6 +1,7 @@
-from websecmap.app.models import CompressedJSONFieldTest
-from django.db import connection
 import pytest
+from django.db import connection
+
+from websecmap.app.models import CompressedJSONFieldTest
 
 
 @pytest.mark.filterwarnings("ignore:app.CompressedJSONFieldTest.data failed to load invalid json")

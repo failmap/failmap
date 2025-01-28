@@ -2,15 +2,17 @@
 Helps cleanup the database of non-normalized records of scanners that had non-normalized results.
 """
 
+import logging
 from datetime import datetime, timezone
 from typing import Union
 
 from celery import group
 
-from websecmap.app import log
 from websecmap.celery import app
-from websecmap.scanners.models import UrlGenericScan, EndpointGenericScan
+from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
+
+log = logging.getLogger(__name__)
 
 
 def get_model_type_from_scan_type(scan_type):

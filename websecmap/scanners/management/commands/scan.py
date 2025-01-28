@@ -1,5 +1,6 @@
-from inspect import signature
 from collections import defaultdict
+from inspect import signature
+
 from websecmap.app.management.commands._private import ScannerTaskCommand
 from websecmap.scanners import tasks
 from websecmap.scanners.management.commands import ActionCommand

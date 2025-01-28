@@ -2,6 +2,7 @@ import logging
 from typing import Callable, Iterable, Optional
 
 from django.db.models import Q
+
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import Endpoint

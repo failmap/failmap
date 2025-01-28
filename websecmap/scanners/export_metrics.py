@@ -1,38 +1,39 @@
 import itertools
-from datetime import datetime, timezone
-from typing import List, Union, Any, Dict
-
-import tldextract
-from django.conf import settings
+import logging
 import os
 import uuid
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Union
 
 import pyexcel
+import tldextract
+from django.conf import settings
 from django.utils.text import slugify
 
-from websecmap.app import log
-from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 import json
+import re
 
+from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 from websecmap.scanners.scanner.metric_constants import (
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT,
     WEB_PRIVACY_COOKIES_CRAWLED_NO_CONSENT,
     WEB_PRIVACY_COOKIES_CRAWLED_WITH_CONSENT,
+    WEB_PRIVACY_THIRD_PARTY_REQUESTS,
     WEB_PRIVACY_THIRD_PARTY_REQUESTS_CRAWLED_NO_CONSENT,
     WEB_PRIVACY_THIRD_PARTY_REQUESTS_CRAWLED_WITH_CONSENT,
-    WEB_PRIVACY_THIRD_PARTY_REQUESTS,
 )
 from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_COOKIES
 from websecmap.scanners.scanner_for_everything.location import (
-    SCAN_TYPE_LOCATION_MAIL_SERVER,
-    SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
-    SCAN_TYPE_LOCATION_SERVER,
     SCAN_TYPE_LOCATION_COOKIES,
+    SCAN_TYPE_LOCATION_MAIL_SERVER,
+    SCAN_TYPE_LOCATION_SERVER,
+    SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
     SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT_CRAWL_WITH_CONSENT,
     SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT_CRAWL_WITHOUT_CONSENT,
 )
 from websecmap.utils import normalize_cookie_name
-import re
+
+log = logging.getLogger(__name__)
 
 
 def export_current_metrics(

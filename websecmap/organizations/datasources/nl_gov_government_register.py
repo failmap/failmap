@@ -1,9 +1,9 @@
 import csv
+import logging
 from typing import Any
 
 from django.utils.text import slugify
 
-from websecmap.app import log
 from websecmap.celery import app
 from websecmap.organizations.administration import (
     add_urls_to_organization,
@@ -13,6 +13,8 @@ from websecmap.organizations.administration import (
 )
 from websecmap.organizations.datasources.utils import download_dataset_file, finish_import, load_parser_info
 from websecmap.organizations.models import GenericFileDataset, OrganizationType
+
+log = logging.getLogger(__name__)
 
 GOVERNMENT_REGISTER_FILES = [
     # "Gemeenten",

@@ -7,11 +7,12 @@ Further reading:
 https://stackoverflow.com/questions/20475552/python-requests-library-redirect-new-url#20475712
 """
 
-import logging
-from typing import Dict, Union, List
 import json
+import logging
+import re
+from typing import Dict, List, Union
 
-from celery import group, Task
+from celery import Task, group
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
@@ -32,7 +33,6 @@ from websecmap.scanners.scanner.http import (
     resolves_on_v6,
 )
 from websecmap.scanners.scanner.utils import IP_QUEUES
-import re
 
 log = logging.getLogger(__package__)
 

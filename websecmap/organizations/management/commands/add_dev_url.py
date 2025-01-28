@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from websecmap.organizations.models import Organization, Url, OrganizationType
+from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.scanners.scanner.resolve_ip import refresh_ips_from_url
 
 log = logging.getLogger(__package__)

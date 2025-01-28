@@ -1,11 +1,7 @@
 from websecmap.celery import app
-from websecmap.scanners.scanmetadata import get_backend_scanmetadata
-from websecmap.map.report import (
-    calculate_vulnerability_statistics,
-    calculate_map_data,
-    calculate_high_level_stats,
-)
 from websecmap.map.logic.map_health import update_map_health_reports
+from websecmap.map.report import calculate_high_level_stats, calculate_map_data, calculate_vulnerability_statistics
+from websecmap.scanners.scanmetadata import get_backend_scanmetadata
 
 
 @app.task(queue="kickoff")

@@ -1,9 +1,9 @@
-from datetime import timezone, datetime
 import json
+from datetime import datetime, timezone
 
 from websecmap.scanners.cleaners import clean_http_security_header_strict_transport_security, something_something_hsts
-from websecmap.scanners.duplicates import deduplicate_all_scans_sequentially, deduplicate_all_endpoints_sequentially
-from websecmap.scanners.models import EndpointGenericScan, Endpoint
+from websecmap.scanners.duplicates import deduplicate_all_endpoints_sequentially, deduplicate_all_scans_sequentially
+from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.tests.test_plannedscan import create_endpoint, create_url
 
 

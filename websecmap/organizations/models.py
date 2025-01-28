@@ -1,5 +1,7 @@
 import hashlib
+import json
 import logging
+import re
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
@@ -12,8 +14,6 @@ from django_countries.fields import CountryField
 from jsonfield import JSONField
 from taggit.managers import TaggableManager
 from validators import domain
-import json
-import re
 
 log = logging.getLogger(__package__)
 

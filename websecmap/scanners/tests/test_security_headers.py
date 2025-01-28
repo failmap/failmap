@@ -9,8 +9,8 @@ from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanner.security_headers import (
     analyze_website_headers,
-    measure_hsts_header,
     clean_csp_header,
+    measure_hsts_header,
     remove_guid_from_string,
     remove_random_identifiers,
     remove_timestamp_from_end_of_string,

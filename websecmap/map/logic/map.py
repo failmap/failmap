@@ -1,3 +1,5 @@
+import logging
+import re
 from datetime import date, datetime, timezone
 from typing import Any, Dict, List
 
@@ -11,9 +13,6 @@ from websecmap.map.util import zip_to_json
 from websecmap.organizations.models import Organization
 from websecmap.reporting.diskreport import retrieve_report
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata
-import re
-
-import logging
 
 log = logging.getLogger(__name__)
 

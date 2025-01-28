@@ -4,7 +4,6 @@
 # default_app_config = "websecmap.scanners.apps.ScannersConfig"
 from typing import Optional
 
-
 ObjectFilter = dict[str, str]
 
 

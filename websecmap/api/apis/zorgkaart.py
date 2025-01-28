@@ -46,7 +46,7 @@ from iso3166 import countries_by_alpha2
 from requests.auth import HTTPBasicAuth
 
 from websecmap.celery import app
-from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url, OrganizationSurrogateId
+from websecmap.organizations.models import Coordinate, Organization, OrganizationSurrogateId, OrganizationType, Url
 
 log = logging.getLogger(__package__)
 

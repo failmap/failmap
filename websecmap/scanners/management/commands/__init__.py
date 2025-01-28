@@ -1,5 +1,8 @@
-from websecmap.app import log
+import logging
+
 from websecmap.app.management.commands._private import TaskCommand
+
+log = logging.getLogger(__name__)
 
 
 class ActionCommand(TaskCommand):

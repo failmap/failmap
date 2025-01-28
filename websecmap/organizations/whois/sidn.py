@@ -1,15 +1,16 @@
+import json
+import logging
 from multiprocessing.pool import ThreadPool
-from typing import Optional, Union, Any, Dict, List
+from time import sleep
+from typing import Any, Dict, List, Optional, Union
 
 import requests
-from time import sleep
-import json
 
-from websecmap.app import log
 from websecmap.celery import app
 from websecmap.organizations.models import Url, UrlWhois
 from websecmap.scanners.models import ScanProxy
 
+log = logging.getLogger(__name__)
 
 MAX_WHOIS_PER_IP = 500
 DEFAULT_SLEEP_PER_REQUEST = 10

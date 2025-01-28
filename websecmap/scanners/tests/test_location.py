@@ -1,25 +1,26 @@
 import json
 from datetime import datetime, timezone
 
+from constance.test import override_config
+
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import GeoIp, DomainIp, DomainMX, UrlGenericScan, EndpointGenericScan, Endpoint
-from websecmap.scanners.scanner_for_everything.location import (
-    scan_mailservers,
-    get_geo_ip_database_directly,
-    get_domain_to_ip_database_directly,
-    get_domain_mx_database_directly,
-    get_policy,
-    scan_servers,
-    scan_third_party_site_content,
-    SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
-    extract_domains_from_cookies,
-    applicable_cookies,
-)
+from websecmap.scanners.models import DomainIp, DomainMX, Endpoint, EndpointGenericScan, GeoIp, UrlGenericScan
 from websecmap.scanners.scanner.web_privacy import (
     WEB_PRIVACY_THIRD_PARTY_DOMAINS,
     WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
 )
-from constance.test import override_config
+from websecmap.scanners.scanner_for_everything.location import (
+    SCAN_TYPE_LOCATION_THIRD_PARTY_WEBSITE_CONTENT,
+    applicable_cookies,
+    extract_domains_from_cookies,
+    get_domain_mx_database_directly,
+    get_domain_to_ip_database_directly,
+    get_geo_ip_database_directly,
+    get_policy,
+    scan_mailservers,
+    scan_servers,
+    scan_third_party_site_content,
+)
 
 
 @override_config(GEOGRAPHY_RATINGS_INCLUDE_IPV6=True)

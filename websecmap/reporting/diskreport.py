@@ -5,12 +5,11 @@ Reports can be stored in various formats, where the "original" is the original f
 added without detailed findings for example.
 """
 
-from json import JSONDecodeError
-
 import gzip
 import json
 import logging
 import os
+from json import JSONDecodeError
 from typing import Dict, Type, Union
 
 from django.conf import settings

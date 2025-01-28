@@ -1,7 +1,9 @@
 # https://docs.djangoproject.com/en/5.0/ref/contrib/sitemaps/
 
 from datetime import datetime, timezone
+
 from django.contrib.sitemaps import Sitemap
+
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import Organization
 from websecmap.scanners.scanner import q_configurations_to_display

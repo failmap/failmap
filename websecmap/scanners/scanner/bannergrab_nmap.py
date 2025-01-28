@@ -12,14 +12,12 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 import nmap
-
 from celery import Signature, group
 
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.scanners import init_dict
-from websecmap.scanners.scanner.http import get_endpoint, force_get_endpoint, get_ipv4, kill_endpoint, get_ipv6
-from websecmap.scanners.models import EndpointGenericScan, UrlIp, Endpoint
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlIp
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, unique_and_random
 from websecmap.scanners.scanner.banners.detect_version import (
@@ -28,6 +26,7 @@ from websecmap.scanners.scanner.banners.detect_version import (
     detect_a_likely_version,
 )
 from websecmap.scanners.scanner.banners.utils import get_urls_by_ip
+from websecmap.scanners.scanner.http import force_get_endpoint, get_endpoint, get_ipv4, get_ipv6, kill_endpoint
 from websecmap.scanners.scanner.utils import in_chunks
 
 SCANNER_NAME = "bannergrab_nmap"

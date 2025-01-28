@@ -1,14 +1,14 @@
-from datetime import timezone, datetime
 import json
+from datetime import datetime, timezone
 
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import UrlGenericScan, GeoIpCorrection
+from websecmap.scanners.models import GeoIpCorrection, UrlGenericScan
 from websecmap.scanners.scanner_for_everything.ip_geolocation_correction import (
+    apply_geoip_corrections,
+    get_correction_data_for_ip_geolocation_from_ripe,
     get_offending_networks,
     get_uncorrected_networks,
-    get_correction_data_for_ip_geolocation_from_ripe,
     parse_ripe_api_response,
-    apply_geoip_corrections,
 )
 
 

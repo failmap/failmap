@@ -9,57 +9,58 @@ Thanks to:
 """
 
 import contextlib
+import logging
+import re
+from collections import defaultdict
 from json import JSONDecodeError
 from typing import Any, Dict, List
-import re
-import requests
 
+import requests
 from celery import group
-from collections import defaultdict
-from websecmap.app import log
+
+import json
+
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import init_dict, plannedscan
-from websecmap.scanners.url_reduction import remove_randomization_from_url
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, ProductCookieIndicator, CookieIndicatorFields
+from websecmap.scanners.models import CookieIndicatorFields, Endpoint, EndpointGenericScan, ProductCookieIndicator
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
 from websecmap.scanners.scanner.metric_constants import (
-    WEB_PRIVACY_TRACKING,
-    WEB_PRIVACY_TRACKING_ERROR,
-    WEB_PRIVACY_THIRD_PARTY_REQUESTS,
-    WEB_PRIVACY_THIRD_PARTY_ERROR,
-    WEB_PRIVACY_COOKIES,
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT,
-    WEB_PRIVACY_COOKIES_ERROR,
-    WEB_PRIVACY_THIRD_PARTY_DOMAINS,
-    WEB_PRIVACY_THIRD_PARTY_FOUND,
-    WEB_PRIVACY_THIRD_PARTY_OK,
-    WEB_PRIVACY_TRACKING_OK,
-    WEB_PRIVACY_TRACKING_TRACKERS_FOUND,
-    WEB_PRIVACY_COOKIES_NEUTRAL,
-    WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
-    WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_ERROR,
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_HIGH,
+    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_LOW,
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM,
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK,
-    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_LOW,
-    WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_ERROR,
+    WEB_PRIVACY_COOKIES,
+    WEB_PRIVACY_COOKIES_ERROR,
+    WEB_PRIVACY_COOKIES_NEUTRAL,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
+    WEB_PRIVACY_THIRD_PARTY_ERROR,
+    WEB_PRIVACY_THIRD_PARTY_FOUND,
+    WEB_PRIVACY_THIRD_PARTY_OK,
+    WEB_PRIVACY_THIRD_PARTY_REQUESTS,
+    WEB_PRIVACY_TRACKING,
+    WEB_PRIVACY_TRACKING_ERROR,
+    WEB_PRIVACY_TRACKING_OK,
+    WEB_PRIVACY_TRACKING_TRACKERS_FOUND,
 )
-
 from websecmap.scanners.scanner.web_privacy_resources.trackers import get_known_trackers_from_urls
-import json
-
 from websecmap.scanners.scanner_for_everything.location import (
-    meaning_of_location_at_web_privacy_cookies,
     SCAN_TYPE_LOCATION_COOKIES,
-    get_geoip_database,
     get_domain_to_ip_database,
+    get_geoip_database,
+    meaning_of_location_at_web_privacy_cookies,
 )
+from websecmap.scanners.url_reduction import remove_randomization_from_url
 from websecmap.utils import normalize_cookies
 
+log = logging.getLogger(__name__)
 SCANNER_NAME = "web_privacy"
 
 # narrow down to the most restrictive set of domains, as the scanner is/can be pretty heavy on resource

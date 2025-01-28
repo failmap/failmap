@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import datetime, timezone
 from typing import Any, Dict
 
@@ -6,8 +7,9 @@ import requests
 from django.core.files.uploadedfile import SimpleUploadedFile
 from requests import RequestException
 
-from websecmap.app import log
 from websecmap.organizations.models import GenericFileDataset
+
+log = logging.getLogger(__name__)
 
 
 def download_dataset_file(

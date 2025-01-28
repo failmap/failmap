@@ -2,7 +2,7 @@
 import json
 import logging
 import random
-from itertools import islice, chain
+from itertools import chain, islice
 from json import JSONDecodeError
 from typing import Any, Iterable, List
 

@@ -4,25 +4,20 @@ Checks if an endpoint has blocked us by attempting to visit the endpoint via dif
 
 import contextlib
 import logging
-from typing import Dict, Any
+from typing import Any, Dict
 
 import requests
 from celery import Task, group
 from requests import RequestException
 
-from websecmap.celery import app, DEFAULT_TASK_TIME_LIMIT
+from websecmap.celery import DEFAULT_TASK_TIME_LIMIT, app
 from websecmap.scanners import init_dict, plannedscan
 from websecmap.scanners.models import ScanProxy
 from websecmap.scanners.plannedscan import retrieve_endpoints_from_urls
 from websecmap.scanners.proxy import check_proxy
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, unique_and_random
-from websecmap.scanners.scanner.filter import (
-    filter_endpoints_only,
-    generic_plan_scan,
-    merge_endpoints_filter,
-)
-
+from websecmap.scanners.scanner.filter import filter_endpoints_only, generic_plan_scan, merge_endpoints_filter
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 
 log = logging.getLogger(__name__)

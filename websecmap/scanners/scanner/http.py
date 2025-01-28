@@ -28,21 +28,22 @@ Likely: 80, 8080, 8008, 8888, 8088
 import ipaddress
 import logging
 import socket
-from typing_extensions import NotRequired
-from urllib.parse import urlparse
-import tldextract
 from datetime import datetime, timedelta, timezone
 from ipaddress import AddressValueError
 from typing import Any, Callable, Dict, List, Optional, Tuple, TypedDict, cast
+from urllib.parse import urlparse
 
 import requests
+import tldextract
 import urllib3
 import urllib3.exceptions
 from celery import Signature, group
 from django.conf import settings
+from django.db import transaction
 from requests import HTTPError
 from requests.exceptions import ChunkedEncodingError, ContentDecodingError, SSLError
 from requests_toolbelt.adapters import host_header_ssl
+from typing_extensions import NotRequired
 
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
@@ -52,12 +53,11 @@ from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanner.__init__ import allowed_to_discover_endpoints, chunks_generator
 from websecmap.scanners.scanner.filter import (
     apply_organzation_or_endpoint_filter_before_url_filter,
+    filter_endpoints_only_as_endpoints,
     merge_endpoints_filter,
     merge_urls_filter,
-    filter_endpoints_only_as_endpoints,
 )
 from websecmap.scanners.scanner.utils import IP_QUEUES
-from django.db import transaction
 
 # suppress InsecureRequestWarning, we do those request on purpose.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

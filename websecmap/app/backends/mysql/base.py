@@ -7,8 +7,9 @@ effort to retry connecting to the database before giving up.
 
 import logging
 import os
-from retry import retry
+
 import django
+from retry import retry
 
 TRIES = os.environ.get("DB_CONNECT_RETRIES", 10)
 

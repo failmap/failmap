@@ -28,26 +28,27 @@ This results in three different scan types: server, mail_server and third_party_
 can have the values clean, unknown, ok, low, medium and high.
 """
 
-import json
 import contextlib
-
+import json
+import logging
 from collections import defaultdict
 from json import JSONDecodeError
-from typing import Any, Dict, Tuple, List
+from typing import Any, Dict, List, Tuple
 
 from celery import group
 
-from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import GeoIp, DomainIp, DomainMX, UrlGenericScan, EndpointGenericScan
-from websecmap.scanners.scanmanager import store_url_scan_result, store_endpoint_scan_result
+from websecmap.scanners.models import DomainIp, DomainMX, EndpointGenericScan, GeoIp, UrlGenericScan
+from websecmap.scanners.scanmanager import store_endpoint_scan_result, store_url_scan_result
 from websecmap.scanners.scanner.metric_constants import (
     WEB_PRIVACY_THIRD_PARTY_DOMAINS,
-    WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_WITH_CONSENT,
     WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_NO_CONSENT,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_WITH_CONSENT,
 )
+
+log = logging.getLogger(__name__)
 
 # On URL:
 SCAN_TYPE_LOCATION_SERVER = "location_server"

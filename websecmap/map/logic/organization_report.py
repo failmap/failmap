@@ -1,16 +1,16 @@
 import itertools
+import json
 import logging
 from datetime import date, datetime
 from tempfile import NamedTemporaryFile
-from typing import Union, Dict, List
+from typing import Dict, List, Union
 
 import tldextract
 from django.http import HttpResponse
-from openpyxl import Workbook
-from openpyxl.worksheet.table import Table, TableStyleInfo
-from openpyxl.styles import Font
-
 from django.utils.text import slugify
+from openpyxl import Workbook
+from openpyxl.styles import Font
+from openpyxl.worksheet.table import Table, TableStyleInfo
 
 from websecmap.map.logic.map_defaults import (
     DEFAULT_COUNTRY,
@@ -21,7 +21,6 @@ from websecmap.map.logic.map_defaults import (
 )
 from websecmap.organizations.models import Organization, OrganizationType
 from websecmap.reporting.diskreport import retrieve_report
-import json
 
 log = logging.getLogger(__package__)
 

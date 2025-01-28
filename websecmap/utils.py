@@ -1,8 +1,7 @@
 """Utility functions that can work outside of Django"""
 
-import sys
 import re
-
+import sys
 
 # simple normalizations, a prefix, followed by a unique hash or id, first
 # capture group stays, second capture group is replaced

@@ -1,11 +1,14 @@
 from datetime import datetime, timezone
 
 from websecmap.organizations.models import Url
-from websecmap.reporting.report import statistics_over_url_calculation, explanation_valid_around_this_moment
+from websecmap.reporting.report import (
+    explanation_valid_around_this_moment,
+    significant_moments,
+    statistics_over_url_calculation,
+)
 
 # fit statements on one 120 char line.
-from websecmap.scanners.models import EndpointGenericScan, Endpoint, UrlGenericScan
-from websecmap.reporting.report import significant_moments
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 
 isoformat = datetime.fromisoformat
 

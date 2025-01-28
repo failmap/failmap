@@ -189,14 +189,14 @@ Usage: amass enum [options] -d DOMAIN
         "hashcat-style" wordlist masks for DNS brute forcing
 """
 
+import logging
 import subprocess
 import tempfile
 from typing import Any, Dict, List
-from django.conf import settings
 
 from celery import group
+from django.conf import settings
 
-from websecmap.app import log
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners import plannedscan
@@ -205,6 +205,8 @@ from websecmap.scanners.plannedscan import generic_retry_watcher
 from websecmap.scanners.scanner.filter import filter_top_level_domains, generic_plan_scan
 from websecmap.scanners.scanner.nuclei_http import convert_nuclei_data_to_json
 from websecmap.scanners.support import kwargs_to_params
+
+log = logging.getLogger(__name__)
 
 SCANNER_NAME = "subdomains_amass"
 

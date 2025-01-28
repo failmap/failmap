@@ -1,13 +1,13 @@
-from pathlib import Path
 import json
+from pathlib import Path
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanner.cookie_consent import store
 from websecmap.scanners.scanner.web_privacy_crawled import (
     get_latest_scan_sessions_per_endpoint_with_and_without_consent,
-    store_session_as_regular_metrics,
     load_cookie_from_string,
+    store_session_as_regular_metrics,
     try_load_json,
 )
 

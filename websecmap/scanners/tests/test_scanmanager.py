@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import EndpointGenericScan, Endpoint
+from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanmanager import delete_metric_and_set_previous_to_latest
 
 

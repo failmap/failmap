@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timezone
-from typing import Union, List
+from typing import List, Union
 
 from django.core.management.base import BaseCommand
 

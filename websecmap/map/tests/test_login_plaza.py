@@ -5,18 +5,18 @@ import pytest
 from freezegun import freeze_time
 
 from websecmap.map.logic.login_plaza import (
+    create_loging_plaza_meanings_for_scans_per_scan,
+    generated_login_portal_meaning_data,
     get_nested_products_in_an_inefficient_way,
     get_nuclei_product_mapping,
     get_products,
+    get_tech_for_endpoints,
     login_plaza_data,
     prioritize_tech,
+    save_get_tech_for_endpoints,
     set_value_to_tech_in_tree,
     smash_tree,
     smash_trees,
-    save_get_tech_for_endpoints,
-    generated_login_portal_meaning_data,
-    create_loging_plaza_meanings_for_scans_per_scan,
-    get_tech_for_endpoints,
 )
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.scanners.models import (

@@ -1,36 +1,29 @@
-import pytest
-
-from pathlib import Path
 from datetime import datetime, timezone
+from pathlib import Path
+
+import pytest
 
 import websecmap.reporting.time_cache
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import (
-    Endpoint,
-    EndpointGenericScan,
-    Scanner,
-    ScannerFinding,
-    Product,
-    SecurityImpact,
-)
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, Product, Scanner, ScannerFinding, SecurityImpact
 from websecmap.scanners.scanner.nuclei_http import (
+    compose_scan_task,
+    compose_verify_task,
     convert_nuclei_data_to_json,
+    create_nuclei_scan_command,
+    evidence_to_json,
     extract_findings_to_scanner_findings,
     get_higher_severity,
     get_templates_from_scan_results,
     neutralize_missing_metrics,
     prepare_nuclei_results_for_storage,
     process_nuclei_record,
+    rate_nuclei_portal_finding,
+    rerate_portal_findings,
+    scan_batch,
     split_nuclei_records_per_host,
     store_scan_batch,
-    compose_verify_task,
-    create_nuclei_scan_command,
-    rate_nuclei_portal_finding,
-    evidence_to_json,
-    rerate_portal_findings,
     store_verify_results,
-    scan_batch,
-    compose_scan_task,
 )
 
 three_example_nuclei_tests = data = (

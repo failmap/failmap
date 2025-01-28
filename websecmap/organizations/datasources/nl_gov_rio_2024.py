@@ -1,12 +1,15 @@
-from typing import Dict, List, Any
+import logging
+from typing import Any, Dict, List
 
-from websecmap.app import log
-from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid import get_organizations_by_surrogate_key
-import requests
 import csv
+import requests
 import tldextract
-from websecmap.organizations.models import Url
+
 from websecmap.celery import app
+from websecmap.organizations.datasources.nl_gov_websiteregister_rijksoverheid import get_organizations_by_surrogate_key
+from websecmap.organizations.models import Url
+
+log = logging.getLogger(__name__)
 
 
 @app.task(queue="storagee")

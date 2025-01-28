@@ -15,39 +15,39 @@ Todo: if time add some extra metric that compares the consent / no consent varia
 """
 
 import json
-
-from datetime import timezone, timedelta, datetime
+import logging
+from datetime import datetime, timedelta, timezone
 from json import JSONDecodeError
-from typing import Optional, Any, Dict
+from typing import Any, Dict, Optional
 
-from websecmap.app import log
 from websecmap.celery import app
-
 from websecmap.scanners.models import CookieScanSession
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.metric_constants import (
-    WEB_PRIVACY_THIRD_PARTY_REQUESTS_CRAWLED_WITH_CONSENT,
-    WEB_PRIVACY_TRACKING_CRAWLED_WITH_CONSENT,
-    WEB_PRIVACY_COOKIES_CRAWLED_WITH_CONSENT,
-    WEB_PRIVACY_THIRD_PARTY_REQUESTS_CRAWLED_NO_CONSENT,
-    WEB_PRIVACY_TRACKING_CRAWLED_NO_CONSENT,
     WEB_PRIVACY_COOKIES_CRAWLED_NO_CONSENT,
-    WEB_PRIVACY_TRACKING_TRACKERS_FOUND,
-    WEB_PRIVACY_TRACKING_OK,
+    WEB_PRIVACY_COOKIES_CRAWLED_WITH_CONSENT,
+    WEB_PRIVACY_COOKIES_ERROR,
+    WEB_PRIVACY_COOKIES_NEUTRAL,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_NO_CONSENT,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_WITH_CONSENT,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
+    WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
+    WEB_PRIVACY_THIRD_PARTY_ERROR,
     WEB_PRIVACY_THIRD_PARTY_FOUND,
     WEB_PRIVACY_THIRD_PARTY_OK,
-    WEB_PRIVACY_COOKIES_NEUTRAL,
+    WEB_PRIVACY_THIRD_PARTY_REQUESTS_CRAWLED_NO_CONSENT,
+    WEB_PRIVACY_THIRD_PARTY_REQUESTS_CRAWLED_WITH_CONSENT,
+    WEB_PRIVACY_TRACKING_CRAWLED_NO_CONSENT,
+    WEB_PRIVACY_TRACKING_CRAWLED_WITH_CONSENT,
     WEB_PRIVACY_TRACKING_ERROR,
-    WEB_PRIVACY_THIRD_PARTY_ERROR,
-    WEB_PRIVACY_COOKIES_ERROR,
-    WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_WITH_CONSENT,
-    WEB_PRIVACY_THIRD_PARTY_DOMAINS_CRAWLED_NO_CONSENT,
-    WEB_PRIVACY_THIRD_PARTY_DOMAINS_NEUTRAL,
-    WEB_PRIVACY_THIRD_PARTY_DOMAINS_ERROR,
+    WEB_PRIVACY_TRACKING_OK,
+    WEB_PRIVACY_TRACKING_TRACKERS_FOUND,
 )
 from websecmap.scanners.scanner.web_privacy import product_meaning_from_cookies
 from websecmap.scanners.scanner.web_privacy_resources.trackers import get_known_trackers_from_urls
 from websecmap.utils import normalize_cookies
+
+log = logging.getLogger(__name__)
 
 
 def import_metrics_from_cookie_scan_sessions():

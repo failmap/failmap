@@ -1,11 +1,10 @@
+import json
 from datetime import datetime, timezone
 
 from constance.test import override_config
 
 from websecmap.scanners.models import EndpointGenericScan
 from websecmap.scanners.scanner.utils import get_nameservers
-
-import json
 
 
 @override_config(SCANNER_NAMESERVERS=["2.2.2.2", "3.3.3.3"])

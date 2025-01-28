@@ -1,12 +1,14 @@
 # Endpoint scanner to determine different roles per endpoint based on standard it configuration / heuristics.
 # This will make it easier to target certain scanners to only relevant endpoint.
 # This also defines the standard IT landscape a little bit
+import logging
 from typing import List
 
-from websecmap.app import log
+from datetime import datetime, timedelta, timezone
 from websecmap.celery import app
-from websecmap.scanners.models import Endpoint, SecurityPolicy, EndpointGenericScan, GeoIp
-from datetime import datetime, timezone, timedelta
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, GeoIp, SecurityPolicy
+
+log = logging.getLogger(__name__)
 
 
 @app.task(queue="database")

@@ -5,15 +5,17 @@ https://techcommunity.microsoft.com/t5/exchange-team-blog/
     implementing-inbound-smtp-dane-with-dnssec-for-exchange-online/ba-p/3939694
 """
 
+import logging
 from datetime import datetime, timezone
 
 from celery import group
 
-from websecmap.app import log
 from websecmap.celery import app
 from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
-from websecmap.scanners.models import EndpointGenericScan, GeoIp, DomainIp, DomainMX
+from websecmap.scanners.models import DomainIp, DomainMX, EndpointGenericScan, GeoIp
+
+log = logging.getLogger(__name__)
 
 explanation = "microsoft_applies_dane_from_july_2024"
 accepted_as = ["MICROSOFT-CORP-MSN-AS-BLOCK"]

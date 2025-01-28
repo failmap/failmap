@@ -18,12 +18,11 @@ import sys
 
 from django.conf import settings
 from django.conf.urls import include
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.template.response import TemplateResponse
 from django.urls import path, re_path
-from django.conf.urls.static import static
-
 
 # Django 1.10 http://stackoverflow.com/questions/38744285/
 # django-urls-error-view-must-be-a-callable-or-a-list-tuple-in-the-case-of-includ#38744286

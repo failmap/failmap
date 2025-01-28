@@ -17,7 +17,7 @@ from django_celery_beat.models import CrontabSchedule, IntervalSchedule, Periodi
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from websecmap.app.models import GameUser, Volunteer, Translation, CompressedJSONFieldTest
+from websecmap.app.models import CompressedJSONFieldTest, GameUser, Translation, Volunteer
 
 
 class MyPeriodicTaskForm(PeriodicTaskForm):

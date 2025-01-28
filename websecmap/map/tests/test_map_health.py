@@ -1,10 +1,11 @@
-import pytz
 from datetime import datetime
+
+import pytz
 
 from websecmap.map.logic.map_health import update_map_health_reports
 from websecmap.map.map_configs import filter_map_configs
 from websecmap.map.models import Configuration, MapHealthReport
-from websecmap.organizations.models import OrganizationType, Organization
+from websecmap.organizations.models import Organization, OrganizationType
 
 
 def test_filter_map_configs(db):

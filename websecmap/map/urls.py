@@ -1,13 +1,12 @@
 # urls for scanners, maybe in their own url files
 
 import proxy.views
+from django.contrib.sitemaps.views import sitemap
 from django.urls import path, re_path
+from django.views.decorators.cache import cache_page
 from django.views.i18n import JavaScriptCatalog
 
-from websecmap.map import views
-from django.contrib.sitemaps.views import sitemap
-from websecmap.map import sitemaps
-from django.views.decorators.cache import cache_page
+from websecmap.map import sitemaps, views
 
 # todo: organization type converter doesn't work yet... using slug as an alternative.
 

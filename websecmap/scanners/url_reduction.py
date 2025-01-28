@@ -1,15 +1,17 @@
 # helps filtering differences in evidence between findings.
-from collections import defaultdict
-from urllib.parse import parse_qs, urlparse
 import json
+import logging
+from collections import defaultdict
 from pprint import pprint
+from urllib.parse import parse_qs, urlparse
 
 import tldextract
 
-from websecmap.app import log
 from websecmap.reporting import time_cache
 from websecmap.scanners.models import EndpointGenericScan, UrlReduction
 from websecmap.scanners.scanner.security_headers import remove_guid_from_string, remove_timestamp_from_end_of_string
+
+log = logging.getLogger(__name__)
 
 
 def get_reductions():

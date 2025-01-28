@@ -1,8 +1,9 @@
-from django.core.management.base import BaseCommand
-import redis
 import json
-from django.conf import settings
 import logging
+
+import redis
+from django.conf import settings
+from django.core.management.base import BaseCommand
 
 log = logging.getLogger(__name__)
 

@@ -1,13 +1,12 @@
+import json
 import logging
 from typing import List
-import json
 
 from celery import group
 
 from websecmap.celery import app
-from websecmap.organizations.models import Organization, UrlWhois, Url
+from websecmap.organizations.models import Organization, Url, UrlWhois
 from websecmap.scanners.scanmanager import store_url_scan_result
-
 
 log = logging.getLogger(__name__)
 

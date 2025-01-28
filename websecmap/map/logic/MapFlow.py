@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from websecmap.celery import app
-from websecmap.map.models import OrganizationOnLayerOverTime, MapFlow
+from websecmap.map.models import MapFlow, OrganizationOnLayerOverTime
 from websecmap.organizations.models import Organization
 from websecmap.scanners.time_storage import abstract_time_storage
 

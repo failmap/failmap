@@ -1,15 +1,15 @@
 import logging
 from collections import defaultdict
 from copy import copy, deepcopy
-from datetime import datetime, timezone, timedelta
-from typing import List, Union, Any, Dict
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Union
 
 from django.db.models import Q
 from django.forms import model_to_dict
 
 from websecmap.celery import Task, app
 from websecmap.organizations.models import Organization, Url
-from websecmap.reporting.models import ScanPolicy, UrlReport, LatestUrlReport
+from websecmap.reporting.models import LatestUrlReport, ScanPolicy, UrlReport
 from websecmap.reporting.severity import get_severity
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, ScanSubject, UrlGenericScan
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata

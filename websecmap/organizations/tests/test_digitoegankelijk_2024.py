@@ -1,6 +1,6 @@
 import pathlib
 
-from websecmap.organizations.datasources.digitoegankelijk_2024 import parse, extract_new_domains
+from websecmap.organizations.datasources.digitoegankelijk_2024 import extract_new_domains, parse
 from websecmap.organizations.models import Organization, Url
 
 

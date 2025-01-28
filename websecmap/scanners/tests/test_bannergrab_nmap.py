@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import EndpointGenericScan, Scanner, UrlIp, Endpoint
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, Scanner, UrlIp
 from websecmap.scanners.scanner.bannergrab_nmap import compose_manual_scan_task, store_results
 from websecmap.scanners.scanner.banners.detect_version import re_evaluate_bannergrab_versions
 

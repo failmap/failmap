@@ -28,6 +28,7 @@ from corsheaders.defaults import default_headers
 from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
+
 from . import __version__
 
 # this application can run in 3 modes: admin, interactive and frontend

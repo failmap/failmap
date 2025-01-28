@@ -12,7 +12,7 @@ from time import sleep
 from typing import List
 
 from celery import Task, group
-from dns.resolver import NXDOMAIN, NoAnswer, Resolver, Timeout, NoNameservers
+from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, Resolver, Timeout
 from tenacity import before_log, retry, stop_after_attempt, wait_exponential
 
 from websecmap.celery import app

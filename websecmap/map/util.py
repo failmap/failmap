@@ -1,7 +1,7 @@
-from typing import Any
+import io
 import json
 import zipfile
-import io
+from typing import Any
 
 from django.core.files.base import ContentFile
 

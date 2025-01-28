@@ -1,20 +1,20 @@
-from datetime import timezone, datetime
+import copy
+from datetime import datetime, timezone
 from typing import Tuple
 
-import copy
 import pyexcel
 from django.core.management import call_command
 from freezegun import freeze_time
 
-from websecmap.organizations.models import Url, Organization, OrganizationType
+from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.scanners.export_metrics import (
-    pivot_location_evidence,
-    pivot_cookies,
-    pivot_cookie_locations,
-    pivot_products,
-    pivot_cookie_meaning,
     create_pivot_data,
     parse_issuer_subject,
+    pivot_cookie_locations,
+    pivot_cookie_meaning,
+    pivot_cookies,
+    pivot_location_evidence,
+    pivot_products,
 )
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 

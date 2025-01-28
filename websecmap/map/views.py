@@ -3,16 +3,17 @@ import logging
 from datetime import date, datetime, timezone
 from wsgiref.util import FileWrapper
 
-from django.http.response import HttpResponseBadRequest
 import django_excel as excel
 import orjson
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http404
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http.response import HttpResponseBadRequest
 from django.shortcuts import render
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_page
+from ninja import NinjaAPI, Schema, Swagger
 
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
@@ -47,9 +48,9 @@ from websecmap.map.logic.map_defaults import (
 )
 from websecmap.map.logic.map_health import get_lastest_map_health_data
 from websecmap.map.logic.organization_report import (
+    convert_report_to_excel,
     get_organization_report_by_id,
     get_organization_report_by_name,
-    convert_report_to_excel,
 )
 from websecmap.map.logic.rss_feeds import latest_updates
 from websecmap.map.logic.stats_and_graphs import (
@@ -57,21 +58,20 @@ from websecmap.map.logic.stats_and_graphs import (
     get_organization_vulnerability_timeline_via_name,
     get_short_and_simple_stats,
     get_stats,
-    get_vulnerability_graph,
-    what_to_improve,
-    get_vulnerability_graph_for_all_layers,
     get_url_history,
+    get_vulnerability_graph,
+    get_vulnerability_graph_for_all_layers,
+    what_to_improve,
 )
 from websecmap.map.logic.ticker import get_ticker_data
 from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
 from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
-from websecmap.map.models import Configuration, LandingPage, OrganizationReport, FrontPageRowContent
+from websecmap.map.models import Configuration, FrontPageRowContent, LandingPage, OrganizationReport
 from websecmap.organizations.models import Organization
 from websecmap.reporting.models import MajorChange
 from websecmap.scanners import plannedscan
 from websecmap.scanners.models import Screenshot
 from websecmap.scanners.scanmetadata import get_backend_scanmetadata, get_scanners_for_frontend
-from ninja import NinjaAPI, Schema, Swagger
 
 # this will expose the branch we're running publicly, which is not really desired but we need that for development
 # purposes.

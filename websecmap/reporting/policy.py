@@ -1,6 +1,9 @@
-from websecmap.app import log
+import logging
+
 from websecmap.reporting import time_cache
 from websecmap.reporting.models import ScanPolicy
+
+log = logging.getLogger(__name__)
 
 CACHE_DURATION_SECONDS = 600
 CACHE = {}

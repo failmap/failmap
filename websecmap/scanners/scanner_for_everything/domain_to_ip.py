@@ -1,17 +1,17 @@
 import contextlib
+import json
 from json import JSONDecodeError
 from typing import Optional
-import json
 
+import tldextract
 from celery import group
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import DomainIp, EndpointGenericScan, DomainMX
+from websecmap.scanners.models import DomainIp, DomainMX, EndpointGenericScan
 from websecmap.scanners.scanner.http import get_ipv4, get_ipv6
 from websecmap.scanners.scanner.web_privacy import WEB_PRIVACY_THIRD_PARTY_DOMAINS
 from websecmap.scanners.time_storage import abstract_time_storage
-import tldextract
 
 
 @app.task(queue="kickoff")

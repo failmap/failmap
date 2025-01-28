@@ -1,32 +1,31 @@
+import json
+from io import StringIO
 from typing import List
 
 from django.core.management import call_command
-from io import StringIO
-
-import json
 
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import (
-    Url,
+    AlternativeName,
     Coordinate,
     Organization,
-    OrganizationType,
-    AlternativeName,
     OrganizationSurrogateId,
+    OrganizationType,
+    Url,
     UrlWhois,
 )
 from websecmap.scanners.models import (
-    Endpoint,
-    UrlGenericScan,
-    EndpointGenericScan,
-    HttpEndpointHeaders,
-    UrlIp,
-    Screenshot,
     Cookie,
     CookieBanner,
     CookieBannerAttribute,
-    ExternalResource,
     CookieScanSession,
+    Endpoint,
+    EndpointGenericScan,
+    ExternalResource,
+    HttpEndpointHeaders,
+    Screenshot,
+    UrlGenericScan,
+    UrlIp,
 )
 
 

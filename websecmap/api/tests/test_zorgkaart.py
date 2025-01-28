@@ -2,13 +2,12 @@ import json
 import logging
 
 import websecmap
-
 from websecmap.api.apis.zorgkaart import (
+    get_zorgkaart_data,
     organization_and_url_import,
     translate_zorgkaart_to_flat_organization,
-    get_zorgkaart_data,
 )
-from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url, OrganizationSurrogateId
+from websecmap.organizations.models import Coordinate, Organization, OrganizationSurrogateId, OrganizationType, Url
 
 log = logging.getLogger("websecmap")
 

@@ -1,8 +1,9 @@
+import json
 import logging
 from datetime import datetime, timedelta, timezone
 
+from constance.test.pytest import override_config
 from freezegun import freeze_time
-import json
 
 from websecmap.organizations.models import Organization, Url
 from websecmap.reporting.models import ScanPolicy
@@ -26,13 +27,12 @@ from websecmap.scanners.plannedscan import (
     request,
     reset,
     retrieve_endpoints_from_urls,
-    store_progress,
-    set_scan_state,
     retry,
+    set_scan_state,
+    store_progress,
 )
 from websecmap.scanners.scanner.autoexplain_no_https_possible import scan
 from websecmap.scanners.scanner.tls_qualys import plan_scan, plan_scan_optimized
-from constance.test.pytest import override_config
 
 log = logging.getLogger("websecmap")
 

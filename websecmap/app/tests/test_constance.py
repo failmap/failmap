@@ -1,5 +1,6 @@
-from websecmap.app.constance import get_all_values, constance_cached_value
 from constance.test import override_config
+
+from websecmap.app.constance import constance_cached_value, get_all_values
 
 
 def test_get_all_values(db):

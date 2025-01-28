@@ -1,13 +1,15 @@
 import json
+import logging
 import re
 from json import JSONDecodeError
 
 from constance import config
 
-from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.scanners.models import EndpointGenericScan
+
+log = logging.getLogger(__name__)
 
 SERVICE_IDENTITY_LIKELY_VERSION_FOUND = "service_identity_likely_version_found"  # high
 SERVICE_IDENTITY_SOME_IDENTITY_FOUND = "service_identity_some_identity_found"  # low

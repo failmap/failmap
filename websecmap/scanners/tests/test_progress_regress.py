@@ -1,10 +1,8 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 from websecmap.scanners.models import EndpointGenericScan
-from websecmap.scanners.progress_regress_results import (
-    calculate_for_metric_on_endpoint,
-)
-from websecmap.scanners.tests.test_plannedscan import create_url, create_endpoint, create_endpoint_scan
+from websecmap.scanners.progress_regress_results import calculate_for_metric_on_endpoint
+from websecmap.scanners.tests.test_plannedscan import create_endpoint, create_endpoint_scan, create_url
 
 
 def test_some_progression(db, default_policy, default_scan_metadata):

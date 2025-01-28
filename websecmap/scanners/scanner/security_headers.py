@@ -51,31 +51,28 @@ Classified as: Ignored
 """
 
 import contextlib
+import copy
+import json
 import logging
-from typing import Dict, Union, Any, List
 import re
-from websecmap.celery.worker import WORKER_ROLE
+from typing import Any, Dict, List, Union
+from urllib.parse import urlparse, urlsplit, urlunsplit
 
 import niquests
 from celery import Task, group
 from niquests.structures import CaseInsensitiveDict
 from tldextract import tldextract
-from urllib.parse import urlparse
-from urllib.parse import urlsplit
-
-from urllib.parse import urlunsplit
 
 from websecmap.celery import app
-from websecmap.organizations.models import Organization, Url, OrganizationType
+from websecmap.celery.worker import WORKER_ROLE
+from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.scanners import init_dict
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, unique_and_random, allowed_to
+from websecmap.scanners.scanner.__init__ import allowed_to, q_configurations_to_scan, unique_and_random
 from websecmap.scanners.scanner.http import create_standard_request_headers, get_random_user_agent
-from websecmap.scanners.security_policies import add_policy_by_name
 from websecmap.scanners.scanner.utils import IP_QUEUES
-import copy
-import json
+from websecmap.scanners.security_policies import add_policy_by_name
 
 log = logging.getLogger(__name__)
 

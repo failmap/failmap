@@ -20,8 +20,7 @@ from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, InternetNLV2Scan, InternetNLV2StateLog
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.internet_nl import InternetNLApiSettings, register, result, status, result_technical
-
+from websecmap.scanners.scanner.internet_nl import InternetNLApiSettings, register, result, result_technical, status
 
 STATE_SCAN_RESULTS_STORED = "scan results stored"
 STATE_STORING_SCAN_RESULTS = "storing scan results"

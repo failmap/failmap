@@ -19,12 +19,12 @@ http://screenshot_v6:1337
 """
 
 import base64
+import json
 import logging
 import os
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from typing import Any, Dict, Union
-import json
 
 import requests
 from celery import Task, group

@@ -1,6 +1,6 @@
+import re
 from datetime import date, datetime, timedelta, timezone
 
-import re
 import iso3166
 from constance import config
 from dateutil.relativedelta import relativedelta

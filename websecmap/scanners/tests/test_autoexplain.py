@@ -16,10 +16,10 @@ from websecmap.scanners.scanner import (
     autoexplain_no_https_microsoft,
     autoexplain_trust_microsoft,
 )
-from websecmap.scanners.scanner.autoexplain_trust_microsoft import any_in_list_match
 from websecmap.scanners.scanner.autoexplain_dutch_untrusted_cert import (
     certificate_chain_contains_trusted_untrusted_certificate,
 )
+from websecmap.scanners.scanner.autoexplain_trust_microsoft import any_in_list_match
 
 log = logging.getLogger("websecmap")
 

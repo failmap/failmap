@@ -1,8 +1,8 @@
 import datetime
-
-from celery.result import ResultBase
-import simplejson
 import logging
+
+import simplejson
+from celery.result import ResultBase
 
 log = logging.getLogger(__name__)
 

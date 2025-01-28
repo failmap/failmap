@@ -1,7 +1,7 @@
 # pylint: disable=too-many-lines
 import importlib
 import logging
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from json import loads
 
 import nested_admin
@@ -37,10 +37,10 @@ from websecmap.organizations.models import (
     Dataset,
     GenericFileDataset,
     Organization,
+    OrganizationSurrogateId,
     OrganizationType,
     Url,
     UrlWhois,
-    OrganizationSurrogateId,
 )
 from websecmap.reporting.models import UrlReport
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, UrlIp
@@ -896,10 +896,8 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     def timeline_debug(self, _, queryset):
         # this debugging method should be cleaned perhaps. Importing here to prevent a circular import.
-        from websecmap.reporting.report import (  # pylint: disable=import-outside-toplevel
-            create_timeline,
-            inspect_timeline,
-        )
+        from websecmap.reporting.report import create_timeline  # pylint: disable=import-outside-toplevel
+        from websecmap.reporting.report import inspect_timeline  # pylint: disable=import-outside-toplevel
 
         content = "<pre>"
         for url in queryset:

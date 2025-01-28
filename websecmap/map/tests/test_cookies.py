@@ -1,23 +1,22 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 from constance.test import override_config
-
+from django.test import Client
+from django.urls import reverse
 from freezegun import freeze_time
 
 from websecmap.map.logic.cookie_plaza import cookie_plaza_data
 from websecmap.map.logic.cookies import get_cookie_database
 from websecmap.map.models import Configuration
-from websecmap.organizations.models import Url, Organization, OrganizationType
+from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.scanners.models import (
-    ProductCookieIndicator,
     CookiePurpose,
-    Product,
-    ProductVendor,
     Endpoint,
     EndpointGenericScan,
+    Product,
+    ProductCookieIndicator,
+    ProductVendor,
 )
-from django.test import Client
-from django.urls import reverse
 
 
 def test_get_cookie_database(db):

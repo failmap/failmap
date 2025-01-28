@@ -13,14 +13,14 @@ from websecmap.celery import app
 from websecmap.map import models
 from websecmap.map.logic.openstreetmap import import_from_scratch, update_coordinates
 from websecmap.map.models import (
-    HighLevelStatistic,
-    MapDataCache,
-    VulnerabilityStatistic,
-    OrganizationOnLayerOverTime,
-    MapFlow,
     FrontPageGroup,
     FrontPageRow,
     FrontPageRowContent,
+    HighLevelStatistic,
+    MapDataCache,
+    MapFlow,
+    OrganizationOnLayerOverTime,
+    VulnerabilityStatistic,
 )
 from websecmap.map.report import compose_task
 from websecmap.organizations.models import OrganizationType

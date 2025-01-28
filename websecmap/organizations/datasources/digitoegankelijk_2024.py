@@ -2,21 +2,23 @@
 # look at surrogate key
 # download data as CSV
 # process results
+import csv
+import logging
 from time import sleep
 from typing import List
 
 import requests
-import csv
-
 import tldextract
 from bs4 import BeautifulSoup
 
-from websecmap.app import log
 from websecmap.celery import app
+
 
 # this does not import the metrics, as that should be in a scanner including what happens when there is no metric etc
 # todo: make task discoverable
-from websecmap.organizations.models import OrganizationSurrogateId, Organization, Url
+from websecmap.organizations.models import Organization, OrganizationSurrogateId, Url
+
+log = logging.getLogger(__name__)
 
 
 @app.task(queue="storage", ignore_result=True)

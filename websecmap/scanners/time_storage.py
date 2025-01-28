@@ -1,7 +1,8 @@
-from datetime import timezone, datetime
+import logging
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
-from websecmap.app import log
+log = logging.getLogger(__name__)
 
 
 def abstract_time_storage(

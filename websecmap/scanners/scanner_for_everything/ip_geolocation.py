@@ -4,21 +4,21 @@ every 14 days or so. It is already optimized to no call the API twice if the net
 """
 
 import ipaddress
+import logging
 from typing import Any, Dict, Iterator, Optional
 
-import netaddr
-from django.forms import model_to_dict
-from netaddr import IPNetwork, IPAddress
-
 import geoip2.webservice
+import netaddr
 from celery import group
+from django.forms import model_to_dict
+from netaddr import IPAddress, IPNetwork
 
-from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
-
 from websecmap.scanners.models import DomainIp, GeoIp
 from websecmap.scanners.time_storage import abstract_time_storage
+
+log = logging.getLogger(__name__)
 
 IP_UNKNOWN = "unknown"
 IP_PRIVATE = "private"

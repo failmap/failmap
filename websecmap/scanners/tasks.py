@@ -2,32 +2,29 @@
 
 import logging
 
-from websecmap.scanners import plannedscan, proxy, progress_regress_results
-from websecmap.scanners.scanner_for_everything import (
-    domain_to_ip,
-    ip_geolocation,
-    location,
-    mailserver,
-    ip_geolocation_correction,
-    locate_and_correct,
-)
+from websecmap.scanners import plannedscan, progress_regress_results, proxy
 
 # todo: iterate over scanners as tasks are often forgotten
 from websecmap.scanners.scanner import (
+    autoexplain_dane_microsoft,
     autoexplain_dutch_untrusted_cert,
     autoexplain_microsoft_neighboring_services,
     autoexplain_no_https_microsoft,
     autoexplain_no_https_possible,
     autoexplain_trust_microsoft,
-    autoexplain_dane_microsoft,
     bannergrab_masscan,
     bannergrab_nmap,
+    blocked_endpoint,
+    cookie_consent,
     dns_clean_wildcards,
     dns_endpoints,
     dns_known_subdomains,
     dns_wildcards,
     dnssec,
     dummy,
+    endpoint_headers,
+    # explicitly disabled as these tasks take an infinite amount of time until refactoring; endpoint_content,
+    # endpoint_content,
     ftp,
     http,
     internet_nl_mail,
@@ -43,13 +40,16 @@ from websecmap.scanners.scanner import (
     tls_qualys,
     verify_unresolvable,
     web_privacy,
-    # explicitly disabled as these tasks take an infinite amount of time until refactoring
-    # endpoint_content,
-    endpoint_headers,
-    cookie_consent,
-    blocked_endpoint,
+    whois,
 )
-from websecmap.scanners.scanner import whois
+from websecmap.scanners.scanner_for_everything import (
+    domain_to_ip,
+    ip_geolocation,
+    ip_geolocation_correction,
+    locate_and_correct,
+    location,
+    mailserver,
+)
 
 log = logging.getLogger(__name__)
 

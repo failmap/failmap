@@ -1,9 +1,11 @@
-from django.db import models
-from jsonfield.fields import JSONFieldMixin
 import gzip
+import logging
 from gzip import BadGzipFile
 
-from websecmap.app import log
+from django.db import models
+from jsonfield.fields import JSONFieldMixin
+
+log = logging.getLogger(__name__)
 
 
 class CompressedJSONField(JSONFieldMixin, models.BinaryField):

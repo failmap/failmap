@@ -1,19 +1,21 @@
+import logging
 import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import tldextract
 
-from websecmap.app import log
 from websecmap.map.models import OrganizationOnLayerOverTime
 from websecmap.organizations.models import (
     AlternativeName,
     Coordinate,
     Organization,
+    OrganizationSurrogateId,
     OrganizationType,
     Url,
-    OrganizationSurrogateId,
 )
+
+log = logging.getLogger(__name__)
 
 
 def insert_or_update_organization(

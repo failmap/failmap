@@ -1,43 +1,42 @@
+import json
 from datetime import datetime, timezone
-from django.core.management import call_command
 
 import pytest
-from deepdiff import DeepDiff
 from constance.test import override_config
+from deepdiff import DeepDiff
+from django.core.management import call_command
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import (
+    CookiePurpose,
     Endpoint,
     EndpointGenericScan,
-    ProductCookieIndicator,
     Product,
+    ProductCookieIndicator,
     ProductVendor,
-    CookiePurpose,
 )
 from websecmap.scanners.scanner.web_privacy import (
-    store,
-    scan,
-    truncate_long_post_data,
-    remove_duplicate_third_party_requests,
     product_meaning_from_cookies,
-    update_meaning_of_location_and_products_at_web_privacy_cookies,
-    worse_rating,
+    remove_duplicate_third_party_requests,
     remove_random_data_from_existing_third_party_requests,
     remove_random_data_from_third_party_requests,
+    scan,
+    store,
+    truncate_long_post_data,
+    update_meaning_of_location_and_products_at_web_privacy_cookies,
+    worse_rating,
 )
-
 from websecmap.scanners.scanner.web_privacy_resources.trackers import (
     get_known_trackers_from_urls,
     get_tracker_info_from_disconnectme,
 )
 
-from .test_location import create_sample_domainip, create_sample_geoip
 from ..scanner.metric_constants import (
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_HIGH,
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_MEDIUM,
     WEB_PRIVACY_COOKIE_PRODUCTS_NO_CONSENT_OK,
 )
-import json
+from .test_location import create_sample_domainip, create_sample_geoip
 
 
 def test_get_tracker_info():

@@ -1,20 +1,22 @@
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any, List
-from typing_extensions import TypeAlias
 
+from django.core.files.storage import storages
 from django.db import models
 from django.forms import model_to_dict
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
-from taggit.managers import TaggableManager
 from statshog.defaults.django import statsd
-from django.core.files.storage import storages
+from taggit.managers import TaggableManager
+from typing_extensions import TypeAlias
 
-from websecmap.app import log
 from websecmap.app.fields import CompressedJSONField
 from websecmap.organizations.models import Url
 from websecmap.reporting.models import ScanPolicy
+
+log = logging.getLogger(__name__)
 
 
 class SecurityPolicy(models.Model):

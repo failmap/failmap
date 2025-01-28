@@ -1,15 +1,14 @@
-from django.urls import reverse
-from websecmap.app.constance import constance_cached_value
-
 import logging
 from datetime import datetime, timezone
 from typing import Any, TypeAlias, Union
 
 from django.core.exceptions import ObjectDoesNotExist
-
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, Url, UrlGenericScan
 from django.db import transaction
+from django.urls import reverse
 from statshog.defaults.django import statsd
+
+from websecmap.app.constance import constance_cached_value
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, Url, UrlGenericScan
 
 log = logging.getLogger(__package__)
 

@@ -1,6 +1,6 @@
 from tldextract import tldextract
 
-from websecmap.organizations.models import Url, Organization
+from websecmap.organizations.models import Organization, Url
 
 
 def test_add_subdomain(db, patch_resolve):

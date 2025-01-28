@@ -1,7 +1,7 @@
 from django.forms import model_to_dict
 
 import websecmap
-from websecmap.organizations.models import UrlWhois, Url
+from websecmap.organizations.models import Url, UrlWhois
 from websecmap.organizations.whois.sidn import parse_whois_data, update_whois_data
 from websecmap.scanners.models import ScanProxy
 

@@ -2,9 +2,9 @@ from datetime import date
 
 from freezegun import freeze_time
 
-from websecmap.map.logic.MapFlow import update_organizations_on_map_over_time, tick_map_flow
-from websecmap.map.models import OrganizationOnLayerOverTime, MapFlow
-from websecmap.organizations.models import OrganizationType, Organization
+from websecmap.map.logic.MapFlow import tick_map_flow, update_organizations_on_map_over_time
+from websecmap.map.models import MapFlow, OrganizationOnLayerOverTime
+from websecmap.organizations.models import Organization, OrganizationType
 
 
 def test_update_organizations_over_time(db):

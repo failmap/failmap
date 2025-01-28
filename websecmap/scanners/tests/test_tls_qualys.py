@@ -1,7 +1,8 @@
-from websecmap.scanners.models import Endpoint, EndpointGenericScan
-from websecmap.scanners.scanner.tls_qualys import save_scan, get_certs
-from websecmap.scanners.tests.test_plannedscan import create_url
 import json
+
+from websecmap.scanners.models import Endpoint, EndpointGenericScan
+from websecmap.scanners.scanner.tls_qualys import get_certs, save_scan
+from websecmap.scanners.tests.test_plannedscan import create_url
 
 
 def test_qualys_save_data(db):

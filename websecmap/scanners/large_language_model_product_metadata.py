@@ -1,7 +1,9 @@
+import logging
 from typing import List
 
-from websecmap.app import log
 from websecmap.scanners.models import Product, ProductGoal, ProductHierarchy, ProductRelationship, ProductVendor
+
+log = logging.getLogger(__name__)
 
 
 def enrich_product_metadata():

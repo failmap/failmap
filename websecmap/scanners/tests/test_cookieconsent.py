@@ -1,11 +1,13 @@
-from websecmap.scanners.scanner.cookie_consent import store, store_paper_trail
-from websecmap.organizations.models import Url
-from websecmap.scanners.models import Cookie, CookieBanner, ExternalResource, CookieScanSession, PaperTrail, Endpoint
-from pathlib import Path
+import base64
 import json
+from pathlib import Path
+
 from django.core.files.storage import storages
 from freezegun import freeze_time
-import base64
+
+from websecmap.organizations.models import Url
+from websecmap.scanners.models import Cookie, CookieBanner, CookieScanSession, Endpoint, ExternalResource, PaperTrail
+from websecmap.scanners.scanner.cookie_consent import store, store_paper_trail
 
 
 def test_cookieconsent_store_empty(db):

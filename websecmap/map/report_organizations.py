@@ -1,16 +1,13 @@
 import logging
 
-
 from celery import group
 from django.db.models import Count
 
 from websecmap.celery import Task
+from websecmap.map.report import create_organization_reports_now, default_organization_rating
 from websecmap.organizations.models import Organization, Url
-
 from websecmap.scanners import init_dict
 from websecmap.scanners.scanner.__init__ import q_configurations_to_report
-
-from websecmap.map.report import create_organization_reports_now, default_organization_rating
 
 log = logging.getLogger(__package__)
 

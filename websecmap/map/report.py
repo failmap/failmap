@@ -6,8 +6,8 @@ from datetime import date, datetime, timedelta, timezone
 from typing import List, Tuple
 
 from celery import group
-from django.db.models import Count
 from django.db import OperationalError
+from django.db.models import Count
 
 from websecmap.celery import Task, app
 from websecmap.map.logic.map import get_map_data, get_reports_by_ids

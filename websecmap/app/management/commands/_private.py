@@ -1,17 +1,16 @@
 """Management command base classes."""
 
-from collections import defaultdict
 import argparse
-from collections.abc import Iterable
 import json
 import logging
 import time
-from collections import Counter
+from collections import Counter, defaultdict
+from collections.abc import Iterable
 from typing import List
 
-from celery import Signature, group
 import kombu.exceptions
 import tldextract
+from celery import Signature, group
 from celery.result import AsyncResult, ResultSet
 from django.conf import settings
 from django.core.management.base import BaseCommand

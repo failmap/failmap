@@ -1,11 +1,13 @@
-from datetime import timezone, datetime
 import socket
+from datetime import datetime, timezone
 from urllib.parse import urlparse
+
+import pytest
 from celery import group
+from freezegun import freeze_time
 from pytest import MonkeyPatch
 from pytest_httpserver import HTTPServer
-from freezegun import freeze_time
-import pytest
+
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanner.http import (
@@ -13,10 +15,10 @@ from websecmap.scanners.scanner.http import (
     compose_discover_task,
     connection_answer,
     get_random_user_agent,
-    kill_endpoint,
-    save_endpoint,
     get_similar_dead_endpoint_in_last_n_days,
     has_acceptable_error,
+    kill_endpoint,
+    save_endpoint,
 )
 
 

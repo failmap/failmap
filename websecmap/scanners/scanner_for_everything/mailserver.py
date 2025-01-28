@@ -2,16 +2,18 @@
 # https://mxtoolbox.com/SuperTool.aspx?action=aaaa%3agoogle.com&run=toolpage
 # https://stackoverflow.com/questions/9463086/how-to-do-dns-aaaa-cname-and-srv-lookups-in-c
 # todo: should we just add all dns records?
-from typing import Optional, List
+import logging
+from typing import List, Optional
 
 from celery import group
 
-from websecmap.app import log
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import DomainMX
 from websecmap.scanners.scanner.dns_endpoints import get_dns_records
 from websecmap.scanners.time_storage import abstract_time_storage
+
+log = logging.getLogger(__name__)
 
 
 @app.task(queue="kickoff")

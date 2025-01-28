@@ -1,9 +1,10 @@
 from datetime import datetime, timezone
 
+from freezegun import freeze_time
+
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import UrlGenericScan
 from websecmap.scanners.reduce_identical_scans import reduce_normalized_identical_scans
-from freezegun import freeze_time
 
 
 def test_reduce_normalized_identical_scans(db, default_policy, default_scan_metadata):

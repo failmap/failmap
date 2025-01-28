@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import datetime, timezone
 from typing import Dict, List, Tuple
@@ -8,10 +9,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from pyexcel_ods import get_data
 from requests import RequestException
 
-from websecmap.app import log
 from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
-from websecmap.organizations.models import GenericFileDataset, OrganizationSurrogateId, Url, Organization
+from websecmap.organizations.models import GenericFileDataset, Organization, OrganizationSurrogateId, Url
+
+log = logging.getLogger(__name__)
 
 
 def find_current_websiteregister_download_link() -> str:

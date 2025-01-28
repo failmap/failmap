@@ -1,4 +1,5 @@
 import copy
+import logging
 from collections import defaultdict
 from typing import Any, Dict, List
 
@@ -6,12 +7,13 @@ import simplejson as json
 from cachetools import TTLCache, cached
 from simplejson import JSONDecodeError
 
-from websecmap.app import log
 from websecmap.celery import app
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
-from websecmap.scanners.models import EndpointGenericScan, Product, ProductHierarchy, ScannerFinding
 from websecmap.reporting import time_cache
+from websecmap.scanners.models import EndpointGenericScan, Product, ProductHierarchy, ScannerFinding
 from websecmap.scanners.scanmanager import Meaning, store_endpoint_scan_result
+
+log = logging.getLogger(__name__)
 
 MAX_RESULTS = 4000
 

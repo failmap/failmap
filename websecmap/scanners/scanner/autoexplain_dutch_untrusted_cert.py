@@ -1,6 +1,7 @@
 import logging
 import socket
 from base64 import b64decode, b64encode
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import List
 
@@ -16,7 +17,6 @@ from websecmap.scanners import plannedscan
 from websecmap.scanners.autoexplain import add_bot_explanation
 from websecmap.scanners.models import EndpointGenericScan
 from websecmap.scanners.scanner import finish_those_that_wont_be_scanned, unique_and_random
-from dataclasses import dataclass
 
 log = logging.getLogger(__package__)
 

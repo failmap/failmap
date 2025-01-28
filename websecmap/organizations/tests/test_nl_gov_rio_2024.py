@@ -1,6 +1,6 @@
 from websecmap.organizations.datasources.nl_gov_rio_2024 import (
-    import_domain_via_organization_surrogate,
     download_single,
+    import_domain_via_organization_surrogate,
 )
 from websecmap.organizations.models import Organization, OrganizationSurrogateId, Url
 

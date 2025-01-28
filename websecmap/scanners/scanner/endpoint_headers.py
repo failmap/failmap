@@ -1,14 +1,13 @@
+import logging
 from typing import Any, Dict
-from websecmap.celery.worker import WORKER_ROLE
+
 import niquests
 
-
 from websecmap.celery import app
+from websecmap.celery.worker import WORKER_ROLE
 from websecmap.scanners.models import Endpoint, HttpEndpointHeaders
-
 from websecmap.scanners.scanner.utils import CELERY_IP_VERSION_QUEUE_NAMES
 from websecmap.scanners.time_storage import abstract_time_storage
-import logging
 
 log = logging.getLogger(__name__)
 
