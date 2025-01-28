@@ -47,6 +47,7 @@ def get_all_ips() -> Iterator[str]:
         .exclude(ip_address__isnull=True)
         .distinct()
         .values_list("ip_address", flat=True)
+        .iterator()
     )
 
     return (i for i in ips if i and "-" not in i)
@@ -91,7 +92,7 @@ def scan_using_known_data():
     # recover network data:
     complete_network_data = {}
     known_ips = []
-    for info in GeoIp.objects.all().filter(is_the_latest=True):
+    for info in GeoIp.objects.all().filter(is_the_latest=True).iterator():
         known_ips.append(info.ip_address)
         if info.network not in complete_network_data:
             tmp = model_to_dict(info)
